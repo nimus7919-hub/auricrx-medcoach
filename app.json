@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "AuricRx MedCoach",
+    "slug": "auricrx-medcoach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/auricrx-logo.png",
+    "scheme": "auricrx-medcoach",
+    "splash": {
+      "image": "./assets/auricrx-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b1117"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/auricrx-logo.png",
+        "backgroundColor": "#0b1117"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "package": "com.auricrx.medcoach"
+    },
+    "web": { "favicon": "./assets/auricrx-logo.png" },
+    "plugins": [
+      "@react-native-voice/voice",
+      ["expo-build-properties", {
+        "android": {
+          "enableJetifier": true,
+          "useAndroidX": true
+        }
+      }]
+    ]
+  }
+}
