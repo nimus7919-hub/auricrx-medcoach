@@ -27,8 +27,25 @@
     "web": { "favicon": "./assets/auricrx-logo.png" },
     "plugins": [
       "@react-native-voice/voice",
-      ["expo-build-properties", { "android": { "enableJetifier": true, "useAndroidX": true } }],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableJetifier": true,
+            "useAndroidX": true,
+            "gradleProperties": {
+              "android.useAndroidX": "true",
+              "android.enableJetifier": "true"
+            }
+          }
+        }
+      ],
       "./app.plugin.js"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "db976ea9-7756-4bdb-ba4e-7563b0d3597b"
+      }
+    }
   }
 }

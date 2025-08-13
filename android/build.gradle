@@ -35,3 +35,13 @@ allprojects {
 
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
+
+
+/** Injected by app.plugin.js (root) to avoid duplicate classes across subprojects **/
+subprojects { project ->
+    configurations.all {
+        exclude group: "com.android.support", module: "versionedparcelable"
+        exclude group: "com.android.support", module: "support-compat"
+        exclude group: "com.android.support"
+    }
+}
