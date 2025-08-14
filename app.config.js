@@ -1,6 +1,9 @@
 // app.config.js
 module.exports = ({ config }) => ({
   ...config,
+  plugins: [
+    "expo-font"
+  ],
   extra: {
     ...(config.extra || {}),
     // Pull from .env at build/start time

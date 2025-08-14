@@ -148,7 +148,6 @@ android {
 }
 
 dependencies {
-    implementation("androidx.versionedparcelable:versionedparcelable:1.1.1")
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
@@ -175,12 +174,4 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-}
-
-
-/** Injected by app.plugin.js to avoid duplicate classes (support vs AndroidX) **/
-configurations.all {
-    exclude group: "com.android.support", module: "versionedparcelable"
-    exclude group: "com.android.support", module: "support-compat"
-    exclude group: "com.android.support"
 }
