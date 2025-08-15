@@ -246,7 +246,14 @@ const [aiMessages, setAiMessages] = useState([{ role: 'system', text: 'Hi! Ask m
   const S = STRINGS[lang] || STRINGS.en;
 
   // Early return until fonts are ready
-  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: '#0b1117' }} />;
+if (!fontsLoaded) {
+  return (
+    <LinearGradient
+      colors={['#0b1117', '#0f1622']}
+      style={{ flex: 1 }}
+    />
+  );
+} />;
 
   // --------- Helpers ----------
   const Card = ({ title, icon, onPress }) => (
