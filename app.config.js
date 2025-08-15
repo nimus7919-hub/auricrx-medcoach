@@ -4,6 +4,16 @@ module.exports = ({ config }) => ({
   plugins: [
     "expo-font",
     "./app.plugin.js",
+    [
+      "expo-build-properties",
+      {
+        android: {
+          kotlinVersion: "1.9.24",
+          compileSdkVersion: 34,
+          targetSdkVersion: 34
+        }
+      }
+    ]
   ],
   extra: {
     ...(config.extra || {}),
