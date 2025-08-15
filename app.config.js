@@ -8,7 +8,7 @@ module.exports = ({ config }) => ({
       "expo-build-properties",
       {
         android: {
-          kotlinVersion: "1.9.24",
+          // let Expo choose Kotlin; keep SDKs pinned
           compileSdkVersion: 34,
           targetSdkVersion: 34
         }
