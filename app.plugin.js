@@ -1,81 +1,51 @@
-// app.plugin.js — manifest patch + global exclude of old support libs + force AndroidX
-const {
-  withAndroidManifest,
-  withAppBuildGradle,
-  withProjectBuildGradle,
-} = require('@expo/config-plugins');
+// app.plugin.js
+const { withAppBuildGradle, withAndroidManifest } = require('@expo/config-plugins');
 
-module.exports = function (config) {
-  // 1) Manifest: tools:replace + AndroidX appComponentFactory
-  config = withAndroidManifest(config, (cfg) => {
-    const manifest = cfg.modResults.manifest;
-    manifest.$ = manifest.$ || {};
-    manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+function addExcludes(gradle) {
+  const marker = '/** Injected by app.plugin.js to avoid duplicate classes (support vs AndroidX) **/';
+  if (gradle.contents.includes(marker)) return gradle;
 
-    const app = manifest.application?.[0];
-    if (app) {
-      app.$ = app.$ || {};
-      const existing = (app.$['tools:replace'] || '')
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (!existing.includes('android:appComponentFactory')) {
-        existing.push('android:appComponentFactory');
-      }
-      app.$['tools:replace'] = existing.join(',');
-      app.$['android:appComponentFactory'] = 'androidx.core.app.CoreComponentFactory';
-    }
-    return cfg;
-  });
-
-  // 2) app/build.gradle: exclude support libs + force AndroidX versionedparcelable
-  config = withAppBuildGradle(config, (cfg) => {
-    let src = cfg.modResults.contents;
-
-    if (!src.includes('configurations.all {') || !src.includes('exclude group: "com.android.support"')) {
-      src += `
-
-/** Injected by app.plugin.js to avoid duplicate classes (support vs AndroidX) **/
+  gradle.contents += `
+${marker}
 configurations.all {
-    exclude group: "com.android.support", module: "versionedparcelable"
-    exclude group: "com.android.support", module: "support-compat"
-    exclude group: "com.android.support"
+  exclude group: "com.android.support", module: "versionedparcelable"
+  exclude group: "com.android.support", module: "support-compat"
+  exclude group: "com.android.support"
+  resolutionStrategy {
+    force "androidx.versionedparcelable:versionedparcelable:1.1.1"
+  }
 }
 `;
+  return gradle;
+}
+
+module.exports = function withFixAndroidX(config) {
+  config = withAndroidManifest(config, (cfg) => {
+    const manifest = cfg.modResults;
+    if (!manifest?.manifest?.application?.[0]?.$) return cfg;
+
+    // Ensure tools namespace exists
+    if (!manifest.manifest.$['xmlns:tools']) {
+      manifest.manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
     }
 
-    if (src.includes('dependencies {') && !src.includes('androidx.versionedparcelable:versionedparcelable:1.1.1')) {
-      src = src.replace(
-        /dependencies\s*\{/,
-        `dependencies {
-    implementation("androidx.versionedparcelable:versionedparcelable:1.1.1")`
-      );
-    }
+    // Prefer AndroidX appComponentFactory
+    const app = manifest.manifest.application[0].$;
+    app['tools:replace'] = (app['tools:replace'] || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .concat('android:appComponentFactory')
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .join(',');
 
-    cfg.modResults.contents = src;
+    app['android:appComponentFactory'] = 'androidx.core.app.CoreComponentFactory';
+
     return cfg;
   });
 
-  // 3) ROOT android/build.gradle: apply the same exclusions to *all* subprojects
-  config = withProjectBuildGradle(config, (cfg) => {
-    let src = cfg.modResults.contents;
-
-    // Add a subprojects block if not present
-    if (!src.includes('subprojects {') || !src.includes('exclude group: "com.android.support"')) {
-      src += `
-
-/** Injected by app.plugin.js (root) to avoid duplicate classes across subprojects **/
-subprojects { project ->
-    configurations.all {
-        exclude group: "com.android.support", module: "versionedparcelable"
-        exclude group: "com.android.support", module: "support-compat"
-        exclude group: "com.android.support"
-    }
-}
-`;
-    }
-
-    cfg.modResults.contents = src;
+  config = withAppBuildGradle(config, (cfg) => {
+    cfg.modResults = addExcludes(cfg.modResults);
     return cfg;
   });
 

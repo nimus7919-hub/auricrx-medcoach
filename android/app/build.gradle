@@ -175,3 +175,13 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+/** Injected by app.plugin.js to avoid duplicate classes (support vs AndroidX) **/
+configurations.all {
+  exclude group: "com.android.support", module: "versionedparcelable"
+  exclude group: "com.android.support", module: "support-compat"
+  exclude group: "com.android.support"
+  resolutionStrategy {
+    force "androidx.versionedparcelable:versionedparcelable:1.1.1"
+  }
+}
