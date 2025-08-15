@@ -9,7 +9,7 @@ module.exports = ({ config }) => ({
       {
         android: {
           // let Expo choose Kotlin; keep SDKs pinned
-          compileSdkVersion: 34,
+          compileSdkVersion: 35,
           targetSdkVersion: 34
         }
       }
