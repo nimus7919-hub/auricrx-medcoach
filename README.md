@@ -1,0 +1,2 @@
+# auricrx-medcoach
+Pharma idea
