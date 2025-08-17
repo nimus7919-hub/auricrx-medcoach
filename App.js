@@ -2,25 +2,37 @@
 // SDK 53 friendly. Minimal deps; stubs where cloud keys are needed.
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
+  import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
-  Modal, TextInput, Switch, Image, Linking, Platform
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+  Modal, TextInput, Switch, Image, Linking, Platform, Animated
+} from 'react-native';import * as ImagePicker from 'expo-image-picker';
+import * as Notifications from 'expo-notifications';
 import * as FileSystem from 'expo-file-system';
+import EnvCheck from './src/EnvCheck';
+
+import { EXPO_PUBLIC_OPENAI_API_KEY, EXPO_PUBLIC_API_MODEL } from '@env';
+
+console.log("🔑 OpenAI Key:", EXPO_PUBLIC_OPENAI_API_KEY);
+console.log("🤖 API Model:", EXPO_PUBLIC_API_MODEL);
+
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as Location from 'expo-location';
-import { Audio } from 'expo-av';
+import { Audio } from 'expo-audio';
+import { Video } from 'expo-video';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFonts,
+import { askMedicalAI } from './src/api/api.medical-ai';
+import {
+  useFonts,
   Inter_400Regular,
   Inter_600SemiBold,
   Inter_700Bold,
   Inter_800ExtraBold,
   Inter_900Black
 } from '@expo-google-fonts/inter';
+
+const BACKEND_URL = 'https://YOUR_ENDPOINT/auricrx-chat'; // <= replace later
 
 // ---------- i18n (inline, tiny) ----------
 const STRINGS = {
@@ -120,10 +132,6 @@ const STRINGS = {
 };
 
 // ---------- THEMES ----------
-/**
- * Each palette now has gradient colors + typography names.
- * We’ll swap to teal automatically when moodShift detects “stress” in the last AI message.
- */
 const PALETTES = {
   gold: {
     id: 'gold',
@@ -172,17 +180,21 @@ const STORAGE = {
 
 // ---------- ROOT APP ----------
 export default function App() {
+  // TEMP FLAG - set to false when done testing env
+  const debugEnv = true;
+
   // Load fonts first (simple gate)
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_600SemiBold,
     Inter_700Bold,
     Inter_800ExtraBold,
-    Inter_900Black
+    Inter_900Black,
   });
 
-  // nav: 'dashboard' | 'reminders' | 'pharmacies' | 'labs' | 'prescription' | 'appointments' | 'settings'
-  const [route, setRoute] = useState('dashboard');
+  // Put hooks/state INSIDE the component, before returns
+  const [route, setRoute] = useState('dashboard'); 
+  // 'reminders' | 'pharmacies' | 'labs' | 'prescription' | 'appointments' | 'settings'
 
   // language & theme
   const [lang, setLang] = useState('en');
@@ -197,33 +209,102 @@ export default function App() {
   // voice notes
   const [voiceNotes, setVoiceNotes] = useState([]);
 
-  // AI Sheet state...
-const [aiOpen, setAiOpen] = useState(false);
-const [aiInput, setAiInput] = useState('');
-const [aiMessages, setAiMessages] = useState([{ role: 'system', text: 'Hi! Ask me anything about your meds or pharmacies.' }]);
+// --- Medical AI local state ---
+const [medInput, setMedInput] = useState('');
+const [medAnswer, setMedAnswer] = useState('');
+const [medLoading, setMedLoading] = useState(false);
 
+async function handleAskMedical() {
+  const q = medInput.trim();
+  if (!q) return;
+  try {
+    setMedLoading(true);
+    const answer = await askMedicalAI(q);   // calls ./src/api/API.Medical-AI
+    setMedAnswer(answer || 'I could not find an answer.');
+  } catch (e) {
+    Alert.alert('AI error', 'Could not get an answer right now.');
+  } finally {
+    setMedLoading(false);
+  }
+}
+
+
+  // AI Sheet state...
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiInput, setAiInput] = useState('');
+  const [aiMessages, setAiMessages] = useState([
+    { role: 'system', text: 'Hi! Ask me anything about your meds or pharmacies.' },
+  ]);
+
+  // ---------- persistence ----------
   // load persisted
   useEffect(() => {
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+  (async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Notifications disabled', 'Enable notifications for reminder alerts.');
+    }
+  })();
+}, []);
+
+    useEffect(() => {
     (async () => {
-      const [L, T, N, M, R, P, V] = await Promise.all([
-        AsyncStorage.getItem(STORAGE.lang),
-        AsyncStorage.getItem(STORAGE.theme),
-        AsyncStorage.getItem(STORAGE.night),
-        AsyncStorage.getItem(STORAGE.mood),
-        AsyncStorage.getItem(STORAGE.reminders),
-        AsyncStorage.getItem(STORAGE.rxPhotos),
-        AsyncStorage.getItem(STORAGE.voiceNotes),
-      ]);
-      if (L) setLang(L);
-      if (T) setThemeKey(T);
-      if (N) setNight(N === '1');
-      if (M) setMoodShift(M === '1');
-      if (R) setReminders(JSON.parse(R));
-      if (P) setRxPhotos(JSON.parse(P));
-      if (V) setVoiceNotes(JSON.parse(V));
+      try {
+        const [L, T, N, M, R, P, V] = await Promise.all([
+          AsyncStorage.getItem(STORAGE.lang),
+          AsyncStorage.getItem(STORAGE.theme),
+          AsyncStorage.getItem(STORAGE.night),
+          AsyncStorage.getItem(STORAGE.mood),
+          AsyncStorage.getItem(STORAGE.reminders),
+          AsyncStorage.getItem(STORAGE.rxPhotos),
+          AsyncStorage.getItem(STORAGE.voiceNotes),
+        ]);
+
+        if (L) setLang(L);
+        if (T) setThemeKey(T);
+        if (N) setNight(N === '1');
+        if (M) setMoodShift(M === '1');
+
+        if (R) { try { setReminders(JSON.parse(R)); } catch {} }
+        if (P) { try { setRxPhotos(JSON.parse(P)); } catch {} }
+        if (V) { try { setVoiceNotes(JSON.parse(V)); } catch {} }
+      } catch {
+        // ignore corrupt storage on boot
+      }
     })();
   }, []);
 
+// inside componen schedule reminder
+async function scheduleReminderNotification(name, time24h) {
+  // time24h like "13:45"
+  const [hh, mm] = (time24h || '').split(':').map(n => parseInt(n, 10));
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return;
+
+  const now = new Date();
+  const fire = new Date(now);
+  fire.setHours(hh, mm, 0, 0);
+  if (fire <= now) fire.setDate(fire.getDate() + 1); // schedule for tomorrow if time already passed
+
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Medication Reminder',
+        body: name || 'Time to take your medication',
+        sound: 'default',
+      },
+      trigger: fire, // exact datetime
+    });
+  } catch (e) {
+    console.log('schedule error', e);
+  }
+}
   // persist basics
   useEffect(() => { AsyncStorage.setItem(STORAGE.lang, lang); }, [lang]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.theme, themeKey); }, [themeKey]);
@@ -243,17 +324,42 @@ const [aiMessages, setAiMessages] = useState([{ role: 'system', text: 'Hi! Ask m
     return base;
   }, [themeKey, night, moodShift, aiMessages]);
 
-  const S = STRINGS[lang] || STRINGS.en;
 
-  // Early return until fonts are ready
-if (!fontsLoaded) {
-  return (
-    <LinearGradient
-      colors={['#0b1117', '#0f1622']}
-      style={{ flex: 1 }}
-    />
-  );
-} />;
+// animation refs
+const splashOpacity = useRef(new Animated.Value(1)).current;
+const logoScale = useRef(new Animated.Value(1)).current;
+const textOpacity = useRef(new Animated.Value(1)).current;
+
+useEffect(() => {
+  if (!fontsLoaded) {
+    Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(logoScale, { toValue: 1.05, duration: 800, useNativeDriver: true }),
+          Animated.timing(logoScale, { toValue: 1, duration: 800, useNativeDriver: true }),
+        ]),
+        Animated.sequence([
+          Animated.timing(textOpacity, { toValue: 0.4, duration: 800, useNativeDriver: true }),
+          Animated.timing(textOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+        ]),
+      ])
+    ).start();
+  }
+}, [fontsLoaded]);
+
+// fade out when fonts loaded
+useEffect(() => {
+  if (fontsLoaded) {
+    Animated.timing(splashOpacity, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }
+}, [fontsLoaded]);
+
+const S = STRINGS[lang] || STRINGS.en;
+
 
   // --------- Helpers ----------
   const Card = ({ title, icon, onPress }) => (
@@ -264,21 +370,29 @@ if (!fontsLoaded) {
   );
 
   const TopBar = () => (
-    <View style={[styles.topbar, { borderColor: theme.chip }]}>
+  <View style={[styles.topbar, { borderColor: theme.chip, flexDirection:'row', alignItems:'center', justifyContent:'space-between' }]}>
+    <TouchableOpacity onPress={() => setRoute('dashboard')}>
       <Text style={[styles.brand, { color: theme.text, fontFamily: 'Inter_900Black' }]}>AuricRx</Text>
-      <View style={styles.quickRow}>
-        <TouchableOpacity onPress={() => setRoute('reminders')}><Text style={[styles.quick, { color: theme.text, fontFamily: 'Inter_600SemiBold' }]}>＋ {S.addReminder}</Text></TouchableOpacity>
-        <TouchableOpacity onPress={openPharmaciesNearMe}><Text style={[styles.quick, { color: theme.text, fontFamily: 'Inter_600SemiBold' }]}>📍 {S.pharmacyLocations}</Text></TouchableOpacity>
-        <TouchableOpacity onPress={() => setAiOpen(true)}><Text style={[styles.quick, { color: theme.text, fontFamily: 'Inter_600SemiBold' }]}>A1 {S.askAI}</Text></TouchableOpacity>
-      </View>
-    </View>
-  );
+    </TouchableOpacity>
+
+    <TouchableOpacity onPress={() => setRoute('settings')}>
+      <Text style={{ fontSize: 22, color: theme.accent }}>⚙️</Text>
+    </TouchableOpacity>
+  </View>
+);
 
   // --------- Dashboard ----------
-  const nextReminder = reminders
-    .slice()
-    .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-    [0];
+  const nextReminder = reminders.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''))[0];
+
+//------------AI-----------
+const [medicalInput, setMedicalInput] = useState("");
+const [medicalResponse, setMedicalResponse] = useState("");
+
+const handleAskMedicalAI = async () => {
+  const answer = await askMedicalAI(medicalInput);
+  setMedicalResponse(answer);
+};
+
 
   // --------- Pharmacies ----------
   async function openPharmaciesNearMe() {
@@ -311,7 +425,6 @@ if (!fontsLoaded) {
 
   async function exportRxToPDF() {
     if (rxPhotos.length === 0) return Alert.alert('No photos', 'Add at least one prescription photo.');
-    // simple HTML gallery -> PDF
     const imgs = rxPhotos.map(p => `<div style="margin:12px 0"><img src="${p.uri}" style="width:100%"/></div>`).join('');
     const html = `<html><body>${imgs}</body></html>`;
     const { uri } = await Print.printToFileAsync({ html });
@@ -365,18 +478,26 @@ if (!fontsLoaded) {
     } catch { /* noop */ }
   }
 
-  // --------- AI Sheet (stub: replace with your backend/Dialogflow/Vertex later) ----------
+  // --------- AI Sheet (stub: replace with your backend later) ----------
   async function askAI() {
-    const q = aiInput.trim();
-    if (!q) return;
-    setAiMessages((m) => [...m, { role: 'user', text: q }]);
-    setAiInput('');
-    // TEMP reply logic:
-    let reply = 'On it. For real medical answers, I’ll connect to our cloud soon.';
-    if (q.toLowerCase().includes('stress')) reply = 'I hear stress in your message. I’ll soften the colors and slow the pace. Remember to breathe 💛';
-    if (q.toLowerCase().includes('pharmacy')) reply = 'Tap “Pharmacy Locations” to open your maps with nearby options.';
-    setTimeout(() => setAiMessages((m) => [...m, { role: 'assistant', text: reply }]), 500);
+  const q = aiInput.trim();
+  if (!q) return;
+  setAiMessages(m => [...m, { role: 'user', text: q }]);
+  setAiInput('');
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: q }),
+    });
+    const data = await res.json();
+    const reply = data?.reply || 'Sorry—no response.';
+    setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
+  } catch (e) {
+    setAiMessages(m => [...m, { role: 'assistant', text: 'Network error. Try again.' }]);
   }
+}
 
   // --------- Screens ----------
   const Dashboard = () => (
@@ -395,7 +516,41 @@ if (!fontsLoaded) {
           </View>
         </View>
 
-        {/* 2x3 card grid like your mock */}
+<View style={{ marginTop: 20, padding: 16 }}>
+  <Text style={{ color: theme.text, fontFamily: "Inter_800ExtraBold", marginBottom: 8 }}>
+    Medical AI
+  </Text>
+  <TextInput
+    placeholder="Ask a medical question..."
+    value={medicalInput}
+    onChangeText={setMedicalInput}
+    placeholderTextColor={theme.sub}
+    style={{
+      borderWidth: 1,
+      borderColor: theme.chip,
+      padding: 10,
+      marginBottom: 10,
+      color: theme.text,
+      fontFamily: "Inter_400Regular"
+    }}
+  />
+  <TouchableOpacity
+    style={[styles.aiBtn, { backgroundColor: theme.accent, padding: 10 }]}
+    onPress={handleAskMedicalAI}
+  >
+    <Text style={{ color: "#0b1117", fontFamily: "Inter_800ExtraBold" }}>
+      Ask Medical AI
+    </Text>
+  </TouchableOpacity>
+  <ScrollView style={{ marginTop: 20, maxHeight: 200 }}>
+    <Text style={{ color: theme.text, fontFamily: "Inter_400Regular" }}>
+      {medicalResponse}
+    </Text>
+  </ScrollView>
+</View>
+
+
+        {/* 2x3 card grid */}
         <View style={styles.grid}>
           <Card title={S.reminders} icon={<Text style={styles.emoji}>🔔</Text>} onPress={() => setRoute('reminders')} />
           <Card title={S.pharmacyLocations} icon={<Text style={styles.emoji}>📍</Text>} onPress={() => setRoute('pharmacies')} />
@@ -420,11 +575,13 @@ if (!fontsLoaded) {
             <TextInput placeholder="HH:MM (24h)" placeholderTextColor={theme.sub} style={[styles.input, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]} value={time} onChangeText={setTime} />
             <TouchableOpacity
               style={[styles.btn, { backgroundColor: theme.accent }]}
-              onPress={() => {
-                if (!name || !time) return;
-                setReminders((r) => [...r, { id: `${Date.now()}`, name, time }]);
-                setName(''); setTime('');
-              }}>
+              onPress={async () => {
+  if (!name || !time) return;
+  const newItem = { id: `${Date.now()}`, name, time };
+  setReminders(r => [...r, newItem]);
+  await scheduleReminderNotification(name, time);
+  setName(''); setTime('');
+}}>
               <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>{S.addReminder}</Text>
             </TouchableOpacity>
           </View>
@@ -448,7 +605,7 @@ if (!fontsLoaded) {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Header title={S.pharmacyLocations} />
         <Text style={{ color: theme.sub, marginBottom: 12, fontFamily: 'Inter_400Regular' }}>
-          {`Tap below to open your maps with nearby pharmacies.`}
+          Tap below to open your maps with nearby pharmacies.
         </Text>
         <TouchableOpacity style={[styles.btn, { backgroundColor: theme.accent }]} onPress={openPharmaciesNearMe}>
           <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>Open Maps</Text>
@@ -561,12 +718,22 @@ if (!fontsLoaded) {
   );
 
   const Header = ({ title }) => (
-    <View style={[styles.header, { borderColor: theme.chip }]}>
-      <TouchableOpacity onPress={() => setRoute('dashboard')}><Text style={{ color: theme.text, fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>← {S.dashboard}</Text></TouchableOpacity>
-      <Text style={{ color: theme.text, fontSize: 16, fontFamily: 'Inter_800ExtraBold' }}>{title}</Text>
-      <TouchableOpacity onPress={() => setRoute('settings')}><Text style={{ color: theme.text, fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>{S.settings} ⚙️</Text></TouchableOpacity>
-    </View>
-  );
+  <View style={[styles.header, { borderColor: theme.chip }]}>
+    {route !== 'dashboard' ? (
+      <TouchableOpacity onPress={() => setRoute('dashboard')}>
+        <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>←</Text>
+      </TouchableOpacity>
+    ) : (
+      <View style={{ width: 20 }} />
+    )}
+
+    <Text style={{ color: theme.text, fontSize: 16, fontFamily: 'Inter_800ExtraBold' }}>{title}</Text>
+
+    <TouchableOpacity onPress={() => setRoute('settings')}>
+      <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
+    </TouchableOpacity>
+  </View>
+);
 
   const Section = ({ title, children }) => (
     <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip }]}>
@@ -581,6 +748,7 @@ if (!fontsLoaded) {
       <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: value ? theme.accent : theme.chip }} />
     </TouchableOpacity>
   );
+
   const SwitchRow = ({ label, value, onValueChange }) => (
     <View style={styles.rowBetween}>
       <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{label}</Text>
@@ -588,8 +756,8 @@ if (!fontsLoaded) {
     </View>
   );
 
-  // --------- Render current route ----------
-  let Screen = <Dashboard />;
+ // choose screen
+  let Screen = <View><Text>Dashboard</Text></View>;
   if (route === 'reminders') Screen = <Reminders />;
   else if (route === 'pharmacies') Screen = <Pharmacies />;
   else if (route === 'labs') Screen = <Labs />;
@@ -597,60 +765,101 @@ if (!fontsLoaded) {
   else if (route === 'appointments') Screen = <Appointments />;
   else if (route === 'settings') Screen = <Settings />;
 
+  // final return (inside the App function)
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg }}>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       {Screen}
 
-      {/* Floating AI button */}
-      <TouchableOpacity style={[styles.fab, { backgroundColor: theme.accent }]} onPress={() => setAiOpen(true)}>
-        <Text style={{ color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }}>A1</Text>
+    {/* Floating AI button */}
+    <TouchableOpacity
+      style={[styles.fab, { backgroundColor: theme.accent }]}
+      onPress={() => setAiOpen(true)}
+    >
+      <Text style={{ color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }}>AI</Text>
+    </TouchableOpacity>
+
+    {/* Medical AI widget (always visible) */}
+    <View style={[styles.widget, { backgroundColor: theme.card, borderColor: theme.chip, marginBottom: 16 }]}>
+      <Text style={[styles.widgetTitle, { color: theme.text, fontFamily: 'Inter_800ExtraBold' }]}>
+        Medical AI
+      </Text>
+
+      <TextInput
+        placeholder="Ask me a medical question..."
+        value={medInput}
+        onChangeText={setMedInput}
+        placeholderTextColor={theme.sub}
+        style={[
+          styles.input,
+          { color: theme.text, borderColor: theme.chip, marginBottom: 8, fontFamily: 'Inter_400Regular' }
+        ]}
+      />
+
+      <TouchableOpacity
+        style={[styles.btnSm, { backgroundColor: theme.accent, alignSelf: 'flex-start' }]}
+        onPress={handleAskMedical}
+        disabled={medLoading}
+      >
+        <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>
+          {medLoading ? 'Thinking…' : 'Ask AI'}
+        </Text>
       </TouchableOpacity>
 
-      {/* AI modal */}
-      <Modal visible={aiOpen} animationType="slide" transparent onRequestClose={() => setAiOpen(false)}>
-        <View style={styles.sheetBackdrop}>
-          <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-            <View style={styles.sheetHeader}>
-              <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>{S.aiConsultant}</Text>
-              <TouchableOpacity onPress={() => setAiOpen(false)}><Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text></TouchableOpacity>
-            </View>
-
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 8 }}>
-              {aiMessages.map((m, idx) => (
-                <View
-                  key={idx}
-                  style={[
-                    styles.msg,
-                    m.role === 'user' ? styles.msgUser : styles.msgBot,
-                    { borderColor: theme.chip, backgroundColor: m.role === 'user' ? theme.chip : theme.card }
-                  ]}>
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
-                </View>
-              ))}
-            </ScrollView>
-
-            <View style={styles.aiInputRow}>
-              <TextInput
-                value={aiInput}
-                onChangeText={setAiInput}
-                placeholder="Ask about medications, pharmacies…"
-                placeholderTextColor={theme.sub}
-                style={[styles.aiInput, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]}
-              />
-              <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={askAI}>
-                <Text style={{ color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }}>Send</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={{ color: theme.sub, fontSize: 12, marginTop: 4, textAlign: 'center', fontFamily: 'Inter_400Regular' }}>
-              {S.tapToTalk}: (voice input wired in next build)
-            </Text>
-          </View>
+      {!!medAnswer && (
+        <View style={[styles.section, { backgroundColor: theme.chip, borderColor: theme.chip, marginTop: 12 }]}>
+          <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{medAnswer}</Text>
         </View>
-      </Modal>
+      )}
     </View>
-  );
-}
+
+    {/* AI modal */}
+    <Modal visible={aiOpen} animationType="slide" transparent onRequestClose={() => setAiOpen(false)}>
+      <View style={styles.sheetBackdrop}>
+        <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip }]}>
+          <View style={styles.sheetHeader}>
+            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>{S.aiConsultant}</Text>
+            <TouchableOpacity onPress={() => setAiOpen(false)}>
+              <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 8 }}>
+            {aiMessages.map((m, idx) => (
+              <View
+                key={idx}
+                style={[
+                  styles.msg,
+                  m.role === 'user' ? styles.msgUser : styles.msgBot,
+                  { borderColor: theme.chip, backgroundColor: m.role === 'user' ? theme.chip : theme.card },
+                ]}
+              >
+                <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
+
+          <View style={styles.aiInputRow}>
+            <TextInput
+              value={aiInput}
+              onChangeText={setAiInput}
+              placeholder="Ask about medications, pharmacies…"
+              placeholderTextColor={theme.sub}
+              style={[styles.aiInput, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]}
+            />
+            <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={askAI}>
+              <Text style={{ color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }}>Send</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={{ color: theme.sub, fontSize: 12, marginTop: 4, textAlign: 'center', fontFamily: 'Inter_400Regular' }}>
+            {S.tapToTalk}: (voice input wired in next build)
+          </Text>
+        </View>
+      </View>
+    </Modal>
+  </View>
+);
+} // <-- CLOSES export default function App()
 
 // ---------- styles ----------
 const styles = StyleSheet.create({
@@ -671,7 +880,16 @@ const styles = StyleSheet.create({
   cardText: { fontSize: 18, textAlign: 'center' },
   emoji: { fontSize: 36 },
 
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, paddingBottom: 10, marginBottom: 12 },
+  header: {  // ✅ fixed here, only one "header"
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    paddingBottom: 10,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+
   section: { borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 12 },
   sectionTitle: { fontSize: 16, marginBottom: 8 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 },
@@ -687,7 +905,20 @@ const styles = StyleSheet.create({
   gallery: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
   thumb: { width: '48%', height: 160, borderRadius: 12 },
 
-  fab: { position: 'absolute', right: 16, bottom: 24, width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, elevation: 6 },
+  fab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: { maxHeight: '80%', borderTopLeftRadius: 18, borderTopRightRadius: 18, borderWidth: 1, padding: 12 },
@@ -695,7 +926,20 @@ const styles = StyleSheet.create({
   msg: { padding: 10, borderRadius: 12, borderWidth: 1, marginVertical: 4, marginHorizontal: 2 },
   msgUser: { alignSelf: 'flex-end' },
   msgBot: { alignSelf: 'flex-start' },
+
   aiInputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
-  aiInput: { flex: 1, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 },
-  aiBtn: { borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, alignItems: 'center', justifyContent: 'center' },
+  aiInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  aiBtn: {
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
