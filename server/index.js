@@ -1,25 +1,46 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
+const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const { z } = require('zod');
 const OpenAI = require('openai');
 
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(cors({ origin: true }));
-app.use(express.json({ limit: '1mb' }));
+// --- Security middleware ---
+app.use(helmet());
+app.use(express.json({ limit: "1mb" }));
 
-// --- SAFETY: Rate limiter to protect API key --- 
-const rateLimit = require("express-rate-limit");
+// --- CORS allowlist ---
+const ALLOW_ORIGINS = [
+  "https://auricrx-medcoach.onrender.com", // deployed server
+  "http://localhost:8081",                 // Expo dev app
+  // later add your production mobile/web domain
+];
 
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || ALLOW_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
+}));
+
+// --- Rate limiter for /ask ---
 const askLimiter = rateLimit({
-  windowMs: 60 * 1000,   // 1 minute
-  max: 10,               // limit each IP to 10 requests per minute
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // limit each IP to 10 requests/min
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { ok: false, error: "Too many requests, please slow down." },
 });
-
 app.use("/ask", askLimiter);
+
+// --- Your routes here ---
 
 app.use((req, _res, next) => {
   if (req.method === "POST") {
