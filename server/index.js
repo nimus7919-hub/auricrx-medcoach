@@ -10,11 +10,32 @@ const port = process.env.PORT || 4000;
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: '1mb' }));
 
+// --- SAFETY: Rate limiter to protect API key --- 
+const rateLimit = require("express-rate-limit");
+
+const askLimiter = rateLimit({
+  windowMs: 60 * 1000,   // 1 minute
+  max: 10,               // limit each IP to 10 requests per minute
+  message: { ok: false, error: "Too many requests, please slow down." },
+});
+
+app.use("/ask", askLimiter);
+
+app.use((req, _res, next) => {
+  if (req.method === "POST") {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} len=${JSON.stringify(req.body || '').length}`);
+  } else {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  }
+  next();
+});
+
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.post('/ask', async (req, res) => {
+console.log('POST /ask', req.body);
   const schema = z.object({ message: z.string().min(1).max(5000) });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ ok: false, error: 'bad_request' });
