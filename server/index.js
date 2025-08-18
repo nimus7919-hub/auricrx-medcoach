@@ -41,6 +41,10 @@ app.post('/ask', async (req, res) => {
   }
 });
 
+app.get('/', (_req, res) => {
+  res.send('AuricRx Medcoach API is running ✅');
+});
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
 });
