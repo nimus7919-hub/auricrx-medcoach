@@ -60,21 +60,28 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
         const cc = geo?.[0]?.isoCountryCode?.toUpperCase();
         if (cc) {
-          const currencyByCountry: Record<string,string> = {
-            US:'USD', PR:'USD', GU:'USD', VI:'USD', MP:'USD', AS:'USD',
-            CA:'CAD', MX:'MXN', BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN',
+          // Expanded mapping (common global currencies)
+          const C: Record<string,string> = {
+            // North America
+            US:'USD', PR:'USD', CA:'CAD', MX:'MXN',
+            // Latin America
+            BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:'USD', UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:'USD', DO:'DOP', PA:'PAB',
+            // Europe (Euro + others)
             ES:'EUR', PT:'EUR', FR:'EUR', DE:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', IE:'EUR', LU:'EUR', AT:'EUR', FI:'EUR', GR:'EUR', SK:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', MT:'EUR', CY:'EUR',
-            GB:'GBP', IE:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF',
-            CN:'CNY', JP:'JPY', KR:'KRW', IN:'INR', AU:'AUD', NZ:'NZD'
+            PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', HR:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF', GB:'GBP', IS:'ISK', TR:'TRY',
+            // Middle East & Africa
+            AE:'AED', SA:'SAR', QA:'QAR', KW:'KWD', BH:'BHD', OM:'OMR', IL:'ILS', EG:'EGP', MA:'MAD', NG:'NGN', KE:'KES', ZA:'ZAR', GH:'GHS',
+            // Asia / Pacific
+            CN:'CNY', JP:'JPY', KR:'KRW', IN:'INR', HK:'HKD', TW:'TWD', SG:'SGD', MY:'MYR', TH:'THB', ID:'IDR', PH:'PHP', VN:'VND', AU:'AUD', NZ:'NZD', FJ:'FJD'
           };
-          if (currencyByCountry[cc]) setCurrency(currencyByCountry[cc]);
+          if (C[cc]) setCurrency(C[cc]);
         }
       } catch {}
       if (!coords) {
         setCurrency(lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
       }
       const near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
-      const prices = await getMedicationPrices(near, medication);
+  const prices = await getMedicationPrices(near, medication, { currency });
       setResults(prices);
       setMockMode(near.some(p => p.id.startsWith('mock-')));
     } catch (e) {
@@ -109,9 +116,15 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     return `${km.toFixed(1)} km`;
   }
   // currency formatting
+  const symbolMap: Record<string,string> = {
+    USD:'$', CAD:'$', MXN:'$','BRL':'R$','ARS':'$','CLP':'$','COP':'$','PEN':'S/','VES':'Bs.','UYU':'$U','PYG':'Gs.','BOB':'Bs','CRC':'₡','GTQ':'Q','HNL':'L','NIO':'C$','DOP':'RD$','PAB':'B/.',
+    EUR:'€','GBP':'£','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'лв','SEK':'kr','NOK':'kr','DKK':'kr','CHF':'CHF','ISK':'kr','TRY':'₺',
+    AED:'د.إ','SAR':'﷼','QAR':'﷼','KWD':'KD','BHD':'BD','OMR':'﷼','ILS':'₪','EGP':'E£','MAD':'د.م.','NGN':'₦','KES':'KSh','ZAR':'R','GHS':'₵',
+    CNY:'¥','JPY':'¥','KRW':'₩','INR':'₹','HKD':'HK$','TWD':'NT$','SGD':'S$','MYR':'RM','THB':'฿','IDR':'Rp','PHP':'₱','VND':'₫','AUD':'A$','NZD':'NZ$','FJD':'FJ$'
+  };
   let formatPrice = (n:number) => {
-    const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '';
-    return symbol ? `${symbol}${n.toFixed(2)}` : `${n.toFixed(2)} ${currency}`;
+    const sym = symbolMap[currency];
+    return sym ? `${sym}${n.toFixed(2)}` : `${n.toFixed(2)} ${currency}`;
   };
   try {
     const nf = new Intl.NumberFormat(lang, { style:'currency', currency, maximumFractionDigits:2 });
@@ -178,7 +191,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
               {medication.name} • {medication.dosage}{medication.lastRefill ? ` • ${(strings.lastRefill||'Last refill')}: ${medication.lastRefill}` : ""}
             </Text>
             {mockMode && (
-              <View style={{ backgroundColor: '#fbbf24', paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.md }}>
+              <View style={{ backgroundColor: '#fbbf24', paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.xl }}>
                 <Text style={{ color:'#000', fontSize:12, fontWeight:'600' }}>Mock data (add GOOGLE_PLACES_API_KEY for live pharmacies)</Text>
               </View>
             )}

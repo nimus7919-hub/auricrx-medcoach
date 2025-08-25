@@ -38,12 +38,12 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   }
 }
 
-export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string }): Promise<StorePrice[]> {
+export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string }, opts?: { currency?: string }): Promise<StorePrice[]> {
   try {
     const res = await fetch(`${API_BASE}/pharmacies/prices`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ medication, pharmacies }),
+  body: JSON.stringify({ medication, pharmacies, currency: opts?.currency }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();

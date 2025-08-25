@@ -250,17 +250,44 @@ app.get('/debug/places', async (req, res) => {
 
 // POST /pharmacies/prices { medication: { name, dosage }, pharmacies: [{id,...}] }
 app.post('/pharmacies/prices', async (req, res) => {
-  const { medication, pharmacies } = req.body || {};
+  const { medication, pharmacies, currency } = req.body || {};
   if (!medication?.name || !Array.isArray(pharmacies)) return res.status(400).json({ ok: false, error: 'bad_request' });
   try {
-    const enriched = pharmacies.map(p => ({
+    // Base prices in USD (pseudo)
+    const usdList = pharmacies.map(p => ({
       ...p,
-      price: genPrice(p.id, medication.name),
+      priceUSD: genPrice(p.id, medication.name),
       pickup: true,
       delivery: (p.id.charCodeAt(0) % 2) === 0,
       requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
     }));
-    res.json({ ok: true, prices: enriched });
+
+    // Lightweight static FX map (approx) – in real app fetch from reliable source
+    const FX = {
+      USD: 1,
+      EUR: 0.92,
+      MXN: 18.2,
+      CAD: 1.36,
+      GBP: 0.78,
+      BRL: 5.5,
+      ARS: 950,
+      CLP: 935,
+      COP: 4000,
+      PEN: 3.75,
+      CNY: 7.2,
+      JPY: 155,
+      INR: 83.2,
+      AUD: 1.52,
+      NZD: 1.66
+    };
+    const target = (typeof currency === 'string' && currency.toUpperCase()) || 'USD';
+    const rate = FX[target] || 1;
+    const prices = usdList.map(p => ({
+      ...p,
+      price: Number((p.priceUSD * rate).toFixed(2)),
+      currency: target
+    }));
+    res.json({ ok: true, prices, meta: { currency: target, rate } });
   } catch (e) {
     console.error('prices error', e.message);
     res.status(500).json({ ok: false, error: 'prices_failed' });
