@@ -17,9 +17,12 @@ export type StorePrice = Pharmacy & {
 
 import { API_BASE } from "../src/config/api";
 
-export async function findNearbyPharmacies(lat: number, lon: number, lang: string = 'en'): Promise<Pharmacy[]> {
+export async function findNearbyPharmacies(lat: number, lon: number, lang: string = 'en', opts?: { limit?: number; noCache?: boolean }): Promise<Pharmacy[]> {
   try {
-  const res = await fetch(`${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=12&lang=${encodeURIComponent(lang)}`);
+  const brands = encodeURIComponent('HEB,Walmart,Target,Costco,CVS,Walgreens');
+  const limit = opts?.limit ?? 15;
+  const noCache = opts?.noCache ? '&noCache=1' : '';
+  const res = await fetch(`${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&brands=${brands}${noCache}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || 'api_error');
@@ -38,7 +41,7 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   }
 }
 
-export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string }, opts?: { currency?: string }): Promise<StorePrice[]> {
+export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string }, opts?: { currency?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number; fxTs?: number } }> {
   try {
     const res = await fetch(`${API_BASE}/pharmacies/prices`, {
       method: 'POST',
@@ -48,16 +51,16 @@ export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || 'api_error');
-    return json.prices || [];
+    return { prices: json.prices || [], meta: json.meta };
   } catch (e) {
     console.warn('prices fallback (mock)', e);
     // Fallback deterministic mock
-    return pharmacies.map((p, i) => ({
+    return { prices: pharmacies.map((p, i) => ({
       ...p,
       price: [25, 30, 22, 28, 24, 27][i % 6],
       pickup: true,
       delivery: i % 2 === 0,
       requiresCoupon: i % 3 === 0,
-    }));
+    })) };
   }
 }

@@ -211,10 +211,57 @@ app.get('/pharmacies/nearby', async (req, res) => {
   const limit = req.query.limit ? Math.min(25, parseInt(req.query.limit, 10) || 10) : 10;
   const lang = typeof req.query.lang === 'string' ? req.query.lang : 'en';
   const noCache = req.query.noCache === '1';
+  const brandsParam = typeof req.query.brands === 'string' ? req.query.brands : '';
+  const brandList = brandsParam.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6); // cap brand searches
   if (Number.isNaN(lat) || Number.isNaN(lon)) return res.status(400).json({ ok: false, error: 'bad_coords' });
   try {
-    const { list, mock, cached } = await fetchNearbyPharmacies(lat, lon, limit, lang, { useCache: !noCache });
-    res.json({ ok: true, pharmacies: list, meta: { mock, cached, count: list.length } });
+    let { list, mock, cached } = await fetchNearbyPharmacies(lat, lon, limit, lang, { useCache: !noCache });
+
+    // --- Optional brand enrichment (text search) ---
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+    const addedBrands = [];
+    if (apiKey && !mock && list.length < limit && brandList.length) {
+      for (const brand of brandList) {
+        if (list.length >= limit) break;
+        try {
+          const query = encodeURIComponent(`${brand} pharmacy`);
+          const radius = 5000;
+          const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&location=${lat},${lon}&radius=${radius}&type=pharmacy&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error('brand_http_'+resp.status);
+          const json = await resp.json();
+          const existingIds = new Set(list.map(p=>p.id));
+            const toAdd = [];
+          for (const r of (json.results||[])) {
+            if (toAdd.length + list.length >= limit) break;
+            if (existingIds.has(r.place_id)) continue;
+            const plat = r.geometry?.location?.lat;
+            const plon = r.geometry?.location?.lng;
+            if (typeof plat !== 'number' || typeof plon !== 'number') continue;
+            const dist = haversineMi(lat, lon, plat, plon);
+            toAdd.push({
+              id: r.place_id,
+              name: r.name,
+              lat: plat,
+              lon: plon,
+              address: r.vicinity || r.formatted_address || '',
+              distanceMiles: Number(dist.toFixed(2)),
+              logoUrl: null,
+            });
+          }
+          if (toAdd.length) {
+            list = list.concat(toAdd);
+            addedBrands.push({ brand, added: toAdd.length });
+          }
+        } catch (e) {
+          console.warn('Brand search failed', brand, e.message);
+        }
+      }
+    }
+
+  // Ensure deterministic ordering (distance ascending) before slicing so client price sorting starts consistent
+  list.sort((a,b)=> (a.distanceMiles||0) - (b.distanceMiles||0));
+  res.json({ ok: true, pharmacies: list.slice(0, limit), meta: { mock, cached, count: list.length, addedBrands } });
   } catch (e) {
     console.error('nearby error', e.message);
     res.status(500).json({ ok: false, error: 'nearby_failed' });

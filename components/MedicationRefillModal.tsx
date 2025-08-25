@@ -13,6 +13,14 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<StorePrice[]>([]);
+  const [sort, setSort] = useState<'distance'|'price'|'name'>('price');
+  const [descending, setDescending] = useState(false);
+  const [fxMeta, setFxMeta] = useState<{ currency: string; rate: number; fxTs?: number }|null>(null);
+  const SORT_KEY = 'AURIC_SORT';
+
+  useEffect(()=>{
+    AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
+  },[]);
   const [showAll, setShowAll] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const [currency, setCurrency] = useState<string>('USD');
@@ -35,7 +43,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       setLoading(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
       let coords = { latitude: 37.7749, longitude: -122.4194 }; // fallback (SF)
-  let determinedCurrency: string = 'USD';
+      let determinedCurrency: string = 'USD';
       if (status === "granted") {
         try {
           const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
@@ -75,16 +83,18 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             // Asia / Pacific
             CN:'CNY', JP:'JPY', KR:'KRW', IN:'INR', HK:'HKD', TW:'TWD', SG:'SGD', MY:'MYR', TH:'THB', ID:'IDR', PH:'PHP', VN:'VND', AU:'AUD', NZ:'NZD', FJ:'FJD'
           };
-          if (C[cc]) setCurrency(C[cc]);
+          if (C[cc]) determinedCurrency = C[cc];
         }
       } catch {}
-      if (!coords) {
+      // If geocode failed we can do a crude language fallback
+      if (!determinedCurrency) {
         determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
       }
-      setCurrency(determinedCurrency);
+      setCurrency(determinedCurrency); // single definitive assignment
       const near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
-      const prices = await getMedicationPrices(near, medication, { currency: determinedCurrency });
-      setResults(prices);
+  const { prices, meta } = await getMedicationPrices(near, medication, { currency: determinedCurrency.toUpperCase() });
+  setResults(prices);
+  if (meta) setFxMeta(meta);
       setMockMode(near.some(p => p.id.startsWith('mock-')));
     } catch (e) {
       console.warn('Refill load error', e);
@@ -94,7 +104,15 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   }
 
   const data = useMemo(() => {
-    let list = results;
+    let list = results.slice();
+    // apply sorting
+    list.sort((a,b)=>{
+      let cmp;
+      if (sort === 'price') cmp = (a.price ?? 0) - (b.price ?? 0);
+      else if (sort === 'name') cmp = a.name.localeCompare(b.name);
+      else cmp = (a.distanceMiles ?? 0) - (b.distanceMiles ?? 0);
+      return descending ? -cmp : cmp;
+    });
     if (activeFilters.size) {
       list = list.filter(r => {
         if (activeFilters.has('pickup') && !r.pickup) return false;
@@ -107,7 +125,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       });
     }
     return showAll ? list : list.slice(0,5);
-  }, [results, showAll, activeFilters]);
+  }, [results, showAll, activeFilters, sort, descending]);
   const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
 
   const useKm = lang !== 'en';
@@ -134,6 +152,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   } catch {}
 
   function renderItem({ item }: { item: StorePrice }) {
+    const lowestPrice = useMemo(()=>{
+      if (!results.length) return null;
+      let min = Infinity;
+      for (const r of results) if (typeof r.price === 'number' && r.price < min) min = r.price;
+      return isFinite(min) ? min : null;
+    }, [results]);
+    const isLowest = lowestPrice != null && item.price === lowestPrice;
     return (
       <Pressable
         onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
@@ -164,6 +189,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         </View>
         <View style={{ alignItems: "flex-end", gap: spacing.sm }}>
           <Text style={{ color: colors.text, fontSize: 18, fontWeight: "700" }}>{formatPrice(item.price)}</Text>
+          {isLowest && (
+            <View style={{ backgroundColor: colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill }}>
+              <Text style={{ color: '#000', fontSize: 10, fontWeight: '700' }}>{strings.lowest || 'Lowest'}</Text>
+            </View>
+          )}
           <Pressable
             onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
             style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 8, minHeight: 36, justifyContent: "center" }}
@@ -188,7 +218,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         }}>
           {/* Header */}
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{strings.refill || 'Refill'}</Text>
+            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{(strings.refill||'Refill')} {`(${(strings.sortBy||'Sort')}: ${strings[sort]||sort}${descending?' ↓':' ↑'})`}</Text>
             <Text style={{ color: colors.sub, fontSize: 14 }}>
               {medication.name} • {medication.dosage}{medication.lastRefill ? ` • ${(strings.lastRefill||'Last refill')}: ${medication.lastRefill}` : ""}
             </Text>
@@ -228,6 +258,30 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 </Pressable>
               )}
             </View>
+            {/* Sorting row */}
+            <View style={{ flexDirection:'row', alignItems:'center', flexWrap:'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
+              <Text style={{ color: colors.sub, fontSize: 12 }}>{strings.sortBy || 'Sort:'}</Text>
+              {['distance','price','name'].map(key => {
+                const label = key === 'distance' ? (strings.distance||'Distance') : key === 'price' ? (strings.price||'Price') : (strings.name||'Name');
+                const active = sort === key;
+                return (
+                  <Pressable accessibilityRole="button" accessibilityLabel={`Sort by ${label}`} key={key} onPress={()=> { setSort(key as any); AsyncStorage.setItem(SORT_KEY, key).catch(()=>{}); }} style={{ backgroundColor: active? colors.gold: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
+                    <Text style={{ color: active? '#000': colors.text, fontSize: 12 }}>{label}</Text>
+                  </Pressable>
+                );
+              })}
+              <Pressable accessibilityRole="button" accessibilityLabel={descending? 'Ascending order':'Descending order'} onPress={()=> setDescending(d=>!d)} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
+                <Text style={{ color: colors.text, fontSize: 12 }}>{descending? '↓':'↑'}</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel={'Refresh pharmacies'} onPress={()=>{ load(); }} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
+                <Text style={{ color: colors.text, fontSize: 12 }}>{strings.refresh||'Refresh'}</Text>
+              </Pressable>
+            </View>
+            {fxMeta && (
+              <Text style={{ color: colors.sub, fontSize: 10, marginTop: spacing.xs }}>
+                {(strings.fxLabel||'FX')+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
+              </Text>
+            )}
           </View>
 
           {/* List */}
