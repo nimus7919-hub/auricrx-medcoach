@@ -126,6 +126,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     }
     return showAll ? list : list.slice(0,5);
   }, [results, showAll, activeFilters, sort, descending]);
+
+  // Precompute current lowest price once per results array
+  const lowestPrice = useMemo(() => {
+    if (!results.length) return null;
+    let min = Infinity; for (const r of results) if (typeof r.price === 'number' && r.price < min) min = r.price;
+    return isFinite(min) ? min : null;
+  }, [results]);
   const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
 
   const useKm = lang !== 'en';
@@ -152,13 +159,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   } catch {}
 
   function renderItem({ item }: { item: StorePrice }) {
-    const lowestPrice = useMemo(()=>{
-      if (!results.length) return null;
-      let min = Infinity;
-      for (const r of results) if (typeof r.price === 'number' && r.price < min) min = r.price;
-      return isFinite(min) ? min : null;
-    }, [results]);
-    const isLowest = lowestPrice != null && item.price === lowestPrice;
+    if (!item || typeof item !== 'object') return null;
+    const isLowest = lowestPrice != null && typeof item.price === 'number' && item.price === lowestPrice;
     return (
       <Pressable
         onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
@@ -188,7 +190,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           </View>
         </View>
         <View style={{ alignItems: "flex-end", gap: spacing.sm }}>
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: "700" }}>{formatPrice(item.price)}</Text>
+              <Text style={{ color: colors.text, fontSize: 18, fontWeight: "700" }}>{typeof item.price === 'number'? formatPrice(item.price): '—'}</Text>
           {isLowest && (
             <View style={{ backgroundColor: colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill }}>
               <Text style={{ color: '#000', fontSize: 10, fontWeight: '700' }}>{strings.lowest || 'Lowest'}</Text>

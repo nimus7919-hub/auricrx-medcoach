@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { askMedicalAI } from './src/api/api.medical-ai';
 import Constants from "expo-constants";
 import MedicationRefillModal from './components/MedicationRefillModal';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
 
@@ -1342,13 +1343,15 @@ const Medications = () => {
              );
            })
          )}
-        <MedicationRefillModal
-          visible={!!refillMed}
+        <ErrorBoundary onError={(e)=> console.log('[RefillBoundary] error', e)}>
+          <MedicationRefillModal
+            visible={!!refillMed}
             onClose={() => setRefillMed(null)}
             medication={refillMed || { name: '', dosage: '' }}
             strings={S}
             lang={lang}
-        />
+          />
+        </ErrorBoundary>
 
           {/* Add Medication Modal */}
           <Modal visible={showAdd} animationType="slide" transparent>
