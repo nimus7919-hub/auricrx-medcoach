@@ -65,6 +65,28 @@ console.log('🟢 Node version:', process.version);
 const pharmacyCache = new Map(); // key: `${lat.toFixed(3)}:${lon.toFixed(3)}` -> { data, ts }
 const PHARMACY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
 
+// --- FX rates cache (dynamic) ---
+let fxRates = { base: 'USD', ts: 0, rates: { USD: 1 } };
+const FX_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+async function refreshFxRates(force = false) {
+  const now = Date.now();
+  if (!force && now - fxRates.ts < FX_TTL_MS && Object.keys(fxRates.rates || {}).length > 1) return fxRates;
+  const src = process.env.FX_RATES_SOURCE || 'https://open.er-api.com/v6/latest/USD';
+  try {
+    const r = await fetch(src);
+    if (!r.ok) throw new Error('fx_http_' + r.status);
+    const j = await r.json();
+    const rates = j.rates || j.data || {};
+    if (!rates.USD) rates.USD = 1;
+    fxRates = { base: 'USD', ts: now, rates };
+    console.log('✅ FX rates refreshed', Object.keys(rates).length, 'currencies');
+  } catch (e) {
+    console.warn('FX refresh failed, using cached/fallback:', e.message);
+    if (!fxRates.rates) fxRates = { base: 'USD', ts: now, rates: { USD: 1 } };
+  }
+  return fxRates;
+}
+
 function haversineMi(lat1, lon1, lat2, lon2) {
   const R = 3958.8; // miles
   const toRad = d => (d * Math.PI) / 180;
@@ -199,6 +221,35 @@ app.get('/pharmacies/nearby', async (req, res) => {
   }
 });
 
+// POST /pharmacies/prices { medication: { name, dosage }, pharmacies: [{id,...}] }
+app.post('/pharmacies/prices', async (req, res) => {
+  const { medication, pharmacies, currency } = req.body || {};
+  if (!medication?.name || !Array.isArray(pharmacies)) return res.status(400).json({ ok: false, error: 'bad_request' });
+  try {
+    const usdList = pharmacies.map(p => ({
+      ...p,
+      priceUSD: genPrice(p.id, medication.name),
+      pickup: true,
+      delivery: (p.id.charCodeAt(0) % 2) === 0,
+      requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
+    }));
+    await refreshFxRates();
+    const target = (typeof currency === 'string' && currency.toUpperCase()) || 'USD';
+    const rate = fxRates.rates[target] || 1;
+    const prices = usdList.map(p => ({
+      ...p,
+      price: Number((p.priceUSD * rate).toFixed(2)),
+      currency: target,
+      baseUSD: p.priceUSD,
+      fxApplied: rate !== 1
+    }));
+    res.json({ ok: true, prices, meta: { currency: target, rate, fxTs: fxRates.ts } });
+  } catch (e) {
+    console.error('prices error', e.message);
+    res.status(500).json({ ok: false, error: 'prices_failed' });
+  }
+});
+
 // --- Debug: environment presence (no secrets) ---
 app.get('/debug/env', (req, res) => {
   res.json({
@@ -208,6 +259,7 @@ app.get('/debug/env', (req, res) => {
       hasOpenAIKey: !!process.env.OPENAI_API_KEY,
       model: process.env.MODEL || null,
       node: process.version,
+      fx: { ts: fxRates.ts, currencies: Object.keys(fxRates.rates || {}).length }
     }
   });
 });
@@ -245,52 +297,6 @@ app.get('/debug/places', async (req, res) => {
     res.json({ ok: true, providerStatus: json.status, resultCount: json.results?.length || 0, sample: (json.results||[]).slice(0,2).map(r=>({ name: r.name, place_id: r.place_id })) });
   } catch (e) {
     res.status(500).json({ ok: false, error: 'fetch_failed', message: e.message });
-  }
-});
-
-// POST /pharmacies/prices { medication: { name, dosage }, pharmacies: [{id,...}] }
-app.post('/pharmacies/prices', async (req, res) => {
-  const { medication, pharmacies, currency } = req.body || {};
-  if (!medication?.name || !Array.isArray(pharmacies)) return res.status(400).json({ ok: false, error: 'bad_request' });
-  try {
-    // Base prices in USD (pseudo)
-    const usdList = pharmacies.map(p => ({
-      ...p,
-      priceUSD: genPrice(p.id, medication.name),
-      pickup: true,
-      delivery: (p.id.charCodeAt(0) % 2) === 0,
-      requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
-    }));
-
-    // Lightweight static FX map (approx) – in real app fetch from reliable source
-    const FX = {
-      USD: 1,
-      EUR: 0.92,
-      MXN: 18.2,
-      CAD: 1.36,
-      GBP: 0.78,
-      BRL: 5.5,
-      ARS: 950,
-      CLP: 935,
-      COP: 4000,
-      PEN: 3.75,
-      CNY: 7.2,
-      JPY: 155,
-      INR: 83.2,
-      AUD: 1.52,
-      NZD: 1.66
-    };
-    const target = (typeof currency === 'string' && currency.toUpperCase()) || 'USD';
-    const rate = FX[target] || 1;
-    const prices = usdList.map(p => ({
-      ...p,
-      price: Number((p.priceUSD * rate).toFixed(2)),
-      currency: target
-    }));
-    res.json({ ok: true, prices, meta: { currency: target, rate } });
-  } catch (e) {
-    console.error('prices error', e.message);
-    res.status(500).json({ ok: false, error: 'prices_failed' });
   }
 });
 

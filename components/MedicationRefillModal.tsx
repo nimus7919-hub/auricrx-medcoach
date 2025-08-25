@@ -35,6 +35,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       setLoading(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
       let coords = { latitude: 37.7749, longitude: -122.4194 }; // fallback (SF)
+  let determinedCurrency: string = 'USD';
       if (status === "granted") {
         try {
           const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
@@ -78,10 +79,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         }
       } catch {}
       if (!coords) {
-        setCurrency(lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
+        determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
       }
+      setCurrency(determinedCurrency);
       const near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
-  const prices = await getMedicationPrices(near, medication, { currency });
+      const prices = await getMedicationPrices(near, medication, { currency: determinedCurrency });
       setResults(prices);
       setMockMode(near.some(p => p.id.startsWith('mock-')));
     } catch (e) {
@@ -117,7 +119,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   }
   // currency formatting
   const symbolMap: Record<string,string> = {
-    USD:'$', CAD:'$', MXN:'$','BRL':'R$','ARS':'$','CLP':'$','COP':'$','PEN':'S/','VES':'Bs.','UYU':'$U','PYG':'Gs.','BOB':'Bs','CRC':'₡','GTQ':'Q','HNL':'L','NIO':'C$','DOP':'RD$','PAB':'B/.',
+    USD:'$', CAD:'C$', MXN:'MX$','BRL':'R$','ARS':'AR$','CLP':'CLP$','COP':'COL$','PEN':'S/','VES':'Bs.','UYU':'$U','PYG':'Gs.','BOB':'Bs','CRC':'₡','GTQ':'Q','HNL':'L','NIO':'C$','DOP':'RD$','PAB':'B/.',
     EUR:'€','GBP':'£','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'лв','SEK':'kr','NOK':'kr','DKK':'kr','CHF':'CHF','ISK':'kr','TRY':'₺',
     AED:'د.إ','SAR':'﷼','QAR':'﷼','KWD':'KD','BHD':'BD','OMR':'﷼','ILS':'₪','EGP':'E£','MAD':'د.م.','NGN':'₦','KES':'KSh','ZAR':'R','GHS':'₵',
     CNY:'¥','JPY':'¥','KRW':'₩','INR':'₹','HKD':'HK$','TWD':'NT$','SGD':'S$','MYR':'RM','THB':'฿','IDR':'Rp','PHP':'₱','VND':'₫','AUD':'A$','NZD':'NZ$','FJD':'FJ$'
