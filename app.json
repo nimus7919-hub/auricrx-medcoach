@@ -4,7 +4,7 @@
     "slug": "auricrx-medcoach",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/auricrx-logo.png",
+    "icon": "./assets/icon.png",
     "scheme": "auricrx-medcoach",
     "splash": {
       "image": "./assets/auricrx-logo.png",
@@ -14,10 +14,6 @@
     "assetBundlePatterns": ["**/*"],
     "ios": { "supportsTablet": true },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/auricrx-logo.png",
-        "backgroundColor": "#0b1117"
-      },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.ACCESS_FINE_LOCATION",

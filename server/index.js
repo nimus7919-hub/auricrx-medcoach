@@ -53,6 +53,220 @@ app.use((req, _res, next) => {
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// --- Startup diagnostics ---
+if (process.env.GOOGLE_PLACES_API_KEY) {
+  console.log(`🔐 GOOGLE_PLACES_API_KEY detected (len=${process.env.GOOGLE_PLACES_API_KEY.length})`);
+} else {
+  console.warn('⚠️  GOOGLE_PLACES_API_KEY NOT set – pharmacy endpoint will serve mock data.');
+}
+console.log('🟢 Node version:', process.version);
+
+// --- Simple in-memory cache (TTL) for nearby pharmacies to reduce API calls ---
+const pharmacyCache = new Map(); // key: `${lat.toFixed(3)}:${lon.toFixed(3)}` -> { data, ts }
+const PHARMACY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
+
+function haversineMi(lat1, lon1, lat2, lon2) {
+  const R = 3958.8; // miles
+  const toRad = d => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCache = true } = {}) {
+  const key = `${lat.toFixed(3)}:${lon.toFixed(3)}`;
+  const now = Date.now();
+  if (useCache) {
+    const cached = pharmacyCache.get(key);
+    if (cached && now - cached.ts < PHARMACY_CACHE_TTL_MS) {
+      return { list: cached.data.slice(0, limit), cached: true, mock: false };
+    }
+  }
+
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) {
+    console.warn('Nearby pharmacies: no API key present – returning mock data.');
+    const mock = [
+      { id: "mock-cvs", name: "CVS Pharmacy", lat: lat + 0.001, lon: lon + 0.001, address: "123 Main St", distanceMiles: 0.8 },
+      { id: "mock-wal", name: "Walgreens", lat: lat + 0.002, lon: lon - 0.001, address: "45 Oak Ave", distanceMiles: 1.1 },
+      { id: "mock-rite", name: "Rite Aid", lat: lat - 0.001, lon: lon + 0.002, address: "8 Pine Rd", distanceMiles: 1.3 },
+      { id: "mock-wmt", name: "Walmart Pharmacy", lat: lat - 0.002, lon: lon - 0.002, address: "220 Market", distanceMiles: 1.9 },
+      { id: "mock-cost", name: "Costco Pharmacy", lat: lat + 0.003, lon: lon + 0.003, address: "5 Lake Dr", distanceMiles: 2.4 },
+      { id: "mock-tar", name: "Target (CVS)", lat: lat + 0.004, lon: lon - 0.003, address: "77 River Rd", distanceMiles: 3.1 },
+    ];
+    return { list: mock.slice(0, limit), cached: false, mock: true };
+  }
+
+    const radius = 5000; // meters (~3.1 mi) adjust as needed
+    let legacyError = null;
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&type=pharmacy&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+      console.log(`Places API (legacy) fetch: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} lang=${lang} limit=${limit}`);
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Places API HTTP ${resp.status}`);
+      const json = await resp.json();
+      console.log('Places API (legacy) status:', json.status, 'results:', json.results?.length);
+      if (json.status === 'OK' || json.status === 'ZERO_RESULTS') {
+        const places = (json.results || []).slice(0, limit).map(p => {
+          const plat = p.geometry?.location?.lat;
+          const plon = p.geometry?.location?.lng;
+          const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+          return {
+            id: p.place_id,
+            name: p.name,
+            lat: plat,
+            lon: plon,
+            address: p.vicinity || p.formatted_address || '',
+            distanceMiles: dist ? Number(dist.toFixed(2)) : undefined,
+            logoUrl: null,
+          };
+        });
+        if (useCache) pharmacyCache.set(key, { data: places, ts: now });
+        return { list: places, cached: false, mock: false, apiVersion: 'legacy', legacyStatus: json.status };
+      } else {
+        legacyError = json.status;
+      }
+    } catch (e) {
+      legacyError = e.message;
+    }
+
+    // Fallback to Places API (New) if legacy failed & new might be enabled.
+    try {
+      console.log('Attempting Places API (New) fallback. Legacy error:', legacyError);
+      const body = {
+        includedTypes: ['pharmacy'],
+        maxResultCount: Math.min(limit, 20),
+        languageCode: lang,
+        locationRestriction: { circle: { center: { latitude: lat, longitude: lon }, radius: radius * 1.0 } },
+      };
+      const newResp = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.location,places.formattedAddress'
+        },
+        body: JSON.stringify(body)
+      });
+      if (!newResp.ok) throw new Error(`New Places HTTP ${newResp.status}`);
+      const j = await newResp.json();
+      const placesArr = (j.places || []).map(p => {
+        const plat = p.location?.latitude;
+        const plon = p.location?.longitude;
+        const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+        return {
+          id: p.id,
+          name: p.displayName?.text || 'Unknown',
+          lat: plat,
+          lon: plon,
+          address: p.formattedAddress || '',
+          distanceMiles: dist ? Number(dist.toFixed(2)) : undefined,
+          logoUrl: null,
+        };
+      });
+      console.log('Places API (New) results:', placesArr.length);
+      if (useCache) pharmacyCache.set(key, { data: placesArr, ts: now });
+      return { list: placesArr.slice(0, limit), cached: false, mock: false, apiVersion: 'new', legacyError };
+    } catch (e2) {
+      console.error('Places API (New) fallback failed:', e2.message);
+      throw new Error('places_failed');
+    }
+}
+
+// Deterministic pseudo-price generator (stable across requests for same id+med)
+function genPrice(pharmacyId, medName) {
+  const seed = [...(pharmacyId + medName)].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const base = 15 + (seed % 30); // $15 - $44
+  return Number((base + (seed % 7) * 0.25).toFixed(2));
+}
+
+// GET /pharmacies/nearby?lat=..&lon=..&limit=10&lang=es
+app.get('/pharmacies/nearby', async (req, res) => {
+  const lat = parseFloat(req.query.lat);
+  const lon = parseFloat(req.query.lon);
+  const limit = req.query.limit ? Math.min(25, parseInt(req.query.limit, 10) || 10) : 10;
+  const lang = typeof req.query.lang === 'string' ? req.query.lang : 'en';
+  const noCache = req.query.noCache === '1';
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return res.status(400).json({ ok: false, error: 'bad_coords' });
+  try {
+    const { list, mock, cached } = await fetchNearbyPharmacies(lat, lon, limit, lang, { useCache: !noCache });
+    res.json({ ok: true, pharmacies: list, meta: { mock, cached, count: list.length } });
+  } catch (e) {
+    console.error('nearby error', e.message);
+    res.status(500).json({ ok: false, error: 'nearby_failed' });
+  }
+});
+
+// --- Debug: environment presence (no secrets) ---
+app.get('/debug/env', (req, res) => {
+  res.json({
+    ok: true,
+    env: {
+      hasPlacesKey: !!process.env.GOOGLE_PLACES_API_KEY,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+      model: process.env.MODEL || null,
+      node: process.version,
+    }
+  });
+});
+
+// Debug: list registered routes
+app.get('/debug/routes', (req, res) => {
+  try {
+    const routes = [];
+    app._router.stack.forEach(layer => {
+      if (layer.route && layer.route.path) {
+        const methods = Object.keys(layer.route.methods).filter(m => layer.route.methods[m]).map(m => m.toUpperCase());
+        routes.push({ path: layer.route.path, methods });
+      }
+    });
+    res.json({ ok: true, routes });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// --- Debug: raw Places call (no cache) returns provider status ---
+app.get('/debug/places', async (req, res) => {
+  const lat = parseFloat(req.query.lat);
+  const lon = parseFloat(req.query.lon);
+  const lang = typeof req.query.lang === 'string' ? req.query.lang : 'en';
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return res.status(400).json({ ok: false, error: 'bad_coords' });
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) return res.json({ ok: true, mock: true, reason: 'no_api_key' });
+  try {
+    const radius = 5000;
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&type=pharmacy&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+    console.log('[debug/places] URL', url.replace(apiKey, '***KEY***'));
+    const resp = await fetch(url);
+    const json = await resp.json();
+    res.json({ ok: true, providerStatus: json.status, resultCount: json.results?.length || 0, sample: (json.results||[]).slice(0,2).map(r=>({ name: r.name, place_id: r.place_id })) });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: 'fetch_failed', message: e.message });
+  }
+});
+
+// POST /pharmacies/prices { medication: { name, dosage }, pharmacies: [{id,...}] }
+app.post('/pharmacies/prices', async (req, res) => {
+  const { medication, pharmacies } = req.body || {};
+  if (!medication?.name || !Array.isArray(pharmacies)) return res.status(400).json({ ok: false, error: 'bad_request' });
+  try {
+    const enriched = pharmacies.map(p => ({
+      ...p,
+      price: genPrice(p.id, medication.name),
+      pickup: true,
+      delivery: (p.id.charCodeAt(0) % 2) === 0,
+      requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
+    }));
+    res.json({ ok: true, prices: enriched });
+  } catch (e) {
+    console.error('prices error', e.message);
+    res.status(500).json({ ok: false, error: 'prices_failed' });
+  }
+});
+
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.post('/ask', async (req, res) => {
@@ -80,6 +294,68 @@ console.log('POST /ask', req.body);
   } catch (err) {
     console.error('OpenAI error:', err?.response?.data || err?.message);
     res.status(500).json({ ok: false, error: 'openai_error' });
+  }
+});
+
+// --- Streaming endpoint (token-by-token) ---
+// POST /ask-stream { messages?: [{role, content}], message?: string }
+// Sends back raw tokens as they arrive (plain text stream) so client can append.
+app.post('/ask-stream', async (req, res) => {
+  try {
+    // Accept either a full messages array or a single message string
+    let { messages, message } = req.body || {};
+    if (!Array.isArray(messages)) {
+      if (typeof message === 'string' && message.trim()) {
+        messages = [
+          {
+            role: 'system',
+            content: 'You are a helpful medical information assistant. Provide general information only. Do not diagnose or give personalized advice.'
+          },
+          { role: 'user', content: message.trim() },
+        ];
+      } else {
+        return res.status(400).json({ ok: false, error: 'bad_request' });
+      }
+    }
+
+    // Basic validation / trimming
+    messages = messages.map(m => ({
+      role: m.role === 'user' || m.role === 'assistant' || m.role === 'system' ? m.role : 'user',
+      content: (m.content || '').slice(0, 8000),
+    }));
+
+    res.writeHead(200, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'Transfer-Encoding': 'chunked',
+    });
+
+    // Kick an initial small chunk so React Native UI shows activity quickly
+    res.write('');
+
+    const stream = await client.chat.completions.create({
+      model: process.env.MODEL || 'gpt-4o-mini',
+      messages,
+      temperature: 0.2,
+      stream: true,
+    });
+
+    let total = '';
+    for await (const chunk of stream) {
+      const token = chunk?.choices?.[0]?.delta?.content || '';
+      if (token) {
+        total += token;
+        // write raw token; no SSE framing so client just concatenates
+        res.write(token);
+      }
+    }
+    res.end();
+  } catch (err) {
+    console.error('stream error', err);
+    // Best-effort error emit; client can detect and show a message
+    try { res.write('\n[STREAM_ERROR]\n'); } catch {}
+    try { res.end(); } catch {}
   }
 });
 

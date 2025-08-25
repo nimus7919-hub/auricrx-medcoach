@@ -65,14 +65,138 @@ const STRINGS = {
     toPDF: 'Create PDF',
     record: 'Record',
     play: 'Play',
-// ...existing code...
+    save: 'Save',
+    recording: 'Recording…',
+    saved: 'Saved',
+    startServerInfo: 'Start local dev server and connect',
+    medications: 'Medications',
+    refill: 'Refill',
+    edit: 'Edit',
+    addMedication: 'Add Medication',
+    editMedication: 'Edit Medication',
+    dosesLeft: 'Doses left',
+    status: 'Status',
+    times: 'Times',
+    delete: 'Delete',
+    cancel: 'Cancel',
+    saveBtn: 'Save',
+    add: 'Add',
+    pickTime: 'Pick time'
+  },
+  es: {
+    nextReminder: 'Próximo recordatorio',
+    reminders: 'Recordatorios',
+    pharmacyLocations: 'Farmacias',
+    aiConsultant: 'Consultor IA',
+    labsLocations: 'Laboratorios',
+    prescription: 'Receta',
+    appointmentLog: 'Citas',
+    healthJournal: 'Registro de Salud',
+    dashboard: 'Panel',
+    settings: 'Configuración',
+    profile: 'Perfil',
+    language: 'Idioma',
+    colorSettings: 'Colores',
+    dayNight: 'Día / Noche',
+    moodShift: 'Cambio de humor',
+    help: 'Ayuda',
+    emailUs: 'Escríbenos',
+    askAI: 'Preguntar a IA',
+    tapToTalk: 'Toca para hablar',
+    stop: 'Detener',
+    addReminder: 'Agregar recordatorio',
+    addPhoto: 'Agregar foto',
+    toPDF: 'Crear PDF',
+    record: 'Grabar',
+    play: 'Reproducir',
+    save: 'Guardar',
+    recording: 'Grabando…',
+    saved: 'Guardado',
+    startServerInfo: 'Iniciar servidor local y conectar',
+    medications: 'Medicamentos',
+    refill: 'Recargar',
+    edit: 'Editar',
+    addMedication: 'Agregar Medicamento',
+    editMedication: 'Editar Medicamento',
+    dosesLeft: 'Dosis restantes',
+    status: 'Estado',
+    times: 'Horarios',
+    delete: 'Eliminar',
+    cancel: 'Cancelar',
+    saveBtn: 'Guardar',
+    add: 'Agregar',
+  pickTime: 'Elegir hora',
+  namePlaceholder: 'Nombre',
+  directions: 'Direcciones',
+  pickup: 'Retiro',
+  delivery: 'Entrega',
+  cash: 'Efectivo',
+  coupon: 'Cupón',
+  showAll: 'Ver todo',
+  close: 'Cerrar',
+  reserve: 'Reservar (demo)',
+  lastRefill: 'Última recarga'
+  ,past: 'Pasado'
+  ,refillSoon: 'Recargar pronto'
+  ,expired: 'Vencido'
+  },
+  zh: {
+    nextReminder: '下一个提醒',
+    reminders: '提醒',
+    pharmacyLocations: '药房位置',
+    aiConsultant: 'AI顾问',
+    labsLocations: '实验室',
+    prescription: '处方',
+    appointmentLog: '预约日志',
+    healthJournal: '健康日记',
+    dashboard: '仪表盘',
+    settings: '设置',
+    profile: '个人资料',
+    language: '语言',
+    colorSettings: '颜色设置',
+    dayNight: '昼 / 夜',
+    moodShift: '情绪主题切换',
+    help: '帮助',
+    emailUs: '给我们发邮件',
+    askAI: '询问 AI',
+    tapToTalk: '点击说话',
+    stop: '停止',
+    addReminder: '添加提醒',
+    addPhoto: '添加照片',
+    toPDF: '生成 PDF',
     record: '录音',
     play: '播放',
     save: '保存',
     recording: '录音中…',
     saved: '已保存',
-    startServerInfo: '启动本地开发服务器并连接',
-  },
+    startServerInfo: '启动本地服务器并连接',
+    medications: '药物',
+    refill: '续药',
+    edit: '编辑',
+    addMedication: '添加药物',
+    editMedication: '编辑药物',
+    dosesLeft: '剩余剂量',
+    status: '状态',
+    times: '时间',
+    delete: '删除',
+    cancel: '取消',
+    saveBtn: '保存',
+    add: '添加',
+  pickTime: '选择时间',
+  namePlaceholder: '名称',
+  directions: '导航',
+  pickup: '自取',
+  delivery: '配送',
+  cash: '现金',
+  coupon: '优惠券',
+  showAll: '显示全部',
+  close: '关闭',
+  reserve: '预定 (演示)',
+  lastRefill: '上次续药'
+  ,past: '已过'
+  ,refillSoon: '快用完'
+  ,expired: '已过期'
+  }
 };
 
 // ---------- THEMES ----------
@@ -666,7 +790,7 @@ const handleAskMedicalAI = async () => {
   onPress={() => setAiOpen(true)}
   style={[consultStyles.fab, { backgroundColor: theme.card, borderColor: theme.chip }]}
 >
-  <Text style={{ color: theme.text, fontFamily: 'Inter_700Bold' }}>AI Consultant</Text>
+  <Text style={{ color: theme.text, fontFamily: 'Inter_700Bold' }}>{S.aiConsultant}</Text>
 </TouchableOpacity>
       </ScrollView>
         {/* 2x3 card grid */}
@@ -674,7 +798,7 @@ const handleAskMedicalAI = async () => {
           <Card title={S.reminders} icon={<Text style={styles.emoji}>🔔</Text>} onPress={() => setRoute('reminders')} />
           <Card title={S.pharmacyLocations} icon={<Text style={styles.emoji}>📍</Text>} onPress={() => setRoute('pharmacies')} />
           {/* Replace AI Consultant with Medications */}
-          <Card title="Medications" icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
+          <Card title={S.medications} icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
           <Card title={S.labsLocations} icon={<Text style={styles.emoji}>🧪</Text>} onPress={() => setRoute('labs')} />
           <Card title={S.prescription} icon={<Text style={styles.emoji}>🧾</Text>} onPress={() => setRoute('prescription')} />
           <Card title={S.appointmentLog} icon={<Text style={styles.emoji}>🗓️</Text>} onPress={() => setRoute('appointments')} />
@@ -890,19 +1014,19 @@ const handleAskMedicalAI = async () => {
   );
 // --------- Medications Screen ----------
 const MED_STATUSES = [
-  { key: 'taking', label: 'Taking', emoji: '💊', color: '#2dd4bf' },
-  { key: 'onhold', label: 'On hold', emoji: '⏸️', color: '#fbbf24' },
-  { key: 'prn', label: 'As needed (PRN)', emoji: '🕒', color: '#60a5fa' },
-  { key: 'finished', label: 'Finished', emoji: '✅', color: '#a3e635' },
-  { key: 'stopped', label: 'Stopped', emoji: '⛔', color: '#f87171' },
+  { key: 'taking', label: S.taking || 'Taking', emoji: '💊', color: '#2dd4bf' },
+  { key: 'onhold', label: S.onhold || 'On hold', emoji: '⏸️', color: '#fbbf24' },
+  { key: 'prn', label: S.prn || 'PRN', emoji: '🕒', color: '#60a5fa' },
+  { key: 'finished', label: S.finished || 'Finished', emoji: '✅', color: '#a3e635' },
+  { key: 'stopped', label: S.stopped || 'Stopped', emoji: '⛔', color: '#f87171' },
 ];
 
 const MED_FILTERS = [
-  { key: 'all', label: 'All' },
-  { key: 'taking', label: 'Taking' },
-  { key: 'prn', label: 'PRN' },
-  { key: 'onhold', label: 'On hold' },
-  { key: 'past', label: 'Past' },
+  { key: 'all', label: S.all || 'All' },
+  { key: 'taking', label: S.taking || 'Taking' },
+  { key: 'prn', label: S.prn || 'PRN' },
+  { key: 'onhold', label: S.onhold || 'On hold' },
+  { key: 'past', label: S.past || 'Past' },
 ];
 
 function getStatusObj(status) {
@@ -911,8 +1035,8 @@ function getStatusObj(status) {
 
 function getUtilityTags(med) {
   const tags = [];
-  if (med.refillSoon) tags.push({ label: 'Refill soon', color: '#fbbf24', emoji: '🛒' });
-  if (med.expired) tags.push({ label: 'Expired', color: '#f87171', emoji: '⌛' });
+  if (med.refillSoon) tags.push({ label: S.refillSoon || 'Refill soon', color: '#fbbf24', emoji: '🛒' });
+  if (med.expired) tags.push({ label: S.expired || 'Expired', color: '#f87171', emoji: '⌛' });
   return tags;
 }
 
@@ -1203,7 +1327,7 @@ const Medications = () => {
                     accessibilityRole="button"
                     accessibilityLabel={`Refill ${med.name}`}
                   >
-                    <Text style={{ color: '#0b1117', fontFamily: 'Inter_700Bold', fontSize: 13 }}>Refill</Text>
+                    <Text style={{ color: '#0b1117', fontFamily: 'Inter_700Bold', fontSize: 13 }}>{S.refill}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => openEdit(med)}
@@ -1211,7 +1335,7 @@ const Medications = () => {
                     accessibilityRole="button"
                     accessibilityLabel={`Edit ${med.name}`}
                   >
-                    <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>Edit</Text>
+                    <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>{S.edit}</Text>
                   </TouchableOpacity>
                 </View>
                </TouchableOpacity>
@@ -1220,8 +1344,10 @@ const Medications = () => {
          )}
         <MedicationRefillModal
           visible={!!refillMed}
-          onClose={() => setRefillMed(null)}
-          medication={refillMed || { name: '', dosage: '' }}
+            onClose={() => setRefillMed(null)}
+            medication={refillMed || { name: '', dosage: '' }}
+            strings={S}
+            lang={lang}
         />
 
           {/* Add Medication Modal */}
@@ -1229,7 +1355,7 @@ const Medications = () => {
             <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
-                  <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>Add Medication</Text>
+                  <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>{S.addMedication}</Text>
                   {['name','notes','startDate','endDate','dosesLeft'].map(field => (
                     <TextInput
                       key={field}
@@ -1240,7 +1366,7 @@ const Medications = () => {
                       onChangeText={v => setAddForm(f => ({ ...f, [field]: field==='dosesLeft'? v.replace(/[^0-9]/g,''): v }))}
                     />
                   ))}
-                  <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginTop:4 }}>Times</Text>
+                  <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginTop:4 }}>{S.times}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap', marginVertical:6 }}>
                     {addTimes.map(t => (
                       <TouchableOpacity key={t} onLongPress={()=> setAddTimes(prev=>prev.filter(x=>x!==t))} style={{ backgroundColor: theme.chip, paddingHorizontal:10, paddingVertical:6, borderRadius:12, margin:4 }}>
@@ -1251,7 +1377,7 @@ const Medications = () => {
                       <Text style={{ color:'#0b1117', fontFamily:'Inter_700Bold' }}>+ Time</Text>
                     </TouchableOpacity>
                   </View>
-                  <Text style={{ color: theme.text, marginTop:4, marginBottom:6, fontFamily:'Inter_600SemiBold' }}>Status</Text>
+                  <Text style={{ color: theme.text, marginTop:4, marginBottom:6, fontFamily:'Inter_600SemiBold' }}>{S.status}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap' }}>
                     {MED_STATUSES.map(s => (
                       <TouchableOpacity key={s.key} onPress={() => setAddForm(f => ({ ...f, status: s.key }))} style={{ backgroundColor: addForm.status===s.key? s.color: theme.chip, paddingHorizontal:10, paddingVertical:6, borderRadius:12, margin:4, flexDirection:'row', alignItems:'center' }}>
@@ -1261,8 +1387,8 @@ const Medications = () => {
                     ))}
                   </View>
                   <View style={{ flexDirection:'row', justifyContent:'flex-end', marginTop:12, gap:16 }}>
-                    <TouchableOpacity onPress={()=>{ setShowAdd(false); }}><Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>Cancel</Text></TouchableOpacity>
-                    <TouchableOpacity onPress={handleAddMed}><Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>Add</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={()=>{ setShowAdd(false); }}><Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>{S.cancel}</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={handleAddMed}><Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>{S.add}</Text></TouchableOpacity>
                   </View>
                 </View>
               </ScrollView>
@@ -1274,7 +1400,7 @@ const Medications = () => {
             <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
-                  <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>Edit Medication</Text>
+                  <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>{S.editMedication}</Text>
                   {['name','notes','startDate','endDate','dosesLeft'].map(field => (
                     <TextInput
                       key={field}
@@ -1285,7 +1411,7 @@ const Medications = () => {
                       onChangeText={v => setEditForm(f => ({ ...f, [field]: field==='dosesLeft'? v.replace(/[^0-9]/g,''): v }))}
                     />
                   ))}
-                  <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginTop:4 }}>Times</Text>
+                  <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginTop:4 }}>{S.times}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap', marginVertical:6 }}>
                     {editTimes.map(t => (
                       <TouchableOpacity key={t} onLongPress={()=> setEditTimes(prev=>prev.filter(x=>x!==t))} style={{ backgroundColor: theme.chip, paddingHorizontal:10, paddingVertical:6, borderRadius:12, margin:4 }}>
@@ -1296,7 +1422,7 @@ const Medications = () => {
                       <Text style={{ color:'#0b1117', fontFamily:'Inter_700Bold' }}>+ Time</Text>
                     </TouchableOpacity>
                   </View>
-                  <Text style={{ color: theme.text, marginTop:4, marginBottom:6, fontFamily:'Inter_600SemiBold' }}>Status</Text>
+                  <Text style={{ color: theme.text, marginTop:4, marginBottom:6, fontFamily:'Inter_600SemiBold' }}>{S.status}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap' }}>
                     {MED_STATUSES.map(s => (
                       <TouchableOpacity key={s.key} onPress={() => setEditForm(f => ({ ...f, status: s.key }))} style={{ backgroundColor: editForm.status===s.key? s.color: theme.chip, paddingHorizontal:10, paddingVertical:6, borderRadius:12, margin:4, flexDirection:'row', alignItems:'center' }}>
@@ -1307,11 +1433,11 @@ const Medications = () => {
                   </View>
                   <View style={{ flexDirection:'row', justifyContent:'space-between', marginTop:12, alignItems:'center' }}>
                     <TouchableOpacity onPress={()=>{ setMeds(list=>list.filter(m=>m.id!==editForm.id)); setShowEdit(false); }}>
-                      <Text style={{ color:'#f87171', fontFamily:'Inter_700Bold' }}>Delete</Text>
+                      <Text style={{ color:'#f87171', fontFamily:'Inter_700Bold' }}>{S.delete}</Text>
                     </TouchableOpacity>
                     <View style={{ flexDirection:'row', gap:16 }}>
-                      <TouchableOpacity onPress={()=>{ setShowEdit(false); }}><Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>Cancel</Text></TouchableOpacity>
-                      <TouchableOpacity onPress={handleEditSave}><Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>Save</Text></TouchableOpacity>
+                      <TouchableOpacity onPress={()=>{ setShowEdit(false); }}><Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>{S.cancel}</Text></TouchableOpacity>
+                      <TouchableOpacity onPress={handleEditSave}><Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>{S.saveBtn}</Text></TouchableOpacity>
                     </View>
                   </View>
                 </View>
