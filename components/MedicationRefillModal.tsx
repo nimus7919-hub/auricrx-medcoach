@@ -133,6 +133,30 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     let min = Infinity; for (const r of results) if (typeof r.price === 'number' && r.price < min) min = r.price;
     return isFinite(min) ? min : null;
   }, [results]);
+
+  // Basic product info extraction from medication name/dosage text (heuristic)
+  const productInfo = useMemo(() => {
+    const baseName = medication.name || '';
+    const raw = (medication.dosage || '').trim();
+    const source = `${baseName} ${raw}`.trim();
+    // Strength patterns (e.g., 500mg, 50 mg, 50/500, 5mg/500mg)
+    const strengths = [] as string[];
+    const strengthRegex = /(\d+\s?mg(?:\/\d+\s?mg)?|\d+\/\d+|\d+\s?mcg|\d+\s?iu)/ig;
+    let m;
+    while ((m = strengthRegex.exec(source)) !== null) {
+      const val = m[0].replace(/\s+/g,'');
+      if (!strengths.includes(val)) strengths.push(val);
+      if (strengths.length >= 2) break; // limit
+    }
+    // Package size (e.g., 30 tablets, 14 caps, 90 tab)
+    const pkgMatch = source.match(/(\d+)\s?(tablet|tab|capsule|cap|caps|pill|pills|unit|units|ml|vial|vials|strip|strips)/i);
+    let packageSize = pkgMatch ? `${pkgMatch[1]} ${pkgMatch[2]}` : null;
+    if (packageSize) packageSize = packageSize.replace(/tab($|\b)/i,'tablets').replace(/caps?($|\b)/i,'capsules');
+    if (!packageSize) packageSize = '30 tablets'; // default assumption
+    const strengthDisplay = strengths.join(' / ');
+    const display = [strengthDisplay || null, packageSize].filter(Boolean).join(' • ');
+    return { display, strengthDisplay, packageSize };
+  }, [medication.name, medication.dosage]);
   const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
 
   const useKm = lang !== 'en';
@@ -169,38 +193,40 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         hitSlop={8}
         style={{
           backgroundColor: colors.card,
-            borderRadius: radius.xl,
-            padding: spacing.md,
-            marginBottom: spacing.sm,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: 72
+          borderRadius: radius.xl,
+          padding: spacing.md,
+          marginBottom: spacing.sm,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: 86
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md, flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, flex: 1 }}>
           {item.logoUrl ? (
-            <Image source={{ uri: item.logoUrl }} style={{ width: 28, height: 28, borderRadius: 6 }} />
+            <Image source={{ uri: item.logoUrl }} style={{ width: 32, height: 32, borderRadius: 6 }} />
           ) : (
-            <View style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: colors.muted }} />
-          )}
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "600" }}>{item.name}</Text>
-            <Text style={{ color: colors.sub, fontSize: 12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
-          </View>
-        </View>
-        <View style={{ alignItems: "flex-end", gap: spacing.sm }}>
-              <Text style={{ color: colors.text, fontSize: 18, fontWeight: "700" }}>{typeof item.price === 'number'? formatPrice(item.price): '—'}</Text>
-          {isLowest && (
-            <View style={{ backgroundColor: colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill }}>
-              <Text style={{ color: '#000', fontSize: 10, fontWeight: '700' }}>{strings.lowest || 'Lowest'}</Text>
+            <View style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: colors.muted, alignItems:'center', justifyContent:'center' }}>
+              <Text style={{ fontSize:18 }}>🏪</Text>
             </View>
           )}
-          <Pressable
-            onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
-            style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 8, minHeight: 36, justifyContent: "center" }}
-          >
-            <Text style={{ color: "#000", fontWeight: "700" }}>{strings.directions || 'Directions'}</Text>
+          <View style={{ flex:1 }}>
+            <Text style={{ color: colors.text, fontSize:16, fontWeight:'600' }}>{item.name}</Text>
+            <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
+            <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
+              <Text style={{ color: colors.sub, fontSize:11 }}>💊 {productInfo.display}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={{ alignItems:'flex-end', gap:4 }}>
+          <Text style={{ color: colors.text, fontSize:18, fontWeight:'700' }}>{typeof item.price==='number'? formatPrice(item.price): '—'}</Text>
+          {isLowest && (
+            <View style={{ backgroundColor: colors.gold, paddingHorizontal:8, paddingVertical:2, borderRadius: radius.pill }}>
+              <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest||'Lowest'}</Text>
+            </View>
+          )}
+          <Pressable onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })} style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 6, minHeight:32, justifyContent:'center' }}>
+            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{strings.directions || 'Directions'}</Text>
           </Pressable>
         </View>
       </Pressable>
