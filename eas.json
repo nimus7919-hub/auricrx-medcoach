@@ -7,10 +7,11 @@
     "dev-apk": {
       "developmentClient": true,
       "distribution": "internal",
-      "android": { "buildType": "apk" }
+      "android": { "buildType": "apk" },
+      "node": "18.18.0"
     },
-    "preview": { "distribution": "internal" },
-    "production": { "autoIncrement": true }
+    "preview": { "distribution": "internal", "node": "18.18.0" },
+    "production": { "autoIncrement": true, "node": "18.18.0" }
   },
   "submit": {
     "production": {}
