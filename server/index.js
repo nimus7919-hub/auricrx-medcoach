@@ -349,6 +349,42 @@ app.get('/debug/places', async (req, res) => {
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
+// Define tools for the AI to call
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "get_medications",
+      description: "Return the signed-in user's active medication list from the app's state.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_supplements",
+      description: "Return the user's active supplements from the app's state.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_reminders",
+      description: "Return upcoming health-related reminders.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_herbs",
+      description: "Return the user's herbal remedies and supplements.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  }
+];
+
 // Test endpoint to verify tool calling setup
 app.post('/test-tools', async (req, res) => {
   console.log('Test tools endpoint called with:', req.body);
@@ -430,42 +466,6 @@ app.post('/test-tools', async (req, res) => {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
-
-// Define tools for the AI to call
-const tools = [
-  {
-    type: "function",
-    function: {
-      name: "get_medications",
-      description: "Return the signed-in user's active medication list from the app's state.",
-      parameters: { type: "object", properties: {}, additionalProperties: false }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_supplements",
-      description: "Return the user's active supplements from the app's state.",
-      parameters: { type: "object", properties: {}, additionalProperties: false }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_reminders",
-      description: "Return upcoming health-related reminders.",
-      parameters: { type: "object", properties: {}, additionalProperties: false }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_herbs",
-      description: "Return the user's herbal remedies and supplements.",
-      parameters: { type: "object", properties: {}, additionalProperties: false }
-    }
-  }
-];
 
 app.post('/ask', async (req, res) => {
   console.log('POST /ask', req.body);
