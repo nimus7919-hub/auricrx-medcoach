@@ -2318,11 +2318,12 @@ return !fontsLoaded ? (
       onRequestClose={() => setAiOpen(false)}
     >
       <KeyboardAvoidingView
-  behavior={Platform.OS === "ios" ? "padding" : "height"}
-  style={{ flex: 1 }}
->
-  <View style={styles.sheetBackdrop}>
-    <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
+        behavior={Platform.OS === "ios" ? "padding" : "padding"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
+        <View style={styles.sheetBackdrop}>
+          <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
       <View style={styles.sheetHeader}>
         <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>
           {S.aiConsultant}
@@ -2381,7 +2382,7 @@ return !fontsLoaded ? (
         </ScrollView>
       </View>
 
-      <View style={styles.aiInputRow}>
+      <View style={[styles.aiInputRow, { backgroundColor: theme.card, paddingBottom: 8 }]}>
         <TextInput
           ref={aiInputRef}
           value={aiInput}
@@ -2526,7 +2527,16 @@ card: {
   msgUser: { alignSelf: 'flex-end' },
   msgBot: { alignSelf: 'flex-start' },
 
-  aiInputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  aiInputRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 8, 
+    marginTop: 6,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    position: 'relative',
+    zIndex: 10
+  },
   aiInput: {
     flex: 1,
     borderWidth: 1,
