@@ -469,19 +469,22 @@ const tools = [
 
 app.post('/ask', async (req, res) => {
 console.log('POST /ask', req.body);
-  const schema = z.object({ 
-    message: z.string().min(1).max(10000),
-    userData: z.object({
-      meds: z.array(z.any()).optional().default([]),
-      supplements: z.array(z.any()).optional().default([]),
-      reminders: z.array(z.any()).optional().default([]),
-      herbs: z.array(z.any()).optional().default([])
-    }).optional().default({})
-  });
-  const parsed = schema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ ok: false, error: 'bad_request' });
-
   try {
+    const schema = z.object({ 
+      message: z.string().min(1).max(10000),
+      userData: z.object({
+        meds: z.array(z.any()).optional().default([]),
+        supplements: z.array(z.any()).optional().default([]),
+        reminders: z.array(z.any()).optional().default([]),
+        herbs: z.array(z.any()).optional().default([])
+      }).optional().default({})
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      console.log('Schema validation failed:', parsed.error);
+      return res.status(400).json({ ok: false, error: 'bad_request', details: parsed.error });
+    }
+
     const { message, userData } = parsed.data;
     const messages = [
       {
@@ -498,7 +501,13 @@ console.log('POST /ask', req.body);
     ];
 
     // Tool calling loop
-    while (true) {
+    let loopCount = 0;
+    const maxLoops = 5; // Prevent infinite loops
+    
+    while (loopCount < maxLoops) {
+      loopCount++;
+      console.log(`Tool calling loop iteration ${loopCount}`);
+      
       const completion = await client.chat.completions.create({
         model: process.env.MODEL || 'gpt-4o-mini',
         messages,
@@ -508,26 +517,33 @@ console.log('POST /ask', req.body);
       });
 
       const msg = completion.choices[0].message;
+      console.log('AI response:', { content: msg.content, tool_calls: msg.tool_calls?.length || 0 });
 
       // If the model asks to call a tool, satisfy it from user data
       if (msg.tool_calls?.length) {
+        console.log('AI wants to call tools:', msg.tool_calls.map(tc => tc.function.name));
         for (const call of msg.tool_calls) {
           let payload = null;
           switch (call.function.name) {
             case "get_medications":
               payload = userData.meds || [];
+              console.log('Returning medications:', payload.length, 'items');
               break;
             case "get_supplements":
               payload = userData.supplements || [];
+              console.log('Returning supplements:', payload.length, 'items');
               break;
             case "get_reminders":
               payload = userData.reminders || [];
+              console.log('Returning reminders:', payload.length, 'items');
               break;
             case "get_herbs":
               payload = userData.herbs || [];
+              console.log('Returning herbs:', payload.length, 'items');
               break;
             default:
               payload = { error: "unknown tool" };
+              console.log('Unknown tool called:', call.function.name);
           }
 
           messages.push({
@@ -543,12 +559,21 @@ console.log('POST /ask', req.body);
 
       // Final answer
       const text = msg.content?.trim() || '';
+      console.log('Final AI response:', text);
       res.json({ ok: true, reply: text });
       return;
     }
+    
+    // If we exit the loop without a response
+    console.log('Tool calling loop exceeded max iterations');
+    res.json({ ok: true, reply: "I'm having trouble processing your request. Please try again." });
   } catch (err) {
     console.error('OpenAI error:', err?.response?.data || err?.message);
     res.status(500).json({ ok: false, error: 'openai_error' });
+  }
+  } catch (outerErr) {
+    console.error('Outer error in /ask endpoint:', outerErr);
+    res.status(500).json({ ok: false, error: 'server_error', message: outerErr.message });
   }
 });
 
