@@ -488,87 +488,21 @@ app.post('/ask', async (req, res) => {
     }
 
     const { message, userData } = parsed.data;
-    const messages = [
-      {
-        role: 'system',
-        content: [
-          'You are a **personal health assistant**.',
-          'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
-          'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
-          'If a list is empty, say so and suggest what the user might add.',
-          'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
-        ].join(' ')
-      },
-      { role: 'user', content: message }
-    ];
-
-    // Tool calling loop
-    let loopCount = 0;
-    const maxLoops = 5;
+    console.log('Received userData:', JSON.stringify(userData, null, 2));
     
-    while (loopCount < maxLoops) {
-      loopCount++;
-      console.log(`Tool calling loop iteration ${loopCount}`);
-      console.log('Messages being sent to OpenAI:', JSON.stringify(messages, null, 2));
-      
-      const completion = await client.chat.completions.create({
-        model: process.env.MODEL || 'gpt-4o-mini',
-        messages,
-        tools,
-        tool_choice: "auto",
-        temperature: 0.2
-      });
-
-      const msg = completion.choices[0].message;
-      console.log('AI response:', { content: msg.content, tool_calls: msg.tool_calls?.length || 0 });
-
-      // If the model asks to call a tool, satisfy it from user data
-      if (msg.tool_calls?.length) {
-        console.log('AI wants to call tools:', msg.tool_calls.map(tc => tc.function.name));
-        for (const call of msg.tool_calls) {
-          let payload = null;
-          switch (call.function.name) {
-            case "get_medications":
-              payload = userData.meds || [];
-              console.log('Returning medications:', payload.length, 'items');
-              break;
-            case "get_supplements":
-              payload = userData.supplements || [];
-              console.log('Returning supplements:', payload.length, 'items');
-              break;
-            case "get_reminders":
-              payload = userData.reminders || [];
-              console.log('Returning reminders:', payload.length, 'items');
-              break;
-            case "get_herbs":
-              payload = userData.herbs || [];
-              console.log('Returning herbs:', payload.length, 'items');
-              break;
-            default:
-              payload = { error: "unknown tool" };
-              console.log('Unknown tool called:', call.function.name);
-          }
-
-          messages.push({
-            role: "tool",
-            tool_call_id: call.id,
-            name: call.function.name,
-            content: JSON.stringify(payload)
-          });
-        }
-        continue;
-      }
-
-      // Final answer
-      const text = msg.content?.trim() || '';
-      console.log('Final AI response:', text);
-      res.json({ ok: true, reply: text });
-      return;
-    }
+    // For now, let's just return a simple response with the user data
+    const medsList = userData.meds?.map(med => `${med.name} (${med.strength || 'N/A'})`).join(', ') || 'No medications found';
+    const supplementsList = userData.supplements?.map(sup => `${sup.name} (${sup.dosage || 'N/A'})`).join(', ') || 'No supplements found';
     
-    // If we exit the loop without a response
-    console.log('Tool calling loop exceeded max iterations');
-    res.json({ ok: true, reply: "I'm having trouble processing your request. Please try again." });
+    const response = `Based on your dashboard data, I can see:
+
+**Medications:** ${medsList}
+**Supplements:** ${supplementsList}
+
+How can I help you with your health management today?`;
+    
+    console.log('Returning response:', response);
+    res.json({ ok: true, reply: response });
     
   } catch (err) {
     console.error('Error in /ask endpoint:', err);
