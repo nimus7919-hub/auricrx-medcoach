@@ -4,7 +4,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
   import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
-  Modal, TextInput, Switch, Image, Linking, Platform, Animated
+  Modal, TextInput, Switch, Image, Linking, Platform, Animated, Keyboard
 } from 'react-native';
 import TypingEffect from './src/components/TypingEffect';
 import * as ImagePicker from 'expo-image-picker';
@@ -429,6 +429,23 @@ async function handleAskMedical() {
 
   // --- Floating AI modal state ---
 const [aiOpen, setAiOpen] = useState(false)
+const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+// Keyboard event listeners
+useEffect(() => {
+  const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+    setKeyboardHeight(e.endCoordinates.height);
+  });
+  const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+    setKeyboardHeight(0);
+  });
+
+  return () => {
+    keyboardDidShowListener?.remove();
+    keyboardDidHideListener?.remove();
+  };
+}, []);
+
 useEffect(() => {
   if (aiOpen) {
     setTimeout(() => aiInputRef.current?.focus(), 100);
@@ -2317,12 +2334,12 @@ return !fontsLoaded ? (
       transparent
       onRequestClose={() => setAiOpen(false)}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "padding"}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-      >
-        <View style={styles.sheetBackdrop}>
+      <View style={styles.sheetBackdrop}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        >
           <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
       <View style={styles.sheetHeader}>
         <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>
@@ -2333,12 +2350,13 @@ return !fontsLoaded ? (
         </TouchableOpacity>
       </View>
 
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, minHeight: 200 }}>
         <ScrollView
           ref={aiScrollRef}
           keyboardShouldPersistTaps="handled"
-          style={{ flex: 1, minHeight: 160 }}
-          contentContainerStyle={{ paddingVertical: 8 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingVertical: 8, paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
         >
           {aiMessages.map((m, idx) => (
             <View
@@ -2382,30 +2400,41 @@ return !fontsLoaded ? (
         </ScrollView>
       </View>
 
-      <View style={[styles.aiInputRow, { backgroundColor: theme.card, paddingBottom: 8 }]}>
-        <TextInput
-          ref={aiInputRef}
-          value={aiInput}
-          onChangeText={setAiInput}
-          placeholder="Ask about medications, pharmacies…"
-          placeholderTextColor={theme.sub}
-          onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
-          autoCapitalize="none"
-          autoCorrect={false}
-          blurOnSubmit={false}
-          style={[
-            styles.aiInput,
-            { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular', minHeight: 44 },
-          ]}
-        />
-        <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} disabled={aiSending || streamLoading}>
-          <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>{streamLoading ? '...' : 'Send'}</Text>
-        </TouchableOpacity>
-        {streamLoading ? (
-          <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
-            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>Stop</Text>
+      {/* Fixed input area that stays visible */}
+      <View style={[
+        styles.aiInputContainer,
+        { 
+          backgroundColor: theme.card,
+          borderTopColor: theme.chip,
+          borderTopWidth: 1,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+        }
+      ]}>
+        <View style={styles.aiInputRow}>
+          <TextInput
+            ref={aiInputRef}
+            value={aiInput}
+            onChangeText={setAiInput}
+            placeholder="Ask about medications, pharmacies…"
+            placeholderTextColor={theme.sub}
+            onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
+            autoCapitalize="none"
+            autoCorrect={false}
+            blurOnSubmit={false}
+            style={[
+              styles.aiInput,
+              { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular', minHeight: 44 },
+            ]}
+          />
+          <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} disabled={aiSending || streamLoading}>
+            <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>{streamLoading ? '...' : 'Send'}</Text>
           </TouchableOpacity>
-        ) : null}
+          {streamLoading ? (
+            <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
+              <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>Stop</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       <Text style={{ color: theme.sub, fontSize: 12, marginTop: 4, textAlign: 'center', fontFamily: 'Inter_400Regular' }}>
@@ -2527,15 +2556,22 @@ card: {
   msgUser: { alignSelf: 'flex-end' },
   msgBot: { alignSelf: 'flex-start' },
 
+  aiInputContainer: {
+    position: 'relative',
+    zIndex: 1000,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
   aiInputRow: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     gap: 8, 
-    marginTop: 6,
     paddingHorizontal: 16,
     paddingTop: 8,
-    position: 'relative',
-    zIndex: 10
+    paddingBottom: 8,
   },
   aiInput: {
     flex: 1,
