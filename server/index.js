@@ -509,6 +509,7 @@ app.post('/ask', async (req, res) => {
     while (loopCount < maxLoops) {
       loopCount++;
       console.log(`Tool calling loop iteration ${loopCount}`);
+      console.log('Messages being sent to OpenAI:', JSON.stringify(messages, null, 2));
       
       const completion = await client.chat.completions.create({
         model: process.env.MODEL || 'gpt-4o-mini',
@@ -571,6 +572,12 @@ app.post('/ask', async (req, res) => {
     
   } catch (err) {
     console.error('Error in /ask endpoint:', err);
+    console.error('Error stack:', err.stack);
+    console.error('Error details:', {
+      name: err.name,
+      message: err.message,
+      code: err.code
+    });
     res.status(500).json({ ok: false, error: 'server_error', message: err.message });
   }
 });
