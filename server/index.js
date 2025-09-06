@@ -481,8 +481,79 @@ app.post('/ask', async (req, res) => {
     console.log('Received message:', message);
     console.log('Received userData:', JSON.stringify(userData, null, 2));
     
-    // Simple response
-    const response = `Hello! I received your message: "${message}". I can see your user data has been processed successfully.`;
+    // Process user data and generate intelligent response
+    const meds = userData?.meds || [];
+    const supplements = userData?.supplements || [];
+    const reminders = userData?.reminders || [];
+    const herbs = userData?.herbs || [];
+    
+    let response = '';
+    
+    // Check if user is asking about medications
+    if (message.toLowerCase().includes('med') || message.toLowerCase().includes('medication') || message.toLowerCase().includes('drug')) {
+      if (meds.length > 0) {
+        const medList = meds.map(med => `• ${med.name} (${med.strength || 'N/A'}) - ${med.status || 'Unknown status'}`).join('\n');
+        response = `From your dashboard data, I can see you're currently taking ${meds.length} medication(s):\n\n${medList}\n\n`;
+        
+        // Add timing information if available
+        const medsWithTimes = meds.filter(med => med.times && med.times.length > 0);
+        if (medsWithTimes.length > 0) {
+          response += `**Timing Information:**\n`;
+          medsWithTimes.forEach(med => {
+            response += `• ${med.name}: ${med.times.join(', ')}\n`;
+          });
+          response += '\n';
+        }
+        
+        response += 'Remember to take your medications as prescribed and consult your healthcare provider with any questions.';
+      } else {
+        response = 'I don\'t see any medications in your current list. If you\'re taking medications, you can add them to your dashboard for better tracking.';
+      }
+    }
+    // Check if user is asking about supplements
+    else if (message.toLowerCase().includes('supplement') || message.toLowerCase().includes('vitamin')) {
+      if (supplements.length > 0) {
+        const supList = supplements.map(sup => `• ${sup.name} (${sup.dosage || 'N/A'}) - ${sup.status || 'Unknown status'}`).join('\n');
+        response = `From your dashboard data, I can see you're currently taking ${supplements.length} supplement(s):\n\n${supList}\n\n`;
+        
+        // Add timing information if available
+        const supsWithTimes = supplements.filter(sup => sup.times && sup.times.length > 0);
+        if (supsWithTimes.length > 0) {
+          response += `**Timing Information:**\n`;
+          supsWithTimes.forEach(sup => {
+            response += `• ${sup.name}: ${sup.times.join(', ')}\n`;
+          });
+          response += '\n';
+        }
+        
+        response += 'Supplements can be beneficial, but always consult with your healthcare provider about interactions with medications.';
+      } else {
+        response = 'I don\'t see any supplements in your current list. If you\'re taking supplements, you can add them to your dashboard for better tracking.';
+      }
+    }
+    // General health question
+    else {
+      let summary = 'From your dashboard data, I can see:\n\n';
+      
+      if (meds.length > 0) {
+        summary += `**Medications (${meds.length}):** ${meds.map(m => m.name).join(', ')}\n`;
+      }
+      if (supplements.length > 0) {
+        summary += `**Supplements (${supplements.length}):** ${supplements.map(s => s.name).join(', ')}\n`;
+      }
+      if (reminders.length > 0) {
+        summary += `**Reminders (${reminders.length}):** ${reminders.map(r => r.title || r.name).join(', ')}\n`;
+      }
+      if (herbs.length > 0) {
+        summary += `**Herbs (${herbs.length}):** ${herbs.map(h => h.name).join(', ')}\n`;
+      }
+      
+      if (meds.length === 0 && supplements.length === 0 && reminders.length === 0 && herbs.length === 0) {
+        summary = 'I don\'t see any health data in your dashboard yet. You can add medications, supplements, reminders, and herbs to get personalized health guidance.';
+      }
+      
+      response = summary + '\n\nHow can I help you with your health management today?';
+    }
     
     console.log('Returning response:', response);
     res.json({ ok: true, reply: response });
