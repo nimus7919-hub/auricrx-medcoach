@@ -471,35 +471,18 @@ app.post('/ask', async (req, res) => {
   console.log('POST /ask', req.body);
   
   try {
-    const schema = z.object({ 
-      message: z.string().min(1).max(10000),
-      userData: z.object({
-        meds: z.array(z.any()).optional().default([]),
-        supplements: z.array(z.any()).optional().default([]),
-        reminders: z.array(z.any()).optional().default([]),
-        herbs: z.array(z.any()).optional().default([])
-      }).optional().default({})
-    });
+    // Simple validation without zod for now
+    const { message, userData } = req.body || {};
     
-    const parsed = schema.safeParse(req.body);
-    if (!parsed.success) {
-      console.log('Schema validation failed:', parsed.error);
-      return res.status(400).json({ ok: false, error: 'bad_request', details: parsed.error });
+    if (!message) {
+      return res.status(400).json({ ok: false, error: 'bad_request', message: 'Message is required' });
     }
-
-    const { message, userData } = parsed.data;
+    
+    console.log('Received message:', message);
     console.log('Received userData:', JSON.stringify(userData, null, 2));
     
-    // For now, let's just return a simple response with the user data
-    const medsList = userData.meds?.map(med => `${med.name} (${med.strength || 'N/A'})`).join(', ') || 'No medications found';
-    const supplementsList = userData.supplements?.map(sup => `${sup.name} (${sup.dosage || 'N/A'})`).join(', ') || 'No supplements found';
-    
-    const response = `Based on your dashboard data, I can see:
-
-**Medications:** ${medsList}
-**Supplements:** ${supplementsList}
-
-How can I help you with your health management today?`;
+    // Simple response
+    const response = `Hello! I received your message: "${message}". I can see your user data has been processed successfully.`;
     
     console.log('Returning response:', response);
     res.json({ ok: true, reply: response });
