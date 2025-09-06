@@ -471,92 +471,106 @@ app.post('/ask', async (req, res) => {
   console.log('POST /ask', req.body);
   
   try {
-    // Simple validation without zod for now
-    const { message, userData } = req.body || {};
+    const schema = z.object({ 
+      message: z.string().min(1).max(10000),
+      userData: z.object({
+        meds: z.array(z.any()).optional().default([]),
+        supplements: z.array(z.any()).optional().default([]),
+        reminders: z.array(z.any()).optional().default([]),
+        herbs: z.array(z.any()).optional().default([])
+      }).optional().default({})
+    });
     
-    if (!message) {
-      return res.status(400).json({ ok: false, error: 'bad_request', message: 'Message is required' });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      console.log('Schema validation failed:', parsed.error);
+      return res.status(400).json({ ok: false, error: 'bad_request', details: parsed.error });
     }
+
+    const { message, userData } = parsed.data;
+    const messages = [
+      {
+        role: 'system',
+        content: [
+          'You are a **personal health assistant**.',
+          'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
+          'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
+          'If a list is empty, say so and suggest what the user might add.',
+          'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
+        ].join(' ')
+      },
+      { role: 'user', content: message }
+    ];
+
+    // Tool calling loop
+    let loopCount = 0;
+    const maxLoops = 5;
     
-    console.log('Received message:', message);
-    console.log('Received userData:', JSON.stringify(userData, null, 2));
-    
-    // Process user data and generate intelligent response
-    const meds = userData?.meds || [];
-    const supplements = userData?.supplements || [];
-    const reminders = userData?.reminders || [];
-    const herbs = userData?.herbs || [];
-    
-    let response = '';
-    
-    // Check if user is asking about medications
-    if (message.toLowerCase().includes('med') || message.toLowerCase().includes('medication') || message.toLowerCase().includes('drug')) {
-      if (meds.length > 0) {
-        const medList = meds.map(med => `• ${med.name} (${med.strength || 'N/A'}) - ${med.status || 'Unknown status'}`).join('\n');
-        response = `From your dashboard data, I can see you're currently taking ${meds.length} medication(s):\n\n${medList}\n\n`;
-        
-        // Add timing information if available
-        const medsWithTimes = meds.filter(med => med.times && med.times.length > 0);
-        if (medsWithTimes.length > 0) {
-          response += `**Timing Information:**\n`;
-          medsWithTimes.forEach(med => {
-            response += `• ${med.name}: ${med.times.join(', ')}\n`;
+    while (loopCount < maxLoops) {
+      loopCount++;
+      console.log(`Tool calling loop iteration ${loopCount}`);
+      
+      const completion = await client.chat.completions.create({
+        model: process.env.MODEL || 'gpt-4o-mini',
+        messages,
+        tools,
+        tool_choice: "auto",
+        temperature: 0.2
+      });
+
+      const msg = completion.choices[0].message;
+      console.log('AI response:', { content: msg.content, tool_calls: msg.tool_calls?.length || 0 });
+
+      // CRITICAL FIX: Add the AI's message to the messages array FIRST
+      messages.push(msg);
+
+      // If the model asks to call a tool, satisfy it from user data
+      if (msg.tool_calls?.length) {
+        console.log('AI wants to call tools:', msg.tool_calls.map(tc => tc.function.name));
+        for (const call of msg.tool_calls) {
+          let payload = null;
+          switch (call.function.name) {
+            case "get_medications":
+              payload = userData.meds || [];
+              console.log('Returning medications:', payload.length, 'items');
+              break;
+            case "get_supplements":
+              payload = userData.supplements || [];
+              console.log('Returning supplements:', payload.length, 'items');
+              break;
+            case "get_reminders":
+              payload = userData.reminders || [];
+              console.log('Returning reminders:', payload.length, 'items');
+              break;
+            case "get_herbs":
+              payload = userData.herbs || [];
+              console.log('Returning herbs:', payload.length, 'items');
+              break;
+            default:
+              payload = { error: "unknown tool" };
+              console.log('Unknown tool called:', call.function.name);
+          }
+
+          // CRITICAL FIX: Add tool response with correct structure
+          messages.push({
+            role: "tool",
+            tool_call_id: call.id,
+            content: JSON.stringify(payload)
           });
-          response += '\n';
         }
-        
-        response += 'Remember to take your medications as prescribed and consult your healthcare provider with any questions.';
-      } else {
-        response = 'I don\'t see any medications in your current list. If you\'re taking medications, you can add them to your dashboard for better tracking.';
+        continue;
       }
-    }
-    // Check if user is asking about supplements
-    else if (message.toLowerCase().includes('supplement') || message.toLowerCase().includes('vitamin')) {
-      if (supplements.length > 0) {
-        const supList = supplements.map(sup => `• ${sup.name} (${sup.dosage || 'N/A'}) - ${sup.status || 'Unknown status'}`).join('\n');
-        response = `From your dashboard data, I can see you're currently taking ${supplements.length} supplement(s):\n\n${supList}\n\n`;
-        
-        // Add timing information if available
-        const supsWithTimes = supplements.filter(sup => sup.times && sup.times.length > 0);
-        if (supsWithTimes.length > 0) {
-          response += `**Timing Information:**\n`;
-          supsWithTimes.forEach(sup => {
-            response += `• ${sup.name}: ${sup.times.join(', ')}\n`;
-          });
-          response += '\n';
-        }
-        
-        response += 'Supplements can be beneficial, but always consult with your healthcare provider about interactions with medications.';
-      } else {
-        response = 'I don\'t see any supplements in your current list. If you\'re taking supplements, you can add them to your dashboard for better tracking.';
-      }
-    }
-    // General health question
-    else {
-      let summary = 'From your dashboard data, I can see:\n\n';
-      
-      if (meds.length > 0) {
-        summary += `**Medications (${meds.length}):** ${meds.map(m => m.name).join(', ')}\n`;
-      }
-      if (supplements.length > 0) {
-        summary += `**Supplements (${supplements.length}):** ${supplements.map(s => s.name).join(', ')}\n`;
-      }
-      if (reminders.length > 0) {
-        summary += `**Reminders (${reminders.length}):** ${reminders.map(r => r.title || r.name).join(', ')}\n`;
-      }
-      if (herbs.length > 0) {
-        summary += `**Herbs (${herbs.length}):** ${herbs.map(h => h.name).join(', ')}\n`;
-      }
-      
-      if (meds.length === 0 && supplements.length === 0 && reminders.length === 0 && herbs.length === 0) {
-        summary = 'I don\'t see any health data in your dashboard yet. You can add medications, supplements, reminders, and herbs to get personalized health guidance.';
-      }
-      
-      response = summary + '\n\nHow can I help you with your health management today?';
+
+      // Final answer
+      const text = msg.content?.trim() || '';
+      console.log('Final AI response:', text);
+      res.json({ ok: true, reply: text });
+      return;
     }
     
-    console.log('Returning response:', response);
-    res.json({ ok: true, reply: response });
+    // If we exit the loop without a response
+    console.log('Tool calling loop exceeded max iterations');
+    res.json({ ok: true, reply: "I'm having trouble processing your request. Please try again." });
     
   } catch (err) {
     console.error('Error in /ask endpoint:', err);
