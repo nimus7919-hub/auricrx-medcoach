@@ -570,6 +570,7 @@ console.log('POST /ask', req.body);
   } catch (err) {
     console.error('OpenAI error:', err?.response?.data || err?.message);
     res.status(500).json({ ok: false, error: 'openai_error' });
+  }
   } catch (outerErr) {
     console.error('Outer error in /ask endpoint:', outerErr);
     res.status(500).json({ ok: false, error: 'server_error', message: outerErr.message });
