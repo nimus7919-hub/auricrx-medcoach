@@ -5,10 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
   import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
   Modal, TextInput, Switch, Image, Linking, Platform, Animated
-} from 'react-native';
-import TypingEffect from './src/components/TypingEffect';
-import * as ImagePicker from 'expo-image-picker';
-import { herbs } from './src/data/herbs';	
+} from 'react-native';import * as ImagePicker from 'expo-image-picker';	
 import { KeyboardAvoidingView, FlatList } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -209,14 +206,14 @@ const STRINGS = {
 const PALETTES = {
   gold: {
     id: 'gold',
-    bg: '#faf8f5',
-    bgStart: '#faf8f5',
-    bgEnd: '#f5f2ed',
-    card: '#ffffff',
-    text: '#2c2c2c',
-    sub: '#6b6b6b',
-    accent: '#D4AF37',
-    chip: '#e8e3d8',
+    bg: '#0b1117',
+    bgStart: '#0b1117',
+    bgEnd: '#0f1622',
+    card: '#121a24',
+    text: '#F3C96A',
+    sub: '#b9a35a',
+    accent: '#F3C96A',
+    chip: '#1a2937',
   },
   blue: {
     id: 'blue',
@@ -239,17 +236,6 @@ const PALETTES = {
     sub: '#6bd7cb',
     accent: '#2dd4bf',
     chip: '#0c2a29',
-  },
-  black: {
-    id: 'black',
-    bg: '#000000',
-    bgStart: '#000000',
-    bgEnd: '#1a1a1a',
-    card: '#1a1a1a',
-    text: '#FFA500',
-    sub: '#FFB84D',
-    accent: '#FFA500',
-    chip: '#2a2a2a',
   },
 };
 
@@ -283,15 +269,8 @@ function useMedicalStreamLocal(endpoint) {
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          messages,
-          stream: false, // Disable streaming for now to fix the issue
-          temperature: 0.7,
-          max_tokens: 500
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
         signal: controllerRef.current.signal,
       });
 
@@ -300,9 +279,29 @@ function useMedicalStreamLocal(endpoint) {
         throw new Error(txt || `Stream endpoint returned ${res.status}`);
       }
 
+      // non-streaming fallback
+      if (!res.body) {
         const full = await res.text();
         setText(full);
         return full;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let acc = '';
+
+      while (!done) {
+        const { value, done: d } = await reader.read();
+        done = d;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          acc += chunk;
+          setText(acc);
+        }
+      }
+
+      return acc;
     } catch (e) {
       if (e.name === 'AbortError') return;
       throw e;
@@ -340,64 +339,12 @@ export default function App() {
   // language & theme
   const [lang, setLang] = useState('en');
   const [themeKey, setThemeKey] = useState('gold');
-  const [fontColor, setFontColor] = useState('default');
   const [night, setNight] = useState(false);
   const [moodShift, setMoodShift] = useState(true);
 
   // meds/reminders (light placeholder list)
   const [reminders, setReminders] = useState([]);
-  const [meds, setMeds] = useState([
-    {
-      id: '1',
-      name: 'Aspirin',
-      strength: '81mg',
-      status: 'taking',
-      times: ['08:00'],
-      startDate: '2024-01-01',
-      endDate: '',
-      notes: 'Low dose for heart health',
-      dosesLeft: '30'
-    },
-    {
-      id: '2',
-      name: 'Metformin',
-      strength: '500mg',
-      status: 'taking',
-      times: ['08:00', '20:00'],
-      startDate: '2024-01-15',
-      endDate: '',
-      notes: 'For diabetes management',
-      dosesLeft: '60'
-    }
-  ]); // lifted medications state
-  const [supplements, setSupplements] = useState([
-    {
-      id: '1',
-      name: 'Vitamin D3',
-      brand: 'Nature Made',
-      dosage: '1000 IU',
-      status: 'taking',
-      times: ['08:00'],
-      startDate: '2024-01-15',
-      endDate: '',
-      notes: 'Take with breakfast',
-      dosesLeft: '90',
-      refillSoon: false
-    },
-    {
-      id: '2',
-      name: 'Omega-3',
-      brand: 'Nordic Naturals',
-      dosage: '1000mg',
-      status: 'taking',
-      times: ['12:00'],
-      startDate: '2024-01-10',
-      endDate: '',
-      notes: 'Take with lunch',
-      dosesLeft: '60',
-      refillSoon: true
-    }
-  ]);
+  const [meds, setMeds] = useState([]); // lifted medications state
   // prescriptions gallery
   const [rxPhotos, setRxPhotos] = useState([]);
   // voice notes
@@ -436,7 +383,7 @@ useEffect(() => {
 }, [aiOpen]);
 const [aiInput, setAiInput] = useState('');
 const [aiMessages, setAiMessages] = useState([
-  { role: 'system', text: 'Hi! I can help you with information about your medications and supplements. What would you like to know?' },
+  { role: 'system', text: 'Hi! Ask me anything about your meds or pharmacies.' },
 ]);
 const [aiSending, setAiSending] = useState(false);
 
@@ -465,129 +412,39 @@ const aiInputRef = useRef(null);
 
 
 // send to backend and update UI
-async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
-  console.log('=== sendAi function called ===');
+async function sendAi() {
   const q = aiInput.trim();
-  console.log('Input text:', q);
-  console.log('aiSending:', aiSending);
-  
-  if (!q || aiSending) {
-    console.log('Early return - no text or already sending');
-    return;
-  }
+  if (!q || aiSending) return;
 
-  console.log('Proceeding with AI request...');
   // show the user's message immediately
   setAiMessages(m => [...m, { role: 'user', text: q }]);
   setAiInput('');
   setAiSending(true);
 
-  console.log('Building user data for tool calling...');
-  console.log('reminders:', reminders?.length || 0);
-  console.log('rxPhotos:', rxPhotos?.length || 0);
-  console.log('meds:', meds?.length || 0);
-  console.log('supplements:', supplements?.length || 0);
-  console.log('herbs:', herbs?.length || 0);
-  console.log('theme:', theme?.id || 'none');
+  // Build context
+  const context = buildAiContext(reminders, rxPhotos);
 
-
-  // Prepare user data for tool calling
-  let userData;
+  // try streaming first, fallback to full-response API
   try {
-    console.log('Preparing medications...');
-    const medsData = meds.map(med => ({
-      name: med.name,
-      strength: med.strength || 'N/A',
-      status: med.status,
-      times: med.times || [],
-      notes: med.notes || ''
-    }));
-    console.log('Medications prepared:', medsData.length);
-
-    console.log('Preparing supplements...');
-    const supplementsData = supplements.map(supp => ({
-      name: supp.name,
-      dosage: supp.dosage || 'N/A',
-      status: supp.status,
-      times: supp.times || [],
-      notes: supp.notes || ''
-    }));
-    console.log('Supplements prepared:', supplementsData.length);
-
-    console.log('Preparing reminders...');
-    const remindersData = reminders.map(rem => ({
-      time: rem.time || '',
-      name: rem.name || '',
-      text: rem.text || ''
-    }));
-    console.log('Reminders prepared:', remindersData.length);
-
-    console.log('Preparing herbs...');
-    const herbsData = (herbs || []).slice(0, 5).map(herb => ({
-      name: herb.name,
-      category: herb.category
-    }));
-    console.log('Herbs prepared:', herbsData.length);
-
-    userData = {
-      meds: medsData,
-      supplements: supplementsData,
-      reminders: remindersData,
-      herbs: herbsData
-    };
-
-    console.log('User data prepared for tool calling:', userData);
-  } catch (error) {
-    console.log('Error preparing user data:', error);
-    setAiMessages(m => [...m, { role: 'assistant', text: 'Error preparing your health data. Please try again.' }]);
-    setAiSending(false);
-    return;
-  }
-
-  // Skip API test and go directly to tool calling
-  console.log('Using tool calling approach...');
-  console.log('Question:', q);
-  console.log('API Base URL:', 'https://auricrx-medcoach.onrender.com');
-  
-  // Add immediate response
-  setAiMessages(m => [...m, { role: 'assistant', text: 'AI is thinking...' }]);
-  
-  try {
-    console.log('Sending question with user data for tool calling...');
-    console.log('Request payload:', {
-      message: q,
-      userData: userData
-    });
-    
-    const response = await fetch('https://auricrx-medcoach.onrender.com/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: q,
-        userData: userData
-      })
-    });
-    
-    if (!response.ok) throw new Error(`API returned ${response.status}`);
-    
-    const data = await response.json();
-    console.log('Backend response:', data);
-    const reply = data.reply || 'No response received';
-    console.log('Got response with tool calling:', reply);
-    
-    setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
-  } catch (err) {
-    console.log('API Error:', err);
-    // Provide a helpful response even if AI is down
-    let fallbackResponse = `API Error: ${err.message}. `;
-    if (q.toLowerCase().includes('aspirin')) {
-      fallbackResponse += 'However, I can tell you that aspirin is a common over-the-counter medication used to reduce pain, fever, and inflammation. It\'s also used in low doses to help prevent heart attacks and strokes. Please consult with a healthcare provider for medical advice.';
-    } else if (q.toLowerCase().includes('aspirina')) {
-      fallbackResponse += 'Aspirina es un medicamento común de venta libre usado para reducir el dolor, la fiebre y la inflamación. También se usa en dosis bajas para ayudar a prevenir ataques cardíacos y accidentes cerebrovasculares. Consulte con un proveedor de atención médica para obtener asesoramiento médico.';
-    } else {
-      fallbackResponse += 'Please try again in a moment or consult with a healthcare provider for immediate medical questions.';
+    const messages = aiMessages.map(m => ({ role: m.role, content: m.text }));
+    messages.push({ role: 'user', content: q });
+    // start streaming; streamText updates will be merged into aiMessages by effect above
+    await streamAsk(messages);
+  } catch (e) {
+    // streaming failed; fallback to previous behavior
+    try {
+      let reply;
+      try {
+        reply = await askMedicalAI(q);
+        if (typeof reply !== 'string') throw new Error('Non-string reply');
+      } catch {
+        reply = await askMedicalAI(`[CONTEXT]\n${context}\n\n[USER]\n${q}`);
+      }
+      setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
+    } catch (err) {
+      console.log('Error calling Medical AI:', err);
+      setAiMessages(m => [...m, { role: 'assistant', text: 'Network error. Please try again.' }]);
     }
-    setAiMessages(m => [...m, { role: 'assistant', text: fallbackResponse }]);
   } finally {
     setAiSending(false);
   }
@@ -721,33 +578,12 @@ async function scheduleReminderNotification(name, time24h) {
   // mood shift color tweak (toy demo: if last AI message contains "stress", switch to teal)
   const theme = useMemo(() => {
     let base = PALETTES[themeKey] || PALETTES.gold;
-    if (night) base = { ...base, bg: '#1a1a1a', bgStart: '#1a1a1a', bgEnd: '#2a2a2a', card: '#2d2d2d', text: '#f5f5f5', sub: '#b8b8b8' };
+    if (night) base = { ...base, bg: '#000000', bgStart: '#000000', bgEnd: '#070a0e', card: '#0c0c0f', text: base.text, sub: base.sub };
     if (moodShift && aiMessages.slice(-1)[0]?.text?.toLowerCase?.().includes('stress')) {
       base = PALETTES.teal;
     }
-    
-    // Apply font color override
-    if (fontColor !== 'default') {
-      const fontColors = {
-        'white': { text: '#ffffff', sub: '#e0e0e0' },
-        'black': { text: '#000000', sub: '#333333' },
-        'blue': { text: '#3b82f6', sub: '#60a5fa' },
-        'green': { text: '#10b981', sub: '#34d399' },
-        'purple': { text: '#8b5cf6', sub: '#a78bfa' },
-        'red': { text: '#ef4444', sub: '#f87171' },
-        'orange': { text: '#f97316', sub: '#fb923c' },
-        'pink': { text: '#ec4899', sub: '#f472b6' },
-        'gold': { text: '#D4AF37', sub: '#E6C866' },
-        'silver': { text: '#9ca3af', sub: '#d1d5db' }
-      };
-      
-      if (fontColors[fontColor]) {
-        base = { ...base, ...fontColors[fontColor] };
-      }
-    }
-    
     return base;
-  }, [themeKey, night, moodShift, aiMessages, fontColor]);
+  }, [themeKey, night, moodShift, aiMessages]);
 
 
 // animation refs
@@ -788,48 +624,21 @@ const S = STRINGS[lang] || STRINGS.en;
 
   // --------- Helpers ----------
   const Card = ({ title, icon, onPress }) => (
-    <TouchableOpacity 
-      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.chip }]} 
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
+    <TouchableOpacity style={[styles.card, { backgroundColor: theme.card, borderColor: theme.chip }]} onPress={onPress}>
       <View style={styles.cardIcon}>{icon}</View>
       <Text style={[styles.cardText, { color: theme.text, fontFamily: 'Inter_700Bold' }]}>{title}</Text>
     </TouchableOpacity>
   );
 
-  const AnimatedFloatingButton = () => (
-    <TouchableOpacity
-      style={[styles.fab, { backgroundColor: theme.accent }]}
-      onPress={() => setAiOpen(true)}
-      activeOpacity={0.8}
-    >
-      <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>AI</Text>
-    </TouchableOpacity>
-  );
-
-  const AnimatedButton = ({ onPress, children, style }) => (
-    <TouchableOpacity 
-      onPress={onPress}
-      activeOpacity={0.8}
-      style={style}
-    >
-      {children}
-    </TouchableOpacity>
-  );
-
   const TopBar = () => (
-  <View style={[styles.topbar, { borderColor: theme.chip, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-    <AnimatedButton onPress={() => setRoute('dashboard')} style={styles.brandButton}>
-        <Image 
-          source={require('./assets/AuricRX_home_button.png')} 
-          style={styles.brandLogo}
-          resizeMode="contain"
-        />
-    </AnimatedButton>
-    <AnimatedButton onPress={() => setRoute('settings')}>
+  <View style={[styles.topbar, { borderColor: theme.chip, flexDirection:'row', alignItems:'center', justifyContent:'space-between' }]}>
+    <TouchableOpacity onPress={() => setRoute('dashboard')}>
+      <Text style={[styles.brand, { color: theme.text, fontFamily: 'Inter_900Black' }]}>AuricRx</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity onPress={() => setRoute('settings')}>
       <Text style={{ fontSize: 22, color: theme.accent }}>⚙️</Text>
-    </AnimatedButton>
+    </TouchableOpacity>
   </View>
 );
 
@@ -981,15 +790,15 @@ const handleAskMedicalAI = async () => {
           </View>
 
           {/* Card grid */}
-        <View style={styles.grid}>
+          <View style={styles.grid}>
             <Card title={S.labsLocations} icon={<Text style={styles.emoji}>🧪</Text>} onPress={() => setRoute('labs')} />
-          <Card title={S.pharmacyLocations} icon={<Text style={styles.emoji}>📍</Text>} onPress={() => setRoute('pharmacies')} />
+            <Card title={S.pharmacyLocations} icon={<Text style={styles.emoji}>📍</Text>} onPress={() => setRoute('pharmacies')} />
             <Card title={S.reminders} icon={<Text style={styles.emoji}>🔔</Text>} onPress={() => setRoute('reminders')} />
-          <Card title={S.medications} icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
+            <Card title={S.medications} icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
             <Card title="Herbs" icon={<Image source={require('./assets/icons/herb_emoji_transparent.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('herbs')} />
             <Card title="Supplements" icon={<Image source={require('./assets/icons/supplement.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('supplements')} />
             <Card title="Documents" icon={<Text style={styles.emoji}>📄</Text>} onPress={() => setRoute('documents')} />
-        </View>
+          </View>
       </ScrollView>
       </>
     </LinearGradient>
@@ -1010,21 +819,7 @@ const handleAskMedicalAI = async () => {
     return (
       <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <View style={[styles.header, { borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 }]}>
-            <AnimatedButton onPress={() => setRoute('dashboard')} style={styles.headerHomeButton}>
-              <Image 
-                source={require('./assets/AuricRX_home_button.png')} 
-                style={styles.headerHomeIcon}
-                resizeMode="contain"
-              />
-            </AnimatedButton>
-
-            <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_800ExtraBold', position: 'absolute', left: '50%', transform: [{ translateX: -50 }], maxWidth: '60%' }} numberOfLines={1}>{S.reminders}</Text>
-
-            <AnimatedButton onPress={() => setRoute('settings')} style={{ padding: 8 }}>
-              <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
-            </AnimatedButton>
-          </View>
+          <Header title={S.reminders} />
           <View style={[styles.form, { backgroundColor: theme.card, borderColor: theme.chip }]}>
             <TextInput placeholder="Name" placeholderTextColor={theme.sub} style={[styles.input, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]} value={name} onChangeText={setName} />
             <TouchableOpacity onPress={()=>setShowPicker(true)} style={[styles.input,{ justifyContent:'center' }]}> 
@@ -1042,7 +837,7 @@ const handleAskMedicalAI = async () => {
                 await scheduleReminderNotification(name, time);
                 setName(''); setTime('');
               }}>
-              <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>{S.addReminder}</Text>
+              <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>{S.addReminder}</Text>
             </TouchableOpacity>
           </View>
           {reminders.map(r => (
@@ -1067,7 +862,7 @@ const handleAskMedicalAI = async () => {
           Tap below to open your maps with nearby pharmacies.
         </Text>
         <TouchableOpacity style={[styles.btn, { backgroundColor: theme.accent }]} onPress={openPharmaciesNearMe}>
-          <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>Open Maps</Text>
+          <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>Open Maps</Text>
         </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
@@ -1090,7 +885,7 @@ const handleAskMedicalAI = async () => {
             });
             Linking.openURL(url);
           }}>
-          <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>Find Labs Near Me</Text>
+          <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>Find Labs Near Me</Text>
         </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
@@ -1102,10 +897,10 @@ const handleAskMedicalAI = async () => {
         <Header title={S.prescription} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={addRxPhoto}>
-            <Text style={[styles.btnText, { color: '#2c2c2c', fontFamily: 'Inter_800ExtraBold' }]}>{S.addPhoto}</Text>
+            <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>{S.addPhoto}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={exportRxToPDF}>
-            <Text style={[styles.btnText, { color: '#2c2c2c', fontFamily: 'Inter_800ExtraBold' }]}>{S.toPDF}</Text>
+            <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>{S.toPDF}</Text>
           </TouchableOpacity>
         </View>
 
@@ -1124,7 +919,7 @@ const handleAskMedicalAI = async () => {
         <Header title={S.appointmentLog} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={toggleRecord}>
-            <Text style={[styles.btnText, { color: '#2c2c2c', fontFamily: 'Inter_800ExtraBold' }]}>{isRecording ? S.stop : S.record}</Text>
+            <Text style={[styles.btnText, { color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }]}>{isRecording ? S.stop : S.record}</Text>
           </TouchableOpacity>
         </View>
         <Text style={{ color: theme.sub, marginTop: 8, fontFamily: 'Inter_600SemiBold' }}>{isRecording ? S.recording : ' '}</Text>
@@ -1157,21 +952,6 @@ const handleAskMedicalAI = async () => {
           <RowSwitch label="Gold" value={themeKey === 'gold'} onToggle={() => setThemeKey('gold')} />
           <RowSwitch label="Blue" value={themeKey === 'blue'} onToggle={() => setThemeKey('blue')} />
           <RowSwitch label="Teal" value={themeKey === 'teal'} onToggle={() => setThemeKey('teal')} />
-          <RowSwitch label="Black" value={themeKey === 'black'} onToggle={() => setThemeKey('black')} />
-        </Section>
-
-        <Section title="Font Color">
-          <RowSwitch label="Default" value={fontColor === 'default'} onToggle={() => setFontColor('default')} />
-          <RowSwitch label="White" value={fontColor === 'white'} onToggle={() => setFontColor('white')} />
-          <RowSwitch label="Black" value={fontColor === 'black'} onToggle={() => setFontColor('black')} />
-          <RowSwitch label="Blue" value={fontColor === 'blue'} onToggle={() => setFontColor('blue')} />
-          <RowSwitch label="Green" value={fontColor === 'green'} onToggle={() => setFontColor('green')} />
-          <RowSwitch label="Purple" value={fontColor === 'purple'} onToggle={() => setFontColor('purple')} />
-          <RowSwitch label="Red" value={fontColor === 'red'} onToggle={() => setFontColor('red')} />
-          <RowSwitch label="Orange" value={fontColor === 'orange'} onToggle={() => setFontColor('orange')} />
-          <RowSwitch label="Pink" value={fontColor === 'pink'} onToggle={() => setFontColor('pink')} />
-          <RowSwitch label="Gold" value={fontColor === 'gold'} onToggle={() => setFontColor('gold')} />
-          <RowSwitch label="Silver" value={fontColor === 'silver'} onToggle={() => setFontColor('silver')} />
         </Section>
 
         <Section title={S.dayNight}>
@@ -1192,24 +972,20 @@ const handleAskMedicalAI = async () => {
   );
 
   const Header = ({ title }) => (
-  <View style={[styles.header, { borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 }]}>
+  <View style={[styles.header, { borderColor: theme.chip }]}>
     {route !== 'dashboard' ? (
-      <AnimatedButton onPress={() => setRoute('dashboard')} style={styles.headerHomeButton}>
-        <Image 
-          source={require('./assets/AuricRX_home_button.png')} 
-          style={styles.headerHomeIcon}
-          resizeMode="contain"
-        />
-      </AnimatedButton>
+      <TouchableOpacity onPress={() => setRoute('dashboard')}>
+        <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>←</Text>
+      </TouchableOpacity>
     ) : (
-      <View style={{ width: 180, height: 70 }} />
+      <View style={{ width: 20 }} />
     )}
 
-    <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_800ExtraBold', position: 'absolute', left: '50%', transform: [{ translateX: -50 }], maxWidth: '60%' }} numberOfLines={1}>{title}</Text>
+    <Text style={{ color: theme.text, fontSize: 16, fontFamily: 'Inter_800ExtraBold' }}>{title}</Text>
 
-    <AnimatedButton onPress={() => setRoute('settings')} style={{ padding: 8 }}>
+    <TouchableOpacity onPress={() => setRoute('settings')}>
       <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
-    </AnimatedButton>
+    </TouchableOpacity>
   </View>
 );
 
@@ -1295,14 +1071,11 @@ const Medications = () => {
   const [detailMed, setDetailMed] = useState(null);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [holdUntil, setHoldUntil] = useState('');
-  const [addForm, setAddForm] = useState({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+  const [addForm, setAddForm] = useState({ name:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
   const [addTimes, setAddTimes] = useState([]); // array of HH:MM
   const [editTimes, setEditTimes] = useState([]);
   const [showMedTimePicker, setShowMedTimePicker] = useState(false);
   const [timeTarget, setTimeTarget] = useState(null); // 'add' | 'edit'
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dateTarget, setDateTarget] = useState(null); // 'add' | 'edit'
-  const [dateField, setDateField] = useState(null); // 'startDate' | 'endDate'
   const onMedTimePicked = (_, date) => {
     setShowMedTimePicker(false);
     if (date) {
@@ -1314,27 +1087,8 @@ const Medications = () => {
     }
     setTimeTarget(null);
   };
-
-  const onDatePicked = (_, date) => {
-    setShowDatePicker(false);
-    if (date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const dateString = `${year}-${month}-${day}`;
-      
-      if (dateTarget === 'add') {
-        setAddForm(prev => ({ ...prev, [dateField]: dateString }));
-      }
-      if (dateTarget === 'edit') {
-        setEditForm(prev => ({ ...prev, [dateField]: dateString }));
-      }
-    }
-    setDateTarget(null);
-    setDateField(null);
-  };
   const [showEdit, setShowEdit] = useState(false);
-  const [editForm, setEditForm] = useState({ id:'', name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+  const [editForm, setEditForm] = useState({ id:'', name:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
 
   // Utility: auto-tag refill soon/expired
   function computeUtility(med) {
@@ -1355,7 +1109,6 @@ const Medications = () => {
     const newMed = computeUtility({
       id: `${Date.now()}`,
       name: addForm.name,
-      strength: addForm.strength,
       times: timesArray,
       status: addForm.status,
       startDate: addForm.startDate || null,
@@ -1364,13 +1117,13 @@ const Medications = () => {
       dosesLeft: addForm.dosesLeft ? Number(addForm.dosesLeft) : undefined,
     });
     setMeds(m => [...m, newMed]);
-    setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+    setAddForm({ name:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
     setAddTimes([]);
     setShowAdd(false);
   }
 
   function openEdit(med) {
-    setEditForm({ id:med.id, name:med.name, strength:med.strength||'', times:(med.times||[]).join(', '), status:med.status, startDate:med.startDate||'', endDate:med.endDate||'', notes:med.notes||'', dosesLeft: med.dosesLeft!=null? String(med.dosesLeft):'' });
+    setEditForm({ id:med.id, name:med.name, times:(med.times||[]).join(', '), status:med.status, startDate:med.startDate||'', endDate:med.endDate||'', notes:med.notes||'', dosesLeft: med.dosesLeft!=null? String(med.dosesLeft):'' });
     setEditTimes(med.times || []);
     setShowEdit(true);
   }
@@ -1381,7 +1134,6 @@ const Medications = () => {
     setMeds(list => list.map(m => m.id === editForm.id ? computeUtility({
       ...m,
       name: editForm.name,
-      strength: editForm.strength,
       times: timesArray,
       status: editForm.status,
       startDate: editForm.startDate || null,
@@ -1484,8 +1236,7 @@ const Medications = () => {
         {/* Filter icon and Add button row */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <SortButton onPress={() => setShowFilterModal(true)} active={false} />
-          <AnimatedButton
-            onPress={() => setShowAdd(true)}
+          <TouchableOpacity
             style={{
               marginLeft: 4,
               width: 36,
@@ -1496,9 +1247,10 @@ const Medications = () => {
               justifyContent: 'center',
               elevation: 2,
             }}
+            onPress={() => setShowAdd(true)}
           >
-            <Text style={{ color: '#2c2c2c', fontSize: 28, fontWeight: 'bold', marginTop: -2 }}>+</Text>
-          </AnimatedButton>
+            <Text style={{ color: '#0b1117', fontSize: 28, fontWeight: 'bold', marginTop: -2 }}>+</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Medications List */}
@@ -1511,131 +1263,79 @@ const Medications = () => {
             const statusObj = getStatusObj(med.status);
             const utilityTags = getUtilityTags(med);
 
-            // Get timing description based on times
-            const getTimingDescription = (times) => {
-              if (!times || times.length === 0) return '';
-              const time = times[0];
-              const hour = parseInt(time.split(':')[0]);
-              if (hour < 6) return 'At night';
-              if (hour < 12) return 'Before breakfast';
-              if (hour < 18) return 'At lunch';
-              return 'At dinner';
-            };
-
-            const timingDesc = getTimingDescription(med.times);
-            const strength = med.strength || med.notes || '100 MG'; // Use strength field first, then notes as fallback
-
             return (
-              <AnimatedButton
+              <TouchableOpacity
                 key={med.id}
+                style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', marginBottom: 10 }]}
                 onPress={() => setDetailMed(med)}
-                style={[styles.section, { 
-                  backgroundColor: theme.card, 
-                  borderColor: theme.chip, 
-                  marginBottom: 12, 
-                  padding: 16,
-                  borderRadius: 12,
-                  borderWidth: 1
-                }]}
               >
-                {/* Top row: Medication name and dosage */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                  {/* Medication name box */}
+                {/* Status pill */}
                 <View style={{
-                    backgroundColor: 'transparent',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderWidth: 1,
-                    borderColor: theme.text,
-                    marginRight: 8,
-                    flex: 1,
-                  }}>
-                    <Text style={{ color: theme.text, fontFamily: 'Inter_700Bold', fontSize: 14 }}>{med.name}</Text>
-                  </View>
-                  
-                  {/* Strength box */}
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginRight: 10,
+                }}>
                   <View style={{
-                    backgroundColor: 'transparent',
-                    borderRadius: 8,
-                    paddingHorizontal: 10,
-                    paddingVertical: 8,
-                    borderWidth: 1,
-                    borderColor: theme.text,
-                    minWidth: 80,
+                    backgroundColor: statusObj.color,
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    marginRight: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}>
-                    <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{strength}</Text>
+                    <Text style={{ fontSize: 15 }}>{statusObj.emoji}</Text>
+                    <Text style={{ color: '#0b1117', fontFamily: 'Inter_700Bold', marginLeft: 4, fontSize: 13 }}>{statusObj.label}</Text>
                   </View>
-                </View>
-
-                {/* Bottom row: Timing and action buttons */}
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {/* Timing box */}
-                  <View style={{
-                    backgroundColor: 'transparent',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    borderWidth: 1,
-                    borderColor: theme.text,
-                    marginRight: 12,
-                    flex: 1,
-                  }}>
-                    <Text style={{ color: theme.text, fontFamily: 'Inter_500Medium', fontSize: 13 }}>{timingDesc}</Text>
-                  </View>
-
-                  {/* Action buttons */}
-                  <View style={{ flexDirection: 'row', gap: 6 }}>
-                    {/* Status button */}
-                    <View style={{
-                      backgroundColor: 'transparent',
-                      borderRadius: 8,
-                      paddingHorizontal: 10,
-                      paddingVertical: 8,
-                      borderWidth: 1,
-                      borderColor: theme.text,
-                      minWidth: 60,
+                  {utilityTags.map(tag => (
+                    <View key={tag.label} style={{
+                      backgroundColor: tag.color,
+                      borderRadius: 10,
+                      paddingHorizontal: 7,
+                      paddingVertical: 3,
+                      marginLeft: 4,
+                      flexDirection: 'row',
                       alignItems: 'center',
                     }}>
-                      <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{statusObj.label}</Text>
+                      <Text style={{ fontSize: 13 }}>{tag.emoji}</Text>
+                      <Text style={{ color: '#0b1117', fontFamily: 'Inter_600SemiBold', marginLeft: 2, fontSize: 12 }}>{tag.label}</Text>
                     </View>
-
-                    {/* Refill button */}
-                    <AnimatedButton
+                  ))}
+                </View>
+                {/* Med name and times */}
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.widgetBig, { color: theme.text, fontFamily: 'Inter_800ExtraBold', marginBottom: 2 }]}>{med.name}</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 2 }}>
+                    {med.times && med.times.map((t, i) => (
+                      <View key={t + i} style={styles.medPill}>
+                        <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>{t}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  {med.notes ? (
+                    <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 13 }}>{med.notes}</Text>
+                  ) : null}
+                </View>
+                {/* Action buttons: Refill & AI */}
+                <View style={{ flexDirection: 'row', marginTop: 6 }}>
+                  <TouchableOpacity
                     onPress={() => setRefillMed({ name: med.name, dosage: med.notes || (med.times?.join(', ') || ''), lastRefill: med.endDate || '' })}
-                      style={{
-                        backgroundColor: 'transparent',
-                        borderRadius: 8,
-                        paddingHorizontal: 10,
-                        paddingVertical: 8,
-                        borderWidth: 1,
-                        borderColor: theme.text,
-                        minWidth: 60,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{S.refill}</Text>
-                    </AnimatedButton>
-
-                    {/* Edit button */}
-                    <AnimatedButton
+                    style={{ backgroundColor: theme.accent, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Refill ${med.name}`}
+                  >
+                    <Text style={{ color: '#0b1117', fontFamily: 'Inter_700Bold', fontSize: 13 }}>{S.refill}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     onPress={() => openEdit(med)}
-                      style={{
-                        backgroundColor: 'transparent',
-                        borderRadius: 8,
-                        paddingHorizontal: 10,
-                        paddingVertical: 8,
-                        borderWidth: 1,
-                        borderColor: theme.text,
-                        minWidth: 60,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{S.edit}</Text>
-                    </AnimatedButton>
+                    style={{ marginLeft: 8, backgroundColor: theme.chip, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth:1, borderColor: theme.accent }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Edit ${med.name}`}
+                  >
+                    <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>{S.edit}</Text>
+                  </TouchableOpacity>
                 </View>
-                </View>
-               </AnimatedButton>
+               </TouchableOpacity>
              );
            })
          )}
@@ -1650,86 +1350,21 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent>
+          <Modal visible={showAdd} animationType="slide" transparent>
             <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
                   <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>{S.addMedication}</Text>
-                  
-                  {/* Name field */}
+                  {['name','notes','startDate','endDate','dosesLeft'].map(field => (
                     <TextInput
-                    placeholder="Name"
+                      key={field}
+                      placeholder={field === 'dosesLeft' ? 'Doses left' : field.charAt(0).toUpperCase()+field.slice(1)}
                       placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={addForm.name}
-                    onChangeText={v => setAddForm(f => ({ ...f, name: v }))}
-                  />
-                  
-                  {/* Strength field */}
-                  <TextInput
-                    placeholder="Strength"
-                    placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={addForm.strength}
-                    onChangeText={v => setAddForm(f => ({ ...f, strength: v }))}
-                  />
-                  
-                  {/* Notes field */}
-                  <TextInput
-                    placeholder="Notes"
-                    placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={addForm.notes}
-                    onChangeText={v => setAddForm(f => ({ ...f, notes: v }))}
-                  />
-                  
-                  {/* Start Date field */}
-                  <View style={{ marginBottom: 12 }}>
-                    <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginBottom: 6 }}>Start Date</Text>
-                    <TouchableOpacity
-                      onPress={() => { setDateTarget('add'); setDateField('startDate'); setShowDatePicker(true); }}
-                      style={[styles.input, { 
-                        color: theme.text, 
-                        borderColor: theme.chip, 
-                        fontFamily:'Inter_400Regular',
-                        justifyContent: 'center',
-                        paddingVertical: 12
-                      }]}
-                    >
-                      <Text style={{ color: addForm.startDate ? theme.text : theme.sub, fontFamily:'Inter_400Regular' }}>
-                        {addForm.startDate || 'Select start date'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {/* End Date field */}
-                  <View style={{ marginBottom: 12 }}>
-                    <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginBottom: 6 }}>End Date</Text>
-                    <TouchableOpacity
-                      onPress={() => { setDateTarget('add'); setDateField('endDate'); setShowDatePicker(true); }}
-                      style={[styles.input, { 
-                        color: theme.text, 
-                        borderColor: theme.chip, 
-                        fontFamily:'Inter_400Regular',
-                        justifyContent: 'center',
-                        paddingVertical: 12
-                      }]}
-                    >
-                      <Text style={{ color: addForm.endDate ? theme.text : theme.sub, fontFamily:'Inter_400Regular' }}>
-                        {addForm.endDate || 'Select end date'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {/* Doses Left field */}
-                  <TextInput
-                    placeholder="Doses left"
-                    placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={addForm.dosesLeft}
-                    onChangeText={v => setAddForm(f => ({ ...f, dosesLeft: v.replace(/[^0-9]/g,'') }))}
-                    keyboardType="numeric"
-                  />
+                      style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular' }]}
+                      value={addForm[field]}
+                      onChangeText={v => setAddForm(f => ({ ...f, [field]: field==='dosesLeft'? v.replace(/[^0-9]/g,''): v }))}
+                    />
+                  ))}
                   <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginTop:4 }}>{S.times}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap', marginVertical:6 }}>
                     {addTimes.map(t => (
@@ -1737,26 +1372,22 @@ const Medications = () => {
                         <Text style={{ color: theme.text }}>{t}</Text>
                       </TouchableOpacity>
                     ))}
-                    <AnimatedButton onPress={()=>{ setTimeTarget('add'); setShowMedTimePicker(true); }} style={{ backgroundColor: theme.accent, paddingHorizontal:12, paddingVertical:6, borderRadius:12, margin:4 }}>
-                      <Text style={{ color:'#2c2c2c', fontFamily:'Inter_700Bold' }}>+ Time</Text>
-                    </AnimatedButton>
+                    <TouchableOpacity onPress={()=>{ setTimeTarget('add'); setShowMedTimePicker(true); }} style={{ backgroundColor: theme.accent, paddingHorizontal:12, paddingVertical:6, borderRadius:12, margin:4 }}>
+                      <Text style={{ color:'#0b1117', fontFamily:'Inter_700Bold' }}>+ Time</Text>
+                    </TouchableOpacity>
                   </View>
                   <Text style={{ color: theme.text, marginTop:4, marginBottom:6, fontFamily:'Inter_600SemiBold' }}>{S.status}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap' }}>
                     {MED_STATUSES.map(s => (
                       <TouchableOpacity key={s.key} onPress={() => setAddForm(f => ({ ...f, status: s.key }))} style={{ backgroundColor: addForm.status===s.key? s.color: theme.chip, paddingHorizontal:10, paddingVertical:6, borderRadius:12, margin:4, flexDirection:'row', alignItems:'center' }}>
                         <Text style={{ fontSize:15 }}>{s.emoji}</Text>
-                        <Text style={{ color: addForm.status===s.key? '#2c2c2c': theme.text, fontFamily:'Inter_600SemiBold', marginLeft:4 }}>{s.label}</Text>
+                        <Text style={{ color: addForm.status===s.key? '#0b1117': theme.text, fontFamily:'Inter_600SemiBold', marginLeft:4 }}>{s.label}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                   <View style={{ flexDirection:'row', justifyContent:'flex-end', marginTop:12, gap:16 }}>
-                    <AnimatedButton onPress={()=>{ setShowAdd(false); }}>
-                      <Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>{S.cancel}</Text>
-                    </AnimatedButton>
-                    <AnimatedButton onPress={handleAddMed}>
-                      <Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>{S.add}</Text>
-                    </AnimatedButton>
+                    <TouchableOpacity onPress={()=>{ setShowAdd(false); }}><Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>{S.cancel}</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={handleAddMed}><Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>{S.add}</Text></TouchableOpacity>
                   </View>
                 </View>
               </ScrollView>
@@ -1764,86 +1395,21 @@ const Medications = () => {
           </Modal>
 
           {/* Edit Medication Modal */}
-          <Modal visible={showEdit} animationType="fade" transparent>
+          <Modal visible={showEdit} animationType="slide" transparent>
             <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
                   <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>{S.editMedication}</Text>
-                  
-                  {/* Name field */}
+                  {['name','notes','startDate','endDate','dosesLeft'].map(field => (
                     <TextInput
-                    placeholder="Name"
+                      key={field}
+                      placeholder={field === 'dosesLeft' ? 'Doses left' : field.charAt(0).toUpperCase()+field.slice(1)}
                       placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={editForm.name}
-                    onChangeText={v => setEditForm(f => ({ ...f, name: v }))}
-                  />
-                  
-                  {/* Strength field */}
-                  <TextInput
-                    placeholder="Strength"
-                    placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={editForm.strength}
-                    onChangeText={v => setEditForm(f => ({ ...f, strength: v }))}
-                  />
-                  
-                  {/* Notes field */}
-                  <TextInput
-                    placeholder="Notes"
-                    placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={editForm.notes}
-                    onChangeText={v => setEditForm(f => ({ ...f, notes: v }))}
-                  />
-                  
-                  {/* Start Date field */}
-                  <View style={{ marginBottom: 12 }}>
-                    <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginBottom: 6 }}>Start Date</Text>
-                    <TouchableOpacity
-                      onPress={() => { setDateTarget('edit'); setDateField('startDate'); setShowDatePicker(true); }}
-                      style={[styles.input, { 
-                        color: theme.text, 
-                        borderColor: theme.chip, 
-                        fontFamily:'Inter_400Regular',
-                        justifyContent: 'center',
-                        paddingVertical: 12
-                      }]}
-                    >
-                      <Text style={{ color: editForm.startDate ? theme.text : theme.sub, fontFamily:'Inter_400Regular' }}>
-                        {editForm.startDate || 'Select start date'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {/* End Date field */}
-                  <View style={{ marginBottom: 12 }}>
-                    <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginBottom: 6 }}>End Date</Text>
-                    <TouchableOpacity
-                      onPress={() => { setDateTarget('edit'); setDateField('endDate'); setShowDatePicker(true); }}
-                      style={[styles.input, { 
-                        color: theme.text, 
-                        borderColor: theme.chip, 
-                        fontFamily:'Inter_400Regular',
-                        justifyContent: 'center',
-                        paddingVertical: 12
-                      }]}
-                    >
-                      <Text style={{ color: editForm.endDate ? theme.text : theme.sub, fontFamily:'Inter_400Regular' }}>
-                        {editForm.endDate || 'Select end date'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  
-                  {/* Doses Left field */}
-                  <TextInput
-                    placeholder="Doses left"
-                    placeholderTextColor={theme.sub}
-                    style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
-                    value={editForm.dosesLeft}
-                    onChangeText={v => setEditForm(f => ({ ...f, dosesLeft: v.replace(/[^0-9]/g,'') }))}
-                    keyboardType="numeric"
-                  />
+                      style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular' }]}
+                      value={editForm[field]}
+                      onChangeText={v => setEditForm(f => ({ ...f, [field]: field==='dosesLeft'? v.replace(/[^0-9]/g,''): v }))}
+                    />
+                  ))}
                   <Text style={{ color: theme.text, fontFamily:'Inter_600SemiBold', marginTop:4 }}>{S.times}</Text>
                   <View style={{ flexDirection:'row', flexWrap:'wrap', marginVertical:6 }}>
                     {editTimes.map(t => (
@@ -1852,7 +1418,7 @@ const Medications = () => {
                       </TouchableOpacity>
                     ))}
                     <TouchableOpacity onPress={()=>{ setTimeTarget('edit'); setShowMedTimePicker(true); }} style={{ backgroundColor: theme.accent, paddingHorizontal:12, paddingVertical:6, borderRadius:12, margin:4 }}>
-                      <Text style={{ color:'#2c2c2c', fontFamily:'Inter_700Bold' }}>+ Time</Text>
+                      <Text style={{ color:'#0b1117', fontFamily:'Inter_700Bold' }}>+ Time</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={{ color: theme.text, marginTop:4, marginBottom:6, fontFamily:'Inter_600SemiBold' }}>{S.status}</Text>
@@ -1860,7 +1426,7 @@ const Medications = () => {
                     {MED_STATUSES.map(s => (
                       <TouchableOpacity key={s.key} onPress={() => setEditForm(f => ({ ...f, status: s.key }))} style={{ backgroundColor: editForm.status===s.key? s.color: theme.chip, paddingHorizontal:10, paddingVertical:6, borderRadius:12, margin:4, flexDirection:'row', alignItems:'center' }}>
                         <Text style={{ fontSize:15 }}>{s.emoji}</Text>
-                        <Text style={{ color: editForm.status===s.key? '#2c2c2c': theme.text, fontFamily:'Inter_600SemiBold', marginLeft:4 }}>{s.label}</Text>
+                        <Text style={{ color: editForm.status===s.key? '#0b1117': theme.text, fontFamily:'Inter_600SemiBold', marginLeft:4 }}>{s.label}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -1880,397 +1446,7 @@ const Medications = () => {
           {showMedTimePicker && (
             <DateTimePicker value={new Date()} mode="time" is24Hour display="default" onChange={onMedTimePicked} />
           )}
-          {showDatePicker && (
-            <DateTimePicker value={new Date()} mode="date" display="default" onChange={onDatePicked} />
-          )}
        </ScrollView>
-     </LinearGradient>
-   );
- };
-
- // --------- Supplements Screen ----------
- const SUPP_STATUSES = [
-   { key: 'taking', label: 'Taking', emoji: '💊', color: '#2dd4bf' },
-   { key: 'onhold', label: 'On hold', emoji: '⏸️', color: '#fbbf24' },
-   { key: 'prn', label: 'PRN', emoji: '🕒', color: '#60a5fa' },
-   { key: 'finished', label: 'Finished', emoji: '✅', color: '#a3e635' },
-   { key: 'stopped', label: 'Stopped', emoji: '⛔', color: '#f87171' },
- ];
-
- const SUPP_FILTERS = [
-   { key: 'all', label: 'All' },
-   { key: 'taking', label: 'Taking' },
-   { key: 'onhold', label: 'On hold' },
-   { key: 'prn', label: 'PRN' },
-   { key: 'finished', label: 'Finished' },
-   { key: 'stopped', label: 'Stopped' },
- ];
-
- const Supplements = ({ supplements, setSupplements }) => {
-   const [showFilterModal, setShowFilterModal] = useState(false);
-   const [showAdd, setShowAdd] = useState(false);
-   const [filter, setFilter] = useState('all');
-   const [detailSupp, setDetailSupp] = useState(null);
-   const [showStatusSheet, setShowStatusSheet] = useState(false);
-   const [holdUntil, setHoldUntil] = useState('');
-   const [addForm, setAddForm] = useState({ 
-     name: '', 
-     times: '', 
-     status: 'taking', 
-     startDate: '', 
-     endDate: '', 
-     notes: '', 
-     dosesLeft: '',
-     dosage: '',
-     brand: ''
-   });
-   const [addTimes, setAddTimes] = useState([]);
-   const [editTimes, setEditTimes] = useState([]);
-     const [showSuppTimePicker, setShowSuppTimePicker] = useState(false);
-  const [timeTarget, setTimeTarget] = useState(null);
-  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
-  const [aiAnalysisQuery, setAiAnalysisQuery] = useState('');
-
-   const onSuppTimePicked = (_, date) => {
-     setShowSuppTimePicker(false);
-     if (date) {
-       const hh = String(date.getHours()).padStart(2, '0');
-       const mm = String(date.getMinutes()).padStart(2, '0');
-       const t = `${hh}:${mm}`;
-       if (timeTarget === 'add') {
-         setAddTimes(prev => [...prev, t]);
-       } else if (timeTarget === 'edit') {
-         setEditTimes(prev => [...prev, t]);
-       }
-     }
-   };
-
-
-   const filteredSupplements = supplements.filter(supp => 
-     filter === 'all' || supp.status === filter
-   );
-
-   const getStatusObj = (status) => {
-     return SUPP_STATUSES.find(s => s.key === status) || SUPP_STATUSES[0];
-   };
-
-     const getUtilityTags = (supp) => {
-    const tags = [];
-    if (supp.refillSoon) tags.push({ label: 'Refill soon', color: '#fbbf24', emoji: '🛒' });
-    if (supp.dosesLeft && parseInt(supp.dosesLeft) < 10) tags.push({ label: 'Low stock', color: '#f87171', emoji: '⚠️' });
-    return tags;
-  };
-
-  const findNearbySupplements = async (supplementName) => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return Alert.alert('Location denied', 'Enable location to search nearby stores.');
-      
-      const { coords } = await Location.getCurrentPositionAsync({});
-      
-      // AI-powered supplement search with price comparison
-      const aiQuery = `Find nearby stores selling ${supplementName} supplement with price comparison. Include pharmacies, health stores, and supplement shops. Provide store names, addresses, and estimated prices.`;
-      
-      // Show AI analysis modal
-      setShowAiAnalysis(true);
-      setAiAnalysisQuery(aiQuery);
-      
-      // Also open maps as fallback
-      const query = encodeURIComponent(`${supplementName} supplement pharmacy store`);
-      const url = Platform.select({
-        ios: `http://maps.apple.com/?q=${query}&ll=${coords.latitude},${coords.longitude}`,
-        android: `geo:${coords.latitude},${coords.longitude}?q=${query}`,
-      });
-      
-      if (url) {
-        await Linking.openURL(url);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Could not open maps app.');
-    }
-  };
-
-   const addSupplement = () => {
-     if (!addForm.name.trim()) return;
-     const newSupp = {
-       id: Date.now().toString(),
-       ...addForm,
-       times: addTimes,
-       refillSoon: false
-     };
-     setSupplements(prev => [...prev, newSupp]);
-     setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosage: '', brand: '' });
-     setAddTimes([]);
-     setShowAdd(false);
-   };
-
-   const updateSupplementStatus = (suppId, newStatus) => {
-     setSupplements(prev => prev.map(supp => 
-       supp.id === suppId ? { ...supp, status: newStatus } : supp
-     ));
-     setShowStatusSheet(false);
-   };
-
-   return (
-     <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-       <ScrollView contentContainerStyle={{ padding: 16 }}>
-         <Header title="Supplements" />
-         
-         {/* Filter and Add button row */}
-         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-           <TouchableOpacity 
-             onPress={() => setShowFilterModal(true)}
-             style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, padding: 12, marginRight: 8 }]}
-           >
-             <Image source={require('./icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: theme.text }} />
-           </TouchableOpacity>
-           
-           <TouchableOpacity 
-             onPress={() => setShowAdd(true)}
-             style={[styles.section, { backgroundColor: theme.accent, borderColor: theme.accent, padding: 12, flex: 1 }]}
-           >
-             <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>+ Add Supplement</Text>
-           </TouchableOpacity>
-         </View>
-
-         {/* Supplements List */}
-         {filteredSupplements.map(supp => {
-           const statusObj = getStatusObj(supp.status);
-           const utilityTags = getUtilityTags(supp);
-
-           return (
-             <AnimatedButton
-               key={supp.id}
-               onPress={() => setDetailSupp(supp)}
-               style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', marginBottom: 10 }]}
-             >
-               <View style={{ flex: 1 }}>
-                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                   <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{supp.name}</Text>
-                   {supp.brand && (
-                     <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginLeft: 8 }}>
-                       ({supp.brand})
-                     </Text>
-                   )}
-                 </View>
-                 
-                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                   <Text style={{ color: statusObj.color, fontFamily: 'Inter_600SemiBold', fontSize: 12, marginRight: 8 }}>
-                     {statusObj.emoji} {statusObj.label}
-                   </Text>
-                   {supp.dosage && (
-                     <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12 }}>
-                       {supp.dosage}
-                     </Text>
-                   )}
-                 </View>
-
-                 <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                   {supp.times.map((time, idx) => (
-                     <Text key={idx} style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginRight: 8 }}>
-                       {time}
-                     </Text>
-                   ))}
-                   {utilityTags.map((tag, idx) => (
-                     <Text key={idx} style={{ color: tag.color, fontFamily: 'Inter_600SemiBold', fontSize: 12, marginRight: 8 }}>
-                       {tag.emoji} {tag.label}
-                     </Text>
-                   ))}
-                 </View>
-               </View>
-               
-               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                 <TouchableOpacity 
-                   onPress={(e) => {
-                     e.stopPropagation();
-                     findNearbySupplements(supp.name);
-                   }}
-                   style={[styles.section, { backgroundColor: theme.accent, borderColor: theme.accent, padding: 8, marginRight: 8 }]}
-                 >
-                   <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>🛒 Refill</Text>
-                 </TouchableOpacity>
-               </View>
-               
-               <TouchableOpacity 
-                 onPress={(e) => {
-                   e.stopPropagation();
-                   setDetailSupp(supp);
-                   setShowStatusSheet(true);
-                 }}
-                 style={{ padding: 8 }}
-               >
-                 <Text style={{ color: theme.sub, fontSize: 18 }}>⋯</Text>
-               </TouchableOpacity>
-             </AnimatedButton>
-           );
-         })}
-
-         {filteredSupplements.length === 0 && (
-           <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, padding: 20, alignItems: 'center' }]}>
-             <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', textAlign: 'center' }}>
-               No supplements found. Add your first supplement to get started.
-             </Text>
-           </View>
-         )}
-       </ScrollView>
-
-       {/* Add Supplement Modal */}
-       <Modal visible={showAdd} animationType="slide" transparent>
-         <View style={styles.modalOverlay}>
-           <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-             <Text style={[styles.modalTitle, { color: theme.text }]}>Add Supplement</Text>
-             
-             <TextInput
-               placeholder="Supplement name"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.name}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
-             />
-             
-             <TextInput
-               placeholder="Brand (optional)"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.brand}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
-             />
-             
-             <TextInput
-               placeholder="Dosage (e.g., 1000mg, 500 IU)"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.dosage}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, dosage: text }))}
-             />
-             
-             <TextInput
-               placeholder="Notes (optional)"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.notes}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
-             />
-
-             <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-               <TouchableOpacity 
-                 onPress={() => setShowAdd(false)}
-                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
-               >
-                 <Text style={{ color: theme.text, textAlign: 'center' }}>Cancel</Text>
-               </TouchableOpacity>
-               
-               <TouchableOpacity 
-                 onPress={addSupplement}
-                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
-               >
-                 <Text style={{ color: '#fff', textAlign: 'center' }}>Add</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
-       </Modal>
-
-       {/* Status Update Sheet */}
-       <Modal visible={showStatusSheet} animationType="slide" transparent>
-         <View style={styles.modalOverlay}>
-           <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-             <Text style={[styles.modalTitle, { color: theme.text }]}>Update Status</Text>
-             
-             {SUPP_STATUSES.map(status => (
-               <TouchableOpacity
-                 key={status.key}
-                 onPress={() => updateSupplementStatus(detailSupp?.id, status.key)}
-                 style={[styles.section, { backgroundColor: theme.chip, marginBottom: 8, padding: 12 }]}
-               >
-                 <Text style={{ color: status.color, fontFamily: 'Inter_600SemiBold' }}>
-                   {status.emoji} {status.label}
-                 </Text>
-               </TouchableOpacity>
-             ))}
-             
-             <TouchableOpacity 
-               onPress={() => setShowStatusSheet(false)}
-               style={[styles.button, { backgroundColor: theme.chip, marginTop: 20 }]}
-             >
-               <Text style={{ color: theme.text, textAlign: 'center' }}>Cancel</Text>
-             </TouchableOpacity>
-           </View>
-         </View>
-       </Modal>
-
-       {/* AI Analysis Modal */}
-       <Modal visible={showAiAnalysis} animationType="slide" transparent>
-         <View style={styles.modalOverlay}>
-           <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.chip, maxHeight: '80%' }]}>
-             <View style={styles.modalHeader}>
-               <Text style={[styles.modalTitle, { color: theme.text }]}>🛒 Supplement Store Finder</Text>
-               <TouchableOpacity onPress={() => setShowAiAnalysis(false)}>
-                 <Text style={styles.closeButton}>✕</Text>
-               </TouchableOpacity>
-             </View>
-             
-             <ScrollView style={{ maxHeight: 400 }}>
-               <Text style={[styles.sectionSub, { color: theme.sub, marginBottom: 16 }]}>
-                 Finding nearby stores with the best prices for your supplement...
-               </Text>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🏪 CVS Pharmacy</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>0.8 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $12.99 - $18.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>💊 Walgreens</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>1.2 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $14.99 - $22.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🌿 GNC</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>1.5 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $19.99 - $29.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🏥 Rite Aid</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>2.1 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $11.99 - $16.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🛒 Walmart</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>2.8 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $9.99 - $14.99</Text>
-               </View>
-               
-               <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12, textAlign: 'center', marginTop: 16 }]}>
-                 💡 Tip: Call ahead to confirm availability and current prices
-               </Text>
-             </ScrollView>
-             
-             <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-               <TouchableOpacity 
-                 onPress={() => setShowAiAnalysis(false)}
-                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
-               >
-                 <Text style={{ color: theme.text, textAlign: 'center' }}>Close</Text>
-               </TouchableOpacity>
-               
-               <TouchableOpacity 
-                 onPress={() => {
-                   setShowAiAnalysis(false);
-                   findNearbySupplements(aiAnalysisQuery.split(' ')[3]); // Extract supplement name
-                 }}
-                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
-               >
-                 <Text style={{ color: '#fff', textAlign: 'center' }}>Open Maps</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
-       </Modal>
      </LinearGradient>
    );
  };
@@ -2284,9 +1460,9 @@ else if (route === 'prescription') Screen = <Prescription />;
 else if (route === 'appointments') Screen = <Appointments />;
 else if (route === 'settings') Screen = <Settings />;
 else if (route === 'medications') Screen = <Medications />;
-        else if (route === 'herbs') Screen = <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} />;
-        else if (route === 'supplements') Screen = <Supplements supplements={supplements} setSupplements={setSupplements} />;
-        else if (route === 'documents') Screen = <DocScanScreen onClose={() => setRoute('dashboard')} theme={theme} />;
+        else if (route === 'herbs') Screen = <HerbsScreen onClose={() => setRoute('dashboard')} />;
+        else if (route === 'supplements') Screen = <HerbsScreen onClose={() => setRoute('dashboard')} />;
+        else if (route === 'documents') Screen = <DocScanScreen onClose={() => setRoute('dashboard')} />;
 
 // ---------- Utility functions ----------
 // Utility: trim a string to n chars, add ellipsis if needed
@@ -2295,6 +1471,28 @@ function trimTo(str, n) {
   return str.length > n ? str.slice(0, n - 1) + '…' : str;
 }
 
+// Build concise context for AI
+function buildAiContext(reminders, rxPhotos) {
+  // Sort reminders by time, take up to 12
+  const sorted = reminders
+    .slice()
+    .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+    .slice(0, 12);
+
+  // Unique med names
+  const medNames = Array.from(new Set(reminders.map(r => r.name).filter(Boolean)));
+
+  // Format times per med
+  const lines = sorted.map(r => `- ${r.time} - ${r.name}`);
+
+  let context = `USER_CONTEXT
+Medications: ${medNames.join(', ') || 'None'}
+Upcoming reminders (local): 
+${lines.join('\n') || 'None'}
+Rx photos: ${rxPhotos.length}`;
+
+  return trimTo(context, 1500);
+}
 
 
 
@@ -2308,7 +1506,12 @@ return !fontsLoaded ? (
     {Screen}
 
     {/* Floating AI button */}
-    <AnimatedFloatingButton />
+    <TouchableOpacity
+      style={[styles.fab, { backgroundColor: theme.accent }]}
+      onPress={() => setAiOpen(true)}
+    >
+      <Text style={{ color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }}>AI</Text>
+    </TouchableOpacity>
 
     {/* AI modal */}
     <Modal
@@ -2348,36 +1551,9 @@ return !fontsLoaded ? (
                 { borderColor: theme.chip, backgroundColor: m.role === 'user' ? theme.chip : theme.card },
               ]}
             >
-              {m.role === 'assistant' && idx === aiMessages.length - 1 && aiSending ? (
-                <TypingEffect 
-                  text={m.text} 
-                  speed={20}
-                  style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}
-                  showCursor={true}
-                />
-              ) : (
               <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
-              )}
             </View>
           ))}
-          
-          {/* Typing indicator when AI is starting to respond */}
-          {aiSending && aiMessages.length > 0 && aiMessages[aiMessages.length - 1].role === 'user' && (
-            <View
-              style={[
-                styles.msg,
-                styles.msgBot,
-                { borderColor: theme.chip, backgroundColor: theme.card },
-              ]}
-            >
-              <TypingEffect 
-                text="AI is thinking..."
-                speed={100}
-                style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontStyle: 'italic' }}
-                showCursor={true}
-              />
-            </View>
-          )}
         </ScrollView>
       </View>
 
@@ -2388,7 +1564,7 @@ return !fontsLoaded ? (
           onChangeText={setAiInput}
           placeholder="Ask about medications, pharmacies…"
           placeholderTextColor={theme.sub}
-          onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
+          onSubmitEditing={sendAi}
           autoCapitalize="none"
           autoCorrect={false}
           blurOnSubmit={false}
@@ -2397,8 +1573,8 @@ return !fontsLoaded ? (
             { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular', minHeight: 44 },
           ]}
         />
-        <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} disabled={aiSending || streamLoading}>
-          <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>{streamLoading ? '...' : 'Send'}</Text>
+        <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={sendAi} disabled={aiSending || streamLoading}>
+          <Text style={{ color: '#0b1117', fontFamily: 'Inter_800ExtraBold' }}>{streamLoading ? '...' : 'Send'}</Text>
         </TouchableOpacity>
         {streamLoading ? (
           <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
@@ -2422,35 +1598,8 @@ return !fontsLoaded ? (
 
 // ---------- styles ----------
 const styles = StyleSheet.create({
-  topbar: { 
-    borderBottomWidth: 1, 
-    paddingBottom: 1, 
-    marginBottom: -15,
-    marginTop: -22,
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+  topbar: { borderBottomWidth: 1, paddingBottom: 10, marginBottom: 16 },
   brand: { fontSize: 28 },
-  brandButton: {
-    padding: 0,
-    backgroundColor: 'transparent',
-    marginLeft: -90,
-  },
-  brandLogo: {
-    width: 280,
-    height: 90,
-  },
-  headerHomeButton: {
-    padding: 0,
-    backgroundColor: 'transparent',
-    marginLeft: -65,
-  },
-  headerHomeIcon: {
-    width: 180,
-    height: 70,
-  },
   quickRow: { flexDirection: 'row', gap: 18, marginTop: 8, flexWrap: 'wrap' },
   quick: { fontSize: 14 },
 
@@ -2461,7 +1610,7 @@ const styles = StyleSheet.create({
   widgetBig: { fontSize: 22, marginBottom: 4 },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingBottom: 100 },
-card: {
+  card: {
     width: '46%',
     borderWidth: 1,
     borderRadius: 18,
@@ -2514,13 +1663,13 @@ card: {
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: { 
-  maxHeight: '80%', 
-  borderTopLeftRadius: 18, 
-  borderTopRightRadius: 18, 
-  borderWidth: 1, 
-  padding: 12,
+    maxHeight: '80%', 
+    borderTopLeftRadius: 18, 
+    borderTopRightRadius: 18, 
+    borderWidth: 1, 
+    padding: 12,
     flex: 1,
-},
+  },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   msg: { padding: 10, borderRadius: 12, borderWidth: 1, marginVertical: 4, marginHorizontal: 2 },
   msgUser: { alignSelf: 'flex-end' },

@@ -1,0 +1,203 @@
+{
+  "dashboard": {
+    "title": "仪表盘",
+    "healthJournal": "健康日记",
+    "nextReminder": "下一个提醒"
+  },
+  "tiles": {
+    "reminders": "提醒",
+    "pharmacyLocations": "药房位置",
+    "medications": "药物",
+    "labsLocations": "实验室",
+    "prescription": "处方",
+    "appointmentLog": "预约日志",
+    "documents": "文档",
+    "herbs": "草药",
+    "supplements": "补充剂"
+  },
+  "ai": {
+    "consultant": "AI顾问",
+    "askAI": "询问 AI",
+    "tapToTalk": "点击说话",
+    "placeholder": "询问药物、药房…",
+    "short": "AI",
+    "voiceNote": "(语音输入将在下一版本中连接)"
+  },
+  "documents": {
+    "title": "文档",
+    "addFromCamera": "从相机添加",
+    "addFromGallery": "从图库添加",
+    "addPhotos": "添加照片",
+    "exportPDF": "导出PDF",
+    "exporting": "导出中...",
+    "noPages": "尚未添加页面。添加一些照片来创建您的文档。",
+    "cameraNotAvailable": "相机捕获需要移动设备。",
+    "permissionNeeded": "请允许相机访问以拍照。",
+    "galleryPermissionNeeded": "请允许相册访问以添加文档。",
+    "failedToCapture": "捕获图像失败",
+    "failedToSelect": "选择图像失败",
+    "noPagesToExport": "导出PDF前添加一些页面。",
+    "pdfExported": "PDF导出并分享成功！",
+    "failedToExport": "导出PDF失败"
+  },
+  "herbs": {
+    "title": "草药",
+    "search": "搜索草药...",
+    "noResults": "未找到草药",
+    "details": {
+      "origin": "原产国",
+      "poisonous": "有毒",
+      "poisonousYes": "是",
+      "poisonousNo": "否",
+      "summary": "摘要"
+    }
+  },
+  "medications": {
+    "title": "药物",
+    "addMedication": "添加药物",
+    "editMedication": "编辑药物",
+    "noMedications": "未找到药物。点击 + 添加来输入一个。",
+    "dosesLeft": "剩余剂量",
+    "status": "状态",
+    "times": "时间",
+    "add": "添加",
+    "edit": "编辑",
+    "delete": "删除",
+    "cancel": "取消",
+    "save": "保存",
+    "refill": "续药",
+    "addTime": "+ 时间",
+    "lastRefill": "上次续药",
+    "lowest": "最低",
+    "reserve": "预订（存根）",
+    "sort": {
+      "distance": "距离",
+      "price": "价格",
+      "name": "名称"
+    },
+    "filters": {
+      "all": "全部",
+      "taking": "服用中",
+      "prn": "按需",
+      "onhold": "暂停",
+      "past": "过去",
+      "pickup": "自取",
+      "delivery": "配送",
+      "cash": "现金",
+      "coupon": "优惠券"
+    },
+    "statuses": {
+      "taking": "服用中",
+      "onhold": "暂停",
+      "prn": "按需",
+      "finished": "完成",
+      "stopped": "停止"
+    },
+    "utility": {
+      "refillSoon": "快用完",
+      "expired": "已过期"
+    }
+  },
+  "supplements": {
+    "title": "补充剂",
+    "addSupplement": "添加补充剂",
+    "editSupplement": "编辑补充剂",
+    "noSupplements": "尚未添加补充剂",
+    "add": "添加",
+    "edit": "编辑",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "pause": "暂停",
+    "resume": "恢复",
+    "status": "状态",
+    "servingsLeft": "剩余份数",
+    "statuses": {
+      "taking": "正在服用",
+      "onhold": "暂停",
+      "finished": "已完成",
+      "stopped": "已停止"
+    },
+    "utility": {
+      "lowSupply": "库存不足",
+      "expired": "已过期"
+    }
+  },
+  "reminders": {
+    "title": "提醒",
+    "addReminder": "添加提醒",
+    "pickTime": "选择时间",
+    "namePlaceholder": "名称"
+  },
+  "pharmacies": {
+    "title": "药房位置",
+    "description": "点击下方打开地图查找附近药房。",
+    "openMaps": "打开地图",
+    "searchQuery": "药房"
+  },
+  "labs": {
+    "title": "实验室",
+    "findLabs": "查找附近实验室",
+    "searchQuery": "医学实验室"
+  },
+  "prescription": {
+    "title": "处方",
+    "addPhoto": "添加照片",
+    "createPDF": "创建PDF"
+  },
+  "appointments": {
+    "title": "预约日志",
+    "record": "录音",
+    "stop": "停止",
+    "recording": "录音中…",
+    "play": "播放"
+  },
+  "settings": {
+    "title": "设置",
+    "profile": "个人资料",
+    "language": "语言",
+    "colorSettings": "颜色设置",
+    "dayNight": "昼 / 夜",
+    "moodShift": "情绪主题切换",
+    "nightMode": "夜间模式",
+    "autoCalm": "压力大时自动使用平静色彩",
+    "help": "帮助",
+    "colors": {
+      "gold": "金色",
+      "blue": "蓝色",
+      "teal": "蓝绿色"
+    },
+    "emailUs": "给我们发邮件",
+    "languages": {
+      "en": "English",
+      "es": "Español",
+      "zh": "中文"
+    }
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "close": "关闭",
+    "back": "返回",
+    "brand": "AuricRx",
+    "send": "发送",
+    "stop": "停止",
+    "noData": "—",
+    "noResponse": "抱歉—没有回应。",
+    "appDescription": "AuricRx — MedCoach",
+    "noTime": "--:--",
+    "sort": "排序",
+    "sortBy": "按...排序",
+    "ascending": "升序",
+    "descending": "降序",
+    "refresh": "刷新",
+    "showAll": "显示全部",
+    "fx": "汇率",
+    "directions": "路线",
+    "alerts": {
+      "locationDenied": "位置被拒绝",
+      "enableLocation": "启用位置以搜索附近药房。"
+    }
+  }
+}

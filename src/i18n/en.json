@@ -1,0 +1,203 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "healthJournal": "Health Journal Widget",
+    "nextReminder": "Next reminder"
+  },
+  "tiles": {
+    "reminders": "Reminders",
+    "pharmacyLocations": "Pharmacy Locations",
+    "medications": "Medications",
+    "labsLocations": "Labs Locations",
+    "prescription": "Prescription",
+    "appointmentLog": "Appointment Log",
+    "documents": "Documents",
+    "herbs": "Herbs",
+    "supplements": "Supplements"
+  },
+  "ai": {
+    "consultant": "AI Consultant",
+    "askAI": "Ask AI",
+    "tapToTalk": "Tap to speak",
+    "placeholder": "Ask about medications, pharmacies…",
+    "short": "AI",
+    "voiceNote": "(voice input wired in next build)"
+  },
+  "documents": {
+    "title": "Documents",
+    "addFromCamera": "Add from Camera",
+    "addFromGallery": "Add from Gallery",
+    "addPhotos": "Add Photos",
+    "exportPDF": "Export PDF",
+    "exporting": "Exporting...",
+    "noPages": "No pages added yet. Add some photos to create your document.",
+    "cameraNotAvailable": "Camera capture requires mobile device.",
+    "permissionNeeded": "Please grant camera access to take photos.",
+    "galleryPermissionNeeded": "Please grant camera roll access to add documents.",
+    "failedToCapture": "Failed to capture image",
+    "failedToSelect": "Failed to select images",
+    "noPagesToExport": "Add some pages before exporting to PDF.",
+    "pdfExported": "PDF exported and shared successfully!",
+    "failedToExport": "Failed to export PDF"
+  },
+  "herbs": {
+    "title": "Herbs",
+    "search": "Search herbs...",
+    "noResults": "No herbs found",
+    "details": {
+      "origin": "Country of Origin",
+      "poisonous": "Poisonous",
+      "poisonousYes": "Yes",
+      "poisonousNo": "No",
+      "summary": "Summary"
+    }
+  },
+  "medications": {
+    "title": "Medications",
+    "addMedication": "Add Medication",
+    "editMedication": "Edit Medication",
+    "noMedications": "No medications found. Tap + Add to enter one.",
+    "dosesLeft": "Doses left",
+    "status": "Status",
+    "times": "Times",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "refill": "Refill",
+    "addTime": "+ Time",
+    "lastRefill": "Last refill",
+    "lowest": "Lowest",
+    "reserve": "Reserve (stub)",
+    "sort": {
+      "distance": "Distance",
+      "price": "Price",
+      "name": "Name"
+    },
+    "filters": {
+      "all": "All",
+      "taking": "Taking",
+      "prn": "PRN",
+      "onhold": "On hold",
+      "past": "Past",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "cash": "Cash",
+      "coupon": "Coupon"
+    },
+    "statuses": {
+      "taking": "Taking",
+      "onhold": "On hold",
+      "prn": "PRN",
+      "finished": "Finished",
+      "stopped": "Stopped"
+    },
+          "utility": {
+        "refillSoon": "Refill soon",
+        "expired": "Expired"
+      }
+    },
+  "supplements": {
+    "title": "Supplements",
+    "addSupplement": "Add Supplement",
+    "editSupplement": "Edit Supplement",
+    "noSupplements": "No supplements added yet",
+    "add": "Add",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "pause": "Pause",
+    "resume": "Resume",
+    "status": "Status",
+    "servingsLeft": "Servings Left",
+    "statuses": {
+      "taking": "Taking",
+      "onhold": "On Hold",
+      "finished": "Finished",
+      "stopped": "Stopped"
+    },
+    "utility": {
+      "lowSupply": "Low Supply",
+      "expired": "Expired"
+    }
+  },
+  "reminders": {
+    "title": "Reminders",
+    "addReminder": "Add Reminder",
+    "pickTime": "Pick time",
+    "namePlaceholder": "Name"
+  },
+  "pharmacies": {
+    "title": "Pharmacy Locations",
+    "description": "Tap below to open your maps with nearby pharmacies.",
+    "openMaps": "Open Maps",
+    "searchQuery": "pharmacy"
+  },
+  "labs": {
+    "title": "Labs Locations",
+    "findLabs": "Find Labs Near Me",
+    "searchQuery": "medical laboratory"
+  },
+  "prescription": {
+    "title": "Prescription",
+    "addPhoto": "Add Photo",
+    "createPDF": "Create PDF"
+  },
+  "appointments": {
+    "title": "Appointment Log",
+    "record": "Record",
+    "stop": "Stop",
+    "recording": "Recording…",
+    "play": "Play"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "language": "Language",
+    "colorSettings": "Color Settings",
+    "dayNight": "Day / Night",
+    "moodShift": "Mood-Based Theme Shift",
+    "nightMode": "Night mode",
+    "autoCalm": "Auto-calm colors when stressed",
+    "help": "Help",
+    "colors": {
+      "gold": "Gold",
+      "blue": "Blue",
+      "teal": "Teal"
+    },
+    "emailUs": "Email us",
+    "languages": {
+      "en": "English",
+      "es": "Español",
+      "zh": "中文"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "back": "Back",
+    "brand": "AuricRx",
+    "send": "Send",
+    "stop": "Stop",
+    "noData": "—",
+    "noResponse": "Sorry—no response.",
+    "appDescription": "AuricRx — MedCoach",
+    "noTime": "--:--",
+    "sort": "Sort",
+    "sortBy": "Sort by",
+    "ascending": "Ascending order",
+    "descending": "Descending order",
+    "refresh": "Refresh",
+    "showAll": "Show all",
+    "fx": "FX",
+    "directions": "Directions",
+    "alerts": {
+      "locationDenied": "Location denied",
+      "enableLocation": "Enable location to search nearby pharmacies."
+    }
+  }
+}

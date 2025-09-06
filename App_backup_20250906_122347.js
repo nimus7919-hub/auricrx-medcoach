@@ -482,7 +482,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
   setAiInput('');
   setAiSending(true);
 
-  console.log('Building user data for tool calling...');
+  console.log('Building context...');
   console.log('reminders:', reminders?.length || 0);
   console.log('rxPhotos:', rxPhotos?.length || 0);
   console.log('meds:', meds?.length || 0);
@@ -491,92 +491,61 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
   console.log('theme:', theme?.id || 'none');
 
 
-  // Prepare user data for tool calling
-  let userData;
+  // Build context
+  let context;
   try {
-    console.log('Preparing medications...');
-    const medsData = meds.map(med => ({
-      name: med.name,
-      strength: med.strength || 'N/A',
-      status: med.status,
-      times: med.times || [],
-      notes: med.notes || ''
-    }));
-    console.log('Medications prepared:', medsData.length);
-
-    console.log('Preparing supplements...');
-    const supplementsData = supplements.map(supp => ({
-      name: supp.name,
-      dosage: supp.dosage || 'N/A',
-      status: supp.status,
-      times: supp.times || [],
-      notes: supp.notes || ''
-    }));
-    console.log('Supplements prepared:', supplementsData.length);
-
-    console.log('Preparing reminders...');
-    const remindersData = reminders.map(rem => ({
-      time: rem.time || '',
-      name: rem.name || '',
-      text: rem.text || ''
-    }));
-    console.log('Reminders prepared:', remindersData.length);
-
-    console.log('Preparing herbs...');
-    const herbsData = (herbs || []).slice(0, 5).map(herb => ({
-      name: herb.name,
-      category: herb.category
-    }));
-    console.log('Herbs prepared:', herbsData.length);
-
-    userData = {
-      meds: medsData,
-      supplements: supplementsData,
-      reminders: remindersData,
-      herbs: herbsData
-    };
-
-    console.log('User data prepared for tool calling:', userData);
-  } catch (error) {
-    console.log('Error preparing user data:', error);
-    setAiMessages(m => [...m, { role: 'assistant', text: 'Error preparing your health data. Please try again.' }]);
+    console.log('Calling buildAiContext now...');
+    context = buildAiContext(reminders, rxPhotos, meds, supplements, herbs, theme);
+    console.log('Context built successfully:', context);
+  } catch (contextError) {
+    console.log('Error building context:', contextError);
+    setAiMessages(m => [...m, { role: 'assistant', text: 'Error building context: ' + contextError.message }]);
     setAiSending(false);
     return;
   }
 
-  // Skip API test and go directly to tool calling
-  console.log('Using tool calling approach...');
+  // Test API connection first
+  console.log('Testing API connection...');
   console.log('Question:', q);
   console.log('API Base URL:', 'https://auricrx-medcoach.onrender.com');
   
-  // Add immediate response
-  setAiMessages(m => [...m, { role: 'assistant', text: 'AI is thinking...' }]);
+  // Add immediate test response
+  setAiMessages(m => [...m, { role: 'assistant', text: 'Testing API connection...' }]);
   
   try {
-    console.log('Sending question with user data for tool calling...');
-    console.log('Request payload:', {
-      message: q,
-      userData: userData
-    });
+    // Test basic API call first
+    console.log('Making API call to:', 'https://auricrx-medcoach.onrender.com/ask');
     
-    const response = await fetch('https://auricrx-medcoach.onrender.com/ask', {
+    const testResponse = await fetch('https://auricrx-medcoach.onrender.com/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: q,
-        userData: userData
-      })
+      body: JSON.stringify({ message: 'AI is thinking...' }),
     });
     
-    if (!response.ok) throw new Error(`API returned ${response.status}`);
+    console.log('API Response Status:', testResponse.status);
+    console.log('API Response OK:', testResponse.ok);
     
-    const data = await response.json();
-    console.log('Backend response:', data);
-    const reply = data.reply || 'No response received';
-    console.log('Got response with tool calling:', reply);
+    if (!testResponse.ok) {
+      throw new Error(`API returned ${testResponse.status}`);
+    }
     
-    setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
-  } catch (err) {
+    const testData = await testResponse.json();
+    console.log('API Response Data:', testData);
+    
+    // If API test works, try the actual question
+      let reply;
+      try {
+      console.log('Trying minimal context...');
+        reply = await askMedicalAI(`User: "I take Aspirin 81mg and Metformin 500mg. I also take Vitamin D3 and Omega-3 supplements."\n\nUser: "${q}"\n\nPlease help them with their question about their medications.`);
+        if (typeof reply !== 'string') throw new Error('Non-string reply');
+      console.log('Got response with minimal context');
+      } catch {
+      console.log('Trying full context...');
+        reply = await askMedicalAI(`User: "${context}"\n\nUser: "${q}"\n\nPlease help them with their question about their medications and supplements.`);
+      console.log('Got response with full context');
+      }
+      setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
+    } catch (err) {
     console.log('API Error:', err);
     // Provide a helpful response even if AI is down
     let fallbackResponse = `API Error: ${err.message}. `;
@@ -2295,6 +2264,58 @@ function trimTo(str, n) {
   return str.length > n ? str.slice(0, n - 1) + '…' : str;
 }
 
+// Build concise context for AI
+function buildAiContext(reminders, rxPhotos, meds = [], supplements = [], herbs = [], theme = {}) {
+  console.log('buildAiContext called with:', { reminders: reminders?.length, rxPhotos: rxPhotos?.length, meds: meds?.length, supplements: supplements?.length, herbs: herbs?.length });
+  
+  try {
+    // Sort reminders by time, take up to 8 (reduced from 12)
+    console.log('Processing reminders...');
+  const sorted = reminders
+    .slice()
+    .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+      .slice(0, 8);
+    console.log('Reminders processed:', sorted.length);
+
+    // Get medication details (simplified)
+    console.log('Processing medications...');
+    const medDetails = meds.slice(0, 5).map(med => {
+      console.log('Processing med:', med);
+      return `${med.name} (${med.strength || 'N/A'}) - ${med.status}`;
+    });
+    console.log('Medications processed:', medDetails.length);
+
+    // Get supplement details (simplified)
+    console.log('Processing supplements...');
+    const supplementDetails = supplements.slice(0, 5).map(supp => {
+      console.log('Processing supplement:', supp);
+      return `${supp.name} (${supp.strength || 'N/A'}) - ${supp.status}`;
+    });
+    console.log('Supplements processed:', supplementDetails.length);
+
+    // Get herb details (reduced sample)
+    console.log('Processing herbs...');
+    const herbSample = herbs.slice(0, 5).map(herb => {
+      console.log('Processing herb:', herb);
+      return `${herb.name} (${herb.category})`;
+    });
+    console.log('Herbs processed:', herbSample.length);
+
+    // Format times per med (simplified)
+    console.log('Formatting reminder lines...');
+    const lines = sorted.map(r => `${r.time} - ${r.name}`);
+    console.log('Reminder lines formatted:', lines.length);
+
+    console.log('Building final context string...');
+    let context = `I take these medications: ${medDetails.join(', ') || 'None'}. I also take these supplements: ${supplementDetails.join(', ') || 'None'}. My medication schedule is: ${lines.join('; ') || 'None'}.`;
+
+    console.log('Context built successfully, length:', context.length);
+    return trimTo(context, 800); // Reduced from 2000 to 800 characters
+  } catch (error) {
+    console.log('Error in buildAiContext:', error);
+    throw error;
+  }
+}
 
 
 

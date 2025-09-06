@@ -349,28 +349,203 @@ app.get('/debug/places', async (req, res) => {
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
+// Test endpoint to verify tool calling setup
+app.post('/test-tools', async (req, res) => {
+  console.log('Test tools endpoint called with:', req.body);
+  const { userData } = req.body || {};
+  
+  try {
+    const testMessage = "What medications am I taking?";
+    const messages = [
+      {
+        role: 'system',
+        content: [
+          'You are a **personal health assistant**.',
+          'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
+          'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
+          'If a list is empty, say so and suggest what the user might add.',
+          'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
+        ].join(' ')
+      },
+      { role: 'user', content: testMessage }
+    ];
+
+    // Tool calling loop
+    while (true) {
+      const completion = await client.chat.completions.create({
+        model: process.env.MODEL || 'gpt-4o-mini',
+        messages,
+        tools,
+        tool_choice: "auto",
+        temperature: 0.2
+      });
+
+      const msg = completion.choices[0].message;
+      console.log('AI response:', msg);
+
+      // If the model asks to call a tool, satisfy it from user data
+      if (msg.tool_calls?.length) {
+        console.log('AI wants to call tools:', msg.tool_calls);
+        for (const call of msg.tool_calls) {
+          let payload = null;
+          switch (call.function.name) {
+            case "get_medications":
+              payload = userData?.meds || [];
+              console.log('Returning medications:', payload);
+              break;
+            case "get_supplements":
+              payload = userData?.supplements || [];
+              console.log('Returning supplements:', payload);
+              break;
+            case "get_reminders":
+              payload = userData?.reminders || [];
+              console.log('Returning reminders:', payload);
+              break;
+            case "get_herbs":
+              payload = userData?.herbs || [];
+              console.log('Returning herbs:', payload);
+              break;
+            default:
+              payload = { error: "unknown tool" };
+          }
+
+          messages.push({
+            role: "tool",
+            tool_call_id: call.id,
+            name: call.function.name,
+            content: JSON.stringify(payload)
+          });
+        }
+        // loop again with the tool outputs appended
+        continue;
+      }
+
+      // Final answer
+      const text = msg.content?.trim() || '';
+      res.json({ ok: true, reply: text, toolCalls: msg.tool_calls?.length || 0 });
+      return;
+    }
+  } catch (err) {
+    console.error('Test tools error:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Define tools for the AI to call
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "get_medications",
+      description: "Return the signed-in user's active medication list from the app's state.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_supplements",
+      description: "Return the user's active supplements from the app's state.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_reminders",
+      description: "Return upcoming health-related reminders.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_herbs",
+      description: "Return the user's herbal remedies and supplements.",
+      parameters: { type: "object", properties: {}, additionalProperties: false }
+    }
+  }
+];
+
 app.post('/ask', async (req, res) => {
 console.log('POST /ask', req.body);
-  const schema = z.object({ message: z.string().min(1).max(5000) });
+  const schema = z.object({ 
+    message: z.string().min(1).max(10000),
+    userData: z.object({
+      meds: z.array(z.any()).optional().default([]),
+      supplements: z.array(z.any()).optional().default([]),
+      reminders: z.array(z.any()).optional().default([]),
+      herbs: z.array(z.any()).optional().default([])
+    }).optional().default({})
+  });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ ok: false, error: 'bad_request' });
 
   try {
-    const completion = await client.chat.completions.create({
-      model: process.env.MODEL || 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a helpful medical information assistant. Provide general information only. Do not diagnose or give personalized advice.'
-        },
-        { role: 'user', content: parsed.data.message }
-      ],
-      temperature: 0.2
-    });
+    const { message, userData } = parsed.data;
+    const messages = [
+      {
+        role: 'system',
+        content: [
+          'You are a **personal health assistant**.',
+          'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
+          'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
+          'If a list is empty, say so and suggest what the user might add.',
+          'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
+        ].join(' ')
+      },
+      { role: 'user', content: message }
+    ];
 
-    const text = completion?.choices?.[0]?.message?.content?.trim() || '';
-    res.json({ ok: true, reply: text });
+    // Tool calling loop
+    while (true) {
+      const completion = await client.chat.completions.create({
+        model: process.env.MODEL || 'gpt-4o-mini',
+        messages,
+        tools,
+        tool_choice: "auto",
+        temperature: 0.2
+      });
+
+      const msg = completion.choices[0].message;
+
+      // If the model asks to call a tool, satisfy it from user data
+      if (msg.tool_calls?.length) {
+        for (const call of msg.tool_calls) {
+          let payload = null;
+          switch (call.function.name) {
+            case "get_medications":
+              payload = userData.meds || [];
+              break;
+            case "get_supplements":
+              payload = userData.supplements || [];
+              break;
+            case "get_reminders":
+              payload = userData.reminders || [];
+              break;
+            case "get_herbs":
+              payload = userData.herbs || [];
+              break;
+            default:
+              payload = { error: "unknown tool" };
+          }
+
+          messages.push({
+            role: "tool",
+            tool_call_id: call.id,
+            name: call.function.name,
+            content: JSON.stringify(payload)
+          });
+        }
+        // loop again with the tool outputs appended
+        continue;
+      }
+
+      // Final answer
+      const text = msg.content?.trim() || '';
+      res.json({ ok: true, reply: text });
+      return;
+    }
   } catch (err) {
     console.error('OpenAI error:', err?.response?.data || err?.message);
     res.status(500).json({ ok: false, error: 'openai_error' });
@@ -389,7 +564,13 @@ app.post('/ask-stream', async (req, res) => {
         messages = [
           {
             role: 'system',
-            content: 'You are a helpful medical information assistant. Provide general information only. Do not diagnose or give personalized advice.'
+            content: [
+              'You are a **personal health assistant**.',
+              'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
+              'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
+              'If a list is empty, say so and suggest what the user might add.',
+              'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
+            ].join(' ')
           },
           { role: 'user', content: message.trim() },
         ];

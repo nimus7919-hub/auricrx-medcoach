@@ -1,0 +1,203 @@
+{
+  "dashboard": {
+    "title": "Panel",
+    "healthJournal": "Registro de Salud",
+    "nextReminder": "Próximo recordatorio"
+  },
+  "tiles": {
+    "reminders": "Recordatorios",
+    "pharmacyLocations": "Farmacias",
+    "medications": "Medicamentos",
+    "labsLocations": "Laboratorios",
+    "prescription": "Receta",
+    "appointmentLog": "Citas",
+    "documents": "Documentos",
+    "herbs": "Hierbas",
+    "supplements": "Suplementos"
+  },
+  "ai": {
+    "consultant": "Consultor IA",
+    "askAI": "Preguntar a IA",
+    "tapToTalk": "Toca para hablar",
+    "placeholder": "Pregunta sobre medicamentos, farmacias…",
+    "short": "IA",
+    "voiceNote": "(entrada de voz conectada en la próxima versión)"
+  },
+  "documents": {
+    "title": "Documentos",
+    "addFromCamera": "Agregar desde Cámara",
+    "addFromGallery": "Agregar desde Galería",
+    "addPhotos": "Agregar Fotos",
+    "exportPDF": "Exportar PDF",
+    "exporting": "Exportando...",
+    "noPages": "Aún no se han agregado páginas. Agrega algunas fotos para crear tu documento.",
+    "cameraNotAvailable": "La captura de cámara requiere dispositivo móvil.",
+    "permissionNeeded": "Por favor permite el acceso a la cámara para tomar fotos.",
+    "galleryPermissionNeeded": "Por favor permite el acceso a la galería para agregar documentos.",
+    "failedToCapture": "Error al capturar imagen",
+    "failedToSelect": "Error al seleccionar imágenes",
+    "noPagesToExport": "Agrega algunas páginas antes de exportar a PDF.",
+    "pdfExported": "¡PDF exportado y compartido exitosamente!",
+    "failedToExport": "Error al exportar PDF"
+  },
+  "herbs": {
+    "title": "Hierbas",
+    "search": "Buscar hierbas...",
+    "noResults": "No se encontraron hierbas",
+    "details": {
+      "origin": "País de Origen",
+      "poisonous": "Venenosa",
+      "poisonousYes": "Sí",
+      "poisonousNo": "No",
+      "summary": "Resumen"
+    }
+  },
+  "medications": {
+    "title": "Medicamentos",
+    "addMedication": "Agregar Medicamento",
+    "editMedication": "Editar Medicamento",
+    "noMedications": "No se encontraron medicamentos. Toca + Agregar para ingresar uno.",
+    "dosesLeft": "Dosis restantes",
+    "status": "Estado",
+    "times": "Horarios",
+    "add": "Agregar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "refill": "Recargar",
+    "addTime": "+ Hora",
+    "lastRefill": "Última recarga",
+    "lowest": "Más bajo",
+    "reserve": "Reservar (stub)",
+    "sort": {
+      "distance": "Distancia",
+      "price": "Precio",
+      "name": "Nombre"
+    },
+    "filters": {
+      "all": "Todos",
+      "taking": "Tomando",
+      "prn": "PRN",
+      "onhold": "En pausa",
+      "past": "Pasado",
+      "pickup": "Recoger",
+      "delivery": "Entrega",
+      "cash": "Efectivo",
+      "coupon": "Cupón"
+    },
+    "statuses": {
+      "taking": "Tomando",
+      "onhold": "En pausa",
+      "prn": "PRN",
+      "finished": "Terminado",
+      "stopped": "Detenido"
+    },
+    "utility": {
+      "refillSoon": "Recargar pronto",
+      "expired": "Vencido"
+    }
+  },
+  "supplements": {
+    "title": "Suplementos",
+    "addSupplement": "Agregar Suplemento",
+    "editSupplement": "Editar Suplemento",
+    "noSupplements": "Aún no se han agregado suplementos",
+    "add": "Agregar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "status": "Estado",
+    "servingsLeft": "Porciones Restantes",
+    "statuses": {
+      "taking": "Tomando",
+      "onhold": "En Pausa",
+      "finished": "Terminado",
+      "stopped": "Detenido"
+    },
+    "utility": {
+      "lowSupply": "Suministro Bajo",
+      "expired": "Vencido"
+    }
+  },
+  "reminders": {
+    "title": "Recordatorios",
+    "addReminder": "Agregar recordatorio",
+    "pickTime": "Elegir hora",
+    "namePlaceholder": "Nombre"
+  },
+  "pharmacies": {
+    "title": "Farmacias",
+    "description": "Toca abajo para abrir tus mapas con farmacias cercanas.",
+    "openMaps": "Abrir Mapas",
+    "searchQuery": "farmacia"
+  },
+  "labs": {
+    "title": "Laboratorios",
+    "findLabs": "Encontrar Laboratorios Cerca",
+    "searchQuery": "laboratorio médico"
+  },
+  "prescription": {
+    "title": "Receta",
+    "addPhoto": "Agregar Foto",
+    "createPDF": "Crear PDF"
+  },
+  "appointments": {
+    "title": "Citas",
+    "record": "Grabar",
+    "stop": "Detener",
+    "recording": "Grabando…",
+    "play": "Reproducir"
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": "Perfil",
+    "language": "Idioma",
+    "colorSettings": "Colores",
+    "dayNight": "Día / Noche",
+    "moodShift": "Cambio de humor",
+    "nightMode": "Modo nocturno",
+    "autoCalm": "Colores auto-calmantes cuando estresado",
+    "help": "Ayuda",
+    "colors": {
+      "gold": "Dorado",
+      "blue": "Azul",
+      "teal": "Verde azulado"
+    },
+    "emailUs": "Escríbenos",
+    "languages": {
+      "en": "English",
+      "es": "Español",
+      "zh": "中文"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "brand": "AuricRx",
+    "send": "Enviar",
+    "stop": "Detener",
+    "noData": "—",
+    "noResponse": "Lo siento—sin respuesta.",
+    "appDescription": "AuricRx — MedCoach",
+    "noTime": "--:--",
+    "sort": "Ordenar",
+    "sortBy": "Ordenar por",
+    "ascending": "Orden ascendente",
+    "descending": "Orden descendente",
+    "refresh": "Actualizar",
+    "showAll": "Mostrar todo",
+    "fx": "FX",
+    "directions": "Direcciones",
+    "alerts": {
+      "locationDenied": "Ubicación denegada",
+      "enableLocation": "Habilita la ubicación para buscar farmacias cercanas."
+    }
+  }
+}
