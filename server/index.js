@@ -468,7 +468,8 @@ const tools = [
 ];
 
 app.post('/ask', async (req, res) => {
-console.log('POST /ask', req.body);
+  console.log('POST /ask', req.body);
+  
   try {
     const schema = z.object({ 
       message: z.string().min(1).max(10000),
@@ -479,6 +480,7 @@ console.log('POST /ask', req.body);
         herbs: z.array(z.any()).optional().default([])
       }).optional().default({})
     });
+    
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
       console.log('Schema validation failed:', parsed.error);
@@ -502,7 +504,7 @@ console.log('POST /ask', req.body);
 
     // Tool calling loop
     let loopCount = 0;
-    const maxLoops = 5; // Prevent infinite loops
+    const maxLoops = 5;
     
     while (loopCount < maxLoops) {
       loopCount++;
@@ -553,7 +555,6 @@ console.log('POST /ask', req.body);
             content: JSON.stringify(payload)
           });
         }
-        // loop again with the tool outputs appended
         continue;
       }
 
@@ -567,13 +568,10 @@ console.log('POST /ask', req.body);
     // If we exit the loop without a response
     console.log('Tool calling loop exceeded max iterations');
     res.json({ ok: true, reply: "I'm having trouble processing your request. Please try again." });
+    
   } catch (err) {
-    console.error('OpenAI error:', err?.response?.data || err?.message);
-    res.status(500).json({ ok: false, error: 'openai_error' });
-  }
-  } catch (outerErr) {
-    console.error('Outer error in /ask endpoint:', outerErr);
-    res.status(500).json({ ok: false, error: 'server_error', message: outerErr.message });
+    console.error('Error in /ask endpoint:', err);
+    res.status(500).json({ ok: false, error: 'server_error', message: err.message });
   }
 });
 
