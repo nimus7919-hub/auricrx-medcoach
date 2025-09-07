@@ -594,8 +594,8 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     const reply = data.reply || 'No response received';
     console.log('Got response with tool calling:', reply);
     
-    setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
-  } catch (err) {
+      setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
+    } catch (err) {
     console.log('API Error:', err);
     // Provide a helpful response even if AI is down
     let fallbackResponse = `API Error: ${err.message}. `;
@@ -2320,7 +2320,7 @@ function trimTo(str, n) {
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
 ) : (
-  <View style={{ flex: 1, backgroundColor: '#fff' }}>
+  <View style={{ flex: 1, backgroundColor: '#fff' }} onStartShouldSetResponder={() => true}>
     {Screen}
 
     {/* Floating AI button */}
@@ -2332,9 +2332,10 @@ function trimTo(str, n) {
       animationType="slide"
       transparent
       onRequestClose={() => setAiOpen(false)}
+      presentationStyle="overFullScreen"
     >
-      <View style={styles.sheetBackdrop}>
-        <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
+  <View style={styles.sheetBackdrop} onStartShouldSetResponder={() => true}>
+    <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]} onStartShouldSetResponder={() => true}>
       <View style={styles.sheetHeader}>
         <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>
           {S.aiConsultant}
@@ -2344,12 +2345,12 @@ function trimTo(str, n) {
         </TouchableOpacity>
       </View>
 
-      <View style={{ flex: 1, minHeight: 200 }}>
+      <View style={{ flex: 1, minHeight: 200, paddingBottom: 100 }}>
         <ScrollView
           ref={aiScrollRef}
           keyboardShouldPersistTaps="handled"
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingVertical: 8, paddingBottom: 20 }}
+          contentContainerStyle={{ paddingVertical: 8, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
         >
           {aiMessages.map((m, idx) => (
@@ -2403,21 +2404,28 @@ function trimTo(str, n) {
           borderTopWidth: 1,
           paddingBottom: Platform.OS === 'ios' ? 20 : 10,
           minHeight: 80, // Ensure minimum height
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
         }
       ]}>
-        <View style={styles.aiInputRow}>
-          <TextInput
-            ref={aiInputRef}
-            value={aiInput}
-            onChangeText={setAiInput}
-            placeholder="Ask about medications, pharmacies…"
-            placeholderTextColor={theme.sub}
+      <View style={styles.aiInputRow}>
+        <TextInput
+          ref={aiInputRef}
+          value={aiInput}
+          onChangeText={setAiInput}
+          placeholder="Ask about medications, pharmacies…"
+          placeholderTextColor={theme.sub}
             onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
-            autoCapitalize="none"
-            autoCorrect={false}
-            blurOnSubmit={false}
-            style={[
-              styles.aiInput,
+          autoCapitalize="none"
+          autoCorrect={false}
+          blurOnSubmit={false}
+            returnKeyType="send"
+            enablesReturnKeyAutomatically={true}
+          style={[
+            styles.aiInput,
               { 
                 color: theme.text, 
                 borderColor: theme.chip, 
@@ -2435,12 +2443,12 @@ function trimTo(str, n) {
             <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>
               {streamLoading ? '...' : 'Send'}
             </Text>
+        </TouchableOpacity>
+        {streamLoading ? (
+          <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
+            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>Stop</Text>
           </TouchableOpacity>
-          {streamLoading ? (
-            <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
-              <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>Stop</Text>
-            </TouchableOpacity>
-          ) : null}
+        ) : null}
         </View>
       </View>
 
