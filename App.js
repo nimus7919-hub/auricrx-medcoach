@@ -448,6 +448,8 @@ useEffect(() => {
 
 useEffect(() => {
   if (aiOpen) {
+    // Reset keyboard height when modal opens
+    setKeyboardHeight(0);
     setTimeout(() => aiInputRef.current?.focus(), 100);
   }
 }, [aiOpen]);
@@ -2335,12 +2337,7 @@ return !fontsLoaded ? (
       onRequestClose={() => setAiOpen(false)}
     >
       <View style={styles.sheetBackdrop}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-        >
-          <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
+        <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
       <View style={styles.sheetHeader}>
         <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>
           {S.aiConsultant}
@@ -2400,7 +2397,7 @@ return !fontsLoaded ? (
         </ScrollView>
       </View>
 
-      {/* Fixed input area that stays visible */}
+      {/* Fixed input area that stays visible - ALWAYS RENDERED */}
       <View style={[
         styles.aiInputContainer,
         { 
@@ -2408,6 +2405,7 @@ return !fontsLoaded ? (
           borderTopColor: theme.chip,
           borderTopWidth: 1,
           paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+          minHeight: 80, // Ensure minimum height
         }
       ]}>
         <View style={styles.aiInputRow}>
@@ -2423,11 +2421,23 @@ return !fontsLoaded ? (
             blurOnSubmit={false}
             style={[
               styles.aiInput,
-              { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular', minHeight: 44 },
+              { 
+                color: theme.text, 
+                borderColor: theme.chip, 
+                fontFamily: 'Inter_400Regular', 
+                minHeight: 44,
+                backgroundColor: theme.card,
+              },
             ]}
           />
-          <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.accent }]} onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} disabled={aiSending || streamLoading}>
-            <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>{streamLoading ? '...' : 'Send'}</Text>
+          <TouchableOpacity 
+            style={[styles.aiBtn, { backgroundColor: theme.accent }]} 
+            onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} 
+            disabled={aiSending || streamLoading}
+          >
+            <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>
+              {streamLoading ? '...' : 'Send'}
+            </Text>
           </TouchableOpacity>
           {streamLoading ? (
             <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
@@ -2442,12 +2452,8 @@ return !fontsLoaded ? (
       </Text>
     </View>
   </View>
-</KeyboardAvoidingView>
     </Modal>
-  </View>
-);
-
-   // closes return
+  );
 } // closes export default function App()
 
 // ---------- styles ----------
@@ -2564,6 +2570,8 @@ card: {
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    minHeight: 80,
+    width: '100%',
   },
   aiInputRow: { 
     flexDirection: 'row', 
