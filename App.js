@@ -1689,9 +1689,9 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent onRequestClose={() => setShowAdd(false)}>
-            <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }} onStartShouldSetResponder={() => true}>
-              <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="always">
+          <Modal visible={showAdd} animationType="fade" transparent presentationStyle="overFullScreen">
+            <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
+              <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18 }}>{S.addMedication}</Text>
@@ -1711,6 +1711,8 @@ const Medications = () => {
                     autoCapitalize="words"
                     autoCorrect={false}
                     returnKeyType="next"
+                    onPressIn={() => console.log('Input pressed')}
+                    onFocus={() => console.log('Input focused')}
                   />
                   
                   {/* Strength field */}
@@ -2350,7 +2352,7 @@ function trimTo(str, n) {
 }
 
   // final return (inside the App function)
-  return !fontsLoaded ? (
+return !fontsLoaded ? (
   <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'#222' }}>
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
@@ -2368,7 +2370,7 @@ function trimTo(str, n) {
       transparent
       onRequestClose={() => setAiOpen(false)}
       presentationStyle="overFullScreen"
-    >
+>
   <View style={styles.sheetBackdrop}>
     <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
       <View style={styles.sheetHeader}>
@@ -2447,16 +2449,16 @@ function trimTo(str, n) {
         }
       ]}>
       <View style={styles.aiInputRow}>
-          <TextInput
-            ref={aiInputRef}
-            value={aiInput}
-            onChangeText={setAiInput}
-            placeholder="Ask about medications, pharmacies…"
-            placeholderTextColor={theme.sub}
+        <TextInput
+          ref={aiInputRef}
+          value={aiInput}
+          onChangeText={setAiInput}
+          placeholder="Ask about medications, pharmacies…"
+          placeholderTextColor={theme.sub}
             onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
-            autoCapitalize="none"
-            autoCorrect={false}
-            blurOnSubmit={false}
+          autoCapitalize="none"
+          autoCorrect={false}
+          blurOnSubmit={false}
             returnKeyType="send"
             enablesReturnKeyAutomatically={true}
             onFocus={() => {
@@ -2467,8 +2469,8 @@ function trimTo(str, n) {
                 }
               }, 100);
             }}
-            style={[
-              styles.aiInput,
+          style={[
+            styles.aiInput,
               { 
                 color: theme.text, 
                 borderColor: theme.chip, 
