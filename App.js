@@ -1045,7 +1045,16 @@ const handleAskMedicalAI = async () => {
             </AnimatedButton>
           </View>
           <View style={[styles.form, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-            <TextInput placeholder="Name" placeholderTextColor={theme.sub} style={[styles.input, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]} value={name} onChangeText={setName} />
+            <TextInput 
+              placeholder="Name" 
+              placeholderTextColor={theme.sub} 
+              style={[styles.input, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]} 
+              value={name} 
+              onChangeText={setName}
+              autoCapitalize="words"
+              autoCorrect={false}
+              returnKeyType="done"
+            />
             <TouchableOpacity onPress={()=>setShowPicker(true)} style={[styles.input,{ justifyContent:'center' }]}> 
               <Text style={{ color: time? theme.text: theme.sub }}>{time || 'Pick time'}</Text>
             </TouchableOpacity>
@@ -1682,6 +1691,9 @@ const Medications = () => {
                     style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
                     value={addForm.name}
                     onChangeText={v => setAddForm(f => ({ ...f, name: v }))}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                    returnKeyType="next"
                   />
                   
                   {/* Strength field */}
@@ -1691,6 +1703,9 @@ const Medications = () => {
                     style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
                     value={addForm.strength}
                     onChangeText={v => setAddForm(f => ({ ...f, strength: v }))}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
                   />
                   
                   {/* Notes field */}
@@ -1700,6 +1715,9 @@ const Medications = () => {
                     style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
                     value={addForm.notes}
                     onChangeText={v => setAddForm(f => ({ ...f, notes: v }))}
+                    autoCapitalize="sentences"
+                    autoCorrect={true}
+                    returnKeyType="next"
                   />
                   
                   {/* Start Date field */}
@@ -2320,7 +2338,7 @@ function trimTo(str, n) {
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
 ) : (
-  <View style={{ flex: 1, backgroundColor: '#fff' }} onStartShouldSetResponder={() => true}>
+  <View style={{ flex: 1, backgroundColor: '#fff' }}>
     {Screen}
 
     {/* Floating AI button */}
@@ -2334,8 +2352,8 @@ function trimTo(str, n) {
       onRequestClose={() => setAiOpen(false)}
       presentationStyle="overFullScreen"
     >
-  <View style={styles.sheetBackdrop} onStartShouldSetResponder={() => true}>
-    <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]} onStartShouldSetResponder={() => true}>
+  <View style={styles.sheetBackdrop}>
+    <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
       <View style={styles.sheetHeader}>
         <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>
           {S.aiConsultant}
@@ -2412,20 +2430,28 @@ function trimTo(str, n) {
         }
       ]}>
       <View style={styles.aiInputRow}>
-        <TextInput
-          ref={aiInputRef}
-          value={aiInput}
-          onChangeText={setAiInput}
-          placeholder="Ask about medications, pharmacies…"
-          placeholderTextColor={theme.sub}
+          <TextInput
+            ref={aiInputRef}
+            value={aiInput}
+            onChangeText={setAiInput}
+            placeholder="Ask about medications, pharmacies…"
+            placeholderTextColor={theme.sub}
             onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
-          autoCapitalize="none"
-          autoCorrect={false}
-          blurOnSubmit={false}
+            autoCapitalize="none"
+            autoCorrect={false}
+            blurOnSubmit={false}
             returnKeyType="send"
             enablesReturnKeyAutomatically={true}
-          style={[
-            styles.aiInput,
+            onFocus={() => {
+              // Keep keyboard open when AI input is focused
+              setTimeout(() => {
+                if (aiInputRef.current) {
+                  aiInputRef.current.focus();
+                }
+              }, 100);
+            }}
+            style={[
+              styles.aiInput,
               { 
                 color: theme.text, 
                 borderColor: theme.chip, 
