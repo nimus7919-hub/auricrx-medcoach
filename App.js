@@ -27,6 +27,7 @@ import MedicationRefillModal from './components/MedicationRefillModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import HerbsScreen from './src/screens/HerbsScreen';
 import DocScanScreen from './src/screens/DocScanScreen';
+import Medications from './components/Medications';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
 
@@ -1316,106 +1317,9 @@ const SortButton = ({ onPress, active }) => (
 );
 
 
-const Medications = () => {
-  // Mount/unmount detection
-  const mounted = useRef(0);
-  useEffect(() => {
-    mounted.current += 1;
-    console.log(`[MEDICATIONS] MOUNT #${mounted.current}`);
-    return () => console.log(`[MEDICATIONS] UNMOUNT #${mounted.current}`);
-  }, []);
+// Medications component now imported from separate file
 
-  useEffect(() => {
-    console.log(`[MEDICATIONS] showAdd ->`, showAdd);
-  }, [showAdd]);
-
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  // Refill modal state
-  const [refillMed, setRefillMed] = useState(null);
-
-  const [showAdd, setShowAdd] = useState(false);
-  const [inputFocused, setInputFocused] = useState(false);
-  console.log('[MEDICATIONS] Component rendering, showAdd:', showAdd, 'inputFocused:', inputFocused);
-  const [buttonPressed, setButtonPressed] = useState(false);
-  
-  // Debug function to track modal state changes with debounce
-  const debugSetShowAdd = (value) => {
-    console.log('[MEDICATIONS] setShowAdd called with:', value, 'current showAdd:', showAdd, 'inputFocused:', inputFocused);
-    
-    // Prevent closing modal when input is focused
-    if (value === false && inputFocused) {
-      console.log('[MEDICATIONS] Preventing modal close - input is focused');
-      return;
-    }
-    
-    // Prevent rapid state changes that could cause modal flickering
-    if (value === true && showAdd === true) {
-      console.log('Preventing duplicate modal open');
-      return;
-    }
-    if (value === false && showAdd === false) {
-      console.log('Preventing duplicate modal close');
-      return;
-    }
-    
-    console.log('[MEDICATIONS] Actually setting showAdd to:', value);
-    setShowAdd(value);
-  };
-  const [filter, setFilter] = useState('all');
-  const [detailMed, setDetailMed] = useState(null);
-  const addMedNameRef = useRef(null);
-
-  // Reset form when modal opens and track modal state changes
-  useEffect(() => {
-    console.log('[MEDICATIONS] Modal state changed - showAdd:', showAdd);
-    if (showAdd) {
-      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
-    } else {
-      setInputFocused(false); // Reset input focus when modal closes
-    }
-  }, [showAdd]);
-  const [showStatusSheet, setShowStatusSheet] = useState(false);
-  const [holdUntil, setHoldUntil] = useState('');
-  const [addForm, setAddForm] = useState({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
-  const [addTimes, setAddTimes] = useState([]); // array of HH:MM
-  const [editTimes, setEditTimes] = useState([]);
-  const [showMedTimePicker, setShowMedTimePicker] = useState(false);
-  const [timeTarget, setTimeTarget] = useState(null); // 'add' | 'edit'
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dateTarget, setDateTarget] = useState(null); // 'add' | 'edit'
-  const [dateField, setDateField] = useState(null); // 'startDate' | 'endDate'
-  const onMedTimePicked = (_, date) => {
-    setShowMedTimePicker(false);
-    if (date) {
-      const hh = String(date.getHours()).padStart(2,'0');
-      const mm = String(date.getMinutes()).padStart(2,'0');
-      const t = `${hh}:${mm}`;
-      if (timeTarget==='add') setAddTimes(prev => prev.includes(t)? prev : [...prev, t]);
-      if (timeTarget==='edit') setEditTimes(prev => prev.includes(t)? prev : [...prev, t]);
-    }
-    setTimeTarget(null);
-  };
-
-  const onDatePicked = (_, date) => {
-    setShowDatePicker(false);
-    if (date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const dateString = `${year}-${month}-${day}`;
-      
-      if (dateTarget === 'add') {
-        setAddForm(prev => ({ ...prev, [dateField]: dateString }));
-      }
-      if (dateTarget === 'edit') {
-        setEditForm(prev => ({ ...prev, [dateField]: dateString }));
-      }
-    }
-    setDateTarget(null);
-    setDateField(null);
-  };
-  const [showEdit, setShowEdit] = useState(false);
-  const [editForm, setEditForm] = useState({ id:'', name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+// --------- Supplements Screen ----------
 
   // Utility: auto-tag refill soon/expired
   function computeUtility(med) {
@@ -1892,9 +1796,9 @@ const Medications = () => {
                     <AnimatedButton onPress={handleAddMed}>
                       <Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>{S.add}</Text>
                     </AnimatedButton>
-                  </View>
-                </ScrollView>
-              </View>
+                </View>
+              </ScrollView>
+            </View>
             </TouchableOpacity>
           </Modal>
 
@@ -2432,7 +2336,7 @@ return !fontsLoaded ? (
      route === 'prescription' ? <Prescription /> :
      route === 'appointments' ? <Appointments /> :
      route === 'settings' ? <Settings /> :
-     route === 'medications' ? <Medications /> :
+     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} /> :
      route === 'documents' ? <DocScanScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
