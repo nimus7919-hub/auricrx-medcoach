@@ -1326,7 +1326,7 @@ const Medications = () => {
   
   // Debug function to track modal state changes with debounce
   const debugSetShowAdd = (value) => {
-    console.log('setShowAdd called with:', value, 'current showAdd:', showAdd, 'from:', new Error().stack);
+    console.log('[MEDICATIONS] setShowAdd called with:', value, 'current showAdd:', showAdd, 'from:', new Error().stack);
     
     // Prevent rapid state changes that could cause modal flickering
     if (value === true && showAdd === true) {
@@ -1338,7 +1338,7 @@ const Medications = () => {
       return;
     }
     
-    console.log('Actually setting showAdd to:', value);
+    console.log('[MEDICATIONS] Actually setting showAdd to:', value);
     setShowAdd(value);
   };
   const [filter, setFilter] = useState('all');
@@ -1347,7 +1347,7 @@ const Medications = () => {
 
   // Reset form when modal opens and track modal state changes
   useEffect(() => {
-    console.log('Modal state changed - showAdd:', showAdd);
+    console.log('[MEDICATIONS] Modal state changed - showAdd:', showAdd);
     if (showAdd) {
       setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
     }
@@ -2087,7 +2087,7 @@ const Medications = () => {
      setSupplements(prev => [...prev, newSupp]);
      setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosage: '', brand: '' });
      setAddTimes([]);
-     setShowAdd(false);
+     debugSetShowAdd(false);
    };
 
    const updateSupplementStatus = (suppId, newStatus) => {
@@ -2112,7 +2112,7 @@ const Medications = () => {
            </TouchableOpacity>
            
            <TouchableOpacity 
-             onPress={() => setShowAdd(true)}
+             onPress={() => debugSetShowAdd(true)}
              style={[styles.section, { backgroundColor: theme.accent, borderColor: theme.accent, padding: 12, flex: 1 }]}
            >
              <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>+ Add Supplement</Text>
@@ -2240,7 +2240,7 @@ const Medications = () => {
 
              <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
                <TouchableOpacity 
-                 onPress={() => setShowAdd(false)}
+                 onPress={() => debugSetShowAdd(false)}
                  style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
                >
                  <Text style={{ color: theme.text, textAlign: 'center' }}>Cancel</Text>
