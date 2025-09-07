@@ -1322,12 +1322,19 @@ const Medications = () => {
   const [refillMed, setRefillMed] = useState(null);
 
   const [showAdd, setShowAdd] = useState(false);
-  console.log('[MEDICATIONS] Component rendering, showAdd:', showAdd);
+  const [inputFocused, setInputFocused] = useState(false);
+  console.log('[MEDICATIONS] Component rendering, showAdd:', showAdd, 'inputFocused:', inputFocused);
   const [buttonPressed, setButtonPressed] = useState(false);
   
   // Debug function to track modal state changes with debounce
   const debugSetShowAdd = (value) => {
-    console.log('[MEDICATIONS] setShowAdd called with:', value, 'current showAdd:', showAdd, 'from:', new Error().stack);
+    console.log('[MEDICATIONS] setShowAdd called with:', value, 'current showAdd:', showAdd, 'inputFocused:', inputFocused);
+    
+    // Prevent closing modal when input is focused
+    if (value === false && inputFocused) {
+      console.log('[MEDICATIONS] Preventing modal close - input is focused');
+      return;
+    }
     
     // Prevent rapid state changes that could cause modal flickering
     if (value === true && showAdd === true) {
@@ -1351,6 +1358,8 @@ const Medications = () => {
     console.log('[MEDICATIONS] Modal state changed - showAdd:', showAdd);
     if (showAdd) {
       setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+    } else {
+      setInputFocused(false); // Reset input focus when modal closes
     }
   }, [showAdd]);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
@@ -1741,8 +1750,14 @@ const Medications = () => {
                     autoCorrect={false}
                     returnKeyType="next"
                     onPressIn={() => console.log('Input pressed')}
-                    onFocus={() => console.log('Input focused')}
-                    onBlur={() => console.log('Input blurred')}
+                    onFocus={() => {
+                      console.log('Input focused');
+                      setInputFocused(true);
+                    }}
+                    onBlur={() => {
+                      console.log('Input blurred');
+                      setInputFocused(false);
+                    }}
                     onEndEditing={() => console.log('Input editing ended')}
                   />
                   
