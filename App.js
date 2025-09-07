@@ -1317,6 +1317,8 @@ const SortButton = ({ onPress, active }) => (
 
 
 const Medications = () => {
+  console.log('[MEDICATIONS] Component rendering, showAdd:', showAdd);
+  
   const [showFilterModal, setShowFilterModal] = useState(false);
   // Refill modal state
   const [refillMed, setRefillMed] = useState(null);
@@ -1717,7 +1719,7 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent presentationStyle="overFullScreen" onShow={() => console.log('Modal shown')} onDismiss={() => console.log('Modal dismissed')}>
+          <Modal visible={showAdd} animationType="fade" transparent presentationStyle="overFullScreen" onShow={() => console.log('Modal shown')} onDismiss={() => console.log('Modal dismissed')} onRequestClose={() => console.log('Modal onRequestClose called')}>
             <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
