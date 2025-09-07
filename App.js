@@ -1326,7 +1326,7 @@ const Medications = () => {
   
   // Debug function to track modal state changes with debounce
   const debugSetShowAdd = (value) => {
-    console.log('setShowAdd called with:', value, 'from:', new Error().stack);
+    console.log('setShowAdd called with:', value, 'current showAdd:', showAdd, 'from:', new Error().stack);
     
     // Prevent rapid state changes that could cause modal flickering
     if (value === true && showAdd === true) {
@@ -1338,14 +1338,16 @@ const Medications = () => {
       return;
     }
     
+    console.log('Actually setting showAdd to:', value);
     setShowAdd(value);
   };
   const [filter, setFilter] = useState('all');
   const [detailMed, setDetailMed] = useState(null);
   const addMedNameRef = useRef(null);
 
-  // Reset form when modal opens
+  // Reset form when modal opens and track modal state changes
   useEffect(() => {
+    console.log('Modal state changed - showAdd:', showAdd);
     if (showAdd) {
       setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
     }
@@ -1715,7 +1717,7 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent presentationStyle="overFullScreen">
+          <Modal visible={showAdd} animationType="fade" transparent presentationStyle="overFullScreen" onShow={() => console.log('Modal shown')} onDismiss={() => console.log('Modal dismissed')}>
             <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
@@ -1739,6 +1741,8 @@ const Medications = () => {
                     returnKeyType="next"
                     onPressIn={() => console.log('Input pressed')}
                     onFocus={() => console.log('Input focused')}
+                    onBlur={() => console.log('Input blurred')}
+                    onEndEditing={() => console.log('Input editing ended')}
                   />
                   
                   {/* Strength field */}
