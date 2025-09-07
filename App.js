@@ -2314,11 +2314,8 @@ function trimTo(str, n) {
   return str.length > n ? str.slice(0, n - 1) + '…' : str;
 }
 
-
-
-
   // final return (inside the App function)
-return !fontsLoaded ? (
+  return !fontsLoaded ? (
   <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'#222' }}>
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
@@ -2453,7 +2450,8 @@ return !fontsLoaded ? (
     </View>
   </View>
     </Modal>
-  );
+  </View>
+);
 } // closes export default function App()
 
 // ---------- styles ----------
