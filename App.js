@@ -1317,6 +1317,18 @@ const SortButton = ({ onPress, active }) => (
 
 
 const Medications = () => {
+  // Mount/unmount detection
+  const mounted = useRef(0);
+  useEffect(() => {
+    mounted.current += 1;
+    console.log(`[MEDICATIONS] MOUNT #${mounted.current}`);
+    return () => console.log(`[MEDICATIONS] UNMOUNT #${mounted.current}`);
+  }, []);
+
+  useEffect(() => {
+    console.log(`[MEDICATIONS] showAdd ->`, showAdd);
+  }, [showAdd]);
+
   const [showFilterModal, setShowFilterModal] = useState(false);
   // Refill modal state
   const [refillMed, setRefillMed] = useState(null);
@@ -1727,10 +1739,31 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent>
-            <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
-              <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
-                <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
+          <Modal 
+            visible={showAdd} 
+            animationType="slide" 
+            transparent 
+            presentationStyle="overFullScreen"
+            statusBarTranslucent
+            onShow={() => console.log('[AddMedicationModal] onShow')}
+            onDismiss={() => console.log('[AddMedicationModal] onDismiss')}
+            onRequestClose={() => debugSetShowAdd(false)}
+          >
+            {/* Backdrop: closes on outside press */}
+            <TouchableOpacity 
+              style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
+              onPress={() => debugSetShowAdd(false)}
+              activeOpacity={1}
+            >
+              {/* Sheet: eats touches so backdrop doesn't get them */}
+              <View 
+                style={{ backgroundColor: theme.card, borderRadius: 18, padding: 20, marginHorizontal: 16, borderWidth: 1, borderColor: theme.chip, maxHeight: '88%', width: '90%' }}
+                onStartShouldSetResponder={() => true}
+              >
+                <ScrollView 
+                  contentContainerStyle={{ padding: 16, width: '100%' }} 
+                  keyboardShouldPersistTaps="always"
+                >
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18 }}>{S.addMedication}</Text>
                     <TouchableOpacity onPress={() => debugSetShowAdd(false)} style={{ padding: 8 }}>
@@ -1860,9 +1893,9 @@ const Medications = () => {
                       <Text style={{ color: theme.accent, fontFamily:'Inter_800ExtraBold' }}>{S.add}</Text>
                     </AnimatedButton>
                   </View>
-                </View>
-              </ScrollView>
-            </View>
+                </ScrollView>
+              </View>
+            </TouchableOpacity>
           </Modal>
 
           {/* Edit Medication Modal */}
