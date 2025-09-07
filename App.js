@@ -2410,18 +2410,7 @@ const Medications = () => {
    );
  };
 
- // choose screen
-let Screen = <Dashboard />; // default
-if (route === 'reminders') Screen = <Reminders />;
-else if (route === 'pharmacies') Screen = <Pharmacies />;
-else if (route === 'labs') Screen = <Labs />;
-else if (route === 'prescription') Screen = <Prescription />;
-else if (route === 'appointments') Screen = <Appointments />;
-else if (route === 'settings') Screen = <Settings />;
-else if (route === 'medications') Screen = <Medications />;
-        else if (route === 'herbs') Screen = <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} />;
-        else if (route === 'supplements') Screen = <Supplements supplements={supplements} setSupplements={setSupplements} />;
-        else if (route === 'documents') Screen = <DocScanScreen onClose={() => setRoute('dashboard')} theme={theme} />;
+ // Screen selection moved to return statement to prevent remounting
 
 // ---------- Utility functions ----------
 // Utility: trim a string to n chars, add ellipsis if needed
@@ -2437,7 +2426,17 @@ return !fontsLoaded ? (
   </View>
 ) : (
   <View style={{ flex: 1, backgroundColor: '#fff' }}>
-    {Screen}
+    {route === 'reminders' ? <Reminders /> :
+     route === 'pharmacies' ? <Pharmacies /> :
+     route === 'labs' ? <Labs /> :
+     route === 'prescription' ? <Prescription /> :
+     route === 'appointments' ? <Appointments /> :
+     route === 'settings' ? <Settings /> :
+     route === 'medications' ? <Medications /> :
+     route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} /> :
+     route === 'documents' ? <DocScanScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+     <Dashboard />}
 
     {/* Floating AI button */}
     <AnimatedFloatingButton />
