@@ -1317,13 +1317,12 @@ const SortButton = ({ onPress, active }) => (
 
 
 const Medications = () => {
-  console.log('[MEDICATIONS] Component rendering, showAdd:', showAdd);
-  
   const [showFilterModal, setShowFilterModal] = useState(false);
   // Refill modal state
   const [refillMed, setRefillMed] = useState(null);
 
   const [showAdd, setShowAdd] = useState(false);
+  console.log('[MEDICATIONS] Component rendering, showAdd:', showAdd);
   const [buttonPressed, setButtonPressed] = useState(false);
   
   // Debug function to track modal state changes with debounce
