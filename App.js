@@ -1727,8 +1727,18 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent presentationStyle="overFullScreen" onShow={() => console.log('Modal shown')} onDismiss={() => console.log('Modal dismissed')} onRequestClose={() => console.log('Modal onRequestClose called')}>
-            <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
+          {showAdd && (
+            <View style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.4)',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000,
+            }}>
               <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -1863,7 +1873,7 @@ const Medications = () => {
                 </View>
               </ScrollView>
             </View>
-          </Modal>
+          )}
 
           {/* Edit Medication Modal */}
           <Modal visible={showEdit} animationType="fade" transparent>
