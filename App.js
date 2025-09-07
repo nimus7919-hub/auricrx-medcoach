@@ -1322,6 +1322,12 @@ const Medications = () => {
   const [refillMed, setRefillMed] = useState(null);
 
   const [showAdd, setShowAdd] = useState(false);
+  
+  // Debug function to track modal state changes
+  const debugSetShowAdd = (value) => {
+    console.log('setShowAdd called with:', value, 'from:', new Error().stack);
+    setShowAdd(value);
+  };
   const [filter, setFilter] = useState('all');
   const [detailMed, setDetailMed] = useState(null);
   const addMedNameRef = useRef(null);
@@ -1405,7 +1411,7 @@ const Medications = () => {
     setMeds(m => [...m, newMed]);
     setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
     setAddTimes([]);
-    setShowAdd(false);
+    debugSetShowAdd(false);
   }
 
   function openEdit(med) {
@@ -1524,7 +1530,7 @@ const Medications = () => {
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <SortButton onPress={() => setShowFilterModal(true)} active={false} />
           <AnimatedButton
-            onPress={() => setShowAdd(true)}
+            onPress={() => debugSetShowAdd(true)}
             style={{
               marginLeft: 4,
               width: 36,
@@ -1695,7 +1701,7 @@ const Medications = () => {
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18 }}>{S.addMedication}</Text>
-                    <TouchableOpacity onPress={() => setShowAdd(false)} style={{ padding: 8 }}>
+                    <TouchableOpacity onPress={() => debugSetShowAdd(false)} style={{ padding: 8 }}>
                       <Text style={{ color: theme.sub, fontSize: 18 }}>✕</Text>
                     </TouchableOpacity>
                   </View>
@@ -1807,7 +1813,7 @@ const Medications = () => {
                     ))}
                   </View>
                   <View style={{ flexDirection:'row', justifyContent:'flex-end', marginTop:12, gap:16 }}>
-                    <AnimatedButton onPress={()=>{ setShowAdd(false); }}>
+                    <AnimatedButton onPress={()=>{ debugSetShowAdd(false); }}>
                       <Text style={{ color: theme.sub, fontFamily:'Inter_700Bold' }}>{S.cancel}</Text>
                     </AnimatedButton>
                     <AnimatedButton onPress={handleAddMed}>
