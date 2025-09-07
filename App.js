@@ -1018,6 +1018,8 @@ const handleAskMedicalAI = async () => {
     const [name, setName] = useState('');
     const [time, setTime] = useState('');
     const [showPicker, setShowPicker] = useState(false);
+    const reminderNameRef = useRef(null);
+
     const onPick = (_, date) => {
       setShowPicker(false);
       if (date) {
@@ -1046,6 +1048,7 @@ const handleAskMedicalAI = async () => {
           </View>
           <View style={[styles.form, { backgroundColor: theme.card, borderColor: theme.chip }]}>
             <TextInput 
+              ref={reminderNameRef}
               placeholder="Name" 
               placeholderTextColor={theme.sub} 
               style={[styles.input, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]} 
@@ -1321,6 +1324,14 @@ const Medications = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState('all');
   const [detailMed, setDetailMed] = useState(null);
+  const addMedNameRef = useRef(null);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (showAdd) {
+      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+    }
+  }, [showAdd]);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [holdUntil, setHoldUntil] = useState('');
   const [addForm, setAddForm] = useState({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
@@ -1678,14 +1689,20 @@ const Medications = () => {
         </ErrorBoundary>
 
           {/* Add Medication Modal */}
-          <Modal visible={showAdd} animationType="fade" transparent>
-            <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }}>
-              <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="handled">
+          <Modal visible={showAdd} animationType="fade" transparent onRequestClose={() => setShowAdd(false)}>
+            <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' }} onStartShouldSetResponder={() => true}>
+              <ScrollView contentContainerStyle={{ padding:16, width:'100%' }} keyboardShouldPersistTaps="always">
                 <View style={{ backgroundColor: theme.card, borderRadius:18, padding:20, marginHorizontal:16, borderWidth:1, borderColor: theme.chip }}>
-                  <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18, marginBottom:10 }}>{S.addMedication}</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <Text style={{ color: theme.text, fontFamily:'Inter_800ExtraBold', fontSize:18 }}>{S.addMedication}</Text>
+                    <TouchableOpacity onPress={() => setShowAdd(false)} style={{ padding: 8 }}>
+                      <Text style={{ color: theme.sub, fontSize: 18 }}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
                   
                   {/* Name field */}
                     <TextInput
+                    ref={addMedNameRef}
                     placeholder="Name"
                       placeholderTextColor={theme.sub}
                     style={[styles.input,{ color: theme.text, borderColor: theme.chip, fontFamily:'Inter_400Regular', marginBottom: 12 }]}
