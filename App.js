@@ -1322,10 +1322,22 @@ const Medications = () => {
   const [refillMed, setRefillMed] = useState(null);
 
   const [showAdd, setShowAdd] = useState(false);
+  const [buttonPressed, setButtonPressed] = useState(false);
   
-  // Debug function to track modal state changes
+  // Debug function to track modal state changes with debounce
   const debugSetShowAdd = (value) => {
     console.log('setShowAdd called with:', value, 'from:', new Error().stack);
+    
+    // Prevent rapid state changes that could cause modal flickering
+    if (value === true && showAdd === true) {
+      console.log('Preventing duplicate modal open');
+      return;
+    }
+    if (value === false && showAdd === false) {
+      console.log('Preventing duplicate modal close');
+      return;
+    }
+    
     setShowAdd(value);
   };
   const [filter, setFilter] = useState('all');
@@ -1530,7 +1542,15 @@ const Medications = () => {
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <SortButton onPress={() => setShowFilterModal(true)} active={false} />
           <AnimatedButton
-            onPress={() => debugSetShowAdd(true)}
+            onPress={() => {
+              if (buttonPressed) {
+                console.log('Button press ignored - already pressed');
+                return;
+              }
+              setButtonPressed(true);
+              debugSetShowAdd(true);
+              setTimeout(() => setButtonPressed(false), 500);
+            }}
             style={{
               marginLeft: 4,
               width: 36,
