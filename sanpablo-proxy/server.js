@@ -82,8 +82,6 @@ async function spSearchPage(q, currentPage = 0, pageSize = 20) {
   url.searchParams.set('pageSize', String(pageSize));
   url.searchParams.set('fields', 'products(code,name,price(FULL),basePrice(FULL));pagination');
   url.searchParams.set('format', 'json');
-  url.searchParams.set('lang', 'es_MX');
-  url.searchParams.set('curr', 'MXN');
 
   const r = await fetch(url, { headers: SP_HEADERS });
   if (!r.ok) throw new Error(`SanPablo ${r.status}`);
