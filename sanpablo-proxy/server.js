@@ -65,7 +65,7 @@ app.get("/api/sanpablo/search", async (req, res) => {
     url.searchParams.set('pageSize', String(pageSize));
     url.searchParams.set('currentPage', String(currentPage));
     url.searchParams.set('fields',
-      'products(code,name,basePrice(FULL),price(FULL),unit,measure,images(FULL));pagination'
+      'products(code,name,basePrice(FULL),price(FULL),images(FULL));pagination'
     );
     url.searchParams.set('format', 'json');
 
@@ -88,7 +88,7 @@ app.get("/api/sanpablo/search", async (req, res) => {
           chain: 'San Pablo',
           productCode: p.code,
           name: p.name,
-          pack: [p?.measure, p?.unit].filter(Boolean).join(' '),
+          pack: null, // Simplified for now
           price,
           currency,
           image: p?.images?.[0]?.url || null
