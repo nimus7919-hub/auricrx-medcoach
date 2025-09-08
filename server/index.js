@@ -26,15 +26,27 @@ const ALLOW_ORIGINS = [
   // later add your production mobile/web domain
 ];
 
+// Temporary: Allow all origins for debugging
+app.use(cors({
+  origin: true, // Allow all origins temporarily
+  credentials: true
+}));
+
+// Original CORS (commented out for debugging)
+/*
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('CORS request from origin:', origin);
     if (!origin || ALLOW_ORIGINS.includes(origin)) {
+      console.log('CORS: Allowing origin:', origin);
       callback(null, true);
     } else {
+      console.log('CORS: Blocking origin:', origin);
       callback(new Error("Not allowed by CORS"));
     }
   }
 }));
+*/
 
 // --- Rate limiter for /ask ---
 const askLimiter = rateLimit({
