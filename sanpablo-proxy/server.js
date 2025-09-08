@@ -25,6 +25,11 @@ app.use(
 
 app.get("/healthz", (_req, res) => res.send("ok"));
 
+// Simple welcome page so GET / isn't 404
+app.get('/', (_req, res) => {
+  res.type('text/plain').send('sanpablo-proxy is running. Try GET /api/sanpablo/search?q=aspirina');
+});
+
 // choose price or basePrice
 function pickPrice(p) {
   if (!p) return null;
@@ -45,71 +50,62 @@ function absolutizeImage(url) {
 
 /**
  * GET /api/sanpablo/search?q=aspirina%20100%20mg&pageSize=10&page=0
+ * Browser-friendly GET endpoint for quick manual tests
  */
 app.get("/api/sanpablo/search", async (req, res) => {
   try {
-    const q = (req.query.q || "").toString().trim();
-    if (!q) return res.status(400).json({ error: "Missing q query param" });
+    const q = String(req.query.q || '');
+    if (!q) return res.status(400).json({ error: 'q (query) is required' });
 
     const pageSize = Number(req.query.pageSize) || 10;
     const currentPage = Number(req.query.page) || 0;
 
-    const fields = "products(code,name,basePrice,price)";
+    const url = new URL('https://api.farmaciasanpablo.com.mx/rest/v2/fsp/products/search');
+    url.searchParams.set('q', q);
+    url.searchParams.set('pageSize', String(pageSize));
+    url.searchParams.set('currentPage', String(currentPage));
+    url.searchParams.set('fields',
+      'products(code,name,basePrice(FULL),price(FULL),packaging,unit,measure,images(FULL));pagination'
+    );
+    url.searchParams.set('format', 'json');
 
-    const url = new URL("https://api.farmaciasanpablo.com.mx/rest/v2/fsp/products/search");
-    url.searchParams.set("q", q);
-    url.searchParams.set("pageSize", String(pageSize));
-    url.searchParams.set("currentPage", String(currentPage));
-    url.searchParams.set("fields", fields);
-    url.searchParams.set("format", "json");
-
-    const r = await fetch(url.toString(), {
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
+    const r = await fetch(url, { headers: { Accept: 'application/json' } });
+    
     if (!r.ok) {
       const body = await r.text();
       return res.status(r.status).json({ error: "Upstream error", status: r.status, body });
     }
 
     const data = await r.json();
-    const products = Array.isArray(data.products) ? data.products : [];
 
-    const items = products.map(p => {
-      const price = pickPrice(p);
-      const img = null; // Simplified for now
-      const pack = null; // Simplified for now
+    const prices = (data?.products || [])
+      .map(p => {
+        const price = p?.price?.value ?? p?.basePrice?.value;
+        const currency = p?.price?.currencyIso ?? p?.basePrice?.currencyIso ?? 'MXN';
+        if (price == null) return null;
+        return {
+          source: 'san-pablo',
+          chain: 'San Pablo',
+          productCode: p.code,
+          name: p.name,
+          pack: p.packaging || [p?.measure, p?.unit].filter(Boolean).join(' '),
+          price,
+          currency,
+          image: p?.images?.[0]?.url || null
+        };
+      })
+      .filter(Boolean);
 
-      return {
-        code: p.code ?? null,
-        name: p.name ?? null,
-        price: price ? price.formattedValue : null,
-        priceValue: price ? price.value : null,
-        currency: price ? price.currencyIso : "MXN",
-        pack,
-        image: absolutizeImage(img),
-      };
-    });
-
-    // Sort by price (ascending)
-    items.sort((a, b) => {
-      const av = a.priceValue ?? Number.POSITIVE_INFINITY;
-      const bv = b.priceValue ?? Number.POSITIVE_INFINITY;
-      return av - bv;
-    });
-
-    res.json({
+    res.json({ 
       query: q,
       page: currentPage,
       pageSize,
-      totalResults: data.pagination?.totalResults ?? items.length,
-      items,
+      totalResults: data.pagination?.totalResults ?? prices.length,
+      items: prices 
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal error", details: String(err) });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: String(e?.message || e) });
   }
 });
 
