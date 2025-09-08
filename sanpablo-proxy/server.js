@@ -27,7 +27,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 
 // --- headers that make responses look like real browser traffic from MX/ES ---
 const SP_HEADERS = {
-  'Accept': 'application/json, text/plain, */*',
+  'Accept': 'application/xml, text/xml, */*',
   'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36',
   'Referer': 'https://www.farmaciasanpablo.com.mx/',
@@ -48,95 +48,116 @@ function parseMoney(x) {
   return null;
 }
 
-// make multiple query variants (brand + generic + pack phrasing)
-function buildVariants(q) {
-  const raw = (q || '').toLowerCase().trim().replace(/\s+/g,' ');
-  // pull out strength & qty if present
-  const mg = (raw.match(/(\d+)\s*mg/) || [])[1];
-  const qty = (raw.match(/\b(\d{1,3})\b(?!\s*mg)/) || [])[1];
-
-  const drug = raw.replace(/\bprotect\b/g,'').replace(/\b\d+\s*mg\b/,'').replace(/\b\d{1,3}\b(?!\s*mg)/,'').trim();
-
-  const candidates = [
-    raw,
-    `${drug} ${mg ?? ''} mg`.trim(),
-    `${drug} ${mg ?? ''} mg ${qty ?? ''}`.trim(),
-    `${drug} ${mg ?? ''} mg ${qty ?? ''} tabletas`.trim(),
-    `${drug} ${mg ?? ''} mg caja ${qty ?? ''}`.trim(),
-    // brand / generic synonyms commonly used
-    raw.replace('aspirina','aspirina protect'),
-    raw.replace('aspirina','ácido acetilsalicílico'),
-    'aspirina',
-    'aspirina protect',
-    'ácido acetilsalicílico',
-  ];
-
-  // dedupe & clean blanks
-  return Array.from(new Set(candidates.map(s => s.trim()).filter(Boolean)));
+// Map search terms to San Pablo categories
+function getCategoryForSearch(q) {
+  const query = (q || '').toLowerCase().trim();
+  
+  // Pain relievers / Analgesics
+  if (query.includes('aspirina') || query.includes('aspirin') || 
+      query.includes('ibuprofeno') || query.includes('ibuprofen') ||
+      query.includes('paracetamol') || query.includes('acetaminophen') ||
+      query.includes('naproxeno') || query.includes('naproxen') ||
+      query.includes('dolor') || query.includes('pain') ||
+      query.includes('analgesic') || query.includes('analgésico')) {
+    return '060030001'; // Analgésicos
+  }
+  
+  // Default to general search if no specific category matches
+  return null;
 }
 
-async function spSearchPage(q, currentPage = 0, pageSize = 20) {
-  const url = new URL('https://api.farmaciasanpablo.com.mx/rest/v2/fsp/products/search');
-  url.searchParams.set('q', q);
-  url.searchParams.set('currentPage', String(currentPage));
-  url.searchParams.set('pageSize', String(pageSize));
-  url.searchParams.set('fields', 'products(code,name,price(FULL),basePrice(FULL));pagination');
-  url.searchParams.set('format', 'json');
-
+// Search using San Pablo's actual XML-based search system
+async function spSearchXML(q, currentPage = 0, pageSize = 12) {
+  const category = getCategoryForSearch(q);
+  
+  // If we have a specific category, use category search
+  if (category) {
+    const url = `https://www.farmaciasanpablo.com.mx/search?q=%3A%3AallCategories%3A${category}&page=${currentPage}&pageSize=${pageSize}`;
+    const r = await fetch(url, { headers: SP_HEADERS });
+    if (!r.ok) throw new Error(`SanPablo ${r.status}`);
+    const xmlText = await r.text();
+    return parseXMLResponse(xmlText);
+  }
+  
+  // Otherwise, try text search
+  const encodedQuery = encodeURIComponent(q);
+  const url = `https://www.farmaciasanpablo.com.mx/search?q=${encodedQuery}&page=${currentPage}&pageSize=${pageSize}`;
   const r = await fetch(url, { headers: SP_HEADERS });
   if (!r.ok) throw new Error(`SanPablo ${r.status}`);
-  return r.json();
+  const xmlText = await r.text();
+  return parseXMLResponse(xmlText);
 }
 
-function mapProducts(products = []) {
-  return products.map(p => {
-    const value = parseMoney(p?.price?.value) ?? parseMoney(p?.price?.formattedValue)
-               ?? parseMoney(p?.basePrice?.value) ?? parseMoney(p?.basePrice?.formattedValue);
-    if (value == null) return null;
-    const currency = p?.price?.currencyIso ?? p?.basePrice?.currencyIso ?? 'MXN';
-    return {
-      source: 'san-pablo',
-      chain: 'San Pablo',
-      productCode: p.code,
-      name: p.name,
-      pack: null, // Simplified for now
-      price: value,
-      currency,
-      image: null // Simplified for now
-    };
-  }).filter(Boolean);
+// Parse XML response to extract product data
+function parseXMLResponse(xmlText) {
+  const products = [];
+  
+  // Simple regex-based parsing (in production, you'd want a proper XML parser)
+  const productMatches = xmlText.match(/<products>[\s\S]*?<\/products>/g);
+  
+  if (productMatches) {
+    for (const productMatch of productMatches) {
+      const codeMatch = productMatch.match(/<code>([^<]+)<\/code>/);
+      const nameMatch = productMatch.match(/<name>([^<]+)<\/name>/);
+      const priceMatch = productMatch.match(/<price>[\s\S]*?<value>([^<]+)<\/value>[\s\S]*?<\/price>/);
+      const basePriceMatch = productMatch.match(/<basePrice>[\s\S]*?<value>([^<]+)<\/value>[\s\S]*?<\/basePrice>/);
+      const currencyMatch = productMatch.match(/<currencyIso>([^<]+)<\/currencyIso>/);
+      const imageMatch = productMatch.match(/<url>([^<]+)<\/url>/);
+      const additionalDescMatch = productMatch.match(/<additionalDescription>([^<]+)<\/additionalDescription>/);
+      
+      const price = parseMoney(priceMatch?.[1] || basePriceMatch?.[1]);
+      if (price == null) continue; // Skip products without valid price
+      
+      products.push({
+        source: 'san-pablo',
+        chain: 'San Pablo',
+        productCode: codeMatch?.[1] || null,
+        name: nameMatch?.[1] || null,
+        pack: additionalDescMatch?.[1] || null,
+        price: price,
+        currency: currencyMatch?.[1] || 'MXN',
+        image: imageMatch?.[1] || null
+      });
+    }
+  }
+  
+  return { products };
 }
 
 async function sanPabloSmart(q) {
-  const variants = buildVariants(q);
   const out = new Map(); // key by productCode
-
-  for (const v of variants) {
-    // fetch first page; if it has results, optionally grab page 1 too
-    const first = await spSearchPage(v, 0, 24);
-    const items0 = mapProducts(first?.products);
-    if (items0.length) {
-      for (const it of items0) {
-        const prev = out.get(it.productCode);
-        if (!prev || it.price < prev.price) out.set(it.productCode, it);
-      }
-      // fetch next page if pagination suggests more
-      const totalPages = Number(first?.pagination?.totalPages ?? 1);
-      if (totalPages > 1) {
-        const second = await spSearchPage(v, 1, 24);
-        const items1 = mapProducts(second?.products);
-        for (const it of items1) {
-          const prev = out.get(it.productCode);
-          if (!prev || it.price < prev.price) out.set(it.productCode, it);
+  
+  try {
+    // Try category-based search first (more reliable)
+    const categoryResults = await spSearchXML(q, 0, 24);
+    if (categoryResults.products.length > 0) {
+      for (const product of categoryResults.products) {
+        if (product.productCode) {
+          const prev = out.get(product.productCode);
+          if (!prev || product.price < prev.price) {
+            out.set(product.productCode, product);
+          }
         }
       }
-      // we have matches; we can stop early
-      break;
-    } else {
-      console.log(`[SanPablo] 0 results for "${v}"`);
     }
+    
+    // If no results from category search, try text search
+    if (out.size === 0) {
+      const textResults = await spSearchXML(q, 0, 24);
+      for (const product of textResults.products) {
+        if (product.productCode) {
+          const prev = out.get(product.productCode);
+          if (!prev || product.price < prev.price) {
+            out.set(product.productCode, product);
+          }
+        }
+      }
+    }
+    
+  } catch (error) {
+    console.log(`[SanPablo] Error searching for "${q}":`, error.message);
   }
-
+  
   const prices = Array.from(out.values()).sort((a,b) => a.price - b.price);
   return { prices };
 }
