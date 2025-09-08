@@ -1117,7 +1117,10 @@ const handleAskMedicalAI = async () => {
         
         // Import the pharmacy search function
         const { findNearbyPharmacies } = await import('./services/pharmacySearch');
-        const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
+        const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
+        
+        console.log('🏪 Received pharmacies:', nearbyPharmacies.length, 'pharmacies');
+        console.log('📏 Sample distances:', nearbyPharmacies.slice(0, 3).map(p => `${p.name}: ${p.distanceMiles} miles`));
         
         setPharmacies(nearbyPharmacies);
         setLastUpdated(new Date());
@@ -1392,7 +1395,10 @@ const handleAskMedicalAI = async () => {
         
         // Import the lab search function
         const { findNearbyLabs, getTestTypesForLab } = await import('./services/labSearch');
-        const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang);
+        const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
+        
+        console.log('🧪 Received labs:', nearbyLabs.length, 'labs');
+        console.log('📏 Sample lab distances:', nearbyLabs.slice(0, 3).map(l => `${l.name}: ${l.distanceMiles} miles`));
         
         // Add test types to each lab
         const labsWithTests = nearbyLabs.map(lab => ({
