@@ -173,6 +173,36 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
             logoUrl: null,
           };
         });
+
+        // Get actual driving distances using Distance Matrix API
+        if (places.length > 0) {
+          try {
+            const origins = `${lat},${lon}`;
+            const destinations = places.map(p => `${p.lat},${p.lon}`).join('|');
+            const distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&units=metric&key=${apiKey}`;
+            
+            console.log('Distance Matrix API call for', places.length, 'pharmacies');
+            const distanceResp = await fetch(distanceUrl);
+            if (distanceResp.ok) {
+              const distanceJson = await distanceResp.json();
+              if (distanceJson.status === 'OK' && distanceJson.rows?.[0]?.elements) {
+                places.forEach((place, index) => {
+                  const element = distanceJson.rows[0].elements[index];
+                  if (element.status === 'OK' && element.distance) {
+                    // Convert meters to miles
+                    const distanceKm = element.distance.value / 1000;
+                    const distanceMiles = distanceKm * 0.621371;
+                    place.distanceMiles = Number(distanceMiles.toFixed(2));
+                    console.log(`📍 ${place.name}: ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} miles) - driving distance`);
+                  }
+                });
+              }
+            }
+          } catch (e) {
+            console.warn('Distance Matrix API failed, using straight-line distances:', e.message);
+          }
+        }
+
         if (useCache) pharmacyCache.set(key, { data: places, ts: now });
         return { list: places, cached: false, mock: false, apiVersion: 'legacy', legacyStatus: json.status };
       } else {
@@ -289,6 +319,35 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
           logoUrl: null
         };
       }).filter(lab => lab.lat && lab.lon); // Only include labs with valid coordinates
+      
+      // Get actual driving distances using Distance Matrix API
+      if (labs.length > 0) {
+        try {
+          const origins = `${lat},${lon}`;
+          const destinations = labs.map(lab => `${lab.lat},${lab.lon}`).join('|');
+          const distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&units=metric&key=${apiKey}`;
+          
+          console.log('Distance Matrix API call for', labs.length, 'labs');
+          const distanceResp = await fetch(distanceUrl);
+          if (distanceResp.ok) {
+            const distanceJson = await distanceResp.json();
+            if (distanceJson.status === 'OK' && distanceJson.rows?.[0]?.elements) {
+              labs.forEach((lab, index) => {
+                const element = distanceJson.rows[0].elements[index];
+                if (element.status === 'OK' && element.distance) {
+                  // Convert meters to miles
+                  const distanceKm = element.distance.value / 1000;
+                  const distanceMiles = distanceKm * 0.621371;
+                  lab.distanceMiles = Number(distanceMiles.toFixed(2));
+                  console.log(`🧪 ${lab.name}: ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} miles) - driving distance`);
+                }
+              });
+            }
+          }
+        } catch (e) {
+          console.warn('Distance Matrix API failed for labs, using straight-line distances:', e.message);
+        }
+      }
       
       console.log('Labs API results:', labs.length);
       if (useCache) pharmacyCache.set(key, { data: labs, ts: now });
