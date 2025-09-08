@@ -17,27 +17,63 @@ export type StorePrice = Pharmacy & {
 
 import { API_BASE } from "../src/config/api";
 
+// Haversine formula for calculating distance between two points
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in kilometers
+}
+
+function deg2rad(deg: number): number {
+  return deg * (Math.PI/180);
+}
+
 export async function findNearbyPharmacies(lat: number, lon: number, lang: string = 'en', opts?: { limit?: number; noCache?: boolean }): Promise<Pharmacy[]> {
   try {
   const brands = encodeURIComponent('HEB,Walmart,Target,Costco,CVS,Walgreens');
   const limit = opts?.limit ?? 15;
   const noCache = opts?.noCache ? '&noCache=1' : '';
-  const res = await fetch(`${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&brands=${brands}${noCache}`);
+  const url = `${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&brands=${brands}${noCache}`;
+  
+  console.log('🔍 Fetching pharmacies from:', url);
+  const res = await fetch(url);
+  console.log('📡 Response status:', res.status, res.statusText);
+  
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
+    console.log('📦 API Response:', json);
     if (!json.ok) throw new Error(json.error || 'api_error');
+    console.log('✅ Returning real pharmacy data:', json.pharmacies?.length, 'pharmacies');
     return json.pharmacies || [];
   } catch (e) {
-    console.warn('nearby fallback (mock)', e);
-    // Fallback mock
-    return [
-      { id: "mock-cvs",  name: "CVS Pharmacy",     lat: lat+0.001, lon: lon+0.001, address: "123 Main St",  logoUrl: "", distanceMiles: 0.8 },
-      { id: "mock-wal",  name: "Walgreens",        lat: lat+0.002, lon: lon-0.001, address: "45 Oak Ave",   logoUrl: "", distanceMiles: 1.1 },
-      { id: "mock-rite", name: "Rite Aid",         lat: lat-0.001, lon: lon+0.002, address: "8 Pine Rd",    logoUrl: "", distanceMiles: 1.3 },
-      { id: "mock-wmt",  name: "Walmart Pharmacy", lat: lat-0.002, lon: lon-0.002, address: "220 Market",   logoUrl: "", distanceMiles: 1.9 },
-      { id: "mock-cost", name: "Costco Pharmacy",  lat: lat+0.003, lon: lon+0.003, address: "5 Lake Dr",    logoUrl: "", distanceMiles: 2.4 },
-      { id: "mock-tar",  name: "Target (CVS)",     lat: lat+0.004, lon: lon-0.003, address: "77 River Rd",  logoUrl: "", distanceMiles: 3.1 },
+    console.warn('❌ API call failed, using fallback (mock)', e);
+    // Fallback mock with realistic coordinates and proper distance calculation
+    // Using larger offsets to simulate real pharmacy distances (0.01-0.05 degrees = 1-5 km)
+    const mockPharmacies = [
+      { id: "mock-cvs",  name: "CVS Pharmacy",     lat: lat+0.015, lon: lon+0.015, address: "123 Main St",  logoUrl: "", distanceMiles: 0.8 },
+      { id: "mock-wal",  name: "Walgreens",        lat: lat+0.025, lon: lon-0.010, address: "45 Oak Ave",   logoUrl: "", distanceMiles: 1.1 },
+      { id: "mock-rite", name: "Rite Aid",         lat: lat-0.020, lon: lon+0.030, address: "8 Pine Rd",    logoUrl: "", distanceMiles: 1.3 },
+      { id: "mock-wmt",  name: "Walmart Pharmacy", lat: lat-0.030, lon: lon-0.025, address: "220 Market",   logoUrl: "", distanceMiles: 1.9 },
+      { id: "mock-cost", name: "Costco Pharmacy",  lat: lat+0.040, lon: lon+0.035, address: "5 Lake Dr",    logoUrl: "", distanceMiles: 2.4 },
+      { id: "mock-tar",  name: "Target (CVS)",     lat: lat+0.050, lon: lon-0.040, address: "77 River Rd",  logoUrl: "", distanceMiles: 3.1 },
     ];
+    
+    // Calculate actual distances using Haversine formula
+    return mockPharmacies.map(pharmacy => {
+      const distanceKm = calculateDistance(lat, lon, pharmacy.lat, pharmacy.lon);
+      const distanceMiles = distanceKm * 0.621371; // Convert km to miles
+      
+      return {
+        ...pharmacy,
+        distanceMiles: distanceMiles
+      };
+    });
   }
 }
 

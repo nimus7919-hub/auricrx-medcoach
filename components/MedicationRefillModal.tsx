@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image } from "react-native";
+import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Linking, Alert } from "react-native";
 import * as Location from "expo-location";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";

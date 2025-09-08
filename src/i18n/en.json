@@ -217,6 +217,35 @@
       "withPrice": "(with price)",
       "go": "Go",
       "retry": "Retry"
+    },
+    "pharmacy": {
+      "call": "Call",
+      "callConfirm": "Call",
+      "callError": "Unable to make phone call",
+      "reserve": "Reserve",
+      "reserveConfirm": "Reserve",
+      "reserveNote": "This will notify the pharmacy to prepare your medication for pickup.",
+      "reserveSuccess": "Reservation confirmed",
+      "pickupTime": "Estimated pickup time",
+      "success": "Success",
+      "cancel": "Cancel",
+      "error": "Error",
+      "updated": "Updated",
+      "directions": "Directions",
+      "lowest": "Lowest",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "cash": "Cash",
+      "coupon": "Coupon",
+      "sortBy": "Sort",
+      "distance": "Distance",
+      "price": "Price",
+      "name": "Name",
+      "refresh": "Refresh",
+      "close": "Close",
+      "showAll": "Show all",
+      "lastRefill": "Last refill",
+      "refill": "Refill"
     }
   }
 }

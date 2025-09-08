@@ -111,14 +111,24 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
   if (!apiKey) {
     console.warn('Nearby pharmacies: no API key present – returning mock data.');
     const mock = [
-      { id: "mock-cvs", name: "CVS Pharmacy", lat: lat + 0.001, lon: lon + 0.001, address: "123 Main St", distanceMiles: 0.8 },
-      { id: "mock-wal", name: "Walgreens", lat: lat + 0.002, lon: lon - 0.001, address: "45 Oak Ave", distanceMiles: 1.1 },
-      { id: "mock-rite", name: "Rite Aid", lat: lat - 0.001, lon: lon + 0.002, address: "8 Pine Rd", distanceMiles: 1.3 },
-      { id: "mock-wmt", name: "Walmart Pharmacy", lat: lat - 0.002, lon: lon - 0.002, address: "220 Market", distanceMiles: 1.9 },
-      { id: "mock-cost", name: "Costco Pharmacy", lat: lat + 0.003, lon: lon + 0.003, address: "5 Lake Dr", distanceMiles: 2.4 },
-      { id: "mock-tar", name: "Target (CVS)", lat: lat + 0.004, lon: lon - 0.003, address: "77 River Rd", distanceMiles: 3.1 },
+      { id: "mock-cvs", name: "CVS Pharmacy", lat: lat + 0.015, lon: lon + 0.015, address: "123 Main St", distanceMiles: 0.8 },
+      { id: "mock-wal", name: "Walgreens", lat: lat + 0.025, lon: lon - 0.010, address: "45 Oak Ave", distanceMiles: 1.1 },
+      { id: "mock-rite", name: "Rite Aid", lat: lat - 0.020, lon: lon + 0.030, address: "8 Pine Rd", distanceMiles: 1.3 },
+      { id: "mock-wmt", name: "Walmart Pharmacy", lat: lat - 0.030, lon: lon - 0.025, address: "220 Market", distanceMiles: 1.9 },
+      { id: "mock-cost", name: "Costco Pharmacy", lat: lat + 0.040, lon: lon + 0.035, address: "5 Lake Dr", distanceMiles: 2.4 },
+      { id: "mock-tar", name: "Target (CVS)", lat: lat + 0.050, lon: lon - 0.040, address: "77 River Rd", distanceMiles: 3.1 },
     ];
-    return { list: mock.slice(0, limit), cached: false, mock: true };
+    
+    // Calculate actual distances using Haversine formula
+    const mockWithDistances = mock.map(pharmacy => {
+      const distanceMiles = haversineMi(lat, lon, pharmacy.lat, pharmacy.lon);
+      return {
+        ...pharmacy,
+        distanceMiles: distanceMiles
+      };
+    });
+    
+    return { list: mockWithDistances.slice(0, limit), cached: false, mock: true };
   }
 
     const radius = 5000; // meters (~3.1 mi) adjust as needed
@@ -197,6 +207,83 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
     }
 }
 
+// Fetch nearby medical laboratories using Google Places API
+async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = true } = {}) {
+  const key = `labs:${lat.toFixed(3)}:${lon.toFixed(3)}`;
+  const now = Date.now();
+  if (useCache) {
+    const cached = pharmacyCache.get(key); // Reuse same cache for now
+    if (cached && now - cached.ts < PHARMACY_CACHE_TTL_MS) {
+      return { list: cached.data.slice(0, limit), cached: true, mock: false };
+    }
+  }
+
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) {
+    console.warn('Nearby labs: no API key present – returning mock data.');
+    const mock = [
+      { id: "mock-chopo", name: "Laboratorio Chopo", lat: lat + 0.015, lon: lon + 0.015, address: "123 Medical Center Dr", distanceMiles: 0.8 },
+      { id: "mock-polanco", name: "Laboratorio Polanco", lat: lat + 0.025, lon: lon - 0.010, address: "456 Healthcare Ave", distanceMiles: 1.2 },
+      { id: "mock-salud", name: "Salud Digna", lat: lat - 0.020, lon: lon + 0.030, address: "789 Wellness St", distanceMiles: 1.5 },
+      { id: "mock-diagnostico", name: "Centro de Diagnóstico", lat: lat - 0.030, lon: lon - 0.025, address: "321 Diagnostic Blvd", distanceMiles: 2.1 },
+      { id: "mock-clinica", name: "Clínica Especializada", lat: lat + 0.040, lon: lon + 0.035, address: "654 Specialty Rd", distanceMiles: 2.8 },
+      { id: "mock-radiologia", name: "Centro de Radiología", lat: lat + 0.050, lon: lon - 0.040, address: "987 Imaging Way", distanceMiles: 3.2 },
+    ];
+    
+    // Calculate actual distances using Haversine formula
+    const mockWithDistances = mock.map(lab => {
+      const distanceMiles = haversineMi(lat, lon, lab.lat, lab.lon);
+      return {
+        ...lab,
+        distanceMiles: distanceMiles
+      };
+    });
+    
+    return { list: mockWithDistances.slice(0, limit), cached: false, mock: true };
+  }
+
+  const radius = 5000; // meters (~3.1 mi)
+  try {
+    // Search for medical laboratories and diagnostic centers
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&keyword=medical laboratory diagnostic center clinical lab blood test imaging center&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+    console.log(`Labs API fetch: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} lang=${lang} limit=${limit}`);
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Labs API HTTP ${resp.status}`);
+    const json = await resp.json();
+    console.log('Labs API status:', json.status, 'results:', json.results?.length);
+    
+    if (json.status === 'OK' || json.status === 'ZERO_RESULTS') {
+      const labs = (json.results || []).slice(0, limit).map(p => {
+        const plat = p.geometry?.location?.lat;
+        const plon = p.geometry?.location?.lng;
+        const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+        return {
+          id: p.place_id,
+          name: p.name,
+          lat: plat,
+          lon: plon,
+          address: p.vicinity || p.formatted_address || 'Address not available',
+          distanceMiles: dist,
+          rating: p.rating,
+          phone: p.formatted_phone_number,
+          website: p.website,
+          openingHours: p.opening_hours?.weekday_text,
+          logoUrl: null
+        };
+      }).filter(lab => lab.lat && lab.lon); // Only include labs with valid coordinates
+      
+      console.log('Labs API results:', labs.length);
+      if (useCache) pharmacyCache.set(key, { data: labs, ts: now });
+      return { list: labs.slice(0, limit), cached: false, mock: false };
+    } else {
+      throw new Error(`Labs API error: ${json.status}`);
+    }
+  } catch (e) {
+    console.error('Labs API failed:', e.message);
+    throw new Error('labs_api_failed');
+  }
+}
+
 // Deterministic pseudo-price generator (stable across requests for same id+med)
 function genPrice(pharmacyId, medName) {
   const seed = [...(pharmacyId + medName)].reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -265,6 +352,20 @@ app.get('/pharmacies/nearby', async (req, res) => {
   } catch (e) {
     console.error('nearby error', e.message);
     res.status(500).json({ ok: false, error: 'nearby_failed' });
+  }
+});
+
+// GET /labs/nearby - Find nearby medical laboratories
+app.get('/labs/nearby', async (req, res) => {
+  const { lat, lon, limit = 10, lang = 'en' } = req.query;
+  if (!lat || !lon) return res.status(400).json({ ok: false, error: 'lat_lon_required' });
+  
+  try {
+    const result = await fetchNearbyLabs(Number(lat), Number(lon), Number(limit), lang);
+    res.json({ ok: true, labs: result.list, meta: { mock: result.mock, cached: result.cached, count: result.list.length } });
+  } catch (e) {
+    console.error('labs nearby error', e.message);
+    res.status(500).json({ ok: false, error: 'labs_failed' });
   }
 });
 

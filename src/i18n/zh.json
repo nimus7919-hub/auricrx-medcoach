@@ -217,6 +217,35 @@
       "withPrice": "（含价格）",
       "go": "前往",
       "retry": "重试"
+    },
+    "pharmacy": {
+      "call": "致电",
+      "callConfirm": "致电",
+      "callError": "无法拨打电话",
+      "reserve": "预订",
+      "reserveConfirm": "预订",
+      "reserveNote": "这将通知药房准备您的药物以供取货。",
+      "reserveSuccess": "预订已确认",
+      "pickupTime": "预计取货时间",
+      "success": "成功",
+      "cancel": "取消",
+      "error": "错误",
+      "updated": "已更新",
+      "directions": "路线",
+      "lowest": "最低",
+      "pickup": "取货",
+      "delivery": "配送",
+      "cash": "现金",
+      "coupon": "优惠券",
+      "sortBy": "排序",
+      "distance": "距离",
+      "price": "价格",
+      "name": "名称",
+      "refresh": "刷新",
+      "close": "关闭",
+      "showAll": "显示全部",
+      "lastRefill": "上次补充",
+      "refill": "补充"
     }
   }
 }

@@ -1091,42 +1091,675 @@ const handleAskMedicalAI = async () => {
     );
   };
 
-  const Pharmacies = () => (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Header title={S.pharmacyLocations} />
-        <Text style={{ color: theme.sub, marginBottom: 12, fontFamily: 'Inter_400Regular' }}>
-          Tap below to open your maps with nearby pharmacies.
-        </Text>
-        <TouchableOpacity style={[styles.btn, { backgroundColor: theme.accent }]} onPress={openPharmaciesNearMe}>
-          <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>Open Maps</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </LinearGradient>
-  );
+  const Pharmacies = () => {
+    const [pharmacies, setPharmacies] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [lastUpdated, setLastUpdated] = useState(null);
 
-  const Labs = () => (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Header title={S.labsLocations} />
-        <TouchableOpacity style={[styles.btn, { backgroundColor: theme.accent }]}
-          onPress={async () => {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') return;
-            const { coords } = await Location.getCurrentPositionAsync({});
-            const q = encodeURIComponent('medical laboratory');
-            const url = Platform.select({
-              ios: `http://maps.apple.com/?q=${q}&ll=${coords.latitude},${coords.longitude}`,
-              android: `geo:${coords.latitude},${coords.longitude}?q=${q}`,
-              default: `https://www.google.com/maps/search/?api=1&query=${q}`,
-            });
-            Linking.openURL(url);
-          }}>
-          <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>Find Labs Near Me</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </LinearGradient>
-  );
+    // Auto-load pharmacies when component mounts
+    useEffect(() => {
+      loadNearbyPharmacies();
+    }, []);
+
+    const loadNearbyPharmacies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setError('Location permission denied. Please enable location services.');
+          return;
+        }
+        
+        const { coords } = await Location.getCurrentPositionAsync({});
+        
+        // Import the pharmacy search function
+        const { findNearbyPharmacies } = await import('./services/pharmacySearch');
+        const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
+        
+        setPharmacies(nearbyPharmacies);
+        setLastUpdated(new Date());
+      } catch (e) {
+        console.error('Error loading pharmacies:', e);
+        setError('Failed to load nearby pharmacies. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const formatDistance = (miles) => {
+      if (lang !== 'en') {
+        const km = miles * 1.60934;
+        return `${km.toFixed(1)} km`;
+      }
+      return `${miles.toFixed(1)} mi`;
+    };
+
+    const openDirections = (pharmacy) => {
+      const q = encodeURIComponent(pharmacy.name);
+      const url = Platform.select({
+        ios: `http://maps.apple.com/?q=${q}&ll=${pharmacy.lat},${pharmacy.lon}`,
+        android: `geo:${pharmacy.lat},${pharmacy.lon}?q=${q}`,
+        default: `https://www.google.com/maps/search/?api=1&query=${q}`,
+      });
+      Linking.openURL(url);
+    };
+
+    const callPharmacy = (pharmacy) => {
+      // Try to extract phone number from address or use a default
+      let phoneNumber = pharmacy.phone;
+      
+      if (!phoneNumber && pharmacy.address) {
+        // Try to extract phone number from address using regex
+        const phoneMatch = pharmacy.address.match(/\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})/);
+        if (phoneMatch) {
+          phoneNumber = `${phoneMatch[1]}-${phoneMatch[2]}-${phoneMatch[3]}`;
+        }
+      }
+      
+      // Fallback phone numbers based on pharmacy name
+      if (!phoneNumber) {
+        const name = pharmacy.name.toLowerCase();
+        if (name.includes('cvs')) phoneNumber = '1-800-SHOP-CVS';
+        else if (name.includes('walgreens')) phoneNumber = '1-800-WALGREENS';
+        else if (name.includes('rite aid')) phoneNumber = '1-800-RITE-AID';
+        else if (name.includes('walmart')) phoneNumber = '1-800-WALMART';
+        else if (name.includes('target')) phoneNumber = '1-800-440-0680';
+        else phoneNumber = '1-800-PHARMACY';
+      }
+      
+      const phoneUrl = `tel:${phoneNumber}`;
+      
+      Alert.alert(
+        'Call Pharmacy',
+        `Call ${pharmacy.name}?\n${phoneNumber}`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Call', 
+            onPress: () => {
+              Linking.openURL(phoneUrl).catch(() => {
+                Alert.alert('Error', 'Unable to make phone call');
+              });
+            }
+          }
+        ]
+      );
+    };
+
+    return (
+      <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Header title={S.pharmacyLocations} />
+          
+          {/* Header with refresh button */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', flex: 1 }}>
+              {pharmacies.length > 0 
+                ? `Found ${pharmacies.length} nearby pharmacies`
+                : 'Find pharmacies near your location'
+              }
+            </Text>
+            <TouchableOpacity 
+              style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
+              onPress={loadNearbyPharmacies}
+              disabled={loading}
+            >
+              <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
+                {loading ? 'Loading...' : 'Refresh'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Error message */}
+          {error && (
+            <View style={{ backgroundColor: '#ffebee', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+              <Text style={{ color: '#c62828', fontFamily: 'Inter_500Medium' }}>{error}</Text>
+            </View>
+          )}
+
+          {/* Last updated */}
+          {lastUpdated && (
+            <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </Text>
+          )}
+
+          {/* Pharmacies list */}
+          {pharmacies.length > 0 ? (
+            pharmacies.map((pharmacy, index) => (
+              <View key={pharmacy.id || index} style={{ 
+                backgroundColor: theme.card, 
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 12,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }}>
+                {/* Pharmacy header */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <View style={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: 8, 
+                    backgroundColor: theme.muted, 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginRight: 12
+                  }}>
+                    <Text style={{ fontSize: 20 }}>🏪</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600', fontFamily: 'Inter_600SemiBold' }}>
+                      {pharmacy.name}
+                    </Text>
+                    <Text style={{ color: theme.sub, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
+                      {formatDistance(pharmacy.distanceMiles)} • {pharmacy.address}
+                    </Text>
+                    {/* Additional info */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                      <Text style={{ color: theme.sub, fontSize: 10, fontFamily: 'Inter_400Regular' }}>
+                        {pharmacy.pickup ? '🏃 Pickup' : ''} {pharmacy.delivery ? '🚚 Delivery' : ''}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Action buttons */}
+                <View style={{ flexDirection: 'row', gap: 6 }}>
+                  <TouchableOpacity 
+                    style={{ 
+                      flex: 1, 
+                      backgroundColor: theme.accent, 
+                      borderRadius: 8, 
+                      paddingVertical: 10, 
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      gap: 4
+                    }}
+                    onPress={() => openDirections(pharmacy)}
+                  >
+                    <Text style={{ fontSize: 14 }}>🗺️</Text>
+                    <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      Directions
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={{ 
+                      flex: 1, 
+                      backgroundColor: theme.gold || '#FFD700', 
+                      borderRadius: 8, 
+                      paddingVertical: 10, 
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      gap: 4
+                    }}
+                    onPress={() => callPharmacy(pharmacy)}
+                  >
+                    <Text style={{ fontSize: 14 }}>📞</Text>
+                    <Text style={{ color: '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      Call
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={{ 
+                      flex: 1, 
+                      backgroundColor: theme.success || '#4CAF50', 
+                      borderRadius: 8, 
+                      paddingVertical: 10, 
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      gap: 4
+                    }}
+                    onPress={() => {
+                      // Open pharmacy website or show more info
+                      const website = pharmacy.website || `https://www.google.com/search?q=${encodeURIComponent(pharmacy.name + ' pharmacy')}`;
+                      Linking.openURL(website).catch(() => {
+                        Alert.alert('Error', 'Unable to open website');
+                      });
+                    }}
+                  >
+                    <Text style={{ fontSize: 14 }}>ℹ️</Text>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      Info
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))
+          ) : !loading && !error ? (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+                No pharmacies loaded yet
+              </Text>
+              <TouchableOpacity 
+                style={[styles.btn, { backgroundColor: theme.accent }]} 
+                onPress={loadNearbyPharmacies}
+              >
+                <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>
+                  Find Nearby Pharmacies
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {/* Loading indicator */}
+          {loading && (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>Loading nearby pharmacies...</Text>
+            </View>
+          )}
+        </ScrollView>
+      </LinearGradient>
+    );
+  };
+
+  const Labs = () => {
+    const [labs, setLabs] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [lastUpdated, setLastUpdated] = useState(null);
+    const [selectedLab, setSelectedLab] = useState(null);
+    const [showTestTypes, setShowTestTypes] = useState(false);
+
+    // Auto-load labs when component mounts
+    useEffect(() => {
+      loadNearbyLabs();
+    }, []);
+
+    const loadNearbyLabs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setError('Location permission denied. Please enable location services.');
+          return;
+        }
+        
+        const { coords } = await Location.getCurrentPositionAsync({});
+        
+        // Import the lab search function
+        const { findNearbyLabs, getTestTypesForLab } = await import('./services/labSearch');
+        const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang);
+        
+        // Add test types to each lab
+        const labsWithTests = nearbyLabs.map(lab => ({
+          ...lab,
+          testTypes: lab.testTypes || getTestTypesForLab(lab.name)
+        }));
+        
+        setLabs(labsWithTests);
+        setLastUpdated(new Date());
+      } catch (e) {
+        console.error('Error loading labs:', e);
+        setError('Failed to load nearby labs. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const formatDistance = (miles) => {
+      if (lang !== 'en') {
+        const km = miles * 1.60934;
+        return `${km.toFixed(1)} km`;
+      }
+      return `${miles.toFixed(1)} mi`;
+    };
+
+    const openDirections = (lab) => {
+      const q = encodeURIComponent(lab.name);
+      const url = Platform.select({
+        ios: `http://maps.apple.com/?q=${q}&ll=${lab.lat},${lab.lon}`,
+        android: `geo:${lab.lat},${lab.lon}?q=${q}`,
+        default: `https://www.google.com/maps/search/?api=1&query=${q}`,
+      });
+      Linking.openURL(url);
+    };
+
+    const callLab = (lab) => {
+      // Try to extract phone number from address or use a default
+      let phoneNumber = lab.phone;
+      
+      if (!phoneNumber && lab.address) {
+        // Try to extract phone number from address using regex
+        const phoneMatch = lab.address.match(/\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})/);
+        if (phoneMatch) {
+          phoneNumber = `${phoneMatch[1]}-${phoneMatch[2]}-${phoneMatch[3]}`;
+        }
+      }
+      
+      // Fallback phone numbers based on lab name
+      if (!phoneNumber) {
+        const name = lab.name.toLowerCase();
+        if (name.includes('chopo')) phoneNumber = '1-800-CHOPO-LAB';
+        else if (name.includes('polanco')) phoneNumber = '1-800-POLANCO';
+        else if (name.includes('salud digna')) phoneNumber = '1-800-SALUD';
+        else if (name.includes('diagnostico')) phoneNumber = '1-800-DIAGNOSTIC';
+        else if (name.includes('clinica')) phoneNumber = '1-800-CLINICA';
+        else if (name.includes('radiologia')) phoneNumber = '1-800-RADIOLOGIA';
+        else phoneNumber = '1-800-MEDICAL';
+      }
+      
+      const phoneUrl = `tel:${phoneNumber}`;
+      
+      Alert.alert(
+        'Call Lab',
+        `Call ${lab.name}?\n${phoneNumber}`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Call', 
+            onPress: () => {
+              Linking.openURL(phoneUrl).catch(() => {
+                Alert.alert('Error', 'Unable to make phone call');
+              });
+            }
+          }
+        ]
+      );
+    };
+
+    const showLabTestTypes = (lab) => {
+      setSelectedLab(lab);
+      setShowTestTypes(true);
+    };
+
+    const getTestTypeIcon = (testType) => {
+      const icons = {
+        'blood-work': '🩸',
+        'imaging': '📷',
+        'cardiac': '❤️',
+        'pathology': '🔬',
+        'infectious-disease': '🦠',
+        'allergy': '🤧',
+        'specialty': '⚕️'
+      };
+      return icons[testType] || '🧪';
+    };
+
+    const getTestTypeName = (testType) => {
+      const names = {
+        'blood-work': 'Blood Work',
+        'imaging': 'Imaging',
+        'cardiac': 'Cardiac',
+        'pathology': 'Pathology',
+        'infectious-disease': 'Infectious Disease',
+        'allergy': 'Allergy',
+        'specialty': 'Specialty'
+      };
+      return names[testType] || testType;
+    };
+
+    const getTestTypeDescription = (testType) => {
+      const descriptions = {
+        'blood-work': 'Complete blood count, metabolic panels, lipid profiles, thyroid function, diabetes screening, vitamin levels, and more.',
+        'imaging': 'X-rays, MRI, CT scans, ultrasounds, mammography, bone density tests, and other diagnostic imaging.',
+        'cardiac': 'EKG/ECG, stress tests, echocardiograms, Holter monitoring, and other heart-related diagnostics.',
+        'pathology': 'Biopsies, cytology, histology, cancer screening, tumor markers, and genetic testing.',
+        'infectious-disease': 'COVID-19 testing, flu tests, STD screening, hepatitis panels, HIV testing, and tuberculosis tests.',
+        'allergy': 'Allergy testing, food allergy panels, environmental allergy tests, patch testing, and RAST testing.',
+        'specialty': 'Sleep studies, pulmonary function tests, neurological testing, endocrinology, rheumatology, and dermatology tests.'
+      };
+      return descriptions[testType] || 'Various medical tests and diagnostics available.';
+    };
+
+    return (
+      <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Header title={S.labsLocations} />
+          
+          {/* Header with refresh button */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', flex: 1 }}>
+              {labs.length > 0 
+                ? `Found ${labs.length} nearby labs`
+                : 'Find medical labs near your location'
+              }
+            </Text>
+            <TouchableOpacity 
+              style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
+              onPress={loadNearbyLabs}
+              disabled={loading}
+            >
+              <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
+                {loading ? 'Loading...' : 'Refresh'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Error message */}
+          {error && (
+            <View style={{ backgroundColor: '#ffebee', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+              <Text style={{ color: '#c62828', fontFamily: 'Inter_500Medium' }}>{error}</Text>
+            </View>
+          )}
+
+          {/* Last updated */}
+          {lastUpdated && (
+            <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </Text>
+          )}
+
+          {/* Labs list */}
+          {labs.length > 0 ? (
+            labs.map((lab, index) => (
+              <View key={lab.id || index} style={{ 
+                backgroundColor: theme.card, 
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 12,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }}>
+                {/* Lab header */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <View style={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: 8, 
+                    backgroundColor: theme.muted, 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    marginRight: 12
+                  }}>
+                    <Text style={{ fontSize: 20 }}>🧪</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600', fontFamily: 'Inter_600SemiBold' }}>
+                      {lab.name}
+                    </Text>
+                    <Text style={{ color: theme.sub, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
+                      {formatDistance(lab.distanceMiles)} • {lab.address}
+                    </Text>
+                    {/* Test types preview */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, flexWrap: 'wrap' }}>
+                      {lab.testTypes && lab.testTypes.slice(0, 3).map((testType, idx) => (
+                        <Text key={idx} style={{ color: theme.sub, fontSize: 10, fontFamily: 'Inter_400Regular', marginRight: 8 }}>
+                          {getTestTypeIcon(testType)} {getTestTypeName(testType)}
+                        </Text>
+                      ))}
+                      {lab.testTypes && lab.testTypes.length > 3 && (
+                        <Text style={{ color: theme.sub, fontSize: 10, fontFamily: 'Inter_400Regular' }}>
+                          +{lab.testTypes.length - 3} more
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                </View>
+
+                {/* Action buttons */}
+                <View style={{ flexDirection: 'row', gap: 6 }}>
+                  <TouchableOpacity 
+                    style={{ 
+                      flex: 1, 
+                      backgroundColor: theme.accent, 
+                      borderRadius: 8, 
+                      paddingVertical: 10, 
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      gap: 4
+                    }}
+                    onPress={() => openDirections(lab)}
+                  >
+                    <Text style={{ fontSize: 14 }}>🗺️</Text>
+                    <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      Directions
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={{ 
+                      flex: 1, 
+                      backgroundColor: theme.gold || '#FFD700', 
+                      borderRadius: 8, 
+                      paddingVertical: 10, 
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      gap: 4
+                    }}
+                    onPress={() => callLab(lab)}
+                  >
+                    <Text style={{ fontSize: 14 }}>📞</Text>
+                    <Text style={{ color: '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      Call
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={{ 
+                      flex: 1, 
+                      backgroundColor: theme.success || '#4CAF50', 
+                      borderRadius: 8, 
+                      paddingVertical: 10, 
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      gap: 4
+                    }}
+                    onPress={() => showLabTestTypes(lab)}
+                  >
+                    <Text style={{ fontSize: 14 }}>🧪</Text>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      Tests
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))
+          ) : !loading && !error ? (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+                No labs loaded yet
+              </Text>
+              <TouchableOpacity 
+                style={[styles.btn, { backgroundColor: theme.accent }]} 
+                onPress={loadNearbyLabs}
+              >
+                <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>
+                  Find Nearby Labs
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {/* Loading indicator */}
+          {loading && (
+            <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+              <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>Loading nearby labs...</Text>
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Test Types Modal */}
+        <Modal visible={showTestTypes} transparent animationType="slide">
+          <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 20 }}>
+            <View style={{ 
+              backgroundColor: theme.card, 
+              borderRadius: 16, 
+              padding: 20, 
+              maxHeight: '80%' 
+            }}>
+              <Text style={{ 
+                color: theme.text, 
+                fontSize: 18, 
+                fontWeight: '600', 
+                fontFamily: 'Inter_600SemiBold',
+                marginBottom: 16 
+              }}>
+                Available Tests - {selectedLab?.name}
+              </Text>
+              
+              {selectedLab?.testTypes && (
+                <ScrollView style={{ maxHeight: 400 }}>
+                  {selectedLab.testTypes.map((testType, index) => (
+                    <View key={index} style={{ 
+                      backgroundColor: theme.muted, 
+                      borderRadius: 8, 
+                      padding: 12, 
+                      marginBottom: 8 
+                    }}>
+                      <Text style={{ 
+                        color: theme.text, 
+                        fontSize: 14, 
+                        fontWeight: '600', 
+                        fontFamily: 'Inter_600SemiBold',
+                        marginBottom: 4 
+                      }}>
+                        {getTestTypeIcon(testType)} {getTestTypeName(testType)}
+                      </Text>
+                      <Text style={{ 
+                        color: theme.sub, 
+                        fontSize: 12, 
+                        fontFamily: 'Inter_400Regular' 
+                      }}>
+                        {getTestTypeDescription(testType)}
+                      </Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+              
+              <TouchableOpacity 
+                style={{ 
+                  backgroundColor: theme.accent, 
+                  borderRadius: 8, 
+                  paddingVertical: 12, 
+                  alignItems: 'center',
+                  marginTop: 16 
+                }}
+                onPress={() => setShowTestTypes(false)}
+              >
+                <Text style={{ 
+                  color: themeKey === 'gold' ? '#2c2c2c' : '#000000', 
+                  fontFamily: 'Inter_600SemiBold' 
+                }}>
+                  Close
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </LinearGradient>
+    );
+  };
 
   const Prescription = () => (
     <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>

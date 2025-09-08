@@ -3,6 +3,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import UserDataDirPlugin from 'puppeteer-extra-plugin-user-data-dir';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import UserAgent from 'user-agents';
 
 // Add stealth plugin to avoid detection
@@ -12,11 +14,63 @@ puppeteer.use(UserDataDirPlugin());
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: '15 minutes'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+  credentials: false,
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Body parsing with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Pharmacy configurations
 const PHARMACIES = {
+  'fahorro': {
+    name: 'Farmacia del Ahorro',
+    baseUrl: 'https://www.fahorro.com',
+    searchUrl: '/farmacia.html',
+    selectors: {
+      productContainer: '.product-item, .product-tile, .product-card, .item-producto, [data-testid="product"]',
+      productName: '.product-name, .product-title, .nombre-producto, h3, h4, .titulo',
+      productPrice: '.price, .product-price, .precio, .precio-producto, [data-testid="price"]',
+      productImage: '.product-image img, .product-img img, .imagen-producto img',
+      productCode: '.product-code, .sku, .codigo-producto',
+      productDescription: '.product-description, .product-details, .descripcion'
+    },
+    searchParams: {
+      q: 'q'
+    }
+  },
   'san-pablo': {
     name: 'Farmacia San Pablo',
     baseUrl: 'https://www.farmaciasanpablo.com.mx',
@@ -498,20 +552,52 @@ app.get('/pharmacies', (req, res) => {
   res.json({ pharmacies });
 });
 
+// Input validation and sanitization
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return '';
+  
+  return input
+    .trim()
+    .replace(/[<>\"'&]/g, '') // Remove potentially dangerous characters
+    .substring(0, 100) // Limit length
+    .toLowerCase();
+}
+
+function validateSearchTerm(term) {
+  if (!term || typeof term !== 'string') return false;
+  
+  // Allow only alphanumeric, spaces, and common medication characters
+  const validPattern = /^[a-zA-Z0-9\s\-\.\(\)]+$/;
+  return validPattern.test(term) && term.length >= 2 && term.length <= 100;
+}
+
 app.get('/search', async (req, res) => {
   const { q: searchTerm } = req.query;
   
+  // Input validation
   if (!searchTerm) {
-    return res.status(400).json({ error: 'Search term (q) is required' });
+    return res.status(400).json({ 
+      error: 'Search term (q) is required',
+      example: '/search?q=aspirin'
+    });
   }
   
-  console.log(`🔍 API search request for: ${searchTerm}`);
+  if (!validateSearchTerm(searchTerm)) {
+    return res.status(400).json({ 
+      error: 'Invalid search term',
+      message: 'Search term must be 2-100 characters, alphanumeric only',
+      received: searchTerm
+    });
+  }
+  
+  const sanitizedTerm = sanitizeInput(searchTerm);
+  console.log(`🔍 API search request for: ${sanitizedTerm}`);
   
   try {
     const scraper = new PharmaScraper();
     await scraper.initialize();
     
-    const response = await scraper.scrapeAllPharmacies(searchTerm);
+    const response = await scraper.scrapeAllPharmacies(sanitizedTerm);
     
     await scraper.close();
     
@@ -532,15 +618,20 @@ app.get('/search', async (req, res) => {
     
   } catch (error) {
     console.error('Search error:', error);
+    
+    // Don't expose internal error details in production
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
     res.status(500).json({ 
       error: 'Search failed', 
-      message: error.message,
+      message: isDevelopment ? error.message : 'Internal server error',
       compliance: {
         robotsTxtChecked: false,
         rateLimited: false,
         userAgent: 'AuricRx-MedCoach/1.0 (+https://auricrx.com/contact)',
         ethicalNotice: 'Error occurred during compliant scraping attempt'
-      }
+      },
+      ...(isDevelopment && { stack: error.stack })
     });
   }
 });
