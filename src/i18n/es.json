@@ -198,6 +198,25 @@
     "alerts": {
       "locationDenied": "Ubicación denegada",
       "enableLocation": "Habilita la ubicación para buscar farmacias cercanas."
+    },
+    "sanpablo": {
+      "searchTitle": "Busca tu medicamento",
+      "searchPlaceholder": "ej. aspirina 100 mg",
+      "searchButton": "Buscar",
+      "sortBy": "Ordenar por",
+      "price": "Precio",
+      "distance": "Distancia",
+      "sanpabloSection": "San Pablo (con precio)",
+      "nearbySection": "Farmacias cercanas (todas las cadenas)",
+      "noResults": "No hay resultados con precio.",
+      "noLocation": "Ubicación no disponible o sin resultados.",
+      "nearbyError": "No se pudieron cargar farmacias cercanas.",
+      "productName": "Producto",
+      "priceUnavailable": "Precio no disponible",
+      "chain": "Cadena: Farmacia San Pablo",
+      "withPrice": "(con precio)",
+      "go": "Ir",
+      "retry": "Reintentar"
     }
   }
 }

@@ -198,6 +198,25 @@
     "alerts": {
       "locationDenied": "位置被拒绝",
       "enableLocation": "启用位置以搜索附近药房。"
+    },
+    "sanpablo": {
+      "searchTitle": "搜索您的药物",
+      "searchPlaceholder": "例如：阿司匹林 100 毫克",
+      "searchButton": "搜索",
+      "sortBy": "排序方式",
+      "price": "价格",
+      "distance": "距离",
+      "sanpabloSection": "圣巴勃罗（含价格）",
+      "nearbySection": "附近药房（所有连锁店）",
+      "noResults": "没有价格结果。",
+      "noLocation": "位置不可用或无结果。",
+      "nearbyError": "无法加载附近药房。",
+      "productName": "产品",
+      "priceUnavailable": "价格不可用",
+      "chain": "连锁：圣巴勃罗药房",
+      "withPrice": "（含价格）",
+      "go": "前往",
+      "retry": "重试"
     }
   }
 }

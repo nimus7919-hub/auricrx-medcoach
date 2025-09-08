@@ -198,6 +198,25 @@
     "alerts": {
       "locationDenied": "Location denied",
       "enableLocation": "Enable location to search nearby pharmacies."
+    },
+    "sanpablo": {
+      "searchTitle": "Search for your medication",
+      "searchPlaceholder": "e.g. aspirin 100 mg",
+      "searchButton": "Search",
+      "sortBy": "Sort by",
+      "price": "Price",
+      "distance": "Distance",
+      "sanpabloSection": "San Pablo (with price)",
+      "nearbySection": "Nearby pharmacies (all chains)",
+      "noResults": "No results with price.",
+      "noLocation": "Location unavailable or no results.",
+      "nearbyError": "Could not load nearby pharmacies.",
+      "productName": "Product",
+      "priceUnavailable": "Price unavailable",
+      "chain": "Chain: Farmacia San Pablo",
+      "withPrice": "(with price)",
+      "go": "Go",
+      "retry": "Retry"
     }
   }
 }
