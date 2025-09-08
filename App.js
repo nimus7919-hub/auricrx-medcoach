@@ -27,6 +27,7 @@ import MedicationRefillModal from './components/MedicationRefillModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import HerbsScreen from './src/screens/HerbsScreen';
 import DocScanScreen from './src/screens/DocScanScreen';
+import MedicalDocumentsScreen from './src/screens/MedicalDocumentsScreen';
 import Medications from './components/Medications';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
@@ -1008,7 +1009,32 @@ const handleAskMedicalAI = async () => {
           <Card title={S.medications} icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
             <Card title="Herbs" icon={<Image source={require('./assets/icons/herb_emoji_transparent.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('herbs')} />
             <Card title="Supplements" icon={<Image source={require('./assets/icons/supplement.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('supplements')} />
-            <Card title="Documents" icon={<Text style={styles.emoji}>📄</Text>} onPress={() => setRoute('documents')} />
+            <Card 
+              title="Documents" 
+              icon={<Text style={styles.emoji}>📄</Text>} 
+              onPress={() => setRoute('documents')}
+              subtitle="Medical documents for doctor visits"
+              actionButton={
+                <TouchableOpacity 
+                  style={styles.quickScanButton}
+                  onPress={() => {
+                    // Quick scan functionality - could open camera directly
+                    Alert.alert(
+                      '📷 Quick Scan',
+                      'Choose what to scan:',
+                      [
+                        { text: 'Photo ID', onPress: () => setRoute('documents') },
+                        { text: 'Insurance Card', onPress: () => setRoute('documents') },
+                        { text: 'Lab Results', onPress: () => setRoute('documents') },
+                        { text: 'Cancel', style: 'cancel' }
+                      ]
+                    );
+                  }}
+                >
+                  <Text style={styles.quickScanButtonText}>📷</Text>
+                </TouchableOpacity>
+              }
+            />
         </View>
       </ScrollView>
       </>
@@ -2327,7 +2353,7 @@ return !fontsLoaded ? (
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} /> :
-     route === 'documents' ? <DocScanScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+     route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      <Dashboard />}
 
     {/* Floating AI button */}
@@ -2528,6 +2554,19 @@ card: {
     minHeight: 120,
   },
   cardIcon: { marginBottom: 12, width: 32, height: 32 },
+  quickScanButton: {
+    backgroundColor: '#d4af37',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  quickScanButtonText: {
+    fontSize: 16,
+    color: '#0b1117',
+  },
   cardText: { fontSize: 18, textAlign: 'center' },
 
   headerTitle: { fontSize: 36 },
