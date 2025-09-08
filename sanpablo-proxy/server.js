@@ -54,7 +54,7 @@ app.get("/api/sanpablo/search", async (req, res) => {
     const pageSize = Number(req.query.pageSize) || 10;
     const currentPage = Number(req.query.page) || 0;
 
-    const fields = "products(code,name,basePrice,price);pagination;sorts";
+    const fields = "products(code,name,basePrice,price)";
 
     const url = new URL("https://api.farmaciasanpablo.com.mx/rest/v2/fsp/products/search");
     url.searchParams.set("q", q);
