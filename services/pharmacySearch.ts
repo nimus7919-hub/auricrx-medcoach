@@ -41,11 +41,32 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   const noCache = opts?.noCache ? '&noCache=1' : '';
   const url = `${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&brands=${brands}${noCache}`;
   
-  const res = await fetch(url);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || 'api_error');
     console.log('✅ Pharmacy API success:', json.pharmacies?.length, 'pharmacies');
+    
+    // Log first pharmacy coordinates for debugging
+    if (json.pharmacies && json.pharmacies.length > 0) {
+      const firstPharmacy = json.pharmacies[0];
+      console.log('🔍 First pharmacy coordinates:', {
+        name: firstPharmacy.name,
+        lat: firstPharmacy.lat,
+        lon: firstPharmacy.lon,
+        distanceMiles: firstPharmacy.distanceMiles
+      });
+      console.log('🔍 User coordinates:', { lat, lon });
+      
+      // Calculate distance manually for verification
+      const calculatedKm = calculateDistance(lat, lon, firstPharmacy.lat, firstPharmacy.lon);
+      const calculatedMiles = calculatedKm * 0.621371;
+      console.log('🔍 Manual distance calculation:', {
+        km: calculatedKm.toFixed(2),
+        miles: calculatedMiles.toFixed(2)
+      });
+    }
+    
     return json.pharmacies || [];
   } catch (e) {
     console.error('❌ Pharmacy API call failed:', e);
