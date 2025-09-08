@@ -17,6 +17,12 @@ app.use(express.json({ limit: "1mb" }));
 const ALLOW_ORIGINS = [
   "https://auricrx-medcoach.onrender.com", // deployed server
   "http://localhost:8081",                 // Expo dev app
+  "http://localhost:19006",                // Expo web
+  "http://localhost:19000",                // Expo dev tools
+  "http://localhost:3000",                 // React dev server
+  "http://localhost:8080",                 // Alternative port
+  "http://127.0.0.1:8081",                // Alternative localhost
+  "http://127.0.0.1:19006",               // Alternative localhost
   // later add your production mobile/web domain
 ];
 
