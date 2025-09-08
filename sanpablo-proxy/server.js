@@ -54,7 +54,7 @@ app.get("/api/sanpablo/search", async (req, res) => {
     const pageSize = Number(req.query.pageSize) || 10;
     const currentPage = Number(req.query.page) || 0;
 
-    const fields = "products(code,name,basePrice(FULL),price(FULL),packaging,unit,measure,images(FULL));pagination;sorts";
+    const fields = "products(code,name,basePrice(FULL),price(FULL),unit,measure,images(FULL));pagination;sorts";
 
     const url = new URL("https://api.farmaciasanpablo.com.mx/rest/v2/fsp/products/search");
     url.searchParams.set("q", q);
@@ -80,7 +80,7 @@ app.get("/api/sanpablo/search", async (req, res) => {
     const items = products.map(p => {
       const price = pickPrice(p);
       const img = p.images?.[0]?.url ?? null;
-      const pack = p.packaging || [p.unit, p.measure].filter(Boolean).join(" ") || null;
+      const pack = [p.unit, p.measure].filter(Boolean).join(" ") || null;
 
       return {
         code: p.code ?? null,
