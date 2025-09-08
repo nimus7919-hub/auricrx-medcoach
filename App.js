@@ -28,6 +28,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import HerbsScreen from './src/screens/HerbsScreen';
 import DocScanScreen from './src/screens/DocScanScreen';
 import MedicalDocumentsScreen from './src/screens/MedicalDocumentsScreen';
+import SmartNotificationsScreen from './src/screens/SmartNotificationsScreen';
 import Medications from './components/Medications';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
@@ -1009,6 +1010,12 @@ const handleAskMedicalAI = async () => {
           <Card title={S.medications} icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
             <Card title="Herbs" icon={<Image source={require('./assets/icons/herb_emoji_transparent.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('herbs')} />
             <Card title="Supplements" icon={<Image source={require('./assets/icons/supplement.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('supplements')} />
+            <Card 
+              title="Smart Alerts" 
+              icon={<Text style={styles.emoji}>🧠</Text>} 
+              onPress={() => setRoute('smart-notifications')}
+              subtitle="Intelligent reminders & notifications"
+            />
             <Card 
               title="Documents" 
               icon={<Text style={styles.emoji}>📄</Text>} 
@@ -2354,6 +2361,7 @@ return !fontsLoaded ? (
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} /> :
      route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+    route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      <Dashboard />}
 
     {/* Floating AI button */}
