@@ -1,6 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Calendar from 'expo-calendar';
-import * as Notifications from 'expo-notifications';
+// Import with fallback for development
+let Calendar: any = null;
+let Notifications: any = null;
+
+try {
+  Calendar = require('expo-calendar');
+} catch (error) {
+  console.warn('expo-calendar not available:', error);
+}
+
+try {
+  Notifications = require('expo-notifications');
+} catch (error) {
+  console.warn('expo-notifications not available:', error);
+}
 import { SmartNotificationService } from './smartNotifications';
 
 export interface Appointment {
@@ -87,13 +100,22 @@ class AppointmentService {
   private async requestPermissions() {
     try {
       // Request calendar permissions
-      const { status: calendarStatus } = await Calendar.requestCalendarPermissionsAsync();
-      this.calendarPermissionGranted = calendarStatus === 'granted';
+      if (Calendar) {
+        const { status: calendarStatus } = await Calendar.requestCalendarPermissionsAsync();
+        this.calendarPermissionGranted = calendarStatus === 'granted';
+      } else {
+        console.warn('Calendar module not available - calendar features disabled');
+        this.calendarPermissionGranted = false;
+      }
 
       // Request notification permissions
-      const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
-      if (notificationStatus !== 'granted') {
-        console.warn('Notification permission not granted');
+      if (Notifications) {
+        const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
+        if (notificationStatus !== 'granted') {
+          console.warn('Notification permission not granted');
+        }
+      } else {
+        console.warn('Notifications module not available - notification features disabled');
       }
     } catch (error) {
       console.error('Permission request failed:', error);
@@ -337,6 +359,11 @@ class AppointmentService {
 
   // Calendar Integration
   private async createCalendarEvent(appointment: Appointment): Promise<string> {
+    if (!Calendar) {
+      console.warn('Calendar module not available - skipping calendar event creation');
+      return '';
+    }
+
     try {
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
       const defaultCalendar = calendars.find(cal => cal.allowsModifications) || calendars[0];
@@ -366,7 +393,7 @@ class AppointmentService {
   }
 
   private async updateCalendarEvent(appointment: Appointment): Promise<void> {
-    if (!appointment.calendarEventId) return;
+    if (!appointment.calendarEventId || !Calendar) return;
 
     try {
       const eventDetails = {
@@ -389,6 +416,8 @@ class AppointmentService {
   }
 
   private async deleteCalendarEvent(eventId: string): Promise<void> {
+    if (!Calendar) return;
+
     try {
       await Calendar.deleteEventAsync(eventId);
     } catch (error) {
@@ -399,6 +428,11 @@ class AppointmentService {
 
   // Reminder Management
   private async scheduleReminders(appointment: Appointment): Promise<void> {
+    if (!Notifications) {
+      console.warn('Notifications module not available - skipping reminder scheduling');
+      return;
+    }
+
     for (const minutesBefore of appointment.reminderMinutes) {
       try {
         const triggerDate = new Date(new Date(appointment.startDate).getTime() - minutesBefore * 60 * 1000);
@@ -441,6 +475,8 @@ class AppointmentService {
   }
 
   private async cancelReminders(appointmentId: string): Promise<void> {
+    if (!Notifications) return;
+
     const appointmentReminders = this.reminders.filter(reminder => reminder.appointmentId === appointmentId);
     
     for (const reminder of appointmentReminders) {
