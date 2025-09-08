@@ -189,9 +189,35 @@ async function sanPabloSmart(q) {
     
   } catch (error) {
     console.log(`[SanPablo] Error searching for "${q}":`, error.message);
+    
+    // If we get blocked (403) or other errors, provide a fallback
+    if (error.message.includes('403') || error.message.includes('SanPablo 403')) {
+      console.log(`[SanPablo] Blocked by bot protection, providing fallback for "${q}"`);
+      return {
+        prices: [],
+        fallback: {
+          message: "Precios no disponibles en este momento",
+          action: "Ver en Farmacia San Pablo",
+          url: `https://www.farmaciasanpablo.com.mx/search?q=${encodeURIComponent(q)}`
+        }
+      };
+    }
   }
   
   const prices = Array.from(out.values()).sort((a,b) => a.price - b.price);
+  
+  // If no results and no fallback, provide a general fallback
+  if (prices.length === 0) {
+    return {
+      prices: [],
+      fallback: {
+        message: "No se encontraron resultados",
+        action: "Buscar en Farmacia San Pablo",
+        url: `https://www.farmaciasanpablo.com.mx/search?q=${encodeURIComponent(q)}`
+      }
+    };
+  }
+  
   return { prices };
 }
 
