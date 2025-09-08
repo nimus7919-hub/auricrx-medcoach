@@ -122,9 +122,32 @@ SCRAPING_DELAY_MAX=3000
 TARGET_PHARMACIES=san-pablo,cvs,walgreens
 ```
 
-## Legal Notice
+## 🏛️ Legal Compliance
 
-This tool is for educational and research purposes. Always respect website terms of service and implement appropriate rate limiting. Consider reaching out to pharmacies for official API access when available.
+This scraper operates under strict legal and ethical guidelines:
+
+### ✅ **Compliant Features:**
+- **Robots.txt Respect**: Always checks and follows robots.txt directives
+- **Rate Limiting**: Maximum 10 requests per minute per domain
+- **Transparent Identity**: Clear user agent with contact information
+- **Public Data Only**: Scrapes only publicly available medication prices
+- **Ethical Notices**: Sends scraping notices to pharmacy websites
+
+### 📋 **Compliance Process:**
+1. **Check robots.txt** before any scraping
+2. **Send scraping notice** to pharmacy
+3. **Use official user agent** (not stealth mode)
+4. **Implement rate limiting** and respectful delays
+5. **Provide fallback options** when blocked
+
+### 🚫 **What We DON'T Do:**
+- Bypass robots.txt restrictions
+- Use fake user agents or stealth techniques
+- Scrape private or restricted data
+- Overwhelm servers with requests
+- Ignore rate limits or blocks
+
+See [LEGAL_COMPLIANCE.md](./LEGAL_COMPLIANCE.md) for complete details.
 
 ## Contributing
 

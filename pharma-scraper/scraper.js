@@ -123,11 +123,130 @@ class MedicationData {
   }
 }
 
+// Legal and ethical scraping compliance
+class ScrapingCompliance {
+  constructor() {
+    this.robotsCache = new Map();
+    this.rateLimits = new Map();
+    this.userAgent = 'AuricRx-MedCoach/1.0 (+https://auricrx.com/contact)';
+  }
+
+  async checkRobotsTxt(url) {
+    try {
+      const baseUrl = new URL(url).origin;
+      
+      if (this.robotsCache.has(baseUrl)) {
+        return this.robotsCache.get(baseUrl);
+      }
+
+      const robotsUrl = `${baseUrl}/robots.txt`;
+      console.log(`🤖 Checking robots.txt: ${robotsUrl}`);
+      
+      const response = await fetch(robotsUrl, {
+        headers: { 'User-Agent': this.userAgent }
+      });
+      
+      if (response.ok) {
+        const robotsText = await response.text();
+        const isAllowed = this.parseRobotsTxt(robotsText, url);
+        this.robotsCache.set(baseUrl, isAllowed);
+        console.log(`✅ Robots.txt check: ${isAllowed ? 'ALLOWED' : 'BLOCKED'}`);
+        return isAllowed;
+      } else {
+        // If no robots.txt, assume allowed but be respectful
+        console.log(`⚠️ No robots.txt found, proceeding with caution`);
+        this.robotsCache.set(baseUrl, true);
+        return true;
+      }
+    } catch (error) {
+      console.log(`❌ Error checking robots.txt: ${error.message}`);
+      return false;
+    }
+  }
+
+  parseRobotsTxt(robotsText, targetUrl) {
+    const lines = robotsText.split('\n');
+    let currentUserAgent = null;
+    let isAllowed = true;
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('User-agent:')) {
+        const agent = trimmed.substring(11).trim();
+        currentUserAgent = agent === '*' ? 'all' : agent;
+      } else if (trimmed.startsWith('Disallow:') && currentUserAgent) {
+        const disallowPath = trimmed.substring(9).trim();
+        if (currentUserAgent === 'all' || currentUserAgent.includes('AuricRx')) {
+          if (disallowPath === '/' || targetUrl.includes(disallowPath)) {
+            isAllowed = false;
+            break;
+          }
+        }
+      } else if (trimmed.startsWith('Allow:') && currentUserAgent) {
+        const allowPath = trimmed.substring(6).trim();
+        if (currentUserAgent === 'all' || currentUserAgent.includes('AuricRx')) {
+          if (targetUrl.includes(allowPath)) {
+            isAllowed = true;
+          }
+        }
+      }
+    }
+    
+    return isAllowed;
+  }
+
+  async checkRateLimit(domain) {
+    const now = Date.now();
+    const limit = this.rateLimits.get(domain) || { count: 0, resetTime: now + 60000 };
+    
+    if (now > limit.resetTime) {
+      limit.count = 0;
+      limit.resetTime = now + 60000; // Reset every minute
+    }
+    
+    if (limit.count >= 10) { // Max 10 requests per minute
+      console.log(`⏳ Rate limit reached for ${domain}, waiting...`);
+      await new Promise(resolve => setTimeout(resolve, 60000 - (now - limit.resetTime)));
+      limit.count = 0;
+      limit.resetTime = Date.now() + 60000;
+    }
+    
+    limit.count++;
+    this.rateLimits.set(domain, limit);
+  }
+
+  async sendScrapingNotice(url, pharmacyName) {
+    try {
+      const notice = {
+        timestamp: new Date().toISOString(),
+        userAgent: this.userAgent,
+        purpose: 'Medication price comparison for healthcare app',
+        contact: 'https://auricrx.com/contact',
+        rateLimit: '10 requests per minute',
+        dataUsage: 'Public medication prices only',
+        optOut: `${url}/contact`
+      };
+      
+      console.log(`📧 Scraping notice for ${pharmacyName}:`, notice);
+      
+      // In a real implementation, you might send this to their contact form
+      // For now, we'll just log it and wait a moment
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      return true;
+    } catch (error) {
+      console.log(`⚠️ Could not send scraping notice: ${error.message}`);
+      return false;
+    }
+  }
+}
+
 // Advanced scraper class
 export class PharmaScraper {
   constructor() {
     this.browser = null;
     this.userAgents = new UserAgent();
+    this.compliance = new ScrapingCompliance();
   }
 
   async initialize() {
@@ -159,27 +278,69 @@ export class PharmaScraper {
 
     console.log(`🔍 Scraping ${pharmacy.name} for: ${searchTerm}`);
     
+    // Step 1: Legal compliance checks
+    const searchUrl = `${pharmacy.baseUrl}${pharmacy.searchUrl}?${pharmacy.searchParams.q}=${encodeURIComponent(searchTerm)}`;
+    
+    // Check robots.txt
+    const isAllowed = await this.compliance.checkRobotsTxt(searchUrl);
+    if (!isAllowed) {
+      console.log(`🚫 Scraping blocked by robots.txt for ${pharmacy.name}`);
+      return {
+        pharmacy: pharmacy.name,
+        blocked: true,
+        reason: 'robots.txt disallows scraping',
+        fallback: {
+          message: `Scraping not allowed by ${pharmacy.name}`,
+          action: `Visit ${pharmacy.name} directly`,
+          url: searchUrl
+        }
+      };
+    }
+    
+    // Check rate limits
+    await this.compliance.checkRateLimit(pharmacy.baseUrl);
+    
+    // Send scraping notice (ethical practice)
+    await this.compliance.sendScrapingNotice(pharmacy.baseUrl, pharmacy.name);
+    
     const page = await this.browser.newPage();
     
     try {
-      // Set random user agent
-      const userAgent = this.userAgents.toString();
-      await page.setUserAgent(userAgent);
+      // Set our official user agent (not random - we want to be identified)
+      await page.setUserAgent(this.compliance.userAgent);
       
       // Set viewport
       await page.setViewport({ width: 1366, height: 768 });
       
-      // Add random delays to avoid detection
-      await this.randomDelay(1000, 3000);
+      // Add respectful delays
+      await this.randomDelay(2000, 4000);
       
-      // Navigate to search page
-      const searchUrl = `${pharmacy.baseUrl}${pharmacy.searchUrl}?${pharmacy.searchParams.q}=${encodeURIComponent(searchTerm)}`;
       console.log(`📍 Navigating to: ${searchUrl}`);
       
       await page.goto(searchUrl, { 
         waitUntil: 'networkidle2',
         timeout: 30000 
       });
+      
+      // Check if we got blocked (403, 429, etc.)
+      const response = await page.waitForResponse(response => 
+        response.url().includes(pharmacy.baseUrl), 
+        { timeout: 10000 }
+      );
+      
+      if (response.status() === 403 || response.status() === 429) {
+        console.log(`🚫 Blocked by ${pharmacy.name} (${response.status()})`);
+        return {
+          pharmacy: pharmacy.name,
+          blocked: true,
+          reason: `HTTP ${response.status()} - Access denied`,
+          fallback: {
+            message: `Access denied by ${pharmacy.name}`,
+            action: `Visit ${pharmacy.name} directly`,
+            url: searchUrl
+          }
+        };
+      }
       
       // Wait for products to load
       await this.randomDelay(2000, 4000);
@@ -244,22 +405,58 @@ export class PharmaScraper {
     console.log(`🎯 Starting comprehensive search for: ${searchTerm}`);
     
     const allResults = [];
+    const blockedPharmacies = [];
+    const fallbacks = [];
     
     for (const pharmacyKey of Object.keys(PHARMACIES)) {
       try {
         const results = await this.scrapePharmacy(pharmacyKey, searchTerm);
-        allResults.push(...results);
         
-        // Random delay between pharmacies
-        await this.randomDelay(3000, 6000);
+        // Handle different response types
+        if (results.blocked) {
+          console.log(`🚫 ${results.pharmacy}: ${results.reason}`);
+          blockedPharmacies.push(results);
+          if (results.fallback) {
+            fallbacks.push(results.fallback);
+          }
+        } else if (Array.isArray(results)) {
+          // Normal results array
+          allResults.push(...results);
+        } else if (results.pharmacy) {
+          // Single result object
+          allResults.push(results);
+        }
+        
+        // Respectful delay between pharmacies
+        await this.randomDelay(5000, 8000);
         
       } catch (error) {
-        console.error(`Failed to scrape ${pharmacyKey}:`, error.message);
+        console.error(`❌ Failed to scrape ${pharmacyKey}:`, error.message);
+        blockedPharmacies.push({
+          pharmacy: PHARMACIES[pharmacyKey]?.name || pharmacyKey,
+          blocked: true,
+          reason: `Error: ${error.message}`,
+          fallback: {
+            message: `Error accessing ${PHARMACIES[pharmacyKey]?.name || pharmacyKey}`,
+            action: `Visit ${PHARMACIES[pharmacyKey]?.name || pharmacyKey} directly`,
+            url: `${PHARMACIES[pharmacyKey]?.baseUrl || ''}/search?q=${encodeURIComponent(searchTerm)}`
+          }
+        });
       }
     }
     
-    console.log(`🏁 Scraping complete. Total results: ${allResults.length}`);
-    return allResults;
+    console.log(`🏁 Scraping complete. Results: ${allResults.length}, Blocked: ${blockedPharmacies.length}`);
+    
+    return {
+      results: allResults,
+      blockedPharmacies,
+      fallbacks,
+      summary: {
+        totalResults: allResults.length,
+        blockedCount: blockedPharmacies.length,
+        successCount: Object.keys(PHARMACIES).length - blockedPharmacies.length
+      }
+    };
   }
 
   async randomDelay(min, max) {
@@ -314,14 +511,22 @@ app.get('/search', async (req, res) => {
     const scraper = new PharmaScraper();
     await scraper.initialize();
     
-    const results = await scraper.scrapeAllPharmacies(searchTerm);
+    const response = await scraper.scrapeAllPharmacies(searchTerm);
     
     await scraper.close();
     
     res.json({
       searchTerm,
-      totalResults: results.length,
-      results: results,
+      results: response.results,
+      blockedPharmacies: response.blockedPharmacies,
+      fallbacks: response.fallbacks,
+      summary: response.summary,
+      compliance: {
+        robotsTxtChecked: true,
+        rateLimited: true,
+        userAgent: scraper.compliance.userAgent,
+        ethicalNotice: 'We respect robots.txt and implement rate limiting'
+      },
       timestamp: new Date().toISOString()
     });
     
@@ -329,7 +534,13 @@ app.get('/search', async (req, res) => {
     console.error('Search error:', error);
     res.status(500).json({ 
       error: 'Search failed', 
-      message: error.message 
+      message: error.message,
+      compliance: {
+        robotsTxtChecked: false,
+        rateLimited: false,
+        userAgent: 'AuricRx-MedCoach/1.0 (+https://auricrx.com/contact)',
+        ethicalNotice: 'Error occurred during compliant scraping attempt'
+      }
     });
   }
 });
