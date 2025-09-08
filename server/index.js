@@ -292,8 +292,8 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
 
   const radius = 5000; // meters (~3.1 mi)
   try {
-    // Search for medical laboratories and diagnostic centers
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&keyword=medical laboratory diagnostic center clinical lab blood test imaging center&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+    // Search for medical laboratories and diagnostic centers with Mexican-specific terms
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&keyword=laboratorio clinico,centro diagnostico,laboratorio medico,analisis clinicos,laboratorio chopo,laboratorio polanco,salud digna,laboratorio simi,centro medico,laboratorio&language=${encodeURIComponent(lang)}&key=${apiKey}`;
     console.log(`Labs API fetch: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} lang=${lang} limit=${limit}`);
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`Labs API HTTP ${resp.status}`);
@@ -301,7 +301,7 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
     console.log('Labs API status:', json.status, 'results:', json.results?.length);
     
     if (json.status === 'OK' || json.status === 'ZERO_RESULTS') {
-      const labs = (json.results || []).slice(0, limit).map(p => {
+      let labs = (json.results || []).slice(0, limit).map(p => {
         const plat = p.geometry?.location?.lat;
         const plon = p.geometry?.location?.lng;
         const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
@@ -319,6 +319,41 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
           logoUrl: null
         };
       }).filter(lab => lab.lat && lab.lon); // Only include labs with valid coordinates
+      
+      // If no labs found with Spanish terms, try English terms as fallback
+      if (labs.length === 0) {
+        console.log('No labs found with Spanish terms, trying English fallback...');
+        try {
+          const fallbackUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&keyword=medical laboratory,diagnostic center,clinical lab,blood test,imaging center,pathology lab&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+          const fallbackResp = await fetch(fallbackUrl);
+          if (fallbackResp.ok) {
+            const fallbackJson = await fallbackResp.json();
+            console.log('Fallback labs API status:', fallbackJson.status, 'results:', fallbackJson.results?.length);
+            if (fallbackJson.status === 'OK' && fallbackJson.results?.length > 0) {
+              labs = (fallbackJson.results || []).slice(0, limit).map(p => {
+                const plat = p.geometry?.location?.lat;
+                const plon = p.geometry?.location?.lng;
+                const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+                return {
+                  id: p.place_id,
+                  name: p.name,
+                  lat: plat,
+                  lon: plon,
+                  address: p.vicinity || p.formatted_address || 'Address not available',
+                  distanceMiles: dist,
+                  rating: p.rating,
+                  phone: p.formatted_phone_number,
+                  website: p.website,
+                  openingHours: p.opening_hours?.weekday_text,
+                  logoUrl: null
+                };
+              }).filter(lab => lab.lat && lab.lon);
+            }
+          }
+        } catch (e) {
+          console.warn('Fallback labs search failed:', e.message);
+        }
+      }
       
       // Get actual driving distances using Distance Matrix API
       if (labs.length > 0) {
