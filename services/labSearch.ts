@@ -101,15 +101,10 @@ export async function findNearbyLabs(lat: number, lon: number, lang: string = 'e
     const noCache = opts?.noCache ? '&noCache=1' : '';
     const url = `${API_BASE}/labs/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&search=${searchTerms}${noCache}`;
     
-    console.log('🔬 Fetching labs from:', url);
     const res = await fetch(url);
-    console.log('📡 Labs response status:', res.status, res.statusText);
-    
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    console.log('📦 Labs API Response:', json);
     if (!json.ok) throw new Error(json.error || 'api_error');
-    console.log('✅ Returning real lab data:', json.labs?.length, 'labs');
     return json.labs || [];
   } catch (e) {
     console.warn('❌ Labs API call failed, using fallback (mock)', e);

@@ -41,18 +41,14 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   const noCache = opts?.noCache ? '&noCache=1' : '';
   const url = `${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&brands=${brands}${noCache}`;
   
-  console.log('🔍 Fetching pharmacies from:', url);
   const res = await fetch(url);
-  console.log('📡 Response status:', res.status, res.statusText);
-  
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    console.log('📦 API Response:', json);
     if (!json.ok) throw new Error(json.error || 'api_error');
-    console.log('✅ Returning real pharmacy data:', json.pharmacies?.length, 'pharmacies');
+    console.log('✅ Pharmacy API success:', json.pharmacies?.length, 'pharmacies');
     return json.pharmacies || [];
   } catch (e) {
-    console.warn('❌ API call failed, using fallback (mock)', e);
+    console.warn('❌ Pharmacy API call failed, using fallback (mock)', e);
     // Fallback mock with realistic coordinates and proper distance calculation
     // Using larger offsets to simulate real pharmacy distances (0.01-0.05 degrees = 1-5 km)
     const mockPharmacies = [
