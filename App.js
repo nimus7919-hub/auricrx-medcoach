@@ -29,6 +29,7 @@ import HerbsScreen from './src/screens/HerbsScreen';
 import DocScanScreen from './src/screens/DocScanScreen';
 import MedicalDocumentsScreen from './src/screens/MedicalDocumentsScreen';
 import SmartNotificationsScreen from './src/screens/SmartNotificationsScreen';
+import HealthAnalyticsScreen from './src/screens/HealthAnalyticsScreen';
 import Medications from './components/Medications';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
@@ -1015,6 +1016,12 @@ const handleAskMedicalAI = async () => {
               icon={<Text style={styles.emoji}>🧠</Text>} 
               onPress={() => setRoute('smart-notifications')}
               subtitle="Intelligent reminders & notifications"
+            />
+            <Card 
+              title="Health Analytics" 
+              icon={<Text style={styles.emoji}>📊</Text>} 
+              onPress={() => setRoute('health-analytics')}
+              subtitle="Track metrics, adherence & insights"
             />
             <Card 
               title="Documents" 
@@ -2362,6 +2369,7 @@ return !fontsLoaded ? (
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} /> :
      route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+    route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      <Dashboard />}
 
     {/* Floating AI button */}
