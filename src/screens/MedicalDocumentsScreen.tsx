@@ -505,7 +505,7 @@ export default function MedicalDocumentsScreen({ onClose, theme }: MedicalDocume
               triggerHaptic('light');
             }}
           >
-            <Text style={dynamicStyles.scanButtonText}>📷 Add</Text>
+            <Text style={dynamicStyles.scanButtonText}>Add</Text>
           </TouchableOpacity>
         </View>
         
