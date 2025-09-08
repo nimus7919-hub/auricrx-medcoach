@@ -1402,7 +1402,11 @@ const handleAskMedicalAI = async () => {
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
         
         console.log('🧪 Received labs:', nearbyLabs.length, 'labs');
-        console.log('📏 Sample lab distances:', nearbyLabs.slice(0, 3).map(l => `${l.name}: ${l.distanceMiles} miles`));
+        if (nearbyLabs.length > 0) {
+          console.log('📏 Sample lab distances:', nearbyLabs.slice(0, 3).map(l => `${l.name}: ${l.distanceMiles} miles`));
+        } else {
+          console.log('⚠️ No labs found - this might be a search term or API issue');
+        }
         
         // Add test types to each lab
         const labsWithTests = nearbyLabs.map(lab => ({
