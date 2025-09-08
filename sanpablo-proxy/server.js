@@ -80,7 +80,7 @@ async function spSearchPage(q, currentPage = 0, pageSize = 20) {
   url.searchParams.set('q', q);
   url.searchParams.set('currentPage', String(currentPage));
   url.searchParams.set('pageSize', String(pageSize));
-  url.searchParams.set('fields', 'products(code,name,price(FULL),basePrice(FULL),packaging,unit,measure,images(FULL));pagination');
+  url.searchParams.set('fields', 'products(code,name,price(FULL),basePrice(FULL),images(FULL));pagination');
   url.searchParams.set('format', 'json');
   url.searchParams.set('lang', 'es_MX');
   url.searchParams.set('curr', 'MXN');
@@ -101,7 +101,7 @@ function mapProducts(products = []) {
       chain: 'San Pablo',
       productCode: p.code,
       name: p.name,
-      pack: p.packaging || [p?.measure, p?.unit].filter(Boolean).join(' '),
+      pack: null, // Simplified for now
       price: value,
       currency,
       image: p?.images?.[0]?.url || null
