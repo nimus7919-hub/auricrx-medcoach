@@ -65,7 +65,7 @@ app.get("/api/sanpablo/search", async (req, res) => {
     url.searchParams.set('pageSize', String(pageSize));
     url.searchParams.set('currentPage', String(currentPage));
     url.searchParams.set('fields',
-      'products(code,name,basePrice(FULL),price(FULL),images(FULL));pagination'
+      'products(code,name,basePrice(FULL),price(FULL),images(FULL))'
     );
     url.searchParams.set('format', 'json');
 
