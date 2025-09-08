@@ -48,28 +48,8 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
     console.log('✅ Pharmacy API success:', json.pharmacies?.length, 'pharmacies');
     return json.pharmacies || [];
   } catch (e) {
-    console.warn('❌ Pharmacy API call failed, using fallback (mock)', e);
-    // Fallback mock with realistic coordinates and proper distance calculation
-    // Using larger offsets to simulate real pharmacy distances (0.01-0.05 degrees = 1-5 km)
-    const mockPharmacies = [
-      { id: "mock-cvs",  name: "CVS Pharmacy",     lat: lat+0.015, lon: lon+0.015, address: "123 Main St",  logoUrl: "", distanceMiles: 0.8 },
-      { id: "mock-wal",  name: "Walgreens",        lat: lat+0.025, lon: lon-0.010, address: "45 Oak Ave",   logoUrl: "", distanceMiles: 1.1 },
-      { id: "mock-rite", name: "Rite Aid",         lat: lat-0.020, lon: lon+0.030, address: "8 Pine Rd",    logoUrl: "", distanceMiles: 1.3 },
-      { id: "mock-wmt",  name: "Walmart Pharmacy", lat: lat-0.030, lon: lon-0.025, address: "220 Market",   logoUrl: "", distanceMiles: 1.9 },
-      { id: "mock-cost", name: "Costco Pharmacy",  lat: lat+0.040, lon: lon+0.035, address: "5 Lake Dr",    logoUrl: "", distanceMiles: 2.4 },
-      { id: "mock-tar",  name: "Target (CVS)",     lat: lat+0.050, lon: lon-0.040, address: "77 River Rd",  logoUrl: "", distanceMiles: 3.1 },
-    ];
-    
-    // Calculate actual distances using Haversine formula
-    return mockPharmacies.map(pharmacy => {
-      const distanceKm = calculateDistance(lat, lon, pharmacy.lat, pharmacy.lon);
-      const distanceMiles = distanceKm * 0.621371; // Convert km to miles
-      
-      return {
-        ...pharmacy,
-        distanceMiles: distanceMiles
-      };
-    });
+    console.error('❌ Pharmacy API call failed:', e);
+    throw new Error(`Failed to fetch pharmacies: ${e.message}`);
   }
 }
 

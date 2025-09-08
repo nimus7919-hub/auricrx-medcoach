@@ -1115,6 +1115,8 @@ const handleAskMedicalAI = async () => {
         
         const { coords } = await Location.getCurrentPositionAsync({});
         
+        console.log('📍 User coordinates:', coords.latitude, coords.longitude);
+        
         // Import the pharmacy search function
         const { findNearbyPharmacies } = await import('./services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
@@ -1392,6 +1394,8 @@ const handleAskMedicalAI = async () => {
         }
         
         const { coords } = await Location.getCurrentPositionAsync({});
+        
+        console.log('📍 User coordinates for labs:', coords.latitude, coords.longitude);
         
         // Import the lab search function
         const { findNearbyLabs, getTestTypesForLab } = await import('./services/labSearch');
