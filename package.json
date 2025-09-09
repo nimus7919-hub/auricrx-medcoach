@@ -46,13 +46,24 @@
     "react": "^19.0.0",
     "react-i18next": "^15.7.3",
     "react-native": "0.79.5",
-    "react-native-dotenv": "^3.4.11"
+    "react-native-dotenv": "^3.4.11",
+    "expo-constants": "~17.1.7",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~19.0.10",
     "dotenv": "^17.2.1",
     "typescript": "~5.8.3"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["@react-native-ml-kit/text-recognition", "pdf-lib"],
+        "listUnknownPackages": false
+      }
+    }
   },
   "private": true
 }
