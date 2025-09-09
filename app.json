@@ -3,7 +3,16 @@
     "name": "AuricRx MedCoach",
     "slug": "auricrx-medcoach",
     "version": "1.0.0",
-    "assetBundlePatterns": ["**/*"],
-    "web": { "favicon": "./assets/auricrx-logo.png" }
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "web": {
+      "favicon": "./assets/auricrx-logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "db976ea9-7756-4bdb-ba4e-7563b0d3597b"
+      }
+    }
   }
 }

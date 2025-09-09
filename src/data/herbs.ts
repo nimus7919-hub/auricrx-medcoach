@@ -9,22 +9,61 @@ export type Herb = {
   };
 };
 
-// Helper function to safely require images with fallback
-const safeRequireImage = (path: string) => {
-  try {
-    return require(path);
-  } catch (error) {
-    console.warn(`Failed to load image: ${path}`, error);
-    // Return a placeholder or default image
-    return require('../../assets/icons/herb_emoji_transparent.png');
-  }
+// Static image mapping - React Native requires static require() calls
+const herbImages = {
+  'damiana': require('../../assets/herbs/damiana.png'),
+  'epazote': require('../../assets/herbs/epazote.png'),
+  'dandelion': require('../../assets/herbs/dandelion.png'),
+  'chamomile': require('../../assets/herbs/chamomile.png'),
+  'garlic': require('../../assets/herbs/garlic.png'),
+  'prunella_vulgaris': require('../../assets/herbs/prunella_vulgaris.png'),
+  'tagetes_lucida': require('../../assets/herbs/tagetes_lucida.png'),
+  'clinopodium_mexicanum': require('../../assets/herbs/clinopodium_mexicanum.png'),
+  'litsea_glaucescens': require('../../assets/herbs/litsea_glaucescens.png'),
+  'artemisia_annua': require('../../assets/herbs/artemisia_annua.png'),
+  'aloe_vera': require('../../assets/herbs/aloe_vera.png'),
+  'ginger': require('../../assets/herbs/ginger.png'),
+  'echinacea': require('../../assets/herbs/echinacea.png'),
+  'ginkgo_biloba': require('../../assets/herbs/ginkgo_biloba.png'),
+  'notoginseng': require('../../assets/herbs/notoginseng.png'),
+  'turmeric': require('../../assets/herbs/turmeric.png'),
+  'rosemary': require('../../assets/herbs/rosemary.png'),
+  'parsley': require('../../assets/herbs/parsley.png'),
+  'fennel': require('../../assets/herbs/fennel.png'),
+  'aristolochia': require('../../assets/herbs/aristolochia.png'),
+  'mexican_oregano': require('../../assets/herbs/mexican_oregano.png'),
+  'yerba_mansa': require('../../assets/herbs/yerba_mansa.png'),
+  'gray_sarsaparilla': require('../../assets/herbs/gray_sarsaparilla.png'),
+  'pericon': require('../../assets/herbs/pericon.png'),
+  'heliopsis_longipes': require('../../assets/herbs/heliopsis_longipes.png'),
+  'lippia_dulcis': require('../../assets/herbs/lippia_dulcis.png'),
+  'agastache_rugosa': require('../../assets/herbs/agastache_rugosa.png'),
+  'astragalus': require('../../assets/herbs/astragalus.png'),
+  'liquorice': require('../../assets/herbs/liquorice.png'),
+  'angelica_sinensis': require('../../assets/herbs/angelica_sinensis.png'),
+  'ganoderma': require('../../assets/herbs/ganoderma.png'),
+  'cinnamon': require('../../assets/herbs/cinnamon.png'),
+  'st_johns_wort': require('../../assets/herbs/st_johns_wort.png'),
+  'eucalyptus': require('../../assets/herbs/eucalyptus.png'),
+  'peppermint': require('../../assets/herbs/peppermint.png'),
+  'milk_thistle': require('../../assets/herbs/milk_thistle.png'),
+  'lavender': require('../../assets/herbs/lavender.png'),
+  'holy_basil': require('../../assets/herbs/holy_basil.png'),
+  'hibiscus': require('../../assets/herbs/hibiscus.png'),
+  'cilantro': require('../../assets/herbs/cilantro.png'),
+  'default': require('../../assets/icons/herb_emoji_transparent.png')
+};
+
+// Helper function to get herb image with fallback
+const getHerbImage = (herbName: string) => {
+  return herbImages[herbName as keyof typeof herbImages] || herbImages.default;
 };
 
 export const HERBS: Herb[] = [
   // 1) Damiana (Turnera diffusa) – Mexico / US
 {
   id: '1',
-  image: safeRequireImage('../../assets/herbs/damiana.png'),
+  image: getHerbImage('damiana'),
   names: {
     en: 'Damiana',
     es: 'Damiana',
@@ -48,7 +87,7 @@ export const HERBS: Herb[] = [
 // 2) Epazote (Dysphania ambrosioides) – Mexico
 {
   id: '2',
-  image: safeRequireImage('../../assets/herbs/epazote.png'),
+  image: getHerbImage('epazote'),
   names: {
     en: 'Epazote',
     es: 'Epazote',
@@ -72,7 +111,7 @@ export const HERBS: Herb[] = [
 // 3) Dandelion (Taraxacum officinale) – Mexico / North America / China
 {
   id: '3',
-  image: safeRequireImage('../../assets/herbs/dandelion.png'),
+  image: getHerbImage('dandelion'),
   names: {
     en: 'Dandelion',
     es: 'Diente de león',
@@ -96,7 +135,7 @@ export const HERBS: Herb[] = [
 // 4) Chamomile (Matricaria recutita) – Europe; widely used in US/Mexico/China
 {
   id: '4',
-  image: safeRequireImage('../../assets/herbs/chamomile.png'),
+  image: getHerbImage('chamomile'),
   names: {
     en: 'Chamomile',
     es: 'Manzanilla',
@@ -120,7 +159,7 @@ export const HERBS: Herb[] = [
 // 5) Garlic (Allium sativum) – US/Mexico/China
 {
   id: '5',
-  image: require('../../assets/herbs/garlic.png'),
+  image: getHerbImage('garlic'),
   names: {
     en: 'Garlic',
     es: 'Ajo',
@@ -144,7 +183,7 @@ export const HERBS: Herb[] = [
 // 6) Prunella vulgaris (Selfheal) – North America / China
 {
   id: '6',
-  image: require('../../assets/herbs/prunella_vulgaris.png'),
+  image: getHerbImage("prunella_vulgaris"),
   names: {
     en: 'Selfheal',
     es: 'Autosanadora',
@@ -168,7 +207,7 @@ export const HERBS: Herb[] = [
 // 7) Tagetes lucida (Mexican Marigold / Yauhtli) – Mexico
 {
   id: '7',
-  image: require('../../assets/herbs/tagetes_lucida.png'),
+  image: getHerbImage("tagetes_lucida"),
   names: {
     en: 'Tagetes lucida',
     es: 'Yauhtli / Clavel de tierra',
@@ -192,7 +231,7 @@ export const HERBS: Herb[] = [
 // 8) Clinopodium mexicanum (“Toronjil de monte”) – Mexico
 {
   id: '8',
-  image: require('../../assets/herbs/clinopodium_mexicanum.png'),
+  image: getHerbImage("clinopodium_mexicanum"),
   names: {
     en: 'Clinopodium mexicanum',
     es: 'Toronjil de monte',
@@ -216,7 +255,7 @@ export const HERBS: Herb[] = [
 // 9) Litsea glaucescens (Mexican Bay Leaf) – Mexico
 {
   id: '9',
-  image: require('../../assets/herbs/litsea_glaucescens.png'),
+  image: getHerbImage("litsea_glaucescens"),
   names: {
     en: 'Mexican Bay Leaf',
     es: 'Laurel Mexicano',
@@ -240,7 +279,7 @@ export const HERBS: Herb[] = [
 // 10) Artemisia annua (Sweet Wormwood) – China
 {
   id: '10',
-  image: require('../../assets/herbs/artemisia_annua.png'),
+  image: getHerbImage("artemisia_annua"),
   names: {
     en: 'Sweet Wormwood',
     es: 'Artemisa dulce',
@@ -264,7 +303,7 @@ export const HERBS: Herb[] = [
 // 11) Aloe Vera – Mexico / US / China
 {
   id: '11',
-  image: require('../../assets/herbs/aloe_vera.png'),
+  image: getHerbImage("aloe_vera"),
   names: { en: 'Aloe Vera', es: 'Aloe vera', zh: '芦荟' },
   details: {
     origin: { en: 'North Africa; naturalized in Mexico, US, and China', es: 'África del Norte; naturalizada en México, EE. UU. y China', zh: '北非；在墨西哥、美国和中国广泛分布' },
@@ -280,7 +319,7 @@ export const HERBS: Herb[] = [
 // 12) Ginger (Zingiber officinale) – US / China / Mexico
 {
   id: '12',
-  image: require('../../assets/herbs/ginger.png'),
+  image: getHerbImage("ginger"),
   names: { en: 'Ginger', es: 'Jengibre', zh: '姜' },
   details: {
     origin: { en: 'Southeast Asia; widely used globally', es: 'Sudeste Asiático; ampliamente usado globalmente', zh: '东南亚；全球广泛使用' },
@@ -296,7 +335,7 @@ export const HERBS: Herb[] = [
 // 13) Echinacea – US
 {
   id: '13',
-  image: require('../../assets/herbs/echinacea.png'),
+  image: getHerbImage("echinacea"),
   names: { en: 'Echinacea', es: 'Equinácea', zh: '紫锥花' },
   details: {
     origin: { en: 'North America', es: 'Norteamérica', zh: '北美' },
@@ -312,7 +351,7 @@ export const HERBS: Herb[] = [
 // 14) Ginkgo biloba – US / China
 {
   id: '14',
-  image: require('../../assets/herbs/ginkgo_biloba.png'),
+  image: getHerbImage("ginkgo_biloba"),
   names: { en: 'Ginkgo', es: 'Ginkgo', zh: '银杏' },
   details: {
     origin: { en: 'China; introduced to US', es: 'China; introducido en EE. UU.', zh: '中国；引入美国' },
@@ -328,7 +367,7 @@ export const HERBS: Herb[] = [
 // 15) Panax notoginseng – China
 {
   id: '15',
-  image: require('../../assets/herbs/notoginseng.png'),
+  image: getHerbImage("notoginseng"),
   names: { en: 'Notoginseng', es: 'Notoginseng', zh: '三七' },
   details: {
     origin: { en: 'China', es: 'China', zh: '中国' },
@@ -344,7 +383,7 @@ export const HERBS: Herb[] = [
 // 16) Turmeric (Curcuma longa) – US / China / Mexico
 {
   id: '16',
-  image: require('../../assets/herbs/turmeric.png'),
+  image: getHerbImage("turmeric"),
   names: { en: 'Turmeric', es: 'Cúrcuma', zh: '姜黄' },
   details: {
     origin: { en: 'Southeast Asia; used globally', es: 'Sudeste Asiático; uso global', zh: '东南亚；全球使用' },
@@ -360,7 +399,7 @@ export const HERBS: Herb[] = [
 // 17) Rosemary – US / Mexico
 {
   id: '17',
-  image: require('../../assets/herbs/rosemary.png'),
+  image: getHerbImage("rosemary"),
   names: { en: 'Rosemary', es: 'Romero', zh: '迷迭香' },
   details: {
     origin: { en: 'Mediterranean; widely used in Mexico and US', es: 'Mediterráneo; ampliamente usado en México y EE. UU.', zh: '地中海；在墨西哥和美国广泛使用' },
@@ -376,7 +415,7 @@ export const HERBS: Herb[] = [
 // 18) Parsley (Petroselinum crispum) – US / Mexico
 {
   id: '18',
-  image: require('../../assets/herbs/parsley.png'),
+  image: getHerbImage("parsley"),
   names: { en: 'Parsley', es: 'Perejil', zh: '欧芹' },
   details: {
     origin: { en: 'Mediterranean; used globally', es: 'Mediterráneo; uso global', zh: '地中海；全球使用' },
@@ -392,7 +431,7 @@ export const HERBS: Herb[] = [
 // 19) Fennel – US / Mexico / China
 {
   id: '19',
-  image: require('../../assets/herbs/fennel.png'),
+  image: getHerbImage("fennel"),
   names: { en: 'Fennel', es: 'Hinojo', zh: '茴香' },
   details: {
     origin: { en: 'Mediterranean; adopted globally', es: 'Mediterráneo; adoptado globalmente', zh: '地中海；全球采用' },
@@ -408,7 +447,7 @@ export const HERBS: Herb[] = [
 // 20) Aristolochia odoratissima (Pipe vine) – Mexico (caution)
 {
   id: '20',
-  image: require('../../assets/herbs/aristolochia.png'),
+  image: getHerbImage("aristolochia"),
   names: { en: 'Aristolochia odoratissima', es: 'Aristolochia odoratissima', zh: '马兜铃属' },
   details: {
     origin: { en: 'Mexico', es: 'México', zh: '墨西哥' },
@@ -424,7 +463,7 @@ export const HERBS: Herb[] = [
 // 21) Mexican Oregano (Lippia graveolens) – Mexico / US
 {
   id: '21',
-  image: require('../../assets/herbs/mexican_oregano.png'),
+  image: getHerbImage("mexican_oregano"),
   names: { en: 'Mexican Oregano', es: 'Orégano Mexicano', zh: '墨西哥牛至' },
   details: {
     origin: { en: 'Mexico', es: 'México', zh: '墨西哥' },
@@ -440,7 +479,7 @@ export const HERBS: Herb[] = [
 // 22) Yerba Mansa (Anemopsis californica) – US / Mexico
 {
   id: '22',
-  image: require('../../assets/herbs/yerba_mansa.png'),
+  image: getHerbImage("yerba_mansa"),
   names: { en: 'Yerba Mansa', es: 'Yerba Mansa', zh: '美洲草锰' },
   details: {
     origin: { en: 'Southwestern USA; Mexico', es: 'Suroeste de EE. UU.; México', zh: '美国西南；墨西哥' },
@@ -456,7 +495,7 @@ export const HERBS: Herb[] = [
 // 23) Gray Sarsaparilla (Smilax aristolochiifolia) – Mexico
 {
   id: '23',
-  image: require('../../assets/herbs/gray_sarsaparilla.png'),
+  image: getHerbImage("gray_sarsaparilla"),
   names: { en: 'Gray Sarsaparilla', es: 'Zarzaparrilla Gris', zh: '灰人参藤' },
   details: {
     origin: { en: 'Mexico, Central America', es: 'México, Centroamérica', zh: '墨西哥、中美洲' },
@@ -472,7 +511,7 @@ export const HERBS: Herb[] = [
 // 24) Pericón (Tagetes erecta) – Mexico
 {
   id: '24',
-  image: require('../../assets/herbs/pericon.png'),
+  image: getHerbImage("pericon"),
   names: { en: 'Mexican Marigold', es: 'Pericón / Cempasúchil', zh: '墨西哥万寿菊' },
   details: {
     origin: { en: 'Mexico, Guatemala', es: 'México, Guatemala', zh: '墨西哥、危地马拉' },
@@ -488,7 +527,7 @@ export const HERBS: Herb[] = [
 // 25) Heliopsis longipes (Chilcuague) – Mexico
 {
   id: '25',
-  image: require('../../assets/herbs/heliopsis_longipes.png'),
+  image: getHerbImage("heliopsis_longipes"),
   names: { en: 'Heliopsis longipes', es: 'Chilcuague', zh: '长管花' },
   details: {
     origin: { en: 'Mexico', es: 'México', zh: '墨西哥' },
@@ -504,7 +543,7 @@ export const HERBS: Herb[] = [
 // 26) Lippia dulcis (Aztec Sweet Herb) – Mexico
 {
   id: '26',
-  image: require('../../assets/herbs/lippia_dulcis.png'),
+  image: getHerbImage("lippia_dulcis"),
   names: { en: 'Aztec Sweet Herb', es: 'Hierba Dulce', zh: '阿兹特克甜草' },
   details: {
     origin: { en: 'Southern Mexico', es: 'Sur de México', zh: '墨西哥南部' },
@@ -520,7 +559,7 @@ export const HERBS: Herb[] = [
 // 27) Agastache rugosa (Korean Mint) – China / US
 {
   id: '27',
-  image: require('../../assets/herbs/agastache_rugosa.png'),
+  image: getHerbImage("agastache_rugosa"),
   names: { en: 'Korean Mint', es: 'Menta Coreana', zh: '藿香' },
   details: {
     origin: { en: 'China, Korea', es: 'China, Corea', zh: '中国、韩国' },
@@ -536,7 +575,7 @@ export const HERBS: Herb[] = [
 // 28) Astragalus (Astragalus membranaceus) – China
 {
   id: '28',
-  image: require('../../assets/herbs/astragalus.png'),
+  image: getHerbImage("astragalus"),
   names: { en: 'Astragalus', es: 'Astrágalo', zh: '黄芪' },
   details: {
     origin: { en: 'China', es: 'China', zh: '中国' },
@@ -552,7 +591,7 @@ export const HERBS: Herb[] = [
 // 29) Liquorice (Glycyrrhiza uralensis) – China
 {
   id: '29',
-  image: require('../../assets/herbs/liquorice.png'),
+  image: getHerbImage("liquorice"),
   names: { en: 'Licorice', es: 'Regaliz', zh: '甘草' },
   details: {
     origin: { en: 'China', es: 'China', zh: '中国' },
@@ -568,7 +607,7 @@ export const HERBS: Herb[] = [
 // 30) Angelica sinensis (Dong Quai) – China
 {
   id: '30',
-  image: require('../../assets/herbs/angelica_sinensis.png'),
+  image: getHerbImage("angelica_sinensis"),
   names: { en: 'Dong Quai', es: 'Angélica China', zh: '当归' },
   details: {
     origin: { en: 'China', es: 'China', zh: '中国' },
@@ -584,7 +623,7 @@ export const HERBS: Herb[] = [
 // 31) Ganoderma (Lingzhi) – China / US
 {
   id: '31',
-  image: require('../../assets/herbs/ganoderma.png'),
+  image: getHerbImage("ganoderma"),
   names: { en: 'Lingzhi Mushroom', es: 'Seta Lingzhi', zh: '灵芝' },
   details: {
     origin: { en: 'China', es: 'China', zh: '中国' },
@@ -600,7 +639,7 @@ export const HERBS: Herb[] = [
 // 32) Cinnamon (Cinnamomum cassia) – China / Mexico / US
 {
   id: '32',
-  image: require('../../assets/herbs/cinnamon.png'),
+  image: getHerbImage("cinnamon"),
   names: { en: 'Cinnamon', es: 'Canela', zh: '肉桂' },
   details: {
     origin: { en: 'China, Southeast Asia; used globally', es: 'China, Sudeste Asiático; uso global', zh: '中国、东南亚；全球使用' },
@@ -616,7 +655,7 @@ export const HERBS: Herb[] = [
 // 33) St. John’s Wort (Hypericum perforatum) – US / Europe
 {
   id: '33',
-  image: require('../../assets/herbs/st_johns_wort.png'),
+  image: getHerbImage("st_johns_wort"),
   names: { en: 'St. John’s Wort', es: 'Hipérico', zh: '贯叶连翘' },
   details: {
     origin: { en: 'Europe; used in US herbalism', es: 'Europa; usado en herbolaria de EE. UU.', zh: '欧洲；也用于美国草药学' },
@@ -632,7 +671,7 @@ export const HERBS: Herb[] = [
 // 34) Eucalyptus – US / Global
 {
   id: '34',
-  image: require('../../assets/herbs/eucalyptus.png'),
+  image: getHerbImage("eucalyptus"),
   names: { en: 'Eucalyptus', es: 'Eucalipto', zh: '桉树' },
   details: {
     origin: { en: 'Australia; used in US and globally', es: 'Australia; usado en EE. UU. y globalmente', zh: '澳大利亚；在美国和全球使用' },
@@ -648,7 +687,7 @@ export const HERBS: Herb[] = [
 // 35) Peppermint – US / Global
 {
   id: '35',
-  image: require('../../assets/herbs/peppermint.png'),
+  image: getHerbImage("peppermint"),
   names: { en: 'Peppermint', es: 'Menta Piperita', zh: '薄荷' },
   details: {
     origin: { en: 'Europe; used globally including US', es: 'Europa; usado globalmente incluido EE. UU.', zh: '欧洲；全球使用包括美国' },
@@ -664,7 +703,7 @@ export const HERBS: Herb[] = [
 // 36) Milk Thistle (Silybum marianum) – US / Europe
 {
   id: '36',
-  image: require('../../assets/herbs/milk_thistle.png'),
+  image: getHerbImage("milk_thistle"),
   names: { en: 'Milk Thistle', es: 'Cardo Mariano', zh: '乳蓟' },
   details: {
     origin: { en: 'Mediterranean; used in US', es: 'Mediterráneo; usado en EE. UU.', zh: '地中海；美国亦用' },
@@ -680,7 +719,7 @@ export const HERBS: Herb[] = [
 // 37) Lavender – US / Global
 {
   id: '37',
-  image: require('../../assets/herbs/lavender.png'),
+  image: getHerbImage("lavender"),
   names: { en: 'Lavender', es: 'Lavanda', zh: '薰衣草' },
   details: {
     origin: { en: 'Mediterranean; used globally', es: 'Mediterráneo; uso global', zh: '地中海；全球使用' },
@@ -696,7 +735,7 @@ export const HERBS: Herb[] = [
 // 38) Holy Basil (Tulsi) – Global
 {
   id: '38',
-  image: require('../../assets/herbs/holy_basil.png'),
+  image: getHerbImage("holy_basil"),
   names: { en: 'Holy Basil', es: 'Albahaca Sagrada', zh: '圣罗勒' },
   details: {
     origin: { en: 'India; used globally in herbalism', es: 'India; uso global en herbolaria', zh: '印度；全球草本应用' },
@@ -712,7 +751,7 @@ export const HERBS: Herb[] = [
 // 39) Hibiscus – US / Mexico / Global
 {
   id: '39',
-  image: require('../../assets/herbs/hibiscus.png'),
+  image: getHerbImage("hibiscus"),
   names: { en: 'Hibiscus', es: 'Hibisco', zh: '木槿' },
   details: {
     origin: { en: 'Tropical regions; used globally including Mexico and US', es: 'Regiones tropicales; uso global incluso México y EE. UU.', zh: '热带地区；全球使用包括墨西哥和美国' },
@@ -728,7 +767,7 @@ export const HERBS: Herb[] = [
 // 40) Cilantro (Coriandrum sativum) – Mexico / US / China
 {
   id: '40',
-  image: require('../../assets/herbs/cilantro.png'),
+  image: getHerbImage("cilantro"),
   names: { en: 'Cilantro', es: 'Cilantro', zh: '香菜' },
   details: {
     origin: { en: 'Mediterranean; used globally', es: 'Mediterráneo; uso global', zh: '地中海；全球使用' },
@@ -750,3 +789,5 @@ export const HERBS: Herb[] = [
 // - Origin information
 // - Poisonous status
 // - Summary description
+
+
