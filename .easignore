@@ -1,9 +1,11 @@
 # EAS Build ignore file
 # Exclude large or problematic assets that might cause build issues
 
-# Exclude large image files that might cause AAPT compilation errors
+# Exclude problematic herb images that cause build failures
+assets/herbs/damiana.png
 assets/herbs/chamomile.png
-assets/herbs/*.png
+assets/herbs/epazote.png
+assets/herbs/dandelion.png
 
 # Exclude other potentially problematic files
 node_modules/
@@ -17,3 +19,6 @@ Thumbs.db
 .env.local
 .env.development
 .env.test
+
+# Exclude large assets to reduce build size
+assets/herbs/*.png

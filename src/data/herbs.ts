@@ -9,11 +9,22 @@ export type Herb = {
   };
 };
 
+// Helper function to safely require images with fallback
+const safeRequireImage = (path: string) => {
+  try {
+    return require(path);
+  } catch (error) {
+    console.warn(`Failed to load image: ${path}`, error);
+    // Return a placeholder or default image
+    return require('../../assets/icons/herb_emoji_transparent.png');
+  }
+};
+
 export const HERBS: Herb[] = [
   // 1) Damiana (Turnera diffusa) – Mexico / US
 {
   id: '1',
-  image: require('../../assets/herbs/damiana.png'),
+  image: safeRequireImage('../../assets/herbs/damiana.png'),
   names: {
     en: 'Damiana',
     es: 'Damiana',
@@ -37,7 +48,7 @@ export const HERBS: Herb[] = [
 // 2) Epazote (Dysphania ambrosioides) – Mexico
 {
   id: '2',
-  image: require('../../assets/herbs/epazote.png'),
+  image: safeRequireImage('../../assets/herbs/epazote.png'),
   names: {
     en: 'Epazote',
     es: 'Epazote',
@@ -61,7 +72,7 @@ export const HERBS: Herb[] = [
 // 3) Dandelion (Taraxacum officinale) – Mexico / North America / China
 {
   id: '3',
-  image: require('../../assets/herbs/dandelion.png'),
+  image: safeRequireImage('../../assets/herbs/dandelion.png'),
   names: {
     en: 'Dandelion',
     es: 'Diente de león',
@@ -85,7 +96,7 @@ export const HERBS: Herb[] = [
 // 4) Chamomile (Matricaria recutita) – Europe; widely used in US/Mexico/China
 {
   id: '4',
-  image: require('../../assets/herbs/chamomile.png'),
+  image: safeRequireImage('../../assets/herbs/chamomile.png'),
   names: {
     en: 'Chamomile',
     es: 'Manzanilla',

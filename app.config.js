@@ -16,6 +16,7 @@
       'expo-router',
       'expo-localization',
       'expo-font',
+      'expo-audio',
       // 'expo-camera' // not required unless you want the plugin's custom options
     ['expo-location', {
         locationWhenInUsePermission:
