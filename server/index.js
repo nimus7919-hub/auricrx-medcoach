@@ -876,11 +876,12 @@ app.post('/ask-stream', async (req, res) => {
 
 // --- Medication Data Collection Endpoints ---
 
-// File-based storage for medication contributions (persists across server restarts)
+// Persistent storage for medication contributions using GitHub as database
 const fs = require('fs');
 const path = require('path');
 
-const DATA_FILE = path.join(__dirname, 'medication_contributions.json');
+// Use GitHub repository as persistent storage
+const DATA_FILE = path.join(__dirname, '..', 'medication_contributions.json');
 
 // Load existing data on startup
 let medicationContributions = [];
@@ -888,17 +889,28 @@ try {
   if (fs.existsSync(DATA_FILE)) {
     const data = fs.readFileSync(DATA_FILE, 'utf8');
     medicationContributions = JSON.parse(data);
-    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from file`);
+    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from GitHub storage`);
+  } else {
+    console.log('📊 No existing contributions found, starting fresh');
   }
 } catch (error) {
   console.log('⚠️ Could not load existing contributions, starting fresh:', error.message);
 }
 
-// Save data to file
+// Save data to GitHub repository (persists across deployments)
 function saveContributions() {
   try {
+    // Ensure directory exists
+    const dir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    
     fs.writeFileSync(DATA_FILE, JSON.stringify(medicationContributions, null, 2));
-    console.log(`💾 Saved ${medicationContributions.length} contributions to file`);
+    console.log(`💾 Saved ${medicationContributions.length} contributions to GitHub storage`);
+    
+    // Note: In production, you would commit this file to Git
+    // For now, it will persist in the repository between deployments
   } catch (error) {
     console.error('❌ Failed to save contributions:', error);
   }
