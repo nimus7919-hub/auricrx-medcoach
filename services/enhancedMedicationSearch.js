@@ -46,14 +46,30 @@ class EnhancedMedicationSearch {
             excelWords.some(eWord => eWord.includes(pWord) || pWord.includes(eWord))
           );
           
-          // Special case: if one name is a subset of the other, consider it a match
+          // Special case: if one name is a subset of the other, but only for specific known cases
+          // This handles specific cases like "H-E-B El Mirador" vs "HEB"
           if (normalizedPharmacyName.includes(normalizedExcelPharmacy) || 
               normalizedExcelPharmacy.includes(normalizedPharmacyName)) {
-            return true;
+            // Only allow subset matching for specific known patterns
+            const allowedSubsets = [
+              { app: 'heb el mirador', excel: 'heb' },
+              { app: 'h-e-b el mirador', excel: 'heb' },
+              { app: 'farmacia guadalajara', excel: 'farmacia guadalajara' }
+            ];
+            
+            const isAllowedSubset = allowedSubsets.some(pattern => 
+              (normalizedPharmacyName.includes(pattern.app) && normalizedExcelPharmacy.includes(pattern.excel)) ||
+              (normalizedExcelPharmacy.includes(pattern.app) && normalizedPharmacyName.includes(pattern.excel))
+            );
+            
+            if (isAllowedSubset) {
+              return true;
+            }
           }
           
-          // If at least 30% of words match (reduced from 50%), consider it a match
-          return matchingWords.length >= Math.max(1, pharmacyWords.length * 0.3);
+          // If at least 80% of words match (increased from 70%), consider it a match
+          // This prevents partial matches like "Aurrera Store" matching "Aurrera"
+          return matchingWords.length >= Math.max(1, pharmacyWords.length * 0.8);
         });
         
         if (pharmacyMatches.length > 0) {
