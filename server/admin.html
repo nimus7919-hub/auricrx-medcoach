@@ -297,6 +297,7 @@
         <div class="controls">
             <input type="text" id="searchInput" class="search-box" placeholder="Search medications, stores, or addresses...">
             <button class="btn btn-primary" onclick="loadData()">🔄 Refresh</button>
+            <button class="btn btn-primary" onclick="testAPI()">🧪 Test API</button>
             <button class="btn btn-success" onclick="exportData('csv')">📊 Export CSV</button>
             <button class="btn btn-success" onclick="exportData('json')">📄 Export JSON</button>
         </div>
@@ -508,8 +509,26 @@
             }
         }
 
+        // Test API function
+        async function testAPI() {
+            try {
+                console.log('🧪 Testing API connection...');
+                const response = await fetch('https://auricrx-medcoach.onrender.com/medication-contributions');
+                console.log('📡 Test response status:', response.status);
+                const data = await response.json();
+                console.log('📊 Test data received:', data);
+                alert(`API Test: ${response.status} - ${data.contributions.length} contributions found`);
+            } catch (error) {
+                console.error('❌ API test failed:', error);
+                alert(`API Test Failed: ${error.message}`);
+            }
+        }
+
         // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Admin page loaded, starting data fetch...');
+            loadData();
+        });
     </script>
 </body>
 </html>
