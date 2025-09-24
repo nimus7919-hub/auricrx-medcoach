@@ -27,11 +27,34 @@ class EnhancedMedicationSearch {
       const enhancedResults = [];
       
       for (const pharmacy of pharmacies) {
-        // Find Excel matches for this specific pharmacy
-        const pharmacyMatches = excelMatches.filter(match => 
-          this.excelReader.normalizePharmacyName(match.Pharmacy) === 
-          this.excelReader.normalizePharmacyName(pharmacy.name)
-        );
+        // Find Excel matches for this specific pharmacy with fuzzy matching
+        const normalizedPharmacyName = this.excelReader.normalizePharmacyName(pharmacy.name);
+        const pharmacyMatches = excelMatches.filter(match => {
+          const normalizedExcelPharmacy = this.excelReader.normalizePharmacyName(match.Pharmacy);
+          
+          // Exact match
+          if (normalizedExcelPharmacy === normalizedPharmacyName) {
+            return true;
+          }
+          
+          // Fuzzy match for variations (e.g., "H-E-B El Mirador" vs "HEB")
+          const pharmacyWords = normalizedPharmacyName.split(' ').filter(w => w.length > 1);
+          const excelWords = normalizedExcelPharmacy.split(' ').filter(w => w.length > 1);
+          
+          // Check if any significant words match
+          const matchingWords = pharmacyWords.filter(pWord => 
+            excelWords.some(eWord => eWord.includes(pWord) || pWord.includes(eWord))
+          );
+          
+          // Special case: if one name is a subset of the other, consider it a match
+          if (normalizedPharmacyName.includes(normalizedExcelPharmacy) || 
+              normalizedExcelPharmacy.includes(normalizedPharmacyName)) {
+            return true;
+          }
+          
+          // If at least 30% of words match (reduced from 50%), consider it a match
+          return matchingWords.length >= Math.max(1, pharmacyWords.length * 0.3);
+        });
         
         if (pharmacyMatches.length > 0) {
           // Use the best match (highest similarity)
@@ -62,6 +85,10 @@ class EnhancedMedicationSearch {
             }
           });
         } else {
+          // Debug: Log why no matches were found
+          console.log(`🔍 No Excel matches for ${pharmacy.name} (normalized: "${normalizedPharmacyName}")`);
+          const sampleExcelPharmacies = [...new Set(excelMatches.slice(0, 10).map(m => m.Pharmacy))];
+          console.log(`🔍 Sample Excel pharmacies: ${sampleExcelPharmacies.join(', ')}`);
           // No Excel match found - show "Price not available"
           enhancedResults.push({
             ...pharmacy,
