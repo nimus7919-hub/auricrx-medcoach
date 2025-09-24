@@ -3712,3 +3712,7 @@ const consultStyles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+
+// Register the app with Expo
+import { AppRegistry } from 'react-native';
+AppRegistry.registerComponent('main', () => App);
