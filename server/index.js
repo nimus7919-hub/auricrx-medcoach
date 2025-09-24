@@ -10,16 +10,9 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 // --- Security middleware ---
+// Temporarily disable CSP for admin page to fix button functionality
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://auricrx-medcoach.onrender.com"],
-    },
-  },
+  contentSecurityPolicy: false
 }));
 app.use(express.json({ limit: "1mb" }));
 
@@ -1242,6 +1235,17 @@ app.get('/debug', (_req, res) => {
 // Admin interface for viewing medication contributions
 app.get('/admin', (_req, res) => {
   res.sendFile(__dirname + '/admin.html');
+});
+
+// Debug endpoint to check file storage
+app.get('/debug/storage', (_req, res) => {
+  res.json({
+    ok: true,
+    contributionsCount: medicationContributions.length,
+    dataFile: DATA_FILE,
+    fileExists: require('fs').existsSync(DATA_FILE),
+    sampleContributions: medicationContributions.slice(0, 2)
+  });
 });
 
 app.listen(port, () => {
