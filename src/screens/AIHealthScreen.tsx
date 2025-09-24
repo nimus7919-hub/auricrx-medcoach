@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Animated,
   StatusBar,
+  Image,
   Platform,
   Vibration,
   Dimensions,
@@ -16,20 +17,67 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { useTranslation } from 'react-i18next';
-import AIHealthService, { HealthInsight, SymptomAnalysis, DrugInteraction, VoiceNote } from '../services/aiHealthService';
+import DynamicText from '../components/DynamicText';
+import { useWallpaper } from '../contexts/WallpaperContext';
+// Simplified AI Health - no external service dependencies
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface AIHealthScreenProps {
   onClose: () => void;
   theme?: any;
+  S?: any;
 }
 
-type VoiceNoteType = 'symptom' | 'medication_side_effect' | 'appointment_note' | 'general_health';
 
-export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) {
-  const { t } = useTranslation();
+// Type definitions with fallbacks
+interface HealthInsight {
+  id: string;
+  type: 'medication_adherence' | 'symptom_pattern' | 'health_trend' | 'risk_assessment' | 'lifestyle' | 'appointment_reminder';
+  title: string;
+  description: string;
+  severity: 'info' | 'warning' | 'critical';
+  actionable: boolean;
+  actionItems: string[];
+  relatedData: any;
+  confidence: number;
+  createdAt: string;
+}
+
+interface SymptomAnalysis {
+  id: string;
+  symptoms: string[];
+  severity: 'mild' | 'moderate' | 'severe' | 'emergency';
+  possibleConditions: {
+    condition: string;
+    probability: number;
+    description: string;
+    recommendations: string[];
+  }[];
+  urgency: 'low' | 'medium' | 'high' | 'emergency';
+  recommendations: string[];
+  followUpActions: string[];
+  createdAt: string;
+}
+
+interface DrugInteraction {
+  id: string;
+  drug1: string;
+  drug2: string;
+  severity: 'minor' | 'moderate' | 'major' | 'contraindicated';
+  description: string;
+  clinicalEffects: string[];
+  management: string;
+  references: string[];
+}
+
+
+export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProps) {
+  console.log('AI Health Screen rendering...');
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  
+  // Use S object for translations, fallback to key if not available
+  const t = (key: string) => S?.[key] || key;
   
   // Default theme if not provided
   const defaultTheme = {
@@ -47,31 +95,30 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
   // Generate dynamic styles based on theme
   const getDynamicStyles = () => StyleSheet.create({
     sectionCard: {
-      backgroundColor: currentTheme.card,
+      backgroundColor: getCardBackgroundColor() + 'CC',
       padding: 16,
       borderRadius: 12,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: currentTheme.chip,
+      borderColor: getCardBorderColor(),
     },
     sectionTitle: {
       fontSize: 18,
       fontWeight: '600',
-      color: currentTheme.text,
       marginBottom: 12,
     },
     sectionDescription: {
       fontSize: 14,
-      color: currentTheme.sub,
       marginBottom: 16,
       lineHeight: 20,
     },
     insightCard: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       padding: 12,
       borderRadius: 8,
       marginBottom: 8,
       borderLeftWidth: 4,
+      borderColor: getCardBorderColor(),
     },
     insightHeader: {
       flexDirection: 'row',
@@ -82,7 +129,6 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     insightTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: currentTheme.text,
       flex: 1,
     },
     insightSeverity: {
@@ -98,7 +144,6 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     },
     insightDescription: {
       fontSize: 14,
-      color: currentTheme.text,
       marginBottom: 8,
       lineHeight: 20,
     },
@@ -107,11 +152,10 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     },
     actionItem: {
       fontSize: 12,
-      color: currentTheme.sub,
       marginBottom: 4,
     },
     addButton: {
-      backgroundColor: currentTheme.accent,
+      backgroundColor: currentTheme.accent + 'CC',
       paddingHorizontal: 16,
       paddingVertical: 12,
       borderRadius: 8,
@@ -119,16 +163,17 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       marginTop: 8,
     },
     addButtonText: {
-      color: currentTheme.text,
       fontSize: 14,
       fontWeight: '600',
     },
     featureCard: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       padding: 16,
       borderRadius: 8,
       marginBottom: 12,
       alignItems: 'center',
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     featureIcon: {
       fontSize: 32,
@@ -137,12 +182,10 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     featureTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: currentTheme.text,
       marginBottom: 4,
     },
     featureDescription: {
       fontSize: 12,
-      color: currentTheme.sub,
       textAlign: 'center',
       lineHeight: 16,
     },
@@ -158,7 +201,7 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       zIndex: 1000,
     },
     modalContent: {
-      backgroundColor: currentTheme.card,
+      backgroundColor: getCardBackgroundColor() + 'F0',
       borderRadius: 12,
       padding: 24,
       width: '90%',
@@ -167,7 +210,6 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     modalTitle: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: currentTheme.text,
       marginBottom: 16,
     },
     inputGroup: {
@@ -176,38 +218,42 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     inputLabel: {
       fontSize: 14,
       fontWeight: '500',
-      color: currentTheme.text,
       marginBottom: 8,
     },
     textInput: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       paddingHorizontal: 12,
       paddingVertical: 10,
       borderRadius: 8,
-      color: currentTheme.text,
+      color: getCardTextColor(),
       fontSize: 14,
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     multilineInput: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       paddingHorizontal: 12,
       paddingVertical: 10,
       borderRadius: 8,
-      color: currentTheme.text,
+      color: getCardTextColor(),
       fontSize: 14,
       height: 80,
       textAlignVertical: 'top',
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     pickerButton: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       paddingHorizontal: 12,
       paddingVertical: 10,
       borderRadius: 8,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     pickerText: {
-      color: currentTheme.text,
       fontSize: 14,
     },
     modalButtons: {
@@ -222,20 +268,22 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       alignItems: 'center',
     },
     modalButtonPrimary: {
-      backgroundColor: currentTheme.accent,
+      backgroundColor: currentTheme.accent + 'CC',
     },
     modalButtonSecondary: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     modalButtonText: {
       fontSize: 16,
       fontWeight: '600',
     },
     modalButtonTextPrimary: {
-      color: currentTheme.text,
+      color: '#ffffff',
     },
     modalButtonTextSecondary: {
-      color: currentTheme.sub,
+      color: getCardTextColor(),
     },
     statsGrid: {
       flexDirection: 'row',
@@ -244,12 +292,14 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       marginBottom: 16,
     },
     statCard: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       padding: 12,
       borderRadius: 8,
       flex: 1,
       minWidth: (screenWidth - 48) / 2,
       alignItems: 'center',
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     statValue: {
       fontSize: 24,
@@ -258,7 +308,6 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     },
     statLabel: {
       fontSize: 12,
-      color: currentTheme.sub,
       marginTop: 4,
     },
     quickActions: {
@@ -267,33 +316,30 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       marginBottom: 16,
     },
     quickActionButton: {
-      backgroundColor: currentTheme.chip,
+      backgroundColor: getCardBackgroundColor() + '80',
       paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 6,
       flex: 1,
       alignItems: 'center',
+      borderColor: getCardBorderColor(),
+      borderWidth: 1,
     },
     quickActionText: {
       fontSize: 12,
-      color: currentTheme.text,
       fontWeight: '500',
     },
   });
   
   const dynamicStyles = getDynamicStyles();
-  const [aiService] = useState(() => AIHealthService.getInstance());
+  // Simplified state - no external service
   const [insights, setInsights] = useState<HealthInsight[]>([]);
   const [symptomAnalyses, setSymptomAnalyses] = useState<SymptomAnalysis[]>([]);
   const [drugInteractions, setDrugInteractions] = useState<DrugInteraction[]>([]);
-  const [voiceNotes, setVoiceNotes] = useState<VoiceNote[]>([]);
   const [showSymptomModal, setShowSymptomModal] = useState(false);
   const [showDrugCheckModal, setShowDrugCheckModal] = useState(false);
-  const [showVoiceNoteModal, setShowVoiceNoteModal] = useState(false);
   const [symptomText, setSymptomText] = useState('');
   const [medicationList, setMedicationList] = useState('');
-  const [voiceNoteText, setVoiceNoteText] = useState('');
-  const [selectedVoiceType, setSelectedVoiceType] = useState<VoiceNoteType>('symptom');
   
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -311,15 +357,10 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     }
   };
 
-  const voiceNoteTypes: { value: VoiceNoteType; label: string; icon: string }[] = [
-    { value: 'symptom', label: 'Symptom', icon: '🤒' },
-    { value: 'medication_side_effect', label: 'Side Effect', icon: '⚠️' },
-    { value: 'appointment_note', label: 'Appointment', icon: '📅' },
-    { value: 'general_health', label: 'General Health', icon: '💭' },
-  ];
 
   useEffect(() => {
-    initializeAIHealth();
+    // Simplified initialization - no external service
+    console.log('AI Health Screen initialized');
     
     // Entrance animation
     Animated.parallel([
@@ -336,42 +377,31 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     ]).start();
   }, []);
 
-  const initializeAIHealth = async () => {
-    try {
-      await aiService.initialize();
-      loadData();
-    } catch (error) {
-      console.error('Failed to initialize AI Health:', error);
-    }
-  };
-
-  const loadData = async () => {
-    try {
-      const [insightsData, symptomsData, interactionsData, voiceData] = await Promise.all([
-        aiService.getHealthInsights(),
-        aiService.getSymptomAnalyses(),
-        aiService.getDrugInteractionHistory(),
-        aiService.getVoiceNotes()
-      ]);
-
-      setInsights(insightsData);
-      setSymptomAnalyses(symptomsData);
-      setDrugInteractions(interactionsData);
-      setVoiceNotes(voiceData);
-    } catch (error) {
-      console.error('Failed to load AI health data:', error);
-    }
-  };
-
   const analyzeSymptoms = async () => {
     if (!symptomText.trim()) {
-      Alert.alert('❌ Error', 'Please enter your symptoms');
+      Alert.alert('❌ ' + t('error'), t('enterSymptoms'));
       return;
     }
 
     try {
       const symptoms = symptomText.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      const analysis = await aiService.analyzeSymptoms(symptoms);
+      
+      // Simplified analysis - create mock data
+      const analysis: SymptomAnalysis = {
+        id: `symptom_${Date.now()}`,
+        symptoms,
+        severity: symptoms.length > 3 ? 'moderate' : 'mild',
+        possibleConditions: [{
+          condition: 'General Symptoms',
+          probability: 0.7,
+          description: 'Multiple symptoms that may indicate various conditions',
+          recommendations: ['Monitor symptoms closely', 'Consider consulting healthcare provider', 'Maintain good hydration and rest']
+        }],
+        urgency: symptoms.some(s => s.toLowerCase().includes('severe')) ? 'high' : 'low',
+        recommendations: ['Get adequate rest', 'Stay hydrated', 'Monitor symptoms'],
+        followUpActions: ['Schedule appointment if symptoms persist', 'Keep symptom diary'],
+        createdAt: new Date().toISOString()
+      };
       
       setSymptomAnalyses(prev => [analysis, ...prev]);
       setSymptomText('');
@@ -385,9 +415,9 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
                           analysis.urgency === 'medium' ? '⚡' : 'ℹ️';
       
       Alert.alert(
-        `${urgencyEmoji} Symptom Analysis Complete`,
+        `${urgencyEmoji} ${t('symptomAnalysisComplete')}`,
         `Severity: ${analysis.severity}\nUrgency: ${analysis.urgency}\n\nPossible Conditions:\n${analysis.possibleConditions.map(c => `• ${c.condition} (${(c.probability * 100).toFixed(0)}%)`).join('\n')}\n\nRecommendations:\n${analysis.recommendations.slice(0, 3).map(r => `• ${r}`).join('\n')}`,
-        [{ text: 'OK' }]
+        [{ text: t('ok') }]
       );
     } catch (error) {
       console.error('Failed to analyze symptoms:', error);
@@ -397,13 +427,29 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
 
   const checkDrugInteractions = async () => {
     if (!medicationList.trim()) {
-      Alert.alert('❌ Error', 'Please enter your medications');
+      Alert.alert('❌ ' + t('error'), t('enterMedications'));
       return;
     }
 
     try {
       const medications = medicationList.split(',').map(m => m.trim()).filter(m => m.length > 0);
-      const interactions = await aiService.checkDrugInteractions(medications);
+      
+      // Simplified interaction check - create mock data
+      const interactions: DrugInteraction[] = [];
+      
+      // Simple mock interaction check
+      if (medications.length > 1) {
+        interactions.push({
+          id: `interaction_${Date.now()}`,
+          drug1: medications[0],
+          drug2: medications[1],
+          severity: 'minor',
+          description: 'Potential mild interaction - monitor for side effects',
+          clinicalEffects: ['Mild side effects possible'],
+          management: 'Monitor for any unusual symptoms',
+          references: ['Drug Interaction Database']
+        });
+      }
       
       setDrugInteractions(prev => [...interactions, ...prev]);
       setMedicationList('');
@@ -412,16 +458,16 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       triggerHaptic('medium');
       
       if (interactions.length === 0) {
-        Alert.alert('✅ No Interactions Found', 'No known drug interactions were detected between your medications.');
+        Alert.alert('✅ ' + t('noInteractionsFound'), t('noKnownInteractions'));
       } else {
         const interactionText = interactions.map(i => 
           `• ${i.drug1} + ${i.drug2}: ${i.severity.toUpperCase()}\n  ${i.description}`
         ).join('\n\n');
         
         Alert.alert(
-          '⚠️ Drug Interactions Detected',
-          `Found ${interactions.length} interaction(s):\n\n${interactionText}`,
-          [{ text: 'OK' }]
+          '⚠️ ' + t('drugInteractionsDetected'),
+          `${t('foundInteractions')} ${interactions.length}:\n\n${interactionText}`,
+          [{ text: t('ok') }]
         );
       }
     } catch (error) {
@@ -430,26 +476,6 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
     }
   };
 
-  const addVoiceNote = async () => {
-    if (!voiceNoteText.trim()) {
-      Alert.alert('❌ Error', 'Please enter your voice note');
-      return;
-    }
-
-    try {
-      const voiceNote = await aiService.addVoiceNote(voiceNoteText, selectedVoiceType);
-      
-      setVoiceNotes(prev => [voiceNote, ...prev]);
-      setVoiceNoteText('');
-      setShowVoiceNoteModal(false);
-      
-      triggerHaptic('medium');
-      Alert.alert('✅ Success', 'Voice note added and processed!');
-    } catch (error) {
-      console.error('Failed to add voice note:', error);
-      Alert.alert('❌ Error', 'Failed to add voice note');
-    }
-  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -479,27 +505,30 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
         }
       ]}
     >
-      <Text style={dynamicStyles.sectionTitle}>🤖 AI Health Features</Text>
-      <Text style={dynamicStyles.sectionDescription}>
-        Intelligent healthcare features powered by AI to help you make informed health decisions.
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+        <Image 
+          source={require('../../assets/dashboard Emojies/AI Health.png')} 
+          style={{ width: 24, height: 24, marginRight: 8 }} 
+          resizeMode="contain" 
+        />
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('aiHealthFeatures')}</DynamicText>
+      </View>
+      <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
+        {t('intelligentHealthcareFeatures')}
+      </DynamicText>
       
       <View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statValue}>{insights.length}</Text>
-          <Text style={dynamicStyles.statLabel}>Health Insights</Text>
+          <DynamicText type="card" style={dynamicStyles.statValue}>{insights.length}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('healthInsights')}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statValue}>{symptomAnalyses.length}</Text>
-          <Text style={dynamicStyles.statLabel}>Symptom Analyses</Text>
+          <DynamicText type="card" style={dynamicStyles.statValue}>{symptomAnalyses.length}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('symptomAnalyses')}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statValue}>{drugInteractions.length}</Text>
-          <Text style={dynamicStyles.statLabel}>Drug Checks</Text>
-        </View>
-        <View style={dynamicStyles.statCard}>
-          <Text style={dynamicStyles.statValue}>{voiceNotes.length}</Text>
-          <Text style={dynamicStyles.statLabel}>Voice Notes</Text>
+          <DynamicText type="card" style={dynamicStyles.statValue}>{drugInteractions.length}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('drugChecks')}</DynamicText>
         </View>
       </View>
 
@@ -508,19 +537,13 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowSymptomModal(true)}
         >
-          <Text style={dynamicStyles.quickActionText}>🤒 Analyze Symptoms</Text>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>🤒 {t('analyzeSymptoms')}</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowDrugCheckModal(true)}
         >
-          <Text style={dynamicStyles.quickActionText}>💊 Check Interactions</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={dynamicStyles.quickActionButton}
-          onPress={() => setShowVoiceNoteModal(true)}
-        >
-          <Text style={dynamicStyles.quickActionText}>🎤 Voice Note</Text>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 {t('checkInteractions')}</DynamicText>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -536,10 +559,10 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
         }
       ]}
     >
-      <Text style={dynamicStyles.sectionTitle}>💡 Health Insights</Text>
-      <Text style={dynamicStyles.sectionDescription}>
-        AI-generated insights based on your health data and patterns.
-      </Text>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {t('healthInsights')}</DynamicText>
+      <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
+        {t('aiGeneratedInsights')}
+      </DynamicText>
       
       {insights.slice(0, 5).map(insight => (
         <View key={insight.id} style={[
@@ -547,30 +570,30 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
           { borderLeftColor: getSeverityColor(insight.severity) }
         ]}>
           <View style={dynamicStyles.insightHeader}>
-            <Text style={dynamicStyles.insightTitle}>{insight.title}</Text>
+            <DynamicText type="card" style={dynamicStyles.insightTitle}>{insight.title}</DynamicText>
             <View style={[
               dynamicStyles.insightSeverity,
               { backgroundColor: getSeverityColor(insight.severity) }
             ]}>
-              <Text style={dynamicStyles.severityText}>
+              <DynamicText type="card" style={dynamicStyles.severityText}>
                 {getSeverityLabel(insight.severity)}
-              </Text>
+              </DynamicText>
             </View>
           </View>
           
-          <Text style={dynamicStyles.insightDescription}>
+          <DynamicText type="card" style={dynamicStyles.insightDescription}>
             {insight.description}
-          </Text>
+          </DynamicText>
           
           {insight.actionable && insight.actionItems.length > 0 && (
             <View style={dynamicStyles.actionItems}>
-              <Text style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                Action Items:
-              </Text>
+              <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
+                {t('actionItems')}
+              </DynamicText>
               {insight.actionItems.slice(0, 3).map((item, index) => (
-                <Text key={index} style={dynamicStyles.actionItem}>
+                <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
                   • {item}
-                </Text>
+                </DynamicText>
               ))}
             </View>
           )}
@@ -578,9 +601,9 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       ))}
       
       {insights.length === 0 && (
-        <Text style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          No health insights available yet. Use the AI features to generate insights.
-        </Text>
+        <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
+          {t('noHealthInsights')}
+        </DynamicText>
       )}
     </Animated.View>
   );
@@ -595,47 +618,49 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
         }
       ]}
     >
-      <Text style={dynamicStyles.sectionTitle}>📊 Recent Analyses</Text>
-      <Text style={dynamicStyles.sectionDescription}>
-        Your recent symptom analyses and health assessments.
-      </Text>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 {t('recentAnalyses')}</DynamicText>
+      <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
+        {t('recentSymptomAnalyses')}
+      </DynamicText>
       
       {symptomAnalyses.slice(0, 3).map(analysis => (
         <View key={analysis.id} style={dynamicStyles.insightCard}>
           <View style={dynamicStyles.insightHeader}>
-            <Text style={dynamicStyles.insightTitle}>
+            <DynamicText type="card" style={dynamicStyles.insightTitle}>
               {analysis.symptoms.join(', ')}
-            </Text>
+            </DynamicText>
             <View style={[
               dynamicStyles.insightSeverity,
               { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
             ]}>
-              <Text style={dynamicStyles.severityText}>
+              <DynamicText type="card" style={dynamicStyles.severityText}>
                 {analysis.urgency.toUpperCase()}
-              </Text>
+              </DynamicText>
             </View>
           </View>
           
-          <Text style={dynamicStyles.insightDescription}>
+          <DynamicText type="card" style={dynamicStyles.insightDescription}>
             {analysis.possibleConditions[0]?.condition} ({(analysis.possibleConditions[0]?.probability * 100).toFixed(0)}% probability)
-          </Text>
+          </DynamicText>
           
-          <Text style={dynamicStyles.actionItem}>
+          <DynamicText type="card" style={dynamicStyles.actionItem}>
             {new Date(analysis.createdAt).toLocaleDateString()}
-          </Text>
+          </DynamicText>
         </View>
       ))}
       
       {symptomAnalyses.length === 0 && (
-        <Text style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          No symptom analyses yet. Try analyzing your symptoms.
-        </Text>
+        <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
+          {t('noSymptomAnalyses')}
+        </DynamicText>
       )}
     </Animated.View>
   );
 
+  // Simplified AI Health - no external service needed
+
   return (
-    <LinearGradient colors={[currentTheme.bgStart, currentTheme.bgEnd, '#f0ede8']} style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
@@ -655,7 +680,7 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
           >
             <TouchableOpacity style={styles.homeButton} onPress={onClose}>
               <Image 
-                source={require('../../assets/AuricRX_home_button.png')} 
+                source={require('../../assets/AuricRX_home_button_across_screens.png')} 
                 style={styles.homeButtonIcon}
                 resizeMode="contain"
               />
@@ -672,12 +697,19 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
               }
             ]}
           >
-            <Text style={[styles.title, { color: currentTheme.text }]}>
-              🤖 AI Health Assistant
-            </Text>
-            <Text style={[styles.subtitle, { color: currentTheme.sub }]}>
-              Intelligent healthcare features powered by AI for better health decisions
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/AI Health.png')} 
+                style={{ width: 32, height: 32, marginRight: 12 }} 
+                resizeMode="contain" 
+              />
+              <DynamicText type="primary" style={styles.title}>
+                {t('aiHealthAssistant')}
+              </DynamicText>
+            </View>
+            <DynamicText type="secondary" style={styles.subtitle}>
+              {t('intelligentHealthcareFeatures')}
+            </DynamicText>
           </Animated.View>
 
           {/* AI Features */}
@@ -700,14 +732,14 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>🤒 Symptom Analysis</Text>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>🤒 {t('symptomAnalysis')}</DynamicText>
             
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Describe your symptoms</Text>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('describeSymptoms')}</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
-                placeholder="Enter your symptoms separated by commas (e.g., fever, headache, fatigue)"
-                placeholderTextColor={currentTheme.sub}
+                placeholder={t('enterSymptomsPlaceholder')}
+                placeholderTextColor={getCardTextColor() + '80'}
                 value={symptomText}
                 onChangeText={setSymptomText}
                 multiline
@@ -719,13 +751,13 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowSymptomModal(false)}
               >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</Text>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeSymptoms}
               >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Analyze</Text>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('analyze')}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -741,14 +773,14 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>💊 Drug Interaction Check</Text>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>💊 {t('drugInteractionCheck')}</DynamicText>
             
             <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>List your medications</Text>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('listMedications')}</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
-                placeholder="Enter your medications separated by commas (e.g., Aspirin, Metformin, Lisinopril)"
-                placeholderTextColor={currentTheme.sub}
+                placeholder={t('enterMedicationsPlaceholder')}
+                placeholderTextColor={getCardTextColor() + '80'}
                 value={medicationList}
                 onChangeText={setMedicationList}
                 multiline
@@ -760,82 +792,20 @@ export default function AIHealthScreen({ onClose, theme }: AIHealthScreenProps) 
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowDrugCheckModal(false)}
               >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</Text>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={checkDrugInteractions}
               >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Check</Text>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('check')}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Voice Note Modal */}
-      <Modal
-        visible={showVoiceNoteModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowVoiceNoteModal(false)}
-      >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContent}>
-            <Text style={dynamicStyles.modalTitle}>🎤 Voice Note</Text>
-            
-            <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Note Type</Text>
-              <TouchableOpacity
-                style={dynamicStyles.pickerButton}
-                onPress={() => {
-                  Alert.alert(
-                    'Select Note Type',
-                    '',
-                    voiceNoteTypes.map(type => ({
-                      text: `${type.icon} ${type.label}`,
-                      onPress: () => setSelectedVoiceType(type.value)
-                    }))
-                  );
-                }}
-              >
-                <Text style={dynamicStyles.pickerText}>
-                  {voiceNoteTypes.find(t => t.value === selectedVoiceType)?.icon} {voiceNoteTypes.find(t => t.value === selectedVoiceType)?.label}
-                </Text>
-                <Text style={dynamicStyles.pickerText}>▼</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={dynamicStyles.inputGroup}>
-              <Text style={dynamicStyles.inputLabel}>Transcription</Text>
-              <TextInput
-                style={dynamicStyles.multilineInput}
-                placeholder="Enter your voice note transcription..."
-                placeholderTextColor={currentTheme.sub}
-                value={voiceNoteText}
-                onChangeText={setVoiceNoteText}
-                multiline
-              />
-            </View>
-
-            <View style={dynamicStyles.modalButtons}>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowVoiceNoteModal(false)}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={addVoiceNote}
-              >
-                <Text style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Add Note</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </LinearGradient>
+    </View>
   );
 }
 

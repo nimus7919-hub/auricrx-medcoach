@@ -14,7 +14,7 @@ try {
 } catch (error) {
   console.warn('expo-notifications not available:', error);
 }
-import { SmartNotificationService } from './smartNotifications';
+import SmartNotificationService from './smartNotifications';
 
 export interface Appointment {
   id: string;
@@ -41,6 +41,8 @@ export interface DoctorContact {
   name: string;
   specialty: string;
   phoneNumber: string;
+  countryCode: string;
+  dialingMethod: 'phone' | 'whatsapp' | 'both';
   email?: string;
   address: string;
   clinicName?: string;
@@ -84,16 +86,44 @@ class AppointmentService {
   }
 
   constructor() {
-    this.smartNotifications = SmartNotificationService.getInstance();
+    try {
+      this.smartNotifications = SmartNotificationService.getInstance();
+    } catch (error) {
+      console.warn('⚠️ Failed to initialize SmartNotificationService, continuing without it:', error);
+      // Create a minimal mock service
+      this.smartNotifications = {
+        initialize: async () => {},
+        addLocationReminder: async () => ({ id: 'mock', name: 'mock', latitude: 0, longitude: 0, radius: 100, message: 'mock', enabled: true }),
+        deleteLocationReminder: async () => {},
+        addWeatherAlert: async () => ({ id: 'mock', medicationId: 'mock', weatherCondition: 'pollen', threshold: 3, message: 'mock', enabled: true }),
+        deleteWeatherAlert: async () => {},
+        updateUsagePattern: async () => {},
+        getSmartRefillPrediction: async () => null,
+        getIntelligentReminderTime: async () => null,
+        getLocationReminders: () => [],
+        getWeatherAlerts: () => [],
+        getUsagePatterns: () => new Map(),
+        getCurrentLocation: () => null
+      };
+    }
   }
 
   async initialize() {
     try {
-      await this.requestPermissions();
+      // Load saved data first (this should always work)
       await this.loadSavedData();
+      
+      // Request permissions (don't fail if this doesn't work)
+      try {
+        await this.requestPermissions();
+      } catch (error) {
+        console.warn('⚠️ Permission request failed, continuing without permissions:', error);
+      }
+      
       console.log('✅ Appointment Service initialized');
     } catch (error) {
       console.error('❌ Failed to initialize Appointment Service:', error);
+      // Don't throw the error, just log it and continue
     }
   }
 

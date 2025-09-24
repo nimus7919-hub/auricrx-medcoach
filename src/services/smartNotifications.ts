@@ -1,6 +1,13 @@
 import * as Location from 'expo-location';
-import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Import with fallback for development
+let Notifications: any = null;
+try {
+  Notifications = require('expo-notifications');
+} catch (error) {
+  console.warn('expo-notifications not available:', error);
+}
 
 export interface SmartNotification {
   id: string;
@@ -63,21 +70,34 @@ class SmartNotificationService {
 
   async initialize() {
     try {
-      // Request permissions
-      await this.requestPermissions();
-      
-      // Load saved data
+      // Load saved data first (this should always work)
       await this.loadSavedData();
       
-      // Start location tracking
-      await this.startLocationTracking();
+      // Request permissions (don't fail if this doesn't work)
+      try {
+        await this.requestPermissions();
+      } catch (error) {
+        console.warn('⚠️ Permission request failed, continuing without permissions:', error);
+      }
       
-      // Start weather monitoring
-      await this.startWeatherMonitoring();
+      // Start location tracking (don't fail if this doesn't work)
+      try {
+        await this.startLocationTracking();
+      } catch (error) {
+        console.warn('⚠️ Location tracking failed, continuing without location:', error);
+      }
+      
+      // Start weather monitoring (don't fail if this doesn't work)
+      try {
+        await this.startWeatherMonitoring();
+      } catch (error) {
+        console.warn('⚠️ Weather monitoring failed, continuing without weather:', error);
+      }
       
       console.log('✅ Smart Notifications initialized');
     } catch (error) {
       console.error('❌ Failed to initialize Smart Notifications:', error);
+      // Don't throw the error, just log it and continue
     }
   }
 
@@ -90,9 +110,13 @@ class SmartNotificationService {
       }
 
       // Request notification permissions
-      const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
-      if (notificationStatus !== 'granted') {
-        console.warn('Notification permission not granted');
+      if (Notifications) {
+        const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
+        if (notificationStatus !== 'granted') {
+          console.warn('Notification permission not granted');
+        }
+      } else {
+        console.warn('expo-notifications not available, skipping permission request');
       }
     } catch (error) {
       console.error('Permission request failed:', error);
@@ -329,6 +353,11 @@ class SmartNotificationService {
     data?: any;
   }) {
     try {
+      if (!Notifications) {
+        console.warn('expo-notifications not available, cannot schedule notification');
+        return;
+      }
+      
       await Notifications.scheduleNotificationAsync({
         content: {
           title: notification.title,
@@ -355,6 +384,11 @@ class SmartNotificationService {
     return newReminder;
   }
 
+  async deleteLocationReminder(id: string) {
+    this.locationReminders = this.locationReminders.filter(reminder => reminder.id !== id);
+    await this.saveData();
+  }
+
   async addWeatherAlert(alert: Omit<WeatherAlert, 'id'>) {
     const newAlert: WeatherAlert = {
       ...alert,
@@ -364,6 +398,11 @@ class SmartNotificationService {
     this.weatherAlerts.push(newAlert);
     await this.saveData();
     return newAlert;
+  }
+
+  async deleteWeatherAlert(id: string) {
+    this.weatherAlerts = this.weatherAlerts.filter(alert => alert.id !== id);
+    await this.saveData();
   }
 
   async updateUsagePattern(medicationId: string, takenAt: string) {

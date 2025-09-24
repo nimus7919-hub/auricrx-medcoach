@@ -25,12 +25,15 @@
     "expo-build-properties": "^0.14.8",
     "expo-calendar": "^14.1.4",
     "expo-camera": "~16.1.11",
+    "expo-constants": "~17.1.7",
     "expo-dev-client": "~5.2.4",
+    "expo-document-picker": "~13.1.6",
     "expo-file-system": "~18.1.11",
     "expo-font": "~13.3.2",
     "expo-haptics": "^14.1.4",
     "expo-image-manipulator": "~13.1.7",
     "expo-image-picker": "~16.1.4",
+    "expo-intent-launcher": "~12.1.5",
     "expo-linear-gradient": "~14.1.5",
     "expo-linking": "~7.1.7",
     "expo-localization": "^16.1.6",
@@ -41,15 +44,18 @@
     "expo-sharing": "~13.1.5",
     "expo-status-bar": "~2.2.3",
     "expo-video": "^2.2.2",
+    "html2canvas": "^1.4.1",
     "i18next": "^25.5.0",
+    "jspdf": "^3.0.3",
     "pdf-lib": "^1.17.1",
     "react": "^19.0.0",
     "react-i18next": "^15.7.3",
     "react-native": "0.79.5",
     "react-native-dotenv": "^3.4.11",
-    "expo-constants": "~17.1.7",
     "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.11.1"
+    "react-native-screens": "~4.11.1",
+    "react-native-webview": "^13.16.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -60,7 +66,10 @@
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
-        "exclude": ["@react-native-ml-kit/text-recognition", "pdf-lib"],
+        "exclude": [
+          "@react-native-ml-kit/text-recognition",
+          "pdf-lib"
+        ],
         "listUnknownPackages": false
       }
     }

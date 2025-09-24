@@ -5,7 +5,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
   import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
-  Modal, TextInput, Switch, Image, Linking, Platform, Animated, Keyboard
+  Modal, TextInput, Switch, Image, Linking, Platform, Animated, Keyboard,
+  StatusBar, SafeAreaView
 } from 'react-native';
 import TypingEffect from './src/components/TypingEffect';
 import * as ImagePicker from 'expo-image-picker';
@@ -34,8 +35,21 @@ import HealthAnalyticsScreen from './src/screens/HealthAnalyticsScreen';
 import AppointmentManagementScreen from './src/screens/AppointmentManagementScreen';
 import AIHealthScreen from './src/screens/AIHealthScreen';
 import Medications from './components/Medications';
+import Supplements from './components/Supplements';
+import Reminders from './components/Reminders';
+import { WallpaperProvider, useWallpaper } from './src/contexts/WallpaperContext';
+import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
+import WallpaperWrapper from './src/components/WallpaperWrapper';
+import DynamicText from './src/components/DynamicText';
+import { useDynamicTheme } from './src/hooks/useDynamicTheme';
+
+// Initialize i18n
+import './src/i18n';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
+
+// Test console log to verify logging works
+console.log('🚀 AuricRx MedCoach App Starting...', { USING_EXPO_GO });
 
 import {
   useFonts,
@@ -59,7 +73,218 @@ const STRINGS = {
     aiConsultant: 'AI Consultant',
     labsLocations: 'Labs Locations',
     prescription: 'Prescription',
-    appointmentLog: 'Appointment Log',
+    appointmentLog: 'Appointment Tracker',
+    appointmentSubtitle: 'Schedule & manage healthcare visits',
+    // Appointment Management translations
+    doctorVisit: 'Doctor Visit',
+    labTest: 'Lab Test',
+    specialist: 'Specialist',
+    emergency: 'Emergency',
+    appointmentManagement: 'Appointment Management',
+    appointmentManagementDesc: 'Schedule appointments, manage doctor contacts, and track your healthcare visits',
+    schedule: 'Schedule',
+    addDoctor: 'Add Doctor',
+    refresh: 'Refresh',
+    primary: 'Primary',
+    followUp: 'Follow-up',
+    checkup: 'Checkup',
+    other: 'Other',
+    scheduled: 'Scheduled',
+    confirmed: 'Confirmed',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    rescheduled: 'Rescheduled',
+    unknown: 'Unknown',
+    totalAppointments: 'Total Appointments',
+    upcoming: 'Upcoming',
+    doctors: 'Doctors',
+    upcomingAppointments: 'Upcoming Appointments',
+    upcomingAppointmentsDesc: 'Your next scheduled healthcare visits',
+    noUpcomingAppointments: 'No upcoming appointments scheduled',
+    doctorContacts: 'Doctor Contacts',
+    doctorContactsDesc: 'Your healthcare providers and their contact information',
+    pharmacy: 'Pharmacy',
+    error: 'Error',
+    success: 'Success',
+    fillAllFields: 'Please fill in all required fields',
+    appointmentScheduled: 'Appointment scheduled successfully!',
+    failedToSchedule: 'Failed to schedule appointment',
+    doctorContactAdded: 'Doctor contact added successfully!',
+    failedToAddDoctor: 'Failed to add doctor contact',
+    appointmentCompleted: 'Appointment marked as completed!',
+    failedToUpdate: 'Failed to update appointment',
+    scheduleAppointment: 'Schedule Appointment',
+    addDoctorContact: 'Add Doctor Contact',
+    appointmentType: 'Appointment Type',
+    selectAppointmentType: 'Select Appointment Type',
+    doctorName: 'Doctor Name',
+    doctorNamePlaceholder: 'Enter doctor name',
+    specialty: 'Specialty',
+    specialtyPlaceholder: 'Enter specialty',
+    phoneNumber: 'Phone Number',
+    phonePlaceholder: 'Enter phone number',
+    address: 'Address',
+    addressPlaceholder: 'Enter address',
+    appointmentOverview: 'Appointment Overview',
+    noDoctorContactsYet: 'No doctor contacts added yet',
+    title: 'Title',
+    location: 'Location',
+    date: 'Date',
+    time: 'Time',
+    notes: 'Notes',
+    notesOptional: 'Notes (Optional)',
+    cancel: 'Cancel',
+    titlePlaceholder: 'e.g., Annual Checkup, Blood Test',
+    locationPlaceholder: 'e.g., Dr. Smith\'s Office, LabCorp',
+    datePlaceholder: 'YYYY-MM-DD',
+    timePlaceholder: 'HH:MM (24-hour format)',
+    notesPlaceholder: 'Add any notes or special instructions...',
+    appointmentServiceNotAvailable: 'Appointment service not available',
+    // Health Metric Types
+    bloodPressure: 'Blood Pressure',
+    weight: 'Weight',
+    bloodSugar: 'Blood Sugar',
+    heartRate: 'Heart Rate',
+    temperature: 'Temperature',
+    oxygenSaturation: 'Oxygen Saturation',
+    painLevel: 'Pain Level',
+    mood: 'Mood',
+    energyLevel: 'Energy Level',
+    sleepHours: 'Sleep Hours',
+    steps: 'Steps',
+    // AI Health Screen translations
+    aiHealthAssistant: 'AI Health Assistant',
+    intelligentHealthcareFeatures: 'Intelligent healthcare features powered by AI for better health decisions',
+    aiHealthFeatures: 'AI Health Features',
+    healthInsights: 'Health Insights',
+    symptomAnalyses: 'Symptom Analyses',
+    drugChecks: 'Drug Checks',
+    voiceNotes: 'Voice Notes',
+    analyzeSymptoms: 'Analyze Symptoms',
+    checkInteractions: 'Check Interactions',
+    voiceNote: 'Voice Note',
+    recentAnalyses: 'Recent Analyses',
+    noHealthInsights: 'No health insights available yet. Use the AI features to generate insights.',
+    noSymptomAnalyses: 'No symptom analyses yet. Try analyzing your symptoms.',
+    describeSymptoms: 'Describe your symptoms',
+    enterSymptomsPlaceholder: 'Enter your symptoms separated by commas (e.g., fever, headache, fatigue)',
+    listMedications: 'List your medications',
+    enterMedicationsPlaceholder: 'Enter your medications separated by commas (e.g., Aspirin, Metformin, Lisinopril)',
+    noteType: 'Note Type',
+    selectNoteType: 'Select Note Type',
+    transcription: 'Transcription',
+    enterVoiceNotePlaceholder: 'Enter your voice note transcription...',
+    addNote: 'Add Note',
+    analyze: 'Analyze',
+    check: 'Check',
+    enterSymptoms: 'Please enter your symptoms',
+    enterMedications: 'Please enter your medications',
+    enterVoiceNote: 'Please enter your voice note',
+    symptomAnalysisComplete: 'Symptom Analysis Complete',
+    noInteractionsFound: 'No Interactions Found',
+    noKnownInteractions: 'No known drug interactions were detected between your medications.',
+    drugInteractionsDetected: 'Drug Interactions Detected',
+    foundInteractions: 'Found interaction(s):',
+    voiceNoteAdded: 'Voice note added and processed!',
+    actionItems: 'Action Items:',
+    generalHealth: 'General Health',
+    appointment: 'Appointment',
+    sideEffect: 'Side Effect',
+    symptom: 'Symptom',
+    aiGeneratedInsights: 'AI-generated insights based on your health data and patterns.',
+    // Documents Screen translations
+    medicalDocuments: 'Medical Documents',
+    organizeDocuments: 'Keep your important medical documents organized and ready for doctor visits',
+    addDocument: 'Add Document',
+    takePhoto: 'Take Photo',
+    uploadFromGallery: 'Upload from Gallery',
+    frontSide: 'Front Side',
+    backSide: 'Back Side',
+    frontOfCard: 'Front of Card',
+    backOfCard: 'Back of Card',
+    document: 'Document',
+    noDocumentsUploaded: 'No documents uploaded yet',
+    documentUploadedSuccessfully: 'Document uploaded successfully!',
+    photoTakenSuccessfully: 'Photo taken successfully!',
+    deleteDocument: 'Delete Document',
+    areYouSureDeleteDocument: 'Are you sure you want to delete this document? This cannot be undone.',
+    delete: 'Delete',
+    permissionRequired: 'Permission Required',
+    grantCameraRollAccess: 'Please grant camera roll access to upload documents.',
+    grantCameraAccess: 'Please grant camera access to take photos.',
+    failedToUploadDocument: 'Failed to upload document',
+    failedToTakePhoto: 'Failed to take photo',
+    // Document Categories
+    photoID: 'Photo ID',
+    driversLicensePassport: 'Driver\'s License, Passport, etc.',
+    birthCertificate: 'Birth Certificate',
+    officialBirthCertificate: 'Official birth certificate',
+    insuranceCard: 'Insurance Card',
+    healthInsuranceInfo: 'Health insurance information',
+    labResults: 'Lab Results',
+    bloodTestsLabWork: 'Blood tests, lab work, etc.',
+    prescriptions: 'Prescriptions',
+    currentAndPastPrescriptions: 'Current and past prescriptions',
+    medicalRecords: 'Medical Records',
+    medicalHistoryReports: 'Medical history, reports',
+    otherDocuments: 'Other Documents',
+    anyOtherMedicalDocuments: 'Any other medical documents',
+    recentSymptomAnalyses: 'Your recent symptom analyses and health assessments.',
+    symptomAnalysis: 'Symptom Analysis',
+    drugInteractionCheck: 'Drug Interaction Check',
+    upcoming: 'Upcoming',
+    doctors: 'Doctors',
+    upcomingAppointments: 'Upcoming Appointments',
+    upcomingAppointmentsDesc: 'Your scheduled appointments for the next 30 days.',
+    noUpcomingAppointments: 'No upcoming appointments scheduled',
+    doctorContacts: 'Doctor Contacts',
+    doctorContactsDesc: 'Your healthcare providers and their contact information.',
+    scheduleAppointment: 'Schedule Appointment',
+    addDoctorContact: 'Add Doctor Contact',
+    appointmentType: 'Appointment Type',
+    selectAppointmentType: 'Select Appointment Type',
+    doctorName: 'Doctor Name',
+    specialty: 'Specialty',
+    phoneNumber: 'Phone Number',
+    address: 'Address',
+    doctorNamePlaceholder: 'e.g., Dr. John Smith',
+    specialtyPlaceholder: 'e.g., General Practice, Cardiology',
+    phonePlaceholder: 'e.g., (555) 123-4567',
+    addressPlaceholder: 'Enter full address...',
+    error: 'Error',
+    success: 'Success',
+    fillAllFields: 'Please fill in all required fields',
+    appointmentScheduled: 'Appointment scheduled successfully!',
+    failedToSchedule: 'Failed to schedule appointment',
+    doctorContactAdded: 'Doctor contact added successfully!',
+    failedToAddDoctor: 'Failed to add doctor contact',
+    appointmentCompleted: 'Appointment marked as completed!',
+    failedToUpdate: 'Failed to update appointment',
+    // AI Health translations
+    symptom: 'Symptom',
+    sideEffect: 'Side Effect',
+    generalHealth: 'General Health',
+    enterSymptoms: 'Please enter your symptoms',
+    // Smart Notifications translations
+    smartServiceNotAvailable: 'Smart notifications service not available',
+    addLocationReminder: 'Add Location Reminder',
+    enterLocationName: 'Enter the name of the location (e.g., "CVS Pharmacy", "Dr. Smith\'s Office"):',
+    reminderMessage: 'Reminder Message',
+    reminderMessagePrompt: 'What should the reminder say when you\'re near this location?',
+    locationReminderAdded: 'Location reminder added!',
+    failedToAddLocationReminder: 'Failed to add location reminder',
+    addWeatherAlert: 'Add Weather Alert',
+    chooseWeatherCondition: 'Choose the weather condition to monitor:',
+    highPollen: 'High Pollen',
+    extremeTemperature: 'Extreme Temperature',
+    highHumidity: 'High Humidity',
+    poorAirQuality: 'Poor Air Quality',
+    pollenMessage: 'Consider taking allergy medication',
+    temperatureMessage: 'Check if you need temperature-sensitive medications',
+    humidityMessage: 'High humidity may affect your condition',
+    airQualityMessage: 'Consider wearing a mask or staying indoors',
+    weatherAlertAdded: 'Weather alert added!',
+    failedToAddWeatherAlert: 'Failed to add weather alert',
     healthJournal: 'Health Journal Widget',
     dashboard: 'Dashboard',
     settings: 'Settings',
@@ -94,7 +319,195 @@ const STRINGS = {
     cancel: 'Cancel',
     saveBtn: 'Save',
     add: 'Add',
-    pickTime: 'Pick time'
+    pickTime: 'Pick time',
+    herbs: 'Herbs',
+    supplements: 'Supplements',
+    smartAlerts: 'Smart Alerts',
+    healthAnalytics: 'Health Analytics',
+    aiHealth: 'AI Health',
+    documents: 'Documents',
+    appointments: 'Appointments',
+    findNearbyPharmacies: 'Find pharmacies near your location',
+    findNearbyLabs: 'Find medical labs near your location',
+    loading: 'Loading...',
+    loadingPharmacies: 'Loading nearby pharmacies...',
+    loadingLabs: 'Loading nearby labs...',
+    refresh: 'Refresh',
+    findNearbyPharmaciesBtn: 'Find Nearby Pharmacies',
+    findNearbyLabsBtn: 'Find Nearby Labs',
+    lastUpdated: 'Last updated',
+    noPharmaciesFound: 'No pharmacies found',
+    noLabsFound: 'No labs found',
+    errorLoadingPharmacies: 'Failed to load nearby pharmacies. Please try again.',
+    errorLoadingLabs: 'Failed to load nearby labs. Please try again.',
+    myDoctorAI: 'My Doctor AI',
+    drAlfred: 'Dr. Alfred',
+    drMimi: 'Dr. Mimi',
+    drPawlmer: 'Dr. Pawlmer',
+    directions: 'Directions',
+    info: 'Info',
+    call: 'Call',
+    noPharmaciesFound: 'No pharmacies found',
+    noLabsFound: 'No labs found',
+    foundPharmacies: 'Found {count} nearby pharmacies',
+    foundLabs: 'Found {count} nearby labs',
+    lastUpdated: 'Last updated',
+    testTypes: 'Test Types',
+    showAll: 'Show all',
+    close: 'Close',
+    addMedication: 'Add Medication',
+    editMedication: 'Edit Medication',
+    deleteMedication: 'Delete Medication',
+    dosesLeft: 'doses left',
+    taking: 'Taking',
+    onHold: 'On hold',
+    finished: 'Finished',
+    addReminder: 'Add Reminder',
+    namePlaceholder: 'Name',
+    pickTime: 'Pick time',
+    addReminderBtn: 'Add Reminder',
+    searchHerbs: 'Search herbs...',
+    searchSupplements: 'Search supplements...',
+    addSupplement: 'Add Supplement',
+    refill: 'Refill',
+    refillSoon: 'Refill soon',
+    taking: 'Taking',
+    smartNotifications: 'Smart Notifications',
+    smartNotificationsActive: 'Smart Notifications Active',
+    smartFeatures: 'Smart Features',
+    smartRefillPredictions: 'Smart Refill Predictions',
+    intelligentTiming: 'Intelligent Timing',
+    contextAwareReminders: 'Context-Aware Reminders',
+    locationBasedReminders: 'Location-Based Reminders',
+    noLocationReminders: 'No location reminders set up yet',
+    addLocationReminder: 'Add Location Reminder',
+    weatherBasedAlerts: 'Weather-Based Alerts',
+    noWeatherAlerts: 'No weather alerts set up yet',
+    addWeatherAlert: 'Add Weather Alert',
+    healthAnalytics: 'Health Analytics',
+    trackHealthMetrics: 'Track your health metrics, medication adherence, and side effects',
+    healthOverview: 'Health Overview',
+    metricsRecorded: 'Metrics Recorded',
+    adherenceRate: 'Adherence Rate',
+    sideEffects: 'Side Effects',
+    medications: 'Medications',
+    recentHealthMetrics: 'Recent Health Metrics',
+    trackVitalSigns: 'Track your vital signs and health indicators over time',
+    noHealthMetrics: 'No health metrics recorded yet',
+    addHealthMetric: 'Add Health Metric',
+    medicationAdherence: 'Medication Adherence',
+    trackMedicationSchedule: 'Track how well you\'re following your medication schedule',
+    noAdherenceData: 'No medication adherence data yet',
+    sideEffectsMonitoring: 'Side Effects Monitoring',
+    trackSideEffects: 'Track any side effects you experience from medications',
+    noSideEffectsRecorded: 'No side effects recorded yet',
+    recordSideEffect: 'Record Side Effect',
+    medicalDocuments: 'Medical Documents',
+    organizeDocuments: 'Keep your important medical documents organized and ready for doctor visits',
+    photoID: 'Photo ID',
+    driversLicensePassport: 'Driver\'s License, Passport, etc.',
+    birthCertificate: 'Birth Certificate',
+    officialBirthCertificate: 'Official birth certificate',
+    insuranceCard: 'Insurance Card',
+    healthInsuranceInfo: 'Health insurance information',
+    labResults: 'Lab Results',
+    bloodTestsLabWork: 'Blood tests, lab work, etc.',
+    noDocumentsUploaded: 'No documents uploaded yet',
+    aiHealthAssistant: 'AI Health Assistant',
+    intelligentHealthcareFeatures: 'Intelligent healthcare features powered by AI for better health decisions',
+    aiHealthFeatures: 'AI Health Features',
+    intelligentHealthcareFeaturesDesc: 'Intelligent healthcare features powered by AI to help you make informed health decisions',
+    healthInsights: 'Health Insights',
+    symptomAnalyses: 'Symptom Analyses',
+    drugChecks: 'Drug Checks',
+    voiceNotes: 'Voice Notes',
+    analyzeSymptoms: 'Analyze Symptoms',
+    checkInteractions: 'Check Interactions',
+    voiceNote: 'Voice Note',
+    locationBasedRemindersDesc: 'Get reminded when you\'re near pharmacies, doctor offices, or other important locations',
+    weatherBasedAlertsDesc: 'Get notified when weather conditions might affect your health or medications',
+    smartFeaturesDesc: 'AI-powered features that learn from your medication patterns and provide intelligent reminders',
+    smartRefillPredictionsDesc: 'Predict when you\'ll need medication refills based on usage patterns',
+    intelligentTimingDesc: 'Learn your medication schedule and suggest optimal reminder times',
+    contextAwareRemindersDesc: 'Consider your location, weather, and schedule when sending reminders',
+    smartNotificationsDesc: 'Intelligent reminders that adapt to your lifestyle and environment',
+    initializing: 'Initializing...',
+    active: 'Active',
+    disabled: 'Disabled',
+    threshold: 'Threshold',
+    pollenAlert: 'Pollen Alert',
+    temperatureAlert: 'Temperature Alert',
+    humidityAlert: 'Humidity Alert',
+    airQualityAlert: 'Air Quality Alert',
+    origin: 'Origin',
+    poisonous: 'Poisonous',
+    summary: 'Summary',
+    yes: 'Yes',
+    no: 'No',
+    noHerbsFound: 'No herbs found',
+    generateHealthReport: 'Generate Health Report',
+    metricType: 'Metric Type',
+    value: 'Value',
+    enterValue: 'Enter value',
+    notesOptional: 'Notes (Optional)',
+    addAnyNotes: 'Add any notes...',
+    cancel: 'Cancel',
+    addMetric: 'Add Metric',
+    symptom: 'Symptom',
+    symptomPlaceholder: 'e.g., headache, nausea, dizziness',
+    severity: 'Severity',
+    mild: 'Mild',
+    moderate: 'Moderate',
+    moderateSevere: 'Moderate-Severe',
+    severe: 'Severe',
+    verySevere: 'Very Severe',
+    unknown: 'Unknown',
+    selectMetricType: 'Select Metric Type',
+    healthReportGenerated: 'Health Report Generated',
+    summary: 'Summary',
+    keyInsights: 'Key Insights',
+    yourHealthMetricsNormal: 'Your health metrics are within normal ranges',
+    considerMaintainingSchedule: 'Consider maintaining consistent medication schedule',
+    monitorNewSideEffects: 'Monitor any new side effects closely',
+    ok: 'OK',
+    pleaseEnterValue: 'Please enter a value',
+    pleaseEnterValidNumber: 'Please enter a valid number',
+    pleaseEnterSymptom: 'Please enter a symptom',
+    sideEffectRecorded: 'Side effect recorded!',
+    error: 'Error',
+    success: 'Success',
+    medicationName: 'Medication name',
+    strengthExample: 'Strength (e.g., 500mg)',
+    selectTimes: 'Select times',
+    startDate: 'Start Date',
+    endDateOptional: 'End Date (optional)',
+    notesOptional: 'Notes (optional)',
+    status: 'Status',
+    taking: 'Taking',
+    onHold: 'On Hold',
+    stopped: 'Stopped',
+    addMedication: 'Add Medication',
+    editMedication: 'Edit Medication',
+    deleteMedication: 'Delete Medication',
+    supplementName: 'Supplement name',
+    brand: 'Brand',
+    dosage: 'Dosage',
+    selectTimes: 'Select times',
+    startDate: 'Start Date',
+    endDateOptional: 'End Date (optional)',
+    notesOptional: 'Notes (optional)',
+    dosesLeft: 'Doses left',
+    prn: 'PRN',
+    finished: 'Finished',
+    stopped: 'Stopped',
+    refillSoon: 'Refill soon',
+    lowStock: 'Low stock',
+    locationDenied: 'Location denied',
+    enableLocation: 'Enable location to search nearby stores.',
+    cancel: 'Cancel',
+    addSupplement: 'Add Supplement',
+    noTimingSet: 'No timing set',
+    noSupplementsFound: 'No supplements found. Add your first supplement to get started.'
   },
   es: {
     nextReminder: 'Próximo recordatorio',
@@ -104,6 +517,217 @@ const STRINGS = {
     labsLocations: 'Laboratorios',
     prescription: 'Receta',
     appointmentLog: 'Citas',
+    appointmentSubtitle: 'Programa y gestiona visitas médicas',
+    // Appointment Management translations
+    doctorVisit: 'Visita al Doctor',
+    labTest: 'Prueba de Laboratorio',
+    specialist: 'Especialista',
+    emergency: 'Emergencia',
+    appointmentManagement: 'Gestión de Citas',
+    appointmentManagementDesc: 'Programa citas, gestiona contactos de doctores y rastrea tus visitas médicas',
+    schedule: 'Programar',
+    addDoctor: 'Agregar Doctor',
+    refresh: 'Actualizar',
+    primary: 'Principal',
+    followUp: 'Seguimiento',
+    checkup: 'Revisión',
+    other: 'Otro',
+    scheduled: 'Programada',
+    confirmed: 'Confirmada',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
+    rescheduled: 'Reprogramada',
+    unknown: 'Desconocida',
+    totalAppointments: 'Total de Citas',
+    upcoming: 'Próximas',
+    doctors: 'Doctores',
+    upcomingAppointments: 'Citas Próximas',
+    upcomingAppointmentsDesc: 'Tus próximas visitas médicas programadas',
+    noUpcomingAppointments: 'No hay citas próximas programadas',
+    doctorContacts: 'Contactos de Doctores',
+    doctorContactsDesc: 'Tus proveedores de atención médica y su información de contacto',
+    pharmacy: 'Farmacia',
+    error: 'Error',
+    success: 'Éxito',
+    fillAllFields: 'Por favor completa todos los campos requeridos',
+    appointmentScheduled: '¡Cita programada exitosamente!',
+    failedToSchedule: 'Error al programar la cita',
+    doctorContactAdded: '¡Contacto de doctor agregado exitosamente!',
+    failedToAddDoctor: 'Error al agregar contacto de doctor',
+    appointmentCompleted: '¡Cita marcada como completada!',
+    failedToUpdate: 'Error al actualizar la cita',
+    scheduleAppointment: 'Programar Cita',
+    addDoctorContact: 'Agregar Contacto de Doctor',
+    appointmentType: 'Tipo de Cita',
+    selectAppointmentType: 'Seleccionar Tipo de Cita',
+    doctorName: 'Nombre del Doctor',
+    doctorNamePlaceholder: 'Ingresa el nombre del doctor',
+    specialty: 'Especialidad',
+    specialtyPlaceholder: 'Ingresa la especialidad',
+    phoneNumber: 'Número de Teléfono',
+    phonePlaceholder: 'Ingresa el número de teléfono',
+    address: 'Dirección',
+    addressPlaceholder: 'Ingresa la dirección',
+    appointmentOverview: 'Resumen de Citas',
+    noDoctorContactsYet: 'Aún no se han agregado contactos de doctores',
+    title: 'Título',
+    location: 'Ubicación',
+    date: 'Fecha',
+    time: 'Hora',
+    notes: 'Notas',
+    notesOptional: 'Notas (Opcional)',
+    cancel: 'Cancelar',
+    titlePlaceholder: 'ej., Revisión Anual, Análisis de Sangre',
+    locationPlaceholder: 'ej., Consultorio del Dr. Smith, LabCorp',
+    datePlaceholder: 'AAAA-MM-DD',
+    timePlaceholder: 'HH:MM (formato 24 horas)',
+    notesPlaceholder: 'Agrega cualquier nota o instrucción especial...',
+    appointmentServiceNotAvailable: 'Servicio de citas no disponible',
+    // Health Metric Types
+    bloodPressure: 'Presión Arterial',
+    weight: 'Peso',
+    bloodSugar: 'Azúcar en Sangre',
+    heartRate: 'Frecuencia Cardíaca',
+    temperature: 'Temperatura',
+    oxygenSaturation: 'Saturación de Oxígeno',
+    painLevel: 'Nivel de Dolor',
+    mood: 'Estado de Ánimo',
+    energyLevel: 'Nivel de Energía',
+    sleepHours: 'Horas de Sueño',
+    steps: 'Pasos',
+    // AI Health Screen translations
+    aiHealthAssistant: 'Asistente de Salud IA',
+    intelligentHealthcareFeatures: 'Características de atención médica inteligente impulsadas por IA para mejores decisiones de salud',
+    aiHealthFeatures: 'Características de Salud IA',
+    healthInsights: 'Perspectivas de Salud',
+    symptomAnalyses: 'Análisis de Síntomas',
+    drugChecks: 'Verificaciones de Medicamentos',
+    voiceNotes: 'Notas de Voz',
+    analyzeSymptoms: 'Analizar Síntomas',
+    checkInteractions: 'Verificar Interacciones',
+    voiceNote: 'Nota de Voz',
+    recentAnalyses: 'Análisis Recientes',
+    noHealthInsights: 'Aún no hay perspectivas de salud disponibles. Usa las características de IA para generar perspectivas.',
+    noSymptomAnalyses: 'Aún no hay análisis de síntomas. Intenta analizar tus síntomas.',
+    describeSymptoms: 'Describe tus síntomas',
+    enterSymptomsPlaceholder: 'Ingresa tus síntomas separados por comas (ej., fiebre, dolor de cabeza, fatiga)',
+    listMedications: 'Lista tus medicamentos',
+    enterMedicationsPlaceholder: 'Ingresa tus medicamentos separados por comas (ej., Aspirina, Metformina, Lisinopril)',
+    noteType: 'Tipo de Nota',
+    selectNoteType: 'Seleccionar Tipo de Nota',
+    transcription: 'Transcripción',
+    enterVoiceNotePlaceholder: 'Ingresa la transcripción de tu nota de voz...',
+    addNote: 'Agregar Nota',
+    analyze: 'Analizar',
+    check: 'Verificar',
+    enterSymptoms: 'Por favor ingresa tus síntomas',
+    enterMedications: 'Por favor ingresa tus medicamentos',
+    enterVoiceNote: 'Por favor ingresa tu nota de voz',
+    symptomAnalysisComplete: 'Análisis de Síntomas Completado',
+    noInteractionsFound: 'No se Encontraron Interacciones',
+    noKnownInteractions: 'No se detectaron interacciones conocidas entre tus medicamentos.',
+    drugInteractionsDetected: 'Interacciones de Medicamentos Detectadas',
+    foundInteractions: 'Se encontraron interacción(es):',
+    voiceNoteAdded: '¡Nota de voz agregada y procesada!',
+    actionItems: 'Elementos de Acción:',
+    generalHealth: 'Salud General',
+    appointment: 'Cita',
+    sideEffect: 'Efecto Secundario',
+    symptom: 'Síntoma',
+    aiGeneratedInsights: 'Perspectivas generadas por IA basadas en tus datos de salud y patrones.',
+    // Documents Screen translations
+    medicalDocuments: 'Documentos Médicos',
+    organizeDocuments: 'Mantén tus documentos médicos importantes organizados y listos para visitas al médico',
+    addDocument: 'Agregar Documento',
+    takePhoto: 'Tomar Foto',
+    uploadFromGallery: 'Subir desde Galería',
+    frontSide: 'Lado Frontal',
+    backSide: 'Lado Trasero',
+    frontOfCard: 'Frente de la Tarjeta',
+    backOfCard: 'Reverso de la Tarjeta',
+    document: 'Documento',
+    noDocumentsUploaded: 'No se han subido documentos aún',
+    documentUploadedSuccessfully: '¡Documento subido exitosamente!',
+    photoTakenSuccessfully: '¡Foto tomada exitosamente!',
+    deleteDocument: 'Eliminar Documento',
+    areYouSureDeleteDocument: '¿Estás seguro de que quieres eliminar este documento? Esto no se puede deshacer.',
+    delete: 'Eliminar',
+    permissionRequired: 'Permiso Requerido',
+    grantCameraRollAccess: 'Por favor permite el acceso a la galería para subir documentos.',
+    grantCameraAccess: 'Por favor permite el acceso a la cámara para tomar fotos.',
+    failedToUploadDocument: 'Error al subir documento',
+    failedToTakePhoto: 'Error al tomar foto',
+    // Document Categories
+    photoID: 'ID con Foto',
+    driversLicensePassport: 'Licencia de Conducir, Pasaporte, etc.',
+    birthCertificate: 'Certificado de Nacimiento',
+    officialBirthCertificate: 'Certificado de nacimiento oficial',
+    insuranceCard: 'Tarjeta de Seguro',
+    healthInsuranceInfo: 'Información del seguro de salud',
+    labResults: 'Resultados de Laboratorio',
+    bloodTestsLabWork: 'Análisis de sangre, trabajo de laboratorio, etc.',
+    prescriptions: 'Recetas',
+    currentAndPastPrescriptions: 'Recetas actuales y pasadas',
+    medicalRecords: 'Expedientes Médicos',
+    medicalHistoryReports: 'Historial médico, reportes',
+    otherDocuments: 'Otros Documentos',
+    anyOtherMedicalDocuments: 'Cualquier otro documento médico',
+    recentSymptomAnalyses: 'Tus análisis de síntomas recientes y evaluaciones de salud.',
+    symptomAnalysis: 'Análisis de Síntomas',
+    drugInteractionCheck: 'Verificación de Interacciones de Medicamentos',
+    upcoming: 'Próximas',
+    doctors: 'Doctores',
+    upcomingAppointments: 'Próximas Citas',
+    upcomingAppointmentsDesc: 'Tus citas programadas para los próximos 30 días.',
+    noUpcomingAppointments: 'No hay citas próximas programadas',
+    doctorContacts: 'Contactos de Doctores',
+    doctorContactsDesc: 'Tus proveedores de atención médica y su información de contacto.',
+    scheduleAppointment: 'Programar Cita',
+    addDoctorContact: 'Agregar Contacto de Doctor',
+    appointmentType: 'Tipo de Cita',
+    selectAppointmentType: 'Seleccionar Tipo de Cita',
+    doctorName: 'Nombre del Doctor',
+    specialty: 'Especialidad',
+    phoneNumber: 'Número de Teléfono',
+    address: 'Dirección',
+    doctorNamePlaceholder: 'ej., Dr. Juan Pérez',
+    specialtyPlaceholder: 'ej., Medicina General, Cardiología',
+    phonePlaceholder: 'ej., (555) 123-4567',
+    addressPlaceholder: 'Ingresa la dirección completa...',
+    error: 'Error',
+    success: 'Éxito',
+    fillAllFields: 'Por favor completa todos los campos requeridos',
+    appointmentScheduled: '¡Cita programada exitosamente!',
+    failedToSchedule: 'Error al programar la cita',
+    doctorContactAdded: '¡Contacto de doctor agregado exitosamente!',
+    failedToAddDoctor: 'Error al agregar contacto de doctor',
+    appointmentCompleted: '¡Cita marcada como completada!',
+    failedToUpdate: 'Error al actualizar la cita',
+    // AI Health translations
+    symptom: 'Síntoma',
+    sideEffect: 'Efecto Secundario',
+    generalHealth: 'Salud General',
+    enterSymptoms: 'Por favor ingresa tus síntomas',
+    // Smart Notifications translations
+    smartServiceNotAvailable: 'Servicio de notificaciones inteligentes no disponible',
+    addLocationReminder: 'Agregar Recordatorio de Ubicación',
+    enterLocationName: 'Ingresa el nombre de la ubicación (ej., "Farmacia CVS", "Oficina del Dr. Smith"):',
+    reminderMessage: 'Mensaje de Recordatorio',
+    reminderMessagePrompt: '¿Qué debería decir el recordatorio cuando estés cerca de esta ubicación?',
+    locationReminderAdded: '¡Recordatorio de ubicación agregado!',
+    failedToAddLocationReminder: 'Error al agregar recordatorio de ubicación',
+    addWeatherAlert: 'Agregar Alerta del Clima',
+    chooseWeatherCondition: 'Elige la condición climática a monitorear:',
+    highPollen: 'Alto Polen',
+    extremeTemperature: 'Temperatura Extrema',
+    highHumidity: 'Alta Humedad',
+    poorAirQuality: 'Mala Calidad del Aire',
+    pollenMessage: 'Considera tomar medicamento para alergias',
+    temperatureMessage: 'Verifica si necesitas medicamentos sensibles a la temperatura',
+    humidityMessage: 'La alta humedad puede afectar tu condición',
+    airQualityMessage: 'Considera usar mascarilla o quedarte en casa',
+    weatherAlertAdded: '¡Alerta del clima agregada!',
+    failedToAddWeatherAlert: 'Error al agregar alerta del clima',
     healthJournal: 'Registro de Salud',
     dashboard: 'Panel',
     settings: 'Configuración',
@@ -151,7 +775,195 @@ const STRINGS = {
   lastRefill: 'Última recarga'
   ,past: 'Pasado'
   ,refillSoon: 'Recargar pronto'
-  ,expired: 'Vencido'
+  ,expired: 'Vencido',
+  herbs: 'Hierbas',
+  supplements: 'Suplementos',
+  smartAlerts: 'Alertas Inteligentes',
+  healthAnalytics: 'Análisis de Salud',
+  aiHealth: 'Salud IA',
+  documents: 'Documentos',
+  appointments: 'Citas',
+  findNearbyPharmacies: 'Encuentra farmacias cerca de tu ubicación',
+  findNearbyLabs: 'Encuentra laboratorios médicos cerca de tu ubicación',
+  loading: 'Cargando...',
+  loadingPharmacies: 'Cargando farmacias cercanas...',
+  loadingLabs: 'Cargando laboratorios cercanos...',
+  refresh: 'Actualizar',
+  findNearbyPharmaciesBtn: 'Encontrar Farmacias Cercanas',
+  findNearbyLabsBtn: 'Encontrar Laboratorios Cercanos',
+  lastUpdated: 'Última actualización',
+  noPharmaciesFound: 'No se encontraron farmacias',
+  noLabsFound: 'No se encontraron laboratorios',
+  errorLoadingPharmacies: 'Error al cargar farmacias cercanas. Inténtalo de nuevo.',
+  errorLoadingLabs: 'Error al cargar laboratorios cercanos. Inténtalo de nuevo.',
+  myDoctorAI: 'Mis Doctores IA',
+  drAlfred: 'Dr. Alfred',
+  drMimi: 'Dr. Mimi',
+  drPawlmer: 'Dr. Pawlmer',
+  directions: 'Direcciones',
+  info: 'Información',
+  call: 'Llamar',
+  noPharmaciesFound: 'No se encontraron farmacias',
+  noLabsFound: 'No se encontraron laboratorios',
+  foundPharmacies: 'Se encontraron {count} farmacias cercanas',
+  foundLabs: 'Se encontraron {count} laboratorios cercanos',
+  lastUpdated: 'Última actualización',
+  testTypes: 'Tipos de Pruebas',
+  showAll: 'Ver todo',
+  close: 'Cerrar',
+  addMedication: 'Agregar Medicamento',
+  editMedication: 'Editar Medicamento',
+  deleteMedication: 'Eliminar Medicamento',
+  dosesLeft: 'dosis restantes',
+  taking: 'Tomando',
+  onHold: 'En espera',
+  finished: 'Terminado',
+  addReminder: 'Agregar Recordatorio',
+  namePlaceholder: 'Nombre',
+  pickTime: 'Elegir hora',
+  addReminderBtn: 'Agregar Recordatorio',
+  searchHerbs: 'Buscar hierbas...',
+  searchSupplements: 'Buscar suplementos...',
+  addSupplement: 'Agregar Suplemento',
+  refill: 'Recargar',
+  refillSoon: 'Recargar pronto',
+  taking: 'Tomando',
+  smartNotifications: 'Notificaciones Inteligentes',
+  smartNotificationsActive: 'Notificaciones Inteligentes Activas',
+  smartFeatures: 'Características Inteligentes',
+  smartRefillPredictions: 'Predicciones de Recarga Inteligentes',
+  intelligentTiming: 'Tiempo Inteligente',
+  contextAwareReminders: 'Recordatorios Conscientes del Contexto',
+  locationBasedReminders: 'Recordatorios Basados en Ubicación',
+  noLocationReminders: 'No hay recordatorios de ubicación configurados aún',
+  addLocationReminder: 'Agregar Recordatorio de Ubicación',
+  weatherBasedAlerts: 'Alertas Basadas en el Clima',
+  noWeatherAlerts: 'No hay alertas climáticas configuradas aún',
+  addWeatherAlert: 'Agregar Alerta Climática',
+  healthAnalytics: 'Análisis de Salud',
+  trackHealthMetrics: 'Rastrea tus métricas de salud, adherencia a medicamentos y efectos secundarios',
+  healthOverview: 'Resumen de Salud',
+  metricsRecorded: 'Métricas Registradas',
+  adherenceRate: 'Tasa de Adherencia',
+  sideEffects: 'Efectos Secundarios',
+  medications: 'Medicamentos',
+  recentHealthMetrics: 'Métricas de Salud Recientes',
+  trackVitalSigns: 'Rastrea tus signos vitales e indicadores de salud a lo largo del tiempo',
+  noHealthMetrics: 'No se han registrado métricas de salud aún',
+  addHealthMetric: 'Agregar Métrica de Salud',
+  medicationAdherence: 'Adherencia a Medicamentos',
+  trackMedicationSchedule: 'Rastrea qué tan bien sigues tu horario de medicamentos',
+  noAdherenceData: 'No hay datos de adherencia a medicamentos aún',
+  sideEffectsMonitoring: 'Monitoreo de Efectos Secundarios',
+  trackSideEffects: 'Rastrea cualquier efecto secundario que experimentes por los medicamentos',
+  noSideEffectsRecorded: 'No se han registrado efectos secundarios aún',
+  recordSideEffect: 'Registrar Efecto Secundario',
+  medicalDocuments: 'Documentos Médicos',
+  organizeDocuments: 'Mantén tus documentos médicos importantes organizados y listos para visitas al médico',
+  photoID: 'ID con Foto',
+  driversLicensePassport: 'Licencia de Conducir, Pasaporte, etc.',
+  birthCertificate: 'Certificado de Nacimiento',
+  officialBirthCertificate: 'Certificado de nacimiento oficial',
+  insuranceCard: 'Tarjeta de Seguro',
+  healthInsuranceInfo: 'Información del seguro de salud',
+  labResults: 'Resultados de Laboratorio',
+  bloodTestsLabWork: 'Análisis de sangre, trabajo de laboratorio, etc.',
+  noDocumentsUploaded: 'No se han subido documentos aún',
+  aiHealthAssistant: 'Asistente de Salud IA',
+  intelligentHealthcareFeatures: 'Características de atención médica inteligentes impulsadas por IA para mejores decisiones de salud',
+  aiHealthFeatures: 'Características de Salud IA',
+  intelligentHealthcareFeaturesDesc: 'Características de atención médica inteligentes impulsadas por IA para ayudarte a tomar decisiones de salud informadas',
+  healthInsights: 'Perspectivas de Salud',
+  symptomAnalyses: 'Análisis de Síntomas',
+  drugChecks: 'Verificaciones de Medicamentos',
+  voiceNotes: 'Notas de Voz',
+  analyzeSymptoms: 'Analizar Síntomas',
+  checkInteractions: 'Verificar Interacciones',
+  voiceNote: 'Nota de Voz',
+  locationBasedRemindersDesc: 'Recibe recordatorios cuando estés cerca de farmacias, consultorios médicos u otras ubicaciones importantes',
+  weatherBasedAlertsDesc: 'Recibe notificaciones cuando las condiciones climáticas puedan afectar tu salud o medicamentos',
+  smartFeaturesDesc: 'Características impulsadas por IA que aprenden de tus patrones de medicación y proporcionan recordatorios inteligentes',
+  smartRefillPredictionsDesc: 'Predice cuándo necesitarás recargas de medicamentos basándose en patrones de uso',
+  intelligentTimingDesc: 'Aprende tu horario de medicamentos y sugiere horarios óptimos para recordatorios',
+  contextAwareRemindersDesc: 'Considera tu ubicación, clima y horario al enviar recordatorios',
+  smartNotificationsDesc: 'Recordatorios inteligentes que se adaptan a tu estilo de vida y entorno',
+  initializing: 'Inicializando...',
+  active: 'Activo',
+  disabled: 'Deshabilitado',
+  threshold: 'Umbral',
+  pollenAlert: 'Alerta de Polen',
+  temperatureAlert: 'Alerta de Temperatura',
+  humidityAlert: 'Alerta de Humedad',
+  airQualityAlert: 'Alerta de Calidad del Aire',
+  origin: 'Origen',
+  poisonous: 'Venenoso',
+  summary: 'Resumen',
+  yes: 'Sí',
+  no: 'No',
+  noHerbsFound: 'No se encontraron hierbas',
+  generateHealthReport: 'Generar Reporte de Salud',
+  metricType: 'Tipo de Métrica',
+  value: 'Valor',
+  enterValue: 'Ingresar valor',
+  notesOptional: 'Notas (Opcional)',
+  addAnyNotes: 'Agregar cualquier nota...',
+  cancel: 'Cancelar',
+  addMetric: 'Agregar Métrica',
+  symptom: 'Síntoma',
+  symptomPlaceholder: 'ej., dolor de cabeza, náuseas, mareos',
+  severity: 'Gravedad',
+  mild: 'Leve',
+  moderate: 'Moderado',
+  moderateSevere: 'Moderado-Severo',
+  severe: 'Severo',
+  verySevere: 'Muy Severo',
+  unknown: 'Desconocido',
+  selectMetricType: 'Seleccionar Tipo de Métrica',
+  healthReportGenerated: 'Reporte de Salud Generado',
+  summary: 'Resumen',
+  keyInsights: 'Perspectivas Clave',
+  yourHealthMetricsNormal: 'Tus métricas de salud están dentro de rangos normales',
+  considerMaintainingSchedule: 'Considera mantener un horario de medicamentos consistente',
+  monitorNewSideEffects: 'Monitorea cualquier efecto secundario nuevo de cerca',
+  ok: 'OK',
+  pleaseEnterValue: 'Por favor ingresa un valor',
+  pleaseEnterValidNumber: 'Por favor ingresa un número válido',
+  pleaseEnterSymptom: 'Por favor ingresa un síntoma',
+  sideEffectRecorded: '¡Efecto secundario registrado!',
+  error: 'Error',
+  success: 'Éxito',
+  medicationName: 'Nombre del medicamento',
+  strengthExample: 'Fuerza (ej., 500mg)',
+  selectTimes: 'Seleccionar horarios',
+  startDate: 'Fecha de inicio',
+  endDateOptional: 'Fecha de fin (opcional)',
+  notesOptional: 'Notas (opcional)',
+  status: 'Estado',
+  taking: 'Tomando',
+  onHold: 'En espera',
+  stopped: 'Detenido',
+  addMedication: 'Agregar Medicamento',
+  editMedication: 'Editar Medicamento',
+  deleteMedication: 'Eliminar Medicamento',
+  supplementName: 'Nombre del suplemento',
+  brand: 'Marca',
+  dosage: 'Dosis',
+  selectTimes: 'Seleccionar horarios',
+  startDate: 'Fecha de inicio',
+  endDateOptional: 'Fecha de fin (opcional)',
+  notesOptional: 'Notas (opcional)',
+  dosesLeft: 'Dosis restantes',
+  prn: 'PRN',
+  finished: 'Terminado',
+  stopped: 'Detenido',
+  refillSoon: 'Recargar pronto',
+  lowStock: 'Stock bajo',
+  locationDenied: 'Ubicación denegada',
+  enableLocation: 'Habilita la ubicación para buscar tiendas cercanas.',
+  cancel: 'Cancelar',
+  addSupplement: 'Agregar Suplemento',
+  noTimingSet: 'Sin horario establecido',
+  noSupplementsFound: 'No se encontraron suplementos. Agrega tu primer suplemento para comenzar.'
   },
   zh: {
     nextReminder: '下一个提醒',
@@ -161,6 +973,217 @@ const STRINGS = {
     labsLocations: '实验室',
     prescription: '处方',
     appointmentLog: '预约日志',
+    appointmentSubtitle: '安排和管理医疗访问',
+    // Appointment Management translations
+    doctorVisit: '医生访问',
+    labTest: '实验室测试',
+    specialist: '专科医生',
+    emergency: '紧急情况',
+    appointmentManagement: '预约管理',
+    appointmentManagementDesc: '安排预约，管理医生联系人，并跟踪您的医疗访问',
+    schedule: '安排',
+    addDoctor: '添加医生',
+    refresh: '刷新',
+    primary: '主要',
+    followUp: '随访',
+    checkup: '体检',
+    other: '其他',
+    scheduled: '已安排',
+    confirmed: '已确认',
+    completed: '已完成',
+    cancelled: '已取消',
+    rescheduled: '已重新安排',
+    unknown: '未知',
+    totalAppointments: '总预约数',
+    upcoming: '即将到来',
+    doctors: '医生',
+    upcomingAppointments: '即将到来的预约',
+    upcomingAppointmentsDesc: '您接下来30天的预定预约',
+    noUpcomingAppointments: '没有即将到来的预约',
+    doctorContacts: '医生联系人',
+    doctorContactsDesc: '您的医疗保健提供者及其联系信息',
+    pharmacy: '药房',
+    error: '错误',
+    success: '成功',
+    fillAllFields: '请填写所有必填字段',
+    appointmentScheduled: '预约安排成功！',
+    failedToSchedule: '安排预约失败',
+    doctorContactAdded: '医生联系人添加成功！',
+    failedToAddDoctor: '添加医生联系人失败',
+    appointmentCompleted: '预约标记为已完成！',
+    failedToUpdate: '更新预约失败',
+    scheduleAppointment: '安排预约',
+    addDoctorContact: '添加医生联系人',
+    appointmentType: '预约类型',
+    selectAppointmentType: '选择预约类型',
+    doctorName: '医生姓名',
+    doctorNamePlaceholder: '输入医生姓名',
+    specialty: '专业',
+    specialtyPlaceholder: '输入专业',
+    phoneNumber: '电话号码',
+    phonePlaceholder: '输入电话号码',
+    address: '地址',
+    addressPlaceholder: '输入地址',
+    appointmentOverview: '预约概览',
+    noDoctorContactsYet: '尚未添加医生联系人',
+    title: '标题',
+    location: '位置',
+    date: '日期',
+    time: '时间',
+    notes: '备注',
+    notesOptional: '备注（可选）',
+    cancel: '取消',
+    titlePlaceholder: '例如：年度体检、血液检查',
+    locationPlaceholder: '例如：史密斯医生办公室、LabCorp',
+    datePlaceholder: 'YYYY-MM-DD',
+    timePlaceholder: 'HH:MM（24小时制）',
+    notesPlaceholder: '添加任何备注或特殊说明...',
+    appointmentServiceNotAvailable: '预约服务不可用',
+    // Health Metric Types
+    bloodPressure: '血压',
+    weight: '体重',
+    bloodSugar: '血糖',
+    heartRate: '心率',
+    temperature: '体温',
+    oxygenSaturation: '血氧饱和度',
+    painLevel: '疼痛程度',
+    mood: '情绪',
+    energyLevel: '能量水平',
+    sleepHours: '睡眠时间',
+    steps: '步数',
+    // AI Health Screen translations
+    aiHealthAssistant: 'AI健康助手',
+    intelligentHealthcareFeatures: '由AI驱动的智能医疗功能，帮助您做出更好的健康决策',
+    aiHealthFeatures: 'AI健康功能',
+    healthInsights: '健康洞察',
+    symptomAnalyses: '症状分析',
+    drugChecks: '药物检查',
+    voiceNotes: '语音笔记',
+    analyzeSymptoms: '分析症状',
+    checkInteractions: '检查相互作用',
+    voiceNote: '语音笔记',
+    recentAnalyses: '最近分析',
+    noHealthInsights: '暂无健康洞察。使用AI功能生成洞察。',
+    noSymptomAnalyses: '暂无症状分析。尝试分析您的症状。',
+    describeSymptoms: '描述您的症状',
+    enterSymptomsPlaceholder: '输入您的症状，用逗号分隔（例如：发烧、头痛、疲劳）',
+    listMedications: '列出您的药物',
+    enterMedicationsPlaceholder: '输入您的药物，用逗号分隔（例如：阿司匹林、二甲双胍、赖诺普利）',
+    noteType: '笔记类型',
+    selectNoteType: '选择笔记类型',
+    transcription: '转录',
+    enterVoiceNotePlaceholder: '输入您的语音笔记转录...',
+    addNote: '添加笔记',
+    analyze: '分析',
+    check: '检查',
+    enterSymptoms: '请输入您的症状',
+    enterMedications: '请输入您的药物',
+    enterVoiceNote: '请输入您的语音笔记',
+    symptomAnalysisComplete: '症状分析完成',
+    noInteractionsFound: '未发现相互作用',
+    noKnownInteractions: '在您的药物之间未检测到已知的药物相互作用。',
+    drugInteractionsDetected: '检测到药物相互作用',
+    foundInteractions: '发现相互作用：',
+    voiceNoteAdded: '语音笔记已添加并处理！',
+    actionItems: '行动项目：',
+    generalHealth: '一般健康',
+    appointment: '预约',
+    sideEffect: '副作用',
+    symptom: '症状',
+    aiGeneratedInsights: '基于您的健康数据和模式的AI生成洞察。',
+    // Documents Screen translations
+    medicalDocuments: '医疗文档',
+    organizeDocuments: '保持您的重要医疗文档井然有序，为医生就诊做好准备',
+    addDocument: '添加文档',
+    takePhoto: '拍照',
+    uploadFromGallery: '从相册上传',
+    frontSide: '正面',
+    backSide: '背面',
+    frontOfCard: '卡片正面',
+    backOfCard: '卡片背面',
+    document: '文档',
+    noDocumentsUploaded: '尚未上传文档',
+    documentUploadedSuccessfully: '文档上传成功！',
+    photoTakenSuccessfully: '拍照成功！',
+    deleteDocument: '删除文档',
+    areYouSureDeleteDocument: '您确定要删除此文档吗？此操作无法撤销。',
+    delete: '删除',
+    permissionRequired: '需要权限',
+    grantCameraRollAccess: '请允许访问相册以上传文档。',
+    grantCameraAccess: '请允许访问相机以拍照。',
+    failedToUploadDocument: '上传文档失败',
+    failedToTakePhoto: '拍照失败',
+    // Document Categories
+    photoID: '带照片身份证',
+    driversLicensePassport: '驾照、护照等',
+    birthCertificate: '出生证明',
+    officialBirthCertificate: '官方出生证明',
+    insuranceCard: '保险卡',
+    healthInsuranceInfo: '健康保险信息',
+    labResults: '实验室结果',
+    bloodTestsLabWork: '血液检查、实验室工作等',
+    prescriptions: '处方',
+    currentAndPastPrescriptions: '当前和过去的处方',
+    medicalRecords: '医疗记录',
+    medicalHistoryReports: '医疗历史、报告',
+    otherDocuments: '其他文档',
+    anyOtherMedicalDocuments: '任何其他医疗文档',
+    recentSymptomAnalyses: '您最近的症状分析和健康评估。',
+    symptomAnalysis: '症状分析',
+    drugInteractionCheck: '药物相互作用检查',
+    upcoming: '即将到来',
+    doctors: '医生',
+    upcomingAppointments: '即将到来的预约',
+    upcomingAppointmentsDesc: '您未来30天的预定预约。',
+    noUpcomingAppointments: '没有即将到来的预约',
+    doctorContacts: '医生联系人',
+    doctorContactsDesc: '您的医疗保健提供者及其联系信息。',
+    scheduleAppointment: '安排预约',
+    addDoctorContact: '添加医生联系人',
+    appointmentType: '预约类型',
+    selectAppointmentType: '选择预约类型',
+    doctorName: '医生姓名',
+    specialty: '专业',
+    phoneNumber: '电话号码',
+    address: '地址',
+    doctorNamePlaceholder: '例如：张医生',
+    specialtyPlaceholder: '例如：全科医学、心脏病学',
+    phonePlaceholder: '例如：(555) 123-4567',
+    addressPlaceholder: '输入完整地址...',
+    error: '错误',
+    success: '成功',
+    fillAllFields: '请填写所有必填字段',
+    appointmentScheduled: '预约安排成功！',
+    failedToSchedule: '安排预约失败',
+    doctorContactAdded: '医生联系人添加成功！',
+    failedToAddDoctor: '添加医生联系人失败',
+    appointmentCompleted: '预约标记为已完成！',
+    failedToUpdate: '更新预约失败',
+    // AI Health translations
+    symptom: '症状',
+    sideEffect: '副作用',
+    generalHealth: '一般健康',
+    enterSymptoms: '请输入您的症状',
+    // Smart Notifications translations
+    smartServiceNotAvailable: '智能通知服务不可用',
+    addLocationReminder: '添加位置提醒',
+    enterLocationName: '输入位置名称（例如："CVS药房"，"Smith医生办公室"）：',
+    reminderMessage: '提醒消息',
+    reminderMessagePrompt: '当您接近此位置时，提醒应该说什么？',
+    locationReminderAdded: '位置提醒已添加！',
+    failedToAddLocationReminder: '添加位置提醒失败',
+    addWeatherAlert: '添加天气警报',
+    chooseWeatherCondition: '选择要监控的天气条件：',
+    highPollen: '高花粉',
+    extremeTemperature: '极端温度',
+    highHumidity: '高湿度',
+    poorAirQuality: '空气质量差',
+    pollenMessage: '考虑服用过敏药物',
+    temperatureMessage: '检查是否需要温度敏感的药物',
+    humidityMessage: '高湿度可能影响您的状况',
+    airQualityMessage: '考虑戴口罩或待在室内',
+    weatherAlertAdded: '天气警报已添加！',
+    failedToAddWeatherAlert: '添加天气警报失败',
     healthJournal: '健康日记',
     dashboard: '仪表盘',
     settings: '设置',
@@ -208,12 +1231,211 @@ const STRINGS = {
   lastRefill: '上次续药'
   ,past: '已过'
   ,refillSoon: '快用完'
-  ,expired: '已过期'
+  ,expired: '已过期',
+  herbs: '草药',
+  supplements: '补充剂',
+  smartAlerts: '智能提醒',
+  healthAnalytics: '健康分析',
+  aiHealth: 'AI健康',
+  documents: '文档',
+  appointments: '预约',
+  findNearbyPharmacies: '查找附近的药房',
+  findNearbyLabs: '查找附近的医疗实验室',
+  loading: '加载中...',
+  loadingPharmacies: '正在加载附近的药房...',
+  loadingLabs: '正在加载附近的实验室...',
+  refresh: '刷新',
+  findNearbyPharmaciesBtn: '查找附近药房',
+  findNearbyLabsBtn: '查找附近实验室',
+  lastUpdated: '最后更新',
+  noPharmaciesFound: '未找到药房',
+  noLabsFound: '未找到实验室',
+  errorLoadingPharmacies: '加载附近药房失败。请重试。',
+  errorLoadingLabs: '加载附近实验室失败。请重试。',
+  myDoctorAI: '我的AI医生',
+  drAlfred: 'Alfred医生',
+  drMimi: 'Mimi医生',
+  drPawlmer: 'Pawlmer医生',
+  directions: '导航',
+  info: '信息',
+  call: '致电',
+  noPharmaciesFound: '未找到药房',
+  noLabsFound: '未找到实验室',
+  foundPharmacies: '找到{count}个附近药房',
+  foundLabs: '找到{count}个附近实验室',
+  lastUpdated: '最后更新',
+  testTypes: '测试类型',
+  showAll: '显示全部',
+  close: '关闭',
+  addMedication: '添加药物',
+  editMedication: '编辑药物',
+  deleteMedication: '删除药物',
+  dosesLeft: '剩余剂量',
+  taking: '服用中',
+  onHold: '暂停',
+  finished: '已完成',
+  addReminder: '添加提醒',
+  namePlaceholder: '名称',
+  pickTime: '选择时间',
+  addReminderBtn: '添加提醒',
+  searchHerbs: '搜索草药...',
+  searchSupplements: '搜索补充剂...',
+  addSupplement: '添加补充剂',
+  refill: '补充',
+  refillSoon: '即将补充',
+  taking: '服用中',
+  smartNotifications: '智能通知',
+  smartNotificationsActive: '智能通知已激活',
+  smartFeatures: '智能功能',
+  smartRefillPredictions: '智能补充预测',
+  intelligentTiming: '智能时间',
+  contextAwareReminders: '情境感知提醒',
+  locationBasedReminders: '基于位置的提醒',
+  noLocationReminders: '尚未设置位置提醒',
+  addLocationReminder: '添加位置提醒',
+  weatherBasedAlerts: '基于天气的警报',
+  noWeatherAlerts: '尚未设置天气警报',
+  addWeatherAlert: '添加天气警报',
+  healthAnalytics: '健康分析',
+  trackHealthMetrics: '跟踪您的健康指标、药物依从性和副作用',
+  healthOverview: '健康概览',
+  metricsRecorded: '已记录指标',
+  adherenceRate: '依从率',
+  sideEffects: '副作用',
+  medications: '药物',
+  recentHealthMetrics: '最近的健康指标',
+  trackVitalSigns: '跟踪您的生命体征和健康指标随时间的变化',
+  noHealthMetrics: '尚未记录健康指标',
+  addHealthMetric: '添加健康指标',
+  medicationAdherence: '药物依从性',
+  trackMedicationSchedule: '跟踪您遵循药物时间表的情况',
+  noAdherenceData: '尚无药物依从性数据',
+  sideEffectsMonitoring: '副作用监测',
+  trackSideEffects: '跟踪您因药物而经历的任何副作用',
+  noSideEffectsRecorded: '尚未记录副作用',
+  recordSideEffect: '记录副作用',
+  medicalDocuments: '医疗文档',
+  organizeDocuments: '保持您的重要医疗文档井然有序，为医生就诊做好准备',
+  photoID: '带照片身份证',
+  driversLicensePassport: '驾照、护照等',
+  birthCertificate: '出生证明',
+  officialBirthCertificate: '官方出生证明',
+  insuranceCard: '保险卡',
+  healthInsuranceInfo: '健康保险信息',
+  labResults: '实验室结果',
+  bloodTestsLabWork: '血液检查、实验室工作等',
+  noDocumentsUploaded: '尚未上传文档',
+  aiHealthAssistant: 'AI健康助手',
+  intelligentHealthcareFeatures: '由AI驱动的智能医疗功能，帮助您做出更好的健康决策',
+  aiHealthFeatures: 'AI健康功能',
+  intelligentHealthcareFeaturesDesc: '由AI驱动的智能医疗功能，帮助您做出明智的健康决策',
+  healthInsights: '健康洞察',
+  symptomAnalyses: '症状分析',
+  drugChecks: '药物检查',
+  voiceNotes: '语音笔记',
+  analyzeSymptoms: '分析症状',
+  checkInteractions: '检查相互作用',
+  voiceNote: '语音笔记',
+  locationBasedRemindersDesc: '当您靠近药房、医生办公室或其他重要地点时收到提醒',
+  weatherBasedAlertsDesc: '当天气条件可能影响您的健康或药物时收到通知',
+  smartFeaturesDesc: '由AI驱动的功能，学习您的用药模式并提供智能提醒',
+  smartRefillPredictionsDesc: '根据使用模式预测您何时需要药物补充',
+  intelligentTimingDesc: '学习您的用药时间表并建议最佳提醒时间',
+  contextAwareRemindersDesc: '在发送提醒时考虑您的位置、天气和时间表',
+  smartNotificationsDesc: '适应您生活方式和环境的智能提醒',
+  initializing: '正在初始化...',
+  active: '活跃',
+  disabled: '已禁用',
+  threshold: '阈值',
+  pollenAlert: '花粉警报',
+  temperatureAlert: '温度警报',
+  humidityAlert: '湿度警报',
+  airQualityAlert: '空气质量警报',
+  origin: '起源',
+  poisonous: '有毒',
+  summary: '摘要',
+  yes: '是',
+  no: '否',
+  noHerbsFound: '未找到草药',
+  generateHealthReport: '生成健康报告',
+  metricType: '指标类型',
+  value: '数值',
+  enterValue: '输入数值',
+  notesOptional: '备注（可选）',
+  addAnyNotes: '添加任何备注...',
+  cancel: '取消',
+  addMetric: '添加指标',
+  symptom: '症状',
+  symptomPlaceholder: '例如：头痛、恶心、头晕',
+  severity: '严重程度',
+  mild: '轻微',
+  moderate: '中等',
+  moderateSevere: '中等-严重',
+  severe: '严重',
+  verySevere: '非常严重',
+  unknown: '未知',
+  selectMetricType: '选择指标类型',
+  healthReportGenerated: '健康报告已生成',
+  summary: '摘要',
+  keyInsights: '关键洞察',
+  yourHealthMetricsNormal: '您的健康指标在正常范围内',
+  considerMaintainingSchedule: '考虑保持一致的用药时间表',
+  monitorNewSideEffects: '密切监测任何新的副作用',
+  ok: '确定',
+  pleaseEnterValue: '请输入数值',
+  pleaseEnterValidNumber: '请输入有效数字',
+  pleaseEnterSymptom: '请输入症状',
+  sideEffectRecorded: '副作用已记录！',
+  error: '错误',
+  success: '成功',
+  medicationName: '药物名称',
+  strengthExample: '强度（例如：500mg）',
+  selectTimes: '选择时间',
+  startDate: '开始日期',
+  endDateOptional: '结束日期（可选）',
+  notesOptional: '备注（可选）',
+  status: '状态',
+  taking: '服用中',
+  onHold: '暂停',
+  stopped: '已停止',
+  addMedication: '添加药物',
+  editMedication: '编辑药物',
+  deleteMedication: '删除药物',
+  supplementName: '补充剂名称',
+  brand: '品牌',
+  dosage: '剂量',
+  selectTimes: '选择时间',
+  startDate: '开始日期',
+  endDateOptional: '结束日期（可选）',
+  notesOptional: '备注（可选）',
+  dosesLeft: '剩余剂量',
+  prn: '按需',
+  finished: '已完成',
+  stopped: '已停止',
+  refillSoon: '即将补充',
+  lowStock: '库存不足',
+  locationDenied: '位置被拒绝',
+  enableLocation: '启用位置以搜索附近商店。',
+  cancel: '取消',
+  addSupplement: '添加补充剂',
+  noTimingSet: '未设置时间',
+  noSupplementsFound: '未找到补充剂。添加您的第一个补充剂开始使用。'
   }
 };
 
 // ---------- THEMES ----------
 const PALETTES = {
+  whiteGold: {
+    id: 'whiteGold',
+    bg: '#ffffff',
+    bgStart: '#ffffff',
+    bgEnd: '#fefefe',
+    card: '#ffffff',
+    text: '#1a1a1a',
+    sub: '#666666',
+    accent: '#D4AF37',
+    chip: '#f8f6f0',
+  },
   gold: {
     id: 'gold',
     bg: '#faf8f5',
@@ -269,6 +1491,7 @@ const STORAGE = {
   rxPhotos: 'AURIC_RX_PHOTOS',
   voiceNotes: 'AURIC_VOICE_NOTES',
   meds: 'AURIC_MEDS',
+  selectedDoctor: 'AURIC_SELECTED_DOCTOR',
 };
 
 // Lightweight streaming hook (defined inline to avoid extra files)
@@ -330,6 +1553,9 @@ function useMedicalStreamLocal(endpoint) {
 export default function App() {
   // TEMP FLAG - set to false when done testing env
   const debugEnv = true;
+  
+  // Test log for component rendering
+  console.log('📱 App component rendered');
 
   // Load fonts first (simple gate)
   const [fontsLoaded] = useFonts({
@@ -341,15 +1567,19 @@ export default function App() {
   });
 
   // Put hooks/state INSIDE the component, before returns
-  const [route, setRoute] = useState('dashboard'); 
+  const [route, setRoute] = useState('dashboard');
+  
+  
+  
   // 'reminders' | 'pharmacies' | 'labs' | 'prescription' | 'appointments' | 'settings'
 
   // language & theme
   const [lang, setLang] = useState('en');
-  const [themeKey, setThemeKey] = useState('gold');
+  const [themeKey, setThemeKey] = useState('whiteGold');
   const [fontColor, setFontColor] = useState('default');
   const [night, setNight] = useState(false);
   const [moodShift, setMoodShift] = useState(true);
+  const [selectedDoctor, setSelectedDoctor] = useState('Dr. Alfred');
 
   // meds/reminders (light placeholder list)
   const [reminders, setReminders] = useState([]);
@@ -650,7 +1880,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     useEffect(() => {
     (async () => {
       try {
-        const [L, T, N, M, R, P, V, MD] = await Promise.all([
+        const [L, T, N, M, R, P, V, MD, SD] = await Promise.all([
           AsyncStorage.getItem(STORAGE.lang),
           AsyncStorage.getItem(STORAGE.theme),
           AsyncStorage.getItem(STORAGE.night),
@@ -659,12 +1889,17 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
           AsyncStorage.getItem(STORAGE.rxPhotos),
           AsyncStorage.getItem(STORAGE.voiceNotes),
           AsyncStorage.getItem(STORAGE.meds),
+          AsyncStorage.getItem(STORAGE.selectedDoctor),
         ]);
 
-        if (L) setLang(L);
+        if (L) {
+          console.log('🔍 App - Loading language from storage:', L);
+          setLang(L);
+        }
         if (T) setThemeKey(T);
         if (N) setNight(N === '1');
         if (M) setMoodShift(M === '1');
+        if (SD) setSelectedDoctor(SD);
 
         if (R) { try { setReminders(JSON.parse(R)); } catch {} }
         if (P) { try { setRxPhotos(JSON.parse(P)); } catch {} }
@@ -676,30 +1911,6 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     })();
   }, []);
 
-// inside componen schedule reminder
-async function scheduleReminderNotification(name, time24h) {
-  // time24h like "13:45"
-  const [hh, mm] = (time24h || '').split(':').map(n => parseInt(n, 10));
-  if (Number.isNaN(hh) || Number.isNaN(mm)) return;
-
-  const now = new Date();
-  const fire = new Date(now);
-  fire.setHours(hh, mm, 0, 0);
-  if (fire <= now) fire.setDate(fire.getDate() + 1); // schedule for tomorrow if time already passed
-
-  try {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Medication Reminder',
-        body: name || 'Time to take your medication',
-        sound: 'default',
-      },
-      trigger: fire, // exact datetime
-    });
-  } catch (e) {
-    console.log('schedule error', e);
-  }
-}
   // persist basics
   useEffect(() => { AsyncStorage.setItem(STORAGE.lang, lang); }, [lang]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.theme, themeKey); }, [themeKey]);
@@ -709,6 +1920,14 @@ async function scheduleReminderNotification(name, time24h) {
   useEffect(() => { AsyncStorage.setItem(STORAGE.rxPhotos, JSON.stringify(rxPhotos)); }, [rxPhotos]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.voiceNotes, JSON.stringify(voiceNotes)); }, [voiceNotes]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);
+  useEffect(() => { AsyncStorage.setItem(STORAGE.selectedDoctor, selectedDoctor); }, [selectedDoctor]);
+
+  // Update AI greeting when doctor changes
+  useEffect(() => {
+    if (aiMessages.length > 0 && aiMessages[0].role === 'assistant') {
+      setAiMessages([{ role: 'assistant', text: getDoctorGreeting(selectedDoctor) }]);
+    }
+  }, [selectedDoctor]);
 
   // migrate from reminders if meds empty
   useEffect(() => {
@@ -746,7 +1965,7 @@ async function scheduleReminderNotification(name, time24h) {
 
   // mood shift color tweak (toy demo: if last AI message contains "stress", switch to teal)
   const theme = useMemo(() => {
-    let base = PALETTES[themeKey] || PALETTES.gold;
+    let base = PALETTES[themeKey] || PALETTES.whiteGold;
     if (night) base = { ...base, bg: '#1a1a1a', bgStart: '#1a1a1a', bgEnd: '#2a2a2a', card: '#2d2d2d', text: '#f5f5f5', sub: '#b8b8b8' };
     if (moodShift && aiMessages.slice(-1)[0]?.text?.toLowerCase?.().includes('stress')) {
       base = PALETTES.teal;
@@ -813,24 +2032,35 @@ const S = STRINGS[lang] || STRINGS.en;
 
 
   // --------- Helpers ----------
-  const Card = ({ title, icon, onPress }) => (
-    <TouchableOpacity 
-      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.chip }]} 
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.cardIcon}>{icon}</View>
-      <Text style={[styles.cardText, { color: theme.text, fontFamily: 'Inter_700Bold' }]}>{title}</Text>
-    </TouchableOpacity>
-  );
+  const Card = ({ title, icon, onPress }) => {
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    return (
+      <TouchableOpacity 
+        style={[styles.card, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]} 
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        <View style={styles.cardIcon}>{icon}</View>
+        <DynamicText type="card" style={[styles.cardText, { fontFamily: 'Inter_700Bold' }]}>{title}</DynamicText>
+      </TouchableOpacity>
+    );
+  };
 
   const AnimatedFloatingButton = () => (
     <TouchableOpacity
-      style={[styles.fab, { backgroundColor: theme.accent }]}
-      onPress={() => setAiOpen(true)}
+      style={[styles.fab, { backgroundColor: 'transparent' }]}
+      onPress={() => {
+        setAiOpen(true);
+        // Always show the selected doctor's greeting when opening AI
+        setAiMessages([{ role: 'assistant', text: getDoctorGreeting(selectedDoctor) }]);
+      }}
       activeOpacity={0.8}
     >
-      <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>AI</Text>
+      <Image 
+        source={getDoctorImage(selectedDoctor)} 
+        style={{ width: 60, height: 60, borderRadius: 30 }} 
+        resizeMode="contain" 
+      />
     </TouchableOpacity>
   );
 
@@ -845,16 +2075,17 @@ const S = STRINGS[lang] || STRINGS.en;
   );
 
   const TopBar = () => (
-  <View style={[styles.topbar, { borderColor: theme.chip, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-    <AnimatedButton onPress={() => setRoute('dashboard')} style={styles.brandButton}>
+  <View style={[styles.topbar, { borderColor: theme.chip }]}>
+    <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.brandButton, { marginLeft: -65 }]}>
         <Image 
-          source={require('./assets/AuricRX_home_button.png')} 
+          source={require('./assets/AuricRX_home_button_across_screens.png')} 
           style={styles.brandLogo}
           resizeMode="contain"
         />
     </AnimatedButton>
+    <View style={{ flex: 1 }} />
     <AnimatedButton onPress={() => setRoute('settings')}>
-      <Text style={{ fontSize: 22, color: theme.accent }}>⚙️</Text>
+      <DynamicText type="accent" style={{ fontSize: 22 }}>⚙️</DynamicText>
     </AnimatedButton>
   </View>
 );
@@ -871,6 +2102,65 @@ const handleAskMedicalAI = async () => {
   setMedicalResponse(answer);
 };
 
+
+  // --------- AI Doctor System ----------
+  const getDoctorGreeting = (doctor) => {
+    const greetings = {
+      'Dr. Alfred': "Hello! I'm Dr. Alfred, your experienced medical AI assistant. I'm here to help you with comprehensive health guidance, medication management, and supplement recommendations. How can I assist you with your health journey today?",
+      'Dr. Mimi': "Hi there! I'm Dr. Mimi, your friendly and approachable health companion. I specialize in making healthcare feel comfortable and easy to understand. Whether it's about your medications, supplements, or general wellness, I'm here to help! What would you like to discuss?",
+      'Dr. Pawlmer': "Meow! I'm Dr. Pawlmer, your purr-fessional feline health expert! 🐱 I bring a unique perspective to healthcare with my cat-like curiosity and attention to detail. I'm here to help you with your medications, supplements, and health questions. What's on your mind today?"
+    };
+    return greetings[doctor] || greetings['Dr. Alfred'];
+  };
+
+  const getDoctorImage = (doctor) => {
+    const images = {
+      'Dr. Alfred': require('./assets/dashboard Emojies/Dr. Alfred AI Widget.png'),
+      'Dr. Mimi': require('./assets/dashboard Emojies/Dr. Mimi AI Widget.png'),
+      'Dr. Pawlmer': require('./assets/dashboard Emojies/Dr. Pawlmer AI Widget.png')
+    };
+    return images[doctor] || images['Dr. Alfred'];
+  };
+
+
+  // --------- Location-based distance formatting ----------
+  const [userCountry, setUserCountry] = useState(null);
+
+  // Function to detect user's country based on coordinates
+  const detectUserCountry = async (latitude, longitude) => {
+    try {
+      console.log('🌍 Country detection - coordinates:', { latitude, longitude });
+      
+      // Use a simple reverse geocoding approach
+      // For USA: roughly between 24-49°N and 66-125°W
+      if (latitude >= 24 && latitude <= 49 && longitude >= -125 && longitude <= -66) {
+        console.log('🌍 Detected as USA');
+        return 'US';
+      }
+      // For Mexico: roughly between 14-33°N and 86-118°W (expanded range)
+      if (latitude >= 14 && latitude <= 33 && longitude >= -118 && longitude <= -86) {
+        console.log('🌍 Detected as Mexico');
+        return 'MX';
+      }
+      // For China: roughly between 18-54°N and 73-135°E
+      if (latitude >= 18 && latitude <= 54 && longitude >= 73 && longitude <= 135) {
+        return 'CN';
+      }
+      // Fallback: if language is Spanish, likely in a Spanish-speaking country (metric)
+      if (lang === 'es') {
+        console.log('🌍 Language is Spanish, defaulting to metric units');
+        return 'MX'; // Use MX to trigger metric units
+      }
+      
+      // Default to metric for other countries
+      console.log('🌍 Detected as other country (using metric)');
+      return 'OTHER';
+    } catch (error) {
+      console.log('Error detecting country:', error);
+      console.log('🌍 Country detection failed, defaulting to metric');
+      return 'OTHER'; // Default to metric
+    }
+  };
 
   // --------- Pharmacies ----------
   async function openPharmaciesNearMe() {
@@ -979,68 +2269,68 @@ const handleAskMedicalAI = async () => {
 
   // --------- Screens ----------
   const Dashboard = () => {
-  return (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-      <>
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-        >
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    return (
+    <>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+      >
           <TopBar />
 
           {/* Health widget */}
-          <View style={[styles.widget, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-            <Text style={[styles.widgetTitle, { color: theme.text, fontFamily: 'Inter_800ExtraBold' }]}>
+          <View style={[styles.widget, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginTop: 16 }]}>
+            <DynamicText type="primary" style={[styles.widgetTitle, { fontFamily: 'Inter_800ExtraBold' }]}>
               {S.healthJournal}
-            </Text>
-            <View style={[styles.widgetInner, { backgroundColor: theme.chip }]}>
-              <Text style={[styles.widgetSub, { color: theme.sub, fontFamily: 'Inter_600SemiBold' }]}>
+            </DynamicText>
+            <View style={[styles.widgetInner, { backgroundColor: getCardBorderColor() }]}>
+              <DynamicText type="card" style={[styles.widgetSub, { fontFamily: 'Inter_600SemiBold' }]}>
                 {S.nextReminder}
-              </Text>
-              <Text style={[styles.widgetBig, { color: theme.text, fontFamily: 'Inter_900Black' }]}>
+              </DynamicText>
+              <DynamicText type="card" style={[styles.widgetBig, { fontFamily: 'Inter_900Black' }]}>
                 {nextReminder?.name || '—'}
-              </Text>
-              <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>
+              </DynamicText>
+              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>
                 {nextReminder?.time || '--:--'}
-              </Text>
+              </DynamicText>
             </View>
           </View>
 
           {/* Card grid */}
         <View style={styles.grid}>
-            <Card title={S.labsLocations} icon={<Text style={styles.emoji}>🧪</Text>} onPress={() => setRoute('labs')} />
-          <Card title={S.pharmacyLocations} icon={<Text style={styles.emoji}>📍</Text>} onPress={() => setRoute('pharmacies')} />
-            <Card title={S.reminders} icon={<Text style={styles.emoji}>🔔</Text>} onPress={() => setRoute('reminders')} />
-          <Card title={S.medications} icon={<Text style={styles.emoji}>💊</Text>} onPress={() => setRoute('medications')} />
-            <Card title="Herbs" icon={<Image source={require('./assets/icons/herb_emoji_transparent.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('herbs')} />
-            <Card title="Supplements" icon={<Image source={require('./assets/icons/supplement.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('supplements')} />
+            <Card title={S.labsLocations} icon={<Image source={require('./assets/dashboard Emojies/Lab Locations.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('labs')} />
+          <Card title={S.pharmacyLocations} icon={<Image source={require('./assets/dashboard Emojies/Pharmacy locations.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('pharmacies')} />
+            <Card title={S.reminders} icon={<Image source={require('./assets/dashboard Emojies/Reminders.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('reminders')} />
+          <Card title={S.medications} icon={<Image source={require('./assets/dashboard Emojies/Medications.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('medications')} />
+            <Card title={S.herbs} icon={<Image source={require('./assets/dashboard Emojies/Herbs.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('herbs')} />
+            <Card title={S.supplements} icon={<Image source={require('./assets/dashboard Emojies/supplements.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('supplements')} />
             <Card 
-              title="Smart Alerts" 
-              icon={<Text style={styles.emoji}>🧠</Text>} 
+              title={S.smartAlerts} 
+              icon={<Image source={require('./assets/dashboard Emojies/Smart Alerts.png')} style={styles.cardIconLarge} resizeMode="contain" />} 
               onPress={() => setRoute('smart-notifications')}
               subtitle="Intelligent reminders & notifications"
             />
             <Card 
-              title="Health Analytics" 
-              icon={<Text style={styles.emoji}>📊</Text>} 
+              title={S.healthAnalytics} 
+              icon={<Image source={require('./assets/dashboard Emojies/Health Analytics.png')} style={styles.cardIconLarge} resizeMode="contain" />} 
               onPress={() => setRoute('health-analytics')}
               subtitle="Track metrics, adherence & insights"
             />
             <Card 
-              title="Appointments" 
-              icon={<Text style={styles.emoji}>📅</Text>} 
+              title={S.appointmentLog} 
+              icon={<Image source={require('./assets/dashboard Emojies/Appointment Tracker.png')} style={styles.cardIcon} resizeMode="contain" />} 
               onPress={() => setRoute('appointments')}
-              subtitle="Schedule & manage healthcare visits"
+              subtitle={S.appointmentSubtitle}
             />
             <Card 
-              title="AI Health" 
-              icon={<Text style={styles.emoji}>🤖</Text>} 
+              title={S.aiHealth} 
+              icon={<Image source={require('./assets/dashboard Emojies/AI Health.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('ai-health')}
               subtitle="Intelligent health insights & analysis"
             />
             <Card 
-              title="Documents" 
-              icon={<Text style={styles.emoji}>📄</Text>} 
+              title={S.documents} 
+              icon={<Image source={require('./assets/dashboard Emojies/Documents.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('documents')}
               subtitle="Medical documents for doctor visits"
               actionButton={
@@ -1067,84 +2357,8 @@ const handleAskMedicalAI = async () => {
         </View>
       </ScrollView>
       </>
-    </LinearGradient>
   );
 };
-  const Reminders = () => {
-    const [name, setName] = useState('');
-    const [time, setTime] = useState('');
-    const [showPicker, setShowPicker] = useState(false);
-    const reminderNameRef = useRef(null);
-
-    const onPick = (_, date) => {
-      setShowPicker(false);
-      if (date) {
-        const hh = String(date.getHours()).padStart(2,'0');
-        const mm = String(date.getMinutes()).padStart(2,'0');
-        setTime(`${hh}:${mm}`);
-      }
-    };
-    return (
-      <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <View style={[styles.header, { borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 }]}>
-            <AnimatedButton onPress={() => setRoute('dashboard')} style={styles.headerHomeButton}>
-              <Image 
-                source={require('./assets/AuricRX_home_button.png')} 
-                style={styles.headerHomeIcon}
-                resizeMode="contain"
-              />
-            </AnimatedButton>
-
-            <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_800ExtraBold', position: 'absolute', left: '50%', transform: [{ translateX: -50 }], maxWidth: '60%' }} numberOfLines={1}>{S.reminders}</Text>
-
-            <AnimatedButton onPress={() => setRoute('settings')} style={{ padding: 8 }}>
-              <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
-            </AnimatedButton>
-          </View>
-          <View style={[styles.form, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-            <TextInput 
-              ref={reminderNameRef}
-              placeholder="Name" 
-              placeholderTextColor={theme.sub} 
-              style={[styles.input, { color: theme.text, borderColor: theme.chip, fontFamily: 'Inter_400Regular' }]} 
-              value={name} 
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="done"
-            />
-            <TouchableOpacity onPress={()=>setShowPicker(true)} style={[styles.input,{ justifyContent:'center' }]}> 
-              <Text style={{ color: time? theme.text: theme.sub }}>{time || 'Pick time'}</Text>
-            </TouchableOpacity>
-            {showPicker && (
-              <DateTimePicker value={new Date()} mode="time" is24Hour display="default" onChange={onPick} />
-            )}
-            <TouchableOpacity
-              style={[styles.btn, { backgroundColor: theme.accent }]}
-              onPress={async () => {
-                if (!name || !time) return;
-                const newItem = { id: `${Date.now()}`, name, time };
-                setReminders(r => [...r, newItem]);
-                await scheduleReminderNotification(name, time);
-                setName(''); setTime('');
-              }}>
-              <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>{S.addReminder}</Text>
-            </TouchableOpacity>
-          </View>
-          {reminders.map(r => (
-            <View key={r.id} style={[styles.row, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-              <Text style={{ color: theme.text, fontFamily: 'Inter_700Bold' }}>{r.time}</Text>
-              <Text style={{ color: theme.text, flex: 1, marginLeft: 12, fontFamily: 'Inter_400Regular' }}>{r.name}</Text>
-              <TouchableOpacity onPress={() => setReminders((all) => all.filter(x => x.id !== r.id))}>
-                <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
-      </LinearGradient>
-    );
-  };
 
   const Pharmacies = () => {
     const [pharmacies, setPharmacies] = useState([]);
@@ -1172,14 +2386,42 @@ const handleAskMedicalAI = async () => {
         
         console.log('📍 User coordinates:', coords.latitude, coords.longitude);
         
+        // Detect user's country for distance units
+        const country = await detectUserCountry(coords.latitude, coords.longitude);
+        setUserCountry(country);
+        console.log('🌍 Detected user country:', country);
+        
         // Import the pharmacy search function
         const { findNearbyPharmacies } = await import('./services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         
         console.log('🏪 Received pharmacies:', nearbyPharmacies.length, 'pharmacies');
-        console.log('📏 Sample distances:', nearbyPharmacies.slice(0, 3).map(p => `${p.name}: ${p.distanceMiles} miles`));
+        console.log('📏 Sample distances (before sorting):', nearbyPharmacies.slice(0, 3).map(p => {
+          const distance = country === 'US' ? `${p.distanceMiles.toFixed(1)} mi` : `${(p.distanceMiles * 1.60934).toFixed(1)} km`;
+          console.log(`📏 ${p.name}: ${p.distanceMiles} miles -> ${distance} (country: ${country})`);
+          return `${p.name}: ${distance}`;
+        }));
         
-        setPharmacies(nearbyPharmacies);
+        // Sort pharmacies by distance (shortest to longest)
+        console.log('📏 Before sorting - checking distanceMiles values:');
+        nearbyPharmacies.forEach((p, index) => {
+          console.log(`📏 [${index}] ${p.name}: distanceMiles = ${p.distanceMiles}`);
+        });
+        
+        const sortedPharmacies = nearbyPharmacies.sort((a, b) => {
+          const distanceA = a.distanceMiles || 0;
+          const distanceB = b.distanceMiles || 0;
+          console.log(`📏 Comparing: ${a.name} (${distanceA}) vs ${b.name} (${distanceB})`);
+          return distanceA - distanceB;
+        });
+        
+        console.log('📏 Sorted distances (closest first):', sortedPharmacies.slice(0, 3).map(p => {
+          const distance = country === 'US' ? `${p.distanceMiles.toFixed(1)} mi` : `${(p.distanceMiles * 1.60934).toFixed(1)} km`;
+          console.log(`📏 SORTED ${p.name}: ${p.distanceMiles} miles -> ${distance} (country: ${country})`);
+          return `${p.name}: ${distance}`;
+        }));
+        
+        setPharmacies(sortedPharmacies);
         setLastUpdated(new Date());
       } catch (e) {
         console.error('Error loading pharmacies:', e);
@@ -1190,11 +2432,13 @@ const handleAskMedicalAI = async () => {
     };
 
     const formatDistance = (miles) => {
-      if (lang !== 'en') {
+      // Use location-based units: miles for USA, kilometers for other countries
+      if (userCountry === 'US') {
+        return `${miles.toFixed(1)} mi`;
+      } else {
         const km = miles * 1.60934;
         return `${km.toFixed(1)} km`;
       }
-      return `${miles.toFixed(1)} mi`;
     };
 
     const openDirections = (pharmacy) => {
@@ -1250,26 +2494,25 @@ const handleAskMedicalAI = async () => {
     };
 
     return (
-      <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <Header title={S.pharmacyLocations} />
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <Header title={S.pharmacyLocations} />
           
           {/* Header with refresh button */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', flex: 1 }}>
+            <DynamicText type="secondary" style={{ fontFamily: 'Inter_400Regular', flex: 1 }}>
               {pharmacies.length > 0 
-                ? `Found ${pharmacies.length} nearby pharmacies`
-                : 'Find pharmacies near your location'
+                ? S.foundPharmacies.replace('{count}', pharmacies.length)
+                : S.findNearbyPharmacies
               }
-            </Text>
+            </DynamicText>
             <TouchableOpacity 
               style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
               onPress={loadNearbyPharmacies}
               disabled={loading}
             >
-              <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
-                {loading ? 'Loading...' : 'Refresh'}
-              </Text>
+              <DynamicText type="card" style={[styles.btnText, { fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
+                {loading ? S.loading : S.refresh}
+              </DynamicText>
             </TouchableOpacity>
           </View>
 
@@ -1277,13 +2520,13 @@ const handleAskMedicalAI = async () => {
           {error && (
             <View style={{ backgroundColor: '#ffebee', padding: 12, borderRadius: 8, marginBottom: 16 }}>
               <Text style={{ color: '#c62828', fontFamily: 'Inter_500Medium' }}>{error}</Text>
-            </View>
+          </View>
           )}
 
           {/* Last updated */}
           {lastUpdated && (
             <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
-              Last updated: {lastUpdated.toLocaleTimeString()}
+              {S.lastUpdated}: {lastUpdated.toLocaleTimeString()}
             </Text>
           )}
 
@@ -1346,8 +2589,8 @@ const handleAskMedicalAI = async () => {
                     onPress={() => openDirections(pharmacy)}
                   >
                     <Text style={{ fontSize: 14 }}>🗺️</Text>
-                    <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      Directions
+                    <Text style={{ color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      {S.directions}
                     </Text>
                   </TouchableOpacity>
                   
@@ -1391,10 +2634,10 @@ const handleAskMedicalAI = async () => {
                   >
                     <Text style={{ fontSize: 14 }}>ℹ️</Text>
                     <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      Info
+                      {S.info}
                     </Text>
-                  </TouchableOpacity>
-                </View>
+            </TouchableOpacity>
+          </View>
               </View>
             ))
           ) : !loading && !error ? (
@@ -1406,7 +2649,7 @@ const handleAskMedicalAI = async () => {
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
                 onPress={loadNearbyPharmacies}
               >
-                <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>
+                <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
                   Find Nearby Pharmacies
                 </Text>
               </TouchableOpacity>
@@ -1420,7 +2663,6 @@ const handleAskMedicalAI = async () => {
             </View>
           )}
         </ScrollView>
-      </LinearGradient>
     );
   };
 
@@ -1442,15 +2684,22 @@ const handleAskMedicalAI = async () => {
         setLoading(true);
         setError(null);
         
-        const { status } = await Location.requestForegroundPermissionsAsync();
+            const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setError('Location permission denied. Please enable location services.');
           return;
         }
         
-        const { coords } = await Location.getCurrentPositionAsync({});
+            const { coords } = await Location.getCurrentPositionAsync({});
         
         console.log('📍 User coordinates for labs:', coords.latitude, coords.longitude);
+        
+        // Detect user's country for distance units (if not already detected)
+        if (!userCountry) {
+          const country = await detectUserCountry(coords.latitude, coords.longitude);
+          setUserCountry(country);
+          console.log('🌍 Detected user country for labs:', country);
+        }
         
         // Import the lab search function
         const { findNearbyLabs, getTestTypesForLab } = await import('./services/labSearch');
@@ -1458,7 +2707,10 @@ const handleAskMedicalAI = async () => {
         
         console.log('🧪 Received labs:', nearbyLabs.length, 'labs');
         if (nearbyLabs.length > 0) {
-          console.log('📏 Sample lab distances:', nearbyLabs.slice(0, 3).map(l => `${l.name}: ${l.distanceMiles} miles`));
+          console.log('📏 Sample lab distances (before sorting):', nearbyLabs.slice(0, 3).map(l => {
+            const distance = userCountry === 'US' ? `${l.distanceMiles.toFixed(1)} mi` : `${(l.distanceMiles * 1.60934).toFixed(1)} km`;
+            return `${l.name}: ${distance}`;
+          }));
         } else {
           console.log('⚠️ No labs found - this might be a search term or API issue');
         }
@@ -1469,7 +2721,25 @@ const handleAskMedicalAI = async () => {
           testTypes: lab.testTypes || getTestTypesForLab(lab.name)
         }));
         
-        setLabs(labsWithTests);
+        // Sort labs by distance (shortest to longest)
+        console.log('📏 Before sorting labs - checking distanceMiles values:');
+        labsWithTests.forEach((l, index) => {
+          console.log(`📏 [${index}] ${l.name}: distanceMiles = ${l.distanceMiles}`);
+        });
+        
+        const sortedLabs = labsWithTests.sort((a, b) => {
+          const distanceA = a.distanceMiles || 0;
+          const distanceB = b.distanceMiles || 0;
+          console.log(`📏 Lab comparing: ${a.name} (${distanceA}) vs ${b.name} (${distanceB})`);
+          return distanceA - distanceB;
+        });
+        
+        console.log('📏 Sorted lab distances (closest first):', sortedLabs.slice(0, 3).map(l => {
+          const distance = userCountry === 'US' ? `${l.distanceMiles.toFixed(1)} mi` : `${(l.distanceMiles * 1.60934).toFixed(1)} km`;
+          return `${l.name}: ${distance}`;
+        }));
+        
+        setLabs(sortedLabs);
         setLastUpdated(new Date());
       } catch (e) {
         console.error('Error loading labs:', e);
@@ -1480,21 +2750,23 @@ const handleAskMedicalAI = async () => {
     };
 
     const formatDistance = (miles) => {
-      if (lang !== 'en') {
+      // Use location-based units: miles for USA, kilometers for other countries
+      if (userCountry === 'US') {
+        return `${miles.toFixed(1)} mi`;
+      } else {
         const km = miles * 1.60934;
         return `${km.toFixed(1)} km`;
       }
-      return `${miles.toFixed(1)} mi`;
     };
 
     const openDirections = (lab) => {
       const q = encodeURIComponent(lab.name);
-      const url = Platform.select({
+            const url = Platform.select({
         ios: `http://maps.apple.com/?q=${q}&ll=${lab.lat},${lab.lon}`,
         android: `geo:${lab.lat},${lab.lon}?q=${q}`,
-        default: `https://www.google.com/maps/search/?api=1&query=${q}`,
-      });
-      Linking.openURL(url);
+              default: `https://www.google.com/maps/search/?api=1&query=${q}`,
+            });
+            Linking.openURL(url);
     };
 
     const callLab = (lab) => {
@@ -1585,16 +2857,16 @@ const handleAskMedicalAI = async () => {
     };
 
     return (
-      <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <Header title={S.labsLocations} />
+      <>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <Header title={S.labsLocations} />
           
           {/* Header with refresh button */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', flex: 1 }}>
               {labs.length > 0 
-                ? `Found ${labs.length} nearby labs`
-                : 'Find medical labs near your location'
+                ? S.foundLabs.replace('{count}', labs.length)
+                : S.findNearbyLabs
               }
             </Text>
             <TouchableOpacity 
@@ -1602,8 +2874,8 @@ const handleAskMedicalAI = async () => {
               onPress={loadNearbyLabs}
               disabled={loading}
             >
-              <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
-                {loading ? 'Loading...' : 'Refresh'}
+              <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
+                {loading ? S.loading : S.refresh}
               </Text>
             </TouchableOpacity>
           </View>
@@ -1618,7 +2890,7 @@ const handleAskMedicalAI = async () => {
           {/* Last updated */}
           {lastUpdated && (
             <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
-              Last updated: {lastUpdated.toLocaleTimeString()}
+              {S.lastUpdated}: {lastUpdated.toLocaleTimeString()}
             </Text>
           )}
 
@@ -1688,10 +2960,10 @@ const handleAskMedicalAI = async () => {
                     onPress={() => openDirections(lab)}
                   >
                     <Text style={{ fontSize: 14 }}>🗺️</Text>
-                    <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      Directions
+                    <Text style={{ color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                      {S.directions}
                     </Text>
-                  </TouchableOpacity>
+        </TouchableOpacity>
                   
                   <TouchableOpacity 
                     style={{ 
@@ -1742,7 +3014,7 @@ const handleAskMedicalAI = async () => {
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
                 onPress={loadNearbyLabs}
               >
-                <Text style={[styles.btnText, { color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }]}>
+                <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
                   Find Nearby Labs
                 </Text>
               </TouchableOpacity>
@@ -1755,7 +3027,7 @@ const handleAskMedicalAI = async () => {
               <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>Loading nearby labs...</Text>
             </View>
           )}
-        </ScrollView>
+      </ScrollView>
 
         {/* Test Types Modal */}
         <Modal visible={showTestTypes} transparent animationType="slide">
@@ -1773,7 +3045,7 @@ const handleAskMedicalAI = async () => {
                 fontFamily: 'Inter_600SemiBold',
                 marginBottom: 16 
               }}>
-                Available Tests - {selectedLab?.name}
+                {S.testTypes} - {selectedLab?.name}
               </Text>
               
               {selectedLab?.testTypes && (
@@ -1817,29 +3089,28 @@ const handleAskMedicalAI = async () => {
                 onPress={() => setShowTestTypes(false)}
               >
                 <Text style={{ 
-                  color: themeKey === 'gold' ? '#2c2c2c' : '#000000', 
+                  color: '#ffffff', 
                   fontFamily: 'Inter_600SemiBold' 
                 }}>
-                  Close
+                  {S.close}
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
-      </LinearGradient>
-    );
+      </>
+  );
   };
 
   const Prescription = () => (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
-        <Header title={S.prescription} />
+    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+      <Header title={S.prescription} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={addRxPhoto}>
-            <Text style={[styles.btnText, { color: '#2c2c2c', fontFamily: 'Inter_800ExtraBold' }]}>{S.addPhoto}</Text>
+            <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{S.addPhoto}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={exportRxToPDF}>
-            <Text style={[styles.btnText, { color: '#2c2c2c', fontFamily: 'Inter_800ExtraBold' }]}>{S.toPDF}</Text>
+            <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{S.toPDF}</Text>
           </TouchableOpacity>
         </View>
 
@@ -1849,16 +3120,14 @@ const handleAskMedicalAI = async () => {
           ))}
         </View>
       </ScrollView>
-    </LinearGradient>
   );
 
   const Appointments = () => (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
-        <Header title={S.appointmentLog} />
+    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+      <Header title="Appointments" />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={toggleRecord}>
-            <Text style={[styles.btnText, { color: '#2c2c2c', fontFamily: 'Inter_800ExtraBold' }]}>{isRecording ? S.stop : S.record}</Text>
+            <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{isRecording ? S.stop : S.record}</Text>
           </TouchableOpacity>
         </View>
         <Text style={{ color: theme.sub, marginTop: 8, fontFamily: 'Inter_600SemiBold' }}>{isRecording ? S.recording : ' '}</Text>
@@ -1870,28 +3139,42 @@ const handleAskMedicalAI = async () => {
           </View>
         ))}
       </ScrollView>
-    </LinearGradient>
   );
 
   const Settings = () => (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Header title={S.settings} />
+    <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <Header title={S.settings} />
         <Section title={S.profile}>
           <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>AuricRx — MedCoach</Text>
         </Section>
 
         <Section title={S.language}>
-          <RowSwitch label="English" value={lang === 'en'} onToggle={() => setLang('en')} />
-          <RowSwitch label="Español" value={lang === 'es'} onToggle={() => setLang('es')} />
-          <RowSwitch label="中文" value={lang === 'zh'} onToggle={() => setLang('zh')} />
+          <RowSwitch label="English" value={lang === 'en'} onToggle={() => {
+            console.log('🔍 App - Setting language to English');
+            setLang('en');
+          }} />
+          <RowSwitch label="Español" value={lang === 'es'} onToggle={() => {
+            console.log('🔍 App - Setting language to Spanish');
+            setLang('es');
+          }} />
+          <RowSwitch label="中文" value={lang === 'zh'} onToggle={() => {
+            console.log('🔍 App - Setting language to Chinese');
+            setLang('zh');
+          }} />
         </Section>
 
         <Section title={S.colorSettings}>
+          <RowSwitch label="White Gold" value={themeKey === 'whiteGold'} onToggle={() => setThemeKey('whiteGold')} />
           <RowSwitch label="Gold" value={themeKey === 'gold'} onToggle={() => setThemeKey('gold')} />
           <RowSwitch label="Blue" value={themeKey === 'blue'} onToggle={() => setThemeKey('blue')} />
           <RowSwitch label="Teal" value={themeKey === 'teal'} onToggle={() => setThemeKey('teal')} />
           <RowSwitch label="Black" value={themeKey === 'black'} onToggle={() => setThemeKey('black')} />
+        </Section>
+
+        <Section title={S.myDoctorAI}>
+          <RowSwitch label={S.drAlfred} value={selectedDoctor === 'Dr. Alfred'} onToggle={() => setSelectedDoctor('Dr. Alfred')} />
+          <RowSwitch label={S.drMimi} value={selectedDoctor === 'Dr. Mimi'} onToggle={() => setSelectedDoctor('Dr. Mimi')} />
+          <RowSwitch label={S.drPawlmer} value={selectedDoctor === 'Dr. Pawlmer'} onToggle={() => setSelectedDoctor('Dr. Pawlmer')} />
         </Section>
 
         <Section title="Font Color">
@@ -1916,30 +3199,49 @@ const handleAskMedicalAI = async () => {
           <SwitchRow label="Auto-calm colors when stressed" value={moodShift} onValueChange={setMoodShift} />
         </Section>
 
+        <Section title="Wallpaper">
+          <TouchableOpacity 
+            style={{ padding: 16, backgroundColor: theme.chip, borderRadius: 8, marginBottom: 8 }}
+            onPress={() => setRoute('wallpaper')}
+          >
+            <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold' }}>🎨 Change Wallpaper</Text>
+            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 4 }}>
+              Choose from beautiful wallpapers or solid colors
+            </Text>
+          </TouchableOpacity>
+        </Section>
+
         <Section title={S.help}>
           <TouchableOpacity onPress={() => Linking.openURL('mailto:AuricRx@gmail.com')}>
             <Text style={{ color: theme.accent, fontFamily: 'Inter_700Bold' }}>{S.emailUs}: AuricRx@gmail.com</Text>
           </TouchableOpacity>
         </Section>
       </ScrollView>
-    </LinearGradient>
   );
 
   const Header = ({ title }) => (
-  <View style={[styles.header, { borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 }]}>
+  <View style={[styles.header, { borderColor: theme.chip }]}>
     {route !== 'dashboard' ? (
-      <AnimatedButton onPress={() => setRoute('dashboard')} style={styles.headerHomeButton}>
+      <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.headerHomeButton, { marginLeft: -65 }]}>
         <Image 
-          source={require('./assets/AuricRX_home_button.png')} 
+          source={require('./assets/AuricRX_home_button_across_screens.png')} 
           style={styles.headerHomeIcon}
           resizeMode="contain"
         />
       </AnimatedButton>
     ) : (
-      <View style={{ width: 180, height: 70 }} />
+      <View style={{ width: 180, height: 60 }} />
     )}
 
-    <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_800ExtraBold', position: 'absolute', left: '50%', transform: [{ translateX: -50 }], maxWidth: '60%' }} numberOfLines={1}>{title}</Text>
+    <Text style={{ 
+      color: theme.text, 
+      fontSize: 18, 
+      fontFamily: 'Inter_800ExtraBold', 
+      position: 'absolute', 
+      left: '50%', 
+      transform: [{ translateX: -50 }], 
+      maxWidth: '60%' 
+    }} numberOfLines={1}>{title}</Text>
 
     <AnimatedButton onPress={() => setRoute('settings')} style={{ padding: 8 }}>
       <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
@@ -1970,392 +3272,13 @@ const handleAskMedicalAI = async () => {
 // --------- Medications Screen ----------
 // Medications component now imported from separate file
 
- // --------- Supplements Screen ----------
- const SUPP_STATUSES = [
-   { key: 'taking', label: 'Taking', emoji: '💊', color: '#2dd4bf' },
-   { key: 'onhold', label: 'On hold', emoji: '⏸️', color: '#fbbf24' },
-   { key: 'prn', label: 'PRN', emoji: '🕒', color: '#60a5fa' },
-   { key: 'finished', label: 'Finished', emoji: '✅', color: '#a3e635' },
-   { key: 'stopped', label: 'Stopped', emoji: '⛔', color: '#f87171' },
- ];
+// --------- Supplements Screen ---------- 
+// Supplements component now imported from separate file
 
- const SUPP_FILTERS = [
-   { key: 'all', label: 'All' },
-   { key: 'taking', label: 'Taking' },
-   { key: 'onhold', label: 'On hold' },
-   { key: 'prn', label: 'PRN' },
-   { key: 'finished', label: 'Finished' },
-   { key: 'stopped', label: 'Stopped' },
- ];
+ // DISABLED - ALL SUPPLEMENTS CODE COMMENTED OUT
+ // The inline Supplements component has been moved to components/Supplements.js
 
- const Supplements = ({ supplements, setSupplements }) => {
-   const [showFilterModal, setShowFilterModal] = useState(false);
-   const [showAdd, setShowAdd] = useState(false);
-   const [filter, setFilter] = useState('all');
-   const [detailSupp, setDetailSupp] = useState(null);
-   const [showStatusSheet, setShowStatusSheet] = useState(false);
-   const [holdUntil, setHoldUntil] = useState('');
-   const [addForm, setAddForm] = useState({ 
-     name: '', 
-     times: '', 
-     status: 'taking', 
-     startDate: '', 
-     endDate: '', 
-     notes: '', 
-     dosesLeft: '',
-     dosage: '',
-     brand: ''
-   });
-   const [addTimes, setAddTimes] = useState([]);
-   const [editTimes, setEditTimes] = useState([]);
-     const [showSuppTimePicker, setShowSuppTimePicker] = useState(false);
-  const [timeTarget, setTimeTarget] = useState(null);
-  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
-  const [aiAnalysisQuery, setAiAnalysisQuery] = useState('');
-
-   const onSuppTimePicked = (_, date) => {
-     setShowSuppTimePicker(false);
-     if (date) {
-       const hh = String(date.getHours()).padStart(2, '0');
-       const mm = String(date.getMinutes()).padStart(2, '0');
-       const t = `${hh}:${mm}`;
-       if (timeTarget === 'add') {
-         setAddTimes(prev => [...prev, t]);
-       } else if (timeTarget === 'edit') {
-         setEditTimes(prev => [...prev, t]);
-       }
-     }
-   };
-
-
-   const filteredSupplements = supplements.filter(supp => 
-     filter === 'all' || supp.status === filter
-   );
-
-   const getStatusObj = (status) => {
-     return SUPP_STATUSES.find(s => s.key === status) || SUPP_STATUSES[0];
-   };
-
-     const getUtilityTags = (supp) => {
-    const tags = [];
-    if (supp.refillSoon) tags.push({ label: 'Refill soon', color: '#fbbf24', emoji: '🛒' });
-    if (supp.dosesLeft && parseInt(supp.dosesLeft) < 10) tags.push({ label: 'Low stock', color: '#f87171', emoji: '⚠️' });
-    return tags;
-  };
-
-  const findNearbySupplements = async (supplementName) => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return Alert.alert('Location denied', 'Enable location to search nearby stores.');
-      
-      const { coords } = await Location.getCurrentPositionAsync({});
-      
-      // AI-powered supplement search with price comparison
-      const aiQuery = `Find nearby stores selling ${supplementName} supplement with price comparison. Include pharmacies, health stores, and supplement shops. Provide store names, addresses, and estimated prices.`;
-      
-      // Show AI analysis modal
-      setShowAiAnalysis(true);
-      setAiAnalysisQuery(aiQuery);
-      
-      // Also open maps as fallback
-      const query = encodeURIComponent(`${supplementName} supplement pharmacy store`);
-      const url = Platform.select({
-        ios: `http://maps.apple.com/?q=${query}&ll=${coords.latitude},${coords.longitude}`,
-        android: `geo:${coords.latitude},${coords.longitude}?q=${query}`,
-      });
-      
-      if (url) {
-        await Linking.openURL(url);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Could not open maps app.');
-    }
-  };
-
-   const addSupplement = () => {
-     if (!addForm.name.trim()) return;
-     const newSupp = {
-       id: Date.now().toString(),
-       ...addForm,
-       times: addTimes,
-       refillSoon: false
-     };
-     setSupplements(prev => [...prev, newSupp]);
-     setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosage: '', brand: '' });
-     setAddTimes([]);
-     debugSetShowAdd(false);
-   };
-
-   const updateSupplementStatus = (suppId, newStatus) => {
-     setSupplements(prev => prev.map(supp => 
-       supp.id === suppId ? { ...supp, status: newStatus } : supp
-     ));
-     setShowStatusSheet(false);
-   };
-
-   return (
-     <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
-       <ScrollView contentContainerStyle={{ padding: 16 }}>
-         <Header title="Supplements" />
-         
-         {/* Filter and Add button row */}
-         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-           <TouchableOpacity 
-             onPress={() => setShowFilterModal(true)}
-             style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, padding: 12, marginRight: 8 }]}
-           >
-             <Image source={require('./icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: theme.text }} />
-           </TouchableOpacity>
-           
-           <TouchableOpacity 
-             onPress={() => debugSetShowAdd(true)}
-             style={[styles.section, { backgroundColor: theme.accent, borderColor: theme.accent, padding: 12, flex: 1 }]}
-           >
-             <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>+ Add Supplement</Text>
-           </TouchableOpacity>
-         </View>
-
-         {/* Supplements List */}
-         {filteredSupplements.map(supp => {
-           const statusObj = getStatusObj(supp.status);
-           const utilityTags = getUtilityTags(supp);
-
-           return (
-             <AnimatedButton
-               key={supp.id}
-               onPress={() => setDetailSupp(supp)}
-               style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, flexDirection: 'row', alignItems: 'center', marginBottom: 10 }]}
-             >
-               <View style={{ flex: 1 }}>
-                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                   <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{supp.name}</Text>
-                   {supp.brand && (
-                     <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginLeft: 8 }}>
-                       ({supp.brand})
-                     </Text>
-                   )}
-                 </View>
-                 
-                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                   <Text style={{ color: statusObj.color, fontFamily: 'Inter_600SemiBold', fontSize: 12, marginRight: 8 }}>
-                     {statusObj.emoji} {statusObj.label}
-                   </Text>
-                   {supp.dosage && (
-                     <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12 }}>
-                       {supp.dosage}
-                     </Text>
-                   )}
-                 </View>
-
-                 <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                   {supp.times.map((time, idx) => (
-                     <Text key={idx} style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginRight: 8 }}>
-                       {time}
-                     </Text>
-                   ))}
-                   {utilityTags.map((tag, idx) => (
-                     <Text key={idx} style={{ color: tag.color, fontFamily: 'Inter_600SemiBold', fontSize: 12, marginRight: 8 }}>
-                       {tag.emoji} {tag.label}
-                     </Text>
-                   ))}
-                 </View>
-               </View>
-               
-               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                 <TouchableOpacity 
-                   onPress={(e) => {
-                     e.stopPropagation();
-                     findNearbySupplements(supp.name);
-                   }}
-                   style={[styles.section, { backgroundColor: theme.accent, borderColor: theme.accent, padding: 8, marginRight: 8 }]}
-                 >
-                   <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>🛒 Refill</Text>
-                 </TouchableOpacity>
-               </View>
-               
-               <TouchableOpacity 
-                 onPress={(e) => {
-                   e.stopPropagation();
-                   setDetailSupp(supp);
-                   setShowStatusSheet(true);
-                 }}
-                 style={{ padding: 8 }}
-               >
-                 <Text style={{ color: theme.sub, fontSize: 18 }}>⋯</Text>
-               </TouchableOpacity>
-             </AnimatedButton>
-           );
-         })}
-
-         {filteredSupplements.length === 0 && (
-           <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip, padding: 20, alignItems: 'center' }]}>
-             <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', textAlign: 'center' }}>
-               No supplements found. Add your first supplement to get started.
-             </Text>
-           </View>
-         )}
-       </ScrollView>
-
-       {/* Add Supplement Modal */}
-       <Modal visible={showAdd} animationType="slide" transparent>
-         <View style={styles.modalOverlay}>
-           <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-             <Text style={[styles.modalTitle, { color: theme.text }]}>Add Supplement</Text>
-             
-             <TextInput
-               placeholder="Supplement name"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.name}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
-             />
-             
-             <TextInput
-               placeholder="Brand (optional)"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.brand}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
-             />
-             
-             <TextInput
-               placeholder="Dosage (e.g., 1000mg, 500 IU)"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.dosage}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, dosage: text }))}
-             />
-             
-             <TextInput
-               placeholder="Notes (optional)"
-               placeholderTextColor={theme.sub}
-               style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
-               value={addForm.notes}
-               onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
-             />
-
-             <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-               <TouchableOpacity 
-                 onPress={() => debugSetShowAdd(false)}
-                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
-               >
-                 <Text style={{ color: theme.text, textAlign: 'center' }}>Cancel</Text>
-               </TouchableOpacity>
-               
-               <TouchableOpacity 
-                 onPress={addSupplement}
-                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
-               >
-                 <Text style={{ color: '#fff', textAlign: 'center' }}>Add</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
-       </Modal>
-
-       {/* Status Update Sheet */}
-       <Modal visible={showStatusSheet} animationType="slide" transparent>
-         <View style={styles.modalOverlay}>
-           <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-             <Text style={[styles.modalTitle, { color: theme.text }]}>Update Status</Text>
-             
-             {SUPP_STATUSES.map(status => (
-               <TouchableOpacity
-                 key={status.key}
-                 onPress={() => updateSupplementStatus(detailSupp?.id, status.key)}
-                 style={[styles.section, { backgroundColor: theme.chip, marginBottom: 8, padding: 12 }]}
-               >
-                 <Text style={{ color: status.color, fontFamily: 'Inter_600SemiBold' }}>
-                   {status.emoji} {status.label}
-                 </Text>
-               </TouchableOpacity>
-             ))}
-             
-             <TouchableOpacity 
-               onPress={() => setShowStatusSheet(false)}
-               style={[styles.button, { backgroundColor: theme.chip, marginTop: 20 }]}
-             >
-               <Text style={{ color: theme.text, textAlign: 'center' }}>Cancel</Text>
-             </TouchableOpacity>
-           </View>
-         </View>
-       </Modal>
-
-       {/* AI Analysis Modal */}
-       <Modal visible={showAiAnalysis} animationType="slide" transparent>
-         <View style={styles.modalOverlay}>
-           <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.chip, maxHeight: '80%' }]}>
-             <View style={styles.modalHeader}>
-               <Text style={[styles.modalTitle, { color: theme.text }]}>🛒 Supplement Store Finder</Text>
-               <TouchableOpacity onPress={() => setShowAiAnalysis(false)}>
-                 <Text style={styles.closeButton}>✕</Text>
-               </TouchableOpacity>
-             </View>
-             
-             <ScrollView style={{ maxHeight: 400 }}>
-               <Text style={[styles.sectionSub, { color: theme.sub, marginBottom: 16 }]}>
-                 Finding nearby stores with the best prices for your supplement...
-               </Text>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🏪 CVS Pharmacy</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>0.8 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $12.99 - $18.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>💊 Walgreens</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>1.2 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $14.99 - $22.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🌿 GNC</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>1.5 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $19.99 - $29.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🏥 Rite Aid</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>2.1 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $11.99 - $16.99</Text>
-               </View>
-               
-               <View style={[styles.section, { backgroundColor: theme.chip, marginBottom: 12, padding: 12 }]}>
-                 <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 14 }]}>🛒 Walmart</Text>
-                 <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12 }]}>2.8 miles away</Text>
-                 <Text style={[styles.sectionSub, { color: theme.accent, fontSize: 12 }]}>Estimated: $9.99 - $14.99</Text>
-               </View>
-               
-               <Text style={[styles.sectionSub, { color: theme.sub, fontSize: 12, textAlign: 'center', marginTop: 16 }]}>
-                 💡 Tip: Call ahead to confirm availability and current prices
-               </Text>
-             </ScrollView>
-             
-             <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-               <TouchableOpacity 
-                 onPress={() => setShowAiAnalysis(false)}
-                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
-               >
-                 <Text style={{ color: theme.text, textAlign: 'center' }}>Close</Text>
-               </TouchableOpacity>
-               
-               <TouchableOpacity 
-                 onPress={() => {
-                   setShowAiAnalysis(false);
-                   findNearbySupplements(aiAnalysisQuery.split(' ')[3]); // Extract supplement name
-                 }}
-                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
-               >
-                 <Text style={{ color: '#fff', textAlign: 'center' }}>Open Maps</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
-       </Modal>
-     </LinearGradient>
-   );
- };
+  
 
  // Screen selection moved to return statement to prevent remounting
 
@@ -2372,21 +3295,28 @@ return !fontsLoaded ? (
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
 ) : (
-  <View style={{ flex: 1, backgroundColor: '#fff' }}>
-    {route === 'reminders' ? <Reminders /> :
+  <WallpaperProvider>
+    <WallpaperWrapper>
+    <StatusBar 
+      barStyle={themeKey === 'whiteGold' || themeKey === 'gold' ? 'dark-content' : 'light-content'} 
+      backgroundColor="transparent"
+      translucent={true}
+    />
+    {route === 'dashboard' ? <Dashboard /> :
+     route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
-     route === 'appointments' ? <Appointments /> :
      route === 'settings' ? <Settings /> :
-     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
-     route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
-     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} /> :
-     route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
-    route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
-    route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
-    route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
-    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
+     route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
+     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
+     route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
      <Dashboard />}
 
     {/* Floating AI button */}
@@ -2403,9 +3333,16 @@ return !fontsLoaded ? (
   <View style={styles.sheetBackdrop}>
     <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
       <View style={styles.sheetHeader}>
-        <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>
-          {S.aiConsultant}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8 }}>
+            {selectedDoctor}
         </Text>
+          <Image 
+            source={getDoctorImage(selectedDoctor)} 
+            style={{ width: 24, height: 24 }} 
+            resizeMode="contain" 
+          />
+        </View>
         <TouchableOpacity onPress={() => setAiOpen(false)}>
           <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>
         </TouchableOpacity>
@@ -2514,7 +3451,7 @@ return !fontsLoaded ? (
             onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} 
             disabled={aiSending || streamLoading}
           >
-            <Text style={{ color: themeKey === 'gold' ? '#2c2c2c' : '#000000', fontFamily: 'Inter_800ExtraBold' }}>
+            <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
               {streamLoading ? '...' : 'Send'}
             </Text>
         </TouchableOpacity>
@@ -2532,7 +3469,8 @@ return !fontsLoaded ? (
     </View>
   </View>
     </Modal>
-  </View>
+    </WallpaperWrapper>
+  </WallpaperProvider>
 );
 } // closes export default function App()
 
@@ -2540,28 +3478,26 @@ return !fontsLoaded ? (
 const styles = StyleSheet.create({
   topbar: { 
     borderBottomWidth: 1, 
-    paddingBottom: 1, 
-    marginBottom: -15,
-    marginTop: -22,
+    paddingBottom: 12, 
+    paddingTop: Platform.OS === 'ios' ? 44 : 24,
     backgroundColor: 'transparent',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    justifyContent: 'space-between',
   },
   brand: { fontSize: 28 },
   brandButton: {
     padding: 0,
     backgroundColor: 'transparent',
-    marginLeft: -90,
   },
   brandLogo: {
-    width: 280,
-    height: 90,
+    width: 180,
+    height: 70,
   },
   headerHomeButton: {
     padding: 0,
     backgroundColor: 'transparent',
-    marginLeft: -65,
   },
   headerHomeIcon: {
     width: 180,
@@ -2570,7 +3506,7 @@ const styles = StyleSheet.create({
   quickRow: { flexDirection: 'row', gap: 18, marginTop: 8, flexWrap: 'wrap' },
   quick: { fontSize: 14 },
 
-  widget: { borderWidth: 1, borderRadius: 18, padding: 12, marginBottom: 16 },
+  widget: { borderWidth: 2, borderRadius: 18, padding: 12, marginBottom: 16 },
   widgetTitle: { fontSize: 18, marginBottom: 10 },
   widgetInner: { borderRadius: 16, padding: 14 },
   widgetSub: { fontSize: 12, marginBottom: 4 },
@@ -2579,7 +3515,7 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingBottom: 100 },
 card: {
     width: '46%',
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: 18,
     paddingVertical: 24,
     paddingHorizontal: 12,
@@ -2587,6 +3523,8 @@ card: {
     minHeight: 120,
   },
   cardIcon: { marginBottom: 12, width: 32, height: 32 },
+  cardIconLarge: { marginBottom: 12, width: 40, height: 40 },
+  cardIconExtraLarge: { marginBottom: 12, width: 48, height: 48 },
   quickScanButton: {
     backgroundColor: '#d4af37',
     width: 32,
@@ -2606,19 +3544,21 @@ card: {
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 16,
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 44 : 24,
+    paddingBottom: 8,
+    justifyContent: 'space-between',
   },
 
-  section: { borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 12 },
+  section: { borderWidth: 2, borderRadius: 16, padding: 12, marginBottom: 12 },
   sectionTitle: { fontSize: 16, marginBottom: 8 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 },
 
-  form: { borderWidth: 1, borderRadius: 16, padding: 12, marginBottom: 16 },
+  form: { borderWidth: 2, borderRadius: 16, padding: 12, marginBottom: 16 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 10 },
 
-  row: { borderWidth: 1, padding: 12, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  row: { borderWidth: 2, padding: 12, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 12 },
   btn: { marginTop: 6, borderRadius: 14, paddingVertical: 12, alignItems: 'center' },
   btnSm: { borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, alignItems: 'center' },
   btnText: { fontSize: 15 },
@@ -2712,16 +3652,9 @@ const consultStyles = StyleSheet.create({
   sheet: {
     maxHeight: '80%',
     borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopRightRadius: 16, 
     borderWidth: 1,
     overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   closeBtn: { padding: 8 },

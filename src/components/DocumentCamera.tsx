@@ -128,7 +128,7 @@ export default function DocumentCamera({
       <View style={styles.topControls}>
         <TouchableOpacity style={styles.homeButton} onPress={onClose}>
             <Image 
-              source={require('../../assets/AuricRX_home_button.png')} 
+              source={require('../../assets/AuricRX_home_button_across_screens.png')} 
               style={styles.homeButtonIcon}
               resizeMode="contain"
             />

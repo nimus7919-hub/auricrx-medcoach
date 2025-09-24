@@ -44,6 +44,8 @@ type Props = {
 };
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/heic", "image/heif", "image/webp"];
+const ALLOWED_PDF_TYPES = ["application/pdf"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete, existing }: Props) {
   const [country, setCountry] = useState(defaultCountry);
@@ -74,7 +76,7 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
       <CardHeader className="flex items-start justify-between gap-4">
         <div>
           <CardTitle className="text-2xl">Documents</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">Upload or scan to PDF. Accepted: JPG/PNG/PDF</p>
+          <p className="text-sm text-muted-foreground mt-1">Upload images/PDFs or scan documents to PDF. Accepted: JPG/PNG/PDF (max 10MB)</p>
         </div>
         <div className="flex items-center gap-2">
           <Label htmlFor="country" className="text-xs text-muted-foreground">Country</Label>
@@ -120,9 +122,12 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
                   <div key={`r-${i}`} className="flex items-center justify-between gap-2 rounded-lg border p-2">
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate">{labelForKind(d.kind)} — {d.name}</div>
-                      <a href={d.url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground underline inline-flex items-center gap-1">
-                        <ExternalLink className="w-3 h-3" /> Open
-                      </a>
+                        <button 
+                          onClick={() => openDocument(d.url, d.name)}
+                          className="text-xs text-muted-foreground underline inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Open
+                        </button>
                     </div>
                     <div className="shrink-0 flex items-center gap-1">
                       <Button size="sm" variant="outline" onClick={() => downloadBlobOrUrl(d.file ?? d.url, d.name)}>
@@ -144,9 +149,12 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
                     <div key={`e-${k}-${i}`} className="flex items-center justify-between gap-2 rounded-lg border p-2">
                       <div className="min-w-0">
                         <div className="text-sm font-medium truncate">{labelForKind(k as DocKind)} — {d.name}</div>
-                        <a href={d.url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground underline inline-flex items-center gap-1">
+                        <button 
+                          onClick={() => openDocument(d.url, d.name)}
+                          className="text-xs text-muted-foreground underline inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                        >
                           <ExternalLink className="w-3 h-3" /> Open
-                        </a>
+                        </button>
                       </div>
                       <div className="shrink-0 flex items-center gap-1">
                         <Button size="sm" variant="outline" onClick={async () => {
@@ -197,41 +205,77 @@ function labelForKind(k: DocKind) {
 function DocSection({ kind, onSaved, allowMulti = false }: { kind: DocKind; onSaved: (k: DocKind, f: File) => void | Promise<void>; allowMulti?: boolean }) {
   const [scannerOpen, setScannerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const pdfInputRef = useRef<HTMLInputElement | null>(null);
+
+  const validateFile = useCallback((file: File) => {
+    const isValidType = ALLOWED_IMAGE_TYPES.includes(file.type) || ALLOWED_PDF_TYPES.includes(file.type);
+    const isValidSize = file.size <= MAX_FILE_SIZE;
+    
+    if (!isValidType) {
+      toast.error("Unsupported file type", { description: `${file.name} (${file.type}). Accepted: JPG, PNG, PDF` });
+      return false;
+    }
+    if (!isValidSize) {
+      toast.error("File too large", { description: `${file.name} (${Math.round(file.size / 1024 / 1024)}MB). Max size: 10MB` });
+      return false;
+    }
+    return true;
+  }, []);
 
   const onUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || !files.length) return;
     for (const f of Array.from(files)) {
-      if (!ALLOWED_IMAGE_TYPES.includes(f.type) && f.type !== "application/pdf") {
-        toast.error("Unsupported file", { description: `${f.name} (${f.type})` });
-        continue;
-      }
+      if (!validateFile(f)) continue;
       await onSaved(kind, f);
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [onSaved, kind]);
+  }, [onSaved, kind, validateFile]);
+
+  const onPdfUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || !files.length) return;
+    for (const f of Array.from(files)) {
+      if (!validateFile(f)) continue;
+      await onSaved(kind, f);
+    }
+    if (pdfInputRef.current) pdfInputRef.current.value = "";
+  }, [onSaved, kind, validateFile]);
 
   return (
     <div className="mt-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Upload box */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Image Upload box */}
         <div className="rounded-2xl border p-4">
-          <div className="flex items-center gap-2 mb-2"><FileUp className="w-4 h-4"/><span className="font-medium">Upload {labelForKind(kind)}</span></div>
-          <p className="text-xs text-muted-foreground mb-3">Choose JPG/PNG or an existing PDF. For photos, you can select multiple.</p>
+          <div className="flex items-center gap-2 mb-2"><FileUp className="w-4 h-4"/><span className="font-medium">Upload Images</span></div>
+          <p className="text-xs text-muted-foreground mb-3">Choose JPG/PNG photos. {allowMulti ? 'Select multiple files.' : 'Single file only.'}</p>
           <Input
             ref={fileInputRef}
             type="file"
-            accept={[...ALLOWED_IMAGE_TYPES, "application/pdf"].join(",")}
+            accept={ALLOWED_IMAGE_TYPES.join(",")}
             capture="environment"
             multiple={allowMulti}
             onChange={onUpload}
           />
         </div>
 
+        {/* PDF Upload box */}
+        <div className="rounded-2xl border p-4">
+          <div className="flex items-center gap-2 mb-2"><FileUp className="w-4 h-4"/><span className="font-medium">Upload PDF</span></div>
+          <p className="text-xs text-muted-foreground mb-3">Choose existing PDF documents. Max 10MB per file.</p>
+          <Input
+            ref={pdfInputRef}
+            type="file"
+            accept={ALLOWED_PDF_TYPES.join(",")}
+            multiple={allowMulti}
+            onChange={onPdfUpload}
+          />
+        </div>
+
         {/* Scan box */}
         <div className="rounded-2xl border p-4">
-          <div className="flex items-center gap-2 mb-2"><ScanLine className="w-4 h-4"/><span className="font-medium">Scan with camera → PDF</span></div>
-          <p className="text-xs text-muted-foreground mb-3">Use your device camera to capture one or more pages and export to a single PDF.</p>
+          <div className="flex items-center gap-2 mb-2"><ScanLine className="w-4 h-4"/><span className="font-medium">Scan → PDF</span></div>
+          <p className="text-xs text-muted-foreground mb-3">Use camera to capture pages and create PDF.</p>
           <div className="flex gap-2">
             <Button variant="default" onClick={() => setScannerOpen(true)}><Camera className="w-4 h-4 mr-2"/>Open scanner</Button>
           </div>
@@ -456,6 +500,104 @@ async function fetchBlob(url: string): Promise<Blob | null> {
     return null;
   }
 }
+
+async function openDocument(url: string, name: string) {
+  try {
+    // Determine file type from name extension
+    const fileExtension = name.split('.').pop()?.toLowerCase();
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(fileExtension || '');
+    const isPdf = fileExtension === 'pdf';
+    const isDocument = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension || '');
+    
+    // For blob URLs (recent files), handle appropriately
+    if (url.startsWith('blob:')) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        
+        if (isPdf) {
+          // For PDFs, use a direct blob URL approach that won't trigger AR
+          const blobUrl = URL.createObjectURL(blob);
+          const newWindow = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+          if (!newWindow) {
+            toast.error("Popup blocked", { description: "Please allow popups for this site to view documents" });
+          }
+          // Clean up after 30 seconds
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+        } else if (isImage) {
+          // Open images directly
+          const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+          if (!newWindow) {
+            toast.error("Popup blocked", { description: "Please allow popups for this site to view documents" });
+          }
+        } else if (isDocument) {
+          // For Office documents, download instead of trying to open
+          downloadBlobOrUrl(blob, name);
+          toast.success("Document downloaded", { description: "Office documents are downloaded for local viewing" });
+        } else {
+          // Download other file types
+          downloadBlobOrUrl(blob, name);
+          toast.success("Document downloaded", { description: "File saved to downloads folder" });
+        }
+        return;
+      } catch (error) {
+        console.error("Error processing blob URL:", error);
+        toast.error("Failed to open document", { description: "Please try downloading the file instead" });
+        return;
+      }
+    }
+    
+    // For external URLs, handle based on file type
+    if (isPdf) {
+      // Try multiple PDF viewer approaches
+      const viewers = [
+        `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`,
+        `https://drive.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`,
+        url // Fallback to direct URL
+      ];
+      
+      let opened = false;
+      for (const viewerUrl of viewers) {
+        try {
+          const newWindow = window.open(viewerUrl, '_blank', 'noopener,noreferrer');
+          if (newWindow) {
+            opened = true;
+            break;
+          }
+        } catch (e) {
+          console.warn("Failed to open with viewer:", viewerUrl);
+        }
+      }
+      
+      if (!opened) {
+        toast.error("Cannot open PDF", { description: "Please use the Download button instead" });
+      }
+      return;
+    }
+    
+    if (isDocument) {
+      // For Office documents, download instead of opening
+      toast.info("Office document detected", { description: "Please use the Download button to save and open with your preferred app" });
+      return;
+    }
+    
+    if (isImage) {
+      // Open images directly
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!newWindow) {
+        toast.error("Popup blocked", { description: "Please allow popups for this site to view documents" });
+      }
+      return;
+    }
+    
+    // For other file types, download
+    toast.info("File type not supported for viewing", { description: "Please use the Download button instead" });
+  } catch (error) {
+    console.error("Error opening document:", error);
+    toast.error("Failed to open document", { description: "Please try downloading the file instead" });
+  }
+}
+
 
 async function shareDocument(d: { name: string; url: string; file?: File; kind?: DocKind }) {
   // Prefer native share with a File (Android Chrome, iOS Safari ≥ 15)

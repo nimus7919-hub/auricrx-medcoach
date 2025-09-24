@@ -3,6 +3,8 @@ import { View, Text, Image, TouchableOpacity, FlatList, TextInput, Modal, StyleS
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { HERBS, Herb } from '../data/herbs';
+import DynamicText from '../components/DynamicText';
+import { useWallpaper } from '../contexts/WallpaperContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
@@ -11,12 +13,27 @@ const ITEM_WIDTH = (screenWidth - 48) / COLUMN_COUNT; // 48 = padding (16) * 2 +
 interface HerbsScreenProps {
   onClose: () => void;
   theme?: any;
+  S?: any; // Translation helper
+  currentLang?: 'en' | 'es' | 'zh'; // Current language from app
 }
 
-export default function HerbsScreen({ onClose, theme }: HerbsScreenProps) {
+export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: HerbsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHerb, setSelectedHerb] = useState<Herb | null>(null);
-  const [currentLang] = useState<'en' | 'es' | 'zh'>('en'); // Default to English
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  
+  // Debug logging
+  console.log('🌿 HerbsScreen - getCardBackgroundColor:', getCardBackgroundColor());
+  console.log('🌿 HerbsScreen - getCardBorderColor:', getCardBorderColor());
+  console.log('🌿 HerbsScreen - getCardTextColor:', getCardTextColor());
+  
+  // Create translation function from S object
+  const t = (key: string) => {
+    if (S && typeof S === 'object' && S[key]) {
+      return S[key];
+    }
+    return key; // fallback to key if translation not found
+  };
 
   // Default theme if not provided
   const defaultTheme = {
@@ -42,11 +59,11 @@ export default function HerbsScreen({ onClose, theme }: HerbsScreenProps) {
 
   const renderHerbItem = ({ item }: { item: Herb }) => (
     <TouchableOpacity 
-      style={[styles.herbCard, { backgroundColor: currentTheme.card, borderColor: currentTheme.chip }]}
+      style={[styles.herbCard, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}
       onPress={() => setSelectedHerb(item)}
     >
       <Image source={item.image} style={styles.herbImage} />
-      <Text style={[styles.herbName, { color: currentTheme.text }]}>{item.names[currentLang]}</Text>
+      <DynamicText type="card" style={styles.herbName}>{item.names[currentLang]}</DynamicText>
     </TouchableOpacity>
   );
 
@@ -61,11 +78,11 @@ export default function HerbsScreen({ onClose, theme }: HerbsScreenProps) {
         onRequestClose={() => setSelectedHerb(null)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: currentTheme.card }]}>
+          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0' }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: currentTheme.text }]}>{selectedHerb.names[currentLang]}</Text>
+              <DynamicText type="card" style={styles.modalTitle}>{selectedHerb.names[currentLang]}</DynamicText>
               <TouchableOpacity onPress={() => setSelectedHerb(null)}>
-                <Text style={[styles.closeButton, { color: currentTheme.text }]}>✕</Text>
+                <DynamicText type="card" style={styles.closeButton}>✕</DynamicText>
               </TouchableOpacity>
             </View>
             
@@ -73,27 +90,27 @@ export default function HerbsScreen({ onClose, theme }: HerbsScreenProps) {
             
             <View style={styles.detailsContainer}>
               <View style={styles.detailRow}>
-                <Text style={[styles.detailLabel, { color: currentTheme.sub }]}>Origin:</Text>
-                <Text style={[styles.detailValue, { color: currentTheme.text }]}>
+                <DynamicText type="secondary" style={styles.detailLabel}>{t('origin')}:</DynamicText>
+                <DynamicText type="card" style={styles.detailValue}>
                   {selectedHerb.details.origin[currentLang]}
-                </Text>
+                </DynamicText>
               </View>
               
               <View style={styles.detailRow}>
-                <Text style={[styles.detailLabel, { color: currentTheme.sub }]}>Poisonous:</Text>
-                <Text style={[
+                <DynamicText type="secondary" style={styles.detailLabel}>{t('poisonous')}:</DynamicText>
+                <DynamicText type="card" style={[
                   styles.detailValue,
                   { color: selectedHerb.details.poisonous ? '#EF4444' : '#10B981' }
                 ]}>
-                  {selectedHerb.details.poisonous ? 'Yes' : 'No'}
-                </Text>
+                  {selectedHerb.details.poisonous ? t('yes') : t('no')}
+                </DynamicText>
               </View>
               
               <View style={styles.detailRow}>
-                <Text style={[styles.detailLabel, { color: currentTheme.sub }]}>Summary:</Text>
-                <Text style={[styles.detailSummary, { color: currentTheme.text }]}>
+                <DynamicText type="secondary" style={styles.detailLabel}>{t('summary')}:</DynamicText>
+                <DynamicText type="card" style={styles.detailSummary}>
                   {selectedHerb.details.summary[currentLang]}
-                </Text>
+                </DynamicText>
               </View>
             </View>
           </View>
@@ -103,31 +120,73 @@ export default function HerbsScreen({ onClose, theme }: HerbsScreenProps) {
   };
 
   return (
-    <LinearGradient colors={[currentTheme.bgStart || '#faf8f5', currentTheme.bgEnd || '#f5f2ed']} style={[styles.container, { paddingTop: 1 }]}>
-      <View style={[styles.header, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+    <View style={[styles.container, { paddingTop: 1, backgroundColor: 'transparent' }]}>
+      <View style={[styles.header, { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        backgroundColor: getCardBackgroundColor() + 'CC', 
+        borderBottomColor: getCardBorderColor() 
+      }]}>
         <TouchableOpacity onPress={onClose} style={styles.homeButton}>
           <Image 
-            source={require('../../assets/AuricRX_home_button.png')} 
+            source={require('../../assets/AuricRX_home_button_across_screens.png')} 
             style={styles.homeButtonIcon}
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <Text style={[styles.title, { position: 'absolute', left: '50%', transform: [{ translateX: -50 }], color: currentTheme.text }]}>Herbs & Supplements</Text>
+        <DynamicText type="primary" style={[styles.title, { position: 'absolute', left: '50%', transform: [{ translateX: -50 }] }]}>Herbs</DynamicText>
         <View style={styles.placeholder} />
       </View>
 
-      <View style={styles.content}>
-        <TextInput
-          style={[styles.searchInput, { backgroundColor: currentTheme.card, color: currentTheme.text, borderColor: currentTheme.chip }]}
-          placeholder="Search herbs..."
-          placeholderTextColor={currentTheme.sub}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+      <View style={[styles.content, { backgroundColor: 'transparent' }]}>
+        <View style={[styles.searchInput, { 
+          backgroundColor: getCardBackgroundColor() + 'CC', 
+          borderColor: getCardBorderColor(),
+          borderWidth: 3, // Make border more obvious
+          borderRadius: 20, // Make it more rounded
+          minHeight: 56, // Make container taller
+          paddingVertical: 8 // Add vertical padding to container
+        }]}>
+          <TextInput
+            style={{
+              color: '#ffffff', // Force white color
+              fontSize: 14, // Smaller font size
+              fontFamily: 'Inter_400Regular', 
+              flex: 1,
+              backgroundColor: 'transparent',
+              borderWidth: 0,
+              padding: 16, // More padding
+              margin: 0,
+              textAlign: 'left',
+              textAlignVertical: 'center',
+              includeFontPadding: false,
+              textDecorationLine: 'none',
+              minHeight: 48 // Ensure minimum height
+            }}
+            placeholder="Search herbs..."
+            placeholderTextColor="#ffffff80" // Force white placeholder for testing
+            value={searchQuery}
+            onChangeText={(text) => {
+              console.log('🌿 HerbsScreen - TextInput onChangeText:', text);
+              setSearchQuery(text);
+            }}
+            autoCorrect={false}
+            autoCapitalize="none"
+            selectionColor="#ffffff"
+            underlineColorAndroid="transparent"
+            keyboardType="default"
+            returnKeyType="search"
+            editable={true}
+            multiline={false}
+            onFocus={() => console.log('🌿 HerbsScreen - TextInput onFocus')}
+            onBlur={() => console.log('🌿 HerbsScreen - TextInput onBlur')}
+          />
+        </View>
 
         {filteredHerbs.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyStateText, { color: currentTheme.sub }]}>No herbs found</Text>
+            <DynamicText type="secondary" style={styles.emptyStateText}>{t('noHerbsFound')}</DynamicText>
           </View>
         ) : (
           <FlatList
@@ -143,7 +202,7 @@ export default function HerbsScreen({ onClose, theme }: HerbsScreenProps) {
       </View>
 
       {renderHerbDetails()}
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -158,7 +217,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2A2D',
   },
   homeButton: {
     padding: 0,
@@ -170,7 +228,6 @@ const styles = StyleSheet.create({
     height: 70,
   },
   title: {
-    color: '#2c2c2c',
     fontSize: 20,
     fontFamily: 'Inter_800ExtraBold',
   },
@@ -182,16 +239,23 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   searchInput: {
-    backgroundColor: '#151517',
     borderWidth: 1,
-    borderColor: '#2A2A2D',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
     marginBottom: 24,
+    minHeight: 48, // Ensure minimum height
+    justifyContent: 'center', // Center content vertically
+  },
+  searchInputText: {
+    fontSize: 16,
+    fontFamily: 'Inter_400Regular',
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    color: '#ffffff', // Force white color in base style
   },
   herbsList: {
     paddingBottom: 16,
@@ -202,11 +266,9 @@ const styles = StyleSheet.create({
   },
   herbCard: {
     width: ITEM_WIDTH,
-    backgroundColor: '#151517',
     borderRadius: 16,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#2A2A2D',
     alignItems: 'center',
   },
   herbImage: {
@@ -216,7 +278,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   herbName: {
-    color: '#F3C96A',
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
     textAlign: 'center',
@@ -227,7 +288,6 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyStateText: {
-    color: '#B8B8BA',
     fontFamily: 'Inter_400Regular',
     fontSize: 16,
     textAlign: 'center',
@@ -255,7 +315,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
-    color: '#F3C96A',
     fontSize: 20,
     fontFamily: 'Inter_800ExtraBold',
     flex: 1,

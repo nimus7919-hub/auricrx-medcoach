@@ -9,7 +9,9 @@ export type Pharmacy = {
 };
 
 export type StorePrice = Pharmacy & {
-  price: number; // USD for now
+  price: number | null; // USD for now, null when not available
+  priceNotAvailable?: boolean; // Flag for "Price not available"
+  pharmacyNotAvailable?: boolean; // Flag for "Pharmacy not available"
   pickup?: boolean;
   delivery?: boolean;
   requiresCoupon?: boolean;
@@ -75,25 +77,57 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
 }
 
 export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string }, opts?: { currency?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number; fxTs?: number } }> {
+  console.log('🔍 DEBUG: getMedicationPrices called with:', {
+    pharmaciesCount: pharmacies.length,
+    medication: medication.name,
+    currency: opts?.currency,
+    apiBase: API_BASE
+  });
+  
   try {
+    console.log('🔍 DEBUG: Making API call to:', `${API_BASE}/pharmacies/prices`);
     const res = await fetch(`${API_BASE}/pharmacies/prices`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ medication, pharmacies, currency: opts?.currency }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    console.log('🔍 DEBUG: API response status:', res.status);
+    
+    if (!res.ok) {
+      console.log('❌ DEBUG: API call failed with status:', res.status);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    
     const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'api_error');
+    console.log('🔍 DEBUG: API response data:', {
+      ok: json.ok,
+      pricesCount: json.prices?.length,
+      samplePrices: json.prices?.slice(0, 3).map((p: any) => ({
+        name: p.name,
+        price: p.price,
+        priceNotAvailable: p.priceNotAvailable
+      }))
+    });
+    
+    if (!json.ok) {
+      console.log('❌ DEBUG: API returned error:', json.error);
+      throw new Error(json.error || 'api_error');
+    }
+    
     return { prices: json.prices || [], meta: json.meta };
   } catch (e) {
-    console.warn('prices fallback (mock)', e);
-    // Fallback deterministic mock
-    return { prices: pharmacies.map((p, i) => ({
+    console.warn('🔍 DEBUG: API call failed, using fallback:', e.message);
+    console.log('🔍 DEBUG: Fallback - returning "Price not available" for all pharmacies');
+    // Fallback: Show "Price not available" instead of mock prices
+    return { prices: pharmacies.map((p) => ({
       ...p,
-      price: [25, 30, 22, 28, 24, 27][i % 6],
+      price: null, // No price available
+      priceNotAvailable: true,
+      pharmacyNotAvailable: true, // Added pharmacy not available flag
       pickup: true,
-      delivery: i % 2 === 0,
-      requiresCoupon: i % 3 === 0,
+      delivery: Math.random() > 0.5,
+      requiresCoupon: Math.random() > 0.8,
     })) };
   }
 }

@@ -484,26 +484,32 @@ app.get('/labs/nearby', async (req, res) => {
 // POST /pharmacies/prices { medication: { name, dosage }, pharmacies: [{id,...}] }
 app.post('/pharmacies/prices', async (req, res) => {
   const { medication, pharmacies, currency } = req.body || {};
-  if (!medication?.name || !Array.isArray(pharmacies)) return res.status(400).json({ ok: false, error: 'bad_request' });
+  console.log('🔍 DEBUG: Pharmacy prices API called');
+  console.log('🔍 DEBUG: Medication:', medication);
+  console.log('🔍 DEBUG: Pharmacies count:', pharmacies?.length);
+  console.log('🔍 DEBUG: Currency:', currency);
+  
+  if (!medication?.name || !Array.isArray(pharmacies)) {
+    console.log('❌ DEBUG: Bad request - missing medication or pharmacies');
+    return res.status(400).json({ ok: false, error: 'bad_request' });
+  }
+  
   try {
-    const usdList = pharmacies.map(p => ({
+    // DISABLED: Mock price generation - return "Price not available" instead
+    console.log('⚠️ DEBUG: Pharmacy prices API: Returning "Price not available" instead of mock prices');
+    console.log('🔍 DEBUG: Processing pharmacies:', pharmacies.map(p => ({ name: p.name, id: p.id })));
+    
+    const prices = pharmacies.map(p => ({
       ...p,
-      priceUSD: genPrice(p.id, medication.name),
+      price: null, // No price available
+      priceNotAvailable: true,
       pickup: true,
       delivery: (p.id.charCodeAt(0) % 2) === 0,
       requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
     }));
-    await refreshFxRates();
-    const target = (typeof currency === 'string' && currency.toUpperCase()) || 'USD';
-    const rate = fxRates.rates[target] || 1;
-    const prices = usdList.map(p => ({
-      ...p,
-      price: Number((p.priceUSD * rate).toFixed(2)),
-      currency: target,
-      baseUSD: p.priceUSD,
-      fxApplied: rate !== 1
-    }));
-    res.json({ ok: true, prices, meta: { currency: target, rate, fxTs: fxRates.ts } });
+    
+    console.log('🔍 DEBUG: Returning prices with priceNotAvailable:', prices.map(p => ({ name: p.name, priceNotAvailable: p.priceNotAvailable })));
+    res.json({ ok: true, prices, meta: { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
   } catch (e) {
     console.error('prices error', e.message);
     res.status(500).json({ ok: false, error: 'prices_failed' });

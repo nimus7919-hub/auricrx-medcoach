@@ -5,7 +5,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { LinearGradient } from 'expo-linear-gradient';
+import DynamicText from '../components/DynamicText';
+import { useWallpaper } from '../contexts/WallpaperContext';
 
 
 type DocumentPage = {
@@ -16,6 +17,14 @@ type DocumentPage = {
 
 export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
   const { t, i18n } = useTranslation();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  
+  // Debug logging
+  console.log('🎨 Documents Screen Dynamic Colors:', {
+    cardBg: getCardBackgroundColor(),
+    cardBorder: getCardBorderColor(),
+    cardText: getCardTextColor()
+  });
 
   const [pages, setPages] = useState<DocumentPage[]>([]);
   const [exporting, setExporting] = useState(false);
@@ -201,34 +210,34 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         <TouchableOpacity 
           onPress={() => movePage(item.id, 'up')}
           disabled={index === 0}
-          style={[styles.controlButton, index === 0 && styles.disabledButton]}
+          style={[styles.controlButton, { backgroundColor: '#3A7BFD' + 'CC' }, index === 0 && styles.disabledButton]}
         >
-          <Text style={styles.controlButtonText}>↑</Text>
+          <DynamicText type="card" style={styles.controlButtonText}>↑</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity 
           onPress={() => movePage(item.id, 'down')}
           disabled={index === pages.length - 1}
-          style={[styles.controlButton, index === pages.length - 1 && styles.disabledButton]}
+          style={[styles.controlButton, { backgroundColor: '#3A7BFD' + 'CC' }, index === pages.length - 1 && styles.disabledButton]}
         >
-          <Text style={styles.controlButtonText}>↓</Text>
+          <DynamicText type="card" style={styles.controlButtonText}>↓</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity 
           onPress={() => removePage(item.id)}
           style={[styles.controlButton, styles.deleteButton]}
         >
-          <Text style={styles.controlButtonText}>✕</Text>
+          <DynamicText type="card" style={styles.controlButtonText}>✕</DynamicText>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <LinearGradient colors={['#0b1117', '#0f1622']} style={[styles.container, { paddingTop: 50 }]}>
-      <View style={styles.header}>
+    <View style={[styles.container, { paddingTop: 50 }]}>
+      <View style={[styles.header, { backgroundColor: getCardBackgroundColor() + 'CC', borderBottomColor: getCardBorderColor() }]}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>←</Text>
+          <DynamicText type="card" style={styles.closeButtonText}>←</DynamicText>
         </TouchableOpacity>
-        <Text style={styles.title}>{t('documents.title')}</Text>
+        <DynamicText type="primary" style={styles.title}>{t('documents.title')}</DynamicText>
         <View style={styles.placeholder} />
       </View>
 
@@ -236,28 +245,28 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         <View style={styles.buttonRow}>
           <TouchableOpacity 
             onPress={addFromCamera}
-            style={styles.actionButton}
+            style={[styles.actionButton, { backgroundColor: '#D4AF37' + 'CC' }]}
           >
-            <Text style={styles.actionButtonText}>
+            <DynamicText type="card" style={styles.actionButtonText}>
               {Platform.OS === 'web' ? t('documents.addPhotos') : t('documents.addFromCamera')}
-            </Text>
+            </DynamicText>
           </TouchableOpacity>
           
           <TouchableOpacity 
             onPress={addFromGallery}
-            style={styles.actionButton}
+            style={[styles.actionButton, { backgroundColor: '#D4AF37' + 'CC' }]}
           >
-            <Text style={styles.actionButtonText}>
+            <DynamicText type="card" style={styles.actionButtonText}>
               {t('documents.addFromGallery')}
-            </Text>
+            </DynamicText>
           </TouchableOpacity>
         </View>
 
         {pages.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>
+            <DynamicText type="secondary" style={styles.emptyStateText}>
               {t('documents.noPages')}
-            </Text>
+            </DynamicText>
           </View>
         ) : (
           <>
@@ -273,16 +282,16 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
             <TouchableOpacity 
               onPress={exportToPDF}
               disabled={exporting}
-              style={[styles.exportButton, exporting && styles.disabledButton]}
+              style={[styles.exportButton, { backgroundColor: '#D4AF37' + 'CC' }, exporting && styles.disabledButton]}
             >
-              <Text style={styles.exportButtonText}>
+              <DynamicText type="card" style={styles.exportButtonText}>
                 {exporting ? t('documents.exporting') : t('documents.exportPDF')}
-              </Text>
+              </DynamicText>
             </TouchableOpacity>
           </>
         )}
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -297,18 +306,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2A2D',
   },
   closeButton: {
     padding: 8,
   },
   closeButtonText: {
-    color: '#F3C96A',
     fontSize: 24,
     fontFamily: 'Inter_600SemiBold',
   },
   title: {
-    color: '#F3C96A',
     fontSize: 18,
     fontFamily: 'Inter_800ExtraBold',
   },
@@ -326,13 +332,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#D4AF37',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
   },
   actionButtonText: {
-    color: '#0B0B0C',
     fontFamily: 'Inter_700Bold',
     fontSize: 16,
   },
@@ -341,7 +345,6 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyStateText: {
-    color: '#B8B8BA',
     fontFamily: 'Inter_400Regular',
     fontSize: 16,
     textAlign: 'center',
@@ -370,29 +373,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3A7BFD',
   },
   disabledButton: {
-    backgroundColor: '#6B7280',
     opacity: 0.5,
   },
   deleteButton: {
-    backgroundColor: '#EF4444',
+    backgroundColor: '#EF4444' + 'CC',
   },
   controlButtonText: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
   },
   exportButton: {
-    backgroundColor: '#D4AF37',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 16,
   },
   exportButtonText: {
-    color: '#0B0B0C',
     fontFamily: 'Inter_700Bold',
     fontSize: 16,
   },

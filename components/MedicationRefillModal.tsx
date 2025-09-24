@@ -5,18 +5,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";
 import { openInMaps } from "../utils/maps";
 import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../services/pharmacySearch";
+// DISABLED: EnhancedMedicationSearch import removed to prevent mock data
+// import EnhancedMedicationSearch from "../services/enhancedMedicationSearch";
 
 interface MedicationInfo { name: string; dosage: string; lastRefill?: string }
-interface Props { visible: boolean; onClose: () => void; medication: MedicationInfo; strings: any; lang: string }
+interface Props { visible: boolean; onClose: () => void; medication: MedicationInfo; strings: any; lang: string; userCountry?: string }
 
-export default function MedicationRefillModal({ visible, onClose, medication, strings, lang }: Props) {
+export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry }: Props) {
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<StorePrice[]>([]);
-  const [sort, setSort] = useState<'distance'|'price'|'name'>('price');
+  const [sort, setSort] = useState<'distance'|'price'|'name'>('distance');
   const [descending, setDescending] = useState(false);
   const [fxMeta, setFxMeta] = useState<{ currency: string; rate: number; fxTs?: number }|null>(null);
   const SORT_KEY = 'AURIC_SORT';
+  
+  // DISABLED: Enhanced medication search instance removed to prevent mock data
+  // const enhancedSearch = useRef(new EnhancedMedicationSearch()).current;
 
   useEffect(()=>{
     AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
@@ -92,9 +97,61 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       }
       setCurrency(determinedCurrency); // single definitive assignment
       const near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
-  const { prices, meta } = await getMedicationPrices(near, medication, { currency: determinedCurrency.toUpperCase() });
-  setResults(prices);
-  if (meta) setFxMeta(meta);
+      
+      // Check if no pharmacies found - reload the modal
+      if (!near || near.length === 0) {
+        console.log('⚠️ No pharmacies found - reloading modal');
+        Alert.alert(
+          strings.noPharmaciesFound || 'No Pharmacies Found',
+          strings.noPharmaciesMessage || 'No pharmacies found in your area. Please try again.',
+          [
+            { text: strings.retry || 'Retry', onPress: () => load() },
+            { text: strings.cancel || 'Cancel', onPress: () => onClose() }
+          ]
+        );
+        return;
+      }
+      
+      // DISABLED: Enhanced Excel search to prevent mock data
+      // TODO: Implement real Excel data integration when ready
+      console.log('⚠️ Enhanced Excel search disabled to prevent mock data');
+      
+      // Use original method only
+      console.log('🔍 DEBUG: Calling getMedicationPrices with:', {
+        nearCount: near.length,
+        medication: medication.name,
+        currency: determinedCurrency
+      });
+      
+      const { prices, meta } = await getMedicationPrices(near, medication, { currency: determinedCurrency.toUpperCase() });
+      
+      console.log('🔍 DEBUG: getMedicationPrices returned:', {
+        pricesCount: prices.length,
+        samplePrices: prices.slice(0, 3).map(p => ({
+          name: p.name,
+          price: p.price,
+          priceNotAvailable: p.priceNotAvailable,
+          pharmacyNotAvailable: p.pharmacyNotAvailable
+        }))
+      });
+      
+      // Check if all pharmacies are not available
+      const allPharmaciesNotAvailable = prices.every(p => p.pharmacyNotAvailable);
+      if (allPharmaciesNotAvailable) {
+        console.log('⚠️ DEBUG: All pharmacies not available - showing reload alert');
+        Alert.alert(
+          strings.noPharmaciesAvailable || 'No Pharmacies Available',
+          strings.noPharmaciesAvailableMessage || 'No pharmacies are currently available. Please try again.',
+          [
+            { text: strings.retry || 'Retry', onPress: () => load() },
+            { text: strings.cancel || 'Cancel', onPress: () => onClose() }
+          ]
+        );
+        return;
+      }
+      
+      setResults(prices);
+      if (meta) setFxMeta(meta);
       setMockMode(near.some(p => p.id.startsWith('mock-')));
     } catch (e) {
       console.warn('Refill load error', e);
@@ -105,14 +162,36 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
 
   const data = useMemo(() => {
     let list = results.slice();
+    console.log('🔍 MedicationRefillModal - Before sorting:', list.slice(0, 3).map(r => ({
+      name: r.name,
+      distanceMiles: r.distanceMiles,
+      price: r.price
+    })));
+    
     // apply sorting
     list.sort((a,b)=>{
       let cmp;
-      if (sort === 'price') cmp = (a.price ?? 0) - (b.price ?? 0);
-      else if (sort === 'name') cmp = a.name.localeCompare(b.name);
-      else cmp = (a.distanceMiles ?? 0) - (b.distanceMiles ?? 0);
+      if (sort === 'price') {
+        // For price sorting, put "price not available" items at the end
+        if (a.priceNotAvailable && !b.priceNotAvailable) return 1;
+        if (!a.priceNotAvailable && b.priceNotAvailable) return -1;
+        if (a.priceNotAvailable && b.priceNotAvailable) return 0;
+        cmp = (a.price ?? 0) - (b.price ?? 0);
+      } else if (sort === 'name') {
+        cmp = a.name.localeCompare(b.name);
+      } else {
+        cmp = (a.distanceMiles ?? 0) - (b.distanceMiles ?? 0);
+      }
+      
+      console.log(`🔍 Sorting ${a.name} (${a.distanceMiles}) vs ${b.name} (${b.distanceMiles}): cmp=${cmp}, descending=${descending}`);
       return descending ? -cmp : cmp;
     });
+    
+    console.log('🔍 MedicationRefillModal - After sorting:', list.slice(0, 3).map(r => ({
+      name: r.name,
+      distanceMiles: r.distanceMiles,
+      price: r.price
+    })));
     if (activeFilters.size) {
       list = list.filter(r => {
         if (activeFilters.has('pickup') && !r.pickup) return false;
@@ -127,10 +206,15 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     return showAll ? list : list.slice(0,5);
   }, [results, showAll, activeFilters, sort, descending]);
 
-  // Precompute current lowest price once per results array
+  // Precompute current lowest price once per results array (excluding "price not available" items)
   const lowestPrice = useMemo(() => {
     if (!results.length) return null;
-    let min = Infinity; for (const r of results) if (typeof r.price === 'number' && r.price < min) min = r.price;
+    let min = Infinity; 
+    for (const r of results) {
+      if (typeof r.price === 'number' && !r.priceNotAvailable && r.price < min) {
+        min = r.price;
+      }
+    }
     return isFinite(min) ? min : null;
   }, [results]);
 
@@ -152,18 +236,25 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     const pkgMatch = source.match(/(\d+)\s?(tablet|tab|capsule|cap|caps|pill|pills|unit|units|ml|vial|vials|strip|strips)/i);
     let packageSize = pkgMatch ? `${pkgMatch[1]} ${pkgMatch[2]}` : null;
     if (packageSize) packageSize = packageSize.replace(/tab($|\b)/i,'tablets').replace(/caps?($|\b)/i,'capsules');
-    if (!packageSize) packageSize = '30 tablets'; // default assumption
+    // Removed default assumption to prevent misleading package size info
     const strengthDisplay = strengths.join(' / ');
     const display = [strengthDisplay || null, packageSize].filter(Boolean).join(' • ');
     return { display, strengthDisplay, packageSize };
   }, [medication.name, medication.dosage]);
   const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
 
-  const useKm = lang !== 'en';
+  // Use country-based distance units: miles for USA, kilometers for other countries
+  const useKm = userCountry !== 'US';
+  console.log('🔍 MedicationRefillModal - userCountry:', userCountry, 'useKm:', useKm);
   function formatDistance(mi?: number) {
+    console.log('🔍 formatDistance called with:', { mi, useKm, userCountry });
     if (mi == null) return '';
-    if (!useKm) return `${mi.toFixed(1)} mi`;
+    if (!useKm) {
+      console.log('🔍 Using miles:', `${mi.toFixed(1)} mi`);
+      return `${mi.toFixed(1)} mi`;
+    }
     const km = mi * 1.60934;
+    console.log('🔍 Using kilometers:', `${km.toFixed(1)} km`);
     return `${km.toFixed(1)} km`;
   }
   // currency formatting
@@ -219,8 +310,23 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           </View>
         </View>
         <View style={{ alignItems:'flex-end', gap:4 }}>
-          <Text style={{ color: colors.text, fontSize:18, fontWeight:'700' }}>{typeof item.price==='number'? formatPrice(item.price): '—'}</Text>
-          {isLowest && (
+          {item.priceNotAvailable ? (
+            <Text style={{ color: colors.sub, fontSize:14, fontWeight:'500', fontStyle: 'italic' }}>
+              {item.pharmacyNotAvailable ? 
+                (lang === 'es' ? 'Farmacia no disponible' : 
+                 lang === 'zh' ? '药店不可用' : 
+                 'Pharmacy not available') :
+                (lang === 'es' ? 'Precio no disponible' : 
+                 lang === 'zh' ? '价格不可用' : 
+                 'Price not available')
+              }
+            </Text>
+          ) : (
+            <Text style={{ color: colors.text, fontSize:18, fontWeight:'700' }}>
+              {typeof item.price==='number'? formatPrice(item.price): '—'}
+            </Text>
+          )}
+          {isLowest && !item.priceNotAvailable && (
             <View style={{ backgroundColor: colors.gold, paddingHorizontal:8, paddingVertical:2, borderRadius: radius.pill }}>
               <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest||'Lowest'}</Text>
             </View>
@@ -255,6 +361,14 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 <Text style={{ color:'#000', fontSize:12, fontWeight:'600' }}>Mock data (add GOOGLE_PLACES_API_KEY for live pharmacies)</Text>
               </View>
             )}
+            {/* DISABLED: Excel data indicator removed since we're not using Excel data */}
+            {/* {!mockMode && results.length > 0 && (
+              <View style={{ backgroundColor: '#10b981', paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.xl }}>
+                <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
+                  📊 Real prices from Excel data
+                </Text>
+              </View>
+            )} */}
             {coordsUsed && (
               <Text style={{ color: colors.sub, fontSize: 10 }}>
                 {`📍 ${coordsUsed.lat.toFixed(4)}, ${coordsUsed.lon.toFixed(4)} • ${currency}`}

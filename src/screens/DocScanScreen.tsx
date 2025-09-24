@@ -1639,7 +1639,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
 
   return (
-    <LinearGradient colors={[currentTheme.bgStart || '#faf8f5', currentTheme.bgEnd || '#f5f2ed', '#f0ede8']} style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
@@ -1660,7 +1660,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         >
           <TouchableOpacity style={styles.homeButton} onPress={onClose}>
             <Image 
-              source={require('../../assets/AuricRX_home_button.png')} 
+              source={require('../../assets/AuricRX_home_button_across_screens.png')} 
               style={styles.homeButtonIcon}
               resizeMode="contain"
             />
@@ -2261,7 +2261,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         </View>
       )}
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
