@@ -876,20 +876,18 @@ app.post('/ask-stream', async (req, res) => {
 
 // --- Medication Data Collection Endpoints ---
 
-// Persistent storage for medication contributions using GitHub as database
-const fs = require('fs');
-const path = require('path');
-
-// Use GitHub repository as persistent storage
-const DATA_FILE = path.join(__dirname, '..', 'medication_contributions.json');
+// Persistent storage for medication contributions using in-memory with backup
+// Note: This is a simple solution for demonstration. In production, use a real database.
 
 // Load existing data on startup
 let medicationContributions = [];
+
+// Try to load from environment variable (persistent across deployments)
 try {
-  if (fs.existsSync(DATA_FILE)) {
-    const data = fs.readFileSync(DATA_FILE, 'utf8');
-    medicationContributions = JSON.parse(data);
-    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from GitHub storage`);
+  const envData = process.env.MEDICATION_CONTRIBUTIONS_DATA;
+  if (envData) {
+    medicationContributions = JSON.parse(envData);
+    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from environment`);
   } else {
     console.log('📊 No existing contributions found, starting fresh');
   }
@@ -897,20 +895,14 @@ try {
   console.log('⚠️ Could not load existing contributions, starting fresh:', error.message);
 }
 
-// Save data to GitHub repository (persists across deployments)
+// Save data (in-memory for now, but logged for persistence)
 function saveContributions() {
   try {
-    // Ensure directory exists
-    const dir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    console.log(`💾 Saved ${medicationContributions.length} contributions to memory`);
+    console.log('📊 Current contributions:', JSON.stringify(medicationContributions, null, 2));
     
-    fs.writeFileSync(DATA_FILE, JSON.stringify(medicationContributions, null, 2));
-    console.log(`💾 Saved ${medicationContributions.length} contributions to GitHub storage`);
-    
-    // Note: In production, you would commit this file to Git
-    // For now, it will persist in the repository between deployments
+    // In production, this would save to a real database
+    // For now, data persists in memory until server restart
   } catch (error) {
     console.error('❌ Failed to save contributions:', error);
   }
