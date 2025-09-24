@@ -876,33 +876,36 @@ app.post('/ask-stream', async (req, res) => {
 
 // --- Medication Data Collection Endpoints ---
 
-// Persistent storage for medication contributions using in-memory with backup
-// Note: This is a simple solution for demonstration. In production, use a real database.
+// Persistent storage using Supabase database
+const { 
+  saveMedicationContribution, 
+  getMedicationContributions 
+} = require('./supabase');
 
 // Load existing data on startup
 let medicationContributions = [];
 
-// Try to load from environment variable (persistent across deployments)
-try {
-  const envData = process.env.MEDICATION_CONTRIBUTIONS_DATA;
-  if (envData) {
-    medicationContributions = JSON.parse(envData);
-    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from environment`);
-  } else {
-    console.log('📊 No existing contributions found, starting fresh');
+// Load contributions from Supabase on startup
+async function loadContributionsFromSupabase() {
+  try {
+    medicationContributions = await getMedicationContributions();
+    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from Supabase`);
+  } catch (error) {
+    console.log('⚠️ Could not load contributions from Supabase, starting fresh:', error.message);
+    medicationContributions = [];
   }
-} catch (error) {
-  console.log('⚠️ Could not load existing contributions, starting fresh:', error.message);
 }
 
-// Save data (in-memory for now, but logged for persistence)
-function saveContributions() {
+// Initialize Supabase connection
+loadContributionsFromSupabase();
+
+// Save data to Supabase
+async function saveContributions() {
   try {
-    console.log(`💾 Saved ${medicationContributions.length} contributions to memory`);
+    console.log(`💾 ${medicationContributions.length} contributions in memory`);
     console.log('📊 Current contributions:', JSON.stringify(medicationContributions, null, 2));
     
-    // In production, this would save to a real database
-    // For now, data persists in memory until server restart
+    // Data is automatically saved to Supabase when new contributions are added
   } catch (error) {
     console.error('❌ Failed to save contributions:', error);
   }
@@ -949,11 +952,11 @@ app.post('/medication-contributions', async (req, res) => {
       source: 'user_contribution'
     };
 
-    // Add to storage
-    medicationContributions.push(contribution);
+    // Save to Supabase database
+    const savedContribution = await saveMedicationContribution(contribution);
     
-    // Save to file
-    saveContributions();
+    // Add to local cache
+    medicationContributions.push(savedContribution);
 
     console.log('📊 New medication contribution saved:', {
       id: contribution.id,
@@ -990,41 +993,13 @@ app.get('/medication-contributions', async (req, res) => {
       offset = 0 
     } = req.query;
 
-    let filteredContributions = [...medicationContributions];
-
-    // Apply filters
-    if (search) {
-      const searchTerm = search.toLowerCase();
-      filteredContributions = filteredContributions.filter(contrib => 
-        contrib.medicationName.toLowerCase().includes(searchTerm) ||
-        contrib.storeName.toLowerCase().includes(searchTerm) ||
-        contrib.strength.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    if (medication) {
-      const medicationTerm = medication.toLowerCase();
-      filteredContributions = filteredContributions.filter(contrib => 
-        contrib.medicationName.toLowerCase().includes(medicationTerm)
-      );
-    }
-
-    if (store) {
-      const storeTerm = store.toLowerCase();
-      filteredContributions = filteredContributions.filter(contrib => 
-        contrib.storeName.toLowerCase().includes(storeTerm)
-      );
-    }
-
-    if (verified !== undefined) {
-      const isVerified = verified === 'true';
-      filteredContributions = filteredContributions.filter(contrib => 
-        contrib.verified === isVerified
-      );
-    }
-
-    // Sort by timestamp (newest first)
-    filteredContributions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Get contributions from Supabase
+    const filteredContributions = await getMedicationContributions({
+      search,
+      medication,
+      store,
+      verified: verified === 'true' ? true : verified === 'false' ? false : undefined
+    });
 
     // Apply pagination
     const startIndex = parseInt(offset);
@@ -1033,13 +1008,13 @@ app.get('/medication-contributions', async (req, res) => {
 
     // Calculate statistics
     const stats = {
-      totalContributions: medicationContributions.length,
+      totalContributions: filteredContributions.length,
       filteredContributions: filteredContributions.length,
-      uniqueMedications: [...new Set(medicationContributions.map(c => c.medicationName))].length,
-      uniqueStores: [...new Set(medicationContributions.map(c => c.storeName))].length,
-      verifiedContributions: medicationContributions.filter(c => c.verified).length,
-      averagePrice: medicationContributions.length > 0 
-        ? medicationContributions.reduce((sum, c) => sum + c.price, 0) / medicationContributions.length 
+      uniqueMedications: [...new Set(filteredContributions.map(c => c.medication_name))].length,
+      uniqueStores: [...new Set(filteredContributions.map(c => c.store_name))].length,
+      verifiedContributions: filteredContributions.filter(c => c.verified).length,
+      averagePrice: filteredContributions.length > 0 
+        ? filteredContributions.reduce((sum, c) => sum + parseFloat(c.price), 0) / filteredContributions.length 
         : 0
     };
 
