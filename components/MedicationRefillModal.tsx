@@ -7,6 +7,7 @@ import { openInMaps } from "../utils/maps";
 import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../services/pharmacySearch";
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
+import medicationDataCollector from "../services/medicationDataCollector";
 
 interface MedicationInfo { name: string; dosage: string; lastRefill?: string }
 interface Props { visible: boolean; onClose: () => void; medication: MedicationInfo; strings: any; lang: string; userCountry?: string }
@@ -211,9 +212,16 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     }
 
     try {
-      // For now, just show success message since we don't have the medicationDataCollector
-      console.log('📊 Price contribution:', contributionData);
-      
+      // Add contribution to data collector (sends to server)
+      const contribution = await medicationDataCollector.addContribution({
+        ...contributionData,
+        pharmacyId: selectedPharmacy?.id || '',
+        userLocation: coordsUsed,
+        currency: currency
+      });
+
+      console.log('📊 Price contribution saved to server:', contribution);
+
       Alert.alert(
         strings.contributionSuccess || 'Thank You!',
         strings.contributionSuccessText || 'Your price information has been saved and will help improve our database for everyone.',
