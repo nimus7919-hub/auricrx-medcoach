@@ -14,7 +14,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://auricrx-medcoach.onrender.com"],
@@ -883,8 +883,33 @@ app.post('/ask-stream', async (req, res) => {
 
 // --- Medication Data Collection Endpoints ---
 
-// In-memory storage for medication contributions (in production, use a database)
+// File-based storage for medication contributions (persists across server restarts)
+const fs = require('fs');
+const path = require('path');
+
+const DATA_FILE = path.join(__dirname, 'medication_contributions.json');
+
+// Load existing data on startup
 let medicationContributions = [];
+try {
+  if (fs.existsSync(DATA_FILE)) {
+    const data = fs.readFileSync(DATA_FILE, 'utf8');
+    medicationContributions = JSON.parse(data);
+    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from file`);
+  }
+} catch (error) {
+  console.log('⚠️ Could not load existing contributions, starting fresh:', error.message);
+}
+
+// Save data to file
+function saveContributions() {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(medicationContributions, null, 2));
+    console.log(`💾 Saved ${medicationContributions.length} contributions to file`);
+  } catch (error) {
+    console.error('❌ Failed to save contributions:', error);
+  }
+}
 
 // POST /medication-contributions - Save a new medication contribution
 app.post('/medication-contributions', async (req, res) => {
@@ -929,6 +954,9 @@ app.post('/medication-contributions', async (req, res) => {
 
     // Add to storage
     medicationContributions.push(contribution);
+    
+    // Save to file
+    saveContributions();
 
     console.log('📊 New medication contribution saved:', {
       id: contribution.id,
@@ -1121,6 +1149,7 @@ app.put('/medication-contributions/:id/verify', async (req, res) => {
     }
 
     contribution.verified = true;
+    saveContributions(); // Save changes to file
     console.log(`✅ Contribution ${id} marked as verified`);
 
     res.json({ 
@@ -1155,6 +1184,7 @@ app.delete('/medication-contributions/:id', async (req, res) => {
       });
     }
 
+    saveContributions(); // Save changes to file
     console.log(`🗑️ Contribution ${id} deleted`);
 
     res.json({ 
@@ -1177,6 +1207,7 @@ app.delete('/medication-contributions', async (req, res) => {
   try {
     const count = medicationContributions.length;
     medicationContributions = [];
+    saveContributions(); // Save changes to file
     
     console.log(`🗑️ All ${count} contributions cleared`);
 
