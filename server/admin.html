@@ -342,7 +342,13 @@
                 document.getElementById('noData').style.display = 'none';
                 document.getElementById('contributionsTable').style.display = 'none';
 
-                const response = await fetch('/medication-contributions');
+                const response = await fetch('/medication-contributions', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
                 const data = await response.json();
 
                 if (data.ok) {
@@ -365,6 +371,12 @@
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').innerHTML = `
+                    <div>❌ Failed to load data: ${error.message}</div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                        Check browser console for more details.
+                    </div>
+                `;
                 document.getElementById('error').style.display = 'block';
             }
         }
