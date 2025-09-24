@@ -1198,6 +1198,11 @@ app.get('/debug', (_req, res) => {
   });
 });
 
+// Admin interface for viewing medication contributions
+app.get('/admin', (_req, res) => {
+  res.sendFile(__dirname + '/admin.html');
+});
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
 });
