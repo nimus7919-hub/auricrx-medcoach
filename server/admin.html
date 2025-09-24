@@ -187,6 +187,12 @@
             color: #4f46e5;
         }
 
+        .quantity {
+            font-weight: 500;
+            color: #059669;
+            font-size: 0.9rem;
+        }
+
         .timestamp {
             color: #6b7280;
             font-size: 0.9rem;
@@ -319,6 +325,7 @@
                         <th>Medication</th>
                         <th>Strength</th>
                         <th>Price</th>
+                        <th>Quantity</th>
                         <th>Store</th>
                         <th>Address</th>
                         <th>Submitted</th>
@@ -407,6 +414,9 @@
                     <td>${contribution.strength || '-'}</td>
                     <td>
                         <div class="price">$${contribution.price} ${contribution.currency}</div>
+                    </td>
+                    <td>
+                        <div class="quantity">${contribution.quantity || '-'}</div>
                     </td>
                     <td>
                         <div class="store-name">${contribution.storeName}</div>
