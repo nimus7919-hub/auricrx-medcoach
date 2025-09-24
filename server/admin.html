@@ -337,6 +337,7 @@
 
         async function loadData() {
             try {
+                console.log('🔄 Loading data from server...');
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('error').style.display = 'none';
                 document.getElementById('noData').style.display = 'none';
@@ -349,7 +350,10 @@
                     },
                     mode: 'cors'
                 });
+                
+                console.log('📡 Response status:', response.status);
                 const data = await response.json();
+                console.log('📊 Received data:', data);
 
                 if (data.ok) {
                     allContributions = data.contributions;
