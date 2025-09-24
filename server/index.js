@@ -1189,6 +1189,15 @@ app.get('/', (_req, res) => {
   res.send('AuricRx Medcoach API is running ✅ - Medication endpoints available! - v2.0');
 });
 
+// Debug route to test if new code is deployed
+app.get('/debug', (_req, res) => {
+  res.json({ 
+    message: 'Debug endpoint working!', 
+    timestamp: new Date().toISOString(),
+    routes: ['/medication-contributions', '/medication-contributions/export']
+  });
+});
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
 });
