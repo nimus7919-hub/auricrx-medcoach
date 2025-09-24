@@ -7,9 +7,7 @@ const CONTRIBUTIONS_KEY = 'AURIC_MEDICATION_CONTRIBUTIONS';
 const EXPORT_KEY = 'AURIC_MEDICATION_EXPORT';
 
 // Use the same API base as other services
-const API_BASE = process.env.NODE_ENV === 'production' 
-  ? 'https://auricrx-medcoach.onrender.com' 
-  : 'http://localhost:4000';
+const API_BASE = 'https://auricrx-medcoach.onrender.com';
 
 class MedicationDataCollector {
   constructor() {
@@ -45,6 +43,8 @@ class MedicationDataCollector {
   async addContribution(contributionData) {
     try {
       console.log('📊 Sending contribution to server:', contributionData);
+      console.log('📊 API_BASE:', API_BASE);
+      console.log('📊 Full URL:', `${API_BASE}/medication-contributions`);
 
       // Send to server
       const response = await fetch(`${API_BASE}/medication-contributions`, {
