@@ -1,7 +1,7 @@
 // services/enhancedMedicationSearch.js
 // Enhanced medication search using Excel data
 
-const ExcelReader = require('./excelReaderRN');
+const ExcelReader = require('./excelReaderRNCompatible');
 
 class EnhancedMedicationSearch {
   constructor() {
@@ -29,7 +29,7 @@ class EnhancedMedicationSearch {
       for (const pharmacy of pharmacies) {
         // Find Excel matches for this specific pharmacy
         const pharmacyMatches = excelMatches.filter(match => 
-          this.excelReader.normalizePharmacyName(match.farmacia) === 
+          this.excelReader.normalizePharmacyName(match.Pharmacy) === 
           this.excelReader.normalizePharmacyName(pharmacy.name)
         );
         
@@ -39,8 +39,11 @@ class EnhancedMedicationSearch {
             current.similarity > best.similarity ? current : best
           );
           
+          // Log what we found for debugging
+          console.log(`🔍 Found ${pharmacyMatches.length} Excel matches for ${pharmacy.name}: ${bestMatch.Medicinas} - MXN ${bestMatch['original price']}`);
+          
           // Convert MXN price to target currency if needed
-          let finalPrice = bestMatch.precioOriginal;
+          let finalPrice = bestMatch['original price'];
           if (options.currency && options.currency !== 'MXN') {
             finalPrice = await this.convertCurrency(finalPrice, 'MXN', options.currency);
           }
@@ -52,8 +55,8 @@ class EnhancedMedicationSearch {
             delivery: Math.random() > 0.5, // Random for now
             requiresCoupon: Math.random() > 0.8, // Random for now
             excelMatch: {
-              medicinas: bestMatch.medicinas,
-              precioOriginal: bestMatch.precioOriginal,
+              medicinas: bestMatch.Medicinas,
+              precioOriginal: bestMatch['original price'],
               unidades: bestMatch.unidades,
               similarity: bestMatch.similarity
             }
@@ -102,15 +105,7 @@ class EnhancedMedicationSearch {
     }
   }
 
-  // Generate mock price based on pharmacy and medication
-  generateMockPrice(pharmacyName, medicationName) {
-    // Create a deterministic but varied price based on inputs
-    const pharmacyHash = pharmacyName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-    const medHash = medicationName.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-    const basePrice = 20 + (pharmacyHash % 30);
-    const variation = (medHash % 20) - 10;
-    return Math.max(5, basePrice + variation);
-  }
+  // REMOVED: Mock price generation to prevent misleading data
 
   // Convert currency (simplified - in real app, use real exchange rates)
   async convertCurrency(amount, from, to) {

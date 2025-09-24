@@ -5,8 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";
 import { openInMaps } from "../utils/maps";
 import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../services/pharmacySearch";
-// DISABLED: EnhancedMedicationSearch import removed to prevent mock data
-// import EnhancedMedicationSearch from "../services/enhancedMedicationSearch";
+// ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
+const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 
 interface MedicationInfo { name: string; dosage: string; lastRefill?: string }
 interface Props { visible: boolean; onClose: () => void; medication: MedicationInfo; strings: any; lang: string; userCountry?: string }
@@ -20,8 +20,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   const [fxMeta, setFxMeta] = useState<{ currency: string; rate: number; fxTs?: number }|null>(null);
   const SORT_KEY = 'AURIC_SORT';
   
-  // DISABLED: Enhanced medication search instance removed to prevent mock data
-  // const enhancedSearch = useRef(new EnhancedMedicationSearch()).current;
+  // ENABLED: Enhanced medication search instance for Excel integration
+  const enhancedSearch = useRef(new EnhancedMedicationSearch()).current;
 
   useEffect(()=>{
     AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
@@ -112,47 +112,60 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         return;
       }
       
-      // DISABLED: Enhanced Excel search to prevent mock data
-      // TODO: Implement real Excel data integration when ready
-      console.log('⚠️ Enhanced Excel search disabled to prevent mock data');
+      // ENABLED: Excel integration with React Native compatible reader
+      console.log('🔍 DEBUG: Attempting Excel integration with React Native compatible reader');
       
-      // Use original method only
-      console.log('🔍 DEBUG: Calling getMedicationPrices with:', {
-        nearCount: near.length,
-        medication: medication.name,
-        currency: determinedCurrency
-      });
-      
-      const { prices, meta } = await getMedicationPrices(near, medication, { currency: determinedCurrency.toUpperCase() });
-      
-      console.log('🔍 DEBUG: getMedicationPrices returned:', {
-        pricesCount: prices.length,
-        samplePrices: prices.slice(0, 3).map(p => ({
-          name: p.name,
-          price: p.price,
-          priceNotAvailable: p.priceNotAvailable,
-          pharmacyNotAvailable: p.pharmacyNotAvailable
-        }))
-      });
-      
-      // Check if all pharmacies are not available
-      const allPharmaciesNotAvailable = prices.every(p => p.pharmacyNotAvailable);
-      if (allPharmaciesNotAvailable) {
-        console.log('⚠️ DEBUG: All pharmacies not available - showing reload alert');
-        Alert.alert(
-          strings.noPharmaciesAvailable || 'No Pharmacies Available',
-          strings.noPharmaciesAvailableMessage || 'No pharmacies are currently available. Please try again.',
-          [
-            { text: strings.retry || 'Retry', onPress: () => load() },
-            { text: strings.cancel || 'Cancel', onPress: () => onClose() }
-          ]
+      try {
+        // Try Excel integration first
+        const { prices: excelPrices, meta: excelMeta } = await enhancedSearch.searchMedicationPrices(
+          near, 
+          medication, 
+          { 
+            currency: determinedCurrency.toUpperCase(),
+            userCountry: userCountry
+          }
         );
-        return;
+        
+        console.log('🔍 DEBUG: Excel integration returned:', {
+          pricesCount: excelPrices.length,
+          samplePrices: excelPrices.slice(0, 3).map(p => ({
+            name: p.name,
+            price: p.price,
+            priceNotAvailable: p.priceNotAvailable,
+            hasExcelMatch: !!p.excelMatch
+          }))
+        });
+        
+        setResults(excelPrices);
+        if (excelMeta) setFxMeta(excelMeta);
+        setMockMode(false); // Excel data is real, not mock
+        
+      } catch (excelError) {
+        console.log('⚠️ DEBUG: Excel integration failed, using fallback:', excelError.message);
+        
+        // Fallback to original method
+        console.log('🔍 DEBUG: Calling getMedicationPrices with:', {
+          nearCount: near.length,
+          medication: medication.name,
+          currency: determinedCurrency
+        });
+        
+        const { prices, meta } = await getMedicationPrices(near, medication, { currency: determinedCurrency.toUpperCase() });
+        
+        console.log('🔍 DEBUG: getMedicationPrices returned:', {
+          pricesCount: prices.length,
+          samplePrices: prices.slice(0, 3).map(p => ({
+            name: p.name,
+            price: p.price,
+            priceNotAvailable: p.priceNotAvailable,
+            pharmacyNotAvailable: p.pharmacyNotAvailable
+          }))
+        });
+        
+        setResults(prices);
+        if (meta) setFxMeta(meta);
+        setMockMode(near.some(p => p.id.startsWith('mock-')));
       }
-      
-      setResults(prices);
-      if (meta) setFxMeta(meta);
-      setMockMode(near.some(p => p.id.startsWith('mock-')));
     } catch (e) {
       console.warn('Refill load error', e);
     } finally {
