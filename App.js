@@ -37,6 +37,7 @@ import AIHealthScreen from './src/screens/AIHealthScreen';
 import Medications from './components/Medications';
 import Supplements from './components/Supplements';
 import Reminders from './components/Reminders';
+import MedicationDataAdminScreen from './src/screens/MedicationDataAdminScreen';
 import { WallpaperProvider, useWallpaper } from './src/contexts/WallpaperContext';
 import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
 import WallpaperWrapper from './src/components/WallpaperWrapper';
@@ -3191,6 +3192,27 @@ const handleAskMedicalAI = async () => {
           <RowSwitch label="Silver" value={fontColor === 'silver'} onToggle={() => setFontColor('silver')} />
         </Section>
 
+        <Section title="Admin">
+          <TouchableOpacity 
+            onPress={() => setRoute('medication-admin')}
+            style={{ 
+              backgroundColor: theme.card, 
+              padding: 16, 
+              borderRadius: 8, 
+              marginVertical: 4,
+              borderWidth: 1,
+              borderColor: theme.accent
+            }}
+          >
+            <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
+              📊 Medication Data Admin
+            </Text>
+            <Text style={{ color: theme.sub, fontSize: 12, marginTop: 4 }}>
+              View and export user-contributed medication prices
+            </Text>
+          </TouchableOpacity>
+        </Section>
+
         <Section title={S.dayNight}>
           <SwitchRow label="Night mode" value={night} onValueChange={setNight} />
         </Section>
@@ -3317,6 +3339,7 @@ return !fontsLoaded ? (
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+    route === 'medication-admin' ? <MedicationDataAdminScreen onClose={() => setRoute('dashboard')} /> :
      <Dashboard />}
 
     {/* Floating AI button */}

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Linking, Alert } from "react-native";
+import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Linking, Alert, TextInput, ScrollView } from "react-native";
 import * as Location from "expo-location";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";
@@ -7,6 +7,7 @@ import { openInMaps } from "../utils/maps";
 import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../services/pharmacySearch";
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
+import medicationDataCollector from "../services/medicationDataCollector";
 
 interface MedicationInfo { name: string; dosage: string; lastRefill?: string }
 interface Props { visible: boolean; onClose: () => void; medication: MedicationInfo; strings: any; lang: string; userCountry?: string }
@@ -31,6 +32,18 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   const [currency, setCurrency] = useState<string>('USD');
   const [mockMode, setMockMode] = useState(false);
   const [coordsUsed, setCoordsUsed] = useState<{lat:number; lon:number}|null>(null);
+  
+  // Price contribution modal state
+  const [showContributionModal, setShowContributionModal] = useState(false);
+  const [contributionData, setContributionData] = useState({
+    medicationName: '',
+    strength: '',
+    price: '',
+    quantity: '',
+    storeName: '',
+    storeAddress: ''
+  });
+  const [selectedPharmacy, setSelectedPharmacy] = useState<StorePrice | null>(null);
   const LAST_LOC_KEY = 'AURIC_LAST_LOC';
 
   useEffect(() => {
@@ -172,6 +185,86 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       setLoading(false);
     }
   }
+
+  // Price contribution functions
+  const openContributionModal = (pharmacy: StorePrice) => {
+    setSelectedPharmacy(pharmacy);
+    setContributionData({
+      medicationName: medication.name || '',
+      strength: medication.dosage || '',
+      price: '',
+      quantity: '',
+      storeName: pharmacy.name || '',
+      storeAddress: pharmacy.address || ''
+    });
+    setShowContributionModal(true);
+  };
+
+  const submitContribution = async () => {
+    // Validate form
+    if (!contributionData.medicationName.trim() || !contributionData.price.trim() || !contributionData.storeName.trim()) {
+      Alert.alert(
+        strings.contributionError || 'Missing Information',
+        strings.contributionErrorText || 'Please fill in medication name, price, and store name.',
+        [{ text: strings.ok || 'OK' }]
+      );
+      return;
+    }
+
+    try {
+      // Add contribution to data collector
+      const contribution = await medicationDataCollector.addContribution({
+        ...contributionData,
+        pharmacyId: selectedPharmacy?.id || '',
+        userLocation: coordsUsed,
+        currency: currency
+      });
+
+      console.log('📊 Price contribution saved:', contribution);
+
+      Alert.alert(
+        strings.contributionSuccess || 'Thank You!',
+        strings.contributionSuccessText || 'Your price information has been saved and will help improve our database for everyone.',
+        [
+          {
+            text: strings.ok || 'OK',
+            onPress: () => {
+              setShowContributionModal(false);
+              setSelectedPharmacy(null);
+              setContributionData({
+                medicationName: '',
+                strength: '',
+                price: '',
+                quantity: '',
+                storeName: '',
+                storeAddress: ''
+              });
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('❌ Failed to save contribution:', error);
+      Alert.alert(
+        strings.contributionError || 'Error',
+        strings.contributionErrorText || 'Failed to save your contribution. Please try again.',
+        [{ text: strings.ok || 'OK' }]
+      );
+    }
+  };
+
+  const closeContributionModal = () => {
+    setShowContributionModal(false);
+    setSelectedPharmacy(null);
+    setContributionData({
+      medicationName: '',
+      strength: '',
+      price: '',
+      quantity: '',
+      storeName: '',
+      storeAddress: ''
+    });
+  };
 
   const data = useMemo(() => {
     let list = results.slice();
@@ -324,16 +417,26 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         </View>
         <View style={{ alignItems:'flex-end', gap:4 }}>
           {item.priceNotAvailable ? (
-            <Text style={{ color: colors.sub, fontSize:14, fontWeight:'500', fontStyle: 'italic' }}>
-              {item.pharmacyNotAvailable ? 
-                (lang === 'es' ? 'Farmacia no disponible' : 
-                 lang === 'zh' ? '药店不可用' : 
-                 'Pharmacy not available') :
-                (lang === 'es' ? 'Precio no disponible' : 
-                 lang === 'zh' ? '价格不可用' : 
-                 'Price not available')
-              }
-            </Text>
+            <View style={{ alignItems: 'flex-end', gap: 4 }}>
+              <Text style={{ color: colors.sub, fontSize:14, fontWeight:'500', fontStyle: 'italic' }}>
+                {item.pharmacyNotAvailable ? 
+                  (lang === 'es' ? 'Farmacia no disponible' : 
+                   lang === 'zh' ? '药店不可用' : 
+                   'Pharmacy not available') :
+                  (lang === 'es' ? 'Precio no disponible' : 
+                   lang === 'zh' ? '价格不可用' : 
+                   'Price not available')
+                }
+              </Text>
+              <Pressable 
+                onPress={() => openContributionModal(item)} 
+                style={{ backgroundColor: '#10b981', borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 4, minHeight:28, justifyContent:'center' }}
+              >
+                <Text style={{ color:'#ffffff', fontWeight:'600', fontSize:11 }}>
+                  {strings.helpUsGetPrice || 'Help Us Get Price'}
+                </Text>
+              </Pressable>
+            </View>
           ) : (
             <Text style={{ color: colors.text, fontSize:18, fontWeight:'700' }}>
               {typeof item.price==='number'? formatPrice(item.price): '—'}
@@ -469,6 +572,174 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           </View>
         </Animated.View>
       </View>
+
+      {/* Price Contribution Modal */}
+      <Modal visible={showContributionModal} animationType="slide" transparent onRequestClose={closeContributionModal}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: spacing.lg }}>
+          <View style={{
+            backgroundColor: colors.bg,
+            borderRadius: radius.xl,
+            padding: spacing.lg,
+            maxHeight: '80%'
+          }}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
+              <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>
+                {strings.helpUsGetPrice || 'Help Us Get Price'}
+              </Text>
+              <Pressable onPress={closeContributionModal} style={{ padding: spacing.xs }}>
+                <Text style={{ color: colors.sub, fontSize: 24 }}>×</Text>
+              </Pressable>
+            </View>
+
+            {/* Form */}
+            <ScrollView 
+              style={{ maxHeight: 400 }}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={{ gap: spacing.md }}>
+                <Text style={{ color: colors.sub, fontSize: 14, marginBottom: spacing.sm }}>
+                  {strings.contributionDescription || 'Help us improve our medication price database by sharing what you found:'}
+                </Text>
+
+                {/* Medication Name */}
+                <View>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
+                    {strings.medicationName || 'Medication Name'} *
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: colors.muted,
+                      borderRadius: radius.md,
+                      padding: spacing.md,
+                      color: colors.text,
+                      fontSize: 16
+                    }}
+                    value={contributionData.medicationName}
+                    onChangeText={(text) => setContributionData(prev => ({ ...prev, medicationName: text }))}
+                    placeholder={strings.medicationNamePlaceholder || 'Enter medication name'}
+                    placeholderTextColor={colors.sub}
+                  />
+                </View>
+
+                {/* Strength */}
+                <View>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
+                    {strings.strength || 'Strength/Dosage'}
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: colors.muted,
+                      borderRadius: radius.md,
+                      padding: spacing.md,
+                      color: colors.text,
+                      fontSize: 16
+                    }}
+                    value={contributionData.strength}
+                    onChangeText={(text) => setContributionData(prev => ({ ...prev, strength: text }))}
+                    placeholder={strings.strengthPlaceholder || 'e.g., 100mg, 50mg/500mg'}
+                    placeholderTextColor={colors.sub}
+                  />
+                </View>
+
+                {/* Price */}
+                <View>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
+                    {strings.price || 'Price'} *
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: colors.muted,
+                      borderRadius: radius.md,
+                      padding: spacing.md,
+                      color: colors.text,
+                      fontSize: 16
+                    }}
+                    value={contributionData.price}
+                    onChangeText={(text) => setContributionData(prev => ({ ...prev, price: text }))}
+                    placeholder={strings.pricePlaceholder || 'Enter price (e.g., 25.50)'}
+                    placeholderTextColor={colors.sub}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                {/* Quantity */}
+                <View>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
+                    {strings.quantity || 'Quantity/Package Size'}
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: colors.muted,
+                      borderRadius: radius.md,
+                      padding: spacing.md,
+                      color: colors.text,
+                      fontSize: 16
+                    }}
+                    value={contributionData.quantity}
+                    onChangeText={(text) => setContributionData(prev => ({ ...prev, quantity: text }))}
+                    placeholder={strings.quantityPlaceholder || 'e.g., 30 tablets, 1 bottle'}
+                    placeholderTextColor={colors.sub}
+                  />
+                </View>
+
+                {/* Store Name */}
+                <View>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
+                    {strings.storeName || 'Store Name'} *
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: colors.muted,
+                      borderRadius: radius.md,
+                      padding: spacing.md,
+                      color: colors.text,
+                      fontSize: 16
+                    }}
+                    value={contributionData.storeName}
+                    onChangeText={(text) => setContributionData(prev => ({ ...prev, storeName: text }))}
+                    placeholder={strings.storeNamePlaceholder || 'Enter store name'}
+                    placeholderTextColor={colors.sub}
+                  />
+                </View>
+
+                {/* Store Address */}
+                <View>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
+                    {strings.storeAddress || 'Store Address'}
+                  </Text>
+                  <TextInput
+                    style={{
+                      backgroundColor: colors.muted,
+                      borderRadius: radius.md,
+                      padding: spacing.md,
+                      color: colors.text,
+                      fontSize: 16
+                    }}
+                    value={contributionData.storeAddress}
+                    onChangeText={(text) => setContributionData(prev => ({ ...prev, storeAddress: text }))}
+                    placeholder={strings.storeAddressPlaceholder || 'Enter store address'}
+                    placeholderTextColor={colors.sub}
+                    multiline
+                    numberOfLines={2}
+                  />
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Footer Actions */}
+            <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
+              <Pressable onPress={closeContributionModal} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
+                <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.cancel || 'Cancel'}</Text>
+              </Pressable>
+              <Pressable onPress={submitContribution} style={{ flex: 1, backgroundColor: '#10b981', borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
+                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{strings.submitContribution || 'Submit'}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 }

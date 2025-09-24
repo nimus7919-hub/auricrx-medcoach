@@ -871,6 +871,320 @@ app.post('/ask-stream', async (req, res) => {
   }
 });
 
+// --- Medication Data Collection Endpoints ---
+
+// In-memory storage for medication contributions (in production, use a database)
+let medicationContributions = [];
+
+// POST /medication-contributions - Save a new medication contribution
+app.post('/medication-contributions', async (req, res) => {
+  try {
+    const { 
+      medicationName, 
+      strength, 
+      price, 
+      quantity, 
+      storeName, 
+      storeAddress, 
+      pharmacyId, 
+      userLocation, 
+      currency 
+    } = req.body || {};
+
+    // Validate required fields
+    if (!medicationName || !price || !storeName) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_required_fields',
+        message: 'Medication name, price, and store name are required'
+      });
+    }
+
+    // Create contribution object
+    const contribution = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      timestamp: new Date().toISOString(),
+      medicationName: medicationName.trim(),
+      strength: (strength || '').trim(),
+      price: parseFloat(price) || 0,
+      quantity: (quantity || '').trim(),
+      storeName: storeName.trim(),
+      storeAddress: (storeAddress || '').trim(),
+      pharmacyId: pharmacyId || '',
+      userLocation: userLocation || null,
+      currency: currency || 'USD',
+      verified: false,
+      source: 'user_contribution'
+    };
+
+    // Add to storage
+    medicationContributions.push(contribution);
+
+    console.log('📊 New medication contribution saved:', {
+      id: contribution.id,
+      medication: contribution.medicationName,
+      price: contribution.price,
+      store: contribution.storeName
+    });
+
+    res.json({ 
+      ok: true, 
+      contribution,
+      message: 'Contribution saved successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to save medication contribution:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'save_failed',
+      message: 'Failed to save contribution'
+    });
+  }
+});
+
+// GET /medication-contributions - Get all contributions with optional filtering
+app.get('/medication-contributions', async (req, res) => {
+  try {
+    const { 
+      search, 
+      medication, 
+      store, 
+      verified, 
+      limit = 100, 
+      offset = 0 
+    } = req.query;
+
+    let filteredContributions = [...medicationContributions];
+
+    // Apply filters
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      filteredContributions = filteredContributions.filter(contrib => 
+        contrib.medicationName.toLowerCase().includes(searchTerm) ||
+        contrib.storeName.toLowerCase().includes(searchTerm) ||
+        contrib.strength.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    if (medication) {
+      const medicationTerm = medication.toLowerCase();
+      filteredContributions = filteredContributions.filter(contrib => 
+        contrib.medicationName.toLowerCase().includes(medicationTerm)
+      );
+    }
+
+    if (store) {
+      const storeTerm = store.toLowerCase();
+      filteredContributions = filteredContributions.filter(contrib => 
+        contrib.storeName.toLowerCase().includes(storeTerm)
+      );
+    }
+
+    if (verified !== undefined) {
+      const isVerified = verified === 'true';
+      filteredContributions = filteredContributions.filter(contrib => 
+        contrib.verified === isVerified
+      );
+    }
+
+    // Sort by timestamp (newest first)
+    filteredContributions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    // Apply pagination
+    const startIndex = parseInt(offset);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedContributions = filteredContributions.slice(startIndex, endIndex);
+
+    // Calculate statistics
+    const stats = {
+      totalContributions: medicationContributions.length,
+      filteredContributions: filteredContributions.length,
+      uniqueMedications: [...new Set(medicationContributions.map(c => c.medicationName))].length,
+      uniqueStores: [...new Set(medicationContributions.map(c => c.storeName))].length,
+      verifiedContributions: medicationContributions.filter(c => c.verified).length,
+      averagePrice: medicationContributions.length > 0 
+        ? medicationContributions.reduce((sum, c) => sum + c.price, 0) / medicationContributions.length 
+        : 0
+    };
+
+    res.json({
+      ok: true,
+      contributions: paginatedContributions,
+      statistics: stats,
+      pagination: {
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        total: filteredContributions.length,
+        hasMore: endIndex < filteredContributions.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to get medication contributions:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'retrieve_failed',
+      message: 'Failed to retrieve contributions'
+    });
+  }
+});
+
+// GET /medication-contributions/export - Export contributions as CSV
+app.get('/medication-contributions/export', async (req, res) => {
+  try {
+    const { format = 'csv' } = req.query;
+
+    if (format === 'csv') {
+      // Create CSV content
+      const headers = [
+        'ID',
+        'Timestamp',
+        'Medication Name',
+        'Strength/Dosage',
+        'Price',
+        'Quantity',
+        'Store Name',
+        'Store Address',
+        'Currency',
+        'Verified',
+        'Source'
+      ];
+
+      const rows = medicationContributions.map(contrib => [
+        contrib.id,
+        contrib.timestamp,
+        `"${contrib.medicationName}"`,
+        `"${contrib.strength}"`,
+        contrib.price,
+        `"${contrib.quantity}"`,
+        `"${contrib.storeName}"`,
+        `"${contrib.storeAddress}"`,
+        contrib.currency,
+        contrib.verified ? 'Yes' : 'No',
+        contrib.source
+      ]);
+
+      const csvContent = [headers, ...rows]
+        .map(row => row.join(','))
+        .join('\n');
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="medication_contributions_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+
+    } else if (format === 'json') {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="medication_contributions_${new Date().toISOString().split('T')[0]}.json"`);
+      res.json(medicationContributions);
+
+    } else {
+      res.status(400).json({ 
+        ok: false, 
+        error: 'invalid_format',
+        message: 'Format must be csv or json'
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Failed to export medication contributions:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'export_failed',
+      message: 'Failed to export contributions'
+    });
+  }
+});
+
+// PUT /medication-contributions/:id/verify - Mark a contribution as verified
+app.put('/medication-contributions/:id/verify', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const contribution = medicationContributions.find(c => c.id === id);
+
+    if (!contribution) {
+      return res.status(404).json({ 
+        ok: false, 
+        error: 'not_found',
+        message: 'Contribution not found'
+      });
+    }
+
+    contribution.verified = true;
+    console.log(`✅ Contribution ${id} marked as verified`);
+
+    res.json({ 
+      ok: true, 
+      contribution,
+      message: 'Contribution verified successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to verify contribution:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'verify_failed',
+      message: 'Failed to verify contribution'
+    });
+  }
+});
+
+// DELETE /medication-contributions/:id - Delete a contribution
+app.delete('/medication-contributions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const initialLength = medicationContributions.length;
+    
+    medicationContributions = medicationContributions.filter(c => c.id !== id);
+
+    if (medicationContributions.length === initialLength) {
+      return res.status(404).json({ 
+        ok: false, 
+        error: 'not_found',
+        message: 'Contribution not found'
+      });
+    }
+
+    console.log(`🗑️ Contribution ${id} deleted`);
+
+    res.json({ 
+      ok: true, 
+      message: 'Contribution deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to delete contribution:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'delete_failed',
+      message: 'Failed to delete contribution'
+    });
+  }
+});
+
+// DELETE /medication-contributions - Clear all contributions (admin only)
+app.delete('/medication-contributions', async (req, res) => {
+  try {
+    const count = medicationContributions.length;
+    medicationContributions = [];
+    
+    console.log(`🗑️ All ${count} contributions cleared`);
+
+    res.json({ 
+      ok: true, 
+      message: `All ${count} contributions cleared successfully`
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to clear contributions:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'clear_failed',
+      message: 'Failed to clear contributions'
+    });
+  }
+});
+
 app.get('/', (_req, res) => {
   res.send('AuricRx Medcoach API is running ✅');
 });
