@@ -342,7 +342,7 @@
                 document.getElementById('noData').style.display = 'none';
                 document.getElementById('contributionsTable').style.display = 'none';
 
-                const response = await fetch('/medication-contributions', {
+                const response = await fetch('https://auricrx-medcoach.onrender.com/medication-contributions', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -445,7 +445,7 @@
 
         async function verifyContribution(id) {
             try {
-                const response = await fetch(`/medication-contributions/${id}/verify`, {
+                const response = await fetch(`https://auricrx-medcoach.onrender.com/medication-contributions/${id}/verify`, {
                     method: 'PUT'
                 });
                 
@@ -466,7 +466,7 @@
             }
 
             try {
-                const response = await fetch(`/medication-contributions/${id}`, {
+                const response = await fetch(`https://auricrx-medcoach.onrender.com/medication-contributions/${id}`, {
                     method: 'DELETE'
                 });
                 
@@ -483,7 +483,7 @@
 
         async function exportData(format) {
             try {
-                const response = await fetch(`/medication-contributions/export?format=${format}`);
+                const response = await fetch(`https://auricrx-medcoach.onrender.com/medication-contributions/export?format=${format}`);
                 
                 if (response.ok) {
                     const blob = await response.blob();
