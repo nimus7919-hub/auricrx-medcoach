@@ -1186,7 +1186,7 @@ app.delete('/medication-contributions', async (req, res) => {
 });
 
 app.get('/', (_req, res) => {
-  res.send('AuricRx Medcoach API is running ✅ - Medication endpoints available! - v2.0');
+  res.send('AuricRx Medcoach API is running ✅ - Medication endpoints available! - v2.1');
 });
 
 // Debug route to test if new code is deployed
