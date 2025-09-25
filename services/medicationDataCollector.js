@@ -1,6 +1,9 @@
 // services/medicationDataCollector.js
 // Service for collecting and sending medication price contributions to the server
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import authService from '../src/services/authService';
+
 const API_BASE = 'https://auricrx-medcoach.onrender.com';
 
 class MedicationDataCollector {
@@ -8,17 +11,58 @@ class MedicationDataCollector {
     this.apiBase = API_BASE;
   }
 
+  // Get authenticated user ID or create anonymous ID
+  async getOrCreateUserId() {
+    try {
+      // First, try to get authenticated user
+      const currentUser = authService.getCurrentUser();
+      if (currentUser && currentUser.uid) {
+        console.log('🆔 Using authenticated user ID:', currentUser.uid);
+        return currentUser.uid;
+      }
+      
+      // Fallback: Try to get existing anonymous user ID from AsyncStorage
+      const existingUserId = await AsyncStorage.getItem('auricrx_user_id');
+      if (existingUserId) {
+        console.log('🆔 Using stored anonymous user ID:', existingUserId);
+        return existingUserId;
+      }
+      
+      // Generate a new anonymous user ID
+      const userId = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Store it for future use
+      await AsyncStorage.setItem('auricrx_user_id', userId);
+      
+      console.log('🆔 Generated new anonymous user ID:', userId);
+      return userId;
+    } catch (error) {
+      console.error('❌ Failed to get/create user ID:', error);
+      // Fallback to a simple timestamp-based ID
+      return 'anonymous_' + Date.now();
+    }
+  }
+
   // Add a new medication contribution
   async addContribution(contributionData) {
     try {
-      console.log('📊 Sending contribution to server:', contributionData);
+      // Generate a unique user ID for this session (in a real app, this would come from authentication)
+      const userId = await this.getOrCreateUserId();
+      
+      // Add userId to contribution data
+      const contributionWithUserId = {
+        ...contributionData,
+        userId: userId
+      };
+      
+      console.log('📊 Sending contribution to server:', contributionWithUserId);
       
       const response = await fetch(`${this.apiBase}/medication-contributions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(contributionData),
+        body: JSON.stringify(contributionWithUserId),
       });
 
       if (!response.ok) {
@@ -38,7 +82,11 @@ class MedicationDataCollector {
   // Get all contributions from server
   async getContributions(options = {}) {
     try {
+      // Get user ID for data isolation
+      const userId = await this.getOrCreateUserId();
+      
       const params = new URLSearchParams();
+      params.append('userId', userId); // Add userId for data isolation
       if (options.search) params.append('search', options.search);
       if (options.medication) params.append('medication', options.medication);
       if (options.store) params.append('store', options.store);

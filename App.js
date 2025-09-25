@@ -37,6 +37,8 @@ import AIHealthScreen from './src/screens/AIHealthScreen';
 import Medications from './components/Medications';
 import Supplements from './components/Supplements';
 import Reminders from './components/Reminders';
+import AnimatedAuthScreen from './src/screens/AnimatedAuthScreen';
+import AdminProfileScreen from './src/screens/AdminProfileScreen';
 import { WallpaperProvider, useWallpaper } from './src/contexts/WallpaperContext';
 import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
 import WallpaperWrapper from './src/components/WallpaperWrapper';
@@ -1569,7 +1571,25 @@ export default function App() {
   // Put hooks/state INSIDE the component, before returns
   const [route, setRoute] = useState('dashboard');
   
-  
+  // Authentication state
+  const [user, setUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(true); // Start with auth screen
+
+  // Authentication handlers
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    setShowAuth(false);
+    console.log('✅ User authenticated:', userData);
+  };
+
+  const handleAuthClose = () => {
+    setShowAuth(false);
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
+    console.log('👋 User signed out');
+  };
   
   // 'reminders' | 'pharmacies' | 'labs' | 'prescription' | 'appointments' | 'settings'
 
@@ -2084,6 +2104,23 @@ const S = STRINGS[lang] || STRINGS.en;
         />
     </AnimatedButton>
     <View style={{ flex: 1 }} />
+    
+    {/* Authentication Button */}
+    {user && (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <AnimatedButton onPress={() => setRoute('admin-profile')}>
+          <DynamicText type="accent" style={{ fontSize: 16, fontWeight: '600' }}>
+            👤 Profile
+          </DynamicText>
+        </AnimatedButton>
+        <AnimatedButton onPress={handleSignOut}>
+          <DynamicText type="accent" style={{ fontSize: 16, fontWeight: '600' }}>
+            👋 Sign Out
+          </DynamicText>
+        </AnimatedButton>
+      </View>
+    )}
+    
     <AnimatedButton onPress={() => setRoute('settings')}>
       <DynamicText type="accent" style={{ fontSize: 22 }}>⚙️</DynamicText>
     </AnimatedButton>
@@ -3302,7 +3339,17 @@ return !fontsLoaded ? (
       backgroundColor="transparent"
       translucent={true}
     />
-    {route === 'dashboard' ? <Dashboard /> :
+    
+    {/* Authentication Screen - Show first */}
+    {showAuth ? (
+      <AnimatedAuthScreen
+        onAuthSuccess={handleAuthSuccess}
+        onClose={handleAuthClose}
+      />
+    ) : (
+      /* Main App Content - Only show after authentication */
+      <>
+        {route === 'dashboard' ? <Dashboard /> :
      route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
@@ -3317,10 +3364,13 @@ return !fontsLoaded ? (
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
+    route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} currentUser={user} /> :
      <Dashboard />}
 
-    {/* Floating AI button */}
-    <AnimatedFloatingButton />
+        {/* Floating AI button */}
+        <AnimatedFloatingButton />
+      </>
+    )}
 
     {/* AI modal */}
     <Modal

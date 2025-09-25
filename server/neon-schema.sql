@@ -418,6 +418,107 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ========================================
+-- USER AUTHENTICATION SYSTEM
+-- ========================================
+
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Authentication data
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  phone_number TEXT UNIQUE,
+  phone_verified BOOLEAN DEFAULT FALSE,
+  
+  -- User profile
+  first_name TEXT,
+  last_name TEXT,
+  date_of_birth DATE,
+  gender TEXT,
+  
+  -- Account status
+  is_active BOOLEAN DEFAULT TRUE,
+  is_admin BOOLEAN DEFAULT FALSE,
+  email_verified BOOLEAN DEFAULT FALSE,
+  
+  -- Security
+  last_login TIMESTAMP WITH TIME ZONE,
+  failed_login_attempts INTEGER DEFAULT 0,
+  locked_until TIMESTAMP WITH TIME ZONE,
+  
+  -- Preferences
+  language TEXT DEFAULT 'en',
+  timezone TEXT,
+  notifications_enabled BOOLEAN DEFAULT TRUE
+);
+
+-- User sessions table
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Session data
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  device_info JSONB,
+  ip_address TEXT,
+  
+  -- Status
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Phone verification codes table
+CREATE TABLE IF NOT EXISTS phone_verification_codes (
+  id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Verification data
+  phone_number TEXT NOT NULL,
+  verification_code TEXT NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  
+  -- Status
+  is_used BOOLEAN DEFAULT FALSE,
+  attempts INTEGER DEFAULT 0
+);
+
+-- Email verification codes table
+CREATE TABLE IF NOT EXISTS email_verification_codes (
+  id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Verification data
+  email TEXT NOT NULL,
+  verification_code TEXT NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  
+  -- Status
+  is_used BOOLEAN DEFAULT FALSE,
+  attempts INTEGER DEFAULT 0
+);
+
+-- Indexes for user authentication
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone_number);
+CREATE INDEX IF NOT EXISTS idx_users_admin ON users(is_admin);
+CREATE INDEX IF NOT EXISTS idx_users_active ON users(is_active);
+
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(token_hash);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_expires ON user_sessions(expires_at);
+
+CREATE INDEX IF NOT EXISTS idx_phone_verification_phone ON phone_verification_codes(phone_number);
+CREATE INDEX IF NOT EXISTS idx_phone_verification_expires ON phone_verification_codes(expires_at);
+
+CREATE INDEX IF NOT EXISTS idx_email_verification_email ON email_verification_codes(email);
+CREATE INDEX IF NOT EXISTS idx_email_verification_expires ON email_verification_codes(expires_at);
+
+-- ========================================
 -- SECURITY NOTES
 -- ========================================
 
