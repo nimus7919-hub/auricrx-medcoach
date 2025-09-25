@@ -876,36 +876,36 @@ app.post('/ask-stream', async (req, res) => {
 
 // --- Medication Data Collection Endpoints ---
 
-// Persistent storage using Supabase database
+// Persistent storage using Neon database
 const { 
   saveMedicationContribution, 
   getMedicationContributions 
-} = require('./supabase');
+} = require('./neon');
 
 // Load existing data on startup
 let medicationContributions = [];
 
-// Load contributions from Supabase on startup
-async function loadContributionsFromSupabase() {
+// Load contributions from Neon on startup
+async function loadContributionsFromNeon() {
   try {
     medicationContributions = await getMedicationContributions();
-    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from Supabase`);
+    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from Neon`);
   } catch (error) {
-    console.log('⚠️ Could not load contributions from Supabase, starting fresh:', error.message);
+    console.log('⚠️ Could not load contributions from Neon, starting fresh:', error.message);
     medicationContributions = [];
   }
 }
 
-// Initialize Supabase connection
-loadContributionsFromSupabase();
+// Initialize Neon connection
+loadContributionsFromNeon();
 
-// Save data to Supabase
+// Save data to Neon
 async function saveContributions() {
   try {
     console.log(`💾 ${medicationContributions.length} contributions in memory`);
     console.log('📊 Current contributions:', JSON.stringify(medicationContributions, null, 2));
     
-    // Data is automatically saved to Supabase when new contributions are added
+    // Data is automatically saved to Neon when new contributions are added
   } catch (error) {
     console.error('❌ Failed to save contributions:', error);
   }
@@ -952,7 +952,7 @@ app.post('/medication-contributions', async (req, res) => {
       source: 'user_contribution'
     };
 
-    // Save to Supabase database
+    // Save to Neon database
     const savedContribution = await saveMedicationContribution(contribution);
     
     // Add to local cache
@@ -993,7 +993,7 @@ app.get('/medication-contributions', async (req, res) => {
       offset = 0 
     } = req.query;
 
-    // Get contributions from Supabase
+    // Get contributions from Neon
     const filteredContributions = await getMedicationContributions({
       search,
       medication,
