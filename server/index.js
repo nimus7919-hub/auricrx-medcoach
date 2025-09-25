@@ -888,10 +888,12 @@ let medicationContributions = [];
 // Load contributions from Neon on startup
 async function loadContributionsFromNeon() {
   try {
-    medicationContributions = await getMedicationContributions();
-    console.log(`📊 Loaded ${medicationContributions.length} existing contributions from Neon`);
+    // Skip loading on startup since we need user_id for data isolation
+    // Contributions will be loaded per-user when needed
+    console.log('📊 Neon database ready - contributions will be loaded per-user');
+    medicationContributions = [];
   } catch (error) {
-    console.log('⚠️ Could not load contributions from Neon, starting fresh:', error.message);
+    console.log('⚠️ Could not initialize Neon connection, starting fresh:', error.message);
     medicationContributions = [];
   }
 }
@@ -923,15 +925,16 @@ app.post('/medication-contributions', async (req, res) => {
       storeAddress, 
       pharmacyId, 
       userLocation, 
-      currency 
+      currency,
+      userId
     } = req.body || {};
 
     // Validate required fields
-    if (!medicationName || !price || !storeName) {
+    if (!medicationName || !price || !storeName || !userId) {
       return res.status(400).json({ 
         ok: false, 
         error: 'missing_required_fields',
-        message: 'Medication name, price, and store name are required'
+        message: 'Medication name, price, store name, and user ID are required'
       });
     }
 
@@ -948,6 +951,7 @@ app.post('/medication-contributions', async (req, res) => {
       pharmacyId: pharmacyId || '',
       userLocation: userLocation || null,
       currency: currency || 'USD',
+      userId: userId.trim(),
       verified: false,
       source: 'user_contribution'
     };
@@ -990,15 +994,28 @@ app.get('/medication-contributions', async (req, res) => {
       store, 
       verified, 
       limit = 100, 
-      offset = 0 
+      offset = 0,
+      userId
     } = req.query;
 
-    // Get contributions from Neon
+    // Validate user_id is provided
+    if (!userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'user_id_required',
+        message: 'User ID is required for data isolation'
+      });
+    }
+
+    // Get contributions from Neon for specific user
     const filteredContributions = await getMedicationContributions({
+      userId,
       search,
       medication,
       store,
-      verified: verified === 'true' ? true : verified === 'false' ? false : undefined
+      verified: verified === 'true' ? true : verified === 'false' ? false : undefined,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
     });
 
     // Apply pagination

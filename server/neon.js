@@ -18,6 +18,11 @@ const TABLES = {
 // Medication contributions functions
 async function saveMedicationContribution(contribution) {
   try {
+    // Validate user_id is provided
+    if (!contribution.userId) {
+      throw new Error('user_id is required for data isolation');
+    }
+
     const { data, error } = await neonClient`
       INSERT INTO medication_contributions (
         medication_name, strength, price, quantity, store_name, 
@@ -29,12 +34,12 @@ async function saveMedicationContribution(contribution) {
         ${contribution.storeName}, ${contribution.storeAddress}, 
         ${contribution.pharmacyId}, ${contribution.currency}, 
         ${JSON.stringify(contribution.userLocation)}, 
-        ${contribution.userId || null}, ${contribution.verified}, 
+        ${contribution.userId}, ${contribution.verified}, 
         ${contribution.source}
       ) RETURNING *
     `;
     
-    console.log('✅ Medication contribution saved to Neon:', data[0]);
+    console.log('✅ Medication contribution saved to Neon for user:', contribution.userId);
     return data[0];
   } catch (error) {
     console.error('❌ Failed to save medication contribution:', error);
@@ -44,36 +49,21 @@ async function saveMedicationContribution(contribution) {
 
 async function getMedicationContributions(filters = {}) {
   try {
-    let query = `SELECT * FROM medication_contributions WHERE 1=1`;
-    const params = [];
-    let paramCount = 1;
-
-    // Apply filters
-    if (filters.search) {
-      query += ` AND (medication_name ILIKE $${paramCount} OR store_name ILIKE $${paramCount})`;
-      params.push(`%${filters.search}%`);
-      paramCount++;
-    }
-    if (filters.medication) {
-      query += ` AND medication_name ILIKE $${paramCount}`;
-      params.push(`%${filters.medication}%`);
-      paramCount++;
-    }
-    if (filters.store) {
-      query += ` AND store_name ILIKE $${paramCount}`;
-      params.push(`%${filters.store}%`);
-      paramCount++;
-    }
-    if (filters.verified !== undefined) {
-      query += ` AND verified = $${paramCount}`;
-      params.push(filters.verified);
-      paramCount++;
+    // Validate user_id is provided for data isolation
+    if (!filters.userId) {
+      throw new Error('user_id is required for data isolation');
     }
 
-    query += ` ORDER BY created_at DESC`;
-
-    const data = await neonClient(query, params);
-    console.log(`📊 Retrieved ${data.length} medication contributions from Neon`);
+    // Use the secure user-specific function with correct syntax
+    const data = await neonClient`
+      SELECT * FROM get_user_medication_contributions(
+        ${filters.userId}, 
+        ${filters.limit || 100}, 
+        ${filters.offset || 0}
+      )
+    `;
+    
+    console.log(`📊 Retrieved ${data.length} medication contributions for user ${filters.userId}`);
     return data;
   } catch (error) {
     console.error('❌ Failed to get medication contributions:', error);
