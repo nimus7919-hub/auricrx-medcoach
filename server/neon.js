@@ -194,35 +194,18 @@ async function saveUserProfile(userId, profile) {
     const { data, error } = await neonClient`
       INSERT INTO user_profiles (
         user_id, first_name, last_name, email, phone, 
-        date_of_birth, gender, blood_type, allergies, 
-        medical_conditions, emergency_contact_name, 
-        emergency_contact_phone, language, timezone, 
-        notifications_enabled
+        language, notifications_enabled
       ) VALUES (
-        ${userId}, ${profile.firstName}, ${profile.lastName}, 
-        ${profile.email}, ${profile.phone}, ${profile.dateOfBirth}, 
-        ${profile.gender}, ${profile.bloodType}, 
-        ${JSON.stringify(profile.allergies || [])}, 
-        ${JSON.stringify(profile.medicalConditions || [])}, 
-        ${profile.emergencyContactName}, ${profile.emergencyContactPhone}, 
-        ${profile.language || 'en'}, ${profile.timezone}, 
-        ${profile.notificationsEnabled !== false}
+        ${userId}, ${profile.first_name}, ${profile.last_name}, 
+        ${profile.email}, ${profile.phone}, 
+        ${profile.country || 'en'}, true
       ) 
       ON CONFLICT (user_id) DO UPDATE SET
         first_name = EXCLUDED.first_name,
         last_name = EXCLUDED.last_name,
         email = EXCLUDED.email,
         phone = EXCLUDED.phone,
-        date_of_birth = EXCLUDED.date_of_birth,
-        gender = EXCLUDED.gender,
-        blood_type = EXCLUDED.blood_type,
-        allergies = EXCLUDED.allergies,
-        medical_conditions = EXCLUDED.medical_conditions,
-        emergency_contact_name = EXCLUDED.emergency_contact_name,
-        emergency_contact_phone = EXCLUDED.emergency_contact_phone,
         language = EXCLUDED.language,
-        timezone = EXCLUDED.timezone,
-        notifications_enabled = EXCLUDED.notifications_enabled,
         updated_at = NOW()
       RETURNING *
     `;
