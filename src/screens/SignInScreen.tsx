@@ -15,6 +15,7 @@ import {
   ScrollView,
   FlatList,
   Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 
 // Expo:
@@ -201,7 +202,16 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
+      <KeyboardAvoidingView 
+        style={styles.container} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* === Language Dropdown === */}
         <View style={styles.languageContainer} pointerEvents="box-none">
           <TouchableOpacity 
@@ -343,7 +353,8 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
             {t.legal}
           </Text>
         </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -606,6 +617,11 @@ const styles = StyleSheet.create({
   },
 
   legal: { color: "#AAAAAA", textAlign: "center", fontSize: 12, lineHeight: 18 },
+  
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   
   // Language dropdown styles
   languageContainer: {
