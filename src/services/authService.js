@@ -36,8 +36,14 @@ class AuthService {
       console.log('Profile updated successfully');
 
       // Send email verification
-      await sendEmailVerification(user);
-      console.log('Email verification sent');
+      try {
+        await sendEmailVerification(user);
+        console.log('✅ Email verification sent successfully to:', user.email);
+      } catch (emailError) {
+        console.error('❌ Failed to send email verification:', emailError);
+        // Don't fail the sign-up if email verification fails
+        console.log('⚠️ Continuing with sign-up despite email verification failure');
+      }
 
       return {
         success: true,

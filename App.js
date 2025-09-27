@@ -18,6 +18,7 @@ import * as Notifications from 'expo-notifications';
 import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import authService from './src/services/authService';
 import * as Location from 'expo-location';
 import { Audio } from 'expo-audio';
 import { Video } from 'expo-video';
@@ -37,7 +38,8 @@ import AIHealthScreen from './src/screens/AIHealthScreen';
 import Medications from './components/Medications';
 import Supplements from './components/Supplements';
 import Reminders from './components/Reminders';
-import AnimatedAuthScreen from './src/screens/AnimatedAuthScreen';
+import SignInScreen from './src/screens/SignInScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import AdminProfileScreen from './src/screens/AdminProfileScreen';
 import { WallpaperProvider, useWallpaper } from './src/contexts/WallpaperContext';
 import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
@@ -1573,22 +1575,72 @@ export default function App() {
   
   // Authentication state
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
 
   // Authentication handlers
-  const handleAuthSuccess = (userData) => {
-    setUser(userData);
-    setShowAuth(false);
-    console.log('✅ User authenticated:', userData);
+  const handleAuthSuccess = async (authData) => {
+    console.log('Auth success:', authData);
+    try {
+      const result = await authService.handleAuth(authData);
+      
+      if (result.success) {
+        // Check if email verification is needed
+        if (result.needsEmailVerification) {
+          Alert.alert(
+            'Email Verification Required', 
+            'Please check your email and click the verification link before signing in.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  // Don't close auth screen, user needs to verify email first
+                  console.log('User needs to verify email before accessing dashboard');
+                }
+              }
+            ]
+          );
+          return; // Don't proceed to dashboard
+        }
+        
+        setUser(result.user);
+        setShowAuth(false);
+        
+        // If it's a sign-up, store the user data
+        if (authData.isSignUp) {
+          setUserData(authData);
+        } else {
+          // If it's a sign-in, try to get user data
+          const userDataResult = await authService.getUserData(result.user.uid);
+          if (userDataResult.success) {
+            setUserData(userDataResult.data);
+          }
+        }
+        
+        Alert.alert('Success', result.message || (authData.isSignUp ? 'Account created successfully!' : 'Signed in successfully!'));
+      } else {
+        Alert.alert('Error', result.error);
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      Alert.alert('Error', 'Authentication failed. Please try again.');
+    }
   };
 
   const handleAuthClose = () => {
     setShowAuth(false);
   };
 
-  const handleSignOut = () => {
-    setUser(null);
-    console.log('👋 User signed out');
+  const handleSignOut = async () => {
+    try {
+      await authService.signOut();
+      setUser(null);
+      setUserData(null);
+      setShowAuth(true);
+      console.log('👋 User signed out');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
   
   // 'reminders' | 'pharmacies' | 'labs' | 'prescription' | 'appointments' | 'settings'
@@ -3341,12 +3393,13 @@ return !fontsLoaded ? (
     />
     
     {/* Authentication Screen - Show first */}
-    {showAuth ? (
-      <AnimatedAuthScreen
-        onAuthSuccess={handleAuthSuccess}
-        onClose={handleAuthClose}
-      />
-    ) : (
+        {showAuth ? (
+          <SignInScreen
+            onAuthSuccess={handleAuthSuccess}
+            onClose={handleAuthClose}
+            onLanguageChange={setLang}
+          />
+        ) : (
       /* Main App Content - Only show after authentication */
       <>
         {route === 'dashboard' ? <Dashboard /> :
@@ -3354,7 +3407,7 @@ return !fontsLoaded ? (
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
-     route === 'settings' ? <Settings /> :
+     route === 'settings' ? <SettingsScreen userData={userData} onSignOut={handleSignOut} /> :
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
