@@ -3319,6 +3319,18 @@ const handleAskMedicalAI = async () => {
             <Text style={{ color: theme.accent, fontFamily: 'Inter_700Bold' }}>{S.emailUs}: AuricRx@gmail.com</Text>
           </TouchableOpacity>
         </Section>
+
+        <Section title="Account">
+          <TouchableOpacity 
+            style={{ padding: 16, backgroundColor: theme.chip, borderRadius: 8, marginBottom: 8 }}
+            onPress={handleSignOut}
+          >
+            <Text style={{ color: '#ff4444', fontFamily: 'Inter_600SemiBold' }}>🚪 Sign Out</Text>
+            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 4 }}>
+              Sign out of your account
+            </Text>
+          </TouchableOpacity>
+        </Section>
       </ScrollView>
   );
 
@@ -3421,7 +3433,7 @@ return !fontsLoaded ? (
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
-     route === 'settings' ? <SettingsScreen userData={userData} onSignOut={handleSignOut} /> :
+     route === 'settings' ? <Settings /> :
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
