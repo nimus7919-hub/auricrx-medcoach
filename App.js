@@ -46,6 +46,8 @@ import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
 import WallpaperWrapper from './src/components/WallpaperWrapper';
 import DynamicText from './src/components/DynamicText';
 import { useDynamicTheme } from './src/hooks/useDynamicTheme';
+import CustomAlert from './src/components/CustomAlert';
+import { useCustomAlert } from './src/hooks/useCustomAlert';
 
 // Initialize i18n
 import './src/i18n';
@@ -1561,6 +1563,9 @@ export default function App() {
   // Test log for component rendering
   console.log('📱 App component rendered');
 
+  // Custom alert hook
+  const { alert, showAlert, handlePress } = useCustomAlert();
+
   // Load fonts first (simple gate)
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -1587,20 +1592,16 @@ export default function App() {
       if (result.success) {
         // Check if email verification is needed
         if (result.needsEmailVerification) {
-          Alert.alert(
-            'Email Verification Required', 
-            'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
-            [
-              {
-                text: 'Back to Sign In',
-                onPress: () => {
-                  // Keep auth screen open, user needs to verify email first
-                  console.log('User needs to verify email before accessing dashboard');
-                  // The auth screen will remain open for them to sign in after verification
-                }
-              }
-            ]
-          );
+          showAlert({
+            title: 'Email Verification Required',
+            message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
+            buttonText: 'Back to Sign In',
+            onPress: () => {
+              // Keep auth screen open, user needs to verify email first
+              console.log('User needs to verify email before accessing dashboard');
+              // The auth screen will remain open for them to sign in after verification
+            }
+          });
           return; // Don't proceed to dashboard
         }
         
@@ -1618,13 +1619,25 @@ export default function App() {
           }
         }
         
-        Alert.alert('Success', result.message || (authData.isSignUp ? 'Account created successfully!' : 'Signed in successfully!'));
+        showAlert({
+          title: 'Success',
+          message: result.message || (authData.isSignUp ? 'Account created successfully!' : 'Signed in successfully!'),
+          buttonText: 'Continue',
+        });
       } else {
-        Alert.alert('Error', result.error);
+        showAlert({
+          title: 'Error',
+          message: result.error,
+          buttonText: 'OK',
+        });
       }
     } catch (error) {
       console.error('Auth error:', error);
-      Alert.alert('Error', 'Authentication failed. Please try again.');
+      showAlert({
+        title: 'Error',
+        message: 'Authentication failed. Please try again.',
+        buttonText: 'OK',
+      });
     }
   };
 
@@ -3573,6 +3586,15 @@ return !fontsLoaded ? (
     </View>
   </View>
     </Modal>
+
+    {/* Custom Alert */}
+    <CustomAlert
+      visible={!!alert}
+      title={alert?.title || ''}
+      message={alert?.message || ''}
+      buttonText={alert?.buttonText || 'OK'}
+      onPress={handlePress}
+    />
     </WallpaperWrapper>
   </WallpaperProvider>
 );

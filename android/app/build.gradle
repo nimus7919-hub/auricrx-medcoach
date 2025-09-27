@@ -1,7 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply plugin: "com.google.gms.google-services"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -88,13 +87,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.auricrx.medcoach'
+    namespace "com.auricrxmedcoach"
     defaultConfig {
-        applicationId 'com.auricrx.medcoach'
+        applicationId "com.auricrxmedcoach"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0.0"
+        versionName "1.0"
     }
     signingConfigs {
         debug {
@@ -151,15 +150,6 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    
-    // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:34.3.0')
-    
-    // Firebase Authentication
-    implementation 'com.google.firebase:firebase-auth'
-    
-    // Firebase Analytics
-    implementation 'com.google.firebase:firebase-analytics'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
@@ -184,14 +174,4 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-}
-
-/** Injected by app.plugin.js to avoid duplicate classes (support vs AndroidX) **/
-configurations.all {
-  exclude group: "com.android.support", module: "versionedparcelable"
-  exclude group: "com.android.support", module: "support-compat"
-  exclude group: "com.android.support"
-  resolutionStrategy {
-    force "androidx.versionedparcelable:versionedparcelable:1.1.1"
-  }
 }

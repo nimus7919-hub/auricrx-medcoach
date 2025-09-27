@@ -11,7 +11,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { authService } from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
@@ -23,7 +25,6 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
   const [loading, setLoading] = useState(false);
   
   // Animation values
-  const glowAnimation = new Animated.Value(0);
   const logoScale = new Animated.Value(0.8);
   const textOpacity = new Animated.Value(0);
   const slideUp = new Animated.Value(50);
@@ -49,22 +50,6 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
       }),
     ]).start();
 
-    // Continuous glow animation for logo
-    const glowLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowAnimation, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: false,
-        }),
-        Animated.timing(glowAnimation, {
-          toValue: 0,
-          duration: 2000,
-          useNativeDriver: false,
-        }),
-      ])
-    );
-    glowLoop.start();
 
     // Continuous glow animation for title
     const titleGlowLoop = Animated.loop(
@@ -84,7 +69,6 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
     titleGlowLoop.start();
 
     return () => {
-      glowLoop.stop();
       titleGlowLoop.stop();
     };
   }, []);
@@ -133,19 +117,10 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
     }
   };
 
-  const glowColor = glowAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#FFD700', '#FFA500'],
-  });
-
-  const glowOpacity = glowAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.3, 0.8],
-  });
 
   const titleGlowColor = titleGlow.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#FFD700', '#FFA500'],
+    outputRange: ['#D4AF37', '#B8860B'],
   });
 
   const titleGlowOpacity = titleGlow.interpolate({
@@ -162,130 +137,130 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
         {/* Background */}
         <View style={styles.background} />
         
-        {/* Animated Logo */}
-        <Animated.View 
-          style={[
-            styles.logoContainer,
-            {
-              transform: [{ scale: logoScale }],
-            }
-          ]}
-        >
+
+        {/* Main Content */}
+        <View style={styles.mainContent}>
           <Animated.View
             style={[
-              styles.logoGlow,
+              styles.contentContainer,
               {
-                backgroundColor: glowColor,
-                opacity: glowOpacity,
+                opacity: textOpacity,
+                transform: [{ translateY: slideUp }],
               }
             ]}
-          />
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>AR</Text>
-            <View style={styles.pillIcon} />
-          </View>
-        </Animated.View>
-
-        {/* Animated Title */}
-        <Animated.View
-          style={[
-            styles.titleContainer,
-            {
-              opacity: textOpacity,
-              transform: [{ translateY: slideUp }],
-            }
-          ]}
-        >
-          <Animated.Text style={[styles.title, { color: titleGlowColor }]}>
-            AURIC RX
-          </Animated.Text>
-          <Animated.Text style={[styles.subtitle, { color: titleGlowColor }]}>
-            AI & Health Checks
-          </Animated.Text>
-        </Animated.View>
-
-        {/* Animated Form */}
-        <Animated.View
-          style={[
-            styles.formContainer,
-            {
-              opacity: textOpacity,
-              transform: [{ translateY: slideUp }],
-            }
-          ]}
-        >
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#999"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.signInButton, { backgroundColor: glowColor }]}
-            onPress={handleAuth}
-            disabled={loading}
           >
-            <Text style={styles.signInButtonText}>
-              {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-            </Text>
-          </TouchableOpacity>
+            {/* Header with Logo */}
+            <View style={styles.header}>
+              <Animated.View
+                style={[
+                  styles.logoContainer,
+                  {
+                    transform: [{ scale: logoScale }],
+                  }
+                ]}
+              >
+                <View style={styles.logo}>
+                  <Image 
+                    source={require('../../assets/sign in logo.png')}
+                    style={styles.logoImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              </Animated.View>
+              
+            </View>
 
-          <TouchableOpacity
-            style={styles.toggleButton}
-            onPress={() => setIsSignUp(!isSignUp)}
-          >
-            <Text style={styles.toggleText}>
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </Text>
-          </TouchableOpacity>
+            {/* Form */}
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email"
+                  placeholderTextColor="#D4AF37"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
 
-          {/* Social Login Buttons */}
-          <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} onPress={handleGoogleAuth}>
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor="#D4AF37"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
 
-            <TouchableOpacity style={styles.socialButton} onPress={handlePhoneAuth}>
-              <Text style={styles.socialButtonText}>Continue with Phone</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+              {/* Primary Sign In Button */}
+              <TouchableOpacity
+                style={styles.signInButtonContainer}
+                onPress={handleAuth}
+                disabled={loading}
+              >
+                <LinearGradient
+                  colors={['#F59E0B', '#D97706', '#F59E0B', '#FCD34D']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.signInButton}
+                >
+                  <Text style={styles.signInButtonText}>
+                    {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
 
-        {/* Legal Text */}
-        <Animated.View
-          style={[
-            styles.legalContainer,
-            {
-              opacity: textOpacity,
-              transform: [{ translateY: slideUp }],
-            }
-          ]}
-        >
-          <Text style={styles.legalText}>
-            By signing in, you agree to our Terms of Service and Privacy Policy
-          </Text>
-        </Animated.View>
+              {/* Social Login Buttons */}
+              <View style={styles.socialContainer}>
+                <TouchableOpacity style={styles.socialButton} onPress={handlePhoneAuth}>
+                  <Text style={styles.socialIcon}>🍎</Text>
+                  <Text style={styles.socialButtonText}>Continue with Apple</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.socialButton} onPress={handleGoogleAuth}>
+                  <Text style={styles.socialIcon}>G</Text>
+                  <Text style={styles.socialButtonText}>Continue with Google</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Toggle Sign Up */}
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setIsSignUp(!isSignUp)}
+              >
+                <Text style={styles.toggleText}>
+                  {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Legal Text */}
+              <Text style={styles.legalText}>
+                By signing in, you agree to our Terms of Service and Privacy Policy
+              </Text>
+            </View>
+          </Animated.View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
+
+/** Animated top beam: slit + pulse + sweep */
+function AnimatedTopBeam() {
+  return (
+    <View style={styles.topBeamContainer}>
+      {/* narrow slit */}
+      <View style={styles.slitLight} />
+      {/* downward luminous beam */}
+      <View style={styles.luminousBeam} />
+      {/* sweeping sparkle */}
+      <View style={styles.sweepingSparkle} />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -306,114 +281,161 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: '#000',
   },
+  // Top Beam Animation
+  topBeamContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 200,
+  },
+  slitLight: {
+    position: 'absolute',
+    left: '7%',
+    top: 8,
+    height: 2,
+    width: '86%',
+    borderRadius: 1,
+    backgroundColor: '#D4AF37',
+    opacity: 0.8,
+  },
+  luminousBeam: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: '100%',
+    backgroundColor: '#D4AF37',
+    opacity: 0.3,
+  },
+  sweepingSparkle: {
+    position: 'absolute',
+    top: 4,
+    left: '50%',
+    height: 40,
+    width: 112,
+    marginLeft: -56,
+    backgroundColor: '#D4AF37',
+    opacity: 0.4,
+  },
+  // Main Content
+  mainContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentContainer: {
+    width: '100%',
+    maxWidth: 400,
+  },
+  // Header
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 30,
-  },
-  logoGlow: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#FFD700',
+    marginBottom: 20,
   },
   logo: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFD700',
     position: 'relative',
   },
-  logoText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#FFD700',
-    letterSpacing: 2,
-  },
-  pillIcon: {
-    position: 'absolute',
-    top: 15,
-    left: 15,
-    width: 20,
-    height: 8,
-    backgroundColor: '#FFD700',
-    borderRadius: 4,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
+  logoImage: {
+    width: 200,
+    height: 200,
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     letterSpacing: 3,
     marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 16,
-    letterSpacing: 1,
-  },
-  formContainer: {
-    marginBottom: 30,
+  // Form
+  form: {
+    width: '100%',
   },
   inputContainer: {
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#FFD700',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#fff',
+    color: '#F59E0B',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  signInButtonContainer: {
+    marginBottom: 20,
+    borderRadius: 8,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 8,
   },
   signInButton: {
-    backgroundColor: '#FFD700',
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'center',
   },
   signInButtonText: {
     color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
   },
-  toggleButton: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  toggleText: {
-    color: '#FFD700',
-    fontSize: 14,
-  },
   socialContainer: {
     gap: 12,
+    marginBottom: 20,
   },
   socialButton: {
-    backgroundColor: '#1a1a1a',
-    borderWidth: 1,
-    borderColor: '#FFD700',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
     borderRadius: 8,
     paddingVertical: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  socialIcon: {
+    fontSize: 18,
+    marginRight: 12,
+    color: '#F59E0B',
   },
   socialButtonText: {
-    color: '#fff',
+    color: '#F59E0B',
     fontSize: 16,
   },
-  legalContainer: {
+  toggleButton: {
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 20,
+  },
+  toggleText: {
+    color: '#F59E0B',
+    fontSize: 14,
   },
   legalText: {
-    color: '#999',
+    color: '#F59E0B',
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 16,
