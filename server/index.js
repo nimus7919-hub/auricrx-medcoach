@@ -879,7 +879,9 @@ app.post('/ask-stream', async (req, res) => {
 // Persistent storage using Neon database
 const { 
   saveMedicationContribution, 
-  getMedicationContributions 
+  getMedicationContributions,
+  saveUserProfile,
+  getUserProfile
 } = require('./neon');
 
 // Load existing data on startup
@@ -1211,6 +1213,91 @@ app.delete('/medication-contributions', async (req, res) => {
       ok: false, 
       error: 'clear_failed',
       message: 'Failed to clear contributions'
+    });
+  }
+});
+
+// --- User Profile Endpoints ---
+
+// POST /api/users - Create or update user profile
+app.post('/api/users', async (req, res) => {
+  try {
+    const { user_id, first_name, last_name, email, phone, username, country, unique_id, created_at } = req.body;
+    
+    if (!user_id) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'user_id_required',
+        message: 'User ID is required' 
+      });
+    }
+    
+    const profileData = {
+      first_name,
+      last_name,
+      email,
+      phone,
+      username,
+      country,
+      unique_id,
+      created_at
+    };
+    
+    const result = await saveUserProfile(user_id, profileData);
+    
+    console.log('✅ User profile saved to Neon for user:', user_id);
+    res.json({ 
+      ok: true, 
+      message: 'User profile saved successfully',
+      data: result
+    });
+    
+  } catch (error) {
+    console.error('❌ Failed to save user profile:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'save_failed',
+      message: 'Failed to save user profile'
+    });
+  }
+});
+
+// GET /api/users/:userId - Get user profile
+app.get('/api/users/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    if (!userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'user_id_required',
+        message: 'User ID is required' 
+      });
+    }
+    
+    const profile = await getUserProfile(userId);
+    
+    if (!profile) {
+      return res.status(404).json({ 
+        ok: false, 
+        error: 'profile_not_found',
+        message: 'User profile not found' 
+      });
+    }
+    
+    console.log('✅ User profile retrieved from Neon for user:', userId);
+    res.json({ 
+      ok: true, 
+      message: 'User profile retrieved successfully',
+      data: profile
+    });
+    
+  } catch (error) {
+    console.error('❌ Failed to get user profile:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'get_failed',
+      message: 'Failed to get user profile'
     });
   }
 });
