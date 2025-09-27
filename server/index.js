@@ -1222,9 +1222,12 @@ app.delete('/medication-contributions', async (req, res) => {
 // POST /api/users - Create or update user profile
 app.post('/api/users', async (req, res) => {
   try {
+    console.log('📝 POST /api/users called with body:', req.body);
+    
     const { user_id, first_name, last_name, email, phone, username, country, unique_id, created_at } = req.body;
     
     if (!user_id) {
+      console.log('❌ Missing user_id');
       return res.status(400).json({ 
         ok: false, 
         error: 'user_id_required',
@@ -1243,6 +1246,8 @@ app.post('/api/users', async (req, res) => {
       created_at
     };
     
+    console.log('📊 Profile data to save:', profileData);
+    
     const result = await saveUserProfile(user_id, profileData);
     
     console.log('✅ User profile saved to Neon for user:', user_id);
@@ -1254,10 +1259,12 @@ app.post('/api/users', async (req, res) => {
     
   } catch (error) {
     console.error('❌ Failed to save user profile:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({ 
       ok: false, 
       error: 'save_failed',
-      message: 'Failed to save user profile'
+      message: 'Failed to save user profile',
+      details: error.message
     });
   }
 });
