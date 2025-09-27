@@ -1311,8 +1311,34 @@ app.get('/debug', (_req, res) => {
   res.json({ 
     message: 'Debug endpoint working!', 
     timestamp: new Date().toISOString(),
-    routes: ['/medication-contributions', '/medication-contributions/export']
+    routes: ['/medication-contributions', '/medication-contributions/export', '/api/users']
   });
+});
+
+// Debug Neon connection
+app.get('/debug/neon', async (_req, res) => {
+  try {
+    const { neon } = require('@neondatabase/serverless');
+    const neonClient = neon(process.env.DATABASE_URL);
+    
+    // Test basic connection
+    const result = await neonClient`SELECT 1 as test`;
+    
+    res.json({
+      ok: true,
+      message: 'Neon connection working',
+      testQuery: result,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'Not set'
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'Not set'
+    });
+  }
 });
 
 // Admin interface for viewing medication contributions
