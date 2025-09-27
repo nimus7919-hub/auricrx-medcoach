@@ -1324,10 +1324,20 @@ app.get('/debug/neon', async (_req, res) => {
     // Test basic connection
     const result = await neonClient`SELECT 1 as test`;
     
+    // Check if user_profiles table exists
+    const tableCheck = await neonClient`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'user_profiles'
+      ) as table_exists
+    `;
+    
     res.json({
       ok: true,
       message: 'Neon connection working',
       testQuery: result,
+      tableExists: tableCheck[0]?.table_exists,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
       databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'Not set'
     });
@@ -1337,6 +1347,56 @@ app.get('/debug/neon', async (_req, res) => {
       error: error.message,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
       databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'Not set'
+    });
+  }
+});
+
+// Create user_profiles table if it doesn't exist
+app.post('/debug/create-table', async (_req, res) => {
+  try {
+    const { neon } = require('@neondatabase/serverless');
+    const neonClient = neon(process.env.DATABASE_URL);
+    
+    // Create user_profiles table
+    await neonClient`
+      CREATE TABLE IF NOT EXISTS user_profiles (
+        id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        
+        -- User identification
+        user_id TEXT NOT NULL UNIQUE,
+        
+        -- Profile data
+        first_name TEXT,
+        last_name TEXT,
+        email TEXT,
+        phone TEXT,
+        date_of_birth DATE,
+        gender TEXT,
+        
+        -- Medical data
+        blood_type TEXT,
+        allergies TEXT[],
+        medical_conditions TEXT[],
+        emergency_contact_name TEXT,
+        emergency_contact_phone TEXT,
+        
+        -- Preferences
+        language TEXT DEFAULT 'en',
+        timezone TEXT,
+        notifications_enabled BOOLEAN DEFAULT TRUE
+      )
+    `;
+    
+    res.json({
+      ok: true,
+      message: 'user_profiles table created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
     });
   }
 });
