@@ -53,6 +53,7 @@ class AuthService {
           displayName: user.displayName,
           emailVerified: user.emailVerified,
         },
+        message: 'Account created successfully! Please check your email (including spam folder) for a verification link.',
       };
     } catch (error) {
       console.error('signUpWithEmail error:', error);
@@ -76,7 +77,7 @@ class AuthService {
         await signOut(this.auth);
         return {
           success: false,
-          error: 'Please verify your email address before signing in. Check your inbox for a verification email.',
+          error: 'Please verify your email address before signing in. Check your inbox (including spam folder) for a verification email.',
           needsEmailVerification: true,
         };
       }

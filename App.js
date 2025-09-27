@@ -1589,13 +1589,14 @@ export default function App() {
         if (result.needsEmailVerification) {
           Alert.alert(
             'Email Verification Required', 
-            'Please check your email and click the verification link before signing in.',
+            'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
             [
               {
-                text: 'OK',
+                text: 'Back to Sign In',
                 onPress: () => {
-                  // Don't close auth screen, user needs to verify email first
+                  // Keep auth screen open, user needs to verify email first
                   console.log('User needs to verify email before accessing dashboard');
+                  // The auth screen will remain open for them to sign in after verification
                 }
               }
             ]
