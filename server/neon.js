@@ -191,7 +191,7 @@ async function getUserDoctors(userId) {
 // User profiles functions
 async function saveUserProfile(userId, profile) {
   try {
-    const { data, error } = await neonClient`
+    const result = await neonClient`
       INSERT INTO user_profiles (
         user_id, first_name, last_name, email, phone, 
         language, notifications_enabled
@@ -210,8 +210,8 @@ async function saveUserProfile(userId, profile) {
       RETURNING *
     `;
     
-    console.log('✅ User profile saved to Neon:', data[0]);
-    return data[0];
+    console.log('✅ User profile saved to Neon:', result[0]);
+    return result[0];
   } catch (error) {
     console.error('❌ Failed to save user profile:', error);
     throw error;
@@ -220,15 +220,15 @@ async function saveUserProfile(userId, profile) {
 
 async function getUserProfile(userId) {
   try {
-    const data = await neonClient`
+    const result = await neonClient`
       SELECT * FROM user_profiles 
       WHERE user_id = ${userId}
     `;
     
-    if (data.length === 0) return null;
+    if (result.length === 0) return null;
     
     console.log(`📊 Retrieved profile for user ${userId}`);
-    return data[0];
+    return result[0];
   } catch (error) {
     console.error('❌ Failed to get user profile:', error);
     throw error;
