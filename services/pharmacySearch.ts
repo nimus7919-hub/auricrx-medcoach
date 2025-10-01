@@ -6,6 +6,7 @@ export type Pharmacy = {
   address: string;
   logoUrl?: string;
   distanceMiles?: number;
+  rating?: number;
 };
 
 export type StorePrice = Pharmacy & {
@@ -15,6 +16,12 @@ export type StorePrice = Pharmacy & {
   pickup?: boolean;
   delivery?: boolean;
   requiresCoupon?: boolean;
+  excelMatch?: {
+    medicinas: string;
+    precioOriginal: number;
+    unidades: string;
+    similarity: number;
+  };
 };
 
 import { API_BASE } from "../src/config/api";

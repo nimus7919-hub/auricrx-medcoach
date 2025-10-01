@@ -6,12 +6,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
   import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
   Modal, TextInput, Switch, Image, Linking, Platform, Animated, Keyboard,
-  StatusBar, SafeAreaView, AppRegistry
+  StatusBar, SafeAreaView, AppRegistry, FlatList
 } from 'react-native';
 import TypingEffect from './src/components/TypingEffect';
 import * as ImagePicker from 'expo-image-picker';
 import { herbs } from './src/data/herbs';	
-import { KeyboardAvoidingView, FlatList } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import * as Notifications from 'expo-notifications';
@@ -48,8 +47,7 @@ import DynamicText from './src/components/DynamicText';
 import { useDynamicTheme } from './src/hooks/useDynamicTheme';
 import CustomAlert from './src/components/CustomAlert';
 import { useCustomAlert } from './src/hooks/useCustomAlert';
-
-// Initialize i18n
+import { useTranslation } from './src/hooks/useTranslation';
 import './src/i18n';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
@@ -295,6 +293,19 @@ const STRINGS = {
     dashboard: 'Dashboard',
     settings: 'Settings',
     profile: 'Profile',
+    notifications: 'Notifications',
+    security: 'Security',
+    privacy: 'Privacy',
+    appearance: 'Appearance',
+    wallpaper: 'Wallpaper',
+    pushNotifications: 'Push Notifications',
+    emailNotifications: 'Email Notifications',
+    smsNotifications: 'SMS Notifications',
+    changePassword: 'Change Password',
+    dataCollection: 'Data Collection',
+    analytics: 'Analytics',
+    changeWallpaper: 'Change Wallpaper',
+    chooseWallpaperDescription: 'Choose from beautiful wallpapers or solid colors',
     language: 'Language',
     colorSettings: 'Color Settings',
     dayNight: 'Day / Night',
@@ -378,6 +389,34 @@ const STRINGS = {
     refill: 'Refill',
     refillSoon: 'Refill soon',
     taking: 'Taking',
+    helpUsGetPrice: 'Help Us Get Price',
+    lowest: 'Lowest',
+    sortBy: 'Sort',
+    distance: 'Distance',
+    price: 'Price',
+    name: 'Name',
+    refresh: 'Refresh',
+    showAll: 'Show all',
+    close: 'Close',
+    reserve: 'Reserve (stub)',
+    contributionDescription: 'Help us improve our medication price database by sharing what you found:',
+    medicationNamePlaceholder: 'Enter medication name',
+    strengthPlaceholder: 'e.g., 100mg, 50mg/500mg',
+    pricePlaceholder: 'Enter price (e.g., 25.50)',
+    quantityPlaceholder: 'e.g., 30 tablets, 1 bottle',
+    storeNamePlaceholder: 'Enter store name',
+    storeAddressPlaceholder: 'Enter store address',
+    contributionError: 'Missing Information',
+    contributionErrorText: 'Please fill in medication name, price, and store name.',
+    contributionSuccess: 'Thank You!',
+    contributionSuccessText: 'Your price information has been saved and will help improve our database for everyone.',
+    noPharmaciesFound: 'No Pharmacies Found',
+    noPharmaciesMessage: 'No pharmacies found in your area. Please try again.',
+    retry: 'Retry',
+    ok: 'OK',
+    fxLabel: 'FX',
+    never: 'Never',
+    refillComplete: 'Refill Complete',
     smartNotifications: 'Smart Notifications',
     smartNotificationsActive: 'Smart Notifications Active',
     smartFeatures: 'Smart Features',
@@ -738,6 +777,19 @@ const STRINGS = {
     dashboard: 'Panel',
     settings: 'Configuración',
     profile: 'Perfil',
+    notifications: 'Notificaciones',
+    security: 'Seguridad',
+    privacy: 'Privacidad',
+    appearance: 'Apariencia',
+    wallpaper: 'Fondo de Pantalla',
+    pushNotifications: 'Notificaciones Push',
+    emailNotifications: 'Notificaciones por Email',
+    smsNotifications: 'Notificaciones SMS',
+    changePassword: 'Cambiar Contraseña',
+    dataCollection: 'Recopilación de Datos',
+    analytics: 'Análisis',
+    changeWallpaper: 'Cambiar Fondo de Pantalla',
+    chooseWallpaperDescription: 'Elige entre hermosos fondos de pantalla o colores sólidos',
     language: 'Idioma',
     colorSettings: 'Colores',
     dayNight: 'Día / Noche',
@@ -834,6 +886,34 @@ const STRINGS = {
   refill: 'Recargar',
   refillSoon: 'Recargar pronto',
   taking: 'Tomando',
+  helpUsGetPrice: 'Ayúdanos a Obtener Precio',
+  lowest: 'Más Bajo',
+  sortBy: 'Ordenar',
+  distance: 'Distancia',
+  price: 'Precio',
+  name: 'Nombre',
+  refresh: 'Actualizar',
+  showAll: 'Mostrar todo',
+  close: 'Cerrar',
+  reserve: 'Reservar (demo)',
+  contributionDescription: 'Ayúdanos a mejorar nuestra base de datos de precios de medicamentos compartiendo lo que encontraste:',
+  medicationNamePlaceholder: 'Ingresa el nombre del medicamento',
+  strengthPlaceholder: 'ej., 100mg, 50mg/500mg',
+  pricePlaceholder: 'Ingresa el precio (ej., 25.50)',
+  quantityPlaceholder: 'ej., 30 tabletas, 1 botella',
+  storeNamePlaceholder: 'Ingresa el nombre de la tienda',
+  storeAddressPlaceholder: 'Ingresa la dirección de la tienda',
+  contributionError: 'Información Faltante',
+  contributionErrorText: 'Por favor completa el nombre del medicamento, precio y nombre de la tienda.',
+  contributionSuccess: '¡Gracias!',
+  contributionSuccessText: 'Tu información de precio ha sido guardada y ayudará a mejorar nuestra base de datos para todos.',
+  noPharmaciesFound: 'No se Encontraron Farmacias',
+  noPharmaciesMessage: 'No se encontraron farmacias en tu área. Por favor intenta de nuevo.',
+  retry: 'Reintentar',
+  ok: 'OK',
+  fxLabel: 'FX',
+  never: 'Nunca',
+  refillComplete: 'Recarga Completada',
   smartNotifications: 'Notificaciones Inteligentes',
   smartNotificationsActive: 'Notificaciones Inteligentes Activas',
   smartFeatures: 'Características Inteligentes',
@@ -1199,6 +1279,20 @@ const STRINGS = {
     dayNight: '昼 / 夜',
     moodShift: '情绪主题切换',
     help: '帮助',
+    notifications: '通知',
+    security: '安全',
+    privacy: '隐私',
+    wallpaper: '壁纸',
+    pushNotifications: '推送通知',
+    emailNotifications: '邮件通知',
+    smsNotifications: '短信通知',
+    changePassword: '修改密码',
+    dataCollection: '数据收集',
+    analytics: '分析',
+    changeWallpaper: '更换壁纸',
+    chooseWallpaperDescription: '选择您喜欢的壁纸来个性化您的应用',
+    never: '从未',
+    refillComplete: '续药完成',
     emailUs: '给我们发邮件',
     askAI: '询问 AI',
     tapToTalk: '点击说话',
@@ -1213,8 +1307,36 @@ const STRINGS = {
     saved: '已保存',
     startServerInfo: '启动本地服务器并连接',
     medications: '药物',
-    refill: '续药',
-    edit: '编辑',
+  refill: '续药',
+  helpUsGetPrice: '帮助我们获取价格',
+  lowest: '最低',
+  sortBy: '排序',
+  distance: '距离',
+  price: '价格',
+  name: '名称',
+  refresh: '刷新',
+  showAll: '显示全部',
+  close: '关闭',
+  reserve: '预订 (演示)',
+  contributionDescription: '通过分享您发现的信息来帮助我们改善药物价格数据库：',
+  medicationNamePlaceholder: '输入药物名称',
+  strengthPlaceholder: '例如：100mg, 50mg/500mg',
+  pricePlaceholder: '输入价格 (例如：25.50)',
+  quantityPlaceholder: '例如：30片, 1瓶',
+  storeNamePlaceholder: '输入商店名称',
+  storeAddressPlaceholder: '输入商店地址',
+  contributionError: '信息缺失',
+  contributionErrorText: '请填写药物名称、价格和商店名称。',
+  contributionSuccess: '谢谢！',
+  contributionSuccessText: '您的价格信息已保存，将有助于改善我们的数据库。',
+  noPharmaciesFound: '未找到药店',
+  noPharmaciesMessage: '在您的地区未找到药店。请重试。',
+  retry: '重试',
+  ok: '确定',
+  fxLabel: '汇率',
+  never: '从未',
+  refillComplete: '续药完成',
+  edit: '编辑',
     addMedication: '添加药物',
     editMedication: '编辑药物',
     dosesLeft: '剩余剂量',
@@ -1582,6 +1704,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
+  const [isRestoringAuth, setIsRestoringAuth] = useState(true); // Track auth restoration
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
@@ -1666,6 +1789,34 @@ export default function App() {
   const [night, setNight] = useState(false);
   const [moodShift, setMoodShift] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState('Dr. Alfred');
+  
+  // notification settings
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(true);
+  
+  // privacy settings
+  const [dataCollection, setDataCollection] = useState(true);
+  const [analytics, setAnalytics] = useState(true);
+  
+  // Pharmacy and Labs data (loaded automatically)
+  const [pharmacies, setPharmacies] = useState([]);
+  const [pharmaciesLoading, setPharmaciesLoading] = useState(false);
+  const [pharmaciesError, setPharmaciesError] = useState(null);
+  const [labs, setLabs] = useState([]);
+  const [labsLoading, setLabsLoading] = useState(false);
+  const [labsError, setLabsError] = useState(null);
+  
+  // Refill modal data (loaded automatically)
+  const [refillPharmacies, setRefillPharmacies] = useState([]);
+  const [refillLoading, setRefillLoading] = useState(false);
+  const [refillError, setRefillError] = useState(null);
+  const [refillCoords, setRefillCoords] = useState(null);
+  const [refillCurrency, setRefillCurrency] = useState('USD');
+  const [refillFxMeta, setRefillFxMeta] = useState(null);
+  
+  // Use i18n translation hook
+  const { t, changeLanguage, currentLanguage, isReady } = useTranslation();
 
   // meds/reminders (light placeholder list)
   const [reminders, setReminders] = useState([]);
@@ -1768,6 +1919,134 @@ useEffect(() => {
     keyboardDidHideListener?.remove();
   };
 }, []);
+
+// Auto-load pharmacy and labs data when app starts
+useEffect(() => {
+  const loadLocationData = async () => {
+    try {
+      // Request location permission
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('📍 Location permission denied - skipping auto-load');
+        return;
+      }
+
+      // Get current position
+      const { coords } = await Location.getCurrentPositionAsync({});
+      console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
+
+      // Load pharmacies
+      setPharmaciesLoading(true);
+      try {
+        const { findNearbyPharmacies } = await import('./services/pharmacySearch');
+        const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
+        setPharmacies(nearbyPharmacies);
+        console.log('🏪 Auto-loaded pharmacies:', nearbyPharmacies.length);
+        
+        // Debug: Log first pharmacy data to see what we're getting
+        if (nearbyPharmacies.length > 0) {
+          console.log('🔍 FIRST PHARMACY DEBUG:', {
+            name: nearbyPharmacies[0].name,
+            phone: nearbyPharmacies[0].phone,
+            website: nearbyPharmacies[0].website,
+            rating: nearbyPharmacies[0].rating,
+            address: nearbyPharmacies[0].address,
+            fullObject: nearbyPharmacies[0]
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error loading pharmacies:', error);
+        setPharmaciesError('Failed to load pharmacies');
+      } finally {
+        setPharmaciesLoading(false);
+      }
+
+      // Load labs
+      setLabsLoading(true);
+      try {
+        const { findNearbyLabs } = await import('./services/labSearch');
+        const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
+        setLabs(nearbyLabs);
+        console.log('🧪 Auto-loaded labs:', nearbyLabs.length);
+        
+        // Debug: Log first lab data to see what we're getting
+        if (nearbyLabs.length > 0) {
+          console.log('🔍 FIRST LAB DEBUG:', {
+            name: nearbyLabs[0].name,
+            phone: nearbyLabs[0].phone,
+            website: nearbyLabs[0].website,
+            rating: nearbyLabs[0].rating,
+            address: nearbyLabs[0].address,
+            fullObject: nearbyLabs[0]
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error loading labs:', error);
+        setLabsError('Failed to load labs');
+      } finally {
+        setLabsLoading(false);
+      }
+
+      // Load refill modal data (pharmacies + currency detection)
+      setRefillLoading(true);
+      try {
+        // Store coordinates for refill modal
+        setRefillCoords({ latitude: coords.latitude, longitude: coords.longitude });
+        
+        // Determine currency from country (same logic as refill modal)
+        let determinedCurrency = 'USD';
+        try {
+          const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
+          const cc = geo?.[0]?.isoCountryCode?.toUpperCase();
+          if (cc) {
+            const C = {
+              // North America
+              US:'USD', PR:'USD', CA:'CAD', MX:'MXN',
+              // Latin America
+              BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:'USD', UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:'USD', DO:'DOP', PA:'PAB',
+              // Europe (Euro + others)
+              ES:'EUR', PT:'EUR', FR:'EUR', DE:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', IE:'EUR', LU:'EUR', AT:'EUR', FI:'EUR', GR:'EUR', SK:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', MT:'EUR', CY:'EUR',
+              PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', HR:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF', GB:'GBP', IS:'ISK', TR:'TRY',
+              // Middle East / Africa
+              AE:'AED', SA:'SAR', QA:'QAR', KW:'KWD', BH:'BHD', OM:'OMR', IL:'ILS', EG:'EGP', MA:'MAD', NG:'NGN', KE:'KES', ZA:'ZAR', GH:'GHS',
+              // Asia / Pacific
+              CN:'CNY', JP:'JPY', KR:'KRW', IN:'INR', HK:'HKD', TW:'TWD', SG:'SGD', MY:'MYR', TH:'THB', ID:'IDR', PH:'PHP', VN:'VND', AU:'AUD', NZ:'NZD', FJ:'FJD'
+            };
+            if (C[cc]) determinedCurrency = C[cc];
+          }
+        } catch {}
+        
+        // If geocode failed, use language fallback
+        if (determinedCurrency === 'USD') {
+          determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
+        }
+        
+        setRefillCurrency(determinedCurrency);
+        console.log('💰 Auto-detected currency:', determinedCurrency);
+        
+        // Load pharmacies for refill modal (same as regular pharmacies but stored separately)
+        const { findNearbyPharmacies } = await import('./services/pharmacySearch');
+        const refillPharmaciesData = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
+        setRefillPharmacies(refillPharmaciesData);
+        console.log('💊 Auto-loaded refill pharmacies:', refillPharmaciesData.length);
+        
+      } catch (error) {
+        console.error('❌ Error loading refill data:', error);
+        setRefillError('Failed to load refill data');
+      } finally {
+        setRefillLoading(false);
+      }
+
+    } catch (error) {
+      console.error('❌ Error in auto-load location data:', error);
+    }
+  };
+
+  // Only load if user is authenticated and not on auth screen
+  if (!showAuth && user) {
+    loadLocationData();
+  }
+}, [showAuth, user, lang]); // Dependencies: reload when auth state or language changes
 
 useEffect(() => {
   if (aiOpen) {
@@ -2008,6 +2287,87 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
   useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.selectedDoctor, selectedDoctor); }, [selectedDoctor]);
 
+  // Authentication state listener and restoration
+  useEffect(() => {
+    let isRestoring = true; // Flag to prevent race conditions
+    
+    const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
+      console.log('🔥 Firebase auth state changed:', firebaseUser ? firebaseUser.uid : 'null');
+      
+      // Don't process auth state changes while we're still restoring
+      if (isRestoring) {
+        console.log('⏳ Skipping auth state change during restoration');
+        return;
+      }
+      
+      if (firebaseUser) {
+        // User is signed in
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          emailVerified: firebaseUser.emailVerified,
+        });
+        setShowAuth(false);
+        setIsRestoringAuth(false);
+        
+        // Try to get user data
+        try {
+          const userDataResult = await authService.getUserData(firebaseUser.uid);
+          if (userDataResult.success) {
+            setUserData(userDataResult.data);
+          }
+        } catch (error) {
+          console.error('Failed to get user data:', error);
+        }
+      } else {
+        // User is signed out
+        setUser(null);
+        setUserData(null);
+        setShowAuth(true);
+        setIsRestoringAuth(false);
+      }
+    });
+
+    // Try to restore authentication state on app start
+    const restoreAuth = async () => {
+      try {
+        console.log('🔄 Starting auth restoration...');
+        const restoreResult = await authService.restoreAuthState();
+        
+        if (restoreResult.success) {
+          console.log('✅ Auth state restored successfully - user will stay signed in');
+          setUser(restoreResult.user);
+          setShowAuth(false);
+          
+          // Try to get user data
+          try {
+            const userDataResult = await authService.getUserData(restoreResult.user.uid);
+            if (userDataResult.success) {
+              setUserData(userDataResult.data);
+            }
+          } catch (error) {
+            console.error('Failed to get user data after restore:', error);
+          }
+        } else {
+          console.log('ℹ️ No valid auth state to restore - showing sign-in screen');
+          setShowAuth(true);
+        }
+      } catch (error) {
+        console.error('Failed to restore auth state:', error);
+        setShowAuth(true);
+      } finally {
+        setIsRestoringAuth(false);
+        isRestoring = false; // Allow auth state changes to be processed
+        console.log('✅ Auth restoration complete');
+      }
+    };
+
+    restoreAuth();
+
+    return () => unsubscribe();
+  }, []);
+
   // Update AI greeting when doctor changes
   useEffect(() => {
     if (aiMessages.length > 0 && aiMessages[0].role === 'assistant') {
@@ -2114,7 +2474,631 @@ useEffect(() => {
   }
 }, [fontsLoaded]);
 
-const S = STRINGS[lang] || STRINGS.en;
+// Use i18n translations instead of hardcoded STRINGS
+const S = {
+  // Dashboard
+  dashboard: t('dashboard.title'),
+  healthJournal: t('dashboard.healthJournal'),
+  nextReminder: t('dashboard.nextReminder'),
+  
+  // Tiles
+  reminders: t('tiles.reminders'),
+  pharmacyLocations: t('tiles.pharmacyLocations'),
+  medications: t('tiles.medications'),
+  labsLocations: t('tiles.labsLocations'),
+  prescription: t('tiles.prescription'),
+  appointmentLog: t('tiles.appointmentLog'),
+  documents: t('tiles.documents'),
+  herbs: t('tiles.herbs'),
+  supplements: t('tiles.supplements'),
+  
+  // AI
+  aiConsultant: t('ai.consultant'),
+  askAI: t('ai.askAI'),
+  tapToTalk: t('ai.tapToTalk'),
+  aiPlaceholder: t('ai.placeholder'),
+  aiShort: t('ai.short'),
+  voiceNote: t('ai.voiceNote'),
+  
+  // Settings
+  settings: t('settings.title'),
+  profile: t('settings.profile'),
+  language: t('settings.language'),
+  colorSettings: t('settings.colorSettings'),
+  dayNight: t('settings.dayNight'),
+  moodShift: t('settings.moodShift'),
+  nightMode: t('settings.nightMode'),
+  autoCalm: t('settings.autoCalm'),
+  help: t('settings.help'),
+  notifications: t('settings.notifications'),
+  security: t('settings.security'),
+  privacy: t('settings.privacy'),
+  wallpaper: t('settings.wallpaper'),
+  pushNotifications: t('settings.pushNotifications'),
+  emailNotifications: t('settings.emailNotifications'),
+  smsNotifications: t('settings.smsNotifications'),
+  changePassword: t('settings.changePassword'),
+  dataCollection: t('settings.dataCollection'),
+  analytics: t('settings.analytics'),
+  changeWallpaper: t('settings.changeWallpaper'),
+  chooseWallpaperDescription: t('settings.chooseWallpaperDescription'),
+  emailUs: t('settings.emailUs'),
+  emailAddress: t('settings.emailAddress'),
+  signOut: t('settings.signOut'),
+  
+  // Colors
+  gold: t('settings.colors.gold'),
+  blue: t('settings.colors.blue'),
+  teal: t('settings.colors.teal'),
+  
+  // Languages
+  english: t('settings.languages.en'),
+  spanish: t('settings.languages.es'),
+  chinese: t('settings.languages.zh'),
+  portuguese: t('settings.languages.pt'),
+  french: t('settings.languages.fr'),
+  german: t('settings.languages.de'),
+  
+  // Common
+  loading: t('common.loading'),
+  loadingPharmacies: t('common.loadingPharmacies'),
+  loadingLabs: t('common.loadingLabs'),
+  error: t('common.error'),
+  success: t('common.success'),
+  close: t('common.close'),
+  back: t('common.back'),
+  brand: t('common.brand'),
+  send: t('common.send'),
+  stop: t('common.stop'),
+  noData: t('common.noData'),
+  noResponse: t('common.noResponse'),
+  appDescription: t('common.appDescription'),
+  noTime: t('common.noTime'),
+  sort: t('common.sort'),
+  sortBy: t('common.sortBy'),
+  ascending: t('common.ascending'),
+  descending: t('common.descending'),
+  refresh: t('common.refresh'),
+  showAll: t('common.showAll'),
+  fx: t('common.fx'),
+  directions: t('common.directions'),
+  never: t('common.never'),
+  refillComplete: t('common.refillComplete'),
+  
+  // Common UI Elements
+  call: t('common.call'),
+  info: t('common.info'),
+  km: t('common.km'),
+  mi: t('common.mi'),
+  tablets: t('common.tablets'),
+  mg: t('common.mg'),
+  mxn: t('common.mxn'),
+  usd: t('common.usd'),
+  exchangeRate: t('common.exchangeRate'),
+  
+  // Smart Notifications
+  smartNotifications: t('tiles.smartAlerts'),
+  smartNotificationsDesc: t('settings.smartNotificationsDesc'),
+  smartNotificationsActive: t('settings.smartNotificationsActive'),
+  smartServiceNotAvailable: t('settings.smartServiceNotAvailable'),
+  smartFeatures: t('settings.smartFeatures'),
+  smartFeaturesDesc: t('settings.smartFeaturesDesc'),
+  smartRefillPredictions: t('settings.smartRefillPredictions'),
+  smartRefillPredictionsDesc: t('settings.smartRefillPredictionsDesc'),
+  intelligentTiming: t('settings.intelligentTiming'),
+  intelligentTimingDesc: t('settings.intelligentTimingDesc'),
+  contextAwareReminders: t('settings.contextAwareReminders'),
+  contextAwareRemindersDesc: t('settings.contextAwareRemindersDesc'),
+  locationBasedReminders: t('settings.locationBasedReminders'),
+  locationBasedRemindersDesc: t('settings.locationBasedRemindersDesc'),
+  weatherBasedAlerts: t('settings.weatherBasedAlerts'),
+  weatherBasedAlertsDesc: t('settings.weatherBasedAlertsDesc'),
+  noLocationReminders: t('settings.noLocationReminders'),
+  noWeatherAlerts: t('settings.noWeatherAlerts'),
+  addLocationReminder: t('settings.addLocationReminder'),
+  addWeatherAlert: t('settings.addWeatherAlert'),
+  active: t('settings.active'),
+  disabled: t('settings.disabled'),
+  initializing: t('settings.initializing'),
+  threshold: t('settings.threshold'),
+  pollenAlert: t('settings.pollenAlert'),
+  temperatureAlert: t('settings.temperatureAlert'),
+  humidityAlert: t('settings.humidityAlert'),
+  airQualityAlert: t('settings.airQualityAlert'),
+  pollenMessage: t('settings.pollenMessage'),
+  temperatureMessage: t('settings.temperatureMessage'),
+  humidityMessage: t('settings.humidityMessage'),
+  airQualityMessage: t('settings.airQualityMessage'),
+  locationReminderAdded: t('settings.locationReminderAdded'),
+  failedToAddLocationReminder: t('settings.failedToAddLocationReminder'),
+  weatherAlertAdded: t('settings.weatherAlertAdded'),
+  failedToAddWeatherAlert: t('settings.failedToAddWeatherAlert'),
+  deleteReminder: t('common.deleteReminder'),
+  deleteReminderConfirm: t('common.deleteReminderConfirm'),
+  deleteAlert: t('common.deleteAlert'),
+  deleteAlertConfirm: t('common.deleteAlertConfirm'),
+  failedToDeleteReminder: t('common.failedToDeleteReminder'),
+  failedToDeleteAlert: t('common.failedToDeleteAlert'),
+  fillBothFields: t('common.fillBothFields'),
+  reminderAdded: t('common.reminderAdded'),
+  failedToAddReminder: t('common.failedToAddReminder'),
+  addLocationReminderTitle: t('common.addLocationReminderTitle'),
+  locationNamePlaceholder: t('common.locationNamePlaceholder'),
+  reminderMessagePlaceholder: t('common.reminderMessagePlaceholder'),
+  addWeatherAlertTitle: t('common.addWeatherAlertTitle'),
+  chooseWeatherCondition: t('common.chooseWeatherCondition'),
+  highPollen: t('common.highPollen'),
+  extremeTemperature: t('common.extremeTemperature'),
+  highHumidity: t('common.highHumidity'),
+  poorAirQuality: t('common.poorAirQuality'),
+  
+  // Common Actions
+  cancel: t('common.cancel'),
+  delete: t('common.delete'),
+  add: t('common.add'),
+  success: t('common.success'),
+  
+  // Medications
+  addMedication: t('medications.addMedication'),
+  editMedication: t('medications.editMedication'),
+  noMedications: t('medications.noMedications'),
+  dosesLeft: t('medications.dosesLeft'),
+  status: t('medications.status'),
+  times: t('medications.times'),
+  add: t('medications.add'),
+  edit: t('medications.edit'),
+  delete: t('medications.delete'),
+  cancel: t('medications.cancel'),
+  save: t('medications.save'),
+  refill: t('medications.refill'),
+  addTime: t('medications.addTime'),
+  lastRefill: t('medications.lastRefill'),
+  lowest: t('medications.lowest'),
+  reserve: t('medications.reserve'),
+  
+  // Supplements
+  addSupplement: t('supplements.addSupplement'),
+  editSupplement: t('supplements.editSupplement'),
+  noSupplements: t('supplements.noSupplements'),
+  pause: t('supplements.pause'),
+  resume: t('supplements.resume'),
+  servingsLeft: t('supplements.servingsLeft'),
+  
+  // Reminders
+  addReminder: t('reminders.addReminder'),
+  pickTime: t('reminders.pickTime'),
+  namePlaceholder: t('reminders.namePlaceholder'),
+  
+  // Pharmacies
+  pharmacyTitle: t('pharmacies.title'),
+  pharmacyDescription: t('pharmacies.description'),
+  openMaps: t('pharmacies.openMaps'),
+  searchQuery: t('pharmacies.searchQuery'),
+  foundPharmacies: t('pharmacies.foundPharmacies'),
+  findNearbyPharmacies: t('pharmacies.findNearbyPharmacies'),
+  
+  // Labs
+  labsTitle: t('labs.title'),
+  findLabs: t('labs.findLabs'),
+  labsSearchQuery: t('labs.searchQuery'),
+  foundLabs: t('labs.foundLabs'),
+  findNearbyLabs: t('labs.findNearbyLabs'),
+  
+  // Lab Test Types
+  bloodWork: t('labs.testTypes.bloodWork'),
+  pathology: t('labs.testTypes.pathology'),
+  infectiousDisease: t('labs.testTypes.infectiousDisease'),
+  imaging: t('labs.testTypes.imaging'),
+  cardiac: t('labs.testTypes.cardiac'),
+  allergy: t('labs.testTypes.allergy'),
+  specialty: t('labs.testTypes.specialty'),
+  
+  // Lab Buttons
+  callLab: t('labs.buttons.call'),
+  testsLab: t('labs.buttons.tests'),
+  moreLab: t('labs.buttons.more'),
+  
+  // Dashboard Cards
+  smartAlerts: t('tiles.smartAlerts'),
+  healthAnalytics: t('tiles.healthAnalytics'),
+  aiHealth: t('tiles.aiHealth'),
+  
+  // AI Health Assistant
+  aiHealthAssistant: t('ai.assistant'),
+  intelligentHealthcareFeatures: t('ai.intelligentFeatures'),
+  aiHealthFeatures: t('ai.features'),
+  healthInsights: t('ai.insights'),
+  symptomAnalyses: t('ai.symptomAnalyses'),
+  drugChecks: t('ai.drugChecks'),
+  voiceNotes: t('ai.voiceNotes'),
+  analyzeSymptoms: t('ai.analyzeSymptoms'),
+  checkInteractions: t('ai.checkInteractions'),
+  symptomAnalysis: t('ai.symptomAnalysis'),
+  describeSymptoms: t('ai.describeSymptoms'),
+  enterSymptomsPlaceholder: t('ai.enterSymptomsPlaceholder'),
+  analyze: t('ai.analyze'),
+  drugInteractionCheck: t('ai.drugInteractionCheck'),
+  listMedications: t('ai.listMedications'),
+  enterMedicationsPlaceholder: t('ai.enterMedicationsPlaceholder'),
+  check: t('ai.check'),
+  aiGeneratedInsights: t('ai.aiGeneratedInsights'),
+  noHealthInsights: t('ai.noHealthInsights'),
+  recentAnalyses: t('ai.recentAnalyses'),
+  recentSymptomAnalyses: t('ai.recentSymptomAnalyses'),
+  noSymptomAnalyses: t('ai.noSymptomAnalyses'),
+  // Medical Documents
+  medicalDocumentsTitle: t('medicalDocuments.title'),
+  medicalDocuments: t('medicalDocuments.medicalDocuments'),
+  organizeDocuments: t('medicalDocuments.organizeDocuments'),
+  addDocument: t('medicalDocuments.addDocument'),
+  noDocumentsUploaded: t('medicalDocuments.noDocumentsUploaded'),
+  multiSelectDoc: t('medicalDocuments.multiSelectDoc'),
+  takePhoto: t('medicalDocuments.takePhoto'),
+  uploadFromGallery: t('medicalDocuments.uploadFromGallery'),
+  selectAll: t('medicalDocuments.selectAll'),
+  clear: t('medicalDocuments.clear'),
+  share: t('medicalDocuments.share'),
+  uploadDocument: t('medicalDocuments.uploadDocument'),
+  uploading: t('medicalDocuments.uploading'),
+  noDocumentsYet: t('medicalDocuments.noDocumentsYet'),
+  uploadFirstDocument: t('medicalDocuments.uploadFirstDocument'),
+  photoID: t('medicalDocuments.photoID'),
+  driversLicensePassport: t('medicalDocuments.driversLicensePassport'),
+  frontSide: t('medicalDocuments.frontSide'),
+  backSide: t('medicalDocuments.backSide'),
+  birthCertificate: t('medicalDocuments.birthCertificate'),
+  officialBirthCertificate: t('medicalDocuments.officialBirthCertificate'),
+  insuranceCard: t('medicalDocuments.insuranceCard'),
+  healthInsuranceInfo: t('medicalDocuments.healthInsuranceInfo'),
+  frontOfCard: t('medicalDocuments.frontOfCard'),
+  backOfCard: t('medicalDocuments.backOfCard'),
+  labResults: t('medicalDocuments.labResults'),
+  bloodTestsLabWork: t('medicalDocuments.bloodTestsLabWork'),
+  prescriptions: t('medicalDocuments.prescriptions'),
+  currentAndPastPrescriptions: t('medicalDocuments.currentAndPastPrescriptions'),
+  medicalRecords: t('medicalDocuments.medicalRecords'),
+  medicalHistoryReports: t('medicalDocuments.medicalHistoryReports'),
+  otherDocuments: t('medicalDocuments.otherDocuments'),
+  anyOtherMedicalDocuments: t('medicalDocuments.anyOtherMedicalDocuments'),
+  uploadPDF: t('medicalDocuments.uploadPDF'),
+  uploadImage: t('medicalDocuments.uploadImage'),
+  scanDocument: t('medicalDocuments.scanDocument'),
+  viewDocument: t('medicalDocuments.viewDocument'),
+  shareDocument: t('medicalDocuments.shareDocument'),
+  deleteDocument: t('medicalDocuments.deleteDocument'),
+  editDocument: t('medicalDocuments.editDocument'),
+  documentName: t('medicalDocuments.documentName'),
+  enterDocumentName: t('medicalDocuments.enterDocumentName'),
+  documentCategory: t('medicalDocuments.documentCategory'),
+  selectCategory: t('medicalDocuments.selectCategory'),
+  documentType: t('medicalDocuments.documentType'),
+  front: t('medicalDocuments.front'),
+  back: t('medicalDocuments.back'),
+  single: t('medicalDocuments.single'),
+  pdfDocument: t('medicalDocuments.pdfDocument'),
+  imageDocument: t('medicalDocuments.imageDocument'),
+  uploadSuccess: t('medicalDocuments.uploadSuccess'),
+  uploadFailed: t('medicalDocuments.uploadFailed'),
+  deleteConfirm: t('medicalDocuments.deleteConfirm'),
+  deleteSuccess: t('medicalDocuments.deleteSuccess'),
+  deleteFailed: t('medicalDocuments.deleteFailed'),
+  shareSuccess: t('medicalDocuments.shareSuccess'),
+  shareFailed: t('medicalDocuments.shareFailed'),
+  shareToDoctor: t('medicalDocuments.shareToDoctor'),
+  shareToEmail: t('medicalDocuments.shareToEmail'),
+  shareToWhatsApp: t('medicalDocuments.shareToWhatsApp'),
+  useWhatsApp: t('medicalDocuments.useWhatsApp'),
+  useEmail: t('medicalDocuments.useEmail'),
+  addEmail: t('medicalDocuments.addEmail'),
+  goToAppointmentTracker: t('medicalDocuments.goToAppointmentTracker'),
+  sharingNotAvailable: t('medicalDocuments.sharingNotAvailable'),
+  documentNotFound: t('medicalDocuments.documentNotFound'),
+  pdfCorrupted: t('medicalDocuments.pdfCorrupted'),
+  pdfNotCreated: t('medicalDocuments.pdfNotCreated'),
+  failedToProcessImages: t('medicalDocuments.failedToProcessImages'),
+  secureSharingFailed: t('medicalDocuments.secureSharingFailed'),
+  shareWasDismissed: t('medicalDocuments.shareWasDismissed'),
+  sharingNotAvailablePlatform: t('medicalDocuments.sharingNotAvailablePlatform'),
+  auricrxMedicalID: t('medicalDocuments.auricrxMedicalID'),
+  idFront: t('medicalDocuments.idFront'),
+  idBack: t('medicalDocuments.idBack'),
+  pleaseUseUploadPDF: t('medicalDocuments.pleaseUseUploadPDF'),
+  failedToSavePDF: t('medicalDocuments.failedToSavePDF'),
+  failedToUploadPDF: t('medicalDocuments.failedToUploadPDF'),
+  failedToShareDocument: t('medicalDocuments.failedToShareDocument'),
+  failedToShareToEmail: t('medicalDocuments.failedToShareToEmail'),
+  failedToShareToWhatsApp: t('medicalDocuments.failedToShareToWhatsApp'),
+  failedToShareRegularDocumentEmail: t('medicalDocuments.failedToShareRegularDocumentEmail'),
+  failedToShareRegularDocumentWhatsApp: t('medicalDocuments.failedToShareRegularDocumentWhatsApp'),
+  // Admin Profile
+  adminProfileTitle: t('adminProfile.title'),
+  displayName: t('adminProfile.displayName'),
+  email: t('adminProfile.email'),
+  phoneNumber: t('adminProfile.phoneNumber'),
+  noPhoneNumber: t('adminProfile.noPhoneNumber'),
+  updateProfile: t('adminProfile.updateProfile'),
+  securitySettings: t('adminProfile.securitySettings'),
+  changePassword: t('adminProfile.changePassword'),
+  deleteAccount: t('adminProfile.deleteAccount'),
+  processing: t('adminProfile.processing'),
+  error: t('adminProfile.error'),
+  success: t('adminProfile.success'),
+  ok: t('adminProfile.ok'),
+  displayNameRequired: t('adminProfile.displayNameRequired'),
+  profileUpdatedSuccessfully: t('adminProfile.profileUpdatedSuccessfully'),
+  failedToUpdateProfile: t('adminProfile.failedToUpdateProfile'),
+  changePasswordTitle: t('adminProfile.changePasswordTitle'),
+  passwordResetMessage: t('adminProfile.passwordResetMessage'),
+  sendResetEmail: t('adminProfile.sendResetEmail'),
+  emailRequiredForReset: t('adminProfile.emailRequiredForReset'),
+  passwordResetEmailSent: t('adminProfile.passwordResetEmailSent'),
+  failedToSendResetEmail: t('adminProfile.failedToSendResetEmail'),
+  deleteAccountTitle: t('adminProfile.deleteAccountTitle'),
+  deleteAccountMessage: t('adminProfile.deleteAccountMessage'),
+  confirmDeletion: t('adminProfile.confirmDeletion'),
+  confirmDeletionMessage: t('adminProfile.confirmDeletionMessage'),
+  yesDeleteForever: t('adminProfile.yesDeleteForever'),
+  accountDeleted: t('adminProfile.accountDeleted'),
+  accountDeletedMessage: t('adminProfile.accountDeletedMessage'),
+  // Wallpaper
+  wallpaperTitle: t('wallpaper.title'),
+  currentWallpaper: t('wallpaper.currentWallpaper'),
+  default: t('wallpaper.default'),
+  changeWallpaper: t('wallpaper.changeWallpaper'),
+  chooseWallpaper: t('wallpaper.chooseWallpaper'),
+  loadingWallpapers: t('wallpaper.loadingWallpapers'),
+  solidColors: t('wallpaper.solidColors'),
+  wallpaperImages: t('wallpaper.wallpaperImages'),
+  wallpaperChangedSuccessfully: t('wallpaper.wallpaperChangedSuccessfully'),
+  failedToSaveWallpaper: t('wallpaper.failedToSaveWallpaper'),
+  wallpaperSuccess: t('wallpaper.success'),
+  wallpaperError: t('wallpaper.error'),
+  aboutWallpapers: t('wallpaper.aboutWallpapers'),
+  aboutWallpapersDescription: t('wallpaper.aboutWallpapersDescription'),
+  uniqueWallpaperDesigns: t('wallpaper.uniqueWallpaperDesigns'),
+  solidColorOptions: t('wallpaper.solidColorOptions'),
+  instantPreviewAndApplication: t('wallpaper.instantPreviewAndApplication'),
+  settingsSavedAutomatically: t('wallpaper.settingsSavedAutomatically'),
+  white: t('wallpaper.white'),
+  black: t('wallpaper.black'),
+  blackGoldDr: t('wallpaper.blackGoldDr'),
+  blackGold: t('wallpaper.blackGold'),
+  blackSilver: t('wallpaper.blackSilver'),
+  boldCream: t('wallpaper.boldCream'),
+  creamWallpaper: t('wallpaper.creamWallpaper'),
+  darkCream: t('wallpaper.darkCream'),
+  darkGreenGold: t('wallpaper.darkGreenGold'),
+  whiteGoldDr: t('wallpaper.whiteGoldDr'),
+  
+  // Prescription
+  prescriptionTitle: t('prescription.title'),
+  addPhoto: t('prescription.addPhoto'),
+  createPDF: t('prescription.createPDF'),
+  
+  // Appointments
+  appointmentsTitle: t('appointments.title'),
+  record: t('appointments.record'),
+  recording: t('appointments.recording'),
+  play: t('appointments.play'),
+  appointmentManagement: t('appointments.appointmentManagement'),
+  appointmentManagementDesc: t('appointments.appointmentManagementDesc'),
+  appointmentOverview: t('appointments.appointmentOverview'),
+  totalAppointments: t('appointments.totalAppointments'),
+  upcoming: t('appointments.upcoming'),
+  doctors: t('appointments.doctors'),
+  upcomingAppointments: t('appointments.upcomingAppointments'),
+  upcomingAppointmentsDesc: t('appointments.upcomingAppointmentsDesc'),
+  noUpcomingAppointments: t('appointments.noUpcomingAppointments'),
+  doctorContacts: t('appointments.doctorContacts'),
+  doctorContactsDesc: t('appointments.doctorContactsDesc'),
+  noDoctorContactsYet: t('appointments.noDoctorContactsYet'),
+  scheduleAppointment: t('appointments.scheduleAppointment'),
+  appointmentType: t('appointments.appointmentType'),
+  selectAppointmentType: t('appointments.selectAppointmentType'),
+  title: t('appointments.title'),
+  titlePlaceholder: t('appointments.titlePlaceholder'),
+  location: t('appointments.location'),
+  locationPlaceholder: t('appointments.locationPlaceholder'),
+  date: t('appointments.date'),
+  time: t('appointments.time'),
+  notesOptional: t('appointments.notesOptional'),
+  notesPlaceholder: t('appointments.notesPlaceholder'),
+  schedule: t('appointments.schedule'),
+  addDoctorContact: t('appointments.addDoctorContact'),
+  doctorName: t('appointments.doctorName'),
+  doctorNamePlaceholder: t('appointments.doctorNamePlaceholder'),
+  specialty: t('appointments.specialty'),
+  specialtyPlaceholder: t('appointments.specialtyPlaceholder'),
+  address: t('appointments.address'),
+  addressPlaceholder: t('appointments.addressPlaceholder'),
+  addDoctor: t('appointments.addDoctor'),
+  doctorVisit: t('appointments.doctorVisit'),
+  labTest: t('appointments.labTest'),
+  pharmacy: t('appointments.pharmacy'),
+  specialist: t('appointments.specialist'),
+  emergency: t('appointments.emergency'),
+  followUp: t('appointments.followUp'),
+  checkup: t('appointments.checkup'),
+  other: t('appointments.other'),
+  scheduled: t('appointments.scheduled'),
+  confirmed: t('appointments.confirmed'),
+  completed: t('appointments.completed'),
+  cancelled: t('appointments.cancelled'),
+  rescheduled: t('appointments.rescheduled'),
+  unknown: t('appointments.unknown'),
+  primary: t('appointments.primary'),
+  error: t('appointments.error'),
+  fillAllFields: t('appointments.fillAllFields'),
+  appointmentServiceNotAvailable: t('appointments.appointmentServiceNotAvailable'),
+  success: t('appointments.success'),
+  appointmentScheduled: t('appointments.appointmentScheduled'),
+  failedToSchedule: t('appointments.failedToSchedule'),
+  doctorContactAdded: t('appointments.doctorContactAdded'),
+  failedToAddDoctor: t('appointments.failedToAddDoctor'),
+  appointmentCompleted: t('appointments.appointmentCompleted'),
+  failedToUpdate: t('appointments.failedToUpdate'),
+  phoneOnly: t('appointments.phoneOnly'),
+  whatsappOnly: t('appointments.whatsappOnly'),
+  bothPhoneWhatsapp: t('appointments.bothPhoneWhatsapp'),
+  selectCountry: t('appointments.selectCountry'),
+  chooseCountryCode: t('appointments.chooseCountryCode'),
+  phoneNumber: t('appointments.phoneNumber'),
+  enterPhoneNumber: t('appointments.enterPhoneNumber'),
+  doctorEmailAddress: t('appointments.emailAddress'),
+  doctorEmailPlaceholder: t('appointments.doctorEmailPlaceholder'),
+  dialingMethod: t('appointments.dialingMethod'),
+  selectDialingMethod: t('appointments.selectDialingMethod'),
+  howToContactDoctor: t('appointments.howToContactDoctor'),
+  editDoctorContact: t('appointments.editDoctorContact'),
+  updateDoctor: t('appointments.updateDoctor'),
+  deleteDoctorContact: t('appointments.deleteDoctorContact'),
+  deleteDoctorConfirm: t('appointments.deleteDoctorConfirm'),
+  doctorContactDeleted: t('appointments.doctorContactDeleted'),
+  failedToDeleteDoctor: t('appointments.failedToDeleteDoctor'),
+  doctorContactUpdated: t('appointments.doctorContactUpdated'),
+  failedToUpdateDoctor: t('appointments.failedToUpdateDoctor'),
+  pastAppointments: t('appointments.pastAppointments'),
+  searchPastAppointments: t('appointments.searchPastAppointments'),
+  noAppointmentsFound: t('appointments.noAppointmentsFound'),
+  noPastAppointments: t('appointments.noPastAppointments'),
+  attended: t('appointments.attended'),
+  missed: t('appointments.missed'),
+  close: t('appointments.close'),
+  refresh: t('appointments.refresh'),
+  pastAppts: t('appointments.pastAppts'),
+  call: t('appointments.call'),
+  whatsapp: t('appointments.whatsapp'),
+  
+  // Documents
+  documentsTitle: t('documents.title'),
+  addFromCamera: t('documents.addFromCamera'),
+  addFromGallery: t('documents.addFromGallery'),
+  addPhotos: t('documents.addPhotos'),
+  exportPDF: t('documents.exportPDF'),
+  exporting: t('documents.exporting'),
+  noPages: t('documents.noPages'),
+  cameraNotAvailable: t('documents.cameraNotAvailable'),
+  permissionNeeded: t('documents.permissionNeeded'),
+  galleryPermissionNeeded: t('documents.galleryPermissionNeeded'),
+  failedToCapture: t('documents.failedToCapture'),
+  failedToSelect: t('documents.failedToSelect'),
+  noPagesToExport: t('documents.noPagesToExport'),
+  pdfExported: t('documents.pdfExported'),
+  failedToExport: t('documents.failedToExport'),
+  
+  // Herbs
+  herbsTitle: t('herbs.title'),
+  search: t('herbs.search'),
+  noResults: t('herbs.noResults'),
+  origin: t('herbs.details.origin'),
+  poisonous: t('herbs.details.poisonous'),
+  poisonousYes: t('herbs.details.poisonousYes'),
+  poisonousNo: t('herbs.details.poisonousNo'),
+  summary: t('herbs.details.summary'),
+  
+  // Pharmacy
+  call: t('common.pharmacy.call'),
+  callConfirm: t('common.pharmacy.callConfirm'),
+  callError: t('common.pharmacy.callError'),
+  reserve: t('common.pharmacy.reserve'),
+  reserveConfirm: t('common.pharmacy.reserveConfirm'),
+  reserveNote: t('common.pharmacy.reserveNote'),
+  reserveSuccess: t('common.pharmacy.reserveSuccess'),
+  pickupTime: t('common.pharmacy.pickupTime'),
+  updated: t('common.pharmacy.updated'),
+  pickup: t('common.pharmacy.pickup'),
+  delivery: t('common.pharmacy.delivery'),
+  cash: t('common.pharmacy.cash'),
+  coupon: t('common.pharmacy.coupon'),
+  name: t('common.pharmacy.name'),
+  price: t('common.pharmacy.price'),
+  distance: t('common.pharmacy.distance'),
+  
+  // San Pablo
+  searchTitle: t('common.sanpablo.searchTitle'),
+  searchPlaceholder: t('common.sanpablo.searchPlaceholder'),
+  searchButton: t('common.sanpablo.searchButton'),
+  sanpabloSection: t('common.sanpablo.sanpabloSection'),
+  nearbySection: t('common.sanpablo.nearbySection'),
+  noResults: t('common.sanpablo.noResults'),
+  noLocation: t('common.sanpablo.noLocation'),
+  nearbyError: t('common.sanpablo.nearbyError'),
+  productName: t('common.sanpablo.productName'),
+  priceUnavailable: t('common.sanpablo.priceUnavailable'),
+  chain: t('common.sanpablo.chain'),
+  withPrice: t('common.sanpablo.withPrice'),
+  go: t('common.sanpablo.go'),
+  retry: t('common.sanpablo.retry'),
+  
+  // Alerts
+  locationDenied: t('common.alerts.locationDenied'),
+  enableLocation: t('common.alerts.enableLocation'),
+  
+  // Health Analytics
+  healthOverview: t('healthAnalytics.healthOverview'),
+  recentHealthMetrics: t('healthAnalytics.recentHealthMetrics'),
+  medicationAdherence: t('healthAnalytics.medicationAdherence'),
+  sideEffectsMonitoring: t('healthAnalytics.sideEffectsMonitoring'),
+  trackHealthMetrics: t('healthAnalytics.trackHealthMetrics'),
+  trackVitalSigns: t('healthAnalytics.trackVitalSigns'),
+  trackMedicationSchedule: t('healthAnalytics.trackMedicationSchedule'),
+  trackSideEffects: t('healthAnalytics.trackSideEffects'),
+  generateHealthReport: t('healthAnalytics.generateHealthReport'),
+  addHealthMetric: t('healthAnalytics.addHealthMetric'),
+  recordSideEffect: t('healthAnalytics.recordSideEffect'),
+  metricsRecorded: t('healthAnalytics.metricsRecorded'),
+  adherenceRate: t('healthAnalytics.adherenceRate'),
+  sideEffects: t('healthAnalytics.sideEffects'),
+  medications: t('healthAnalytics.medications'),
+  noHealthMetrics: t('healthAnalytics.noHealthMetrics'),
+  noAdherenceData: t('healthAnalytics.noAdherenceData'),
+  noSideEffectsRecorded: t('healthAnalytics.noSideEffectsRecorded'),
+  bloodPressure: t('healthAnalytics.bloodPressure'),
+  weight: t('healthAnalytics.weight'),
+  bloodSugar: t('healthAnalytics.bloodSugar'),
+  heartRate: t('healthAnalytics.heartRate'),
+  temperature: t('healthAnalytics.temperature'),
+  oxygenSaturation: t('healthAnalytics.oxygenSaturation'),
+  painLevel: t('healthAnalytics.painLevel'),
+  mood: t('healthAnalytics.mood'),
+  energyLevel: t('healthAnalytics.energyLevel'),
+  sleepHours: t('healthAnalytics.sleepHours'),
+  steps: t('healthAnalytics.steps'),
+  pleaseEnterValue: t('healthAnalytics.pleaseEnterValue'),
+  pleaseEnterValidNumber: t('healthAnalytics.pleaseEnterValidNumber'),
+  sideEffectRecorded: t('healthAnalytics.sideEffectRecorded'),
+  yourHealthMetricsNormal: t('healthAnalytics.yourHealthMetricsNormal'),
+  considerMaintainingSchedule: t('healthAnalytics.considerMaintainingSchedule'),
+  monitorNewSideEffects: t('healthAnalytics.monitorNewSideEffects'),
+  healthReportGenerated: t('healthAnalytics.healthReportGenerated'),
+  summary: t('healthAnalytics.summary'),
+  keyInsights: t('healthAnalytics.keyInsights'),
+  ok: t('healthAnalytics.ok'),
+  mild: t('healthAnalytics.mild'),
+  moderate: t('healthAnalytics.moderate'),
+  moderateSevere: t('healthAnalytics.moderateSevere'),
+  severe: t('healthAnalytics.severe'),
+  verySevere: t('healthAnalytics.verySevere'),
+  unknown: t('healthAnalytics.unknown'),
+  metricType: t('healthAnalytics.metricType'),
+  selectMetricType: t('healthAnalytics.selectMetricType'),
+  value: t('healthAnalytics.value'),
+  enterValue: t('healthAnalytics.enterValue'),
+  notesOptional: t('healthAnalytics.notesOptional'),
+  addAnyNotes: t('healthAnalytics.addAnyNotes'),
+  addMetric: t('healthAnalytics.addMetric'),
+  symptom: t('healthAnalytics.symptom'),
+  symptomPlaceholder: t('healthAnalytics.symptomPlaceholder'),
+  severity: t('healthAnalytics.severity'),
+  healthMetricAdded: t('healthAnalytics.healthMetricAdded'),
+  failedToAddHealthMetric: t('healthAnalytics.failedToAddHealthMetric'),
+  failedToRecordSideEffect: t('healthAnalytics.failedToRecordSideEffect'),
+  failedToGenerateHealthReport: t('healthAnalytics.failedToGenerateHealthReport'),
+  taken: t('healthAnalytics.taken'),
+  missed: t('healthAnalytics.missed'),
+  dayStreak: t('healthAnalytics.dayStreak'),
+  started: t('healthAnalytics.started'),
+};
 
 
   // --------- Helpers ----------
@@ -2171,24 +3155,13 @@ const S = STRINGS[lang] || STRINGS.en;
     </AnimatedButton>
     <View style={{ flex: 1 }} />
     
-    {/* Authentication Button */}
-    {user && (
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <AnimatedButton onPress={() => setRoute('admin-profile')}>
-          <DynamicText type="accent" style={{ fontSize: 16, fontWeight: '600' }}>
-            👤 Profile
-          </DynamicText>
-        </AnimatedButton>
-        <AnimatedButton onPress={handleSignOut}>
-          <DynamicText type="accent" style={{ fontSize: 16, fontWeight: '600' }}>
-            👋 Sign Out
-          </DynamicText>
-        </AnimatedButton>
-      </View>
-    )}
     
     <AnimatedButton onPress={() => setRoute('settings')}>
-      <DynamicText type="accent" style={{ fontSize: 22 }}>⚙️</DynamicText>
+      <Image 
+        source={require('./assets/dashboard Emojies/settings cog.png')} 
+        style={{ width: 48, height: 48, tintColor: theme.accent }}
+        resizeMode="contain"
+      />
     </AnimatedButton>
   </View>
 );
@@ -2464,83 +3437,48 @@ const handleAskMedicalAI = async () => {
 };
 
   const Pharmacies = () => {
-    const [pharmacies, setPharmacies] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
     const [lastUpdated, setLastUpdated] = useState(null);
 
-    // Auto-load pharmacies when component mounts
-    useEffect(() => {
-      loadNearbyPharmacies();
-    }, []);
+    // Use pre-loaded data from main App component
+    // No need for local state - using pharmacies, pharmaciesLoading, pharmaciesError from main component
 
-    const loadNearbyPharmacies = async () => {
+    // Refresh function - reloads data if needed
+    const refreshPharmacies = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        setPharmaciesLoading(true);
+        setPharmaciesError(null);
         
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setError('Location permission denied. Please enable location services.');
+          setPharmaciesError('Location permission denied. Please enable location services.');
           return;
         }
         
         const { coords } = await Location.getCurrentPositionAsync({});
         
-        console.log('📍 User coordinates:', coords.latitude, coords.longitude);
-        
-        // Detect user's country for distance units
-        const country = await detectUserCountry(coords.latitude, coords.longitude);
-        setUserCountry(country);
-        console.log('🌍 Detected user country:', country);
-        
         // Import the pharmacy search function
         const { findNearbyPharmacies } = await import('./services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         
-        console.log('🏪 Received pharmacies:', nearbyPharmacies.length, 'pharmacies');
-        console.log('📏 Sample distances (before sorting):', nearbyPharmacies.slice(0, 3).map(p => {
-          const distance = country === 'US' ? `${p.distanceMiles.toFixed(1)} mi` : `${(p.distanceMiles * 1.60934).toFixed(1)} km`;
-          console.log(`📏 ${p.name}: ${p.distanceMiles} miles -> ${distance} (country: ${country})`);
-          return `${p.name}: ${distance}`;
-        }));
-        
-        // Sort pharmacies by distance (shortest to longest)
-        console.log('📏 Before sorting - checking distanceMiles values:');
-        nearbyPharmacies.forEach((p, index) => {
-          console.log(`📏 [${index}] ${p.name}: distanceMiles = ${p.distanceMiles}`);
-        });
-        
-        const sortedPharmacies = nearbyPharmacies.sort((a, b) => {
-          const distanceA = a.distanceMiles || 0;
-          const distanceB = b.distanceMiles || 0;
-          console.log(`📏 Comparing: ${a.name} (${distanceA}) vs ${b.name} (${distanceB})`);
-          return distanceA - distanceB;
-        });
-        
-        console.log('📏 Sorted distances (closest first):', sortedPharmacies.slice(0, 3).map(p => {
-          const distance = country === 'US' ? `${p.distanceMiles.toFixed(1)} mi` : `${(p.distanceMiles * 1.60934).toFixed(1)} km`;
-          console.log(`📏 SORTED ${p.name}: ${p.distanceMiles} miles -> ${distance} (country: ${country})`);
-          return `${p.name}: ${distance}`;
-        }));
-        
-        setPharmacies(sortedPharmacies);
+        setPharmacies(nearbyPharmacies);
         setLastUpdated(new Date());
+        console.log('🏪 Refreshed pharmacies:', nearbyPharmacies.length);
       } catch (e) {
-        console.error('Error loading pharmacies:', e);
-        setError('Failed to load nearby pharmacies. Please try again.');
+        console.error('Error refreshing pharmacies:', e);
+        setPharmaciesError('Failed to refresh pharmacies. Please try again.');
       } finally {
-        setLoading(false);
+        setPharmaciesLoading(false);
       }
     };
 
     const formatDistance = (miles) => {
       // Use location-based units: miles for USA, kilometers for other countries
       if (userCountry === 'US') {
-        return `${miles.toFixed(1)} mi`;
+        return `${miles.toFixed(1)} ${S.mi}`;
       } else {
         const km = miles * 1.60934;
-        return `${km.toFixed(1)} km`;
+        return `${km.toFixed(1)} ${S.km}`;
       }
     };
 
@@ -2555,29 +3493,38 @@ const handleAskMedicalAI = async () => {
     };
 
     const callPharmacy = (pharmacy) => {
-      // Try to extract phone number from address or use a default
-      let phoneNumber = pharmacy.phone;
+      // Debug logging
+      console.log('🔍 callPharmacy DEBUG - RECEIVED DATA:', {
+        pharmacyName: pharmacy.name,
+        pharmacyPhone: pharmacy.phone,
+        pharmacyWebsite: pharmacy.website,
+        pharmacyRating: pharmacy.rating,
+        pharmacyAddress: pharmacy.address,
+        pharmacyId: pharmacy.id,
+        fullPharmacyObject: pharmacy
+      });
       
-      if (!phoneNumber && pharmacy.address) {
-        // Try to extract phone number from address using regex
-        const phoneMatch = pharmacy.address.match(/\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})/);
-        if (phoneMatch) {
-          phoneNumber = `${phoneMatch[1]}-${phoneMatch[2]}-${phoneMatch[3]}`;
-        }
-      }
+      // Use only the real phone number from the API
+      const phoneNumber = pharmacy.phone;
       
-      // Fallback phone numbers based on pharmacy name
       if (!phoneNumber) {
-        const name = pharmacy.name.toLowerCase();
-        if (name.includes('cvs')) phoneNumber = '1-800-SHOP-CVS';
-        else if (name.includes('walgreens')) phoneNumber = '1-800-WALGREENS';
-        else if (name.includes('rite aid')) phoneNumber = '1-800-RITE-AID';
-        else if (name.includes('walmart')) phoneNumber = '1-800-WALMART';
-        else if (name.includes('target')) phoneNumber = '1-800-440-0680';
-        else phoneNumber = '1-800-PHARMACY';
+        console.log('❌ No phone number found for pharmacy:', pharmacy.name);
+        // Show alert if no phone number available
+        Alert.alert(
+          'Phone Not Available',
+          `No phone number found for ${pharmacy.name}. Please try calling them directly or visit their website.`,
+          [
+            { text: 'OK', style: 'cancel' }
+          ]
+        );
+        return;
       }
       
-      const phoneUrl = `tel:${phoneNumber}`;
+      console.log('✅ Phone number found:', phoneNumber);
+      
+      // Clean up the phone number (remove spaces, dashes, etc.)
+      const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+      const phoneUrl = `tel:${cleanPhoneNumber}`;
       
       Alert.alert(
         'Call Pharmacy',
@@ -2602,43 +3549,45 @@ const handleAskMedicalAI = async () => {
           
           {/* Header with refresh button */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <DynamicText type="secondary" style={{ fontFamily: 'Inter_400Regular', flex: 1 }}>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, flex: 1, opacity: 0.8 }}>
               {pharmacies.length > 0 
-                ? S.foundPharmacies.replace('{count}', pharmacies.length)
-                : S.findNearbyPharmacies
+                ? (S.foundPharmacies || 'Found {count} pharmacies nearby').replace('{count}', pharmacies.length)
+                : (S.findNearbyPharmacies || 'Find nearby pharmacies')
               }
             </DynamicText>
             <TouchableOpacity 
               style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
-              onPress={loadNearbyPharmacies}
-              disabled={loading}
+              onPress={refreshPharmacies}
+              disabled={labsLoading}
             >
               <DynamicText type="card" style={[styles.btnText, { fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
-                {loading ? S.loading : S.refresh}
+                {labsLoading ? S.loading : S.refresh}
               </DynamicText>
             </TouchableOpacity>
           </View>
 
           {/* Error message */}
-          {error && (
-            <View style={{ backgroundColor: '#ffebee', padding: 12, borderRadius: 8, marginBottom: 16 }}>
-              <Text style={{ color: '#c62828', fontFamily: 'Inter_500Medium' }}>{error}</Text>
+          {pharmaciesError && (
+            <View style={{ backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2, padding: 12, borderRadius: 18, marginBottom: 16 }}>
+              <DynamicText type="card" style={{ color: '#c62828', fontFamily: 'Inter_600SemiBold' }}>{pharmaciesError}</DynamicText>
           </View>
           )}
 
           {/* Last updated */}
           {lastUpdated && (
-            <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+            <DynamicText type="card" style={{ fontSize: 12, marginBottom: 16, fontFamily: 'Inter_500Medium', opacity: 0.7 }}>
               {S.lastUpdated}: {lastUpdated.toLocaleTimeString()}
-            </Text>
+            </DynamicText>
           )}
 
           {/* Pharmacies list */}
           {pharmacies.length > 0 ? (
             pharmacies.map((pharmacy, index) => (
               <View key={pharmacy.id || index} style={{ 
-                backgroundColor: theme.card, 
-                borderRadius: 12, 
+                backgroundColor: getCardBackgroundColor() + 'CC', 
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18, 
                 padding: 16, 
                 marginBottom: 12,
                 shadowColor: '#000',
@@ -2652,8 +3601,10 @@ const handleAskMedicalAI = async () => {
                   <View style={{ 
                     width: 40, 
                     height: 40, 
-                    borderRadius: 8, 
-                    backgroundColor: theme.muted, 
+                    borderRadius: 12, 
+                    backgroundColor: getCardBackgroundColor() + '80', 
+                    borderColor: getCardBorderColor(),
+                    borderWidth: 1,
                     alignItems: 'center', 
                     justifyContent: 'center',
                     marginRight: 12
@@ -2661,17 +3612,17 @@ const handleAskMedicalAI = async () => {
                     <Text style={{ fontSize: 20 }}>🏪</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600', fontFamily: 'Inter_600SemiBold' }}>
+                    <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold' }}>
                       {pharmacy.name}
-                    </Text>
-                    <Text style={{ color: theme.sub, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
+                    </DynamicText>
+                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_500Medium', opacity: 0.7 }}>
                       {formatDistance(pharmacy.distanceMiles)} • {pharmacy.address}
-                    </Text>
+                    </DynamicText>
                     {/* Additional info */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                      <Text style={{ color: theme.sub, fontSize: 10, fontFamily: 'Inter_400Regular' }}>
+                      <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_400Regular', opacity: 0.6 }}>
                         {pharmacy.pickup ? '🏃 Pickup' : ''} {pharmacy.delivery ? '🚚 Delivery' : ''}
-                      </Text>
+                      </DynamicText>
                     </View>
                   </View>
                 </View>
@@ -2683,7 +3634,7 @@ const handleAskMedicalAI = async () => {
                       flex: 1, 
                       backgroundColor: theme.accent, 
                       borderRadius: 8, 
-                      paddingVertical: 10, 
+                      paddingVertical: 12, 
                       alignItems: 'center',
                       flexDirection: 'row',
                       justifyContent: 'center',
@@ -2691,66 +3642,22 @@ const handleAskMedicalAI = async () => {
                     }}
                     onPress={() => openDirections(pharmacy)}
                   >
-                    <Text style={{ fontSize: 14 }}>🗺️</Text>
-                    <Text style={{ color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                    <Text style={{ fontSize: 16 }}>🗺️</Text>
+                    <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_700Bold', fontSize: 12 }}>
                       {S.directions}
-                    </Text>
+                    </DynamicText>
                   </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={{ 
-                      flex: 1, 
-                      backgroundColor: theme.gold || '#FFD700', 
-                      borderRadius: 8, 
-                      paddingVertical: 10, 
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      gap: 4
-                    }}
-                    onPress={() => callPharmacy(pharmacy)}
-                  >
-                    <Text style={{ fontSize: 14 }}>📞</Text>
-                    <Text style={{ color: '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      Call
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity 
-                    style={{ 
-                      flex: 1, 
-                      backgroundColor: theme.success || '#4CAF50', 
-                      borderRadius: 8, 
-                      paddingVertical: 10, 
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      gap: 4
-                    }}
-                    onPress={() => {
-                      // Open pharmacy website or show more info
-                      const website = pharmacy.website || `https://www.google.com/search?q=${encodeURIComponent(pharmacy.name + ' pharmacy')}`;
-                      Linking.openURL(website).catch(() => {
-                        Alert.alert('Error', 'Unable to open website');
-                      });
-                    }}
-                  >
-                    <Text style={{ fontSize: 14 }}>ℹ️</Text>
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      {S.info}
-                    </Text>
-            </TouchableOpacity>
           </View>
               </View>
             ))
-          ) : !loading && !error ? (
+          ) : !labsLoading && !labsError ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
               <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
                 No pharmacies loaded yet
               </Text>
               <TouchableOpacity 
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
-                onPress={loadNearbyPharmacies}
+                onPress={refreshPharmacies}
               >
                 <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
                   Find Nearby Pharmacies
@@ -2760,9 +3667,9 @@ const handleAskMedicalAI = async () => {
           ) : null}
 
           {/* Loading indicator */}
-          {loading && (
+          {pharmaciesLoading && (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>Loading nearby pharmacies...</Text>
+              <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>{S.loadingPharmacies}</Text>
             </View>
           )}
         </ScrollView>
@@ -2770,53 +3677,31 @@ const handleAskMedicalAI = async () => {
   };
 
   const Labs = () => {
-    const [labs, setLabs] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
     const [lastUpdated, setLastUpdated] = useState(null);
     const [selectedLab, setSelectedLab] = useState(null);
     const [showTestTypes, setShowTestTypes] = useState(false);
 
-    // Auto-load labs when component mounts
-    useEffect(() => {
-      loadNearbyLabs();
-    }, []);
+    // Use pre-loaded data from main App component
+    // No need for local state - using labs, labsLoading, labsError from main component
 
-    const loadNearbyLabs = async () => {
+    // Refresh function - reloads data if needed
+    const refreshLabs = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        setLabsLoading(true);
+        setLabsError(null);
         
-            const { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setError('Location permission denied. Please enable location services.');
+          setLabsError('Location permission denied. Please enable location services.');
           return;
         }
         
-            const { coords } = await Location.getCurrentPositionAsync({});
-        
-        console.log('📍 User coordinates for labs:', coords.latitude, coords.longitude);
-        
-        // Detect user's country for distance units (if not already detected)
-        if (!userCountry) {
-          const country = await detectUserCountry(coords.latitude, coords.longitude);
-          setUserCountry(country);
-          console.log('🌍 Detected user country for labs:', country);
-        }
+        const { coords } = await Location.getCurrentPositionAsync({});
         
         // Import the lab search function
         const { findNearbyLabs, getTestTypesForLab } = await import('./services/labSearch');
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
-        
-        console.log('🧪 Received labs:', nearbyLabs.length, 'labs');
-        if (nearbyLabs.length > 0) {
-          console.log('📏 Sample lab distances (before sorting):', nearbyLabs.slice(0, 3).map(l => {
-            const distance = userCountry === 'US' ? `${l.distanceMiles.toFixed(1)} mi` : `${(l.distanceMiles * 1.60934).toFixed(1)} km`;
-            return `${l.name}: ${distance}`;
-          }));
-        } else {
-          console.log('⚠️ No labs found - this might be a search term or API issue');
-        }
         
         // Add test types to each lab
         const labsWithTests = nearbyLabs.map(lab => ({
@@ -2824,41 +3709,24 @@ const handleAskMedicalAI = async () => {
           testTypes: lab.testTypes || getTestTypesForLab(lab.name)
         }));
         
-        // Sort labs by distance (shortest to longest)
-        console.log('📏 Before sorting labs - checking distanceMiles values:');
-        labsWithTests.forEach((l, index) => {
-          console.log(`📏 [${index}] ${l.name}: distanceMiles = ${l.distanceMiles}`);
-        });
-        
-        const sortedLabs = labsWithTests.sort((a, b) => {
-          const distanceA = a.distanceMiles || 0;
-          const distanceB = b.distanceMiles || 0;
-          console.log(`📏 Lab comparing: ${a.name} (${distanceA}) vs ${b.name} (${distanceB})`);
-          return distanceA - distanceB;
-        });
-        
-        console.log('📏 Sorted lab distances (closest first):', sortedLabs.slice(0, 3).map(l => {
-          const distance = userCountry === 'US' ? `${l.distanceMiles.toFixed(1)} mi` : `${(l.distanceMiles * 1.60934).toFixed(1)} km`;
-          return `${l.name}: ${distance}`;
-        }));
-        
-        setLabs(sortedLabs);
+        setLabs(labsWithTests);
         setLastUpdated(new Date());
+        console.log('🧪 Refreshed labs:', labsWithTests.length);
       } catch (e) {
-        console.error('Error loading labs:', e);
-        setError('Failed to load nearby labs. Please try again.');
+        console.error('Error refreshing labs:', e);
+        setLabsError('Failed to refresh labs. Please try again.');
       } finally {
-        setLoading(false);
+        setLabsLoading(false);
       }
     };
 
     const formatDistance = (miles) => {
       // Use location-based units: miles for USA, kilometers for other countries
       if (userCountry === 'US') {
-        return `${miles.toFixed(1)} mi`;
+        return `${miles.toFixed(1)} ${S.mi}`;
       } else {
         const km = miles * 1.60934;
-        return `${km.toFixed(1)} km`;
+        return `${km.toFixed(1)} ${S.km}`;
       }
     };
 
@@ -2873,30 +3741,38 @@ const handleAskMedicalAI = async () => {
     };
 
     const callLab = (lab) => {
-      // Try to extract phone number from address or use a default
-      let phoneNumber = lab.phone;
+      // Debug logging
+      console.log('🔍 callLab DEBUG - RECEIVED DATA:', {
+        labName: lab.name,
+        labPhone: lab.phone,
+        labWebsite: lab.website,
+        labRating: lab.rating,
+        labAddress: lab.address,
+        labId: lab.id,
+        fullLabObject: lab
+      });
       
-      if (!phoneNumber && lab.address) {
-        // Try to extract phone number from address using regex
-        const phoneMatch = lab.address.match(/\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})/);
-        if (phoneMatch) {
-          phoneNumber = `${phoneMatch[1]}-${phoneMatch[2]}-${phoneMatch[3]}`;
-        }
-      }
+      // Use only the real phone number from the API
+      const phoneNumber = lab.phone;
       
-      // Fallback phone numbers based on lab name
       if (!phoneNumber) {
-        const name = lab.name.toLowerCase();
-        if (name.includes('chopo')) phoneNumber = '1-800-CHOPO-LAB';
-        else if (name.includes('polanco')) phoneNumber = '1-800-POLANCO';
-        else if (name.includes('salud digna')) phoneNumber = '1-800-SALUD';
-        else if (name.includes('diagnostico')) phoneNumber = '1-800-DIAGNOSTIC';
-        else if (name.includes('clinica')) phoneNumber = '1-800-CLINICA';
-        else if (name.includes('radiologia')) phoneNumber = '1-800-RADIOLOGIA';
-        else phoneNumber = '1-800-MEDICAL';
+        console.log('❌ No phone number found for lab:', lab.name);
+        // Show alert if no phone number available
+        Alert.alert(
+          'Phone Not Available',
+          `No phone number found for ${lab.name}. Please try calling them directly or visit their website.`,
+          [
+            { text: 'OK', style: 'cancel' }
+          ]
+        );
+        return;
       }
       
-      const phoneUrl = `tel:${phoneNumber}`;
+      console.log('✅ Phone number found:', phoneNumber);
+      
+      // Clean up the phone number (remove spaces, dashes, etc.)
+      const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+      const phoneUrl = `tel:${cleanPhoneNumber}`;
       
       Alert.alert(
         'Call Lab',
@@ -2935,13 +3811,13 @@ const handleAskMedicalAI = async () => {
 
     const getTestTypeName = (testType) => {
       const names = {
-        'blood-work': 'Blood Work',
-        'imaging': 'Imaging',
-        'cardiac': 'Cardiac',
-        'pathology': 'Pathology',
-        'infectious-disease': 'Infectious Disease',
-        'allergy': 'Allergy',
-        'specialty': 'Specialty'
+        'blood-work': S.bloodWork,
+        'imaging': S.imaging,
+        'cardiac': S.cardiac,
+        'pathology': S.pathology,
+        'infectious-disease': S.infectiousDisease,
+        'allergy': S.allergy,
+        'specialty': S.specialty
       };
       return names[testType] || testType;
     };
@@ -2966,43 +3842,45 @@ const handleAskMedicalAI = async () => {
           
           {/* Header with refresh button */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', flex: 1 }}>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, flex: 1, opacity: 0.8 }}>
               {labs.length > 0 
-                ? S.foundLabs.replace('{count}', labs.length)
-                : S.findNearbyLabs
+                ? (S.foundLabs || 'Found {count} labs nearby').replace('{count}', labs.length)
+                : (S.findNearbyLabs || 'Find nearby labs')
               }
-            </Text>
+            </DynamicText>
             <TouchableOpacity 
               style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
-              onPress={loadNearbyLabs}
-              disabled={loading}
+              onPress={refreshLabs}
+              disabled={labsLoading}
             >
               <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
-                {loading ? S.loading : S.refresh}
+                {labsLoading ? S.loading : S.refresh}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* Error message */}
-          {error && (
-            <View style={{ backgroundColor: '#ffebee', padding: 12, borderRadius: 8, marginBottom: 16 }}>
-              <Text style={{ color: '#c62828', fontFamily: 'Inter_500Medium' }}>{error}</Text>
+          {labsError && (
+            <View style={{ backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2, padding: 12, borderRadius: 18, marginBottom: 16 }}>
+              <DynamicText type="card" style={{ color: '#c62828', fontFamily: 'Inter_600SemiBold' }}>{labsError}</DynamicText>
             </View>
           )}
 
           {/* Last updated */}
           {lastUpdated && (
-            <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+            <DynamicText type="card" style={{ fontSize: 12, marginBottom: 16, fontFamily: 'Inter_500Medium', opacity: 0.7 }}>
               {S.lastUpdated}: {lastUpdated.toLocaleTimeString()}
-            </Text>
+            </DynamicText>
           )}
 
           {/* Labs list */}
           {labs.length > 0 ? (
             labs.map((lab, index) => (
               <View key={lab.id || index} style={{ 
-                backgroundColor: theme.card, 
-                borderRadius: 12, 
+                backgroundColor: getCardBackgroundColor() + 'CC', 
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18, 
                 padding: 16, 
                 marginBottom: 12,
                 shadowColor: '#000',
@@ -3025,23 +3903,23 @@ const handleAskMedicalAI = async () => {
                     <Text style={{ fontSize: 20 }}>🧪</Text>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600', fontFamily: 'Inter_600SemiBold' }}>
+                    <DynamicText type="card" style={{ fontSize: 16, fontWeight: '600', fontFamily: 'Inter_600SemiBold' }}>
                       {lab.name}
-                    </Text>
-                    <Text style={{ color: theme.sub, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
+                    </DynamicText>
+                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                       {formatDistance(lab.distanceMiles)} • {lab.address}
-                    </Text>
+                    </DynamicText>
                     {/* Test types preview */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, flexWrap: 'wrap' }}>
                       {lab.testTypes && lab.testTypes.slice(0, 3).map((testType, idx) => (
-                        <Text key={idx} style={{ color: theme.sub, fontSize: 10, fontFamily: 'Inter_400Regular', marginRight: 8 }}>
+                        <DynamicText key={idx} type="card" style={{ fontSize: 10, fontFamily: 'Inter_400Regular', marginRight: 8, opacity: 0.7 }}>
                           {getTestTypeIcon(testType)} {getTestTypeName(testType)}
-                        </Text>
+                        </DynamicText>
                       ))}
                       {lab.testTypes && lab.testTypes.length > 3 && (
-                        <Text style={{ color: theme.sub, fontSize: 10, fontFamily: 'Inter_400Regular' }}>
-                          +{lab.testTypes.length - 3} more
-                        </Text>
+                        <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
+                          +{lab.testTypes.length - 3} {S.moreLab.replace('+1 ', '')}
+                        </DynamicText>
                       )}
                     </View>
                   </View>
@@ -3054,7 +3932,7 @@ const handleAskMedicalAI = async () => {
                       flex: 1, 
                       backgroundColor: theme.accent, 
                       borderRadius: 8, 
-                      paddingVertical: 10, 
+                      paddingVertical: 12, 
                       alignItems: 'center',
                       flexDirection: 'row',
                       justifyContent: 'center',
@@ -3062,72 +3940,34 @@ const handleAskMedicalAI = async () => {
                     }}
                     onPress={() => openDirections(lab)}
                   >
-                    <Text style={{ fontSize: 14 }}>🗺️</Text>
-                    <Text style={{ color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
+                    <Text style={{ fontSize: 16 }}>🗺️</Text>
+                    <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_700Bold', fontSize: 12 }}>
                       {S.directions}
-                    </Text>
+                    </DynamicText>
         </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={{ 
-                      flex: 1, 
-                      backgroundColor: theme.gold || '#FFD700', 
-                      borderRadius: 8, 
-                      paddingVertical: 10, 
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      gap: 4
-                    }}
-                    onPress={() => callLab(lab)}
-                  >
-                    <Text style={{ fontSize: 14 }}>📞</Text>
-                    <Text style={{ color: '#000000', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      Call
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity 
-                    style={{ 
-                      flex: 1, 
-                      backgroundColor: theme.success || '#4CAF50', 
-                      borderRadius: 8, 
-                      paddingVertical: 10, 
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      gap: 4
-                    }}
-                    onPress={() => showLabTestTypes(lab)}
-                  >
-                    <Text style={{ fontSize: 14 }}>🧪</Text>
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 11 }}>
-                      Tests
-                    </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             ))
-          ) : !loading && !error ? (
+          ) : !labsLoading && !labsError ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
+              <DynamicText type="card" style={{ fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                 No labs loaded yet
-              </Text>
+              </DynamicText>
               <TouchableOpacity 
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
-                onPress={loadNearbyLabs}
+                onPress={refreshLabs}
               >
-                <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
+                <DynamicText type="card" style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
                   Find Nearby Labs
-                </Text>
+                </DynamicText>
               </TouchableOpacity>
             </View>
           ) : null}
 
           {/* Loading indicator */}
-          {loading && (
+          {labsLoading && (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>Loading nearby labs...</Text>
+              <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', opacity: 0.7 }}>{S.loadingLabs}</DynamicText>
             </View>
           )}
       </ScrollView>
@@ -3244,143 +4084,348 @@ const handleAskMedicalAI = async () => {
       </ScrollView>
   );
 
-  const Settings = () => (
-    <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <Header title={S.settings} />
-        <Section title={S.profile}>
-          <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular' }}>AuricRx — MedCoach</Text>
-        </Section>
+  // State for dropdown sections
+  const [expandedSections, setExpandedSections] = useState({
+    profile: true,
+    notifications: false,
+    security: false,
+    privacy: false,
+    wallpaper: false,
+    language: false,
+    colorSettings: false,
+    doctorAI: false,
+    fontColor: false,
+    dayNight: false,
+    help: true,
+    account: false
+  });
 
-        <Section title={S.language}>
-          <RowSwitch label="English" value={lang === 'en'} onToggle={() => {
-            console.log('🔍 App - Setting language to English');
-            setLang('en');
-          }} />
-          <RowSwitch label="Español" value={lang === 'es'} onToggle={() => {
-            console.log('🔍 App - Setting language to Spanish');
-            setLang('es');
-          }} />
-          <RowSwitch label="中文" value={lang === 'zh'} onToggle={() => {
-            console.log('🔍 App - Setting language to Chinese');
-            setLang('zh');
-          }} />
-        </Section>
-
-        <Section title={S.colorSettings}>
-          <RowSwitch label="White Gold" value={themeKey === 'whiteGold'} onToggle={() => setThemeKey('whiteGold')} />
-          <RowSwitch label="Gold" value={themeKey === 'gold'} onToggle={() => setThemeKey('gold')} />
-          <RowSwitch label="Blue" value={themeKey === 'blue'} onToggle={() => setThemeKey('blue')} />
-          <RowSwitch label="Teal" value={themeKey === 'teal'} onToggle={() => setThemeKey('teal')} />
-          <RowSwitch label="Black" value={themeKey === 'black'} onToggle={() => setThemeKey('black')} />
-        </Section>
-
-        <Section title={S.myDoctorAI}>
-          <RowSwitch label={S.drAlfred} value={selectedDoctor === 'Dr. Alfred'} onToggle={() => setSelectedDoctor('Dr. Alfred')} />
-          <RowSwitch label={S.drMimi} value={selectedDoctor === 'Dr. Mimi'} onToggle={() => setSelectedDoctor('Dr. Mimi')} />
-          <RowSwitch label={S.drPawlmer} value={selectedDoctor === 'Dr. Pawlmer'} onToggle={() => setSelectedDoctor('Dr. Pawlmer')} />
-        </Section>
-
-        <Section title="Font Color">
-          <RowSwitch label="Default" value={fontColor === 'default'} onToggle={() => setFontColor('default')} />
-          <RowSwitch label="White" value={fontColor === 'white'} onToggle={() => setFontColor('white')} />
-          <RowSwitch label="Black" value={fontColor === 'black'} onToggle={() => setFontColor('black')} />
-          <RowSwitch label="Blue" value={fontColor === 'blue'} onToggle={() => setFontColor('blue')} />
-          <RowSwitch label="Green" value={fontColor === 'green'} onToggle={() => setFontColor('green')} />
-          <RowSwitch label="Purple" value={fontColor === 'purple'} onToggle={() => setFontColor('purple')} />
-          <RowSwitch label="Red" value={fontColor === 'red'} onToggle={() => setFontColor('red')} />
-          <RowSwitch label="Orange" value={fontColor === 'orange'} onToggle={() => setFontColor('orange')} />
-          <RowSwitch label="Pink" value={fontColor === 'pink'} onToggle={() => setFontColor('pink')} />
-          <RowSwitch label="Gold" value={fontColor === 'gold'} onToggle={() => setFontColor('gold')} />
-          <RowSwitch label="Silver" value={fontColor === 'silver'} onToggle={() => setFontColor('silver')} />
-        </Section>
-
-        <Section title={S.dayNight}>
-          <SwitchRow label="Night mode" value={night} onValueChange={setNight} />
-        </Section>
-
-        <Section title={S.moodShift}>
-          <SwitchRow label="Auto-calm colors when stressed" value={moodShift} onValueChange={setMoodShift} />
-        </Section>
-
-        <Section title="Wallpaper">
-          <TouchableOpacity 
-            style={{ padding: 16, backgroundColor: theme.chip, borderRadius: 8, marginBottom: 8 }}
-            onPress={() => setRoute('wallpaper')}
-          >
-            <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold' }}>🎨 Change Wallpaper</Text>
-            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 4 }}>
-              Choose from beautiful wallpapers or solid colors
-            </Text>
-          </TouchableOpacity>
-        </Section>
-
-        <Section title={S.help}>
-          <TouchableOpacity onPress={() => Linking.openURL('mailto:AuricRx@gmail.com')}>
-            <Text style={{ color: theme.accent, fontFamily: 'Inter_700Bold' }}>{S.emailUs}: AuricRx@gmail.com</Text>
-          </TouchableOpacity>
-        </Section>
-
-        <Section title="Account">
-          <TouchableOpacity 
-            style={{ padding: 16, backgroundColor: theme.chip, borderRadius: 8, marginBottom: 8 }}
-            onPress={handleSignOut}
-          >
-            <Text style={{ color: '#ff4444', fontFamily: 'Inter_600SemiBold' }}>🚪 Sign Out</Text>
-            <Text style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 4 }}>
-              Sign out of your account
-            </Text>
-          </TouchableOpacity>
-        </Section>
-      </ScrollView>
-  );
+  const CollapsibleSection = ({ title, children, sectionKey, onToggle }) => {
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    return (
+      <View style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
+        <TouchableOpacity 
+          style={styles.sectionHeader} 
+          onPress={() => onToggle(sectionKey)}
+          activeOpacity={0.7}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <DynamicText type="card" style={[styles.sectionTitle, { fontFamily: 'Inter_700Bold' }]}>{title}</DynamicText>
+          </View>
+        <Text style={{ 
+          color: theme.accent, 
+          fontSize: 18, 
+          transform: [{ rotate: expandedSections[sectionKey] ? '90deg' : '0deg' }] 
+        }}>
+          ▶
+        </Text>
+      </TouchableOpacity>
+      {expandedSections[sectionKey] && children}
+    </View>
+    );
+  };
 
   const Header = ({ title }) => (
-  <View style={[styles.header, { borderColor: theme.chip }]}>
-    {route !== 'dashboard' ? (
-      <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.headerHomeButton, { marginLeft: -65 }]}>
-        <Image 
-          source={require('./assets/AuricRX_home_button_across_screens.png')} 
-          style={styles.headerHomeIcon}
-          resizeMode="contain"
-        />
-      </AnimatedButton>
-    ) : (
-      <View style={{ width: 180, height: 60 }} />
-    )}
-
-    <Text style={{ 
-      color: theme.text, 
-      fontSize: 18, 
-      fontFamily: 'Inter_800ExtraBold', 
-      position: 'absolute', 
-      left: '50%', 
-      transform: [{ translateX: -50 }], 
-      maxWidth: '60%' 
-    }} numberOfLines={1}>{title}</Text>
-
-    <AnimatedButton onPress={() => setRoute('settings')} style={{ padding: 8 }}>
-      <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
-    </AnimatedButton>
-  </View>
-);
-
-  const Section = ({ title, children }) => (
-    <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.chip }]}>
-      <Text style={[styles.sectionTitle, { color: theme.text, fontFamily: 'Inter_800ExtraBold' }]}>{title}</Text>
-      {children}
+    <View style={[styles.header, { borderColor: theme.chip }]}>
+      {route !== 'dashboard' ? (
+        <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.headerHomeButton, { marginLeft: -65 }]}>
+          <Image 
+            source={require('./assets/AuricRX_home_button_across_screens.png')} 
+            style={styles.headerHomeIcon}
+            resizeMode="contain"
+          />
+        </AnimatedButton>
+      ) : (
+        <View style={{ width: 180, height: 60 }} />
+      )}
+      <DynamicText type="primary" style={[styles.headerTitle, { 
+        fontFamily: 'Inter_600SemiBold',
+        textAlign: 'center',
+        flex: 1,
+        position: 'absolute',
+        left: '50%',
+        transform: [{ translateX: -50 }],
+        maxWidth: '60%'
+      }]}>{title}</DynamicText>
+      {route !== 'dashboard' ? (
+        <View style={{ width: 40 }} />
+      ) : (
+        <AnimatedButton onPress={() => setRoute('settings')} style={styles.headerSettingsButton}>
+          <Image 
+            source={require('./assets/dashboard Emojies/settings cog.png')} 
+            style={styles.headerSettingsIcon}
+            resizeMode="contain"
+          />
+        </AnimatedButton>
+      )}
     </View>
   );
 
+  const Settings = () => {
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    
+    const toggleSection = (section) => {
+      setExpandedSections(prev => ({
+        ...prev,
+        [section]: !prev[section]
+      }));
+    };
+    
+    return (
+      <ScrollView 
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 16 }}
+        keyboardShouldPersistTaps="handled"
+        scrollsToTop={false}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+      >
+        <Header title={S.settings} />
+        
+        <CollapsibleSection title={S.profile} sectionKey="profile" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.appDescription}</DynamicText>
+            <TouchableOpacity 
+              onPress={() => setRoute('admin-profile')}
+              style={[styles.settingsButton, {
+                backgroundColor: getCardBackgroundColor() + 'CC',
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_700Bold', 
+                fontSize: 16,
+                textAlign: 'center'
+              }}>{S.profile}</DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.notifications} sectionKey="notifications" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <RowSwitch
+              label={S.pushNotifications}
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
+            />
+            <RowSwitch
+              label={S.emailNotifications}
+              value={emailNotifications}
+              onValueChange={setEmailNotifications}
+            />
+            <RowSwitch
+              label={S.smsNotifications}
+              value={smsNotifications}
+              onValueChange={setSmsNotifications}
+            />
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.security} sectionKey="security" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <TouchableOpacity 
+              onPress={() => setRoute('admin-profile')}
+              style={[styles.settingsButton, {
+                backgroundColor: getCardBackgroundColor() + 'CC',
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>{S.changePassword}</DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.privacy} sectionKey="privacy" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <RowSwitch
+              label={S.dataCollection}
+              value={dataCollection}
+              onValueChange={setDataCollection}
+            />
+            <RowSwitch
+              label={S.analytics}
+              value={analytics}
+              onValueChange={setAnalytics}
+            />
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <TouchableOpacity 
+              onPress={() => setRoute('wallpaper')}
+              style={[styles.settingsButton, {
+                backgroundColor: getCardBackgroundColor() + 'CC',
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_700Bold', 
+                fontSize: 16,
+                textAlign: 'center',
+                marginBottom: 4
+              }}>{S.changeWallpaper}</DynamicText>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_400Regular', 
+                fontSize: 12, 
+                opacity: 0.7,
+                textAlign: 'center'
+              }}>
+                {S.chooseWallpaperDescription}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.language} sectionKey="language" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <SwitchRow
+              label={S.english}
+              value={currentLanguage === 'en'}
+              onValueChange={() => {
+                setLang('en');
+                changeLanguage('en');
+              }}
+            />
+            <SwitchRow
+              label={S.spanish}
+              value={currentLanguage === 'es'}
+              onValueChange={() => {
+                setLang('es');
+                changeLanguage('es');
+              }}
+            />
+            <SwitchRow
+              label={S.portuguese}
+              value={currentLanguage === 'pt'}
+              onValueChange={() => {
+                setLang('pt');
+                changeLanguage('pt');
+              }}
+            />
+            <SwitchRow
+              label={S.french}
+              value={currentLanguage === 'fr'}
+              onValueChange={() => {
+                setLang('fr');
+                changeLanguage('fr');
+              }}
+            />
+            <SwitchRow
+              label={S.german}
+              value={currentLanguage === 'de'}
+              onValueChange={() => {
+                setLang('de');
+                changeLanguage('de');
+              }}
+            />
+            <SwitchRow
+              label={S.chinese}
+              value={currentLanguage === 'zh'}
+              onValueChange={() => {
+                setLang('zh');
+                changeLanguage('zh');
+              }}
+            />
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.help} sectionKey="help" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.emailUs}</DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{S.emailAddress}</DynamicText>
+          </View>
+        </CollapsibleSection>
+        
+        <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
+          <TouchableOpacity 
+            onPress={handleSignOut}
+            style={[styles.settingsButton, {
+              backgroundColor: '#dc2626',
+              borderColor: '#b91c1c',
+              borderWidth: 2,
+              borderRadius: 18,
+              paddingVertical: 16,
+              paddingHorizontal: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#dc2626',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5
+            }]}
+          >
+            <DynamicText type="card" style={{ 
+              fontFamily: 'Inter_700Bold',
+              color: '#ffffff',
+              fontSize: 16,
+              textAlign: 'center'
+            }}>
+              {S.signOut}
+            </DynamicText>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  };
+
+  const Section = ({ title, children }) => {
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    return (
+      <View style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
+        <DynamicText type="card" style={[styles.sectionTitle, { fontFamily: 'Inter_700Bold' }]}>{title}</DynamicText>
+        {children}
+      </View>
+    );
+  };
+
+  
+
+
   const RowSwitch = ({ label, value, onToggle }) => (
     <TouchableOpacity style={styles.rowBetween} onPress={onToggle}>
-      <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{label}</Text>
+      <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>{label}</DynamicText>
       <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: value ? theme.accent : theme.chip }} />
     </TouchableOpacity>
   );
 
   const SwitchRow = ({ label, value, onValueChange }) => (
     <View style={styles.rowBetween}>
-      <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{label}</Text>
+      <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>{label}</DynamicText>
       <Switch value={value} onValueChange={onValueChange} />
     </View>
   );
@@ -3405,7 +4450,7 @@ function trimTo(str, n) {
 }
 
   // final return (inside the App function)
-return !fontsLoaded ? (
+  return !fontsLoaded ? (
   <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'#222' }}>
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
@@ -3419,7 +4464,17 @@ return !fontsLoaded ? (
     />
     
     {/* Authentication Screen - Show first */}
-        {showAuth ? (
+        {isRestoringAuth ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+            <Text style={{ color: '#D4AF37', fontSize: 18, fontFamily: 'Inter_600SemiBold', marginBottom: 20 }}>
+              🔄 Restoring your session...
+            </Text>
+            <Text style={{ color: '#D4AF37', fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7, textAlign: 'center', paddingHorizontal: 40, marginBottom: 20 }}>
+              Checking if you're already signed in
+            </Text>
+            <ActivityIndicator size="large" color="#D4AF37" />
+          </View>
+        ) : showAuth ? (
           <SignInScreen
             onAuthSuccess={handleAuthSuccess}
             onClose={handleAuthClose}
@@ -3434,7 +4489,7 @@ return !fontsLoaded ? (
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
      route === 'settings' ? <Settings /> :
-     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
+     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
      route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
@@ -3442,8 +4497,8 @@ return !fontsLoaded ? (
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} theme={theme} /> :
-    route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} currentUser={user} /> :
+    route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
+    route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
      <Dashboard />}
 
         {/* Floating AI button */}
@@ -3678,7 +4733,7 @@ card: {
   },
   cardText: { fontSize: 18, textAlign: 'center' },
 
-  headerTitle: { fontSize: 36 },
+  headerTitle: { fontSize: 18 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -3689,8 +4744,15 @@ card: {
     justifyContent: 'space-between',
   },
 
-  section: { borderWidth: 2, borderRadius: 16, padding: 12, marginBottom: 12 },
-  sectionTitle: { fontSize: 16, marginBottom: 8 },
+  section: { borderWidth: 2, borderRadius: 18, padding: 16, marginBottom: 12 },
+  sectionTitle: { fontSize: 18, marginBottom: 8, textAlign: 'center' },
+  sectionHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingVertical: 12,
+    paddingHorizontal: 4
+  },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 },
 
   form: { borderWidth: 2, borderRadius: 16, padding: 12, marginBottom: 16 },

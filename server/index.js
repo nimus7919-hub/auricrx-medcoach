@@ -118,19 +118,79 @@ function haversineMi(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+// Function to get detailed place information using Google Places API (New) - Place Details
+async function getPlaceDetails(placeId, apiKey) {
+  try {
+    const url = `https://places.googleapis.com/v1/places/${placeId}`;
+    
+    console.log('🔍 Places API (New) - Place Details for:', placeId);
+    console.log('🌐 Places API (New) Place Details Endpoint:', url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'id,displayName,formattedAddress,nationalPhoneNumber,internationalPhoneNumber,websiteUri,rating,regularOpeningHours'
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Place Details API HTTP Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorBody: errorText
+      });
+      throw new Error(`Place Details API HTTP ${response.status}: ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('📥 Places API (New) - Place Details Response:', {
+      apiName: 'Places API (New)',
+      endpoint: 'Place Details',
+      place_id: placeId,
+      name: data.displayName?.text,
+      nationalPhoneNumber: data.nationalPhoneNumber,
+      internationalPhoneNumber: data.internationalPhoneNumber,
+      websiteUri: data.websiteUri,
+      rating: data.rating,
+      hasPhoneNumber: !!(data.nationalPhoneNumber || data.internationalPhoneNumber),
+      fullResponse: data
+    });
+    
+    if (data) {
+      return {
+        phone: data.nationalPhoneNumber || data.internationalPhoneNumber,
+        website: data.websiteUri,
+        rating: data.rating,
+        openingHours: data.regularOpeningHours?.weekdayDescriptions
+      };
+    }
+    
+    return { phone: null, website: null, rating: null, openingHours: null };
+  } catch (error) {
+    console.error('❌ Place Details API failed:', error.message);
+    return { phone: null, website: null, rating: null, openingHours: null };
+  }
+}
+
 async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCache = true } = {}) {
+  console.log('🚀 STARTING fetchNearbyPharmacies:', { lat, lon, limit, lang, useCache });
+  console.log('🔥 THIS IS THE PHARMACY SEARCH FUNCTION - IF YOU SEE THIS, THE SERVER IS WORKING!');
   const key = `${lat.toFixed(3)}:${lon.toFixed(3)}`;
   const now = Date.now();
   if (useCache) {
     const cached = pharmacyCache.get(key);
     if (cached && now - cached.ts < PHARMACY_CACHE_TTL_MS) {
+      console.log('📦 Using cached pharmacy data');
       return { list: cached.data.slice(0, limit), cached: true, mock: false };
     }
   }
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  console.log('🔑 API Key status:', apiKey ? 'Present' : 'Missing');
+  console.log('🔑 API Key value (first 10 chars):', apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING');
   if (!apiKey) {
-    console.warn('Nearby pharmacies: no API key present – returning mock data.');
+    console.warn('❌ Nearby pharmacies: no API key present – returning mock data.');
     const mock = [
       { id: "mock-cvs", name: "CVS Pharmacy", lat: lat + 0.015, lon: lon + 0.015, address: "123 Main St", distanceMiles: 0.8 },
       { id: "mock-wal", name: "Walgreens", lat: lat + 0.025, lon: lon - 0.010, address: "45 Oak Ave", distanceMiles: 1.1 },
@@ -156,16 +216,30 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
     let legacyError = null;
     try {
       const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&type=pharmacy&language=${encodeURIComponent(lang)}&key=${apiKey}`;
+      console.log('🔍 SKIPPING Legacy Places API (nearbysearch) - Using Places API (New) only');
+      console.log(`📍 Legacy Places API URL: ${url}`);
+      console.log('🔥 SKIPPING LEGACY API - GOING STRAIGHT TO PLACES API (NEW)!');
       console.log(`Places API (legacy) fetch: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} lang=${lang} limit=${limit}`);
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`Places API HTTP ${resp.status}`);
-      const json = await resp.json();
-      console.log('Places API (legacy) status:', json.status, 'results:', json.results?.length);
+      // Skip legacy API entirely - go straight to Places API (New)
+      throw new Error('SKIP_LEGACY_API');
       if (json.status === 'OK' || json.status === 'ZERO_RESULTS') {
         const places = (json.results || []).slice(0, limit).map(p => {
           const plat = p.geometry?.location?.lat;
           const plon = p.geometry?.location?.lng;
           const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+          
+          // Debug logging for pharmacy data
+          console.log('🔍 Pharmacy API Response DEBUG:', {
+            name: p.name,
+            formatted_phone_number: p.formatted_phone_number,
+            website: p.website,
+            rating: p.rating,
+            vicinity: p.vicinity,
+            formatted_address: p.formatted_address,
+            place_id: p.place_id,
+            fullPlaceObject: p
+          });
+          
           return {
             id: p.place_id,
             name: p.name,
@@ -173,6 +247,9 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
             lon: plon,
             address: p.vicinity || p.formatted_address || '',
             distanceMiles: dist ? Number(dist.toFixed(2)) : undefined,
+            phone: p.formatted_phone_number, // This will be null from nearbysearch
+            website: p.website, // This will be null from nearbysearch
+            rating: p.rating, // This will be null from nearbysearch
             logoUrl: null,
           };
         });
@@ -206,8 +283,38 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
           }
         }
 
-        if (useCache) pharmacyCache.set(key, { data: places, ts: now });
-        return { list: places, cached: false, mock: false, apiVersion: 'legacy', legacyStatus: json.status };
+        // Fetch detailed information for each place using Place Details API
+        console.log('🔍 Fetching place details for', places.length, 'pharmacies...');
+        const placesWithDetails = await Promise.all(places.map(async (place) => {
+          const details = await getPlaceDetails(place.id, apiKey);
+          return {
+            ...place,
+            phone: details.phone,
+            website: details.website,
+            rating: details.rating,
+            openingHours: details.openingHours
+          };
+        }));
+        
+        console.log('🔍 Final pharmacy data with details:', placesWithDetails.map(p => ({
+          name: p.name,
+          phone: p.phone,
+          website: p.website,
+          rating: p.rating
+        })));
+
+      console.log('✅ SUCCESS: Legacy Places API completed');
+      console.log('📊 Final Results:', {
+        apiName: 'Legacy Places API',
+        apiVersion: 'legacy',
+        placesCount: placesWithDetails.length,
+        withPhoneNumbers: placesWithDetails.filter(p => p.phone).length,
+        withWebsites: placesWithDetails.filter(p => p.website).length,
+        withRatings: placesWithDetails.filter(p => p.rating).length
+      });
+
+        if (useCache) pharmacyCache.set(key, { data: placesWithDetails, ts: now });
+        return { list: placesWithDetails, cached: false, mock: false, apiVersion: 'legacy', legacyStatus: json.status };
       } else {
         legacyError = json.status;
       }
@@ -217,24 +324,47 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
 
     // Fallback to Places API (New) if legacy failed & new might be enabled.
     try {
-      console.log('Attempting Places API (New) fallback. Legacy error:', legacyError);
+      console.log('🔄 ATTEMPTING Places API (New) - searchNearby (PRIMARY METHOD)');
+      console.log('❌ Legacy error:', legacyError);
+      console.log('🔥 CALLING PLACES API (NEW) - IF YOU SEE THIS, THE SERVER IS WORKING!');
       const body = {
         includedTypes: ['pharmacy'],
         maxResultCount: Math.min(limit, 20),
         languageCode: lang,
         locationRestriction: { circle: { center: { latitude: lat, longitude: lon }, radius: radius * 1.0 } },
       };
+      console.log('📡 Places API (New) Request Body:', JSON.stringify(body, null, 2));
+      console.log('📡 Places API (New) Headers (BASIC DATA ONLY - NO CONTACT FIELDS):', {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey ? 'Present' : 'Missing',
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating'
+      });
+      console.log('🌐 Places API (New) Endpoint: https://places.googleapis.com/v1/places:searchNearby');
+      
       const newResp = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.location,places.formattedAddress'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating'
         },
         body: JSON.stringify(body)
       });
       if (!newResp.ok) throw new Error(`New Places HTTP ${newResp.status}`);
       const j = await newResp.json();
+      console.log('📥 Places API (New) Response (BASIC DATA ONLY):', {
+        apiName: 'Places API (New)',
+        endpoint: 'searchNearby',
+        status: 'Success',
+        placesCount: j.places?.length || 0,
+        firstPlace: j.places?.[0] ? {
+          id: j.places[0].id,
+          name: j.places[0].displayName?.text,
+          address: j.places[0].formattedAddress,
+          rating: j.places[0].rating
+        } : null
+      });
+      
       const placesArr = (j.places || []).map(p => {
         const plat = p.location?.latitude;
         const plon = p.location?.longitude;
@@ -246,12 +376,79 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
           lon: plon,
           address: p.formattedAddress || '',
           distanceMiles: dist ? Number(dist.toFixed(2)) : undefined,
+          rating: p.rating,
           logoUrl: null,
         };
       });
+
+      // Get actual driving distances using Distance Matrix API (low cost)
+      if (placesArr.length > 0) {
+        try {
+          console.log('🗺️ Fetching driving distances using Distance Matrix API...');
+          console.log('🗺️ Number of pharmacies to calculate:', placesArr.length);
+          const origins = `${lat},${lon}`;
+          const destinations = placesArr.map(p => `${p.lat},${p.lon}`).join('|');
+          const distUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&units=metric&key=${apiKey}`;
+          console.log('🗺️ Distance Matrix API URL:', distUrl.replace(apiKey, 'API_KEY_HIDDEN'));
+          const distResp = await fetch(distUrl);
+          console.log('🗺️ Distance Matrix API response status:', distResp.status);
+          
+          if (distResp.ok) {
+            const distanceJson = await distResp.json();
+            console.log('🗺️ Distance Matrix API status:', distanceJson.status);
+            console.log('🗺️ Distance Matrix API rows:', distanceJson.rows?.length || 0);
+            
+            if (distanceJson.status === 'OK' && distanceJson.rows?.[0]?.elements) {
+              console.log('🗺️ Distance Matrix API elements:', distanceJson.rows[0].elements.length);
+              placesArr.forEach((place, index) => {
+                const element = distanceJson.rows[0].elements[index];
+                console.log(`🗺️ Processing ${place.name}: element status = ${element.status}`);
+                if (element.status === 'OK' && element.distance) {
+                  // Convert meters to km and miles
+                  const distanceKm = element.distance.value / 1000;
+                  const distanceMiles = distanceKm * 0.621371;
+                  const oldDistance = place.distanceMiles;
+                  place.distanceMiles = Number(distanceMiles.toFixed(2));
+                  console.log(`📍 ${place.name}: ${oldDistance}km (straight) → ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} mi) - DRIVING distance`);
+                } else {
+                  console.warn(`⚠️ ${place.name}: Distance element status = ${element.status}, keeping straight-line distance`);
+                }
+              });
+            } else {
+              console.warn('⚠️ Distance Matrix API returned status:', distanceJson.status, '- using straight-line distances');
+            }
+          } else {
+            const errorText = await distResp.text();
+            console.warn('⚠️ Distance Matrix API failed with status:', distResp.status, 'Error:', errorText);
+          }
+        } catch (e) {
+          console.warn('⚠️ Distance Matrix API error:', e.message, '- using straight-line distances');
+        }
+      }
+
+      // REMOVED: Place Details API calls to save costs
+      // We only use basic data from searchNearby (name, address, location, rating)
+      console.log('💰 Skipping Place Details API calls to save costs');
+      console.log('📊 Final pharmacy data (BASIC DATA ONLY):', placesArr.slice(0, 3).map(p => ({
+        name: p.name,
+        address: p.address,
+        distance: p.distanceMiles,
+        rating: p.rating
+      })));
+
+      console.log('✅ SUCCESS: Places API (New) completed (PRIMARY METHOD - BASIC DATA ONLY)');
+      console.log('📊 Final Results:', {
+        apiName: 'Places API (New)',
+        apiVersion: 'new',
+        method: 'PRIMARY',
+        dataType: 'BASIC (no contact fields)',
+        placesCount: placesArr.length,
+        withRatings: placesArr.filter(p => p.rating).length
+      });
+      
       console.log('Places API (New) results:', placesArr.length);
       if (useCache) pharmacyCache.set(key, { data: placesArr, ts: now });
-      return { list: placesArr.slice(0, limit), cached: false, mock: false, apiVersion: 'new', legacyError };
+      return { list: placesArr.slice(0, limit), cached: false, mock: false, apiVersion: 'new' };
     } catch (e2) {
       console.error('Places API (New) fallback failed:', e2.message);
       throw new Error('places_failed');
@@ -260,6 +457,8 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
 
 // Fetch nearby medical laboratories using Google Places API
 async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = true } = {}) {
+  console.log('🧪 STARTING fetchNearbyLabs:', { lat, lon, limit, lang, useCache });
+  console.log('🔥 THIS IS THE LABS SEARCH FUNCTION - IF YOU SEE THIS, THE SERVER IS WORKING!');
   const key = `labs:${lat.toFixed(3)}:${lon.toFixed(3)}`;
   const now = Date.now();
   if (useCache) {
@@ -308,6 +507,18 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
         const plat = p.geometry?.location?.lat;
         const plon = p.geometry?.location?.lng;
         const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+        
+        // Debug logging for lab data
+        console.log('🔍 Lab API Response DEBUG:', {
+          name: p.name,
+          formatted_phone_number: p.formatted_phone_number,
+          website: p.website,
+          rating: p.rating,
+          vicinity: p.vicinity,
+          formatted_address: p.formatted_address,
+          fullPlaceObject: p
+        });
+        
         return {
           id: p.place_id,
           name: p.name,
@@ -387,9 +598,29 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
         }
       }
       
-      console.log('Labs API results:', labs.length);
-      if (useCache) pharmacyCache.set(key, { data: labs, ts: now });
-      return { list: labs.slice(0, limit), cached: false, mock: false };
+      // Fetch detailed information for each lab using Place Details API
+      console.log('🔍 Fetching place details for', labs.length, 'labs...');
+      const labsWithDetails = await Promise.all(labs.map(async (lab) => {
+        const details = await getPlaceDetails(lab.id, apiKey);
+        return {
+          ...lab,
+          phone: details.phone,
+          website: details.website,
+          rating: details.rating,
+          openingHours: details.openingHours
+        };
+      }));
+      
+      console.log('🔍 Final lab data with details:', labsWithDetails.map(l => ({
+        name: l.name,
+        phone: l.phone,
+        website: l.website,
+        rating: l.rating
+      })));
+
+      console.log('Labs API results:', labsWithDetails.length);
+      if (useCache) pharmacyCache.set(key, { data: labsWithDetails, ts: now });
+      return { list: labsWithDetails.slice(0, limit), cached: false, mock: false };
     } else {
       throw new Error(`Labs API error: ${json.status}`);
     }
@@ -448,6 +679,9 @@ app.get('/pharmacies/nearby', async (req, res) => {
               lon: plon,
               address: r.vicinity || r.formatted_address || '',
               distanceMiles: Number(dist.toFixed(2)),
+              phone: r.formatted_phone_number,
+              website: r.website,
+              rating: r.rating,
               logoUrl: null,
             });
           }
@@ -463,6 +697,16 @@ app.get('/pharmacies/nearby', async (req, res) => {
 
   // Ensure deterministic ordering (distance ascending) before slicing so client price sorting starts consistent
   list.sort((a,b)=> (a.distanceMiles||0) - (b.distanceMiles||0));
+  
+  // Debug logging for final pharmacy data being sent to client
+  console.log('🔍 Final Pharmacy Data Sent to Client:', list.slice(0, limit).map(p => ({
+    name: p.name,
+    phone: p.phone,
+    website: p.website,
+    rating: p.rating,
+    address: p.address
+  })));
+  
   res.json({ ok: true, pharmacies: list.slice(0, limit), meta: { mock, cached, count: list.length, addedBrands } });
   } catch (e) {
     console.error('nearby error', e.message);
@@ -477,6 +721,16 @@ app.get('/labs/nearby', async (req, res) => {
   
   try {
     const result = await fetchNearbyLabs(Number(lat), Number(lon), Number(limit), lang);
+    
+    // Debug logging for final lab data being sent to client
+    console.log('🔍 Final Lab Data Sent to Client:', result.list.map(l => ({
+      name: l.name,
+      phone: l.phone,
+      website: l.website,
+      rating: l.rating,
+      address: l.address
+    })));
+    
     res.json({ ok: true, labs: result.list, meta: { mock: result.mock, cached: result.cached, count: result.list.length } });
   } catch (e) {
     console.error('labs nearby error', e.message);
@@ -1426,4 +1680,5 @@ app.get('/debug/storage', (_req, res) => {
 
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
+  console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');
 });
