@@ -13,13 +13,6 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   
-  // Debug wallpaper theming
-  useEffect(() => {
-    console.log('🎨 MEDICATIONS DEBUG - Current wallpaper:', currentWallpaper);
-    console.log('🎨 MEDICATIONS DEBUG - Card background color:', getCardBackgroundColor());
-    console.log('🎨 MEDICATIONS DEBUG - Card text color:', getCardTextColor());
-    console.log('🎨 MEDICATIONS DEBUG - Card border color:', getCardBorderColor());
-  }, [currentWallpaper, getCardBackgroundColor, getCardTextColor, getCardBorderColor]);
   useEffect(() => {
     mounted.current += 1;
     console.log(`[MEDICATIONS] MOUNT #${mounted.current}`);
@@ -534,31 +527,20 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   ref={addMedNameRef}
-                  placeholder={(() => {
-                    const placeholder = S.medicationName;
-                    console.log('🎨 PLACEHOLDER DEBUG - medicationName:', placeholder, 'S object:', S);
-                    return placeholder;
-                  })()}
+                  placeholder={S.medicationName}
                   placeholderTextColor={getSubTextColor()}
                   value={addForm.name}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
-                  style={(() => {
-                    const bgColor = getCardBackgroundColor();
-                    const textColor = getCardTextColor();
-                    const borderColor = getCardBorderColor();
-                    const placeholderColor = getSubTextColor();
-                    console.log('🎨 TextInput DEBUG - bgColor:', bgColor, 'textColor:', textColor, 'borderColor:', borderColor, 'placeholderColor:', placeholderColor);
-                    return {
-                      backgroundColor: bgColor,
-                      borderRadius: 12,
-                      padding: 16,
-                      marginBottom: 12,
-                      color: textColor,
-                      fontFamily: 'Inter_400Regular',
-                      borderWidth: 1,
-                      borderColor: borderColor
-                    };
-                  })()}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
+                  }}
                   onFocus={() => {
                     console.log('Input focused');
                     setInputFocused(true);
@@ -577,11 +559,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 />
 
                 <TextInput
-                  placeholder={(() => {
-                    const placeholder = S.strengthExample;
-                    console.log('🎨 PLACEHOLDER DEBUG - strengthExample:', placeholder);
-                    return placeholder;
-                  })()}
+                  placeholder={S.strengthExample}
                   placeholderTextColor={getSubTextColor()}
                   value={addForm.strength}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, strength: text }))}

@@ -162,9 +162,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
 
   const getSubTextColor = (): string => {
     const textColor = getTextColor();
-    const subColor = textColor === '#ffffff' ? '#e0e0e0' : '#666666';
-    console.log('🎨 getSubTextColor - textColor:', textColor, 'returning:', subColor);
-    return subColor; // Medium gray for placeholder text visibility
+    return textColor === '#ffffff' ? '#e0e0e0' : '#666666'; // Medium gray for placeholder text visibility
   };
 
   const getAccentColor = (): string => {
@@ -192,41 +190,31 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     // If card background is dark, use light text
     // If card background is light, use dark text
     if (cardBgColor === '#2a2a2a' || cardBgColor === '#1a1a1a' || cardBgColor === '#0d2424' || cardBgColor === '#121a33') {
-      console.log('🎨 getCardTextColor - Dark card, returning white text');
       return '#ffffff'; // Light text for dark cards
     } else {
-      console.log('🎨 getCardTextColor - Light card, returning black text');
       return '#000000'; // Pure black text for light cards for better visibility
     }
   };
 
   const getCardBackgroundColor = (): string => {
     if (!currentWallpaper) {
-      console.log('🎨 getCardBackgroundColor - No wallpaper, returning white');
       return '#ffffff'; // Default white
     }
 
     if (currentWallpaper.type === 'color') {
       // For the default gold theme, use white cards
       if (currentWallpaper.id === 'default_gold') {
-        console.log('🎨 getCardBackgroundColor - Default gold theme, returning white');
         return '#ffffff';
       }
-      const isLight = isLightColor(currentWallpaper.value);
-      const cardColor = isLight ? '#ffffff' : '#2a2a2a';
-      console.log('🎨 getCardBackgroundColor - Color wallpaper:', currentWallpaper.value, 'isLight:', isLight, 'returning:', cardColor);
-      return cardColor;
+      return isLightColor(currentWallpaper.value) ? '#ffffff' : '#2a2a2a';
     } else {
       // For image wallpapers, use smart defaults
       const imageName = currentWallpaper.value.toLowerCase();
       if (imageName.includes('black') || imageName.includes('dark')) {
-        console.log('🎨 getCardBackgroundColor - Dark image wallpaper, returning dark card');
         return '#2a2a2a'; // Dark card for dark wallpapers
       } else if (imageName.includes('white') || imageName.includes('cream')) {
-        console.log('🎨 getCardBackgroundColor - Light image wallpaper, returning white card');
         return '#ffffff'; // White card for light wallpapers
       } else {
-        console.log('🎨 getCardBackgroundColor - Unknown image wallpaper, defaulting to white');
         return '#ffffff'; // Default to white for complex images
       }
     }
