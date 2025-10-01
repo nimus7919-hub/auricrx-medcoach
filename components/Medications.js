@@ -11,7 +11,15 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onNavigateToDashboard, onNavigateToSettings, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, currentWallpaper } = useWallpaper();
+  
+  // Debug wallpaper theming
+  useEffect(() => {
+    console.log('🎨 MEDICATIONS DEBUG - Current wallpaper:', currentWallpaper);
+    console.log('🎨 MEDICATIONS DEBUG - Card background color:', getCardBackgroundColor());
+    console.log('🎨 MEDICATIONS DEBUG - Card text color:', getCardTextColor());
+    console.log('🎨 MEDICATIONS DEBUG - Card border color:', getCardBorderColor());
+  }, [currentWallpaper, getCardBackgroundColor, getCardTextColor, getCardBorderColor]);
   useEffect(() => {
     mounted.current += 1;
     console.log(`[MEDICATIONS] MOUNT #${mounted.current}`);
