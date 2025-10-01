@@ -1321,126 +1321,179 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         )}
       </ScrollView>
 
-      {/* Dropdown Overlay */}
-      {(showStrengthUnitDropdown || showQuantityUnitDropdown) && (
-        <TouchableOpacity
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 99999,
-          }}
-          activeOpacity={1}
-          onPress={() => {
-            setShowStrengthUnitDropdown(false);
-            setShowQuantityUnitDropdown(false);
-          }}
-        />
-      )}
+      {/* Dropdown Components */}
+      <StrengthUnitDropdown
+        visible={showStrengthUnitDropdown}
+        units={strengthUnits}
+        selectedUnit={addForm.strengthUnit}
+        onSelect={(unit) => setAddForm(prev => ({ ...prev, strengthUnit: unit }))}
+        onClose={() => setShowStrengthUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+      />
 
-      {/* Strength Unit Dropdown */}
-      {showStrengthUnitDropdown && (
-        <View style={{
+      <QuantityUnitDropdown
+        visible={showQuantityUnitDropdown}
+        units={quantityUnits}
+        selectedUnit={addForm.quantityUnit}
+        onSelect={(unit) => setAddForm(prev => ({ ...prev, quantityUnit: unit }))}
+        onClose={() => setShowQuantityUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+      />
+    </View>
+  );
+};
+
+// Dropdown components rendered outside the main component
+const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor }) => {
+  if (!visible) return null;
+  
+  return (
+    <View style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 999999,
+    }}>
+      <TouchableOpacity
+        style={{
           position: 'absolute',
-          top: 200, // Position under the strength field
-          right: 16,
-          left: 16,
-          backgroundColor: getCardBackgroundColor(),
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: getCardBorderColor(),
-          maxHeight: 150,
-          zIndex: 100000,
-          elevation: 50,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.4,
-          shadowRadius: 4,
-        }}>
-          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
-            {strengthUnits.map((unit, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  setAddForm(prev => ({ ...prev, strengthUnit: unit }));
-                  setShowStrengthUnitDropdown(false);
-                }}
-                style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  borderBottomWidth: index < strengthUnits.length - 1 ? 0.5 : 0,
-                  borderBottomColor: getCardBorderColor(),
-                  backgroundColor: addForm.strengthUnit === unit ? theme.accent + '20' : 'transparent'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.3)',
+        }}
+        activeOpacity={1}
+        onPress={onClose}
+      />
+      <View style={{
+        position: 'absolute',
+        top: 200,
+        right: 16,
+        left: 16,
+        backgroundColor: getCardBackgroundColor(),
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: getCardBorderColor(),
+        maxHeight: 150,
+        elevation: 50,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+      }}>
+        <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          {units.map((unit, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                onSelect(unit);
+                onClose();
+              }}
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
+                borderBottomColor: getCardBorderColor(),
+                backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
+              }}
+            >
+              <DynamicText 
+                type="card" 
+                style={{ 
+                  fontSize: 12,
+                  color: selectedUnit === unit ? theme.accent : getCardTextColor(),
+                  fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                 }}
               >
-                <DynamicText 
-                  type="card" 
-                  style={{ 
-                    fontSize: 12,
-                    color: addForm.strengthUnit === unit ? theme.accent : getCardTextColor(),
-                    fontFamily: addForm.strengthUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
-                  }}
-                >
-                  {unit}
-                </DynamicText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+                {unit}
+              </DynamicText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
+  );
+};
 
-      {/* Quantity Unit Dropdown */}
-      {showQuantityUnitDropdown && (
-        <View style={{
+const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor }) => {
+  if (!visible) return null;
+  
+  return (
+    <View style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 999999,
+    }}>
+      <TouchableOpacity
+        style={{
           position: 'absolute',
-          top: 350, // Position under the quantity field
-          right: 16,
-          left: 16,
-          backgroundColor: getCardBackgroundColor(),
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: getCardBorderColor(),
-          maxHeight: 150,
-          zIndex: 100000,
-          elevation: 50,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.4,
-          shadowRadius: 4,
-        }}>
-          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
-            {quantityUnits.map((unit, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  setAddForm(prev => ({ ...prev, quantityUnit: unit }));
-                  setShowQuantityUnitDropdown(false);
-                }}
-                style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  borderBottomWidth: index < quantityUnits.length - 1 ? 0.5 : 0,
-                  borderBottomColor: getCardBorderColor(),
-                  backgroundColor: addForm.quantityUnit === unit ? theme.accent + '20' : 'transparent'
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.3)',
+        }}
+        activeOpacity={1}
+        onPress={onClose}
+      />
+      <View style={{
+        position: 'absolute',
+        top: 350,
+        right: 16,
+        left: 16,
+        backgroundColor: getCardBackgroundColor(),
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: getCardBorderColor(),
+        maxHeight: 150,
+        elevation: 50,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+      }}>
+        <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          {units.map((unit, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                onSelect(unit);
+                onClose();
+              }}
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
+                borderBottomColor: getCardBorderColor(),
+                backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
+              }}
+            >
+              <DynamicText 
+                type="card" 
+                style={{ 
+                  fontSize: 12,
+                  color: selectedUnit === unit ? theme.accent : getCardTextColor(),
+                  fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                 }}
               >
-                <DynamicText 
-                  type="card" 
-                  style={{ 
-                    fontSize: 12,
-                    color: addForm.quantityUnit === unit ? theme.accent : getCardTextColor(),
-                    fontFamily: addForm.quantityUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
-                  }}
-                >
-                  {unit}
-                </DynamicText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+                {unit}
+              </DynamicText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 };
