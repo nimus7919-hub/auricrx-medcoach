@@ -13,20 +13,19 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   
-  // Unit options for strength and quantity
+  // Unit options for strength and quantity (sorted alphabetically)
   const strengthUnits = [
-    'mg', 'mcg', 'g', 'mL', 'L', 'U', 'IU', 'USP units', 'mmol', 'mEq', 
-    'mg/mL', 'mg/5mL', 'mcg/mL', 'U/mL', 'IU/mL', 'mEq/L', 'mmol/L',
-    '% w/v', '% w/w', '% v/v', 'mg/kg', 'mcg/kg', 'U/kg', 'mg/m²',
-    'mL/hour', 'mg/hour', 'mcg/kg/min', 'U/hour', 'mcg/hour', 'mg/day',
-    'FTU', 'drops', 'puffs', 'actuations', 'units'
+    '% v/v', '% w/v', '% w/w', 'FTU', 'IU', 'IU/mL', 'L', 'U', 'U/kg', 'U/mL', 'U/hour',
+    'actuations', 'drops', 'g', 'mcg', 'mcg/kg', 'mcg/kg/min', 'mcg/hour', 'mcg/mL',
+    'mg', 'mg/kg', 'mg/m²', 'mg/day', 'mg/hour', 'mg/mL', 'mg/5mL', 'mL', 'mL/hour',
+    'mEq', 'mEq/L', 'mmol', 'mmol/L', 'puffs', 'units', 'USP units'
   ];
   
   const quantityUnits = [
-    'tablet', 'tablets', 'capsule', 'capsules', 'vial', 'vials', 'ampule', 'ampules',
-    'sachet', 'sachets', 'suppository', 'suppositories', 'pump', 'pumps',
-    'puff', 'puffs', 'drop', 'drops', 'unit', 'units', 'piece', 'pieces',
-    'strip', 'strips', 'bottle', 'bottles', 'pack', 'packs', 'box', 'boxes'
+    'ampule', 'ampules', 'bottle', 'bottles', 'box', 'boxes', 'capsule', 'capsules',
+    'drop', 'drops', 'pack', 'packs', 'piece', 'pieces', 'puff', 'puffs', 'pump', 'pumps',
+    'sachet', 'sachets', 'strip', 'strips', 'suppository', 'suppositories',
+    'tablet', 'tablets', 'unit', 'units', 'vial', 'vials'
   ];
   
   useEffect(() => {
