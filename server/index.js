@@ -493,83 +493,76 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
   }
 
   const radius = 5000; // meters (~3.1 mi)
+  
+  // Skip legacy API and use Places API (New) directly
   try {
-    // Search for medical laboratories and diagnostic centers with Mexican-specific terms
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&keyword=laboratorio clinico,centro diagnostico,laboratorio medico,analisis clinicos,laboratorio chopo,laboratorio polanco,salud digna,laboratorio simi,centro medico,laboratorio&language=${encodeURIComponent(lang)}&key=${apiKey}`;
-    console.log(`Labs API fetch: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} lang=${lang} limit=${limit}`);
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Labs API HTTP ${resp.status}`);
-    const json = await resp.json();
-    console.log('Labs API status:', json.status, 'results:', json.results?.length);
+    console.log('🔄 ATTEMPTING Places API (New) for labs - searchNearby (PRIMARY METHOD)');
+    console.log('🔥 CALLING PLACES API (NEW) FOR LABS!');
     
-    if (json.status === 'OK' || json.status === 'ZERO_RESULTS') {
-      let labs = (json.results || []).slice(0, limit).map(p => {
-        const plat = p.geometry?.location?.lat;
-        const plon = p.geometry?.location?.lng;
-        const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
-        
-        // Debug logging for lab data
-        console.log('🔍 Lab API Response DEBUG:', {
-          name: p.name,
-          formatted_phone_number: p.formatted_phone_number,
-          website: p.website,
-          rating: p.rating,
-          vicinity: p.vicinity,
-          formatted_address: p.formatted_address,
-          fullPlaceObject: p
-        });
-        
-        return {
-          id: p.place_id,
-          name: p.name,
-          lat: plat,
-          lon: plon,
-          address: p.vicinity || p.formatted_address || 'Address not available',
-          distanceMiles: dist,
-          rating: p.rating,
-          logoUrl: null
-        };
-      }).filter(lab => lab.lat && lab.lon); // Only include labs with valid coordinates
-      
-      // If no labs found with Spanish terms, try English terms as fallback
-      if (labs.length === 0) {
-        console.log('No labs found with Spanish terms, trying English fallback...');
-        try {
-          const fallbackUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&keyword=medical laboratory,diagnostic center,clinical lab,blood test,imaging center,pathology lab&language=${encodeURIComponent(lang)}&key=${apiKey}`;
-          const fallbackResp = await fetch(fallbackUrl);
-          if (fallbackResp.ok) {
-            const fallbackJson = await fallbackResp.json();
-            console.log('Fallback labs API status:', fallbackJson.status, 'results:', fallbackJson.results?.length);
-            if (fallbackJson.status === 'OK' && fallbackJson.results?.length > 0) {
-              labs = (fallbackJson.results || []).slice(0, limit).map(p => {
-                const plat = p.geometry?.location?.lat;
-                const plon = p.geometry?.location?.lng;
-                const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
-                return {
-                  id: p.place_id,
-                  name: p.name,
-                  lat: plat,
-                  lon: plon,
-                  address: p.vicinity || p.formatted_address || 'Address not available',
-                  distanceMiles: dist,
-                  rating: p.rating,
-                  logoUrl: null
-                };
-              }).filter(lab => lab.lat && lab.lon);
-            }
-          }
-        } catch (e) {
-          console.warn('Fallback labs search failed:', e.message);
-        }
-      }
-      
-      // Get actual driving distances using Distance Matrix API (low cost)
-      if (labs.length > 0) {
-        try {
-          console.log('🗺️ Fetching driving distances for labs using Distance Matrix API...');
-          console.log('🗺️ Number of labs to calculate:', labs.length);
-          const origins = `${lat},${lon}`;
-          const destinations = labs.map(lab => `${lab.lat},${lab.lon}`).join('|');
+    const body = {
+      includedTypes: ['medical_lab', 'hospital'], // Using new API types for labs
+      maxResultCount: Math.min(limit, 20),
+      languageCode: lang,
+      locationRestriction: { circle: { center: { latitude: lat, longitude: lon }, radius: radius * 1.0 } },
+    };
+    
+    console.log('📡 Places API (New) Request Body for Labs:', JSON.stringify(body, null, 2));
+    console.log('📡 Places API (New) Headers (BASIC DATA ONLY - NO CONTACT FIELDS):', {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey ? 'Present' : 'Missing',
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating'
+    });
+    console.log('🌐 Places API (New) Endpoint: https://places.googleapis.com/v1/places:searchNearby');
+    
+    const newResp = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating'
+      },
+      body: JSON.stringify(body)
+    });
+    
+    if (!newResp.ok) throw new Error(`Labs Places API (New) HTTP ${newResp.status}`);
+    const json = await newResp.json();
+    console.log('📥 Places API (New) Response for Labs (BASIC DATA ONLY):', {
+      apiName: 'Places API (New)',
+      endpoint: 'searchNearby',
+      status: 'Success',
+      placesCount: json.places?.length || 0,
+      firstPlace: json.places?.[0] ? {
+        id: json.places[0].id,
+        name: json.places[0].displayName?.text,
+        address: json.places[0].formattedAddress,
+        rating: json.places[0].rating
+      } : null
+    });
+    
+    // Parse Places API (New) format for labs
+    const labsArr = (json.places || []).map(p => {
+      const plat = p.location?.latitude;
+      const plon = p.location?.longitude;
+      const dist = (plat && plon) ? haversineMi(lat, lon, plat, plon) : null;
+      return {
+        id: p.id,
+        name: p.displayName?.text || 'Unknown',
+        lat: plat,
+        lon: plon,
+        address: p.formattedAddress || '',
+        distanceMiles: dist ? Number(dist.toFixed(2)) : undefined,
+        rating: p.rating,
+        logoUrl: null,
+      };
+    });
+
+    // Get actual driving distances using Distance Matrix API (low cost)
+    if (labsArr.length > 0) {
+      try {
+        console.log('🗺️ Fetching driving distances for labs using Distance Matrix API...');
+        console.log('🗺️ Number of labs to calculate:', labsArr.length);
+        const origins = `${lat},${lon}`;
+        const destinations = labsArr.map(lab => `${lab.lat},${lab.lon}`).join('|');
           const distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&units=metric&key=${apiKey}`;
           console.log('🗺️ Distance Matrix API URL:', distanceUrl.replace(apiKey, 'API_KEY_HIDDEN'));
           
@@ -583,7 +576,7 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
             
             if (distanceJson.status === 'OK' && distanceJson.rows?.[0]?.elements) {
               console.log('🗺️ Distance Matrix API elements:', distanceJson.rows[0].elements.length);
-              labs.forEach((lab, index) => {
+              labsArr.forEach((lab, index) => {
                 const element = distanceJson.rows[0].elements[index];
                 console.log(`🗺️ Processing ${lab.name}: element status = ${element.status}`);
                 if (element.status === 'OK' && element.distance) {
@@ -608,23 +601,29 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
           console.warn('⚠️ Distance Matrix API error:', e.message, '- using straight-line distances');
         }
       }
-      
-      // REMOVED: Place Details API calls to save costs
-      // We only use basic data from nearbysearch (name, address, location, rating)
-      console.log('💰 Skipping Place Details API calls for labs to save costs');
-      console.log('📊 Final lab data (BASIC DATA ONLY):', labs.slice(0, 3).map(l => ({
-        name: l.name,
-        address: l.address,
-        distance: l.distanceMiles,
-        rating: l.rating
-      })));
 
-      console.log('Labs API results:', labs.length);
-      if (useCache) pharmacyCache.set(key, { data: labs, ts: now });
-      return { list: labs.slice(0, limit), cached: false, mock: false };
-    } else {
-      throw new Error(`Labs API error: ${json.status}`);
-    }
+    // REMOVED: Place Details API calls to save costs
+    // We only use basic data from searchNearby (name, address, location, rating)
+    console.log('💰 Skipping Place Details API calls for labs to save costs');
+    console.log('📊 Final lab data (BASIC DATA ONLY):', labsArr.slice(0, 3).map(l => ({
+      name: l.name,
+      address: l.address,
+      distance: l.distanceMiles,
+      rating: l.rating
+    })));
+
+    console.log('✅ SUCCESS: Places API (New) completed for labs (PRIMARY METHOD - BASIC DATA ONLY)');
+    console.log('📊 Final Results:', {
+      apiName: 'Places API (New)',
+      apiVersion: 'new',
+      dataType: 'BASIC (no contact fields)',
+      placesCount: labsArr.length,
+      withRatings: labsArr.filter(l => l.rating).length
+    });
+
+    console.log('Labs API results:', labsArr.length);
+    if (useCache) pharmacyCache.set(key, { data: labsArr, ts: now });
+    return { list: labsArr.slice(0, limit), cached: false, mock: false, apiVersion: 'new' };
   } catch (e) {
     console.error('Labs API failed:', e.message);
     throw new Error('labs_api_failed');
