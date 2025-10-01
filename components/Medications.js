@@ -190,6 +190,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   // Unit dropdown states
   const [showStrengthUnitDropdown, setShowStrengthUnitDropdown] = useState(false);
   const [showQuantityUnitDropdown, setShowQuantityUnitDropdown] = useState(false);
+  const [showEditStrengthUnitDropdown, setShowEditStrengthUnitDropdown] = useState(false);
+  const [showEditQuantityUnitDropdown, setShowEditQuantityUnitDropdown] = useState(false);
 
   // Auto-focus name input when modal opens
   useEffect(() => {
@@ -343,13 +345,28 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const handleEditMed = () => {
     try {
       if (!editForm.name.trim()) return;
-      console.log('[MEDICATIONS DEBUG] Editing medication with quantity:', editForm.quantity);
+      console.log('[MEDICATIONS DEBUG] Editing medication with quantity:', editForm.quantityValue, editForm.quantityUnit);
       setMeds(prev => prev.map(med => 
         med.id === editForm.id 
-          ? { ...med, name: editForm.name.trim(), strength: editForm.strength.trim(), status: editForm.status, times: editTimes, startDate: editForm.startDate, endDate: editForm.endDate, notes: editForm.notes.trim(), dosesLeft: editForm.dosesLeft.trim(), quantity: editForm.quantity.trim() }
+          ? { 
+              ...med, 
+              name: editForm.name.trim(), 
+              strength: `${editForm.strengthValue.trim()} ${editForm.strengthUnit}`.trim(),
+              strengthValue: editForm.strengthValue.trim(),
+              strengthUnit: editForm.strengthUnit,
+              status: editForm.status, 
+              times: editTimes, 
+              startDate: editForm.startDate, 
+              endDate: editForm.endDate, 
+              notes: editForm.notes.trim(), 
+              dosesLeft: editForm.dosesLeft.trim(), 
+              quantity: `${editForm.quantityValue.trim()} ${editForm.quantityUnit}`.trim(),
+              quantityValue: editForm.quantityValue.trim(),
+              quantityUnit: editForm.quantityUnit
+            }
           : med
       ));
-      console.log('[MEDICATIONS DEBUG] Updated medication with quantity:', editForm.quantity);
+      console.log('[MEDICATIONS DEBUG] Updated medication with quantity:', editForm.quantityValue, editForm.quantityUnit);
       setShowEdit(false);
     } catch (error) {
       console.error('[MEDICATIONS] Error editing medication:', error);
@@ -583,7 +600,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 <TouchableOpacity
                   onPress={() => {
                     console.log('[MEDICATIONS DEBUG] Editing medication:', med.name, 'quantity:', med.quantity);
-                    setEditForm({ ...med, times: med.times.join(', ') });
+                    setEditForm({ 
+                      ...med, 
+                      times: med.times.join(', '),
+                      strengthValue: med.strengthValue || med.strength?.split(' ')[0] || '',
+                      strengthUnit: med.strengthUnit || med.strength?.split(' ').slice(1).join(' ') || 'mg',
+                      quantityValue: med.quantityValue || med.quantity?.split(' ')[0] || '',
+                      quantityUnit: med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || 'tablet'
+                    });
                     setEditTimes([...med.times]);
                     setShowEdit(true);
                   }}
@@ -1063,25 +1087,68 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   returnKeyType="next"
                 />
 
-                <TextInput
-                  placeholder={S.strengthExample}
-                  placeholderTextColor={getSubTextColor()}
-                  value={editForm.strength}
-                  onChangeText={(text) => setEditForm(prev => ({ ...prev, strength: text }))}
-                  style={{
-                    backgroundColor: getCardBackgroundColor(),
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    color: getCardTextColor(),
-                    fontFamily: 'Inter_400Regular',
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
+                {/* Strength Value and Unit */}
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                  <TextInput
+                    placeholder="500"
+                    placeholderTextColor={getSubTextColor()}
+                    value={editForm.strengthValue}
+                    onChangeText={(text) => setEditForm(prev => ({ ...prev, strengthValue: text }))}
+                    style={{
+                      flex: 1,
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      padding: 16,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_400Regular',
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor()
+                    }}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    keyboardType="numeric"
+                  />
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowEditStrengthUnitDropdown(true)}
+                    style={{
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor(),
+                      paddingHorizontal: 16,
+                      paddingVertical: 16,
+                      minWidth: 80,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      gap: 4
+                    }}
+                  >
+                    <DynamicText 
+                      type="card" 
+                      style={{ 
+                        fontSize: 14,
+                        color: getCardTextColor(),
+                        fontFamily: 'Inter_600SemiBold'
+                      }}
+                    >
+                      {editForm.strengthUnit}
+                    </DynamicText>
+                    <DynamicText 
+                      type="sub" 
+                      style={{ 
+                        fontSize: 12,
+                        color: getSubTextColor()
+                      }}
+                    >
+                      ▼
+                    </DynamicText>
+                  </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
                   onPress={() => {
@@ -1176,28 +1243,71 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   returnKeyType="default"
                 />
 
-                <TextInput
-                  placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
-                  placeholderTextColor={getSubTextColor()}
-                  value={editForm.quantity}
-                  onChangeText={(text) => {
-                    console.log('[MEDICATIONS DEBUG] Edit quantity input changed:', text);
-                    setEditForm(prev => ({ ...prev, quantity: text }));
-                  }}
-                  style={{
-                    backgroundColor: getCardBackgroundColor(),
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    color: getCardTextColor(),
-                    fontFamily: 'Inter_400Regular',
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
+                {/* Quantity Value and Unit */}
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                  <TextInput
+                    placeholder="30"
+                    placeholderTextColor={getSubTextColor()}
+                    value={editForm.quantityValue}
+                    onChangeText={(text) => {
+                      console.log('[MEDICATIONS DEBUG] Edit quantity input changed:', text);
+                      setEditForm(prev => ({ ...prev, quantityValue: text }));
+                    }}
+                    style={{
+                      flex: 1,
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      padding: 16,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_400Regular',
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor()
+                    }}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    keyboardType="numeric"
+                  />
+                  
+                  <TouchableOpacity
+                    onPress={() => setShowEditQuantityUnitDropdown(true)}
+                    style={{
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor(),
+                      paddingHorizontal: 16,
+                      paddingVertical: 16,
+                      minWidth: 80,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      gap: 4
+                    }}
+                  >
+                    <DynamicText 
+                      type="card" 
+                      style={{ 
+                        fontSize: 14,
+                        color: getCardTextColor(),
+                        fontFamily: 'Inter_600SemiBold'
+                      }}
+                    >
+                      {editForm.quantityUnit}
+                    </DynamicText>
+                    <DynamicText 
+                      type="sub" 
+                      style={{ 
+                        fontSize: 12,
+                        color: getSubTextColor()
+                      }}
+                    >
+                      ▼
+                    </DynamicText>
+                  </TouchableOpacity>
+                </View>
 
                 {/* Status Selection for Edit */}
                 <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', marginBottom: 8, marginTop: 8 }}>
@@ -1340,6 +1450,31 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         selectedUnit={addForm.quantityUnit}
         onSelect={(unit) => setAddForm(prev => ({ ...prev, quantityUnit: unit }))}
         onClose={() => setShowQuantityUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+      />
+
+      {/* Edit Dropdown Components */}
+      <StrengthUnitDropdown
+        visible={showEditStrengthUnitDropdown}
+        units={strengthUnits}
+        selectedUnit={editForm.strengthUnit}
+        onSelect={(unit) => setEditForm(prev => ({ ...prev, strengthUnit: unit }))}
+        onClose={() => setShowEditStrengthUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+      />
+
+      <QuantityUnitDropdown
+        visible={showEditQuantityUnitDropdown}
+        units={quantityUnits}
+        selectedUnit={editForm.quantityUnit}
+        onSelect={(unit) => setEditForm(prev => ({ ...prev, quantityUnit: unit }))}
+        onClose={() => setShowEditQuantityUnitDropdown(false)}
         theme={theme}
         getCardBackgroundColor={getCardBackgroundColor}
         getCardBorderColor={getCardBorderColor}
