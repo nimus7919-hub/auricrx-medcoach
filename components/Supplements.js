@@ -154,13 +154,17 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
     filter === 'all' || supp.status === filter
   );
 
-  const getSuppStatuses = () => [
-    { key: 'taking', label: S.taking, emoji: '💊', color: '#2dd4bf' },
-    { key: 'onhold', label: S.onHold, emoji: '⏸️', color: '#fbbf24' },
-    { key: 'prn', label: S.prn, emoji: '🕒', color: '#60a5fa' },
-    { key: 'finished', label: S.finished, emoji: '✅', color: '#a3e635' },
-    { key: 'stopped', label: S.stopped, emoji: '⛔', color: '#f87171' }
-  ];
+  const getSuppStatuses = () => {
+    const statuses = [
+      { key: 'taking', label: S.taking || 'Taking', emoji: '💊', color: '#2dd4bf' },
+      { key: 'onhold', label: S.onHold || 'On Hold', emoji: '⏸️', color: '#fbbf24' },
+      { key: 'prn', label: S.prn || 'PRN', emoji: '🕒', color: '#60a5fa' },
+      { key: 'finished', label: S.finished || 'Finished', emoji: '✅', color: '#a3e635' },
+      { key: 'stopped', label: S.stopped || 'Stopped', emoji: '⛔', color: '#f87171' }
+    ];
+    console.log('[SUPPLEMENTS] Status labels:', statuses.map(s => ({ key: s.key, label: s.label })));
+    return statuses;
+  };
 
   const getStatusObj = (status) => {
     return getSuppStatuses().find(s => s.key === status) || getSuppStatuses()[0];
@@ -716,9 +720,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
               <TouchableOpacity
                 key={status.key}
                 onPress={() => updateSupplementStatus(detailSupp?.id, status.key)}
-                style={[styles.section, { backgroundColor: theme.chip, marginBottom: 8, padding: 12 }]}
+                style={[styles.section, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor(), marginBottom: 8, padding: 12 }]}
               >
-                <DynamicText type="card" style={{ color: status.color, fontFamily: 'Inter_600SemiBold' }}>
+                <DynamicText type="card" style={{ color: getCardTextColor(), fontFamily: 'Inter_600SemiBold' }}>
                   {status.emoji} {status.label}
                 </DynamicText>
               </TouchableOpacity>
