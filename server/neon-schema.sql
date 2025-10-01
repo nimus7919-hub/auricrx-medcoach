@@ -78,14 +78,16 @@ CREATE TABLE IF NOT EXISTS user_medications (
   
   -- Medication data
   medication_name TEXT NOT NULL,
-  strength TEXT,
+  strength_value TEXT,
+  strength_unit TEXT,
   status TEXT NOT NULL, -- 'taking', 'onhold', 'finished', 'stopped'
   times TEXT[], -- Array of times like ['08:00', '20:00']
   start_date DATE,
   end_date DATE,
   notes TEXT,
   doses_left TEXT,
-  quantity TEXT,
+  quantity_value TEXT,
+  quantity_unit TEXT,
   last_refill DATE,
   
   -- Status
@@ -380,14 +382,16 @@ RETURNS TABLE (
   id TEXT,
   created_at TIMESTAMP WITH TIME ZONE,
   medication_name TEXT,
-  strength TEXT,
+  strength_value TEXT,
+  strength_unit TEXT,
   status TEXT,
   times TEXT[],
   start_date DATE,
   end_date DATE,
   notes TEXT,
   doses_left TEXT,
-  quantity TEXT,
+  quantity_value TEXT,
+  quantity_unit TEXT,
   last_refill DATE,
   is_active BOOLEAN
 ) AS $$
@@ -399,14 +403,16 @@ BEGIN
     um.id,
     um.created_at,
     um.medication_name,
-    um.strength,
+    um.strength_value,
+    um.strength_unit,
     um.status,
     um.times,
     um.start_date,
     um.end_date,
     um.notes,
     um.doses_left,
-    um.quantity,
+    um.quantity_value,
+    um.quantity_unit,
     um.last_refill,
     um.is_active
   FROM user_medications um

@@ -13,6 +13,22 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   
+  // Unit options for strength and quantity
+  const strengthUnits = [
+    'mg', 'mcg', 'g', 'mL', 'L', 'U', 'IU', 'USP units', 'mmol', 'mEq', 
+    'mg/mL', 'mg/5mL', 'mcg/mL', 'U/mL', 'IU/mL', 'mEq/L', 'mmol/L',
+    '% w/v', '% w/w', '% v/v', 'mg/kg', 'mcg/kg', 'U/kg', 'mg/m²',
+    'mL/hour', 'mg/hour', 'mcg/kg/min', 'U/hour', 'mcg/hour', 'mg/day',
+    'FTU', 'drops', 'puffs', 'actuations', 'units'
+  ];
+  
+  const quantityUnits = [
+    'tablet', 'tablets', 'capsule', 'capsules', 'vial', 'vials', 'ampule', 'ampules',
+    'sachet', 'sachets', 'suppository', 'suppositories', 'pump', 'pumps',
+    'puff', 'puffs', 'drop', 'drops', 'unit', 'units', 'piece', 'pieces',
+    'strip', 'strips', 'bottle', 'bottles', 'pack', 'packs', 'box', 'boxes'
+  ];
+  
   useEffect(() => {
     mounted.current += 1;
     console.log(`[MEDICATIONS] MOUNT #${mounted.current}`);
@@ -68,7 +84,19 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   useEffect(() => {
     console.log('[MEDICATIONS] Modal state changed - showAdd:', showAdd);
     if (showAdd) {
-      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
+      setAddForm({ 
+        name:'', 
+        strengthValue:'', 
+        strengthUnit:'mg', 
+        times:'', 
+        status:'taking', 
+        startDate:'', 
+        endDate:'', 
+        notes:'', 
+        dosesLeft:'', 
+        quantityValue:'', 
+        quantityUnit:'tablet' 
+      });
     } else {
       setInputFocused(false); // Reset input focus when modal closes
     }
@@ -93,7 +121,19 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   }, []);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [holdUntil, setHoldUntil] = useState('');
-  const [addForm, setAddForm] = useState({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
+  const [addForm, setAddForm] = useState({ 
+    name:'', 
+    strengthValue:'', 
+    strengthUnit:'mg', 
+    times:'', 
+    status:'taking', 
+    startDate:'', 
+    endDate:'', 
+    notes:'', 
+    dosesLeft:'', 
+    quantityValue:'', 
+    quantityUnit:'tablet' 
+  });
   const [addTimes, setAddTimes] = useState([]); // array of HH:MM
   const [editTimes, setEditTimes] = useState([]);
   const [showMedTimePicker, setShowMedTimePicker] = useState(false);
@@ -132,7 +172,20 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     setDateField(null);
   };
   const [showEdit, setShowEdit] = useState(false);
-  const [editForm, setEditForm] = useState({ id:'', name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
+  const [editForm, setEditForm] = useState({ 
+    id:'', 
+    name:'', 
+    strengthValue:'', 
+    strengthUnit:'mg', 
+    times:'', 
+    status:'taking', 
+    startDate:'', 
+    endDate:'', 
+    notes:'', 
+    dosesLeft:'', 
+    quantityValue:'', 
+    quantityUnit:'tablet' 
+  });
 
   // Auto-focus name input when modal opens
   useEffect(() => {
@@ -156,14 +209,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               const dbMeds = result.medications.map(med => ({
                 id: med.id,
                 name: med.medication_name,
-                strength: med.strength || '',
+                strength: `${med.strength_value || ''} ${med.strength_unit || ''}`.trim(),
+                strengthValue: med.strength_value || '',
+                strengthUnit: med.strength_unit || 'mg',
                 status: med.status,
                 times: med.times || [],
                 startDate: med.start_date || '',
                 endDate: med.end_date || '',
                 notes: med.notes || '',
                 dosesLeft: med.doses_left || '',
-                quantity: med.quantity || '',
+                quantity: `${med.quantity_value || ''} ${med.quantity_unit || ''}`.trim(),
+                quantityValue: med.quantity_value || '',
+                quantityUnit: med.quantity_unit || 'tablet',
                 lastRefill: med.last_refill || null,
                 dbId: med.id // Store database ID
               }));
@@ -191,14 +248,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       const newMed = {
         id: `${Date.now()}`,
         name: addForm.name.trim(),
-        strength: addForm.strength.trim(),
+        strength: `${addForm.strengthValue.trim()} ${addForm.strengthUnit}`.trim(),
+        strengthValue: addForm.strengthValue.trim(),
+        strengthUnit: addForm.strengthUnit,
         status: addForm.status,
         times: addTimes,
         startDate: addForm.startDate,
         endDate: addForm.endDate,
         notes: addForm.notes.trim(),
         dosesLeft: addForm.dosesLeft.trim(),
-        quantity: addForm.quantity.trim(),
+        quantity: `${addForm.quantityValue.trim()} ${addForm.quantityUnit}`.trim(),
+        quantityValue: addForm.quantityValue.trim(),
+        quantityUnit: addForm.quantityUnit,
         lastRefill: null // No refill yet
       };
       
@@ -218,14 +279,16 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             body: JSON.stringify({
               userId: user.uid,
               medicationName: newMed.name,
-              strength: newMed.strength,
+              strengthValue: newMed.strengthValue,
+              strengthUnit: newMed.strengthUnit,
               status: newMed.status,
               times: newMed.times,
               startDate: newMed.startDate,
               endDate: newMed.endDate,
               notes: newMed.notes,
               dosesLeft: newMed.dosesLeft,
-              quantity: newMed.quantity,
+              quantityValue: newMed.quantityValue,
+              quantityUnit: newMed.quantityUnit,
               lastRefill: newMed.lastRefill
             })
           });
@@ -249,7 +312,19 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         console.log('⚠️ User not authenticated, medication saved locally only');
       }
       
-      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
+      setAddForm({ 
+        name:'', 
+        strengthValue:'', 
+        strengthUnit:'mg', 
+        times:'', 
+        status:'taking', 
+        startDate:'', 
+        endDate:'', 
+        notes:'', 
+        dosesLeft:'', 
+        quantityValue:'', 
+        quantityUnit:'tablet' 
+      });
       setAddTimes([]);
       // Close modal immediately after successful add
       setShowAdd(false);
@@ -646,25 +721,73 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   returnKeyType="next"
                 />
 
-                <TextInput
-                  placeholder={S.strengthExample}
-                  placeholderTextColor={getSubTextColor()}
-                  value={addForm.strength}
-                  onChangeText={(text) => setAddForm(prev => ({ ...prev, strength: text }))}
-                  style={{
-                    backgroundColor: getCardBackgroundColor(),
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    color: getCardTextColor(),
-                    fontFamily: 'Inter_400Regular',
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
+                {/* Strength Value and Unit */}
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                  <TextInput
+                    placeholder="500"
+                    placeholderTextColor={getSubTextColor()}
+                    value={addForm.strengthValue}
+                    onChangeText={(text) => setAddForm(prev => ({ ...prev, strengthValue: text }))}
+                    style={{
+                      flex: 1,
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      padding: 16,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_400Regular',
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor()
+                    }}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    keyboardType="numeric"
+                  />
+                  
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    style={{ 
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor(),
+                      maxHeight: 56,
+                      minWidth: 80
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', paddingHorizontal: 8, paddingVertical: 4 }}>
+                      {strengthUnits.map((unit, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => setAddForm(prev => ({ ...prev, strengthUnit: unit }))}
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            marginHorizontal: 2,
+                            borderRadius: 8,
+                            backgroundColor: addForm.strengthUnit === unit ? theme.accent : 'transparent',
+                            borderWidth: 1,
+                            borderColor: addForm.strengthUnit === unit ? theme.accent : getCardBorderColor()
+                          }}
+                        >
+                          <DynamicText 
+                            type="card" 
+                            style={{ 
+                              fontSize: 12,
+                              color: addForm.strengthUnit === unit ? '#ffffff' : getCardTextColor(),
+                              fontFamily: 'Inter_600SemiBold'
+                            }}
+                          >
+                            {unit}
+                          </DynamicText>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </ScrollView>
+                </View>
 
                 <TouchableOpacity
                   onPress={() => {
@@ -759,28 +882,76 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   returnKeyType="default"
                 />
 
-                <TextInput
-                  placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
-                  placeholderTextColor={getSubTextColor()}
-                  value={addForm.quantity}
-                  onChangeText={(text) => {
-                    console.log('[MEDICATIONS DEBUG] Quantity input changed:', text);
-                    setAddForm(prev => ({ ...prev, quantity: text }));
-                  }}
-                  style={{
-                    backgroundColor: getCardBackgroundColor(),
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    color: getCardTextColor(),
-                    fontFamily: 'Inter_400Regular',
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
+                {/* Quantity Value and Unit */}
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                  <TextInput
+                    placeholder="30"
+                    placeholderTextColor={getSubTextColor()}
+                    value={addForm.quantityValue}
+                    onChangeText={(text) => {
+                      console.log('[MEDICATIONS DEBUG] Quantity input changed:', text);
+                      setAddForm(prev => ({ ...prev, quantityValue: text }));
+                    }}
+                    style={{
+                      flex: 1,
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      padding: 16,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_400Regular',
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor()
+                    }}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    keyboardType="numeric"
+                  />
+                  
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    style={{ 
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor(),
+                      maxHeight: 56,
+                      minWidth: 80
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', paddingHorizontal: 8, paddingVertical: 4 }}>
+                      {quantityUnits.map((unit, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => setAddForm(prev => ({ ...prev, quantityUnit: unit }))}
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 8,
+                            marginHorizontal: 2,
+                            borderRadius: 8,
+                            backgroundColor: addForm.quantityUnit === unit ? theme.accent : 'transparent',
+                            borderWidth: 1,
+                            borderColor: addForm.quantityUnit === unit ? theme.accent : getCardBorderColor()
+                          }}
+                        >
+                          <DynamicText 
+                            type="card" 
+                            style={{ 
+                              fontSize: 12,
+                              color: addForm.quantityUnit === unit ? '#ffffff' : getCardTextColor(),
+                              fontFamily: 'Inter_600SemiBold'
+                            }}
+                          >
+                            {unit}
+                          </DynamicText>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </ScrollView>
+                </View>
 
                 {/* Status Selection */}
                 <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', marginBottom: 8, marginTop: 8 }}>

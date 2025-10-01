@@ -1481,14 +1481,16 @@ app.post('/api/medications', async (req, res) => {
     const { 
       userId,
       medicationName, 
-      strength, 
+      strengthValue, 
+      strengthUnit,
       status, 
       times, 
       startDate, 
       endDate, 
       notes, 
       dosesLeft, 
-      quantity, 
+      quantityValue,
+      quantityUnit,
       lastRefill 
     } = req.body;
 
@@ -1504,14 +1506,16 @@ app.post('/api/medications', async (req, res) => {
     // Prepare medication data
     const medicationData = {
       medicationName: medicationName.trim(),
-      strength: strength?.trim() || '',
+      strengthValue: strengthValue?.trim() || '',
+      strengthUnit: strengthUnit?.trim() || '',
       status: status.trim(),
       times: Array.isArray(times) ? times : [],
       startDate: startDate || null,
       endDate: endDate || null,
       notes: notes?.trim() || '',
       dosesLeft: dosesLeft?.trim() || '',
-      quantity: quantity?.trim() || '',
+      quantityValue: quantityValue?.trim() || '',
+      quantityUnit: quantityUnit?.trim() || '',
       lastRefill: lastRefill || null,
       isActive: true
     };

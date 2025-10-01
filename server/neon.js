@@ -137,15 +137,15 @@ async function saveUserMedication(userId, medication) {
   try {
     const { data, error } = await neonClient`
       INSERT INTO user_medications (
-        user_id, medication_name, strength, status, times, 
-        start_date, end_date, notes, doses_left, quantity, 
+        user_id, medication_name, strength_value, strength_unit, status, times, 
+        start_date, end_date, notes, doses_left, quantity_value, quantity_unit, 
         last_refill, is_active
       ) VALUES (
-        ${userId}, ${medication.medicationName}, ${medication.strength}, 
-        ${medication.status}, ${medication.times}, ${medication.startDate}, 
-        ${medication.endDate}, ${medication.notes}, ${medication.dosesLeft}, 
-        ${medication.quantity}, ${medication.lastRefill}, 
-        ${medication.isActive || true}
+        ${userId}, ${medication.medicationName}, ${medication.strengthValue}, 
+        ${medication.strengthUnit}, ${medication.status}, ${medication.times}, 
+        ${medication.startDate}, ${medication.endDate}, ${medication.notes}, 
+        ${medication.dosesLeft}, ${medication.quantityValue}, ${medication.quantityUnit}, 
+        ${medication.lastRefill}, ${medication.isActive || true}
       ) RETURNING *
     `;
     
