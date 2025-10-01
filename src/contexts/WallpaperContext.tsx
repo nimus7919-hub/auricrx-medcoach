@@ -162,7 +162,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
 
   const getSubTextColor = (): string => {
     const textColor = getTextColor();
-    return textColor === '#ffffff' ? '#e0e0e0' : '#6b6b6b';
+    return textColor === '#ffffff' ? '#e0e0e0' : '#333333'; // Darker gray for better visibility
   };
 
   const getAccentColor = (): string => {
@@ -192,7 +192,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     if (cardBgColor === '#2a2a2a' || cardBgColor === '#1a1a1a' || cardBgColor === '#0d2424' || cardBgColor === '#121a33') {
       return '#ffffff'; // Light text for dark cards
     } else {
-      return '#2c2c2c'; // Dark text for light cards
+      return '#000000'; // Pure black text for light cards for better visibility
     }
   };
 
