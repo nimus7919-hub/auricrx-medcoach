@@ -162,7 +162,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
 
   const getSubTextColor = (): string => {
     const textColor = getTextColor();
-    return textColor === '#ffffff' ? '#e0e0e0' : '#333333'; // Darker gray for better visibility
+    return textColor === '#ffffff' ? '#e0e0e0' : '#666666'; // Medium gray for placeholder text visibility
   };
 
   const getAccentColor = (): string => {

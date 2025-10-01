@@ -535,7 +535,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 <TextInput
                   ref={addMedNameRef}
                   placeholder={S.medicationName}
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={addForm.name}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
                   style={{
@@ -567,7 +567,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.strengthExample}
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={addForm.strength}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, strength: text }))}
                   style={{
@@ -658,7 +658,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.notesOptional}
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={addForm.notes}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
                   style={{
@@ -680,7 +680,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={addForm.quantity}
                   onChangeText={(text) => {
                     console.log('[MEDICATIONS DEBUG] Quantity input changed:', text);
@@ -799,7 +799,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.medicationName}
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={editForm.name}
                   onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
                   style={{
@@ -819,7 +819,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.strengthExample}
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={editForm.strength}
                   onChangeText={(text) => setEditForm(prev => ({ ...prev, strength: text }))}
                   style={{
@@ -910,7 +910,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.notesOptional}
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={editForm.notes}
                   onChangeText={(text) => setEditForm(prev => ({ ...prev, notes: text }))}
                   style={{
@@ -932,7 +932,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
-                  placeholderTextColor={getCardTextColor()}
+                  placeholderTextColor={getSubTextColor()}
                   value={editForm.quantity}
                   onChangeText={(text) => {
                     console.log('[MEDICATIONS DEBUG] Edit quantity input changed:', text);
