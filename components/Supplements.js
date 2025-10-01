@@ -467,9 +467,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     borderColor: statusObj.color
                   }}
                 >
-                  <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12, textAlign: 'center' }}>
+                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12, textAlign: 'center' }}>
                     {statusObj.emoji} {statusObj.label}
-                  </Text>
+                  </DynamicText>
                 </TouchableOpacity>
 
                 {/* Refill Button */}
@@ -488,9 +488,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     borderColor: theme.accent
                   }}
                 >
-                  <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12, textAlign: 'center' }}>
+                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12, textAlign: 'center' }}>
                     🛒 {S.refill}
-                  </Text>
+                  </DynamicText>
                 </TouchableOpacity>
 
                 {/* Edit Button */}
@@ -540,9 +540,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                       marginRight: 8, 
                       marginBottom: 4 
                     }}>
-                      <Text style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 10 }}>
+                      <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 10 }}>
                         {tag.emoji} {tag.label}
-                      </Text>
+                      </DynamicText>
                     </View>
                   ))}
                 </View>
@@ -692,14 +692,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 onPress={() => setShowAdd(false)}
                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
               >
-                <Text style={{ color: theme.text, textAlign: 'center' }}>{S.cancel}</Text>
+                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>{S.cancel}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 onPress={addSupplement}
                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
               >
-                <Text style={{ color: '#fff', textAlign: 'center' }}>{S.addSupplement}</Text>
+                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>{S.addSupplement}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -718,9 +718,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 onPress={() => updateSupplementStatus(detailSupp?.id, status.key)}
                 style={[styles.section, { backgroundColor: theme.chip, marginBottom: 8, padding: 12 }]}
               >
-                <Text style={{ color: status.color, fontFamily: 'Inter_600SemiBold' }}>
+                <DynamicText type="card" style={{ color: status.color, fontFamily: 'Inter_600SemiBold' }}>
                   {status.emoji} {status.label}
-                </Text>
+                </DynamicText>
               </TouchableOpacity>
             ))}
           </View>
@@ -739,9 +739,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             </View>
             
             <ScrollView style={{ maxHeight: 400 }}>
-              <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular', lineHeight: 20 }}>
+              <DynamicText type="card" style={{ color: getCardTextColor(), fontFamily: 'Inter_400Regular', lineHeight: 20 }}>
                 {aiAnalysisQuery}
-              </Text>
+              </DynamicText>
             </ScrollView>
             
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
@@ -749,7 +749,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 onPress={() => setShowAiAnalysis(false)}
                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
               >
-                <Text style={{ color: theme.text, textAlign: 'center' }}>Close</Text>
+                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>Close</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -761,7 +761,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 }}
                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
               >
-                <Text style={{ color: '#fff', textAlign: 'center' }}>Search Again</Text>
+                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>Search Again</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -874,10 +874,10 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 setShowSuppTimePicker(true);
               }}
             >
-              <Text style={{ color: editTimes.length > 0 ? theme.text : theme.sub }}>
+              <DynamicText type="card" style={{ color: editTimes.length > 0 ? getCardTextColor() : getSubTextColor() }}>
                 {editTimes.length > 0 ? editTimes.join(', ') : S.selectTimes}
-              </Text>
-              <Text style={{ color: theme.sub }}>🕐</Text>
+              </DynamicText>
+              <DynamicText type="sub">🕐</DynamicText>
             </TouchableOpacity>
             
             <TextInput
@@ -898,14 +898,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 onPress={() => setShowEdit(false)}
                 style={[styles.button, { backgroundColor: theme.chip, flex: 1 }]}
               >
-                <Text style={{ color: theme.text, textAlign: 'center' }}>{S.cancel}</Text>
+                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>{S.cancel}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 onPress={updateSupplement}
                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
               >
-                <Text style={{ color: '#fff', textAlign: 'center' }}>{S.save || 'Save'}</Text>
+                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>{S.save || 'Save'}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
