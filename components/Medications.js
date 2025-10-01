@@ -1321,7 +1321,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         )}
       </ScrollView>
 
-      {/* Dropdown Components */}
+      {/* Dropdown Components - Render at the very end */}
       <StrengthUnitDropdown
         visible={showStrengthUnitDropdown}
         units={strengthUnits}
@@ -1360,7 +1360,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 999999,
+      zIndex: 9999999,
     }}>
       <TouchableOpacity
         style={{
@@ -1369,7 +1369,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.3)',
+          backgroundColor: 'rgba(0,0,0,0.5)',
         }}
         activeOpacity={1}
         onPress={onClose}
@@ -1384,11 +1384,12 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
         borderWidth: 1,
         borderColor: getCardBorderColor(),
         maxHeight: 150,
-        elevation: 50,
+        elevation: 100,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.6,
+        shadowRadius: 8,
+        zIndex: 9999999,
       }}>
         <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
           {units.map((unit, index) => (
@@ -1434,7 +1435,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 999999,
+      zIndex: 9999999,
     }}>
       <TouchableOpacity
         style={{
@@ -1443,7 +1444,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.3)',
+          backgroundColor: 'rgba(0,0,0,0.5)',
         }}
         activeOpacity={1}
         onPress={onClose}
@@ -1458,11 +1459,12 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
         borderWidth: 1,
         borderColor: getCardBorderColor(),
         maxHeight: 150,
-        elevation: 50,
+        elevation: 100,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.6,
+        shadowRadius: 8,
+        zIndex: 9999999,
       }}>
         <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
           {units.map((unit, index) => (
