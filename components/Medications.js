@@ -1321,103 +1321,126 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         )}
       </ScrollView>
 
-      {/* Strength Unit Dropdown Modal */}
-      <Modal visible={showStrengthUnitDropdown} animationType="slide" transparent>
-        <TouchableOpacity 
-          style={styles.modalOverlay}
+      {/* Dropdown Overlay */}
+      {(showStrengthUnitDropdown || showQuantityUnitDropdown) && (
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 999,
+          }}
           activeOpacity={1}
-          onPress={() => setShowStrengthUnitDropdown(false)}
-        >
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0', borderColor: getCardBorderColor() }]}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
-                Select Strength Unit
-              </DynamicText>
-              <TouchableOpacity onPress={() => setShowStrengthUnitDropdown(false)}>
-                <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={{ maxHeight: 300 }}>
-              {strengthUnits.map((unit, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => {
-                    setAddForm(prev => ({ ...prev, strengthUnit: unit }));
-                    setShowStrengthUnitDropdown(false);
-                  }}
-                  style={{
-                    padding: 16,
-                    borderBottomWidth: 1,
-                    borderBottomColor: getCardBorderColor(),
-                    backgroundColor: addForm.strengthUnit === unit ? theme.accent + '20' : 'transparent'
-                  }}
-                >
-                  <DynamicText 
-                    type="card" 
-                    style={{ 
-                      fontSize: 16,
-                      color: addForm.strengthUnit === unit ? theme.accent : getCardTextColor(),
-                      fontFamily: addForm.strengthUnit === unit ? 'Inter_700Bold' : 'Inter_400Regular'
-                    }}
-                  >
-                    {unit}
-                  </DynamicText>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+          onPress={() => {
+            setShowStrengthUnitDropdown(false);
+            setShowQuantityUnitDropdown(false);
+          }}
+        />
+      )}
 
-      {/* Quantity Unit Dropdown Modal */}
-      <Modal visible={showQuantityUnitDropdown} animationType="slide" transparent>
-        <TouchableOpacity 
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowQuantityUnitDropdown(false)}
-        >
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0', borderColor: getCardBorderColor() }]}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
-                Select Quantity Unit
-              </DynamicText>
-              <TouchableOpacity onPress={() => setShowQuantityUnitDropdown(false)}>
-                <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={{ maxHeight: 300 }}>
-              {quantityUnits.map((unit, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => {
-                    setAddForm(prev => ({ ...prev, quantityUnit: unit }));
-                    setShowQuantityUnitDropdown(false);
-                  }}
-                  style={{
-                    padding: 16,
-                    borderBottomWidth: 1,
-                    borderBottomColor: getCardBorderColor(),
-                    backgroundColor: addForm.quantityUnit === unit ? theme.accent + '20' : 'transparent'
+      {/* Strength Unit Dropdown */}
+      {showStrengthUnitDropdown && (
+        <View style={{
+          position: 'absolute',
+          top: 200, // Position under the strength field
+          right: 16,
+          left: 16,
+          backgroundColor: getCardBackgroundColor(),
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: getCardBorderColor(),
+          maxHeight: 200,
+          zIndex: 1000,
+          elevation: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+        }}>
+          <ScrollView style={{ maxHeight: 200 }}>
+            {strengthUnits.map((unit, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  setAddForm(prev => ({ ...prev, strengthUnit: unit }));
+                  setShowStrengthUnitDropdown(false);
+                }}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderBottomWidth: index < strengthUnits.length - 1 ? 1 : 0,
+                  borderBottomColor: getCardBorderColor(),
+                  backgroundColor: addForm.strengthUnit === unit ? theme.accent + '20' : 'transparent'
+                }}
+              >
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 14,
+                    color: addForm.strengthUnit === unit ? theme.accent : getCardTextColor(),
+                    fontFamily: addForm.strengthUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                   }}
                 >
-                  <DynamicText 
-                    type="card" 
-                    style={{ 
-                      fontSize: 16,
-                      color: addForm.quantityUnit === unit ? theme.accent : getCardTextColor(),
-                      fontFamily: addForm.quantityUnit === unit ? 'Inter_700Bold' : 'Inter_400Regular'
-                    }}
-                  >
-                    {unit}
-                  </DynamicText>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+                  {unit}
+                </DynamicText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Quantity Unit Dropdown */}
+      {showQuantityUnitDropdown && (
+        <View style={{
+          position: 'absolute',
+          top: 350, // Position under the quantity field
+          right: 16,
+          left: 16,
+          backgroundColor: getCardBackgroundColor(),
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: getCardBorderColor(),
+          maxHeight: 200,
+          zIndex: 1000,
+          elevation: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+        }}>
+          <ScrollView style={{ maxHeight: 200 }}>
+            {quantityUnits.map((unit, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  setAddForm(prev => ({ ...prev, quantityUnit: unit }));
+                  setShowQuantityUnitDropdown(false);
+                }}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderBottomWidth: index < quantityUnits.length - 1 ? 1 : 0,
+                  borderBottomColor: getCardBorderColor(),
+                  backgroundColor: addForm.quantityUnit === unit ? theme.accent + '20' : 'transparent'
+                }}
+              >
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 14,
+                    color: addForm.quantityUnit === unit ? theme.accent : getCardTextColor(),
+                    fontFamily: addForm.quantityUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
+                  }}
+                >
+                  {unit}
+                </DynamicText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 };
