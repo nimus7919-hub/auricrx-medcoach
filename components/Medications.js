@@ -1439,7 +1439,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       >
         <View style={{
           position: 'absolute',
-          top: 350,
+          top: 450,
           right: 16,
           left: 16,
           backgroundColor: getCardBackgroundColor(),
