@@ -538,16 +538,23 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                   placeholderTextColor={getSubTextColor()}
                   value={addForm.name}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
-                  style={{
-                    backgroundColor: getCardBackgroundColor(),
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    color: getCardTextColor(),
-                    fontFamily: 'Inter_400Regular',
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
+                  style={(() => {
+                    const bgColor = getCardBackgroundColor();
+                    const textColor = getCardTextColor();
+                    const borderColor = getCardBorderColor();
+                    const placeholderColor = getSubTextColor();
+                    console.log('🎨 TextInput DEBUG - bgColor:', bgColor, 'textColor:', textColor, 'borderColor:', borderColor, 'placeholderColor:', placeholderColor);
+                    return {
+                      backgroundColor: bgColor,
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 12,
+                      color: textColor,
+                      fontFamily: 'Inter_400Regular',
+                      borderWidth: 1,
+                      borderColor: borderColor
+                    };
+                  })()}
                   onFocus={() => {
                     console.log('Input focused');
                     setInputFocused(true);
