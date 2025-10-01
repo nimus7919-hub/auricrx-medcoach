@@ -357,13 +357,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
               height: 36,
               borderRadius: 18,
               borderWidth: 1,
-              borderColor: theme.chip,
+              borderColor: getCardBorderColor(),
+              backgroundColor: getCardBackgroundColor(),
               alignItems: 'center',
               justifyContent: 'center',
               marginRight: 12
             }}
           >
-            <Image source={require('../icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: theme.text }} />
+            <Image source={require('../icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: getCardTextColor() }} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
