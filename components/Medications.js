@@ -192,6 +192,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const [showEditStrengthUnitDropdown, setShowEditStrengthUnitDropdown] = useState(false);
   const [showEditQuantityUnitDropdown, setShowEditQuantityUnitDropdown] = useState(false);
 
+  // Refs for unit buttons to measure their position
+  const strengthUnitButtonRef = useRef(null);
+  const quantityUnitButtonRef = useRef(null);
+  const editStrengthUnitButtonRef = useRef(null);
+  const editQuantityUnitButtonRef = useRef(null);
+
+  // State to store layout of unit buttons
+  const [strengthUnitButtonLayout, setStrengthUnitButtonLayout] = useState(null);
+  const [quantityUnitButtonLayout, setQuantityUnitButtonLayout] = useState(null);
+  const [editStrengthUnitButtonLayout, setEditStrengthUnitButtonLayout] = useState(null);
+  const [editQuantityUnitButtonLayout, setEditQuantityUnitButtonLayout] = useState(null);
+
   // Auto-focus name input when modal opens
   useEffect(() => {
     if (showAdd && addMedNameRef.current) {
@@ -774,7 +786,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   />
                   
                   <TouchableOpacity
-                    onPress={() => setShowStrengthUnitDropdown(true)}
+                    ref={strengthUnitButtonRef}
+                    onPress={() => {
+                      strengthUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                        setStrengthUnitButtonLayout({ x, y, width, height });
+                      });
+                      setShowStrengthUnitDropdown(true);
+                    }}
                     style={{
                       backgroundColor: getCardBackgroundColor(),
                       borderRadius: 12,
@@ -933,7 +951,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   />
                   
                   <TouchableOpacity
-                    onPress={() => setShowQuantityUnitDropdown(true)}
+                    ref={quantityUnitButtonRef}
+                    onPress={() => {
+                      quantityUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                        setQuantityUnitButtonLayout({ x, y, width, height });
+                      });
+                      setShowQuantityUnitDropdown(true);
+                    }}
                     style={{
                       backgroundColor: getCardBackgroundColor(),
                       borderRadius: 12,
@@ -1112,7 +1136,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   />
                   
                   <TouchableOpacity
-                    onPress={() => setShowEditStrengthUnitDropdown(true)}
+                    ref={editStrengthUnitButtonRef}
+                    onPress={() => {
+                      editStrengthUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                        setEditStrengthUnitButtonLayout({ x, y, width, height });
+                      });
+                      setShowEditStrengthUnitDropdown(true);
+                    }}
                     style={{
                       backgroundColor: getCardBackgroundColor(),
                       borderRadius: 12,
@@ -1271,7 +1301,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   />
                   
                   <TouchableOpacity
-                    onPress={() => setShowEditQuantityUnitDropdown(true)}
+                    ref={editQuantityUnitButtonRef}
+                    onPress={() => {
+                      editQuantityUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                        setEditQuantityUnitButtonLayout({ x, y, width, height });
+                      });
+                      setShowEditQuantityUnitDropdown(true);
+                    }}
                     style={{
                       backgroundColor: getCardBackgroundColor(),
                       borderRadius: 12,
@@ -1441,6 +1477,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         getCardBackgroundColor={getCardBackgroundColor}
         getCardBorderColor={getCardBorderColor}
         getCardTextColor={getCardTextColor}
+        buttonLayout={strengthUnitButtonLayout}
       />
 
       <QuantityUnitDropdown
@@ -1453,6 +1490,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         getCardBackgroundColor={getCardBackgroundColor}
         getCardBorderColor={getCardBorderColor}
         getCardTextColor={getCardTextColor}
+        buttonLayout={quantityUnitButtonLayout}
       />
 
       {/* Edit Dropdown Components */}
@@ -1466,6 +1504,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         getCardBackgroundColor={getCardBackgroundColor}
         getCardBorderColor={getCardBorderColor}
         getCardTextColor={getCardTextColor}
+        buttonLayout={editStrengthUnitButtonLayout}
       />
 
       <QuantityUnitDropdown
@@ -1478,13 +1517,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         getCardBackgroundColor={getCardBackgroundColor}
         getCardBorderColor={getCardBorderColor}
         getCardTextColor={getCardTextColor}
+        buttonLayout={editQuantityUnitButtonLayout}
       />
     </View>
   );
 };
 
 // Dropdown components using Modal for top-level rendering
-const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor }) => {
+const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor, buttonLayout }) => {
   return (
     <Modal
       visible={visible}
@@ -1504,9 +1544,9 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       >
         <View style={{
           position: 'absolute',
-          top: 200,
-          right: 60,
-          left: 60,
+          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 4 : 200,
+          left: buttonLayout ? buttonLayout.x : 60,
+          width: buttonLayout ? buttonLayout.width : 200,
           backgroundColor: getCardBackgroundColor(),
           borderRadius: 8,
           borderWidth: 1,
@@ -1553,7 +1593,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
   );
 };
 
-const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor }) => {
+const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor, buttonLayout }) => {
   return (
     <Modal
       visible={visible}
@@ -1573,9 +1613,9 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       >
         <View style={{
           position: 'absolute',
-          top: 550,
-          right: 60,
-          left: 60,
+          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 4 : 550,
+          left: buttonLayout ? buttonLayout.x : 60,
+          width: buttonLayout ? buttonLayout.width : 200,
           backgroundColor: getCardBackgroundColor(),
           borderRadius: 8,
           borderWidth: 1,
