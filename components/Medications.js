@@ -534,7 +534,11 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   ref={addMedNameRef}
-                  placeholder={S.medicationName}
+                  placeholder={(() => {
+                    const placeholder = S.medicationName;
+                    console.log('🎨 PLACEHOLDER DEBUG - medicationName:', placeholder, 'S object:', S);
+                    return placeholder;
+                  })()}
                   placeholderTextColor={getSubTextColor()}
                   value={addForm.name}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
@@ -573,7 +577,11 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 />
 
                 <TextInput
-                  placeholder={S.strengthExample}
+                  placeholder={(() => {
+                    const placeholder = S.strengthExample;
+                    console.log('🎨 PLACEHOLDER DEBUG - strengthExample:', placeholder);
+                    return placeholder;
+                  })()}
                   placeholderTextColor={getSubTextColor()}
                   value={addForm.strength}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, strength: text }))}
