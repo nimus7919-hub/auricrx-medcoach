@@ -16,7 +16,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
   // Unit options for supplements (common supplement dosage forms and units)
   const dosageUnits = [
     // Mass units
-    'mcg', 'mg', 'g',
+    'mcg', 'mg', 'g', 'kg',
     // International units
     'IU',
     // Special vitamin units
