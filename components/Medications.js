@@ -1330,7 +1330,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 9999,
+            zIndex: 99999,
           }}
           activeOpacity={1}
           onPress={() => {
@@ -1352,8 +1352,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           borderWidth: 1,
           borderColor: getCardBorderColor(),
           maxHeight: 150,
-          zIndex: 10000,
-          elevation: 20,
+          zIndex: 100000,
+          elevation: 50,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.4,
@@ -1403,8 +1403,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           borderWidth: 1,
           borderColor: getCardBorderColor(),
           maxHeight: 150,
-          zIndex: 10000,
-          elevation: 20,
+          zIndex: 100000,
+          elevation: 50,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.4,
