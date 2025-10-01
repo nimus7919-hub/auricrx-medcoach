@@ -1544,7 +1544,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       >
         <View style={{
           position: 'absolute',
-          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 4 : 200,
+          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 1 : 200,
           left: buttonLayout ? buttonLayout.x : 60,
           width: buttonLayout ? buttonLayout.width : 200,
           backgroundColor: getCardBackgroundColor(),
@@ -1613,7 +1613,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
       >
         <View style={{
           position: 'absolute',
-          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 4 : 550,
+          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 1 : 550,
           left: buttonLayout ? buttonLayout.x : 60,
           width: buttonLayout ? buttonLayout.width : 200,
           backgroundColor: getCardBackgroundColor(),
