@@ -520,7 +520,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 keyboardShouldPersistTaps="always"
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold', backgroundColor: 'red', padding: 10 }}>
                     {S.addMedication}
                   </DynamicText>
                   <TouchableOpacity onPress={() => {
