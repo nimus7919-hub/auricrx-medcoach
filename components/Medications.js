@@ -11,7 +11,7 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onNavigateToDashboard, onNavigateToSettings, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, currentWallpaper } = useWallpaper();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   
   // Debug wallpaper theming
   useEffect(() => {
