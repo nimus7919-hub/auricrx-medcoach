@@ -358,6 +358,9 @@
     "resume": "Fortsetzen",
     "status": "Status",
     "servingsLeft": "Verbleibende Portionen",
+    "supplementName": "Nahrungsergänzungsmittel-Name",
+    "brand": "Marke",
+    "dosage": "Dosierung",
     "statuses": {
       "taking": "Einnahme",
       "onhold": "Pausiert",

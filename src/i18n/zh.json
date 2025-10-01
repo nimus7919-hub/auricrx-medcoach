@@ -358,6 +358,9 @@
     "resume": "恢复",
     "status": "状态",
     "servingsLeft": "剩余份数",
+    "supplementName": "补充剂名称",
+    "brand": "品牌",
+    "dosage": "剂量",
     "statuses": {
       "taking": "正在服用",
       "onhold": "暂停",

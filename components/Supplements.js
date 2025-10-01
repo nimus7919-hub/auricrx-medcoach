@@ -11,7 +11,7 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashboard, onNavigateToSettings }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
   useEffect(() => {
     mounted.current += 1;
     console.log(`[SUPPLEMENTS] MOUNT #${mounted.current}`);
@@ -514,8 +514,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             
             <TextInput
               placeholder={S.supplementName}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={addForm.name}
               onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
               onFocus={() => setInputFocused(true)}
@@ -527,8 +531,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             
             <TextInput
               placeholder={S.brand}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={addForm.brand}
               onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
               onFocus={() => setInputFocused(true)}
@@ -540,8 +548,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             
             <TextInput
               placeholder={S.dosage}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={addForm.dosage}
               onChangeText={(text) => setAddForm(prev => ({ ...prev, dosage: text }))}
               onFocus={() => setInputFocused(true)}
@@ -553,8 +565,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             
             <TextInput
               placeholder={S.notesOptional}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={addForm.notes}
               onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
               onFocus={() => setInputFocused(true)}
@@ -653,24 +669,36 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             
             <TextInput
               placeholder={S.supplementName}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={editForm.name}
               onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
             />
             
             <TextInput
               placeholder={S.brand}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={editForm.brand}
               onChangeText={(text) => setEditForm(prev => ({ ...prev, brand: text }))}
             />
             
             <TextInput
               placeholder={S.dosage}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={editForm.dosage}
               onChangeText={(text) => setEditForm(prev => ({ ...prev, dosage: text }))}
             />
@@ -690,8 +718,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             
             <TextInput
               placeholder={S.notesOptional}
-              placeholderTextColor={theme.sub}
-              style={[styles.input, { color: theme.text, borderColor: theme.chip }]}
+              placeholderTextColor={getSubTextColor()}
+              style={[styles.input, { 
+                color: getCardTextColor(), 
+                borderColor: getCardBorderColor(),
+                backgroundColor: getCardBackgroundColor()
+              }]}
               value={editForm.notes}
               onChangeText={(text) => setEditForm(prev => ({ ...prev, notes: text }))}
               multiline

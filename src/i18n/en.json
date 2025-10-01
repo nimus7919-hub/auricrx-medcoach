@@ -358,6 +358,9 @@
     "resume": "Resume",
     "status": "Status",
     "servingsLeft": "Servings Left",
+    "supplementName": "Supplement name",
+    "brand": "Brand",
+    "dosage": "Dosage",
     "statuses": {
       "taking": "Taking",
       "onhold": "On Hold",

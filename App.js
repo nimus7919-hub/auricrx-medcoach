@@ -2667,6 +2667,9 @@ const S = {
   editSupplement: t('supplements.editSupplement'),
   noSupplements: t('supplements.noSupplements'),
   pause: t('supplements.pause'),
+  supplementName: t('supplements.supplementName'),
+  brand: t('supplements.brand'),
+  dosage: t('supplements.dosage'),
   resume: t('supplements.resume'),
   servingsLeft: t('supplements.servingsLeft'),
   

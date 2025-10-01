@@ -358,6 +358,9 @@
     "resume": "Reanudar",
     "status": "Estado",
     "servingsLeft": "Porciones Restantes",
+    "supplementName": "Nombre del suplemento",
+    "brand": "Marca",
+    "dosage": "Dosis",
     "statuses": {
       "taking": "Tomando",
       "onhold": "En Pausa",
