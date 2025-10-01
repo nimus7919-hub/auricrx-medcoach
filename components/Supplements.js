@@ -12,6 +12,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
+
+  // Unit options for dosage (sorted alphabetically)
+  const dosageUnits = [
+    'ampule', 'ampules', 'bottle', 'bottles', 'box', 'boxes', 'capsule', 'capsules',
+    'drop', 'drops', 'pack', 'packs', 'piece', 'pieces', 'puff', 'puffs', 'pump', 'pumps',
+    'sachet', 'sachets', 'strip', 'strips', 'suppository', 'suppositories',
+    'tablet', 'tablets', 'unit', 'units', 'vial', 'vials'
+  ];
   useEffect(() => {
     mounted.current += 1;
     console.log(`[SUPPLEMENTS] MOUNT #${mounted.current}`);
@@ -37,7 +45,8 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
     endDate: '', 
     notes: '', 
     dosesLeft: '', 
-    dosage: '', 
+    dosageValue: '', 
+    dosageUnit: 'tablet',
     brand: '' 
   });
   const [addTimes, setAddTimes] = useState([]);
@@ -58,10 +67,23 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
     endDate: '', 
     notes: '', 
     dosesLeft: '', 
-    dosage: '', 
+    dosageValue: '', 
+    dosageUnit: 'tablet',
     brand: '' 
   });
   const [editingSupplement, setEditingSupplement] = useState(null);
+
+  // Unit dropdown states
+  const [showDosageUnitDropdown, setShowDosageUnitDropdown] = useState(false);
+  const [showEditDosageUnitDropdown, setShowEditDosageUnitDropdown] = useState(false);
+
+  // Refs for unit buttons to measure their position
+  const dosageUnitButtonRef = useRef(null);
+  const editDosageUnitButtonRef = useRef(null);
+
+  // State to store layout of unit buttons
+  const [dosageUnitButtonLayout, setDosageUnitButtonLayout] = useState(null);
+  const [editDosageUnitButtonLayout, setEditDosageUnitButtonLayout] = useState(null);
 
 
   // Add keyboard event listeners to prevent modal from closing due to keyboard events
@@ -86,7 +108,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
   useEffect(() => {
     console.log('[SUPPLEMENTS] Modal state changed - showAdd:', showAdd);
     if (showAdd) {
-      setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosage: '', brand: '' });
+      setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'tablet', brand: '' });
     } else {
       setInputFocused(false); // Reset input focus when modal closes
     }
@@ -182,12 +204,21 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
     if (!addForm.name.trim()) return;
     const newSupp = {
       id: Date.now().toString(),
-      ...addForm,
+      name: addForm.name.trim(),
+      brand: addForm.brand ? addForm.brand.trim() : '',
+      dosage: `${addForm.dosageValue.trim()} ${addForm.dosageUnit}`.trim(),
+      dosageValue: addForm.dosageValue.trim(),
+      dosageUnit: addForm.dosageUnit,
       times: addTimes,
+      status: addForm.status,
+      startDate: addForm.startDate,
+      endDate: addForm.endDate,
+      notes: addForm.notes ? addForm.notes.trim() : '',
+      dosesLeft: addForm.dosesLeft ? addForm.dosesLeft.trim() : '',
       refillSoon: false
     };
     setSupplements(prev => [...prev, newSupp]);
-    setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosage: '', brand: '' });
+    setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'tablet', brand: '' });
     setAddTimes([]);
     setShowAdd(false);
   };
@@ -200,7 +231,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             ...supp,
             name: editForm.name.trim(),
             brand: editForm.brand ? editForm.brand.trim() : '',
-            dosage: editForm.dosage ? editForm.dosage.trim() : '',
+            dosage: `${editForm.dosageValue.trim()} ${editForm.dosageUnit}`.trim(),
+            dosageValue: editForm.dosageValue.trim(),
+            dosageUnit: editForm.dosageUnit,
             times: editTimes.join(', '),
             status: editForm.status,
             startDate: editForm.startDate,
@@ -210,7 +243,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
           }
         : supp
     ));
-    setEditForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosage: '', brand: '' });
+    setEditForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'tablet', brand: '' });
     setEditTimes([]);
     setEditingSupplement(null);
     setShowEdit(false);
@@ -447,7 +480,8 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     setEditForm({
                       name: supp.name || '',
                       brand: supp.brand || '',
-                      dosage: supp.dosage || '',
+                      dosageValue: supp.dosageValue || supp.dosage?.split(' ')[0] || '',
+                      dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || 'tablet',
                       times: supp.times || '',
                       status: supp.status || 'taking',
                       startDate: supp.startDate || '',
@@ -546,22 +580,74 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
               returnKeyType="next"
             />
             
-            <TextInput
-              placeholder={S.dosage}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={addForm.dosage}
-              onChangeText={(text) => setAddForm(prev => ({ ...prev, dosage: text }))}
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="next"
-            />
+            {/* Dosage Value and Unit */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              <TextInput
+                placeholder="30"
+                placeholderTextColor={getSubTextColor()}
+                value={addForm.dosageValue}
+                onChangeText={(text) => setAddForm(prev => ({ ...prev, dosageValue: text }))}
+                style={{
+                  flex: 1,
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  color: getCardTextColor(),
+                  fontFamily: 'Inter_400Regular',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                keyboardType="numeric"
+              />
+              
+              <TouchableOpacity
+                ref={dosageUnitButtonRef}
+                onPress={() => {
+                  dosageUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                    setDosageUnitButtonLayout({ x, y, width, height });
+                  });
+                  setShowDosageUnitDropdown(true);
+                }}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor(),
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
+                  minWidth: 80,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  gap: 4
+                }}
+              >
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 14,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_600SemiBold'
+                  }}
+                >
+                  {addForm.dosageUnit}
+                </DynamicText>
+                <DynamicText 
+                  type="sub" 
+                  style={{ 
+                    fontSize: 12,
+                    color: getSubTextColor()
+                  }}
+                >
+                  ▼
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
             
             <TextInput
               placeholder={S.notesOptional}
@@ -691,17 +777,74 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
               onChangeText={(text) => setEditForm(prev => ({ ...prev, brand: text }))}
             />
             
-            <TextInput
-              placeholder={S.dosage}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={editForm.dosage}
-              onChangeText={(text) => setEditForm(prev => ({ ...prev, dosage: text }))}
-            />
+            {/* Dosage Value and Unit */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              <TextInput
+                placeholder="30"
+                placeholderTextColor={getSubTextColor()}
+                value={editForm.dosageValue}
+                onChangeText={(text) => setEditForm(prev => ({ ...prev, dosageValue: text }))}
+                style={{
+                  flex: 1,
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  color: getCardTextColor(),
+                  fontFamily: 'Inter_400Regular',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                keyboardType="numeric"
+              />
+              
+              <TouchableOpacity
+                ref={editDosageUnitButtonRef}
+                onPress={() => {
+                  editDosageUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                    setEditDosageUnitButtonLayout({ x, y, width, height });
+                  });
+                  setShowEditDosageUnitDropdown(true);
+                }}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor(),
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
+                  minWidth: 80,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  gap: 4
+                }}
+              >
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 14,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_600SemiBold'
+                  }}
+                >
+                  {editForm.dosageUnit}
+                </DynamicText>
+                <DynamicText 
+                  type="sub" 
+                  style={{ 
+                    fontSize: 12,
+                    color: getSubTextColor()
+                  }}
+                >
+                  ▼
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
             
             <TouchableOpacity
               style={[styles.input, { borderColor: theme.chip, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}
@@ -777,7 +920,104 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
           onChange={onSuppTimePicked}
         />
       )}
+
+      {/* Dropdown Components */}
+      <DosageUnitDropdown
+        visible={showDosageUnitDropdown}
+        units={dosageUnits}
+        selectedUnit={addForm.dosageUnit}
+        onSelect={(unit) => setAddForm(prev => ({ ...prev, dosageUnit: unit }))}
+        onClose={() => setShowDosageUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+        buttonLayout={dosageUnitButtonLayout}
+      />
+
+      <DosageUnitDropdown
+        visible={showEditDosageUnitDropdown}
+        units={dosageUnits}
+        selectedUnit={editForm.dosageUnit}
+        onSelect={(unit) => setEditForm(prev => ({ ...prev, dosageUnit: unit }))}
+        onClose={() => setShowEditDosageUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+        buttonLayout={editDosageUnitButtonLayout}
+      />
     </View>
+  );
+};
+
+// Dosage Unit Dropdown Component using Modal for top-level rendering
+const DosageUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor, buttonLayout }) => {
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        activeOpacity={1}
+        onPress={onClose}
+      >
+        <View style={{
+          position: 'absolute',
+          top: buttonLayout ? buttonLayout.y + buttonLayout.height - 22 : 200,
+          left: buttonLayout ? buttonLayout.x : 60,
+          width: buttonLayout ? buttonLayout.width : 200,
+          backgroundColor: getCardBackgroundColor(),
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: getCardBorderColor(),
+          maxHeight: 150,
+          elevation: 100,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.6,
+          shadowRadius: 8,
+        }}>
+          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+            {units.map((unit, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  onSelect(unit);
+                  onClose();
+                }}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
+                  borderBottomColor: getCardBorderColor(),
+                  backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
+                }}
+              >
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 12,
+                    color: selectedUnit === unit ? theme.accent : getCardTextColor(),
+                    fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
+                  }}
+                >
+                  {unit}
+                </DynamicText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </TouchableOpacity>
+    </Modal>
   );
 };
 
