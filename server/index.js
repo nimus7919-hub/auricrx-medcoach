@@ -527,9 +527,6 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
           address: p.vicinity || p.formatted_address || 'Address not available',
           distanceMiles: dist,
           rating: p.rating,
-          phone: p.formatted_phone_number,
-          website: p.website,
-          openingHours: p.opening_hours?.weekday_text,
           logoUrl: null
         };
       }).filter(lab => lab.lat && lab.lon); // Only include labs with valid coordinates
@@ -556,9 +553,6 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
                   address: p.vicinity || p.formatted_address || 'Address not available',
                   distanceMiles: dist,
                   rating: p.rating,
-                  phone: p.formatted_phone_number,
-                  website: p.website,
-                  openingHours: p.opening_hours?.weekday_text,
                   logoUrl: null
                 };
               }).filter(lab => lab.lat && lab.lon);
@@ -569,58 +563,65 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
         }
       }
       
-      // Get actual driving distances using Distance Matrix API
+      // Get actual driving distances using Distance Matrix API (low cost)
       if (labs.length > 0) {
         try {
+          console.log('🗺️ Fetching driving distances for labs using Distance Matrix API...');
+          console.log('🗺️ Number of labs to calculate:', labs.length);
           const origins = `${lat},${lon}`;
           const destinations = labs.map(lab => `${lab.lat},${lab.lon}`).join('|');
           const distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&units=metric&key=${apiKey}`;
+          console.log('🗺️ Distance Matrix API URL:', distanceUrl.replace(apiKey, 'API_KEY_HIDDEN'));
           
-          console.log('Distance Matrix API call for', labs.length, 'labs');
           const distanceResp = await fetch(distanceUrl);
+          console.log('🗺️ Distance Matrix API response status:', distanceResp.status);
+          
           if (distanceResp.ok) {
             const distanceJson = await distanceResp.json();
+            console.log('🗺️ Distance Matrix API status:', distanceJson.status);
+            console.log('🗺️ Distance Matrix API rows:', distanceJson.rows?.length || 0);
+            
             if (distanceJson.status === 'OK' && distanceJson.rows?.[0]?.elements) {
+              console.log('🗺️ Distance Matrix API elements:', distanceJson.rows[0].elements.length);
               labs.forEach((lab, index) => {
                 const element = distanceJson.rows[0].elements[index];
+                console.log(`🗺️ Processing ${lab.name}: element status = ${element.status}`);
                 if (element.status === 'OK' && element.distance) {
-                  // Convert meters to miles
+                  // Convert meters to km and miles
                   const distanceKm = element.distance.value / 1000;
                   const distanceMiles = distanceKm * 0.621371;
+                  const oldDistance = lab.distanceMiles;
                   lab.distanceMiles = Number(distanceMiles.toFixed(2));
-                  console.log(`🧪 ${lab.name}: ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} miles) - driving distance`);
+                  console.log(`🧪 ${lab.name}: ${oldDistance}km (straight) → ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} mi) - DRIVING distance`);
+                } else {
+                  console.warn(`⚠️ ${lab.name}: Distance element status = ${element.status}, keeping straight-line distance`);
                 }
               });
+            } else {
+              console.warn('⚠️ Distance Matrix API returned status:', distanceJson.status, '- using straight-line distances');
             }
+          } else {
+            const errorText = await distanceResp.text();
+            console.warn('⚠️ Distance Matrix API failed with status:', distanceResp.status, 'Error:', errorText);
           }
         } catch (e) {
-          console.warn('Distance Matrix API failed for labs, using straight-line distances:', e.message);
+          console.warn('⚠️ Distance Matrix API error:', e.message, '- using straight-line distances');
         }
       }
       
-      // Fetch detailed information for each lab using Place Details API
-      console.log('🔍 Fetching place details for', labs.length, 'labs...');
-      const labsWithDetails = await Promise.all(labs.map(async (lab) => {
-        const details = await getPlaceDetails(lab.id, apiKey);
-        return {
-          ...lab,
-          phone: details.phone,
-          website: details.website,
-          rating: details.rating,
-          openingHours: details.openingHours
-        };
-      }));
-      
-      console.log('🔍 Final lab data with details:', labsWithDetails.map(l => ({
+      // REMOVED: Place Details API calls to save costs
+      // We only use basic data from nearbysearch (name, address, location, rating)
+      console.log('💰 Skipping Place Details API calls for labs to save costs');
+      console.log('📊 Final lab data (BASIC DATA ONLY):', labs.slice(0, 3).map(l => ({
         name: l.name,
-        phone: l.phone,
-        website: l.website,
+        address: l.address,
+        distance: l.distanceMiles,
         rating: l.rating
       })));
 
-      console.log('Labs API results:', labsWithDetails.length);
-      if (useCache) pharmacyCache.set(key, { data: labsWithDetails, ts: now });
-      return { list: labsWithDetails.slice(0, limit), cached: false, mock: false };
+      console.log('Labs API results:', labs.length);
+      if (useCache) pharmacyCache.set(key, { data: labs, ts: now });
+      return { list: labs.slice(0, limit), cached: false, mock: false };
     } else {
       throw new Error(`Labs API error: ${json.status}`);
     }
