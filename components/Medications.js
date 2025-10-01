@@ -1506,8 +1506,8 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
         <View style={{
           position: 'absolute',
           top: 200,
-          right: 16,
-          left: 16,
+          right: 60,
+          left: 60,
           backgroundColor: getCardBackgroundColor(),
           borderRadius: 8,
           borderWidth: 1,
@@ -1528,8 +1528,8 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
                   onClose();
                 }}
                 style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
                   borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
                   borderBottomColor: getCardBorderColor(),
                   backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
@@ -1575,8 +1575,8 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
         <View style={{
           position: 'absolute',
           top: 550,
-          right: 16,
-          left: 16,
+          right: 60,
+          left: 60,
           backgroundColor: getCardBackgroundColor(),
           borderRadius: 8,
           borderWidth: 1,
@@ -1597,8 +1597,8 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
                   onClose();
                 }}
                 style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
                   borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
                   borderBottomColor: getCardBorderColor(),
                   backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
