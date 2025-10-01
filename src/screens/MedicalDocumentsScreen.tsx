@@ -592,7 +592,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                        asset.uri.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/);
         
         if (!isImage) {
-          Alert.alert('❌ ' + t('error'), 'Please use the "Upload PDF" button for PDF files, or select an image file.');
+          Alert.alert('❌ ' + t('error'), t('pleaseUseUploadPDF'));
           return;
         }
         
@@ -654,12 +654,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Verify the copied file is still a valid PDF
             const fileInfo = await FileSystem.getInfoAsync(newUri);
             if (!fileInfo.exists || fileInfo.size === 0) {
-              throw new Error('PDF file was corrupted during copy');
+              throw new Error(t('pdfCorrupted'));
             }
                       
                       const newDocument: DocumentItem = {
                         id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                        name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? 'PDF Document' : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+                        name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
                         uri: newUri,
                         type,
                         category,
@@ -671,10 +671,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       await saveDocuments(updatedDocuments);
                       
                       triggerHaptic('medium');
-                      Alert.alert('✅ ' + t('success'), 'PDF document uploaded successfully');
+                      Alert.alert('✅ ' + t('success'), t('uploadSuccess'));
                     } catch (copyError) {
                       console.error('Failed to copy PDF:', copyError);
-                      Alert.alert('❌ ' + t('error'), 'Failed to save PDF document');
+                      Alert.alert('❌ ' + t('error'), t('failedToSavePDF'));
                     }
         } else {
           Alert.alert('❌ ' + t('error'), 'Please select a PDF file. The selected file is not a PDF document.');
@@ -682,7 +682,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       }
     } catch (error) {
       console.error('Failed to upload PDF:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to upload PDF document');
+      Alert.alert('❌ ' + t('error'), t('failedToUploadPDF'));
     }
   };
 
@@ -781,7 +781,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             const backBase64 = await convertImageToDataUri(pair.back.uri);
             
             if (!frontBase64 || !backBase64) {
-              Alert.alert('❌ Error', 'Failed to process images for PDF');
+              Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
               return;
             }
 
@@ -874,17 +874,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               <body>
                 <div class="header">
                   ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-                  <div class="title">AuricRX Medical ID Document</div>
+                  <div class="title">${t('auricrxMedicalID')}</div>
                 </div>
                 
                 <div class="id-container">
                   <div class="id-side">
-                    <h3>Front</h3>
-                    <img src="${frontBase64}" class="id-image" alt="ID Front">
+                    <h3>${t('front')}</h3>
+                    <img src="${frontBase64}" class="id-image" alt="${t('idFront')}">
                   </div>
                   <div class="id-side">
-                    <h3>Back</h3>
-                    <img src="${backBase64}" class="id-image" alt="ID Back">
+                    <h3>${t('back')}</h3>
+                    <img src="${backBase64}" class="id-image" alt="${t('idBack')}">
                   </div>
                 </div>
                 
@@ -924,7 +924,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               });
               console.log('✅ ID PDF shared successfully');
             } else {
-              Alert.alert('❌ Error', 'Sharing not available on this device');
+              Alert.alert('❌ ' + t('error'), t('sharingNotAvailable'));
             }
             
           } catch (pdfError) {
@@ -964,13 +964,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             dialogTitle: `Share ${document.name}`,
           });
         } else {
-          Alert.alert('❌ ' + t('error'), 'Sharing not available on this device');
+          Alert.alert('❌ ' + t('error'), t('sharingNotAvailable'));
         }
       }
       
     } catch (error) {
       console.error('Failed to share document:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share document');
+      Alert.alert('❌ ' + t('error'), t('failedToShareDocument'));
     }
   };
 
@@ -988,11 +988,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           `${doctor.name} doesn't have an email address. Please add their email in the Appointment Tracker.`,
           [
             {
-              text: 'Use WhatsApp',
+              text: t('useWhatsApp'),
               onPress: () => shareToSpecificDoctorWhatsApp(document, doctor)
             },
             {
-              text: 'Cancel',
+              text: t('cancel'),
               style: 'cancel'
             }
           ]
@@ -1021,7 +1021,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             const backBase64 = await convertImageToDataUri(pair.back.uri);
             
             if (!frontBase64 || !backBase64) {
-              Alert.alert('❌ Error', 'Failed to process images for PDF');
+              Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
               return;
             }
 
@@ -1193,7 +1193,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             console.log('🔍 PDF file exists:', fileInfo.exists);
             
             if (!fileInfo.exists) {
-              Alert.alert('❌ Error', 'PDF file was not created successfully');
+              Alert.alert('❌ ' + t('error'), t('pdfNotCreated'));
               return;
             }
             
@@ -1218,7 +1218,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         }, doctor);
         
         if (!success) {
-          throw new Error('Secure sharing failed');
+          throw new Error(t('secureSharingFailed'));
         }
               
               console.log('✅ ID PDF opened in Gmail successfully');
@@ -1235,7 +1235,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   });
                   console.log('✅ ID PDF shared successfully with expo-sharing');
                 } else {
-                  throw new Error('Sharing not available');
+                  throw new Error(t('sharingNotAvailable'));
                 }
               } catch (sharingError) {
                 console.log('⚠️ expo-sharing failed, trying Share.share:', sharingError);
@@ -1271,7 +1271,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       
     } catch (error) {
       console.error('Failed to share to doctor via email:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share to doctor via email');
+      Alert.alert('❌ ' + t('error'), t('failedToShareToEmail'));
     }
   };
 
@@ -1286,11 +1286,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           `${doctor.name} doesn't have a phone number. Please add their phone number in the Appointment Tracker.`,
           [
             {
-              text: 'Use Email',
+              text: t('useEmail'),
               onPress: () => shareToSpecificDoctorEmail(document, doctor)
             },
             {
-              text: 'Cancel',
+              text: t('cancel'),
               style: 'cancel'
             }
           ]
@@ -1319,7 +1319,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             const backBase64 = await convertImageToDataUri(pair.back.uri);
             
             if (!frontBase64 || !backBase64) {
-              Alert.alert('❌ Error', 'Failed to process images for PDF');
+              Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
               return;
             }
 
@@ -1491,7 +1491,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             console.log('🔍 PDF file exists:', fileInfo.exists);
             
             if (!fileInfo.exists) {
-              Alert.alert('❌ Error', 'PDF file was not created successfully');
+              Alert.alert('❌ ' + t('error'), t('pdfNotCreated'));
               return;
             }
             
@@ -1548,7 +1548,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       });
                       console.log('✅ ID document shared via expo-sharing fallback');
                     } else {
-                      throw new Error('Sharing not available');
+                      throw new Error(t('sharingNotAvailable'));
                     }
                   }
                 }
@@ -1565,7 +1565,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 if (shareResult.action === Share.sharedAction) {
                   console.log('✅ ID document shared to WhatsApp with Share API');
                 } else {
-                  throw new Error('Share was dismissed');
+                  throw new Error(t('shareWasDismissed'));
                 }
               }
               
@@ -1583,7 +1583,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   });
                   console.log('✅ ID PDF shared successfully with expo-sharing');
                 } else {
-                  throw new Error('Sharing not available');
+                  throw new Error(t('sharingNotAvailable'));
                 }
               } catch (sharingError) {
                 console.log('⚠️ expo-sharing failed, trying Share.share:', sharingError);
@@ -1619,7 +1619,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       
     } catch (error) {
       console.error('Failed to share to doctor via WhatsApp:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share to doctor via WhatsApp');
+      Alert.alert('❌ ' + t('error'), t('failedToShareToWhatsApp'));
     }
   };
 
@@ -1639,7 +1639,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Check if sharing is available
             const isAvailable = await Sharing.isAvailableAsync();
             if (!isAvailable) {
-              throw new Error('Sharing is not available on this platform');
+              throw new Error(t('sharingNotAvailablePlatform'));
             }
             
             // Share the PDF directly to Gmail using IntentLauncher
@@ -1676,7 +1676,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               console.log('✅ PDF shared to Gmail successfully');
             }
           } else {
-            Alert.alert('❌ ' + t('error'), 'Document file not found');
+            Alert.alert('❌ ' + t('error'), t('documentNotFound'));
           }
         } catch (error) {
           console.error('Failed to share PDF to Gmail:', error);
@@ -1706,7 +1706,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       }
     } catch (error) {
       console.error('Failed to share regular document to email:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share document to email');
+      Alert.alert('❌ ' + t('error'), t('failedToShareRegularDocumentEmail'));
     }
   };
 
@@ -1726,7 +1726,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Check if sharing is available
             const isAvailable = await Sharing.isAvailableAsync();
             if (!isAvailable) {
-              throw new Error('Sharing is not available on this platform');
+              throw new Error(t('sharingNotAvailablePlatform'));
             }
             
             // Share the PDF directly to WhatsApp using IntentLauncher
@@ -1750,7 +1750,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         }, doctor);
         
         if (!success) {
-          throw new Error('Secure sharing failed');
+          throw new Error(t('secureSharingFailed'));
         }
               
               console.log('✅ PDF opened in WhatsApp successfully');
@@ -1766,7 +1766,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               console.log('✅ PDF shared to WhatsApp successfully');
             }
           } else {
-            Alert.alert('❌ ' + t('error'), 'Document file not found');
+            Alert.alert('❌ ' + t('error'), t('documentNotFound'));
           }
         } catch (error) {
           console.error('Failed to share PDF to WhatsApp:', error);
@@ -1796,7 +1796,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       }
     } catch (error) {
       console.error('Failed to share regular document to WhatsApp:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share document to WhatsApp');
+      Alert.alert('❌ ' + t('error'), t('failedToShareRegularDocumentWhatsApp'));
     }
   };
 
@@ -1811,19 +1811,19 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           `${doctor.name} doesn't have an email address. Please add their email in the Appointment Tracker or use WhatsApp sharing.`,
           [
             {
-              text: 'Add Email',
+              text: t('addEmail'),
               onPress: () => {
                 // Navigate to appointment tracker to add email
                 // This would require navigation logic
-                Alert.alert('Info', 'Please go to Appointment Tracker to add the doctor\'s email address.');
+                Alert.alert(t('info'), t('goToAppointmentTracker'));
               }
             },
             {
-              text: 'Use WhatsApp',
+              text: t('useWhatsApp'),
               onPress: () => shareToDoctor(document)
             },
             {
-              text: 'Cancel',
+              text: t('cancel'),
               style: 'cancel'
             }
           ]
@@ -1845,7 +1845,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Check if sharing is available
             const isAvailable = await Sharing.isAvailableAsync();
             if (!isAvailable) {
-              throw new Error('Sharing is not available on this platform');
+              throw new Error(t('sharingNotAvailablePlatform'));
             }
             
             // Share the PDF file directly using expo-sharing
@@ -1856,7 +1856,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             
             console.log('✅ PDF shared to doctor successfully');
           } else {
-            Alert.alert('❌ ' + t('error'), 'Document file not found');
+            Alert.alert('❌ ' + t('error'), t('documentNotFound'));
           }
         } catch (shareError) {
           console.error('Failed to share PDF to doctor:', shareError);
@@ -2403,7 +2403,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         const backBase64 = await convertImageToDataUri(backDoc.uri);
         
         if (!frontBase64 || !backBase64) {
-          Alert.alert('❌ Error', 'Failed to process images for PDF');
+          Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
           return;
         }
 
@@ -2684,7 +2684,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   'Delete ID Documents',
                   'Are you sure you want to delete both front and back ID documents?',
                   [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: t('cancel'), style: 'cancel' },
                     { 
                       text: 'Delete', 
                       style: 'destructive',
@@ -2850,7 +2850,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 onPress={toggleSelectionMode}
               >
                 <Text style={[styles.selectionButtonText, isSelectionMode && styles.selectionButtonTextActive]}>
-                  {isSelectionMode ? 'Cancel' : 'Multi Select Doc'}
+                  {isSelectionMode ? t('cancel') : t('multiSelectDoc')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -2863,14 +2863,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 style={styles.selectionActionButton}
                 onPress={selectAllDocuments}
               >
-                <Text style={styles.selectionActionButtonText}>Select All</Text>
+                <Text style={styles.selectionActionButtonText}>{t('selectAll')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.selectionActionButton}
                 onPress={clearSelection}
               >
-                <Text style={styles.selectionActionButtonText}>Clear</Text>
+                <Text style={styles.selectionActionButtonText}>{t('clear')}</Text>
               </TouchableOpacity>
               
               {selectedDocuments.size > 0 && (
@@ -2879,7 +2879,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   onPress={shareSelectedDocuments}
                 >
                   <Text style={styles.shareSelectedButtonText}>
-                    Share ({selectedDocuments.size})
+                    {t('share')} ({selectedDocuments.size})
                   </Text>
                 </TouchableOpacity>
               )}
@@ -3209,7 +3209,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                    // Check if sharing is available
                    const isAvailable = await Sharing.isAvailableAsync();
                    if (!isAvailable) {
-                     throw new Error('Sharing is not available on this platform');
+                     throw new Error(t('sharingNotAvailablePlatform'));
                    }
                    
                    // Create a content URI using FileProvider
@@ -3667,7 +3667,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         const backBase64 = await convertImageToDataUri(idPair.back.uri);
                         
                         if (!frontBase64 || !backBase64) {
-                          Alert.alert('❌ Error', 'Failed to process images for PDF');
+                          Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
                           return;
                         }
 
@@ -3885,7 +3885,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         console.log('🔍 PDF file URI:', fileInfo.uri);
                         
                         if (!fileInfo.exists) {
-                          Alert.alert('❌ Error', 'PDF file was not created successfully');
+                          Alert.alert('❌ ' + t('error'), t('pdfNotCreated'));
                           return;
                         }
                         
@@ -4025,7 +4025,7 @@ startxref
                         'Delete ID Documents',
                         'Are you sure you want to delete both front and back ID documents?',
                         [
-                          { text: 'Cancel', style: 'cancel' },
+                          { text: t('cancel'), style: 'cancel' },
                           { 
                             text: 'Delete', 
                             style: 'destructive',

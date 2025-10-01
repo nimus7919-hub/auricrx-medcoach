@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
+import { useWallpaper } from '../contexts/WallpaperContext';
+import DynamicText from './DynamicText';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -42,24 +44,34 @@ const WALLPAPER_OPTIONS: WallpaperOption[] = [
 interface WallpaperSelectorProps {
   onClose: () => void;
   theme?: any;
+  S?: any;
   onWallpaperChange?: (wallpaper: WallpaperOption) => void;
 }
 
-export default function WallpaperSelector({ onClose, theme, onWallpaperChange }: WallpaperSelectorProps) {
+export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange }: WallpaperSelectorProps) {
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const defaultTheme = {
-    card: '#ffffff',
-    text: '#2c2c2c',
-    sub: '#6b6b6b',
-    accent: '#d4af37',
-    chip: '#e8e3d8',
-    bgStart: '#faf8f5',
-    bgEnd: '#f5f2ed',
+  
+  // Use S object for translations, fallback to key if not available
+  const t = (key: string) => S?.[key] || key;
+  
+  // Function to get translated wallpaper name
+  const getTranslatedWallpaperName = (wallpaper: WallpaperOption) => {
+    const nameMap: { [key: string]: string } = {
+      'solid_white': t('white'),
+      'solid_black': t('black'),
+      'black_gold_dr': t('blackGoldDr'),
+      'black_gold': t('blackGold'),
+      'black_silver': t('blackSilver'),
+      'bold_cream': t('boldCream'),
+      'cream_wallpaper': t('creamWallpaper'),
+      'dark_cream': t('darkCream'),
+      'dark_green_gold': t('darkGreenGold'),
+      'white_gold_dr': t('whiteGoldDr'),
+    };
+    return nameMap[wallpaper.id] || wallpaper.name;
   };
-
-  const currentTheme = theme || defaultTheme;
 
   useEffect(() => {
     loadCurrentWallpaper();
@@ -94,10 +106,10 @@ export default function WallpaperSelector({ onClose, theme, onWallpaperChange }:
         onWallpaperChange(wallpaper);
       }
       
-      Alert.alert('✅ Success', 'Wallpaper changed successfully!');
+      Alert.alert('✅ ' + t('wallpaperSuccess'), t('wallpaperChangedSuccessfully'));
     } catch (error) {
       console.error('Failed to save wallpaper:', error);
-      Alert.alert('❌ Error', 'Failed to save wallpaper');
+      Alert.alert('❌ ' + t('wallpaperError'), t('failedToSaveWallpaper'));
     }
   };
 
@@ -148,8 +160,8 @@ export default function WallpaperSelector({ onClose, theme, onWallpaperChange }:
         style={[
           styles.wallpaperOption,
           { 
-            backgroundColor: currentTheme.card,
-            borderColor: isSelected ? currentTheme.accent : currentTheme.chip,
+            backgroundColor: getCardBackgroundColor() + 'CC',
+            borderColor: isSelected ? (theme?.accent || '#D4AF37') : getCardBorderColor(),
             borderWidth: isSelected ? 2 : 1,
           }
         ]}
@@ -158,19 +170,19 @@ export default function WallpaperSelector({ onClose, theme, onWallpaperChange }:
         <View style={styles.previewContainer}>
           {getWallpaperPreview(wallpaper)}
         </View>
-        <Text 
+        <DynamicText 
+          type="card"
           style={[
             styles.wallpaperName,
             { 
-              color: currentTheme.text,
-              fontWeight: isSelected ? '600' : '400'
+              fontFamily: isSelected ? 'Inter_600SemiBold' : 'Inter_400Regular'
             }
           ]}
         >
-          {wallpaper.name}
-        </Text>
+          {getTranslatedWallpaperName(wallpaper)}
+        </DynamicText>
         {isSelected && (
-          <View style={[styles.selectedIndicator, { backgroundColor: currentTheme.accent }]}>
+          <View style={[styles.selectedIndicator, { backgroundColor: theme?.accent || '#D4AF37' }]}>
             <Text style={styles.checkmark}>✓</Text>
           </View>
         )}
@@ -180,28 +192,39 @@ export default function WallpaperSelector({ onClose, theme, onWallpaperChange }:
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: currentTheme.bgStart }]}>
-        <Text style={[styles.loadingText, { color: currentTheme.text }]}>
-          Loading wallpapers...
-        </Text>
+      <View style={styles.container}>
+        <DynamicText type="card" style={styles.loadingText}>
+          {t('loadingWallpapers')}
+        </DynamicText>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: currentTheme.bgStart }]}>
-      <View style={[styles.header, { backgroundColor: currentTheme.card }]}>
-        <Text style={[styles.title, { color: currentTheme.text }]}>
-          🎨 Choose Wallpaper
-        </Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity
-          style={[styles.closeButton, { backgroundColor: currentTheme.chip }]}
+          style={styles.closeButton}
           onPress={onClose}
         >
-          <Text style={[styles.closeButtonText, { color: currentTheme.text }]}>
-            ✕
-          </Text>
+          <Image 
+            source={require('../../assets/dashboard Emojies/close Window.png')} 
+            style={{ 
+              width: 32, 
+              height: 32,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.8,
+              shadowRadius: 4,
+              elevation: 5,
+            }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
+        <DynamicText type="primary" style={styles.title}>
+          {t('chooseWallpaper')}
+        </DynamicText>
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView 
@@ -209,16 +232,16 @@ export default function WallpaperSelector({ onClose, theme, onWallpaperChange }:
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Text style={[styles.sectionTitle, { color: currentTheme.sub }]}>
-          Solid Colors
-        </Text>
+        <DynamicText type="card" style={[styles.sectionTitle, { opacity: 0.7 }]}>
+          {t('solidColors')}
+        </DynamicText>
         <View style={styles.wallpaperGrid}>
           {WALLPAPER_OPTIONS.filter(w => w.type === 'color').map(renderWallpaperOption)}
         </View>
 
-        <Text style={[styles.sectionTitle, { color: currentTheme.sub }]}>
-          Wallpaper Images
-        </Text>
+        <DynamicText type="card" style={[styles.sectionTitle, { opacity: 0.7 }]}>
+          {t('wallpaperImages')}
+        </DynamicText>
         <View style={styles.wallpaperGrid}>
           {WALLPAPER_OPTIONS.filter(w => w.type === 'image').map(renderWallpaperOption)}
         </View>
@@ -237,12 +260,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingTop: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'Inter_800ExtraBold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 40,
   },
   closeButton: {
     width: 40,
@@ -250,10 +276,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   scrollView: {
     flex: 1,
@@ -263,7 +285,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Inter_700Bold',
     marginBottom: 15,
     marginTop: 10,
   },
@@ -276,7 +298,7 @@ const styles = StyleSheet.create({
   wallpaperOption: {
     width: (screenWidth - 60) / 2,
     marginBottom: 15,
-    borderRadius: 12,
+    borderRadius: 18,
     padding: 10,
     alignItems: 'center',
     position: 'relative',
@@ -284,14 +306,14 @@ const styles = StyleSheet.create({
   previewContainer: {
     width: '100%',
     height: 120,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 8,
   },
   colorPreview: {
     width: '100%',
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 12,
   },
   imagePreview: {
     width: '100%',
@@ -320,5 +342,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginTop: 50,
+    fontFamily: 'Inter_400Regular',
   },
 });

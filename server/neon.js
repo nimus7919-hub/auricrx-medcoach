@@ -132,6 +132,31 @@ async function saveUserSupplement(userId, supplement) {
   }
 }
 
+// User medications functions
+async function saveUserMedication(userId, medication) {
+  try {
+    const { data, error } = await neonClient`
+      INSERT INTO user_medications (
+        user_id, medication_name, strength, status, times, 
+        start_date, end_date, notes, doses_left, quantity, 
+        last_refill, is_active
+      ) VALUES (
+        ${userId}, ${medication.medicationName}, ${medication.strength}, 
+        ${medication.status}, ${medication.times}, ${medication.startDate}, 
+        ${medication.endDate}, ${medication.notes}, ${medication.dosesLeft}, 
+        ${medication.quantity}, ${medication.lastRefill}, 
+        ${medication.isActive || true}
+      ) RETURNING *
+    `;
+    
+    console.log('✅ User medication saved to Neon:', data[0]);
+    return data[0];
+  } catch (error) {
+    console.error('❌ Failed to save user medication:', error);
+    throw error;
+  }
+}
+
 async function getUserSupplements(userId) {
   try {
     const data = await neonClient`
@@ -144,6 +169,20 @@ async function getUserSupplements(userId) {
     return data;
   } catch (error) {
     console.error('❌ Failed to get user supplements:', error);
+    throw error;
+  }
+}
+
+async function getUserMedications(userId) {
+  try {
+    const data = await neonClient`
+      SELECT * FROM get_user_medications(${userId})
+    `;
+    
+    console.log(`📊 Retrieved ${data.length} medications for user ${userId}`);
+    return data;
+  } catch (error) {
+    console.error('❌ Failed to get user medications:', error);
     throw error;
   }
 }
@@ -247,6 +286,9 @@ module.exports = {
   // User supplements
   saveUserSupplement,
   getUserSupplements,
+  // User medications
+  saveUserMedication,
+  getUserMedications,
   // User doctors
   saveUserDoctor,
   getUserDoctors,

@@ -11,18 +11,28 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from '../components/DynamicText';
 import authService from '../services/authService';
+import CustomAlert from '../components/CustomAlert';
+import { useCustomAlert } from '../hooks/useCustomAlert';
 
 interface AdminProfileScreenProps {
   onClose: () => void;
   currentUser: any;
+  theme?: any;
+  S?: any;
+  onNavigateToSettings?: () => void;
 }
 
-export default function AdminProfileScreen({ onClose, currentUser }: AdminProfileScreenProps) {
+export default function AdminProfileScreen({ onClose, currentUser, theme, S, onNavigateToSettings }: AdminProfileScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const { alert, showAlert, handlePress } = useCustomAlert();
+  
+  // Use S object for translations, fallback to key if not available
+  const t = (key: string) => S?.[key] || key;
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
     displayName: currentUser?.displayName || '',
@@ -35,7 +45,6 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: getCardBackgroundColor(),
     },
     scrollContent: {
       flexGrow: 1,
@@ -46,77 +55,105 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 30,
+      paddingTop: 20,
     },
     closeButton: {
-      padding: 10,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    closeButtonText: {
-      fontSize: 18,
-      color: getCardTextColor(),
+    circleContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: '#2c2c2c',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: '#444444',
+    },
+    circleEmoji: {
+      fontSize: 20,
+      color: '#D4AF37',
+      fontWeight: 'bold',
     },
     title: {
       fontSize: 24,
-      fontWeight: 'bold',
-      color: getCardTextColor(),
+      fontFamily: 'Inter_800ExtraBold',
       textAlign: 'center',
       marginBottom: 10,
     },
     subtitle: {
       fontSize: 16,
-      color: getCardTextColor() + '80',
+      fontFamily: 'Inter_600SemiBold',
       textAlign: 'center',
       marginBottom: 30,
+      opacity: 0.8,
     },
     formContainer: {
-      backgroundColor: getCardBackgroundColor(),
-      borderRadius: 12,
+      backgroundColor: getCardBackgroundColor() + 'CC',
+      borderRadius: 18,
       padding: 20,
-      borderWidth: 1,
+      borderWidth: 2,
       borderColor: getCardBorderColor(),
       marginBottom: 20,
     },
     input: {
-      backgroundColor: getCardBackgroundColor(),
+      backgroundColor: getCardBackgroundColor() + '80',
       borderWidth: 1,
       borderColor: getCardBorderColor(),
-      borderRadius: 8,
+      borderRadius: 12,
       padding: 15,
       fontSize: 16,
+      fontFamily: 'Inter_500Medium',
       color: getCardTextColor(),
       marginBottom: 15,
     },
     button: {
-      backgroundColor: '#3b82f6',
+      backgroundColor: theme?.accent || '#D4AF37',
       padding: 15,
-      borderRadius: 8,
+      borderRadius: 18,
       alignItems: 'center',
       marginBottom: 15,
+      shadowColor: theme?.accent || '#D4AF37',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 5,
     },
     buttonText: {
-      color: '#ffffff',
+      color: theme?.bg === '#ffffff' || theme?.bg === '#fefefe' ? '#000000' : '#ffffff',
       fontSize: 16,
-      fontWeight: '600',
+      fontFamily: 'Inter_700Bold',
     },
     secondaryButton: {
       backgroundColor: 'transparent',
-      borderWidth: 1,
+      borderWidth: 2,
       borderColor: getCardBorderColor(),
+      borderRadius: 25,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     secondaryButtonText: {
       color: getCardTextColor(),
+      fontFamily: 'Inter_700Bold',
+      textAlign: 'center',
     },
-    adminBadge: {
-      backgroundColor: '#10b981',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 20,
-      alignSelf: 'flex-start',
-      marginBottom: 20,
+    sectionTitle: {
+      fontSize: 18,
+      fontFamily: 'Inter_700Bold',
+      color: getCardTextColor(),
+      marginBottom: 15,
     },
-    adminBadgeText: {
-      color: '#ffffff',
-      fontSize: 12,
-      fontWeight: '600',
+    dangerSectionTitle: {
+      fontSize: 18,
+      fontFamily: 'Inter_700Bold',
+      color: '#ef4444',
+      marginBottom: 15,
     },
     loadingContainer: {
       flexDirection: 'row',
@@ -127,12 +164,17 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
     loadingText: {
       marginLeft: 10,
       color: getCardTextColor(),
+      fontFamily: 'Inter_600SemiBold',
     },
   });
 
   const handleUpdateProfile = async () => {
     if (!profile.displayName.trim()) {
-      Alert.alert('Error', 'Display name is required');
+      showAlert({
+        title: t('error'),
+        message: t('displayNameRequired'),
+        buttonText: t('ok'),
+      });
       return;
     }
 
@@ -142,28 +184,38 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
       // For now, simulate success
       setTimeout(() => {
         setLoading(false);
-        Alert.alert('Success', 'Profile updated successfully!');
+        showAlert({
+          title: t('success'),
+          message: t('profileUpdatedSuccessfully'),
+          buttonText: t('ok'),
+        });
       }, 2000);
     } catch (error) {
       setLoading(false);
-      Alert.alert('Error', 'Failed to update profile');
+      showAlert({
+        title: t('error'),
+        message: t('failedToUpdateProfile'),
+        buttonText: t('ok'),
+      });
     }
   };
 
   const handleChangePassword = () => {
-    Alert.alert(
-      'Change Password',
-      'Password reset email will be sent to your email address.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Send Reset Email', onPress: handlePasswordReset }
-      ]
-    );
+    showAlert({
+      title: t('changePasswordTitle'),
+      message: t('passwordResetMessage'),
+      buttonText: t('sendResetEmail'),
+      onPress: handlePasswordReset,
+    });
   };
 
   const handlePasswordReset = async () => {
     if (!profile.email) {
-      Alert.alert('Error', 'Email address is required for password reset');
+      showAlert({
+        title: t('error'),
+        message: t('emailRequiredForReset'),
+        buttonText: t('ok'),
+      });
       return;
     }
 
@@ -171,68 +223,73 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
     try {
       const result = await authService.resetPassword(profile.email);
       if (result.success) {
-        Alert.alert('Success', 'Password reset email sent!');
+        showAlert({
+          title: t('success'),
+          message: t('passwordResetEmailSent'),
+          buttonText: t('ok'),
+        });
       } else {
-        Alert.alert('Error', result.error);
+        showAlert({
+          title: t('error'),
+          message: result.error,
+          buttonText: t('ok'),
+        });
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to send password reset email');
+      showAlert({
+        title: t('error'),
+        message: t('failedToSendResetEmail'),
+        buttonText: t('ok'),
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete Account', style: 'destructive', onPress: confirmDeleteAccount }
-      ]
-    );
+    showAlert({
+      title: t('deleteAccountTitle'),
+      message: t('deleteAccountMessage'),
+      buttonText: t('deleteAccount'),
+      onPress: confirmDeleteAccount,
+    });
   };
 
   const confirmDeleteAccount = () => {
-    Alert.alert(
-      'Confirm Deletion',
-      'Are you absolutely sure? This will delete your account and all associated data.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Yes, Delete Forever', style: 'destructive', onPress: () => {
-          // TODO: Implement account deletion
-          Alert.alert('Account Deleted', 'Your account has been deleted.');
-        }}
-      ]
-    );
+    showAlert({
+      title: t('confirmDeletion'),
+      message: t('confirmDeletionMessage'),
+      buttonText: t('yesDeleteForever'),
+      onPress: () => {
+        // TODO: Implement account deletion
+        showAlert({
+          title: t('accountDeleted'),
+          message: t('accountDeletedMessage'),
+          buttonText: t('ok'),
+        });
+      },
+    });
   };
 
   return (
     <View style={dynamicStyles.container}>
       <ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
         <View style={dynamicStyles.header}>
-          <TouchableOpacity style={dynamicStyles.closeButton} onPress={onClose}>
-            <Text style={dynamicStyles.closeButtonText}>✕</Text>
+          <TouchableOpacity style={dynamicStyles.closeButton} onPress={onNavigateToSettings || onClose}>
+            <View style={dynamicStyles.circleContainer}>
+              <Text style={dynamicStyles.circleEmoji}>✕</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
-        <DynamicText style={dynamicStyles.title}>Admin Profile</DynamicText>
-        <DynamicText style={dynamicStyles.subtitle}>
-          Manage your account settings and permissions
-        </DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.title}>{t('adminProfileTitle')}</DynamicText>
 
-        {/* Admin Badge */}
-        <View style={dynamicStyles.adminBadge}>
-          <Text style={dynamicStyles.adminBadgeText}>
-            🔐 {profile.adminLevel.toUpperCase()} ACCESS
-          </Text>
-        </View>
 
         {/* Profile Form */}
         <View style={dynamicStyles.formContainer}>
           <TextInput
             style={dynamicStyles.input}
-            placeholder="Display Name"
+            placeholder={t('displayName')}
             placeholderTextColor={getCardTextColor() + '60'}
             value={profile.displayName}
             onChangeText={(text) => setProfile(prev => ({ ...prev, displayName: text }))}
@@ -240,7 +297,7 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
           
           <TextInput
             style={[dynamicStyles.input, { backgroundColor: getCardBackgroundColor() + '60' }]}
-            placeholder="Email"
+            placeholder={t('email')}
             placeholderTextColor={getCardTextColor() + '60'}
             value={profile.email}
             editable={false}
@@ -248,62 +305,67 @@ export default function AdminProfileScreen({ onClose, currentUser }: AdminProfil
           
           <TextInput
             style={[dynamicStyles.input, { backgroundColor: getCardBackgroundColor() + '60' }]}
-            placeholder="Phone Number"
+            placeholder={t('phoneNumber')}
             placeholderTextColor={getCardTextColor() + '60'}
-            value={profile.phoneNumber}
+            value={currentUser?.phoneNumber || t('noPhoneNumber')}
             editable={false}
           />
 
           <TouchableOpacity
-            style={dynamicStyles.button}
+            style={dynamicStyles.secondaryButton}
             onPress={handleUpdateProfile}
             disabled={loading}
           >
-            <Text style={dynamicStyles.buttonText}>Update Profile</Text>
+            <DynamicText type="card" style={dynamicStyles.secondaryButtonText}>{t('updateProfile')}</DynamicText>
           </TouchableOpacity>
         </View>
 
         {/* Security Settings */}
         <View style={dynamicStyles.formContainer}>
-          <DynamicText style={{ fontSize: 18, fontWeight: '600', color: getCardTextColor(), marginBottom: 15 }}>
-            Security Settings
+          <DynamicText type="card" style={dynamicStyles.sectionTitle}>
+            {t('securitySettings')}
           </DynamicText>
           
           <TouchableOpacity
-            style={[dynamicStyles.button, dynamicStyles.secondaryButton]}
+            style={dynamicStyles.secondaryButton}
             onPress={handleChangePassword}
             disabled={loading}
           >
-            <Text style={[dynamicStyles.buttonText, dynamicStyles.secondaryButtonText]}>
-              🔒 Change Password
-            </Text>
+            <DynamicText type="card" style={dynamicStyles.secondaryButtonText}>
+              {t('changePassword')}
+            </DynamicText>
           </TouchableOpacity>
         </View>
 
-        {/* Danger Zone */}
-        <View style={[dynamicStyles.formContainer, { borderColor: '#ef4444' }]}>
-          <DynamicText style={{ fontSize: 18, fontWeight: '600', color: '#ef4444', marginBottom: 15 }}>
-            Danger Zone
-          </DynamicText>
-          
+        {/* Delete Account */}
+        <View style={[dynamicStyles.formContainer, { borderColor: '#ef4444', padding: 15 }]}>
           <TouchableOpacity
-            style={[dynamicStyles.button, { backgroundColor: '#ef4444' }]}
+            style={[dynamicStyles.button, { backgroundColor: '#ef4444', marginBottom: 0 }]}
             onPress={handleDeleteAccount}
             disabled={loading}
           >
-            <Text style={dynamicStyles.buttonText}>
-              🗑️ Delete Account
-            </Text>
+            <DynamicText type="card" style={dynamicStyles.buttonText}>
+              {t('deleteAccount')}
+            </DynamicText>
           </TouchableOpacity>
         </View>
 
         {loading && (
           <View style={dynamicStyles.loadingContainer}>
-            <ActivityIndicator color="#3b82f6" />
-            <Text style={dynamicStyles.loadingText}>Processing...</Text>
+            <ActivityIndicator color={theme?.accent || '#D4AF37'} />
+            <DynamicText type="card" style={dynamicStyles.loadingText}>{t('processing')}</DynamicText>
           </View>
         )}
       </ScrollView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={!!alert}
+        title={alert?.title || ''}
+        message={alert?.message || ''}
+        buttonText={alert?.buttonText || 'OK'}
+        onPress={handlePress}
+      />
     </View>
   );
 }

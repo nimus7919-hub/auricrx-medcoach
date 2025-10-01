@@ -7,33 +7,46 @@ import {
   Dimensions,
   StatusBar,
   Platform,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import WallpaperSelector from '../components/WallpaperSelector';
+import DynamicText from '../components/DynamicText';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface WallpaperSettingsScreenProps {
   onClose: () => void;
   theme?: any;
+  S?: any;
+  onNavigateToSettings?: () => void;
 }
 
-export default function WallpaperSettingsScreen({ onClose, theme }: WallpaperSettingsScreenProps) {
-  const { currentWallpaper, setWallpaper } = useWallpaper();
+export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateToSettings }: WallpaperSettingsScreenProps) {
+  const { currentWallpaper, setWallpaper, getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const [showSelector, setShowSelector] = useState(false);
-
-  const defaultTheme = {
-    card: '#ffffff',
-    text: '#2c2c2c',
-    sub: '#6b6b6c',
-    accent: '#d4af37',
-    chip: '#e8e3d8',
-    bgStart: '#faf8f5',
-    bgEnd: '#f5f2ed',
+  
+  // Use S object for translations, fallback to key if not available
+  const t = (key: string) => S?.[key] || key;
+  
+  // Function to get translated wallpaper name
+  const getTranslatedWallpaperName = (wallpaper: any) => {
+    if (!wallpaper) return t('default');
+    const nameMap: { [key: string]: string } = {
+      'solid_white': t('white'),
+      'solid_black': t('black'),
+      'black_gold_dr': t('blackGoldDr'),
+      'black_gold': t('blackGold'),
+      'black_silver': t('blackSilver'),
+      'bold_cream': t('boldCream'),
+      'cream_wallpaper': t('creamWallpaper'),
+      'dark_cream': t('darkCream'),
+      'dark_green_gold': t('darkGreenGold'),
+      'white_gold_dr': t('whiteGoldDr'),
+    };
+    return nameMap[wallpaper.id] || wallpaper.name;
   };
-
-  const currentTheme = theme || defaultTheme;
 
   const handleWallpaperChange = async (wallpaper: any) => {
     try {
@@ -48,7 +61,8 @@ export default function WallpaperSettingsScreen({ onClose, theme }: WallpaperSet
     return (
       <WallpaperSelector
         onClose={() => setShowSelector(false)}
-        theme={currentTheme}
+        theme={theme}
+        S={S}
         onWallpaperChange={handleWallpaperChange}
       />
     );
@@ -60,61 +74,72 @@ export default function WallpaperSettingsScreen({ onClose, theme }: WallpaperSet
       
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.homeButton} onPress={onClose}>
-            <Text style={[styles.homeButtonText, { color: currentTheme.text }]}>←</Text>
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: currentTheme.text }]}>
-            🎨 Wallpaper Settings
-          </Text>
+        <View style={[styles.header, { borderColor: theme?.chip || '#e8e3d8' }]}>
+        <TouchableOpacity style={[styles.homeButton, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onNavigateToSettings || onClose}>
+          <Image 
+            source={require('../../assets/dashboard Emojies/close Window.png')} 
+            style={{ 
+              width: 32, 
+              height: 32,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.8,
+              shadowRadius: 4,
+              elevation: 5,
+            }}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+          <DynamicText type="primary" style={styles.title}>
+            {t('wallpaperTitle')}
+          </DynamicText>
           <View style={styles.placeholder} />
         </View>
 
         {/* Content */}
-        <View style={[styles.content, { backgroundColor: currentTheme.card }]}>
+        <View style={[styles.content, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]}>
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>
-              Current Wallpaper
-            </Text>
-            <View style={[styles.currentWallpaper, { backgroundColor: currentTheme.chip }]}>
-              <Text style={[styles.currentWallpaperText, { color: currentTheme.sub }]}>
-                {currentWallpaper ? currentWallpaper.name : 'Default'}
-              </Text>
+            <DynamicText type="card" style={styles.sectionTitle}>
+              {t('currentWallpaper')}
+            </DynamicText>
+            <View style={[styles.currentWallpaper, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor(), borderWidth: 1 }]}>
+              <DynamicText type="card" style={[styles.currentWallpaperText, { opacity: 0.7 }]}>
+                {getTranslatedWallpaperName(currentWallpaper)}
+              </DynamicText>
             </View>
           </View>
 
           <TouchableOpacity
-            style={[styles.changeButton, { backgroundColor: currentTheme.accent }]}
+            style={[styles.changeButton, { backgroundColor: theme?.accent || '#D4AF37' }]}
             onPress={() => setShowSelector(true)}
           >
-            <Text style={[styles.changeButtonText, { color: currentTheme.text }]}>
-              Change Wallpaper
-            </Text>
+            <DynamicText type="card" style={[styles.changeButtonText, { color: theme?.bg === '#ffffff' || theme?.bg === '#fefefe' ? '#000000' : '#ffffff' }]}>
+              {t('changeWallpaper')}
+            </DynamicText>
           </TouchableOpacity>
 
           <View style={styles.infoSection}>
-            <Text style={[styles.infoTitle, { color: currentTheme.text }]}>
-              About Wallpapers
-            </Text>
-            <Text style={[styles.infoText, { color: currentTheme.sub }]}>
-              Choose from our collection of beautiful wallpapers or select a solid color. 
-              Your wallpaper choice will be applied throughout the app to personalize your experience.
-            </Text>
+            <DynamicText type="card" style={styles.infoTitle}>
+              {t('aboutWallpapers')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.infoText, { opacity: 0.7 }]}>
+              {t('aboutWallpapersDescription')}
+            </DynamicText>
           </View>
 
           <View style={styles.featuresList}>
-            <Text style={[styles.featureItem, { color: currentTheme.sub }]}>
-              • 8 unique wallpaper designs
-            </Text>
-            <Text style={[styles.featureItem, { color: currentTheme.sub }]}>
-              • Solid color options (white/black)
-            </Text>
-            <Text style={[styles.featureItem, { color: currentTheme.sub }]}>
-              • Instant preview and application
-            </Text>
-            <Text style={[styles.featureItem, { color: currentTheme.sub }]}>
-              • Settings are saved automatically
-            </Text>
+            <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
+              • {t('uniqueWallpaperDesigns')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
+              • {t('solidColorOptions')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
+              • {t('instantPreviewAndApplication')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
+              • {t('settingsSavedAutomatically')}
+            </DynamicText>
           </View>
         </View>
       </View>
@@ -138,13 +163,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  homeButtonText: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   title: {
     fontSize: 24,
@@ -158,7 +178,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     margin: 20,
-    borderRadius: 20,
+    borderRadius: 18,
     padding: 24,
   },
   section: {
@@ -166,7 +186,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Inter_700Bold',
     marginBottom: 12,
   },
   currentWallpaper: {
@@ -176,7 +196,7 @@ const styles = StyleSheet.create({
   },
   currentWallpaperText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   changeButton: {
     paddingVertical: 16,
@@ -187,19 +207,20 @@ const styles = StyleSheet.create({
   },
   changeButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   infoSection: {
     marginBottom: 20,
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
     lineHeight: 20,
+    fontFamily: 'Inter_400Regular',
   },
   featuresList: {
     marginTop: 10,
@@ -208,5 +229,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     marginBottom: 4,
+    fontFamily: 'Inter_400Regular',
   },
 });

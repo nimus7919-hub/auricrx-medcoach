@@ -45,6 +45,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
   const [loading, setLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [staySignedIn, setStaySignedIn] = useState(false);
 
   // where is the logo? (to aim the beam)
   const [logoBox, setLogoBox] = useState<{ y: number; h: number }>({ y: 160, h: 56 });
@@ -83,9 +84,9 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     
     setLoading(true);
     try {
-      console.log({ email, pw });
+      console.log({ email, pw, staySignedIn });
       if (onAuthSuccess) {
-        await onAuthSuccess({ email, password: pw, isSignUp: false });
+        await onAuthSuccess({ email, password: pw, isSignUp: false, staySignedIn });
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -185,7 +186,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         legal: "登录即表示您同意我们的服务条款和隐私政策"
       }
     };
-    return translations[lang] || translations.en;
+    return translations[lang as keyof typeof translations] || translations.en;
   };
 
   const t = getTranslations(selectedLanguage);
@@ -316,6 +317,27 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           </GoldOutline>
 
           <View style={{ height: 18 }} />
+
+          {/* Stay Signed In Toggle */}
+          <View style={styles.staySignedInContainer}>
+            <TouchableOpacity 
+              style={styles.staySignedInToggle}
+              onPress={() => setStaySignedIn(!staySignedIn)}
+              activeOpacity={0.7}
+            >
+              <View style={[
+                styles.checkbox, 
+                { backgroundColor: staySignedIn ? GOLD.a500 : 'transparent' }
+              ]}>
+                {staySignedIn && (
+                  <Text style={styles.checkmark}>✓</Text>
+                )}
+              </View>
+              <Text style={styles.staySignedInText}>Stay signed in</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ height: 16 }} />
 
           <GoldButton 
             title={loading ? "Loading..." : t.signIn} 
@@ -621,6 +643,37 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 20,
+  },
+
+  // Stay Signed In styles
+  staySignedInContainer: {
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  staySignedInToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: GOLD.a500,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  checkmark: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  staySignedInText: {
+    color: '#E9C978',
+    fontSize: 14,
+    fontWeight: '500',
   },
   
   // Language dropdown styles

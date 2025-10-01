@@ -8,7 +8,7 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 
 // Medications component moved outside App to prevent remounting
-const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onNavigateToDashboard, onNavigateToSettings, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
+const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, onNavigateToSettings, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
@@ -143,10 +143,51 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
     }
   }, [showAdd]);
 
-  const handleAddMed = () => {
+  // Load medications from database when component mounts
+  useEffect(() => {
+    const loadMedicationsFromDB = async () => {
+      if (user && user.uid) {
+        try {
+          const response = await fetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.medications && result.medications.length > 0) {
+              // Convert database format to local format
+              const dbMeds = result.medications.map(med => ({
+                id: med.id,
+                name: med.medication_name,
+                strength: med.strength || '',
+                status: med.status,
+                times: med.times || [],
+                startDate: med.start_date || '',
+                endDate: med.end_date || '',
+                notes: med.notes || '',
+                dosesLeft: med.doses_left || '',
+                quantity: med.quantity || '',
+                lastRefill: med.last_refill || null,
+                dbId: med.id // Store database ID
+              }));
+              
+              console.log('📊 Loaded medications from database:', dbMeds.length);
+              setMeds(dbMeds);
+            }
+          } else {
+            console.error('❌ Failed to load medications from database:', response.status);
+          }
+        } catch (error) {
+          console.error('❌ Error loading medications from database:', error);
+        }
+      }
+    };
+
+    loadMedicationsFromDB();
+  }, [user]);
+
+  const handleAddMed = async () => {
     try {
       if (!addForm.name.trim()) return;
       console.log('[MEDICATIONS DEBUG] Adding medication with quantity:', addForm.quantity);
+      
       const newMed = {
         id: `${Date.now()}`,
         name: addForm.name.trim(),
@@ -160,8 +201,54 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
         quantity: addForm.quantity.trim(),
         lastRefill: null // No refill yet
       };
+      
       console.log('[MEDICATIONS DEBUG] New medication object:', newMed);
+      
+      // Save to local state first for immediate UI update
       setMeds(prev => [...prev, newMed]);
+      
+      // Save to database if user is authenticated
+      if (user && user.uid) {
+        try {
+          const response = await fetch('https://auricrx-medcoach.onrender.com/api/medications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: user.uid,
+              medicationName: newMed.name,
+              strength: newMed.strength,
+              status: newMed.status,
+              times: newMed.times,
+              startDate: newMed.startDate,
+              endDate: newMed.endDate,
+              notes: newMed.notes,
+              dosesLeft: newMed.dosesLeft,
+              quantity: newMed.quantity,
+              lastRefill: newMed.lastRefill
+            })
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Medication saved to database:', result.medication.id);
+            
+            // Update local medication with database ID
+            setMeds(prev => prev.map(med => 
+              med.id === newMed.id ? { ...med, dbId: result.medication.id } : med
+            ));
+          } else {
+            console.error('❌ Failed to save medication to database:', response.status);
+          }
+        } catch (dbError) {
+          console.error('❌ Database save error:', dbError);
+          // Don't fail the entire operation if database save fails
+        }
+      } else {
+        console.log('⚠️ User not authenticated, medication saved locally only');
+      }
+      
       setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
       setAddTimes([]);
       // Close modal immediately after successful add

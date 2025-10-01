@@ -1135,7 +1135,9 @@ const {
   saveMedicationContribution, 
   getMedicationContributions,
   saveUserProfile,
-  getUserProfile
+  getUserProfile,
+  saveUserMedication,
+  getUserMedications
 } = require('./neon');
 
 // Load existing data on startup
@@ -1467,6 +1469,102 @@ app.delete('/medication-contributions', async (req, res) => {
       ok: false, 
       error: 'clear_failed',
       message: 'Failed to clear contributions'
+    });
+  }
+});
+
+// --- User Medications Endpoints ---
+
+// POST /api/medications - Save a new user medication
+app.post('/api/medications', async (req, res) => {
+  try {
+    const { 
+      userId,
+      medicationName, 
+      strength, 
+      status, 
+      times, 
+      startDate, 
+      endDate, 
+      notes, 
+      dosesLeft, 
+      quantity, 
+      lastRefill 
+    } = req.body;
+
+    // Validate required fields
+    if (!userId || !medicationName || !status) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_required_fields',
+        message: 'userId, medicationName, and status are required'
+      });
+    }
+
+    // Prepare medication data
+    const medicationData = {
+      medicationName: medicationName.trim(),
+      strength: strength?.trim() || '',
+      status: status.trim(),
+      times: Array.isArray(times) ? times : [],
+      startDate: startDate || null,
+      endDate: endDate || null,
+      notes: notes?.trim() || '',
+      dosesLeft: dosesLeft?.trim() || '',
+      quantity: quantity?.trim() || '',
+      lastRefill: lastRefill || null,
+      isActive: true
+    };
+
+    // Save to Neon database
+    const savedMedication = await saveUserMedication(userId, medicationData);
+    
+    console.log('✅ Medication saved successfully:', savedMedication.id);
+    
+    res.json({ 
+      ok: true, 
+      medication: savedMedication,
+      message: 'Medication saved successfully'
+    });
+  } catch (error) {
+    console.error('❌ Failed to save medication:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'save_failed',
+      message: 'Failed to save medication'
+    });
+  }
+});
+
+// GET /api/medications - Get user medications
+app.get('/api/medications', async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_user_id',
+        message: 'userId is required'
+      });
+    }
+
+    // Get medications from Neon database
+    const medications = await getUserMedications(userId);
+    
+    console.log(`📊 Retrieved ${medications.length} medications for user ${userId}`);
+    
+    res.json({ 
+      ok: true, 
+      medications,
+      count: medications.length
+    });
+  } catch (error) {
+    console.error('❌ Failed to get medications:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'retrieve_failed',
+      message: 'Failed to retrieve medications'
     });
   }
 });

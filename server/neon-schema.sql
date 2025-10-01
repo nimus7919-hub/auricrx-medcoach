@@ -67,6 +67,31 @@ CREATE TABLE IF NOT EXISTS user_supplements (
   is_active BOOLEAN DEFAULT TRUE
 );
 
+-- User medications table
+CREATE TABLE IF NOT EXISTS user_medications (
+  id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- User identification
+  user_id TEXT NOT NULL,
+  
+  -- Medication data
+  medication_name TEXT NOT NULL,
+  strength TEXT,
+  status TEXT NOT NULL, -- 'taking', 'onhold', 'finished', 'stopped'
+  times TEXT[], -- Array of times like ['08:00', '20:00']
+  start_date DATE,
+  end_date DATE,
+  notes TEXT,
+  doses_left TEXT,
+  quantity TEXT,
+  last_refill DATE,
+  
+  -- Status
+  is_active BOOLEAN DEFAULT TRUE
+);
+
 -- User doctors table
 CREATE TABLE IF NOT EXISTS user_doctors (
   id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
@@ -131,6 +156,10 @@ CREATE INDEX IF NOT EXISTS idx_user_symptoms_active ON user_symptoms(is_active);
 CREATE INDEX IF NOT EXISTS idx_user_supplements_user_id ON user_supplements(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_supplements_active ON user_supplements(is_active);
 
+CREATE INDEX IF NOT EXISTS idx_user_medications_user_id ON user_medications(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_medications_active ON user_medications(is_active);
+CREATE INDEX IF NOT EXISTS idx_user_medications_status ON user_medications(status);
+
 CREATE INDEX IF NOT EXISTS idx_user_doctors_user_id ON user_doctors(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
@@ -154,6 +183,9 @@ CREATE TRIGGER update_user_symptoms_updated_at BEFORE UPDATE ON user_symptoms
 CREATE TRIGGER update_user_supplements_updated_at BEFORE UPDATE ON user_supplements
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_user_medications_updated_at BEFORE UPDATE ON user_medications
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_user_doctors_updated_at BEFORE UPDATE ON user_doctors
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -168,6 +200,7 @@ CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
 ALTER TABLE medication_contributions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_symptoms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_supplements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_medications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_doctors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
@@ -186,6 +219,11 @@ CREATE POLICY user_symptoms_isolation ON user_symptoms
 
 -- User supplements policies
 CREATE POLICY user_supplements_isolation ON user_supplements
+  FOR ALL TO authenticated
+  USING (user_id = current_setting('app.current_user_id', true));
+
+-- User medications policies
+CREATE POLICY user_medications_isolation ON user_medications
   FOR ALL TO authenticated
   USING (user_id = current_setting('app.current_user_id', true));
 
@@ -333,6 +371,47 @@ BEGIN
   FROM user_supplements us
   WHERE us.user_id = p_user_id
   ORDER BY us.created_at DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Get user medications for current user
+CREATE OR REPLACE FUNCTION get_user_medications(p_user_id TEXT)
+RETURNS TABLE (
+  id TEXT,
+  created_at TIMESTAMP WITH TIME ZONE,
+  medication_name TEXT,
+  strength TEXT,
+  status TEXT,
+  times TEXT[],
+  start_date DATE,
+  end_date DATE,
+  notes TEXT,
+  doses_left TEXT,
+  quantity TEXT,
+  last_refill DATE,
+  is_active BOOLEAN
+) AS $$
+BEGIN
+  PERFORM set_user_context(p_user_id);
+  
+  RETURN QUERY
+  SELECT 
+    um.id,
+    um.created_at,
+    um.medication_name,
+    um.strength,
+    um.status,
+    um.times,
+    um.start_date,
+    um.end_date,
+    um.notes,
+    um.doses_left,
+    um.quantity,
+    um.last_refill,
+    um.is_active
+  FROM user_medications um
+  WHERE um.user_id = p_user_id
+  ORDER BY um.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

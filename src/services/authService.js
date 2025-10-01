@@ -15,6 +15,7 @@ import {
 } from 'firebase/auth';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class AuthService {
   constructor() {
@@ -66,7 +67,7 @@ class AuthService {
     }
   }
 
-  async signInWithEmail(email, password) {
+  async signInWithEmail(email, password, staySignedIn = false) {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
@@ -80,6 +81,16 @@ class AuthService {
           error: 'Please verify your email address before signing in. Check your inbox (including spam folder) for a verification email.',
           needsEmailVerification: true,
         };
+      }
+
+      // Store authentication state if stay signed in is enabled
+      if (staySignedIn) {
+        await this.storeAuthState({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+        });
       }
 
       return {
@@ -177,6 +188,9 @@ class AuthService {
   // Sign Out
   async signOut() {
     try {
+      // Clear stored authentication state
+      await this.clearAuthState();
+      
       // Sign out from Firebase
       await signOut(this.auth);
       
@@ -222,9 +236,9 @@ class AuthService {
   // Handle both sign-in and sign-up
   async handleAuth(authData) {
     try {
-      const { email, password, isSignUp, ...userData } = authData;
+      const { email, password, isSignUp, staySignedIn = false, ...userData } = authData;
       
-      console.log('handleAuth called with:', { email, isSignUp, userData });
+      console.log('handleAuth called with:', { email, isSignUp, staySignedIn, userData });
       
       if (isSignUp) {
         // Create account with Firebase
@@ -252,7 +266,7 @@ class AuthService {
           return result;
         }
       } else {
-        return await this.signInWithEmail(email, password);
+        return await this.signInWithEmail(email, password, staySignedIn);
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -344,6 +358,78 @@ class AuthService {
         error: 'Phone verification failed',
         message: 'Account created successfully! Phone verification failed.'
       };
+    }
+  }
+
+  // Persistent Authentication Methods
+  async storeAuthState(userData) {
+    try {
+      const authState = {
+        ...userData,
+        timestamp: Date.now(),
+        staySignedIn: true,
+      };
+      await AsyncStorage.setItem('AURIC_AUTH_STATE', JSON.stringify(authState));
+      console.log('✅ Auth state stored for persistent login');
+    } catch (error) {
+      console.error('❌ Failed to store auth state:', error);
+    }
+  }
+
+  async getStoredAuthState() {
+    try {
+      const storedAuth = await AsyncStorage.getItem('AURIC_AUTH_STATE');
+      if (storedAuth) {
+        const authState = JSON.parse(storedAuth);
+        // Check if the stored auth is not too old (30 days)
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        if (authState.timestamp > thirtyDaysAgo) {
+          console.log('✅ Valid stored auth state found');
+          return authState;
+        } else {
+          console.log('⚠️ Stored auth state expired, clearing...');
+          await this.clearAuthState();
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ Failed to get stored auth state:', error);
+      return null;
+    }
+  }
+
+  async clearAuthState() {
+    try {
+      await AsyncStorage.removeItem('AURIC_AUTH_STATE');
+      console.log('✅ Auth state cleared');
+    } catch (error) {
+      console.error('❌ Failed to clear auth state:', error);
+    }
+  }
+
+  async restoreAuthState() {
+    try {
+      const storedAuth = await this.getStoredAuthState();
+      if (storedAuth && storedAuth.staySignedIn) {
+        // Check if Firebase still has the user authenticated
+        const currentUser = this.auth.currentUser;
+        if (currentUser && currentUser.uid === storedAuth.uid) {
+          console.log('✅ User already authenticated, restoring state');
+          return {
+            success: true,
+            user: {
+              uid: storedAuth.uid,
+              email: storedAuth.email,
+              displayName: storedAuth.displayName,
+              emailVerified: storedAuth.emailVerified,
+            },
+          };
+        }
+      }
+      return { success: false };
+    } catch (error) {
+      console.error('❌ Failed to restore auth state:', error);
+      return { success: false };
     }
   }
 }

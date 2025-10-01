@@ -102,20 +102,27 @@ const Reminders = ({ theme, reminders, setReminders, S, themeKey, onNavigateToDa
           />
         </TouchableOpacity>
 
-        <Text style={{ 
-          color: theme.text, 
-          fontSize: 18, 
-          fontFamily: 'Inter_800ExtraBold', 
+        <DynamicText type="primary" style={{ 
+          fontSize: 16, 
+          fontFamily: 'Inter_600SemiBold', 
           position: 'absolute', 
           left: '50%', 
           transform: [{ translateX: -50 }], 
-          maxWidth: '60%' 
+          maxWidth: '60%',
+          textAlign: 'center'
         }} numberOfLines={1}>
           {S.reminders}
-        </Text>
+        </DynamicText>
 
         <TouchableOpacity onPress={onNavigateToSettings} style={{ padding: 8 }}>
-          <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
+          <Image 
+            source={require('../assets/dashboard Emojies/settings cog.png')} 
+            style={{
+              width: 24,
+              height: 24,
+            }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 

@@ -434,10 +434,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       setMetricNotes('');
       setShowAddMetricModal(false);
       triggerHaptic('medium');
-      Alert.alert('✅ Success', 'Health metric added!');
+      Alert.alert(`✅ ${t('success')}`, t('healthMetricAdded'));
     } catch (error) {
       console.error('Failed to add metric:', error);
-      Alert.alert('❌ Error', 'Failed to add health metric');
+      Alert.alert(`❌ ${t('error')}`, t('failedToAddHealthMetric'));
     }
   };
 
@@ -469,7 +469,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       Alert.alert(`✅ ${t('success')}`, t('sideEffectRecorded'));
     } catch (error) {
       console.error('Failed to add side effect:', error);
-      Alert.alert('❌ Error', 'Failed to record side effect');
+      Alert.alert(`❌ ${t('error')}`, t('failedToRecordSideEffect'));
     }
   };
 
@@ -496,7 +496,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       );
     } catch (error) {
       console.error('Failed to generate report:', error);
-      Alert.alert('❌ Error', 'Failed to generate health report');
+      Alert.alert(`❌ ${t('error')}`, t('failedToGenerateHealthReport'));
     }
   };
 
@@ -633,7 +633,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
             <DynamicText type="card" style={dynamicStyles.adherenceRate}>{med.adherenceRate.toFixed(0)}%</DynamicText>
           </View>
           <DynamicText type="card" style={dynamicStyles.adherenceDetails}>
-            {med.takenDoses} taken • {med.missedDoses} missed • {med.streak} day streak
+            {med.takenDoses} {t('taken')} • {med.missedDoses} {t('missed')} • {med.streak} {t('dayStreak')}
           </DynamicText>
         </View>
       ))}
@@ -675,7 +675,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
             </View>
           </View>
           <DynamicText type="card" style={dynamicStyles.sideEffectDetails}>
-            {sideEffect.medicationName} • Started {new Date(sideEffect.startDate).toLocaleDateString()}
+            {sideEffect.medicationName} • {t('started')} {new Date(sideEffect.startDate).toLocaleDateString()}
             {sideEffect.notes && ` • ${sideEffect.notes}`}
           </DynamicText>
         </View>

@@ -10,9 +10,22 @@ const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch")
 import medicationDataCollector from "../services/medicationDataCollector";
 
 interface MedicationInfo { name: string; dosage: string; lastRefill?: string }
-interface Props { visible: boolean; onClose: () => void; medication: MedicationInfo; strings: any; lang: string; userCountry?: string }
+interface Props { 
+  visible: boolean; 
+  onClose: () => void; 
+  medication: MedicationInfo; 
+  strings: any; 
+  lang: string; 
+  userCountry?: string; 
+  onRefillComplete?: (medicationName: string) => void;
+  // Pre-loaded data for faster loading
+  preloadedPharmacies?: any[];
+  preloadedCoords?: { latitude: number; longitude: number };
+  preloadedCurrency?: string;
+  preloadedFxMeta?: any;
+}
 
-export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry }: Props) {
+export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry, onRefillComplete, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }: Props) {
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<StorePrice[]>([]);
@@ -59,57 +72,76 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   async function load() {
     try {
       setLoading(true);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      let coords = { latitude: 37.7749, longitude: -122.4194 }; // fallback (SF)
-      let determinedCurrency: string = 'USD';
-      if (status === "granted") {
-        try {
-          const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-          coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-          // cache it
-          AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
-        } catch {}
-      } else {
-        // attempt cached last location
-        try {
-          const cached = await AsyncStorage.getItem(LAST_LOC_KEY);
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed && typeof parsed.latitude==='number' && typeof parsed.longitude==='number') {
-              coords = { latitude: parsed.latitude, longitude: parsed.longitude };
+      
+      // Use pre-loaded data if available for faster loading
+      let coords = preloadedCoords || { latitude: 37.7749, longitude: -122.4194 }; // fallback (SF)
+      let determinedCurrency: string = preloadedCurrency || 'USD';
+      let near = preloadedPharmacies || [];
+      
+      // If no pre-loaded data, load it manually (fallback)
+      if (!preloadedCoords || !preloadedPharmacies || !preloadedCurrency) {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          try {
+            const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+            coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+            // cache it
+            AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
+          } catch {}
+        } else {
+          // attempt cached last location
+          try {
+            const cached = await AsyncStorage.getItem(LAST_LOC_KEY);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (parsed && typeof parsed.latitude==='number' && typeof parsed.longitude==='number') {
+                coords = { latitude: parsed.latitude, longitude: parsed.longitude };
+              }
             }
-          }
-        } catch {}
-      }
-      setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
-      // Determine currency from country (reverse geocode); fall back to language mapping then USD
-      try {
-        const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
-        const cc = geo?.[0]?.isoCountryCode?.toUpperCase();
-        if (cc) {
-          // Expanded mapping (common global currencies)
-          const C: Record<string,string> = {
-            // North America
-            US:'USD', PR:'USD', CA:'CAD', MX:'MXN',
-            // Latin America
-            BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:'USD', UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:'USD', DO:'DOP', PA:'PAB',
-            // Europe (Euro + others)
-            ES:'EUR', PT:'EUR', FR:'EUR', DE:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', IE:'EUR', LU:'EUR', AT:'EUR', FI:'EUR', GR:'EUR', SK:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', MT:'EUR', CY:'EUR',
-            PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', HR:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF', GB:'GBP', IS:'ISK', TR:'TRY',
-            // Middle East & Africa
-            AE:'AED', SA:'SAR', QA:'QAR', KW:'KWD', BH:'BHD', OM:'OMR', IL:'ILS', EG:'EGP', MA:'MAD', NG:'NGN', KE:'KES', ZA:'ZAR', GH:'GHS',
-            // Asia / Pacific
-            CN:'CNY', JP:'JPY', KR:'KRW', IN:'INR', HK:'HKD', TW:'TWD', SG:'SGD', MY:'MYR', TH:'THB', ID:'IDR', PH:'PHP', VN:'VND', AU:'AUD', NZ:'NZD', FJ:'FJD'
-          };
-          if (C[cc]) determinedCurrency = C[cc];
+          } catch {}
         }
-      } catch {}
-      // If geocode failed we can do a crude language fallback
-      if (!determinedCurrency) {
-        determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
+        setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
+        
+        // Determine currency from country (reverse geocode); fall back to language mapping then USD
+        if (!preloadedCurrency) {
+          try {
+            const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
+            const cc = geo?.[0]?.isoCountryCode?.toUpperCase();
+            if (cc) {
+              // Expanded mapping (common global currencies)
+              const C: Record<string,string> = {
+                // North America
+                US:'USD', PR:'USD', CA:'CAD', MX:'MXN',
+                // Latin America
+                BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:'USD', UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:'USD', DO:'DOP', PA:'PAB',
+                // Europe (Euro + others)
+                ES:'EUR', PT:'EUR', FR:'EUR', DE:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', IE:'EUR', LU:'EUR', AT:'EUR', FI:'EUR', GR:'EUR', SK:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', MT:'EUR', CY:'EUR',
+                PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', HR:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF', GB:'GBP', IS:'ISK', TR:'TRY',
+                // Middle East & Africa
+                AE:'AED', SA:'SAR', QA:'QAR', KW:'KWD', BH:'BHD', OM:'OMR', IL:'ILS', EG:'EGP', MA:'MAD', NG:'NGN', KE:'KES', ZA:'ZAR', GH:'GHS',
+                // Asia / Pacific
+                CN:'CNY', JP:'JPY', KR:'KRW', IN:'INR', HK:'HKD', TW:'TWD', SG:'SGD', MY:'MYR', TH:'THB', ID:'IDR', PH:'PHP', VN:'VND', AU:'AUD', NZ:'NZD', FJ:'FJD'
+              };
+              if (C[cc]) determinedCurrency = C[cc];
+            }
+          } catch {}
+          // If geocode failed we can do a crude language fallback
+          if (!determinedCurrency) {
+            determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
+          }
+        }
+        setCurrency(determinedCurrency); // single definitive assignment
+        
+        // Load pharmacies if not pre-loaded
+        if (!preloadedPharmacies) {
+          near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
+        }
+      } else {
+        // Use pre-loaded data
+        setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
+        setCurrency(determinedCurrency);
+        console.log('🚀 Using pre-loaded refill data for faster loading');
       }
-      setCurrency(determinedCurrency); // single definitive assignment
-      const near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
       
       // Check if no pharmacies found - reload the modal
       if (!near || near.length === 0) {
@@ -145,7 +177,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             name: p.name,
             price: p.price,
             priceNotAvailable: p.priceNotAvailable,
-            hasExcelMatch: !!p.excelMatch
+            excelMatch: p.excelMatch
           }))
         });
         
@@ -193,7 +225,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       medicationName: medication.name || '',
       strength: medication.dosage || '',
       price: '',
-      quantity: '',
+      quantity: medication.quantity || '',
       storeName: pharmacy.name || '',
       storeAddress: pharmacy.address || ''
     });
@@ -370,18 +402,28 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     AED:'د.إ','SAR':'﷼','QAR':'﷼','KWD':'KD','BHD':'BD','OMR':'﷼','ILS':'₪','EGP':'E£','MAD':'د.م.','NGN':'₦','KES':'KSh','ZAR':'R','GHS':'₵',
     CNY:'¥','JPY':'¥','KRW':'₩','INR':'₹','HKD':'HK$','TWD':'NT$','SGD':'S$','MYR':'RM','THB':'฿','IDR':'Rp','PHP':'₱','VND':'₫','AUD':'A$','NZD':'NZ$','FJD':'FJ$'
   };
-  let formatPrice = (n:number) => {
-    const sym = symbolMap[currency];
-    return sym ? `${sym}${n.toFixed(2)}` : `${n.toFixed(2)} ${currency}`;
+  // Map language codes to proper locales for currency formatting
+  const localeMap: Record<string, string> = {
+    'en': 'en-US',
+    'es': 'es-MX', // Mexican Spanish for MXN currency
+    'zh': 'zh-CN',
+    'fr': 'fr-FR',
+    'de': 'de-DE',
+    'pt': 'pt-BR'
   };
-  try {
-    const nf = new Intl.NumberFormat(lang, { style:'currency', currency, maximumFractionDigits:2 });
-    formatPrice = (n:number) => nf.format(n);
-  } catch {}
+  
+  const locale = localeMap[lang] || 'en-US';
+  const nf = new Intl.NumberFormat(locale, { style:'currency', currency, maximumFractionDigits:2 });
+  const formatPrice = (n:number) => {
+    const formatted = nf.format(n);
+    console.log(`💰 Price formatting: ${n} -> ${formatted} (locale: ${locale}, currency: ${currency})`);
+    return formatted;
+  };
 
   function renderItem({ item }: { item: StorePrice }) {
     if (!item || typeof item !== 'object') return null;
     const isLowest = lowestPrice != null && typeof item.price === 'number' && item.price === lowestPrice;
+    console.log('[PHARMACY DEBUG] Rendering pharmacy:', item.name, 'excelMatch:', item.excelMatch);
     return (
       <Pressable
         onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
@@ -411,7 +453,10 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Text style={{ color: colors.text, fontSize:16, fontWeight:'600' }}>{item.name}</Text>
             <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
             <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
-              <Text style={{ color: colors.sub, fontSize:11 }}>💊 {productInfo.display}</Text>
+              <Text style={{ color: colors.sub, fontSize:11 }}>{productInfo.display}</Text>
+              {item.excelMatch?.unidades && (
+                <Text style={{ color: colors.sub, fontSize:11, marginLeft: 8 }}>{item.excelMatch.unidades}</Text>
+              )}
             </View>
           </View>
         </View>
@@ -470,7 +515,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           <View style={{ gap: spacing.sm }}>
             <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{(strings.refill||'Refill')} {`(${(strings.sortBy||'Sort')}: ${strings[sort]||sort}${descending?' ↓':' ↑'})`}</Text>
             <Text style={{ color: colors.sub, fontSize: 14 }}>
-              {medication.name} • {medication.dosage}{medication.lastRefill ? ` • ${(strings.lastRefill||'Last refill')}: ${medication.lastRefill}` : ""}
+              {medication.name} • {medication.dosage}{medication.quantity && medication.quantity !== 'N/A' ? ` • ${medication.quantity}` : ""}{medication.lastRefill ? ` • ${(strings.lastRefill||'Last refill')}: ${medication.lastRefill}` : ""}
             </Text>
             {mockMode && (
               <View style={{ backgroundColor: '#fbbf24', paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.xl }}>
@@ -566,9 +611,22 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
               <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.close || 'Close'}</Text>
             </Pressable>
-            <Pressable style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-              <Text style={{ color: '#000', fontWeight: '700' }}>{strings.reserve || 'Reserve (stub)'}</Text>
-            </Pressable>
+            {onRefillComplete && (
+              <Pressable 
+                onPress={() => {
+                  onRefillComplete(medication.name);
+                  onClose();
+                }}
+                style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}
+              >
+                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.refillComplete || 'Refill Complete'}</Text>
+              </Pressable>
+            )}
+            {!onRefillComplete && (
+              <Pressable style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
+                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.reserve || 'Reserve (stub)'}</Text>
+              </Pressable>
+            )}
           </View>
         </Animated.View>
       </View>
