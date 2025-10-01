@@ -45,11 +45,27 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
         console.log('🎨 WallpaperContext - Parsed wallpaper:', wallpaper);
         setCurrentWallpaper(wallpaper);
       } else {
-        console.log('🎨 WallpaperContext - No saved wallpaper found');
+        console.log('🎨 WallpaperContext - No saved wallpaper found, setting default');
+        // Set default wallpaper to match the app's default theme
+        const defaultWallpaper = {
+          id: 'default_gold',
+          name: 'Default Gold',
+          type: 'color',
+          value: '#faf8f5'
+        };
+        setCurrentWallpaper(defaultWallpaper);
       }
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to load wallpaper:', error);
+      // Set default wallpaper even on error
+      const defaultWallpaper = {
+        id: 'default_gold',
+        name: 'Default Gold',
+        type: 'color',
+        value: '#faf8f5'
+      };
+      setCurrentWallpaper(defaultWallpaper);
       setIsLoading(false);
     }
   };
@@ -186,6 +202,10 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     }
 
     if (currentWallpaper.type === 'color') {
+      // For the default gold theme, use white cards
+      if (currentWallpaper.id === 'default_gold') {
+        return '#ffffff';
+      }
       return isLightColor(currentWallpaper.value) ? '#ffffff' : '#2a2a2a';
     } else {
       // For image wallpapers, use smart defaults
@@ -206,6 +226,10 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     }
 
     if (currentWallpaper.type === 'color') {
+      // For the default gold theme, use light border
+      if (currentWallpaper.id === 'default_gold') {
+        return '#e8e3d8';
+      }
       return isLightColor(currentWallpaper.value) ? '#e8e3d8' : '#404040';
     } else {
       // For image wallpapers, use smart defaults
