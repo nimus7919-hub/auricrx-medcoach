@@ -527,16 +527,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 <TextInput
                   ref={addMedNameRef}
                   placeholder={S.medicationName}
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={addForm.name}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   onFocus={() => {
                     console.log('Input focused');
@@ -557,16 +559,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.strengthExample}
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={addForm.strength}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, strength: text }))}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -579,13 +583,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     setShowMedTimePicker(true);
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
@@ -601,13 +607,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     setShowDatePicker(true);
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
@@ -623,13 +631,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     setShowDatePicker(true);
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
@@ -640,16 +650,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.notesOptional}
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={addForm.notes}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   multiline
                   numberOfLines={3}
@@ -660,19 +672,21 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={addForm.quantity}
                   onChangeText={(text) => {
                     console.log('[MEDICATIONS DEBUG] Quantity input changed:', text);
                     setAddForm(prev => ({ ...prev, quantity: text }));
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -693,23 +707,25 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                       key={status.key}
                       onPress={() => setAddForm(prev => ({ ...prev, status: status.key }))}
                       style={{
-                        backgroundColor: addForm.status === status.key ? status.color : theme.chip,
+                        backgroundColor: addForm.status === status.key ? status.color : getCardBackgroundColor(),
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 12,
                         margin: 4,
                         flexDirection: 'row',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: getCardBorderColor()
                       }}
                     >
-                      <Text style={{ fontSize: 16, marginRight: 4 }}>{status.emoji}</Text>
-                      <Text style={{ 
-                        color: addForm.status === status.key ? '#2c2c2c' : theme.text, 
+                      <DynamicText type="card" style={{ fontSize: 16, marginRight: 4 }}>{status.emoji}</DynamicText>
+                      <DynamicText type="card" style={{ 
+                        color: addForm.status === status.key ? '#2c2c2c' : getCardTextColor(), 
                         fontFamily: 'Inter_600SemiBold',
                         fontSize: 14
                       }}>
                         {status.label}
-                      </Text>
+                      </DynamicText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -724,9 +740,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     marginTop: 8
                   }}
                 >
-                  <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
+                  <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
                     {S.add}
-                  </Text>
+                  </DynamicText>
                 </TouchableOpacity>
               </ScrollView>
             </View>
@@ -775,16 +791,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.medicationName}
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={editForm.name}
                   onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -793,16 +811,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.strengthExample}
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={editForm.strength}
                   onChangeText={(text) => setEditForm(prev => ({ ...prev, strength: text }))}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -815,13 +835,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     setShowMedTimePicker(true);
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
@@ -837,13 +859,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     setShowDatePicker(true);
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
@@ -859,13 +883,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     setShowDatePicker(true);
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
@@ -876,16 +902,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder={S.notesOptional}
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={editForm.notes}
                   onChangeText={(text) => setEditForm(prev => ({ ...prev, notes: text }))}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   multiline
                   numberOfLines={3}
@@ -896,19 +924,21 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
                 <TextInput
                   placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
-                  placeholderTextColor={theme.sub}
+                  placeholderTextColor={getCardTextColor()}
                   value={editForm.quantity}
                   onChangeText={(text) => {
                     console.log('[MEDICATIONS DEBUG] Edit quantity input changed:', text);
                     setEditForm(prev => ({ ...prev, quantity: text }));
                   }}
                   style={{
-                    backgroundColor: theme.chip,
+                    backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
                     padding: 16,
                     marginBottom: 12,
-                    color: theme.text,
-                    fontFamily: 'Inter_400Regular'
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
                   }}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -929,23 +959,25 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                       key={status.key}
                       onPress={() => setEditForm(prev => ({ ...prev, status: status.key }))}
                       style={{
-                        backgroundColor: editForm.status === status.key ? status.color : theme.chip,
+                        backgroundColor: editForm.status === status.key ? status.color : getCardBackgroundColor(),
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                         borderRadius: 12,
                         margin: 4,
                         flexDirection: 'row',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: getCardBorderColor()
                       }}
                     >
-                      <Text style={{ fontSize: 16, marginRight: 4 }}>{status.emoji}</Text>
-                      <Text style={{ 
-                        color: editForm.status === status.key ? '#2c2c2c' : theme.text, 
+                      <DynamicText type="card" style={{ fontSize: 16, marginRight: 4 }}>{status.emoji}</DynamicText>
+                      <DynamicText type="card" style={{ 
+                        color: editForm.status === status.key ? '#2c2c2c' : getCardTextColor(), 
                         fontFamily: 'Inter_600SemiBold',
                         fontSize: 14
                       }}>
                         {status.label}
-                      </Text>
+                      </DynamicText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -966,9 +998,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                       marginRight: 8
                     }}
                   >
-                    <Text style={{ color: '#fff', fontFamily: 'Inter_700Bold' }}>
+                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_700Bold' }}>
                       {S.delete}
-                    </Text>
+                    </DynamicText>
                   </TouchableOpacity>
                   
                   <TouchableOpacity
@@ -983,9 +1015,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                       marginLeft: 8
                     }}
                   >
-                    <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
+                    <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
                       {S.saveBtn}
-                    </Text>
+                    </DynamicText>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
