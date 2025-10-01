@@ -1330,7 +1330,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 999,
+            zIndex: 9999,
           }}
           activeOpacity={1}
           onPress={() => {
@@ -1348,18 +1348,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           right: 16,
           left: 16,
           backgroundColor: getCardBackgroundColor(),
-          borderRadius: 12,
+          borderRadius: 8,
           borderWidth: 1,
           borderColor: getCardBorderColor(),
-          maxHeight: 200,
-          zIndex: 1000,
-          elevation: 10,
+          maxHeight: 150,
+          zIndex: 10000,
+          elevation: 20,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.4,
+          shadowRadius: 4,
         }}>
-          <ScrollView style={{ maxHeight: 200 }}>
+          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
             {strengthUnits.map((unit, index) => (
               <TouchableOpacity
                 key={index}
@@ -1368,9 +1368,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   setShowStrengthUnitDropdown(false);
                 }}
                 style={{
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderBottomWidth: index < strengthUnits.length - 1 ? 1 : 0,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderBottomWidth: index < strengthUnits.length - 1 ? 0.5 : 0,
                   borderBottomColor: getCardBorderColor(),
                   backgroundColor: addForm.strengthUnit === unit ? theme.accent + '20' : 'transparent'
                 }}
@@ -1378,7 +1378,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 <DynamicText 
                   type="card" 
                   style={{ 
-                    fontSize: 14,
+                    fontSize: 12,
                     color: addForm.strengthUnit === unit ? theme.accent : getCardTextColor(),
                     fontFamily: addForm.strengthUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                   }}
@@ -1399,18 +1399,18 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           right: 16,
           left: 16,
           backgroundColor: getCardBackgroundColor(),
-          borderRadius: 12,
+          borderRadius: 8,
           borderWidth: 1,
           borderColor: getCardBorderColor(),
-          maxHeight: 200,
-          zIndex: 1000,
-          elevation: 10,
+          maxHeight: 150,
+          zIndex: 10000,
+          elevation: 20,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.4,
+          shadowRadius: 4,
         }}>
-          <ScrollView style={{ maxHeight: 200 }}>
+          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
             {quantityUnits.map((unit, index) => (
               <TouchableOpacity
                 key={index}
@@ -1419,9 +1419,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   setShowQuantityUnitDropdown(false);
                 }}
                 style={{
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderBottomWidth: index < quantityUnits.length - 1 ? 1 : 0,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderBottomWidth: index < quantityUnits.length - 1 ? 0.5 : 0,
                   borderBottomColor: getCardBorderColor(),
                   backgroundColor: addForm.quantityUnit === unit ? theme.accent + '20' : 'transparent'
                 }}
@@ -1429,7 +1429,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 <DynamicText 
                   type="card" 
                   style={{ 
-                    fontSize: 14,
+                    fontSize: 12,
                     color: addForm.quantityUnit === unit ? theme.accent : getCardTextColor(),
                     fontFamily: addForm.quantityUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                   }}
