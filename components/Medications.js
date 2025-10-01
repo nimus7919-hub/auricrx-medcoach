@@ -1349,154 +1349,142 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   );
 };
 
-// Dropdown components rendered outside the main component
+// Dropdown components using Modal for top-level rendering
 const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor }) => {
-  if (!visible) return null;
-  
   return (
-    <View style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 9999999,
-    }}>
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <TouchableOpacity
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          flex: 1,
           backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
         activeOpacity={1}
         onPress={onClose}
-      />
-      <View style={{
-        position: 'absolute',
-        top: 200,
-        right: 16,
-        left: 16,
-        backgroundColor: getCardBackgroundColor(),
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: getCardBorderColor(),
-        maxHeight: 150,
-        elevation: 100,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.6,
-        shadowRadius: 8,
-        zIndex: 9999999,
-      }}>
-        <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
-          {units.map((unit, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => {
-                onSelect(unit);
-                onClose();
-              }}
-              style={{
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
-                borderBottomColor: getCardBorderColor(),
-                backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
-              }}
-            >
-              <DynamicText 
-                type="card" 
-                style={{ 
-                  fontSize: 12,
-                  color: selectedUnit === unit ? theme.accent : getCardTextColor(),
-                  fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
+      >
+        <View style={{
+          position: 'absolute',
+          top: 200,
+          right: 16,
+          left: 16,
+          backgroundColor: getCardBackgroundColor(),
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: getCardBorderColor(),
+          maxHeight: 150,
+          elevation: 100,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.6,
+          shadowRadius: 8,
+        }}>
+          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+            {units.map((unit, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  onSelect(unit);
+                  onClose();
+                }}
+                style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
+                  borderBottomColor: getCardBorderColor(),
+                  backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
                 }}
               >
-                {unit}
-              </DynamicText>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    </View>
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 12,
+                    color: selectedUnit === unit ? theme.accent : getCardTextColor(),
+                    fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
+                  }}
+                >
+                  {unit}
+                </DynamicText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </TouchableOpacity>
+    </Modal>
   );
 };
 
 const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor }) => {
-  if (!visible) return null;
-  
   return (
-    <View style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 9999999,
-    }}>
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <TouchableOpacity
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          flex: 1,
           backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
         activeOpacity={1}
         onPress={onClose}
-      />
-      <View style={{
-        position: 'absolute',
-        top: 350,
-        right: 16,
-        left: 16,
-        backgroundColor: getCardBackgroundColor(),
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: getCardBorderColor(),
-        maxHeight: 150,
-        elevation: 100,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.6,
-        shadowRadius: 8,
-        zIndex: 9999999,
-      }}>
-        <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
-          {units.map((unit, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => {
-                onSelect(unit);
-                onClose();
-              }}
-              style={{
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
-                borderBottomColor: getCardBorderColor(),
-                backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
-              }}
-            >
-              <DynamicText 
-                type="card" 
-                style={{ 
-                  fontSize: 12,
-                  color: selectedUnit === unit ? theme.accent : getCardTextColor(),
-                  fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
+      >
+        <View style={{
+          position: 'absolute',
+          top: 350,
+          right: 16,
+          left: 16,
+          backgroundColor: getCardBackgroundColor(),
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: getCardBorderColor(),
+          maxHeight: 150,
+          elevation: 100,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.6,
+          shadowRadius: 8,
+        }}>
+          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+            {units.map((unit, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  onSelect(unit);
+                  onClose();
+                }}
+                style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderBottomWidth: index < units.length - 1 ? 0.5 : 0,
+                  borderBottomColor: getCardBorderColor(),
+                  backgroundColor: selectedUnit === unit ? theme.accent + '20' : 'transparent'
                 }}
               >
-                {unit}
-              </DynamicText>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    </View>
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 12,
+                    color: selectedUnit === unit ? theme.accent : getCardTextColor(),
+                    fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
+                  }}
+                >
+                  {unit}
+                </DynamicText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </TouchableOpacity>
+    </Modal>
   );
 };
 
