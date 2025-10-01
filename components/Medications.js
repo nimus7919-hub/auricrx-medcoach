@@ -4,11 +4,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
 import MedicationRefillModal from './MedicationRefillModal';
+import DynamicText from '../src/components/DynamicText';
+import { useWallpaper } from '../src/contexts/WallpaperContext';
 
 // Medications component moved outside App to prevent remounting
-const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onNavigateToDashboard, onNavigateToSettings }) => {
+const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onNavigateToDashboard, onNavigateToSettings, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   useEffect(() => {
     mounted.current += 1;
     console.log(`[MEDICATIONS] MOUNT #${mounted.current}`);
@@ -64,7 +67,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
   useEffect(() => {
     console.log('[MEDICATIONS] Modal state changed - showAdd:', showAdd);
     if (showAdd) {
-      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
     } else {
       setInputFocused(false); // Reset input focus when modal closes
     }
@@ -89,7 +92,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
   }, []);
   const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [holdUntil, setHoldUntil] = useState('');
-  const [addForm, setAddForm] = useState({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+  const [addForm, setAddForm] = useState({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
   const [addTimes, setAddTimes] = useState([]); // array of HH:MM
   const [editTimes, setEditTimes] = useState([]);
   const [showMedTimePicker, setShowMedTimePicker] = useState(false);
@@ -128,7 +131,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
     setDateField(null);
   };
   const [showEdit, setShowEdit] = useState(false);
-  const [editForm, setEditForm] = useState({ id:'', name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+  const [editForm, setEditForm] = useState({ id:'', name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
 
   // Auto-focus name input when modal opens
   useEffect(() => {
@@ -142,6 +145,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
   const handleAddMed = () => {
     try {
       if (!addForm.name.trim()) return;
+      console.log('[MEDICATIONS DEBUG] Adding medication with quantity:', addForm.quantity);
       const newMed = {
         id: `${Date.now()}`,
         name: addForm.name.trim(),
@@ -151,10 +155,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
         startDate: addForm.startDate,
         endDate: addForm.endDate,
         notes: addForm.notes.trim(),
-        dosesLeft: addForm.dosesLeft.trim()
+        dosesLeft: addForm.dosesLeft.trim(),
+        quantity: addForm.quantity.trim(),
+        lastRefill: null // No refill yet
       };
+      console.log('[MEDICATIONS DEBUG] New medication object:', newMed);
       setMeds(prev => [...prev, newMed]);
-      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'' });
+      setAddForm({ name:'', strength:'', times:'', status:'taking', startDate:'', endDate:'', notes:'', dosesLeft:'', quantity:'' });
       setAddTimes([]);
       // Close modal immediately after successful add
       setShowAdd(false);
@@ -169,11 +176,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
   const handleEditMed = () => {
     try {
       if (!editForm.name.trim()) return;
+      console.log('[MEDICATIONS DEBUG] Editing medication with quantity:', editForm.quantity);
       setMeds(prev => prev.map(med => 
         med.id === editForm.id 
-          ? { ...med, name: editForm.name.trim(), strength: editForm.strength.trim(), status: editForm.status, times: editTimes, startDate: editForm.startDate, endDate: editForm.endDate, notes: editForm.notes.trim(), dosesLeft: editForm.dosesLeft.trim() }
+          ? { ...med, name: editForm.name.trim(), strength: editForm.strength.trim(), status: editForm.status, times: editTimes, startDate: editForm.startDate, endDate: editForm.endDate, notes: editForm.notes.trim(), dosesLeft: editForm.dosesLeft.trim(), quantity: editForm.quantity.trim() }
           : med
       ));
+      console.log('[MEDICATIONS DEBUG] Updated medication with quantity:', editForm.quantity);
       setShowEdit(false);
     } catch (error) {
       console.error('[MEDICATIONS] Error editing medication:', error);
@@ -183,6 +192,17 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
 
   const handleDeleteMed = (id) => {
     setMeds(prev => prev.filter(med => med.id !== id));
+  };
+
+  // Handle refill completion - update lastRefill date
+  const handleRefillComplete = (medicationName) => {
+    const currentDate = new Date().toLocaleDateString();
+    setMeds(prev => prev.map(med => 
+      med.name === medicationName 
+        ? { ...med, lastRefill: currentDate }
+        : med
+    ));
+    console.log('[MEDICATIONS DEBUG] Refill completed for:', medicationName, 'Date:', currentDate);
   };
 
   // Refill medication function
@@ -227,7 +247,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
       const medicationInfo = {
         name: medication.name,
         dosage: medication.strength || 'N/A',
-        lastRefill: medication.lastRefill || 'Never'
+        quantity: medication.quantity || 'N/A',
+        lastRefill: medication.lastRefill || S.never || 'Never'
       };
       
       setRefillMed(medicationInfo);
@@ -273,7 +294,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
   });
 
   return (
-    <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header with AuricRX home button */}
       <View style={{ 
         flexDirection: 'row', 
@@ -302,20 +323,27 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
           />
         </TouchableOpacity>
 
-        <Text style={{ 
-          color: theme.text, 
-          fontSize: 18, 
-          fontFamily: 'Inter_800ExtraBold', 
+        <DynamicText type="primary" style={{ 
+          fontSize: 16, 
+          fontFamily: 'Inter_600SemiBold', 
           position: 'absolute', 
           left: '50%', 
           transform: [{ translateX: -50 }], 
-          maxWidth: '60%' 
+          maxWidth: '60%',
+          textAlign: 'center'
         }} numberOfLines={1}>
           {S.medications}
-        </Text>
+        </DynamicText>
 
         <TouchableOpacity onPress={onNavigateToSettings} style={{ padding: 8 }}>
-          <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
+          <Image 
+            source={require('../assets/dashboard Emojies/settings cog.png')} 
+            style={{
+              width: 24,
+              height: 24,
+            }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 
@@ -361,28 +389,32 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
           </TouchableOpacity>
         </View>
 
+        {/* DEBUG: Show current medications */}
+        {console.log('[MEDICATIONS DEBUG] Current medications array:', meds.map(m => ({ name: m.name, quantity: m.quantity })))}
+        
         {filteredMeds.map(med => (
-          <View key={med.id} style={{
-            backgroundColor: theme.card,
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: theme.chip
-          }}>
+          <View key={med.id} style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             {/* Header row */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.text, fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 4 }}>
+                <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 4 }}>
                   {med.name}
-                </Text>
-                <Text style={{ color: theme.sub, fontSize: 14, fontFamily: 'Inter_400Regular' }}>
+                </DynamicText>
+                <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                   {med.strength}
-                </Text>
+                </DynamicText>
+                {med.quantity && (
+                  <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 2 }}>
+                    {med.quantity}
+                  </DynamicText>
+                )}
+                {/* DEBUG: Show quantity info */}
+                {console.log('[MEDICATIONS DEBUG] Rendering medication:', med.name, 'quantity:', med.quantity, 'has quantity:', !!med.quantity)}
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <TouchableOpacity
                   onPress={() => {
+                    console.log('[MEDICATIONS DEBUG] Editing medication:', med.name, 'quantity:', med.quantity);
                     setEditForm({ ...med, times: med.times.join(', ') });
                     setEditTimes([...med.times]);
                     setShowEdit(true);
@@ -429,12 +461,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
             
             {/* Bottom info */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ color: theme.sub, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
+              <DynamicText type="sub" style={{ fontSize: 12, fontFamily: 'Inter_400Regular' }}>
                 {med.times.join(', ')}
-              </Text>
-              <Text style={{ color: theme.sub, fontSize: 12, fontFamily: 'Inter_400Regular' }}>
+              </DynamicText>
+              <DynamicText type="sub" style={{ fontSize: 12, fontFamily: 'Inter_400Regular' }}>
                 {med.dosesLeft} {S.dosesLeft}
-              </Text>
+              </DynamicText>
             </View>
           </View>
         ))}
@@ -472,7 +504,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
           >
             {/* Modal Content Container */}
             <View
-              style={{ backgroundColor: theme.card, borderRadius: 18, padding: 20, marginHorizontal: 16, borderWidth: 1, borderColor: theme.chip, width: '90%', maxHeight: '80%' }}
+              style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginHorizontal: 16, width: '90%', maxHeight: '80%', padding: 20 }]}
               onStartShouldSetResponder={() => true} // Prevent touches from bubbling up to the backdrop
             >
               <ScrollView 
@@ -480,15 +512,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 keyboardShouldPersistTaps="always"
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
                     {S.addMedication}
-                  </Text>
+                  </DynamicText>
                   <TouchableOpacity onPress={() => {
                     console.log('[AddMedicationModal] X button pressed');
                     setShowAdd(false);
                     setInputFocused(false);
                   }}>
-                    <Text style={{ color: theme.sub, fontSize: 18 }}>✕</Text>
+                    <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
                   </TouchableOpacity>
                 </View>
 
@@ -556,10 +588,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     alignItems: 'center'
                   }}
                 >
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
                     {addTimes.length > 0 ? addTimes.join(', ') : S.selectTimes}
-                  </Text>
-                  <Text style={{ color: theme.sub }}>⏰</Text>
+                  </DynamicText>
+                  <DynamicText type="sub">⏰</DynamicText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -578,10 +610,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     alignItems: 'center'
                   }}
                 >
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
                     {addForm.startDate || S.startDate}
-                  </Text>
-                  <Text style={{ color: theme.sub }}>📅</Text>
+                  </DynamicText>
+                  <DynamicText type="sub">📅</DynamicText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -600,10 +632,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     alignItems: 'center'
                   }}
                 >
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
                     {addForm.endDate || S.endDateOptional}
-                  </Text>
-                  <Text style={{ color: theme.sub }}>📅</Text>
+                  </DynamicText>
+                  <DynamicText type="sub">📅</DynamicText>
                 </TouchableOpacity>
 
                 <TextInput
@@ -626,10 +658,31 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                   returnKeyType="default"
                 />
 
+                <TextInput
+                  placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
+                  placeholderTextColor={theme.sub}
+                  value={addForm.quantity}
+                  onChangeText={(text) => {
+                    console.log('[MEDICATIONS DEBUG] Quantity input changed:', text);
+                    setAddForm(prev => ({ ...prev, quantity: text }));
+                  }}
+                  style={{
+                    backgroundColor: theme.chip,
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    color: theme.text,
+                    fontFamily: 'Inter_400Regular'
+                  }}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                />
+
                 {/* Status Selection */}
-                <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', marginBottom: 8, marginTop: 8 }}>
+                <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', marginBottom: 8, marginTop: 8 }}>
                   {S.status}
-                </Text>
+                </DynamicText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
                   {[
                     { key: 'taking', label: S.taking, emoji: '💊', color: '#2dd4bf' },
@@ -701,7 +754,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
             }}
           >
             <View
-              style={{ backgroundColor: theme.card, borderRadius: 18, padding: 20, marginHorizontal: 16, borderWidth: 1, borderColor: theme.chip, width: '90%', maxHeight: '80%' }}
+              style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginHorizontal: 16, width: '90%', maxHeight: '80%', padding: 20 }]}
               onStartShouldSetResponder={() => true}
             >
               <ScrollView 
@@ -709,14 +762,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                 keyboardShouldPersistTaps="always"
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <Text style={{ color: theme.text, fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
                     {S.editMedication}
-                  </Text>
+                  </DynamicText>
                   <TouchableOpacity onPress={() => {
                     console.log('[EditMedicationModal] X button pressed');
                     setShowEdit(false);
                   }}>
-                    <Text style={{ color: theme.sub, fontSize: 18 }}>✕</Text>
+                    <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
                   </TouchableOpacity>
                 </View>
 
@@ -771,10 +824,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     alignItems: 'center'
                   }}
                 >
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
                     {editTimes.length > 0 ? editTimes.join(', ') : S.selectTimes}
-                  </Text>
-                  <Text style={{ color: theme.sub }}>⏰</Text>
+                  </DynamicText>
+                  <DynamicText type="sub">⏰</DynamicText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -793,10 +846,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     alignItems: 'center'
                   }}
                 >
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
                     {editForm.startDate || S.startDate}
-                  </Text>
-                  <Text style={{ color: theme.sub }}>📅</Text>
+                  </DynamicText>
+                  <DynamicText type="sub">📅</DynamicText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -815,10 +868,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     alignItems: 'center'
                   }}
                 >
-                  <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
                     {editForm.endDate || S.endDateOptional}
-                  </Text>
-                  <Text style={{ color: theme.sub }}>📅</Text>
+                  </DynamicText>
+                  <DynamicText type="sub">📅</DynamicText>
                 </TouchableOpacity>
 
                 <TextInput
@@ -841,10 +894,31 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                   returnKeyType="default"
                 />
 
+                <TextInput
+                  placeholder="Quantity (e.g., 30 tablets, 1 bottle)"
+                  placeholderTextColor={theme.sub}
+                  value={editForm.quantity}
+                  onChangeText={(text) => {
+                    console.log('[MEDICATIONS DEBUG] Edit quantity input changed:', text);
+                    setEditForm(prev => ({ ...prev, quantity: text }));
+                  }}
+                  style={{
+                    backgroundColor: theme.chip,
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    color: theme.text,
+                    fontFamily: 'Inter_400Regular'
+                  }}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                />
+
                 {/* Status Selection for Edit */}
-                <Text style={{ color: theme.text, fontFamily: 'Inter_600SemiBold', marginBottom: 8, marginTop: 8 }}>
+                <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', marginBottom: 8, marginTop: 8 }}>
                   {S.status}
-                </Text>
+                </DynamicText>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
                   {[
                     { key: 'taking', label: S.taking, emoji: '💊', color: '#2dd4bf' },
@@ -952,11 +1026,27 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
             strings={S}
             lang={lang}
             userCountry={userCountry}
+            onRefillComplete={handleRefillComplete}
+            preloadedPharmacies={preloadedPharmacies}
+            preloadedCoords={preloadedCoords}
+            preloadedCurrency={preloadedCurrency}
+            preloadedFxMeta={preloadedFxMeta}
           />
         )}
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  section: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#333333'
+  }
+});
 
 export default Medications;
