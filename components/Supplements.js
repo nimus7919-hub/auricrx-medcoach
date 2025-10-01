@@ -13,12 +13,33 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
 
-  // Unit options for dosage (sorted alphabetically)
+  // Unit options for supplements (common supplement dosage forms and units)
   const dosageUnits = [
-    'ampule', 'ampules', 'bottle', 'bottles', 'box', 'boxes', 'capsule', 'capsules',
-    'drop', 'drops', 'pack', 'packs', 'piece', 'pieces', 'puff', 'puffs', 'pump', 'pumps',
-    'sachet', 'sachets', 'strip', 'strips', 'suppository', 'suppositories',
-    'tablet', 'tablets', 'unit', 'units', 'vial', 'vials'
+    // Mass units
+    'mcg', 'mg', 'g',
+    // International units
+    'IU',
+    // Special vitamin units
+    'mcg DFE', 'mg NE', 'mg alpha-tocopherol',
+    // Probiotics
+    'CFU', 'billion CFU',
+    // Enzyme activity units
+    'HUT', 'DU', 'FIP', 'ALU', 'GDU', 'FCC units',
+    // Dosage forms - solids
+    'tablet', 'tablets', 'capsule', 'capsules', 'softgel', 'softgels', 'caplet', 'caplets', 
+    'lozenge', 'lozenges', 'gummy', 'gummies', 'chewable', 'chewables',
+    // Dosage forms - powders
+    'scoop', 'scoops', 'tsp', 'tbsp',
+    // Dosage forms - liquids
+    'mL', 'L', 'drop', 'drops', 'spray', 'sprays', 'puff', 'puffs', 'actuation', 'actuations',
+    // Dosage forms - others
+    'patch', 'patches', 'sachet', 'sachets', 'stick pack', 'stick packs',
+    // Concentrations
+    'mg/mL', 'mcg/mL', 'mg/5mL', '% w/w', '% w/v', '% v/v',
+    // Ratios
+    '1:1', '1:2', '1:5',
+    // General
+    'serving', 'servings', 'unit', 'units'
   ];
   useEffect(() => {
     mounted.current += 1;
@@ -46,7 +67,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
     notes: '', 
     dosesLeft: '', 
     dosageValue: '', 
-    dosageUnit: 'tablet',
+    dosageUnit: 'mg',
     brand: '' 
   });
   const [addTimes, setAddTimes] = useState([]);
@@ -68,7 +89,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
     notes: '', 
     dosesLeft: '', 
     dosageValue: '', 
-    dosageUnit: 'tablet',
+    dosageUnit: 'mg',
     brand: '' 
   });
   const [editingSupplement, setEditingSupplement] = useState(null);
@@ -481,7 +502,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                       name: supp.name || '',
                       brand: supp.brand || '',
                       dosageValue: supp.dosageValue || supp.dosage?.split(' ')[0] || '',
-                      dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || 'tablet',
+                      dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || 'mg',
                       times: supp.times || '',
                       status: supp.status || 'taking',
                       startDate: supp.startDate || '',
