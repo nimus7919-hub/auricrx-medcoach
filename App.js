@@ -2655,6 +2655,12 @@ const S = {
   lastRefill: t('medications.lastRefill'),
   lowest: t('medications.lowest'),
   reserve: t('medications.reserve'),
+  medicationName: t('medications.medicationName'),
+  strengthExample: t('medications.strengthExample'),
+  notesOptional: t('medications.notesOptional'),
+  selectTimes: t('medications.selectTimes'),
+  startDate: t('medications.startDate'),
+  endDateOptional: t('medications.endDateOptional'),
   
   // Supplements
   addSupplement: t('supplements.addSupplement'),
