@@ -564,7 +564,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       {/* Add Supplement Modal */}
       <Modal visible={showAdd} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0', borderColor: getCardBorderColor() }]}>
+          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={styles.modalTitle}>{S.addSupplement}</DynamicText>
             
             <TextInput
@@ -709,7 +709,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       {/* Status Update Modal */}
       <Modal visible={showStatusSheet} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0', borderColor: getCardBorderColor() }]}>
+          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={styles.modalTitle}>Update Status</DynamicText>
             
             {getSuppStatuses().map(status => (
@@ -730,7 +730,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       {/* AI Analysis Modal */}
       <Modal visible={showAiAnalysis} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0', borderColor: getCardBorderColor(), maxHeight: '80%' }]}>
+          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), maxHeight: '80%' }]}>
             <View style={styles.modalHeader}>
               <DynamicText type="card" style={styles.modalTitle}>AI Analysis</DynamicText>
               <TouchableOpacity onPress={() => setShowAiAnalysis(false)}>
@@ -771,7 +771,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       {/* Edit Supplement Modal */}
       <Modal visible={showEdit} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0', borderColor: getCardBorderColor() }]}>
+          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={styles.modalTitle}>{S.editSupplement || 'Edit Supplement'}</DynamicText>
             
             <TextInput
