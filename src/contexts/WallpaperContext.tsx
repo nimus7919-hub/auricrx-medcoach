@@ -202,23 +202,31 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
 
   const getCardBackgroundColor = (): string => {
     if (!currentWallpaper) {
+      console.log('🎨 getCardBackgroundColor - No wallpaper, returning white');
       return '#ffffff'; // Default white
     }
 
     if (currentWallpaper.type === 'color') {
       // For the default gold theme, use white cards
       if (currentWallpaper.id === 'default_gold') {
+        console.log('🎨 getCardBackgroundColor - Default gold theme, returning white');
         return '#ffffff';
       }
-      return isLightColor(currentWallpaper.value) ? '#ffffff' : '#2a2a2a';
+      const isLight = isLightColor(currentWallpaper.value);
+      const cardColor = isLight ? '#ffffff' : '#2a2a2a';
+      console.log('🎨 getCardBackgroundColor - Color wallpaper:', currentWallpaper.value, 'isLight:', isLight, 'returning:', cardColor);
+      return cardColor;
     } else {
       // For image wallpapers, use smart defaults
       const imageName = currentWallpaper.value.toLowerCase();
       if (imageName.includes('black') || imageName.includes('dark')) {
+        console.log('🎨 getCardBackgroundColor - Dark image wallpaper, returning dark card');
         return '#2a2a2a'; // Dark card for dark wallpapers
       } else if (imageName.includes('white') || imageName.includes('cream')) {
+        console.log('🎨 getCardBackgroundColor - Light image wallpaper, returning white card');
         return '#ffffff'; // White card for light wallpapers
       } else {
+        console.log('🎨 getCardBackgroundColor - Unknown image wallpaper, defaulting to white');
         return '#ffffff'; // Default to white for complex images
       }
     }
