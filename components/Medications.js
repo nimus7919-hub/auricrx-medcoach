@@ -383,9 +383,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
               alignItems: 'center'
             }}
           >
-            <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
+            <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
               {S.addMedication}
-            </Text>
+            </DynamicText>
           </TouchableOpacity>
         </View>
 
@@ -426,9 +426,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     borderRadius: 8
                   }}
                 >
-                  <Text style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                  <DynamicText type="card" style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
                     {S.edit}
-                  </Text>
+                  </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => findNearbyMedications(med)}
@@ -439,9 +439,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     borderRadius: 8
                   }}
                 >
-                  <Text style={{ color: '#2c2c2c', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                  <DynamicText type="card" style={{ color: '#2c2c2c', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
                     {S.refill}
-                  </Text>
+                  </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => handleDeleteMed(med.id)}
@@ -452,9 +452,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, onN
                     borderRadius: 8
                   }}
                 >
-                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                  <DynamicText type="card" style={{ color: '#fff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
                     {S.delete}
-                  </Text>
+                  </DynamicText>
                 </TouchableOpacity>
               </View>
             </View>
