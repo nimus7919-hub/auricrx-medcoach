@@ -3526,12 +3526,11 @@ const S = {
   
   // Goals
   primaryGoal: t('fastingProfile.primaryGoal'),
-  weightLossGoal: t('fastingProfile.weightLossGoal'),
-  metabolicHealthGoal: t('fastingProfile.metabolicHealthGoal'),
   
-  // Medical Supervision
-  selfMonitoring: t('fastingProfile.selfMonitoring'),
-  wearableDevices: t('fastingProfile.wearableDevices'),
+    // Health Monitoring
+    healthMonitoring: t('fastingProfile.healthMonitoring'),
+    selfMonitoring: t('fastingProfile.selfMonitoring'),
+    wearableDevices: t('fastingProfile.wearableDevices'),
   
   // Options
   low: t('fastingProfile.low'),

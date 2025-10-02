@@ -406,8 +406,8 @@ export default function FastingProfileScreen({
             </View>
           ))}
 
-          {/* Medical Supervision & Monitoring */}
-          {renderSection(t('medicalSupervision'), (
+          {/* Health Monitoring & Tracking */}
+          {renderSection(t('healthMonitoring'), (
             <View style={styles.sectionContent}>
               {renderSwitch('medicalSupervision', t('medicalSupervision'))}
               {renderSwitch('selfMonitoring', t('selfMonitoring'))}
