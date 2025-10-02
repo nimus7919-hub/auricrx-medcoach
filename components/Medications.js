@@ -594,25 +594,28 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         {console.log('[MEDICATIONS DEBUG] Current medications array:', meds.map(m => ({ name: m.name, quantity: m.quantity })))}
         
         {filteredMeds.map(med => (
-          <View key={med.id} style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
+          <View key={med.id} style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), padding: 12 }]}>
             {/* Header row */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
               <View style={{ flex: 1 }}>
-                <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 4 }}>
+                <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 2 }}>
                   {med.name}
                 </DynamicText>
-                <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
+                <DynamicText type="card" style={{ fontSize: 13, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                   {med.strength}
                 </DynamicText>
                 {med.quantity && (
-                  <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 2 }}>
+                  <DynamicText type="card" style={{ fontSize: 11, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 1 }}>
                     {med.quantity}
                   </DynamicText>
                 )}
+                <DynamicText type="sub" style={{ fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 2 }}>
+                  {med.times.join(', ')}
+                </DynamicText>
                 {/* DEBUG: Show quantity info */}
                 {console.log('[MEDICATIONS DEBUG] Rendering medication:', med.name, 'quantity:', med.quantity, 'has quantity:', !!med.quantity)}
               </View>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+              <View style={{ flexDirection: 'row', gap: 6 }}>
                 <TouchableOpacity
                   onPress={() => {
                     console.log('[MEDICATIONS DEBUG] Editing medication:', med.name, 'quantity:', med.quantity);
@@ -629,12 +632,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   }}
                   style={{
                     backgroundColor: theme.accent,
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 6
                   }}
                 >
-                  <DynamicText type="card" style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                  <DynamicText type="card" style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                     {S.edit}
                   </DynamicText>
                 </TouchableOpacity>
@@ -642,12 +645,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   onPress={() => findNearbyMedications(med)}
                   style={{
                     backgroundColor: '#2dd4bf',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 6
                   }}
                 >
-                  <DynamicText type="card" style={{ color: '#2c2c2c', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                  <DynamicText type="card" style={{ color: '#2c2c2c', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                     {S.refill}
                   </DynamicText>
                 </TouchableOpacity>
@@ -655,27 +658,20 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   onPress={() => handleDeleteMed(med.id)}
                   style={{
                     backgroundColor: '#f87171',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    borderRadius: 6
                   }}
                 >
-                  <DynamicText type="card" style={{ color: '#fff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
+                  <DynamicText type="card" style={{ color: '#fff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                     {S.delete}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
             </View>
-            
-            {/* Bottom info */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <DynamicText type="sub" style={{ fontSize: 12, fontFamily: 'Inter_400Regular' }}>
-                {med.times.join(', ')}
-              </DynamicText>
-            </View>
 
             {/* Counter and Took Button Row - Compact Corner */}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 8 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
                   {parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0')} left
