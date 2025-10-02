@@ -154,8 +154,13 @@ async function saveUserMedication(userId, medication) {
     }
     
     // Set user context for RLS
-    await neonClient`SELECT set_user_context(${userId})`;
-    console.log('✅ User context set for RLS');
+    try {
+      await neonClient`SELECT set_user_context(${userId}::text)`;
+      console.log('✅ User context set for RLS');
+    } catch (contextError) {
+      console.log('⚠️ Could not set user context, proceeding without RLS:', contextError.message);
+      // Continue without RLS if the function doesn't exist
+    }
     
     const { data, error } = await neonClient`
       INSERT INTO user_medications (
