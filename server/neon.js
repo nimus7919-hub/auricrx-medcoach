@@ -141,8 +141,21 @@ async function saveUserSupplement(userId, supplement) {
 // User medications functions
 async function saveUserMedication(userId, medication) {
   try {
+    console.log('🔍 Attempting to save medication for user:', userId);
+    console.log('🔍 Medication data:', medication);
+    
+    // First, check if user_medications table exists
+    try {
+      await neonClient`SELECT 1 FROM user_medications LIMIT 1`;
+      console.log('✅ user_medications table exists');
+    } catch (tableError) {
+      console.error('❌ user_medications table does not exist:', tableError.message);
+      throw new Error('user_medications table does not exist. Please run the schema setup.');
+    }
+    
     // Set user context for RLS
     await neonClient`SELECT set_user_context(${userId})`;
+    console.log('✅ User context set for RLS');
     
     const { data, error } = await neonClient`
       INSERT INTO user_medications (
@@ -158,10 +171,17 @@ async function saveUserMedication(userId, medication) {
       ) RETURNING *
     `;
     
+    if (error) {
+      console.error('❌ Database error:', error);
+      throw error;
+    }
+    
     console.log('✅ User medication saved to Neon:', data[0]);
     return data[0];
   } catch (error) {
     console.error('❌ Failed to save user medication:', error);
+    console.error('❌ Error details:', error.message);
+    console.error('❌ Error code:', error.code);
     throw error;
   }
 }
