@@ -659,7 +659,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
 
     // Check health conditions
     if (profile) {
-      // Calculate BMI if weight and height are provided
+      // Calculate BMI (Body Mass Index) if weight and height are provided
       let bmi = null;
       if (profile.weight && profile.height) {
         const weight = parseFloat(profile.weight);
@@ -681,14 +681,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
         }
       }
 
-      // BMI considerations
+      // BMI (Body Mass Index) considerations
       if (bmi !== null) {
         if (bmi < 18.5) {
-          warnings.push('Low BMI may make extended fasting risky.');
+          warnings.push('Low BMI (Body Mass Index) may make extended fasting risky.');
           suggestedFastingHours = Math.min(suggestedFastingHours, 12);
           riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
         } else if (bmi > 30) {
-          warnings.push('Higher BMI may benefit from medical supervision during fasting.');
+          warnings.push('Higher BMI (Body Mass Index) may benefit from medical supervision during fasting.');
           suggestedFastingHours = Math.min(suggestedFastingHours, 14);
           riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
         }
@@ -924,12 +924,6 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
         >
           <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 {t('checkInteractions')}</DynamicText>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={dynamicStyles.quickActionButton}
-          onPress={() => setShowFastingModal(true)}
-        >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>⏰ {t('fastingAnalytics')}</DynamicText>
-        </TouchableOpacity>
       </View>
     </Animated.View>
   );
@@ -960,7 +954,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
             style={{ width: 24, height: 24, marginRight: 8 }} 
             resizeMode="contain" 
           />
-          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>⏰ {t('fastingAnalytics')}</DynamicText>
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('fastingAnalytics')}</DynamicText>
         </View>
         
         <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
@@ -971,7 +965,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
           <View style={dynamicStyles.fastingProfileCard}>
             <View style={dynamicStyles.fastingProfileHeader}>
               <DynamicText type="card" style={dynamicStyles.fastingProfileTitle}>
-                📊 Your Fasting Profile
+                Your Fasting Profile
               </DynamicText>
               <View style={[
                 dynamicStyles.fastingStatusBadge,
@@ -999,7 +993,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
                 {fastingAnalysis.warnings.length > 0 && (
                   <View style={dynamicStyles.fastingWarnings}>
                     <DynamicText type="card" style={dynamicStyles.fastingWarningsTitle}>
-                      ⚠️ Important Considerations:
+                      Important Considerations:
                     </DynamicText>
                     {fastingAnalysis.warnings.map((warning, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.fastingWarningItem}>
@@ -1022,14 +1016,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
               onPress={analyzeFastingCompatibility}
             >
               <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
-                {fastingAnalysis ? '🔄 Re-analyze Fasting' : '🔍 Analyze Fasting Compatibility'}
+                {fastingAnalysis ? 'Re-analyze Fasting' : 'Analyze Fasting Compatibility'}
               </DynamicText>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={dynamicStyles.fastingNoProfileCard}>
             <DynamicText type="card" style={dynamicStyles.fastingNoProfileTitle}>
-              📝 Complete Your Fasting Profile
+              Complete Your Fasting Profile
             </DynamicText>
             <DynamicText type="card" style={dynamicStyles.fastingNoProfileDescription}>
               Set up your fasting profile in Settings to get personalized fasting recommendations based on your health conditions, medications, and lifestyle.
@@ -1042,7 +1036,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
               }}
             >
               <DynamicText type="card" style={dynamicStyles.fastingSetupButtonText}>
-                ⚙️ Go to Settings
+                Go to Settings
               </DynamicText>
             </TouchableOpacity>
           </View>
