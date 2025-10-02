@@ -1139,7 +1139,9 @@ const {
   saveUserProfile,
   getUserProfile,
   saveUserMedication,
-  getUserMedications
+  getUserMedications,
+  saveUserFastingProfile,
+  getUserFastingProfile
 } = require('./neon');
 
 // Load existing data on startup
@@ -1571,6 +1573,82 @@ app.get('/api/medications', async (req, res) => {
       ok: false, 
       error: 'retrieve_failed',
       message: 'Failed to retrieve medications'
+    });
+  }
+});
+
+// --- Fasting Profile Endpoints ---
+
+// POST /api/fasting-profile - Save user fasting profile
+app.post('/api/fasting-profile', async (req, res) => {
+  try {
+    const { userId, profileData } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_user_id',
+        message: 'userId is required' 
+      });
+    }
+
+    if (!profileData) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_profile_data',
+        message: 'Profile data is required' 
+      });
+    }
+
+    console.log(`💾 Saving fasting profile for user: ${userId}`);
+    const result = await saveUserFastingProfile(userId, profileData);
+    
+    res.json({ 
+      ok: true, 
+      message: 'Fasting profile saved successfully',
+      profileId: result.id,
+      createdAt: result.created_at,
+      updatedAt: result.updated_at
+    });
+  } catch (error) {
+    console.error('❌ Error saving fasting profile:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'save_failed',
+      message: 'Failed to save fasting profile',
+      details: error.message 
+    });
+  }
+});
+
+// GET /api/fasting-profile - Get user fasting profile
+app.get('/api/fasting-profile', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_user_id',
+        message: 'userId is required' 
+      });
+    }
+
+    console.log(`📖 Loading fasting profile for user: ${userId}`);
+    const profile = await getUserFastingProfile(userId);
+    
+    res.json({ 
+      ok: true, 
+      profile: profile,
+      found: profile !== null
+    });
+  } catch (error) {
+    console.error('❌ Error loading fasting profile:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'retrieve_failed',
+      message: 'Failed to load fasting profile',
+      details: error.message 
     });
   }
 });

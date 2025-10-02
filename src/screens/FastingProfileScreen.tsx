@@ -20,6 +20,7 @@ interface FastingProfileScreenProps {
   S?: any;
   fastingProfile: any;
   setFastingProfile: (profile: any) => void;
+  saveFastingProfileToDB?: (profile: any) => void;
 }
 
 export default function FastingProfileScreen({ 
@@ -27,7 +28,8 @@ export default function FastingProfileScreen({
   theme, 
   S, 
   fastingProfile, 
-  setFastingProfile 
+  setFastingProfile,
+  saveFastingProfileToDB
 }: FastingProfileScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
   
@@ -59,6 +61,11 @@ export default function FastingProfileScreen({
   };
 
   const saveProfile = () => {
+    // Save to database if function is provided
+    if (saveFastingProfileToDB) {
+      saveFastingProfileToDB(fastingProfile);
+    }
+    
     Alert.alert(
       t('profileSaved'),
       t('fastingProfileSavedMessage'),

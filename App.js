@@ -2102,6 +2102,62 @@ export default function App() {
   const [labs, setLabs] = useState([]);
   const [labsLoading, setLabsLoading] = useState(false);
   const [labsError, setLabsError] = useState(null);
+
+  // Load fasting profile from database
+  const loadFastingProfileFromDB = async (userId) => {
+    try {
+      console.log('📖 Loading fasting profile from database for user:', userId);
+      const response = await fetch(`${API_BASE_URL}/api/fasting-profile?userId=${userId}`);
+      const data = await response.json();
+      
+      if (data.ok && data.found && data.profile) {
+        console.log('✅ Loaded fasting profile from database');
+        setFastingProfile(data.profile);
+      } else {
+        console.log('ℹ️ No fasting profile found in database, using defaults');
+      }
+    } catch (error) {
+      console.error('❌ Error loading fasting profile from database:', error);
+    }
+  };
+
+  // Save fasting profile to database
+  const saveFastingProfileToDB = async (profileData) => {
+    try {
+      if (!user?.uid) {
+        console.log('⚠️ No user ID available for saving fasting profile');
+        return;
+      }
+
+      console.log('💾 Saving fasting profile to database for user:', user.uid);
+      const response = await fetch(`${API_BASE_URL}/api/fasting-profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          profileData: profileData
+        })
+      });
+      
+      const data = await response.json();
+      if (data.ok) {
+        console.log('✅ Fasting profile saved to database successfully');
+      } else {
+        console.error('❌ Failed to save fasting profile to database:', data.message);
+      }
+    } catch (error) {
+      console.error('❌ Error saving fasting profile to database:', error);
+    }
+  };
+
+  // Load fasting profile when user is authenticated
+  useEffect(() => {
+    if (user?.uid) {
+      loadFastingProfileFromDB(user.uid);
+    }
+  }, [user?.uid]);
   
   // Refill modal data (loaded automatically)
   const [refillPharmacies, setRefillPharmacies] = useState([]);
@@ -4944,7 +5000,7 @@ function trimTo(str, n) {
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} /> :
-    route === 'fasting-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} /> :
+        route === 'fasting-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
      <Dashboard />}
