@@ -31,7 +31,11 @@ export default function FastingProfileScreen({
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const t = (key: string) => {
+    const translation = S?.[key];
+    console.log(`Translation for ${key}:`, translation);
+    return translation || key;
+  };
   
   const updateProfile = (key: string, value: any) => {
     setFastingProfile(prev => ({
@@ -54,20 +58,20 @@ export default function FastingProfileScreen({
       backgroundColor: getCardBackgroundColor() + 'CC', 
       borderColor: getCardBorderColor() 
     }]}>
-      <DynamicText type="card" style={styles.sectionTitle}>{title}</DynamicText>
+      <DynamicText type="card" style={[styles.sectionTitle, { color: getCardTextColor() }]}>{title}</DynamicText>
       {children}
     </View>
   );
 
   const renderSwitch = (key: string, label: string) => (
     <View style={styles.switchRow}>
-      <DynamicText type="card" style={styles.switchLabel}>{label}</DynamicText>
+      <DynamicText type="card" style={[styles.switchLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
       <TouchableOpacity
         onPress={() => updateProfile(key, !fastingProfile[key])}
         style={[
           styles.switch,
           { 
-            backgroundColor: fastingProfile[key] ? theme.accent : '#e5e5e5',
+            backgroundColor: fastingProfile[key] ? theme.accent : getCardBackgroundColor(),
             borderColor: getCardBorderColor()
           }
         ]}
@@ -75,7 +79,7 @@ export default function FastingProfileScreen({
         <View style={[
           styles.switchThumb,
           { 
-            backgroundColor: fastingProfile[key] ? '#ffffff' : '#ffffff',
+            backgroundColor: '#ffffff',
             transform: [{ translateX: fastingProfile[key] ? 20 : 2 }]
           }
         ]} />
@@ -85,7 +89,7 @@ export default function FastingProfileScreen({
 
   const renderSelect = (key: string, label: string, options: { value: string; label: string }[]) => (
     <View style={styles.selectRow}>
-      <DynamicText type="card" style={styles.selectLabel}>{label}</DynamicText>
+      <DynamicText type="card" style={[styles.selectLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
       <View style={styles.selectOptions}>
         {options.map((option) => (
           <TouchableOpacity
@@ -115,21 +119,21 @@ export default function FastingProfileScreen({
 
   const renderSlider = (key: string, label: string, min: number, max: number, step: number = 1) => (
     <View style={styles.sliderRow}>
-      <DynamicText type="card" style={styles.sliderLabel}>{label}</DynamicText>
+      <DynamicText type="card" style={[styles.sliderLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
       <View style={styles.sliderContainer}>
-        <DynamicText type="card" style={styles.sliderValue}>{fastingProfile[key]} hours</DynamicText>
+        <DynamicText type="card" style={[styles.sliderValue, { color: getCardTextColor() }]}>{fastingProfile[key]} hours</DynamicText>
         <View style={styles.sliderButtons}>
           <TouchableOpacity
             onPress={() => updateProfile(key, Math.max(min, fastingProfile[key] - step))}
             style={[styles.sliderButton, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}
           >
-            <DynamicText type="card" style={styles.sliderButtonText}>-</DynamicText>
+            <DynamicText type="card" style={[styles.sliderButtonText, { color: getCardTextColor() }]}>-</DynamicText>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => updateProfile(key, Math.min(max, fastingProfile[key] + step))}
             style={[styles.sliderButton, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}
           >
-            <DynamicText type="card" style={styles.sliderButtonText}>+</DynamicText>
+            <DynamicText type="card" style={[styles.sliderButtonText, { color: getCardTextColor() }]}>+</DynamicText>
           </TouchableOpacity>
         </View>
       </View>
@@ -142,7 +146,7 @@ export default function FastingProfileScreen({
       
       <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={styles.container}>
         {/* Header */}
-        <View style={[styles.header, { borderColor: theme?.chip || '#e8e3d8' }]}>
+        <View style={[styles.header, { borderColor: getCardBorderColor() }]}>
           <TouchableOpacity style={[styles.homeButton, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onClose}>
             <Image 
               source={require('../../assets/dashboard Emojies/close Window.png')} 
@@ -150,7 +154,7 @@ export default function FastingProfileScreen({
               resizeMode="contain"
             />
           </TouchableOpacity>
-          <DynamicText type="primary" style={styles.title}>
+          <DynamicText type="primary" style={[styles.title, { color: getCardTextColor() }]}>
             {t('fastingProfile')}
           </DynamicText>
         </View>
@@ -277,9 +281,9 @@ export default function FastingProfileScreen({
           {/* Save Button */}
           <TouchableOpacity
             onPress={saveProfile}
-            style={[styles.saveButton, { backgroundColor: theme.accent }]}
+            style={[styles.saveButton, { backgroundColor: theme.accent, borderColor: getCardBorderColor() }]}
           >
-            <DynamicText type="card" style={styles.saveButtonText}>
+            <DynamicText type="card" style={[styles.saveButtonText, { color: '#ffffff' }]}>
               {t('saveProfile')}
             </DynamicText>
           </TouchableOpacity>
