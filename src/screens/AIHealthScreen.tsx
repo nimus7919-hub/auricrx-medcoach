@@ -75,7 +75,7 @@ interface DrugInteraction {
 
 export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AIHealthScreenProps) {
   console.log('AI Health Screen rendering...');
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
   const t = (key: string) => S?.[key] || key;
