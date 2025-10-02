@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
   import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
   Modal, TextInput, Switch, Image, Linking, Platform, Animated, Keyboard,
-  StatusBar, SafeAreaView, AppRegistry, FlatList
+  StatusBar, SafeAreaView, AppRegistry, FlatList, ActivityIndicator
 } from 'react-native';
 import TypingEffect from './src/components/TypingEffect';
 import * as ImagePicker from 'expo-image-picker';
