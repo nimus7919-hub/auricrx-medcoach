@@ -31,11 +31,7 @@ export default function FastingProfileScreen({
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => {
-    const translation = S?.[key];
-    console.log(`Translation for ${key}:`, translation);
-    return translation || key;
-  };
+  const t = (key: string) => S?.[key] || key;
   
   const updateProfile = (key: string, value: any) => {
     setFastingProfile(prev => ({

@@ -3395,6 +3395,97 @@ const S = {
   missed: t('healthAnalytics.missed'),
   dayStreak: t('healthAnalytics.dayStreak'),
   started: t('healthAnalytics.started'),
+  
+  // Fasting Analytics
+  fastingAnalytics: t('fastingAnalytics'),
+  fastingCompatibilityCheck: t('fastingCompatibilityCheck'),
+  fastingDescription: t('fastingDescription'),
+  fastingDisclaimer: t('fastingDisclaimer'),
+  warnings: t('warnings'),
+  
+  // Fasting Profile
+  fastingProfile: t('fastingProfile'),
+  fastingProfileDescription: t('fastingProfileDescription'),
+  healthConditions: t('healthConditions'),
+  nutritionalStatus: t('nutritionalStatus'),
+  mentalHealth: t('mentalHealth'),
+  lifestyleActivity: t('lifestyleActivity'),
+  fastingPreferences: t('fastingPreferences'),
+  fastingGoals: t('fastingGoals'),
+  medicalSupervision: t('medicalSupervision'),
+  
+  // Health Conditions
+  diabetes: t('diabetes'),
+  hypoglycemia: t('hypoglycemia'),
+  heartConditions: t('heartConditions'),
+  kidneyDisease: t('kidneyDisease'),
+  liverDisease: t('liverDisease'),
+  eatingDisorders: t('eatingDisorders'),
+  pregnancy: t('pregnancy'),
+  breastfeeding: t('breastfeeding'),
+  gastrointestinalIssues: t('gastrointestinalIssues'),
+  
+  // Nutritional Status
+  bodyFatLevel: t('bodyFatLevel'),
+  muscleMass: t('muscleMass'),
+  micronutrientLevels: t('micronutrientLevels'),
+  hydrationLevel: t('hydrationLevel'),
+  
+  // Mental Health
+  highStressEnvironment: t('highStressEnvironment'),
+  intensiveMentalTasks: t('intensiveMentalTasks'),
+  anxiety: t('anxiety'),
+  depression: t('depression'),
+  
+  // Lifestyle
+  activityLevel: t('activityLevel'),
+  physicalLabor: t('physicalLabor'),
+  longShifts: t('longShifts'),
+  sleepQuality: t('sleepQuality'),
+  
+  // Fasting Preferences
+  preferredFastingType: t('preferredFastingType'),
+  maxFastingHours: t('maxFastingHours'),
+  fastingFrequency: t('fastingFrequency'),
+  
+  // Goals
+  primaryGoal: t('primaryGoal'),
+  weightLossGoal: t('weightLossGoal'),
+  metabolicHealthGoal: t('metabolicHealthGoal'),
+  
+  // Medical Supervision
+  selfMonitoring: t('selfMonitoring'),
+  wearableDevices: t('wearableDevices'),
+  
+  // Options
+  low: t('low'),
+  normal: t('normal'),
+  high: t('high'),
+  poor: t('poor'),
+  fair: t('fair'),
+  good: t('good'),
+  excellent: t('excellent'),
+  sedentary: t('sedentary'),
+  light: t('light'),
+  moderate: t('moderate'),
+  athlete: t('athlete'),
+  timeRestricted: t('timeRestricted'),
+  alternateDay: t('alternateDay'),
+  extended: t('extended'),
+  custom: t('custom'),
+  daily: t('daily'),
+  weekly: t('weekly'),
+  monthly: t('monthly'),
+  weightLoss: t('weightLoss'),
+  metabolicHealth: t('metabolicHealth'),
+  generalHealth: t('generalHealth'),
+  spiritual: t('spiritual'),
+  medical: t('medical'),
+  
+  // Additional translations
+  profileSaved: t('profileSaved'),
+  fastingProfileSavedMessage: t('fastingProfileSavedMessage'),
+  saveProfile: t('saveProfile'),
 };
 
 
