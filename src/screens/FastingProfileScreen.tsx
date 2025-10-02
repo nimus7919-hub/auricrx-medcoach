@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
   Alert,
+  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DynamicText from '../components/DynamicText';
@@ -37,6 +38,23 @@ export default function FastingProfileScreen({
     setFastingProfile(prev => ({
       ...prev,
       [key]: value
+    }));
+  };
+
+  const addHealthCondition = () => {
+    if (fastingProfile.customHealthCondition.trim()) {
+      setFastingProfile(prev => ({
+        ...prev,
+        otherHealthConditions: [...prev.otherHealthConditions, prev.customHealthCondition.trim()],
+        customHealthCondition: ''
+      }));
+    }
+  };
+
+  const removeHealthCondition = (index: number) => {
+    setFastingProfile(prev => ({
+      ...prev,
+      otherHealthConditions: prev.otherHealthConditions.filter((_, i) => i !== index)
     }));
   };
 
@@ -136,6 +154,54 @@ export default function FastingProfileScreen({
     </View>
   );
 
+  const renderTextInput = (key: string, label: string, placeholder: string, keyboardType: any = 'default') => (
+    <View style={styles.inputRow}>
+      <DynamicText type="card" style={[styles.inputLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
+      <TextInput
+        style={[styles.textInput, { 
+          backgroundColor: getCardBackgroundColor(), 
+          borderColor: getCardBorderColor(),
+          color: getCardTextColor()
+        }]}
+        value={fastingProfile[key]}
+        onChangeText={(text) => updateProfile(key, text)}
+        placeholder={placeholder}
+        placeholderTextColor={getSubTextColor()}
+        keyboardType={keyboardType}
+      />
+    </View>
+  );
+
+  const renderUnitSelect = (key: string, label: string, options: { value: string; label: string }[]) => (
+    <View style={styles.selectRow}>
+      <DynamicText type="card" style={[styles.selectLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
+      <View style={styles.selectOptions}>
+        {options.map((option) => (
+          <TouchableOpacity
+            key={option.value}
+            onPress={() => updateProfile(key, option.value)}
+            style={[
+              styles.selectOption,
+              {
+                backgroundColor: fastingProfile[key] === option.value ? theme.accent : getCardBackgroundColor(),
+                borderColor: getCardBorderColor()
+              }
+            ]}
+          >
+            <DynamicText type="card" style={[
+              styles.selectOptionText,
+              { 
+                color: fastingProfile[key] === option.value ? '#ffffff' : getCardTextColor()
+              }
+            ]}>
+              {option.label}
+            </DynamicText>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
@@ -160,6 +226,22 @@ export default function FastingProfileScreen({
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={true}
         >
+          {/* Basic Information */}
+          {renderSection(t('basicInfo'), (
+            <View style={styles.sectionContent}>
+              {renderTextInput('weight', t('weight'), 'Enter your weight', 'numeric')}
+              {renderUnitSelect('weightUnit', t('weightUnit'), [
+                { value: 'kg', label: t('kg') },
+                { value: 'lbs', label: t('lbs') },
+              ])}
+              {renderTextInput('height', t('height'), 'Enter your height', 'numeric')}
+              {renderUnitSelect('heightUnit', t('heightUnit'), [
+                { value: 'cm', label: t('cm') },
+                { value: 'ft', label: t('ft') },
+              ])}
+            </View>
+          ))}
+
           {/* Health Conditions */}
           {renderSection(t('healthConditions'), (
             <View style={styles.sectionContent}>
@@ -172,6 +254,61 @@ export default function FastingProfileScreen({
               {renderSwitch('pregnancy', t('pregnancy'))}
               {renderSwitch('breastfeeding', t('breastfeeding'))}
               {renderSwitch('gastrointestinalIssues', t('gastrointestinalIssues'))}
+              
+              {/* Other Health Conditions */}
+              <View style={styles.otherHealthConditionsSection}>
+                <DynamicText type="card" style={[styles.subsectionTitle, { color: getCardTextColor() }]}>
+                  {t('otherHealthConditions')}
+                </DynamicText>
+                
+                {/* Add new health condition */}
+                <View style={styles.addHealthConditionRow}>
+                  <TextInput
+                    style={[styles.textInput, { 
+                      backgroundColor: getCardBackgroundColor(), 
+                      borderColor: getCardBorderColor(),
+                      color: getCardTextColor(),
+                      flex: 1,
+                      marginRight: 8
+                    }]}
+                    value={fastingProfile.customHealthCondition}
+                    onChangeText={(text) => updateProfile('customHealthCondition', text)}
+                    placeholder={t('enterHealthCondition')}
+                    placeholderTextColor={getSubTextColor()}
+                  />
+                  <TouchableOpacity
+                    onPress={addHealthCondition}
+                    style={[styles.addButton, { 
+                      backgroundColor: theme.accent,
+                      borderColor: getCardBorderColor()
+                    }]}
+                  >
+                    <DynamicText type="card" style={[styles.addButtonText, { color: '#ffffff' }]}>
+                      {t('addHealthCondition')}
+                    </DynamicText>
+                  </TouchableOpacity>
+                </View>
+                
+                {/* List of added health conditions */}
+                {fastingProfile.otherHealthConditions.map((condition, index) => (
+                  <View key={index} style={styles.healthConditionItem}>
+                    <DynamicText type="card" style={[styles.healthConditionText, { color: getCardTextColor() }]}>
+                      {condition}
+                    </DynamicText>
+                    <TouchableOpacity
+                      onPress={() => removeHealthCondition(index)}
+                      style={[styles.removeButton, { 
+                        backgroundColor: '#f87171',
+                        borderColor: getCardBorderColor()
+                      }]}
+                    >
+                      <DynamicText type="card" style={[styles.removeButtonText, { color: '#ffffff' }]}>
+                        {t('removeHealthCondition')}
+                      </DynamicText>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
             </View>
           ))}
 
@@ -432,5 +569,82 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  // New styles for weight/height and other health conditions
+  inputRow: {
+    marginBottom: 10,
+    paddingVertical: 8,
+  },
+  inputLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: '600',
+    // color handled by getCardTextColor
+  },
+  textInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    // backgroundColor, borderColor, color handled by getCardBackgroundColor, getCardBorderColor, getCardTextColor
+  },
+  otherHealthConditionsSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  subsectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    // color handled by getCardTextColor
+  },
+  addHealthConditionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  addButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    // backgroundColor handled by theme.accent
+    // borderColor handled by getCardBorderColor
+  },
+  addButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    // color: '#ffffff', // Always white
+  },
+  healthConditionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  healthConditionText: {
+    fontSize: 14,
+    flex: 1,
+    // color handled by getCardTextColor
+  },
+  removeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    // backgroundColor: '#f87171', // Red
+    // borderColor handled by getCardBorderColor
+  },
+  removeButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    // color: '#ffffff', // Always white
   },
 });

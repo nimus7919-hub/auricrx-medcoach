@@ -2042,6 +2042,12 @@ export default function App() {
   
   // fasting profile settings
   const [fastingProfile, setFastingProfile] = useState({
+    // Basic Info
+    weight: '', // User's weight
+    height: '', // User's height
+    weightUnit: 'kg', // 'kg' or 'lbs'
+    heightUnit: 'cm', // 'cm' or 'ft'
+    
     // Health Conditions
     diabetes: false,
     hypoglycemia: false,
@@ -2052,6 +2058,8 @@ export default function App() {
     pregnancy: false,
     breastfeeding: false,
     gastrointestinalIssues: false,
+    otherHealthConditions: [], // Array of custom health conditions
+    customHealthCondition: '', // Current input for new health condition
     
     // Nutritional Status & Body Composition
     bodyFatLevel: 'normal', // 'low', 'normal', 'high'
@@ -3406,7 +3414,20 @@ const S = {
   // Fasting Profile
   fastingProfile: t('fastingProfile.title'),
   fastingProfileDescription: t('fastingProfile.description'),
+  basicInfo: t('fastingProfile.basicInfo'),
+  weight: t('fastingProfile.weight'),
+  height: t('fastingProfile.height'),
+  weightUnit: t('fastingProfile.weightUnit'),
+  heightUnit: t('fastingProfile.heightUnit'),
+  kg: t('fastingProfile.kg'),
+  lbs: t('fastingProfile.lbs'),
+  cm: t('fastingProfile.cm'),
+  ft: t('fastingProfile.ft'),
   healthConditions: t('fastingProfile.healthConditions'),
+  otherHealthConditions: t('fastingProfile.otherHealthConditions'),
+  addHealthCondition: t('fastingProfile.addHealthCondition'),
+  enterHealthCondition: t('fastingProfile.enterHealthCondition'),
+  removeHealthCondition: t('fastingProfile.removeHealthCondition'),
   nutritionalStatus: t('fastingProfile.nutritionalStatus'),
   mentalHealth: t('fastingProfile.mentalHealth'),
   lifestyleActivity: t('fastingProfile.lifestyleActivity'),

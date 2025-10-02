@@ -521,6 +521,65 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
 
     // Check health conditions
     if (profile) {
+      // Calculate BMI if weight and height are provided
+      let bmi = null;
+      if (profile.weight && profile.height) {
+        const weight = parseFloat(profile.weight);
+        const height = parseFloat(profile.height);
+        
+        if (weight > 0 && height > 0) {
+          // Convert to metric if needed
+          let weightKg = weight;
+          let heightM = height / 100; // Assume cm
+          
+          if (profile.weightUnit === 'lbs') {
+            weightKg = weight * 0.453592; // Convert lbs to kg
+          }
+          if (profile.heightUnit === 'ft') {
+            heightM = height * 0.3048; // Convert ft to m
+          }
+          
+          bmi = weightKg / (heightM * heightM);
+        }
+      }
+
+      // BMI considerations
+      if (bmi !== null) {
+        if (bmi < 18.5) {
+          warnings.push('Low BMI may make extended fasting risky.');
+          suggestedFastingHours = Math.min(suggestedFastingHours, 12);
+          riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
+        } else if (bmi > 30) {
+          warnings.push('Higher BMI may benefit from medical supervision during fasting.');
+          suggestedFastingHours = Math.min(suggestedFastingHours, 14);
+          riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
+        }
+      }
+
+      // Check custom health conditions
+      if (profile.otherHealthConditions && profile.otherHealthConditions.length > 0) {
+        const highRiskConditions = ['cancer', 'autoimmune', 'thyroid', 'adrenal', 'pituitary', 'seizure', 'epilepsy'];
+        const mediumRiskConditions = ['migraine', 'chronic fatigue', 'fibromyalgia', 'arthritis', 'osteoporosis'];
+        
+        profile.otherHealthConditions.forEach((condition: string) => {
+          const lowerCondition = condition.toLowerCase();
+          
+          if (highRiskConditions.some(risk => lowerCondition.includes(risk))) {
+            fastingSafe = false;
+            warnings.push(`${condition} requires medical supervision for fasting.`);
+            suggestedFastingHours = Math.min(suggestedFastingHours, 14);
+            riskLevel = 'high';
+          } else if (mediumRiskConditions.some(risk => lowerCondition.includes(risk))) {
+            warnings.push(`${condition} may be affected by fasting.`);
+            suggestedFastingHours = Math.min(suggestedFastingHours, 14);
+            riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
+          } else {
+            warnings.push(`${condition} should be discussed with your healthcare provider before fasting.`);
+            riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
+          }
+        });
+      }
+
       // Critical conditions that make fasting unsafe
       if (profile.diabetes || profile.hypoglycemia) {
         fastingSafe = false;
