@@ -10,7 +10,6 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 
@@ -31,7 +30,7 @@ export default function FastingProfileScreen({
   setFastingProfile,
   saveFastingProfileToDB
 }: FastingProfileScreenProps) {
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, getAccentColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
   const t = (key: string) => S?.[key] || key;
@@ -92,7 +91,7 @@ export default function FastingProfileScreen({
         style={[
           styles.switch,
           { 
-            backgroundColor: fastingProfile[key] ? theme.accent : getCardBackgroundColor(),
+            backgroundColor: fastingProfile[key] ? getAccentColor() : getCardBackgroundColor(),
             borderColor: getCardBorderColor()
           }
         ]}
@@ -119,7 +118,7 @@ export default function FastingProfileScreen({
             style={[
               styles.selectOption,
               {
-                backgroundColor: fastingProfile[key] === option.value ? theme.accent : getCardBackgroundColor(),
+                backgroundColor: fastingProfile[key] === option.value ? getAccentColor() : getCardBackgroundColor(),
                 borderColor: getCardBorderColor()
               }
             ]}
@@ -190,7 +189,7 @@ export default function FastingProfileScreen({
             style={[
               styles.selectOption,
               {
-                backgroundColor: fastingProfile[key] === option.value ? theme.accent : getCardBackgroundColor(),
+                backgroundColor: fastingProfile[key] === option.value ? getAccentColor() : getCardBackgroundColor(),
                 borderColor: getCardBorderColor()
               }
             ]}
@@ -210,10 +209,10 @@ export default function FastingProfileScreen({
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: getCardBackgroundColor() }]}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
-      <LinearGradient colors={[theme.bgStart, theme.bgEnd]} style={styles.container}>
+      <View style={[styles.container, { backgroundColor: getCardBackgroundColor() }]}>
         {/* Header */}
         <View style={[styles.header, { borderColor: getCardBorderColor() }]}>
           <TouchableOpacity style={[styles.homeButton, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onClose}>
@@ -286,7 +285,7 @@ export default function FastingProfileScreen({
                   <TouchableOpacity
                     onPress={addHealthCondition}
                     style={[styles.addButton, { 
-                      backgroundColor: theme.accent,
+                      backgroundColor: getAccentColor(),
                       borderColor: getCardBorderColor()
                     }]}
                   >
@@ -421,14 +420,14 @@ export default function FastingProfileScreen({
           {/* Save Button */}
           <TouchableOpacity
             onPress={saveProfile}
-            style={[styles.saveButton, { backgroundColor: theme.accent, borderColor: getCardBorderColor() }]}
+            style={[styles.saveButton, { backgroundColor: getAccentColor(), borderColor: getCardBorderColor() }]}
           >
             <DynamicText type="card" style={[styles.saveButtonText, { color: '#ffffff' }]}>
               {t('saveProfile')}
             </DynamicText>
           </TouchableOpacity>
         </ScrollView>
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -618,7 +617,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    // backgroundColor handled by theme.accent
+    // backgroundColor handled by getAccentColor()
     // borderColor handled by getCardBorderColor
   },
   addButtonText: {
