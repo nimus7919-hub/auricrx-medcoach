@@ -341,6 +341,16 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
   const [symptomText, setSymptomText] = useState('');
   const [medicationList, setMedicationList] = useState('');
   
+  // Fasting Analytics State
+  const [showFastingModal, setShowFastingModal] = useState(false);
+  const [fastingResult, setFastingResult] = useState<string>('');
+  const [fastingAnalysis, setFastingAnalysis] = useState<{
+    compatible: boolean;
+    warnings: string[];
+    suggestedHours: number;
+    message: string;
+  } | null>(null);
+  
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -476,6 +486,84 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
     }
   };
 
+  // Fasting Compatibility Check Function
+  const checkFastingCompatibility = (medications: any[]) => {
+    let fastingSafe = true;
+    let warnings: string[] = [];
+    let suggestedFastingHours = 16; // Default recommendation
+
+    // Common medications that require food
+    const foodRequiredMedications = [
+      'metformin', 'aspirin', 'ibuprofen', 'naproxen', 'diclofenac',
+      'prednisone', 'prednisolone', 'iron', 'calcium', 'vitamin d',
+      'omeprazole', 'lansoprazole', 'esomeprazole', 'pantoprazole',
+      'sulfonylureas', 'glipizide', 'glyburide', 'glimepiride'
+    ];
+
+    medications.forEach(med => {
+      const medName = med.name?.toLowerCase() || '';
+      const medStrength = med.strength?.toLowerCase() || '';
+      const fullMedName = `${medName} ${medStrength}`.toLowerCase();
+      
+      // Check if medication requires food
+      const requiresFood = foodRequiredMedications.some(requiredMed => 
+        medName.includes(requiredMed) || fullMedName.includes(requiredMed)
+      );
+      
+      if (requiresFood) {
+        fastingSafe = false;
+        warnings.push(`${med.name} should be taken with food.`);
+        suggestedFastingHours = 12; // Reduce recommendation if needed
+      }
+    });
+
+    let message = '';
+    if (fastingSafe) {
+      message = `Fasting is generally compatible with your medications. An ideal fasting timeframe might be around ${suggestedFastingHours}:${24-suggestedFastingHours} hours.`;
+    } else {
+      message = `Fasting may not be fully suitable with your current medications: ${warnings.join('; ')} You might consider a shorter fasting period, like ${suggestedFastingHours}:${24-suggestedFastingHours} hours, and please consult your healthcare provider.`;
+    }
+
+    return {
+      compatible: fastingSafe,
+      warnings,
+      suggestedHours: suggestedFastingHours,
+      message
+    };
+  };
+
+  const analyzeFastingCompatibility = async () => {
+    try {
+      // Get medications from the app's medication data
+      // For now, we'll use a mock list - in a real app, this would come from the medication state
+      const mockMedications = [
+        { name: 'Metformin', strength: '500mg', times: ['08:00', '20:00'] },
+        { name: 'Aspirin', strength: '81mg', times: ['08:00'] },
+        { name: 'Vitamin D', strength: '1000 IU', times: ['08:00'] }
+      ];
+      
+      const analysis = checkFastingCompatibility(mockMedications);
+      setFastingAnalysis(analysis);
+      setFastingResult(analysis.message);
+      setShowFastingModal(false);
+      
+      triggerHaptic('medium');
+      
+      // Show analysis results
+      const statusEmoji = analysis.compatible ? '✅' : '⚠️';
+      const statusTitle = analysis.compatible ? 'Fasting Compatible' : 'Fasting Warning';
+      
+      Alert.alert(
+        `${statusEmoji} ${statusTitle}`,
+        analysis.message,
+        [{ text: t('ok') }]
+      );
+    } catch (error) {
+      console.error('Failed to analyze fasting compatibility:', error);
+      Alert.alert('❌ Error', 'Failed to analyze fasting compatibility');
+    }
+  };
+
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -544,6 +632,12 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
           onPress={() => setShowDrugCheckModal(true)}
         >
           <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 {t('checkInteractions')}</DynamicText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={dynamicStyles.quickActionButton}
+          onPress={() => setShowFastingModal(true)}
+        >
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>⏰ {t('fastingAnalytics')}</DynamicText>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -801,6 +895,82 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('check')}</DynamicText>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Fasting Analytics Modal */}
+      <Modal
+        visible={showFastingModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowFastingModal(false)}
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={dynamicStyles.modalContent}>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>⏰ {t('fastingAnalytics')}</DynamicText>
+            
+            <View style={dynamicStyles.inputGroup}>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('fastingCompatibilityCheck')}</DynamicText>
+              <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
+                {t('fastingDescription')}
+              </DynamicText>
+            </View>
+
+            {fastingAnalysis && (
+              <View style={[dynamicStyles.insightCard, { 
+                borderLeftColor: fastingAnalysis.compatible ? '#10b981' : '#f59e0b',
+                marginBottom: 16 
+              }]}>
+                <View style={dynamicStyles.insightHeader}>
+                  <DynamicText type="card" style={dynamicStyles.insightTitle}>
+                    {fastingAnalysis.compatible ? '✅ Compatible' : '⚠️ Warning'}
+                  </DynamicText>
+                  <View style={[
+                    dynamicStyles.insightSeverity,
+                    { backgroundColor: fastingAnalysis.compatible ? '#10b981' : '#f59e0b' }
+                  ]}>
+                    <DynamicText type="card" style={dynamicStyles.severityText}>
+                      {fastingAnalysis.suggestedHours}:{24-fastingAnalysis.suggestedHours}
+                    </DynamicText>
+                  </View>
+                </View>
+                <DynamicText type="card" style={dynamicStyles.insightDescription}>
+                  {fastingAnalysis.message}
+                </DynamicText>
+                {fastingAnalysis.warnings.length > 0 && (
+                  <View style={dynamicStyles.actionItems}>
+                    <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
+                      {t('warnings')}:
+                    </DynamicText>
+                    {fastingAnalysis.warnings.map((warning, index) => (
+                      <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
+                        • {warning}
+                      </DynamicText>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
+                onPress={() => setShowFastingModal(false)}
+              >
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={analyzeFastingCompatibility}
+              >
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('analyze')}</DynamicText>
+              </TouchableOpacity>
+            </View>
+            
+            <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
+              {t('fastingDisclaimer')}
+            </DynamicText>
           </View>
         </View>
       </Modal>
