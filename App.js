@@ -67,6 +67,7 @@ import {
 
 // --- backend endpoint ---
 const BACKEND_URL = "https://auricrx-medcoach.onrender.com/ask";
+const API_BASE_URL = "https://auricrx-medcoach.onrender.com";
 
 
 // ---------- i18n (inline, tiny) ----------
