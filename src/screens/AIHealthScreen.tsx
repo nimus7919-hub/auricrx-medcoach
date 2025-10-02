@@ -887,53 +887,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     try {
       const currentDate = new Date().toLocaleDateString();
       
-      // Prepare data for server-side PDF generation
-      const reportData = {
-        medications: medications,
-        fastingProfile: fastingProfile,
-        fastingAnalysis: fastingAnalysis,
-        generatedDate: currentDate
-      };
-
-      // Call server endpoint to generate PDF
-      const response = await fetch('https://auricrx-medcoach.onrender.com/api/generate-health-report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(reportData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
-      }
-
-      // Get the PDF blob
-      const pdfBlob = await response.blob();
-      
-      // Create a temporary URL for the PDF
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      
-      // Share the PDF
-      const shareOptions = {
-        title: 'AuricRX Health Report',
-        message: `AuricRX Health Report - ${currentDate}`,
-        url: pdfUrl,
-        type: 'application/pdf',
-      };
-
-      await Share.share(shareOptions);
-      
-      Alert.alert(
-        'Export Successful',
-        'Your health report has been generated as a PDF and is ready for sharing.',
-        [{ text: 'OK' }]
-      );
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      
-      // Fallback to HTML sharing if server fails
-      const currentDate = new Date().toLocaleDateString();
+      // Generate HTML content for the report
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -941,20 +895,80 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <meta charset="utf-8">
           <title>Health Report - ${currentDate}</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              line-height: 1.6; 
+              color: #333;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              border-bottom: 2px solid #333; 
+              padding-bottom: 20px; 
+            }
             .section { margin-bottom: 25px; }
-            .section-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px; border-left: 4px solid #007bff; padding-left: 10px; }
-            .medication-item { background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 5px; }
+            .section-title { 
+              font-size: 18px; 
+              font-weight: bold; 
+              color: #333; 
+              margin-bottom: 15px; 
+              border-left: 4px solid #007bff; 
+              padding-left: 10px; 
+            }
+            .medication-item { 
+              background: #f8f9fa; 
+              padding: 10px; 
+              margin: 5px 0; 
+              border-radius: 5px; 
+              border: 1px solid #e9ecef;
+            }
             .profile-item { margin: 8px 0; }
             .label { font-weight: bold; color: #555; }
             .value { color: #333; }
-            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 10px 0; }
-            .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin: 10px 0; }
-            .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+            .warning { 
+              background: #fff3cd; 
+              border: 1px solid #ffeaa7; 
+              padding: 10px; 
+              border-radius: 5px; 
+              margin: 10px 0; 
+            }
+            .success { 
+              background: #d4edda; 
+              border: 1px solid #c3e6cb; 
+              padding: 10px; 
+              border-radius: 5px; 
+              margin: 10px 0; 
+            }
+            .footer { 
+              margin-top: 30px; 
+              text-align: center; 
+              font-size: 12px; 
+              color: #666; 
+              border-top: 1px solid #ddd; 
+              padding-top: 20px; 
+            }
+            .print-instructions {
+              background: #e3f2fd;
+              border: 1px solid #2196f3;
+              padding: 15px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+              text-align: center;
+            }
           </style>
         </head>
         <body>
+          <div class="print-instructions no-print">
+            <h3>📄 How to Save as PDF:</h3>
+            <p><strong>Desktop:</strong> Press Ctrl+P (Windows) or Cmd+P (Mac), then select "Save as PDF"</p>
+            <p><strong>Mobile:</strong> Use your browser's "Share" or "Print" option and select "Save as PDF"</p>
+          </div>
+
           <div class="header">
             <h1>AuricRX Health Report</h1>
             <p>Generated on ${currentDate}</p>
@@ -1046,10 +1060,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         </html>
       `;
 
-      // Fallback to HTML sharing
+      // Share the HTML content with clear instructions
       const shareOptions = {
         title: 'AuricRX Health Report',
-        message: `AuricRX Health Report - ${currentDate}\n\nThis HTML file can be opened in a browser and saved as PDF.`,
+        message: `AuricRX Health Report - ${currentDate}\n\nOpen this file in your browser and use "Print to PDF" to save as PDF.`,
         url: `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`
       };
 
@@ -1057,7 +1071,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       Alert.alert(
         'Export Successful',
-        'Your health report has been prepared for sharing. Open the HTML file in your browser and use "Print to PDF" to create a PDF version.',
+        'Your health report has been prepared for sharing. Open the HTML file in your browser and use "Print to PDF" to create a PDF version.\n\nInstructions:\n• Desktop: Ctrl+P (Windows) or Cmd+P (Mac)\n• Mobile: Use browser\'s Share/Print option',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      Alert.alert(
+        'Export Error',
+        'There was an error preparing your health report. Please try again.',
         [{ text: 'OK' }]
       );
     }
