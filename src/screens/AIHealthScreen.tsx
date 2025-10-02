@@ -27,6 +27,7 @@ interface AIHealthScreenProps {
   onClose: () => void;
   theme?: any;
   S?: any;
+  fastingProfile?: any;
 }
 
 
@@ -72,7 +73,7 @@ interface DrugInteraction {
 }
 
 
-export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProps) {
+export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AIHealthScreenProps) {
   console.log('AI Health Screen rendering...');
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
@@ -486,11 +487,12 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
     }
   };
 
-  // Fasting Compatibility Check Function
-  const checkFastingCompatibility = (medications: any[]) => {
+  // Enhanced Fasting Compatibility Check Function with Profile
+  const checkFastingCompatibilityWithProfile = (medications: any[], profile: any) => {
     let fastingSafe = true;
     let warnings: string[] = [];
     let suggestedFastingHours = 16; // Default recommendation
+    let riskLevel = 'low'; // 'low', 'medium', 'high', 'critical'
 
     // Common medications that require food
     const foodRequiredMedications = [
@@ -500,12 +502,12 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
       'sulfonylureas', 'glipizide', 'glyburide', 'glimepiride'
     ];
 
+    // Check medications
     medications.forEach(med => {
       const medName = med.name?.toLowerCase() || '';
       const medStrength = med.strength?.toLowerCase() || '';
       const fullMedName = `${medName} ${medStrength}`.toLowerCase();
       
-      // Check if medication requires food
       const requiresFood = foodRequiredMedications.some(requiredMed => 
         medName.includes(requiredMed) || fullMedName.includes(requiredMed)
       );
@@ -513,23 +515,114 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
       if (requiresFood) {
         fastingSafe = false;
         warnings.push(`${med.name} should be taken with food.`);
-        suggestedFastingHours = 12; // Reduce recommendation if needed
+        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
       }
     });
 
+    // Check health conditions
+    if (profile) {
+      // Critical conditions that make fasting unsafe
+      if (profile.diabetes || profile.hypoglycemia) {
+        fastingSafe = false;
+        riskLevel = 'critical';
+        warnings.push('Diabetes or hypoglycemia requires medical supervision for fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 8);
+      }
+
+      if (profile.pregnancy || profile.breastfeeding) {
+        fastingSafe = false;
+        riskLevel = 'critical';
+        warnings.push('Pregnancy and breastfeeding require medical supervision for fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 8);
+      }
+
+      if (profile.eatingDisorders) {
+        fastingSafe = false;
+        riskLevel = 'high';
+        warnings.push('Eating disorders require medical supervision for fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 8);
+      }
+
+      // High-risk conditions
+      if (profile.heartConditions || profile.kidneyDisease || profile.liverDisease) {
+        riskLevel = 'high';
+        warnings.push('Heart, kidney, or liver conditions require medical supervision for fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
+      }
+
+      // Medium-risk conditions
+      if (profile.gastrointestinalIssues) {
+        riskLevel = 'medium';
+        warnings.push('Gastrointestinal issues may be worsened by fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 14);
+      }
+
+      // Nutritional status considerations
+      if (profile.bodyFatLevel === 'low' || profile.muscleMass === 'low') {
+        riskLevel = 'medium';
+        warnings.push('Low body fat or muscle mass may make fasting risky.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
+      }
+
+      if (profile.hydrationLevel === 'poor') {
+        riskLevel = 'medium';
+        warnings.push('Poor hydration increases fasting risks.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
+      }
+
+      // Mental health considerations
+      if (profile.anxiety || profile.depression) {
+        riskLevel = 'medium';
+        warnings.push('Anxiety or depression may be affected by fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 14);
+      }
+
+      // Activity level considerations
+      if (profile.activityLevel === 'athlete' || profile.physicalLabor) {
+        warnings.push('High activity levels may require more frequent nutrition.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
+      }
+
+      // Sleep quality considerations
+      if (profile.sleepQuality === 'poor') {
+        warnings.push('Poor sleep quality may be affected by fasting.');
+        suggestedFastingHours = Math.min(suggestedFastingHours, 14);
+      }
+
+      // Respect user preferences
+      if (profile.maxFastingHours && profile.maxFastingHours < suggestedFastingHours) {
+        suggestedFastingHours = profile.maxFastingHours;
+      }
+    }
+
+    // Generate personalized message
     let message = '';
-    if (fastingSafe) {
-      message = `Fasting is generally compatible with your medications. An ideal fasting timeframe might be around ${suggestedFastingHours}:${24-suggestedFastingHours} hours.`;
+    const riskEmoji = riskLevel === 'critical' ? '🚨' : 
+                     riskLevel === 'high' ? '⚠️' : 
+                     riskLevel === 'medium' ? '⚡' : '✅';
+
+    if (riskLevel === 'critical' || !fastingSafe) {
+      message = `${riskEmoji} Fasting is NOT recommended for your current health profile. ${warnings.join(' ')} Please consult your healthcare provider before considering any fasting protocol.`;
+    } else if (riskLevel === 'high') {
+      message = `${riskEmoji} Fasting requires medical supervision for your health profile. ${warnings.join(' ')} Consider a shorter fasting period of ${suggestedFastingHours}:${24-suggestedFastingHours} hours and consult your healthcare provider.`;
+    } else if (riskLevel === 'medium') {
+      message = `${riskEmoji} Fasting may be suitable with caution. ${warnings.join(' ')} A ${suggestedFastingHours}:${24-suggestedFastingHours} hour fasting window may be appropriate, but monitor your health closely.`;
     } else {
-      message = `Fasting may not be fully suitable with your current medications: ${warnings.join('; ')} You might consider a shorter fasting period, like ${suggestedFastingHours}:${24-suggestedFastingHours} hours, and please consult your healthcare provider.`;
+      message = `${riskEmoji} Fasting appears compatible with your health profile. A ${suggestedFastingHours}:${24-suggestedFastingHours} hour fasting window may be suitable. Always listen to your body and consult your healthcare provider if you have concerns.`;
     }
 
     return {
-      compatible: fastingSafe,
+      compatible: fastingSafe && riskLevel !== 'critical',
       warnings,
       suggestedHours: suggestedFastingHours,
+      riskLevel,
       message
     };
+  };
+
+  // Original function for backward compatibility
+  const checkFastingCompatibility = (medications: any[]) => {
+    return checkFastingCompatibilityWithProfile(medications, null);
   };
 
   const analyzeFastingCompatibility = async () => {
@@ -542,7 +635,8 @@ export default function AIHealthScreen({ onClose, theme, S }: AIHealthScreenProp
         { name: 'Vitamin D', strength: '1000 IU', times: ['08:00'] }
       ];
       
-      const analysis = checkFastingCompatibility(mockMedications);
+      // Enhanced analysis using fasting profile
+      const analysis = checkFastingCompatibilityWithProfile(mockMedications, fastingProfile);
       setFastingAnalysis(analysis);
       setFastingResult(analysis.message);
       setShowFastingModal(false);

@@ -34,6 +34,7 @@ import SmartNotificationsScreen from './src/screens/SmartNotificationsScreen';
 import HealthAnalyticsScreen from './src/screens/HealthAnalyticsScreen';
 import AppointmentManagementScreen from './src/screens/AppointmentManagementScreen';
 import AIHealthScreen from './src/screens/AIHealthScreen';
+import FastingProfileScreen from './src/screens/FastingProfileScreen';
 import Medications from './components/Medications';
 import Supplements from './components/Supplements';
 import Reminders from './components/Reminders';
@@ -180,6 +181,80 @@ const STRINGS = {
     fastingDescription: 'Check if your current medications are compatible with intermittent fasting',
     fastingDisclaimer: 'This recommendation is AI-generated and should not replace professional medical advice.',
     warnings: 'Warnings',
+    // Fasting Profile translations
+    fastingProfile: 'Fasting Profile',
+    fastingProfileDescription: 'Set up your health profile for personalized fasting recommendations',
+    healthConditions: 'Health Conditions',
+    nutritionalStatus: 'Nutritional Status & Body Composition',
+    mentalHealth: 'Mental Health & Cognitive Demands',
+    lifestyleActivity: 'Lifestyle & Activity Level',
+    fastingPreferences: 'Fasting Protocol Preferences',
+    fastingGoals: 'Goals',
+    medicalSupervision: 'Medical Supervision & Monitoring',
+    // Health Conditions
+    diabetes: 'Diabetes',
+    hypoglycemia: 'Hypoglycemia',
+    heartConditions: 'Heart Conditions',
+    kidneyDisease: 'Kidney Disease',
+    liverDisease: 'Liver Disease',
+    eatingDisorders: 'Eating Disorders (past or present)',
+    pregnancy: 'Pregnancy',
+    breastfeeding: 'Breastfeeding',
+    gastrointestinalIssues: 'Gastrointestinal Issues (ulcers, GERD, IBS)',
+    // Nutritional Status
+    bodyFatLevel: 'Body Fat Level',
+    muscleMass: 'Muscle Mass',
+    micronutrientLevels: 'Micronutrient Levels',
+    hydrationLevel: 'Hydration Level',
+    // Mental Health
+    highStressEnvironment: 'High-Stress Environment',
+    intensiveMentalTasks: 'Intensive Mental Tasks',
+    anxiety: 'Anxiety',
+    depression: 'Depression',
+    // Lifestyle
+    activityLevel: 'Activity Level',
+    physicalLabor: 'Physical Labor Job',
+    longShifts: 'Long Work Shifts',
+    sleepQuality: 'Sleep Quality',
+    // Fasting Preferences
+    preferredFastingType: 'Preferred Fasting Type',
+    maxFastingHours: 'Maximum Fasting Hours',
+    fastingFrequency: 'Fasting Frequency',
+    // Goals
+    primaryGoal: 'Primary Goal',
+    weightLossGoal: 'Weight Loss Goal',
+    metabolicHealthGoal: 'Metabolic Health Goal',
+    // Medical Supervision
+    selfMonitoring: 'Self-Monitoring',
+    wearableDevices: 'Wearable Devices',
+    // Options
+    low: 'Low',
+    normal: 'Normal',
+    high: 'High',
+    poor: 'Poor',
+    fair: 'Fair',
+    good: 'Good',
+    excellent: 'Excellent',
+    sedentary: 'Sedentary',
+    light: 'Light',
+    moderate: 'Moderate',
+    athlete: 'Athlete',
+    timeRestricted: 'Time-Restricted Feeding (16:8, 14:10)',
+    alternateDay: 'Alternate Day Fasting',
+    extended: 'Extended Fasting (24h+)',
+    custom: 'Custom',
+    daily: 'Daily',
+    weekly: 'Weekly',
+    monthly: 'Monthly',
+    weightLoss: 'Weight Loss',
+    metabolicHealth: 'Metabolic Health',
+    generalHealth: 'General Health',
+    spiritual: 'Spiritual/Religious',
+    medical: 'Medical',
+    // Additional translations
+    profileSaved: 'Profile Saved',
+    fastingProfileSavedMessage: 'Your fasting profile has been saved and will be used for personalized recommendations.',
+    saveProfile: 'Save Profile',
     noteType: 'Note Type',
     selectNoteType: 'Select Note Type',
     transcription: 'Transcription',
@@ -670,6 +745,80 @@ const STRINGS = {
     fastingDescription: 'Verifica si tus medicamentos actuales son compatibles con el ayuno intermitente',
     fastingDisclaimer: 'Esta recomendación es generada por IA y no debe reemplazar el consejo médico profesional.',
     warnings: 'Advertencias',
+    // Fasting Profile translations
+    fastingProfile: 'Perfil de Ayuno',
+    fastingProfileDescription: 'Configura tu perfil de salud para recomendaciones personalizadas de ayuno',
+    healthConditions: 'Condiciones de Salud',
+    nutritionalStatus: 'Estado Nutricional y Composición Corporal',
+    mentalHealth: 'Salud Mental y Demandas Cognitivas',
+    lifestyleActivity: 'Estilo de Vida y Nivel de Actividad',
+    fastingPreferences: 'Preferencias del Protocolo de Ayuno',
+    fastingGoals: 'Objetivos',
+    medicalSupervision: 'Supervisión Médica y Monitoreo',
+    // Health Conditions
+    diabetes: 'Diabetes',
+    hypoglycemia: 'Hipoglucemia',
+    heartConditions: 'Condiciones Cardíacas',
+    kidneyDisease: 'Enfermedad Renal',
+    liverDisease: 'Enfermedad Hepática',
+    eatingDisorders: 'Trastornos Alimentarios (pasados o presentes)',
+    pregnancy: 'Embarazo',
+    breastfeeding: 'Lactancia',
+    gastrointestinalIssues: 'Problemas Gastrointestinales (úlceras, GERD, SII)',
+    // Nutritional Status
+    bodyFatLevel: 'Nivel de Grasa Corporal',
+    muscleMass: 'Masa Muscular',
+    micronutrientLevels: 'Niveles de Micronutrientes',
+    hydrationLevel: 'Nivel de Hidratación',
+    // Mental Health
+    highStressEnvironment: 'Ambiente de Alto Estrés',
+    intensiveMentalTasks: 'Tareas Mentales Intensivas',
+    anxiety: 'Ansiedad',
+    depression: 'Depresión',
+    // Lifestyle
+    activityLevel: 'Nivel de Actividad',
+    physicalLabor: 'Trabajo de Esfuerzo Físico',
+    longShifts: 'Turnos Largos',
+    sleepQuality: 'Calidad del Sueño',
+    // Fasting Preferences
+    preferredFastingType: 'Tipo de Ayuno Preferido',
+    maxFastingHours: 'Horas Máximas de Ayuno',
+    fastingFrequency: 'Frecuencia de Ayuno',
+    // Goals
+    primaryGoal: 'Objetivo Principal',
+    weightLossGoal: 'Objetivo de Pérdida de Peso',
+    metabolicHealthGoal: 'Objetivo de Salud Metabólica',
+    // Medical Supervision
+    selfMonitoring: 'Automonitoreo',
+    wearableDevices: 'Dispositivos Portátiles',
+    // Options
+    low: 'Bajo',
+    normal: 'Normal',
+    high: 'Alto',
+    poor: 'Pobre',
+    fair: 'Regular',
+    good: 'Bueno',
+    excellent: 'Excelente',
+    sedentary: 'Sedentario',
+    light: 'Ligero',
+    moderate: 'Moderado',
+    athlete: 'Atleta',
+    timeRestricted: 'Alimentación con Restricción de Tiempo (16:8, 14:10)',
+    alternateDay: 'Ayuno en Días Alternos',
+    extended: 'Ayuno Extendido (24h+)',
+    custom: 'Personalizado',
+    daily: 'Diario',
+    weekly: 'Semanal',
+    monthly: 'Mensual',
+    weightLoss: 'Pérdida de Peso',
+    metabolicHealth: 'Salud Metabólica',
+    generalHealth: 'Salud General',
+    spiritual: 'Espiritual/Religioso',
+    medical: 'Médico',
+    // Additional translations
+    profileSaved: 'Perfil Guardado',
+    fastingProfileSavedMessage: 'Tu perfil de ayuno ha sido guardado y se utilizará para recomendaciones personalizadas.',
+    saveProfile: 'Guardar Perfil',
     noteType: 'Tipo de Nota',
     selectNoteType: 'Seleccionar Tipo de Nota',
     transcription: 'Transcripción',
@@ -1173,6 +1322,80 @@ const STRINGS = {
     fastingDescription: '检查您当前的药物是否与间歇性禁食兼容',
     fastingDisclaimer: '此建议由AI生成，不应替代专业医疗建议。',
     warnings: '警告',
+    // Fasting Profile translations
+    fastingProfile: '禁食档案',
+    fastingProfileDescription: '设置您的健康档案以获得个性化禁食建议',
+    healthConditions: '健康状况',
+    nutritionalStatus: '营养状态和身体组成',
+    mentalHealth: '心理健康和认知需求',
+    lifestyleActivity: '生活方式和活动水平',
+    fastingPreferences: '禁食协议偏好',
+    fastingGoals: '目标',
+    medicalSupervision: '医疗监督和监测',
+    // Health Conditions
+    diabetes: '糖尿病',
+    hypoglycemia: '低血糖',
+    heartConditions: '心脏疾病',
+    kidneyDisease: '肾脏疾病',
+    liverDisease: '肝脏疾病',
+    eatingDisorders: '饮食失调（过去或现在）',
+    pregnancy: '怀孕',
+    breastfeeding: '哺乳',
+    gastrointestinalIssues: '胃肠道问题（溃疡、胃食管反流、肠易激综合征）',
+    // Nutritional Status
+    bodyFatLevel: '体脂水平',
+    muscleMass: '肌肉量',
+    micronutrientLevels: '微量营养素水平',
+    hydrationLevel: '水合水平',
+    // Mental Health
+    highStressEnvironment: '高压力环境',
+    intensiveMentalTasks: '高强度脑力任务',
+    anxiety: '焦虑',
+    depression: '抑郁',
+    // Lifestyle
+    activityLevel: '活动水平',
+    physicalLabor: '体力劳动工作',
+    longShifts: '长时间轮班',
+    sleepQuality: '睡眠质量',
+    // Fasting Preferences
+    preferredFastingType: '首选禁食类型',
+    maxFastingHours: '最大禁食小时数',
+    fastingFrequency: '禁食频率',
+    // Goals
+    primaryGoal: '主要目标',
+    weightLossGoal: '减重目标',
+    metabolicHealthGoal: '代谢健康目标',
+    // Medical Supervision
+    selfMonitoring: '自我监测',
+    wearableDevices: '可穿戴设备',
+    // Options
+    low: '低',
+    normal: '正常',
+    high: '高',
+    poor: '差',
+    fair: '一般',
+    good: '好',
+    excellent: '优秀',
+    sedentary: '久坐',
+    light: '轻度',
+    moderate: '中度',
+    athlete: '运动员',
+    timeRestricted: '限时进食（16:8、14:10）',
+    alternateDay: '隔日禁食',
+    extended: '延长禁食（24小时+）',
+    custom: '自定义',
+    daily: '每日',
+    weekly: '每周',
+    monthly: '每月',
+    weightLoss: '减重',
+    metabolicHealth: '代谢健康',
+    generalHealth: '一般健康',
+    spiritual: '精神/宗教',
+    medical: '医疗',
+    // Additional translations
+    profileSaved: '档案已保存',
+    fastingProfileSavedMessage: '您的禁食档案已保存，将用于个性化建议。',
+    saveProfile: '保存档案',
     noteType: '笔记类型',
     selectNoteType: '选择笔记类型',
     transcription: '转录',
@@ -1816,6 +2039,53 @@ export default function App() {
   // privacy settings
   const [dataCollection, setDataCollection] = useState(true);
   const [analytics, setAnalytics] = useState(true);
+  
+  // fasting profile settings
+  const [fastingProfile, setFastingProfile] = useState({
+    // Health Conditions
+    diabetes: false,
+    hypoglycemia: false,
+    heartConditions: false,
+    kidneyDisease: false,
+    liverDisease: false,
+    eatingDisorders: false,
+    pregnancy: false,
+    breastfeeding: false,
+    gastrointestinalIssues: false,
+    
+    // Nutritional Status & Body Composition
+    bodyFatLevel: 'normal', // 'low', 'normal', 'high'
+    muscleMass: 'normal', // 'low', 'normal', 'high'
+    micronutrientLevels: 'normal', // 'low', 'normal', 'high'
+    hydrationLevel: 'good', // 'poor', 'good', 'excellent'
+    
+    // Mental Health & Cognitive Demands
+    highStressEnvironment: false,
+    intensiveMentalTasks: false,
+    anxiety: false,
+    depression: false,
+    
+    // Lifestyle & Activity Level
+    activityLevel: 'moderate', // 'sedentary', 'light', 'moderate', 'high', 'athlete'
+    physicalLabor: false,
+    longShifts: false,
+    sleepQuality: 'good', // 'poor', 'fair', 'good', 'excellent'
+    
+    // Fasting Protocol Preferences
+    preferredFastingType: 'timeRestricted', // 'timeRestricted', 'alternateDay', 'extended', 'custom'
+    maxFastingHours: 16,
+    fastingFrequency: 'daily', // 'daily', 'weekly', 'monthly'
+    
+    // Goals
+    primaryGoal: 'generalHealth', // 'weightLoss', 'metabolicHealth', 'generalHealth', 'spiritual', 'medical'
+    weightLossGoal: false,
+    metabolicHealthGoal: false,
+    
+    // Medical Supervision
+    medicalSupervision: false,
+    selfMonitoring: false,
+    wearableDevices: false
+  });
   
   // Pharmacy and Labs data (loaded automatically)
   const [pharmacies, setPharmacies] = useState([]);
@@ -4337,6 +4607,44 @@ const handleAskMedicalAI = async () => {
           </View>
         </CollapsibleSection>
         
+        <CollapsibleSection title={S.fastingProfile} sectionKey="fastingProfile" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <TouchableOpacity 
+              onPress={() => setRoute('fasting-profile')}
+              style={[styles.settingsButton, {
+                backgroundColor: getCardBackgroundColor() + 'CC',
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_700Bold', 
+                fontSize: 16,
+                textAlign: 'center',
+                marginBottom: 4
+              }}>{S.fastingProfile}</DynamicText>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_400Regular', 
+                fontSize: 12, 
+                opacity: 0.7,
+                textAlign: 'center'
+              }}>
+                {S.fastingProfileDescription}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
         <CollapsibleSection title={S.language} sectionKey="language" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             <SwitchRow
@@ -4523,7 +4831,8 @@ function trimTo(str, n) {
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} /> :
+    route === 'fasting-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
      <Dashboard />}
