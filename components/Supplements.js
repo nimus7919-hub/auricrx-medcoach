@@ -443,6 +443,25 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     </DynamicText>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setSelectedSupplement(supp);
+                      setShowRefillModal(true);
+                    }}
+                    style={{
+                      backgroundColor: '#4CAF50',
+                      borderRadius: 8,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderWidth: 1,
+                      borderColor: '#4CAF50'
+                    }}
+                  >
+                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
+                      Refill
+                    </DynamicText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     onPress={() => {
                       Alert.alert(
                         S.deleteSupplement || 'Delete Supplement',
