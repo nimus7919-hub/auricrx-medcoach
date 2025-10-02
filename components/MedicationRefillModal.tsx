@@ -9,7 +9,7 @@ import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../servic
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 import medicationDataCollector from "../services/medicationDataCollector";
 
-interface MedicationInfo { name: string; dosage: string; lastRefill?: string }
+interface MedicationInfo { name: string; dosage: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
 interface Props { 
   visible: boolean; 
   onClose: () => void; 
@@ -195,7 +195,16 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           currency: determinedCurrency
         });
         
-        const { prices, meta } = await getMedicationPrices(near, medication, { currency: determinedCurrency.toUpperCase() });
+        // Create enhanced medication object with quantity unit for better search
+        const enhancedMedication = {
+          ...medication,
+          // Add quantity unit to the search query for better filtering
+          searchQuery: medication.quantityUnit ? 
+            `${medication.name} ${medication.quantityUnit}` : 
+            medication.name
+        };
+        
+        const { prices, meta } = await getMedicationPrices(near, enhancedMedication, { currency: determinedCurrency.toUpperCase() });
         
         console.log('🔍 DEBUG: getMedicationPrices returned:', {
           pricesCount: prices.length,

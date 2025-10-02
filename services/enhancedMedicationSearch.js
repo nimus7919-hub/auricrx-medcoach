@@ -23,13 +23,39 @@ class EnhancedMedicationSearch {
       
       console.log(`📊 Found ${excelMatches.length} Excel matches for "${medication.name}"`);
       
+      // Filter by quantity unit if available
+      let filteredMatches = excelMatches;
+      if (medication.quantityUnit) {
+        const quantityUnit = medication.quantityUnit.toLowerCase();
+        console.log(`🔍 Filtering by quantity unit: "${quantityUnit}"`);
+        
+        filteredMatches = excelMatches.filter(match => {
+          const unidades = (match.Unidades || '').toLowerCase();
+          const medicinas = (match.Medicinas || '').toLowerCase();
+          
+          // Check if the quantity unit appears in the medication name or units field
+          const hasUnitMatch = unidades.includes(quantityUnit) || 
+                              medicinas.includes(quantityUnit) ||
+                              // Handle common variations
+                              (quantityUnit === 'tablet' && (unidades.includes('tab') || medicinas.includes('tab'))) ||
+                              (quantityUnit === 'capsule' && (unidades.includes('cap') || medicinas.includes('cap'))) ||
+                              (quantityUnit === 'gel cap' && (unidades.includes('gel') || medicinas.includes('gel'))) ||
+                              (quantityUnit === 'ml' && (unidades.includes('ml') || medicinas.includes('ml'))) ||
+                              (quantityUnit === 'mg' && (unidades.includes('mg') || medicinas.includes('mg')));
+          
+          return hasUnitMatch;
+        });
+        
+        console.log(`📊 After quantity unit filtering: ${filteredMatches.length} matches`);
+      }
+      
       // Create enhanced results by combining pharmacy locations with Excel prices
       const enhancedResults = [];
       
       for (const pharmacy of pharmacies) {
         // Find Excel matches for this specific pharmacy with fuzzy matching
         const normalizedPharmacyName = this.excelReader.normalizePharmacyName(pharmacy.name);
-        const pharmacyMatches = excelMatches.filter(match => {
+        const pharmacyMatches = filteredMatches.filter(match => {
           const normalizedExcelPharmacy = this.excelReader.normalizePharmacyName(match.Pharmacy);
           
           // Exact match

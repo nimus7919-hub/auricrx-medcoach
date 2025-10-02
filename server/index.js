@@ -743,6 +743,8 @@ app.post('/pharmacies/prices', async (req, res) => {
   const { medication, pharmacies, currency } = req.body || {};
   console.log('🔍 DEBUG: Pharmacy prices API called');
   console.log('🔍 DEBUG: Medication:', medication);
+  console.log('🔍 DEBUG: Search query:', medication.searchQuery || medication.name);
+  console.log('🔍 DEBUG: Quantity unit:', medication.quantityUnit);
   console.log('🔍 DEBUG: Pharmacies count:', pharmacies?.length);
   console.log('🔍 DEBUG: Currency:', currency);
   

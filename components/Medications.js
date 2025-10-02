@@ -444,6 +444,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         name: medication.name,
         dosage: medication.strength || 'N/A',
         quantity: medication.quantity || 'N/A',
+        quantityUnit: medication.quantityUnit || 'tablet', // Include quantity unit for better search
         lastRefill: medication.lastRefill || S.never || 'Never'
       };
       
