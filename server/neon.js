@@ -74,6 +74,9 @@ async function getMedicationContributions(filters = {}) {
 // User symptoms functions
 async function saveUserSymptom(userId, symptom) {
   try {
+    // Set user context for RLS
+    await neonClient`SELECT set_user_context(${userId})`;
+    
     const { data, error } = await neonClient`
       INSERT INTO user_symptoms (
         user_id, symptom_name, severity, duration, 
@@ -112,6 +115,9 @@ async function getUserSymptoms(userId) {
 // User supplements functions
 async function saveUserSupplement(userId, supplement) {
   try {
+    // Set user context for RLS
+    await neonClient`SELECT set_user_context(${userId})`;
+    
     const { data, error } = await neonClient`
       INSERT INTO user_supplements (
         user_id, supplement_name, dosage, frequency, 
@@ -135,6 +141,9 @@ async function saveUserSupplement(userId, supplement) {
 // User medications functions
 async function saveUserMedication(userId, medication) {
   try {
+    // Set user context for RLS
+    await neonClient`SELECT set_user_context(${userId})`;
+    
     const { data, error } = await neonClient`
       INSERT INTO user_medications (
         user_id, medication_name, strength_value, strength_unit, status, times, 
@@ -190,6 +199,9 @@ async function getUserMedications(userId) {
 // User doctors functions
 async function saveUserDoctor(userId, doctor) {
   try {
+    // Set user context for RLS
+    await neonClient`SELECT set_user_context(${userId})`;
+    
     const { data, error } = await neonClient`
       INSERT INTO user_doctors (
         user_id, doctor_name, specialty, phone_number, 
