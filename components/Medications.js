@@ -146,8 +146,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       const hh = String(date.getHours()).padStart(2,'0');
       const mm = String(date.getMinutes()).padStart(2,'0');
       const t = `${hh}:${mm}`;
-      if (timeTarget==='add') setAddTimes(prev => prev.includes(t)? prev : [...prev, t]);
-      if (timeTarget==='edit') setEditTimes(prev => prev.includes(t)? prev : [...prev, t]);
+      if (timeTarget==='add') {
+        // Always replace existing times with the new selection for simplicity
+        setAddTimes([t]);
+      }
+      if (timeTarget==='edit') {
+        setEditTimes(prev => prev.includes(t)? prev : [...prev, t]);
+      }
     }
     setTimeTarget(null);
   };
@@ -892,28 +897,49 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity
-                  onPress={() => {
-                    setTimeTarget('add');
-                    setShowMedTimePicker(true);
-                  }}
-                  style={{
-                    backgroundColor: getCardBackgroundColor(),
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                >
-                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
-                    {addTimes.length > 0 ? addTimes.join(', ') : S.selectTimes}
-                  </DynamicText>
-                  <DynamicText type="sub">⏰</DynamicText>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setTimeTarget('add');
+                      setShowMedTimePicker(true);
+                    }}
+                    style={{
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 12,
+                      padding: 16,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor(),
+                      flex: 1
+                    }}
+                  >
+                    <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                      {addTimes.length > 0 ? addTimes.join(', ') : S.selectTimes}
+                    </DynamicText>
+                    <DynamicText type="sub">⏰</DynamicText>
+                  </TouchableOpacity>
+                  
+                  {addTimes.length > 0 && (
+                    <TouchableOpacity
+                      onPress={() => setAddTimes([])}
+                      style={{
+                        backgroundColor: '#f87171',
+                        borderRadius: 8,
+                        padding: 8,
+                        width: 32,
+                        height: 32,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <DynamicText type="card" style={{ color: '#fff', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>
+                        ×
+                      </DynamicText>
+                    </TouchableOpacity>
+                  )}
+                </View>
 
                 <TouchableOpacity
                   onPress={() => {
