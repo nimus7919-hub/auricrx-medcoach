@@ -15,11 +15,13 @@ import {
   Modal,
   TextInput,
   Share,
+  PermissionsAndroid,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import RNPrint from 'react-native-print';
 // Simplified AI Health - no external service dependencies
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -999,19 +1001,39 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         </html>
       `;
 
-      // For now, we'll use Share to export as text/HTML
-      // In a full implementation, you'd use a PDF library
-      const shareOptions = {
-        title: 'Health Report',
-        message: `AuricRX Health Report - ${currentDate}\n\nMedications: ${medications.length}\nFasting Profile: ${fastingProfile ? 'Completed' : 'Not completed'}\n\nThis report contains your current medications and fasting profile information.`,
-        url: `data:text/html,${encodeURIComponent(htmlContent)}`
+      // Request storage permission for Android
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'This app needs storage permission to save the PDF file.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission Required', 'Storage permission is required to save the PDF file.');
+          return;
+        }
+      }
+
+      // Use react-native-print to generate PDF
+      const printOptions = {
+        html: htmlContent,
+        fileName: `AuricRX_Health_Report_${currentDate.replace(/\//g, '-')}`,
+        base64: false,
+        width: 595, // A4 width in points
+        height: 842, // A4 height in points
       };
 
-      await Share.share(shareOptions);
+      await RNPrint.print(printOptions);
       
       Alert.alert(
         'Export Successful',
-        'Your health report has been prepared for sharing. You can save it as an HTML file and convert to PDF using your device\'s built-in tools.',
+        'Your health report has been generated and is ready for printing or saving as PDF.',
         [{ text: 'OK' }]
       );
     } catch (error) {
