@@ -277,6 +277,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         quantity: `${addForm.quantityValue.trim()} ${addForm.quantityUnit}`.trim(),
         quantityValue: addForm.quantityValue.trim(),
         quantityUnit: addForm.quantityUnit,
+        remainingQuantity: addForm.quantityValue ? addForm.quantityValue : '0',
         lastRefill: null // No refill yet
       };
       
@@ -674,6 +675,70 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               <DynamicText type="sub" style={{ fontSize: 12, fontFamily: 'Inter_400Regular' }}>
                 {med.dosesLeft} {S.dosesLeft}
               </DynamicText>
+            </View>
+
+            {/* Counter and Took Button Row - Compact Corner */}
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
+                  {parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0')} left
+                </DynamicText>
+                <TextInput
+                  placeholder="0"
+                  placeholderTextColor={getSubTextColor()}
+                  value={med.tookAmount || ''}
+                  onChangeText={(text) => {
+                    setMeds(prev => prev.map(m => 
+                      m.id === med.id 
+                        ? { ...m, tookAmount: text }
+                        : m
+                    ));
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 4,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    width: 30,
+                    height: 20,
+                    fontSize: 10,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_500Medium',
+                    textAlign: 'center'
+                  }}
+                  keyboardType="numeric"
+                  maxLength={3}
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    const amount = parseFloat(med.tookAmount || '0');
+                    if (amount > 0) {
+                      const currentRemaining = parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0');
+                      const newRemaining = Math.max(0, currentRemaining - amount);
+                      setMeds(prev => prev.map(m => 
+                        m.id === med.id 
+                          ? { ...m, remainingQuantity: `${newRemaining}`, tookAmount: '' }
+                          : m
+                      ));
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#2196F3',
+                    borderRadius: 4,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderWidth: 1,
+                    borderColor: '#2196F3',
+                    height: 20
+                  }}
+                >
+                  <DynamicText type="card" style={{ color: '#fff', fontSize: 8, fontFamily: 'Inter_600SemiBold' }}>
+                    Took
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ))}
