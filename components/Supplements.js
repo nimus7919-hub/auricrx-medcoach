@@ -872,7 +872,13 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             </View>
             
             <TouchableOpacity
-              style={[styles.input, { borderColor: theme.chip, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}
+              style={[styles.input, { 
+                backgroundColor: getCardBackgroundColor(), 
+                borderColor: getCardBorderColor(), 
+                flexDirection: 'row', 
+                justifyContent: 'space-between', 
+                alignItems: 'center' 
+              }]}
               onPress={() => {
                 setTimeTarget('edit');
                 setShowSuppTimePicker(true);
