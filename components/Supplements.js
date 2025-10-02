@@ -442,6 +442,36 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                       Edit
                     </DynamicText>
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        S.deleteSupplement || 'Delete Supplement',
+                        S.deleteSupplementConfirm || 'Are you sure you want to delete this supplement?',
+                        [
+                          { text: S.cancel || 'Cancel', style: 'cancel' },
+                          { 
+                            text: S.delete || 'Delete', 
+                            style: 'destructive',
+                            onPress: () => {
+                              setSupplements(prev => prev.filter(s => s.id !== supp.id));
+                            }
+                          }
+                        ]
+                      );
+                    }}
+                    style={{
+                      backgroundColor: '#ff4444',
+                      borderRadius: 8,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderWidth: 1,
+                      borderColor: '#ff4444'
+                    }}
+                  >
+                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
+                      Delete
+                    </DynamicText>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
