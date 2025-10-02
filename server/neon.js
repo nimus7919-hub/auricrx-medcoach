@@ -162,7 +162,7 @@ async function saveUserMedication(userId, medication) {
       // Continue without RLS if the function doesn't exist
     }
     
-    const { data, error } = await neonClient`
+    const result = await neonClient`
       INSERT INTO user_medications (
         user_id, medication_name, strength_value, strength_unit, status, times, 
         start_date, end_date, notes, doses_left, quantity_value, quantity_unit, 
@@ -176,13 +176,14 @@ async function saveUserMedication(userId, medication) {
       ) RETURNING *
     `;
     
-    if (error) {
-      console.error('❌ Database error:', error);
-      throw error;
+    console.log('🔍 Database result:', result);
+    
+    if (!result || result.length === 0) {
+      throw new Error('No data returned from database insert');
     }
     
-    console.log('✅ User medication saved to Neon:', data[0]);
-    return data[0];
+    console.log('✅ User medication saved to Neon:', result[0]);
+    return result[0];
   } catch (error) {
     console.error('❌ Failed to save user medication:', error);
     console.error('❌ Error details:', error.message);
