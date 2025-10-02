@@ -362,8 +362,6 @@ async function saveUserFastingProfile(userId, profileData) {
           max_fasting_hours = ${profileData.maxFastingHours || 16},
           fasting_frequency = ${profileData.fastingFrequency || 'daily'},
           primary_goal = ${profileData.primaryGoal || 'generalHealth'},
-          weight_loss_goal = ${profileData.weightLossGoal || false},
-          metabolic_health_goal = ${profileData.metabolicHealthGoal || false},
           medical_supervision = ${profileData.medicalSupervision || false},
           self_monitoring = ${profileData.selfMonitoring || false},
           wearable_devices = ${profileData.wearableDevices || false},
@@ -419,8 +417,6 @@ async function saveUserFastingProfile(userId, profileData) {
           ${profileData.maxFastingHours || 16},
           ${profileData.fastingFrequency || 'daily'},
           ${profileData.primaryGoal || 'generalHealth'},
-          ${profileData.weightLossGoal || false},
-          ${profileData.metabolicHealthGoal || false},
           ${profileData.medicalSupervision || false},
           ${profileData.selfMonitoring || false},
           ${profileData.wearableDevices || false}
@@ -486,8 +482,6 @@ async function getUserFastingProfile(userId) {
         maxFastingHours: profile.max_fasting_hours || 16,
         fastingFrequency: profile.fasting_frequency || 'daily',
         primaryGoal: profile.primary_goal || 'generalHealth',
-        weightLossGoal: profile.weight_loss_goal || false,
-        metabolicHealthGoal: profile.metabolic_health_goal || false,
         medicalSupervision: profile.medical_supervision || false,
         selfMonitoring: profile.self_monitoring || false,
         wearableDevices: profile.wearable_devices || false

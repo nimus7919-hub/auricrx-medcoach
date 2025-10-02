@@ -403,8 +403,6 @@ export default function FastingProfileScreen({
                 { value: 'spiritual', label: t('spiritual') },
                 { value: 'medical', label: t('medical') }
               ])}
-              {renderSwitch('weightLossGoal', t('weightLossGoal'))}
-              {renderSwitch('metabolicHealthGoal', t('metabolicHealthGoal'))}
             </View>
           ))}
 

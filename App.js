@@ -2085,10 +2085,8 @@ export default function App() {
     maxFastingHours: 16,
     fastingFrequency: 'daily', // 'daily', 'weekly', 'monthly'
     
-    // Goals
-    primaryGoal: 'generalHealth', // 'weightLoss', 'metabolicHealth', 'generalHealth', 'spiritual', 'medical'
-    weightLossGoal: false,
-    metabolicHealthGoal: false,
+        // Goals
+        primaryGoal: 'generalHealth', // 'weightLoss', 'metabolicHealth', 'generalHealth', 'spiritual', 'medical'
     
     // Medical Supervision
     medicalSupervision: false,
