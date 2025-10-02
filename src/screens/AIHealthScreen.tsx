@@ -21,7 +21,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
-import RNPrint from 'react-native-print';
 // Simplified AI Health - no external service dependencies
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -888,7 +887,53 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     try {
       const currentDate = new Date().toLocaleDateString();
       
-      // Generate HTML content for PDF
+      // Prepare data for server-side PDF generation
+      const reportData = {
+        medications: medications,
+        fastingProfile: fastingProfile,
+        fastingAnalysis: fastingAnalysis,
+        generatedDate: currentDate
+      };
+
+      // Call server endpoint to generate PDF
+      const response = await fetch('https://auricrx-medcoach.onrender.com/api/generate-health-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Get the PDF blob
+      const pdfBlob = await response.blob();
+      
+      // Create a temporary URL for the PDF
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      
+      // Share the PDF
+      const shareOptions = {
+        title: 'AuricRX Health Report',
+        message: `AuricRX Health Report - ${currentDate}`,
+        url: pdfUrl,
+        type: 'application/pdf',
+      };
+
+      await Share.share(shareOptions);
+      
+      Alert.alert(
+        'Export Successful',
+        'Your health report has been generated as a PDF and is ready for sharing.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      
+      // Fallback to HTML sharing if server fails
+      const currentDate = new Date().toLocaleDateString();
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -1001,46 +1046,18 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         </html>
       `;
 
-      // Request storage permission for Android
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission',
-            message: 'This app needs storage permission to save the PDF file.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert('Permission Required', 'Storage permission is required to save the PDF file.');
-          return;
-        }
-      }
-
-      // Use react-native-print to generate PDF
-      const printOptions = {
-        html: htmlContent,
-        fileName: `AuricRX_Health_Report_${currentDate.replace(/\//g, '-')}`,
-        base64: false,
-        width: 595, // A4 width in points
-        height: 842, // A4 height in points
+      // Fallback to HTML sharing
+      const shareOptions = {
+        title: 'AuricRX Health Report',
+        message: `AuricRX Health Report - ${currentDate}\n\nThis HTML file can be opened in a browser and saved as PDF.`,
+        url: `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`
       };
 
-      await RNPrint.print(printOptions);
+      await Share.share(shareOptions);
       
       Alert.alert(
         'Export Successful',
-        'Your health report has been generated and is ready for printing or saving as PDF.',
-        [{ text: 'OK' }]
-      );
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      Alert.alert(
-        'Export Error',
-        'There was an error preparing your health report. Please try again.',
+        'Your health report has been prepared for sharing. Open the HTML file in your browser and use "Print to PDF" to create a PDF version.',
         [{ text: 'OK' }]
       );
     }

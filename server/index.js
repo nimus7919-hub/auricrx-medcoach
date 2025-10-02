@@ -1860,6 +1860,140 @@ app.get('/debug/storage', (_req, res) => {
   });
 });
 
+// Health Report PDF Generation Endpoint
+app.post('/api/generate-health-report', async (req, res) => {
+  try {
+    const { medications, fastingProfile, fastingAnalysis, generatedDate } = req.body;
+    
+    // Generate HTML content for PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Health Report - ${generatedDate}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+          .section { margin-bottom: 25px; }
+          .section-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px; border-left: 4px solid #007bff; padding-left: 10px; }
+          .medication-item { background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 5px; }
+          .profile-item { margin: 8px 0; }
+          .label { font-weight: bold; color: #555; }
+          .value { color: #333; }
+          .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 10px 0; }
+          .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin: 10px 0; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>AuricRX Health Report</h1>
+          <p>Generated on ${generatedDate}</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Current Medications</h2>
+          ${medications && medications.length > 0 ? 
+            medications.map(med => `
+              <div class="medication-item">
+                <div class="label">Medication:</div>
+                <div class="value">${med.name || 'N/A'}</div>
+                <div class="label">Dosage:</div>
+                <div class="value">${med.strength || 'N/A'}</div>
+                <div class="label">Quantity:</div>
+                <div class="value">${med.quantity || 'N/A'}</div>
+                <div class="label">Times:</div>
+                <div class="value">${med.times ? med.times.join(', ') : 'N/A'}</div>
+                ${med.notes ? `<div class="label">Notes:</div><div class="value">${med.notes}</div>` : ''}
+              </div>
+            `).join('') : 
+            '<p>No medications recorded</p>'
+          }
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Fasting Profile</h2>
+          ${fastingProfile ? `
+            <div class="profile-item">
+              <span class="label">Weight:</span>
+              <span class="value">${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}</span>
+            </div>
+            <div class="profile-item">
+              <span class="label">Height:</span>
+              <span class="value">${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}</span>
+            </div>
+            <div class="profile-item">
+              <span class="label">Health Conditions:</span>
+              <span class="value">
+                ${[
+                  fastingProfile.diabetes ? 'Diabetes' : '',
+                  fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
+                  fastingProfile.heartConditions ? 'Heart Conditions' : '',
+                  fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
+                  fastingProfile.liverDisease ? 'Liver Disease' : '',
+                  fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
+                  fastingProfile.pregnancy ? 'Pregnancy' : '',
+                  fastingProfile.breastfeeding ? 'Breastfeeding' : '',
+                  fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
+                  ...(fastingProfile.otherHealthConditions || [])
+                ].filter(Boolean).join(', ') || 'None reported'}
+              </span>
+            </div>
+            <div class="profile-item">
+              <span class="label">Activity Level:</span>
+              <span class="value">${fastingProfile.activityLevel || 'Not specified'}</span>
+            </div>
+            <div class="profile-item">
+              <span class="label">Primary Goal:</span>
+              <span class="value">${fastingProfile.primaryGoal || 'Not specified'}</span>
+            </div>
+          ` : '<p>No fasting profile completed</p>'}
+        </div>
+
+        ${fastingAnalysis ? `
+          <div class="section">
+            <h2 class="section-title">Fasting Analysis</h2>
+            <div class="${fastingAnalysis.compatible ? 'success' : 'warning'}">
+              <strong>Status:</strong> ${fastingAnalysis.compatible ? 'Compatible' : 'Needs Review'}<br>
+              <strong>Recommended Fasting Window:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}<br>
+              <strong>Analysis:</strong> ${fastingAnalysis.message}
+            </div>
+            ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
+              <div class="warning">
+                <strong>Important Considerations:</strong>
+                <ul>
+                  ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          <p>This report was generated by AuricRX Medical Coach</p>
+          <p>Please consult with your healthcare provider before making any changes to your medication or fasting routine.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // For now, return the HTML content as a response
+    // In a full implementation, you would use puppeteer or similar to generate actual PDF
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Disposition', `attachment; filename="AuricRX_Health_Report_${generatedDate.replace(/\//g, '-')}.html"`);
+    res.send(htmlContent);
+    
+  } catch (error) {
+    console.error('Error generating health report:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'pdf_generation_failed',
+      message: 'Failed to generate health report PDF' 
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
   console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');
