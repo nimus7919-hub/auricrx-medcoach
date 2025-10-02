@@ -240,7 +240,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       endDate: addForm.endDate,
       notes: addForm.notes ? addForm.notes.trim() : '',
       dosesLeft: addForm.dosesLeft ? addForm.dosesLeft.trim() : '',
-      remainingQuantity: addForm.dosageValue ? `${addForm.dosageValue}${addForm.dosageUnit}` : '0g',
+      remainingQuantity: addForm.dosageValue ? addForm.dosageValue : '0',
       refillSoon: false
     };
     setSupplements(prev => [...prev, newSupp]);
@@ -495,69 +495,64 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                 </View>
               </View>
 
-              {/* Counter and Took Button Row */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                <View style={{ flex: 1 }}>
-                  <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_500Medium', opacity: 0.8 }}>
-                    {supp.remainingQuantity || supp.quantity || 'No quantity set'} left
+              {/* Counter and Took Button Row - Compact Corner */}
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
+                    {parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0')} left
                   </DynamicText>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const amounts = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
-                      Alert.alert(
-                        'Select Amount',
-                        'How much did you take?',
-                        amounts.map(amount => ({
-                          text: `${amount}g`,
-                          onPress: () => {
-                            const currentRemaining = parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0');
-                            const newRemaining = Math.max(0, currentRemaining - amount);
-                            setSupplements(prev => prev.map(s => 
-                              s.id === supp.id 
-                                ? { ...s, remainingQuantity: `${newRemaining}g` }
-                                : s
-                            ));
-                          }
-                        })).concat([{ text: 'Cancel', style: 'cancel' }])
-                      );
-                    }}
-                    style={{
-                      backgroundColor: getCardBackgroundColor(),
-                      borderRadius: 6,
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      borderWidth: 1,
-                      borderColor: getCardBorderColor(),
-                      minWidth: 40
-                    }}
-                  >
-                    <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>
-                      Amount
-                    </DynamicText>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const currentRemaining = parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0');
-                      const defaultAmount = 10; // Default 10g if no amount selected
-                      const newRemaining = Math.max(0, currentRemaining - defaultAmount);
+                  <TextInput
+                    placeholder="0"
+                    placeholderTextColor={getSubTextColor()}
+                    value={supp.tookAmount || ''}
+                    onChangeText={(text) => {
                       setSupplements(prev => prev.map(s => 
                         s.id === supp.id 
-                          ? { ...s, remainingQuantity: `${newRemaining}g` }
+                          ? { ...s, tookAmount: text }
                           : s
                       ));
                     }}
                     style={{
-                      backgroundColor: '#2196F3',
-                      borderRadius: 6,
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
+                      backgroundColor: getCardBackgroundColor(),
+                      borderRadius: 4,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
                       borderWidth: 1,
-                      borderColor: '#2196F3'
+                      borderColor: getCardBorderColor(),
+                      width: 30,
+                      height: 20,
+                      fontSize: 10,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_500Medium',
+                      textAlign: 'center'
+                    }}
+                    keyboardType="numeric"
+                    maxLength={3}
+                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      const amount = parseFloat(supp.tookAmount || '0');
+                      if (amount > 0) {
+                        const currentRemaining = parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0');
+                        const newRemaining = Math.max(0, currentRemaining - amount);
+                        setSupplements(prev => prev.map(s => 
+                          s.id === supp.id 
+                            ? { ...s, remainingQuantity: `${newRemaining}`, tookAmount: '' }
+                            : s
+                        ));
+                      }
+                    }}
+                    style={{
+                      backgroundColor: '#2196F3',
+                      borderRadius: 4,
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      borderWidth: 1,
+                      borderColor: '#2196F3',
+                      height: 20
                     }}
                   >
-                    <DynamicText type="card" style={{ color: '#fff', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>
+                    <DynamicText type="card" style={{ color: '#fff', fontSize: 8, fontFamily: 'Inter_600SemiBold' }}>
                       Took
                     </DynamicText>
                   </TouchableOpacity>
