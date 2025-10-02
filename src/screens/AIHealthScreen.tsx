@@ -436,21 +436,28 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       fontSize: 14,
       fontWeight: '600',
     },
-    fastingButtonContainer: {
-      flexDirection: 'row',
-      gap: 12,
-      marginTop: 16,
+    exportSection: {
+      backgroundColor: getCardBackgroundColor(),
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: getCardBorderColor(),
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
-    fastingExportButton: {
-      flex: 1,
+    exportButton: {
       borderRadius: 8,
       paddingVertical: 12,
       paddingHorizontal: 16,
       alignItems: 'center',
-      borderWidth: 2,
-      backgroundColor: 'transparent',
+      marginTop: 16,
     },
-    fastingExportButtonText: {
+    exportButtonText: {
+      color: '#ffffff',
       fontSize: 14,
       fontWeight: '600',
     },
@@ -1172,25 +1179,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               </View>
             )}
 
-            <View style={dynamicStyles.fastingButtonContainer}>
-              <TouchableOpacity
-                style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: getAccentColor() }]}
-                onPress={analyzeFastingCompatibility}
-              >
-                <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
-                  {fastingAnalysis ? 'Re-analyze Fasting' : 'Analyze Fasting Compatibility'}
-                </DynamicText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[dynamicStyles.fastingExportButton, { borderColor: getAccentColor() }]}
-                onPress={exportToPDF}
-              >
-                <DynamicText type="card" style={[dynamicStyles.fastingExportButtonText, { color: getAccentColor() }]}>
-                  Export Report
-                </DynamicText>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: getAccentColor() }]}
+              onPress={analyzeFastingCompatibility}
+            >
+              <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
+                {fastingAnalysis ? 'Re-analyze Fasting' : 'Analyze Fasting Compatibility'}
+              </DynamicText>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={dynamicStyles.fastingNoProfileCard}>
@@ -1218,6 +1214,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           {t('fastingDisclaimer')}
         </DynamicText>
       </Animated.View>
+
     );
   };
 
@@ -1389,6 +1386,37 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
           {/* Fasting Analytics Section */}
           {renderFastingAnalytics()}
+
+          {/* Export Health Report Section */}
+          <Animated.View style={[
+            dynamicStyles.exportSection,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/AI Health.png')} 
+                style={{ width: 24, height: 24, marginRight: 8 }} 
+                resizeMode="contain" 
+              />
+              <DynamicText type="primary" style={dynamicStyles.sectionTitle}>Export Health Report</DynamicText>
+            </View>
+            
+            <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
+              Generate a comprehensive health report including your medications and fasting profile for sharing with healthcare providers.
+            </DynamicText>
+
+            <TouchableOpacity
+              style={[dynamicStyles.exportButton, { backgroundColor: getAccentColor() }]}
+              onPress={exportToPDF}
+            >
+              <DynamicText type="card" style={dynamicStyles.exportButtonText}>
+                Export Health Report
+              </DynamicText>
+            </TouchableOpacity>
+          </Animated.View>
 
           {/* Health Insights */}
           {renderHealthInsights()}
