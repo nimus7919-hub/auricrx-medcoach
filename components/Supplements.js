@@ -401,156 +401,49 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
               key={supp.id}
               style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginBottom: 12, padding: 16 }]}
             >
-              {/* Top Row - Name and Dosage */}
-              <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                {/* Supplement Name Field */}
-                <View style={{ 
-                  flex: 2, 
-                  backgroundColor: getCardBackgroundColor() + '80', 
-                  borderRadius: 8, 
-                  padding: 12, 
-                  marginRight: 8,
-                  borderWidth: 1,
-                  borderColor: getCardBorderColor()
-                }}>
-                  <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>
+              {/* Header row */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 4 }}>
                     {supp.name}
                   </DynamicText>
                   {supp.brand && (
-                    <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 2 }}>
+                    <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                       {supp.brand}
                     </DynamicText>
                   )}
+                  {supp.dosage && (
+                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 2 }}>
+                      {supp.dosage}
+                    </DynamicText>
+                  )}
+                  {supp.times && (
+                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_400Regular', opacity: 0.6, marginTop: 2 }}>
+                      {supp.times}
+                    </DynamicText>
+                  )}
                 </View>
-                
-                {/* Dosage Field */}
-                <View style={{ 
-                  flex: 1, 
-                  backgroundColor: getCardBackgroundColor() + '80', 
-                  borderRadius: 8, 
-                  padding: 12,
-                  borderWidth: 1,
-                  borderColor: getCardBorderColor()
-                }}>
-                  <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>
-                    {supp.dosage || 'N/A'}
-                  </DynamicText>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setDetailSupp(supp);
+                      setShowStatusSheet(true);
+                    }}
+                    style={{
+                      backgroundColor: theme.accent,
+                      borderRadius: 8,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderWidth: 1,
+                      borderColor: theme.accent
+                    }}
+                  >
+                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
+                      Edit
+                    </DynamicText>
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              {/* Bottom Row - Timing, Status, Refill, Edit */}
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {/* Timing/Instruction Button */}
-                <TouchableOpacity 
-                  style={{ 
-                    flex: 1, 
-                    backgroundColor: getCardBackgroundColor() + '80', 
-                    borderRadius: 8, 
-                    padding: 12,
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                >
-                  <DynamicText type="card" style={{ fontFamily: 'Inter_500Medium', fontSize: 12, textAlign: 'center' }}>
-                    {supp.times && Array.isArray(supp.times) && supp.times.length > 0 ? supp.times.join(', ') : (supp.times && typeof supp.times === 'string' ? supp.times : S.noTimingSet)}
-                  </DynamicText>
-                </TouchableOpacity>
-
-                {/* Status Button */}
-                <TouchableOpacity 
-                  onPress={() => {
-                    setDetailSupp(supp);
-                    setShowStatusSheet(true);
-                  }}
-                  style={{ 
-                    flex: 1, 
-                    backgroundColor: statusObj.color + 'CC', 
-                    borderRadius: 8, 
-                    padding: 12,
-                    borderWidth: 1,
-                    borderColor: statusObj.color
-                  }}
-                >
-                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12, textAlign: 'center' }}>
-                    {statusObj.emoji} {statusObj.label}
-                  </DynamicText>
-                </TouchableOpacity>
-
-                {/* Refill Button */}
-                <TouchableOpacity 
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    setSelectedSupplement(supp);
-                    setShowRefillModal(true);
-                  }}
-                  style={{ 
-                    flex: 1, 
-                    backgroundColor: theme.accent + 'CC', 
-                    borderRadius: 8, 
-                    padding: 12,
-                    borderWidth: 1,
-                    borderColor: theme.accent
-                  }}
-                >
-                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12, textAlign: 'center' }}>
-                    🛒 {S.refill}
-                  </DynamicText>
-                </TouchableOpacity>
-
-                {/* Edit Button */}
-                <TouchableOpacity 
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    setEditingSupplement(supp);
-                    setEditForm({
-                      name: supp.name || '',
-                      brand: supp.brand || '',
-                      dosageValue: supp.dosageValue || supp.dosage?.split(' ')[0] || '',
-                      dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || 'mg',
-                      times: supp.times || '',
-                      status: supp.status || 'taking',
-                      startDate: supp.startDate || '',
-                      endDate: supp.endDate || '',
-                      notes: supp.notes || '',
-                      dosesLeft: supp.dosesLeft || ''
-                    });
-                    setEditTimes(supp.times && typeof supp.times === 'string' ? supp.times.split(', ') : []);
-                    setShowEdit(true);
-                  }}
-                  style={{ 
-                    flex: 1, 
-                    backgroundColor: getCardBackgroundColor() + '80', 
-                    borderRadius: 8, 
-                    padding: 12,
-                    borderWidth: 1,
-                    borderColor: getCardBorderColor()
-                  }}
-                >
-                  <DynamicText type="card" style={{ fontFamily: 'Inter_500Medium', fontSize: 12, textAlign: 'center' }}>
-                    edit
-                  </DynamicText>
-                </TouchableOpacity>
-              </View>
-
-              {/* Utility Tags Row */}
-              {utilityTags.length > 0 && (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
-                  {utilityTags.map((tag, idx) => (
-                    <View key={idx} style={{ 
-                      backgroundColor: tag.color, 
-                      borderRadius: 12, 
-                      paddingHorizontal: 8, 
-                      paddingVertical: 4, 
-                      marginRight: 8, 
-                      marginBottom: 4 
-                    }}>
-                      <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 10 }}>
-                        {tag.emoji} {tag.label}
-                      </DynamicText>
-                    </View>
-                  ))}
-                </View>
-              )}
             </View>
           );
         })}
