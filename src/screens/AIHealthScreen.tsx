@@ -330,6 +330,144 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
       fontSize: 12,
       fontWeight: '500',
     },
+    // Fasting Analytics Dynamic Styles
+    fastingProfileCard: {
+      backgroundColor: getCardBackgroundColor() + '80',
+      borderRadius: 12,
+      padding: 16,
+      marginTop: 12,
+      borderWidth: 1,
+      borderColor: getCardBorderColor(),
+    },
+    fastingProfileHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    fastingProfileTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: getCardTextColor(),
+    },
+    fastingStatusBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    fastingStatusText: {
+      color: '#ffffff',
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    fastingAnalysisResult: {
+      marginBottom: 16,
+    },
+    fastingTimeRecommendation: {
+      backgroundColor: getCardBackgroundColor() + '40',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: getCardBorderColor(),
+    },
+    fastingTimeLabel: {
+      fontSize: 14,
+      opacity: 0.8,
+      marginBottom: 4,
+      color: getCardTextColor(),
+    },
+    fastingTimeValue: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: '#10b981',
+    },
+    fastingMessage: {
+      fontSize: 14,
+      lineHeight: 20,
+      marginBottom: 12,
+      color: getCardTextColor(),
+    },
+    fastingWarnings: {
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      borderRadius: 8,
+      padding: 12,
+      borderLeftWidth: 3,
+      borderLeftColor: '#f59e0b',
+    },
+    fastingWarningsTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 8,
+      color: '#f59e0b',
+    },
+    fastingWarningItem: {
+      fontSize: 13,
+      lineHeight: 18,
+      marginBottom: 4,
+      color: getCardTextColor(),
+    },
+    fastingAnalysisPrompt: {
+      backgroundColor: getCardBackgroundColor() + '40',
+      borderRadius: 8,
+      padding: 16,
+      marginBottom: 16,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: getCardBorderColor(),
+    },
+    fastingAnalysisPromptText: {
+      fontSize: 14,
+      textAlign: 'center',
+      opacity: 0.8,
+      color: getCardTextColor(),
+    },
+    fastingAnalyzeButton: {
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+    },
+    fastingAnalyzeButtonText: {
+      color: '#ffffff',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    fastingNoProfileCard: {
+      backgroundColor: getCardBackgroundColor() + '80',
+      borderRadius: 12,
+      padding: 16,
+      marginTop: 12,
+      borderWidth: 1,
+      borderColor: getCardBorderColor(),
+      alignItems: 'center',
+    },
+    fastingNoProfileTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+      color: getCardTextColor(),
+    },
+    fastingNoProfileDescription: {
+      fontSize: 14,
+      textAlign: 'center',
+      opacity: 0.8,
+      marginBottom: 16,
+      lineHeight: 20,
+      color: getCardTextColor(),
+    },
+    fastingSetupButton: {
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+    },
+    fastingSetupButtonText: {
+      color: '#ffffff',
+      fontSize: 14,
+      fontWeight: '600',
+    },
   });
   
   const dynamicStyles = getDynamicStyles();
@@ -796,6 +934,127 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
     </Animated.View>
   );
 
+  const renderFastingAnalytics = () => {
+    // Check if user has a fasting profile
+    const hasProfile = fastingProfile && (
+      fastingProfile.weight || 
+      fastingProfile.height || 
+      fastingProfile.diabetes || 
+      fastingProfile.heartConditions ||
+      fastingProfile.otherHealthConditions?.length > 0
+    );
+
+    return (
+      <Animated.View 
+        style={[
+          dynamicStyles.sectionCard,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }]
+          }
+        ]}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <Image 
+            source={require('../../assets/dashboard Emojies/AI Health.png')} 
+            style={{ width: 24, height: 24, marginRight: 8 }} 
+            resizeMode="contain" 
+          />
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>⏰ {t('fastingAnalytics')}</DynamicText>
+        </View>
+        
+        <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
+          {t('fastingDescription')}
+        </DynamicText>
+
+        {hasProfile ? (
+          <View style={dynamicStyles.fastingProfileCard}>
+            <View style={dynamicStyles.fastingProfileHeader}>
+              <DynamicText type="card" style={dynamicStyles.fastingProfileTitle}>
+                📊 Your Fasting Profile
+              </DynamicText>
+              <View style={[
+                dynamicStyles.fastingStatusBadge,
+                { backgroundColor: fastingAnalysis?.compatible ? '#10b981' : '#f59e0b' }
+              ]}>
+                <DynamicText type="card" style={dynamicStyles.fastingStatusText}>
+                  {fastingAnalysis ? (fastingAnalysis.compatible ? 'Compatible' : 'Needs Review') : 'Not Analyzed'}
+                </DynamicText>
+              </View>
+            </View>
+
+            {fastingAnalysis ? (
+              <View style={dynamicStyles.fastingAnalysisResult}>
+                <View style={dynamicStyles.fastingTimeRecommendation}>
+                  <DynamicText type="card" style={dynamicStyles.fastingTimeLabel}>Recommended Fasting Window</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.fastingTimeValue}>
+                    {fastingAnalysis.suggestedHours}:{24-fastingAnalysis.suggestedHours}
+                  </DynamicText>
+                </View>
+
+                <DynamicText type="card" style={dynamicStyles.fastingMessage}>
+                  {fastingAnalysis.message}
+                </DynamicText>
+
+                {fastingAnalysis.warnings.length > 0 && (
+                  <View style={dynamicStyles.fastingWarnings}>
+                    <DynamicText type="card" style={dynamicStyles.fastingWarningsTitle}>
+                      ⚠️ Important Considerations:
+                    </DynamicText>
+                    {fastingAnalysis.warnings.map((warning, index) => (
+                      <DynamicText key={index} type="card" style={dynamicStyles.fastingWarningItem}>
+                        • {warning}
+                      </DynamicText>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View style={dynamicStyles.fastingAnalysisPrompt}>
+                <DynamicText type="card" style={dynamicStyles.fastingAnalysisPromptText}>
+                  Tap below to analyze your fasting compatibility based on your profile
+                </DynamicText>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: getAccentColor() }]}
+              onPress={analyzeFastingCompatibility}
+            >
+              <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
+                {fastingAnalysis ? '🔄 Re-analyze Fasting' : '🔍 Analyze Fasting Compatibility'}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={dynamicStyles.fastingNoProfileCard}>
+            <DynamicText type="card" style={dynamicStyles.fastingNoProfileTitle}>
+              📝 Complete Your Fasting Profile
+            </DynamicText>
+            <DynamicText type="card" style={dynamicStyles.fastingNoProfileDescription}>
+              Set up your fasting profile in Settings to get personalized fasting recommendations based on your health conditions, medications, and lifestyle.
+            </DynamicText>
+            <TouchableOpacity
+              style={[dynamicStyles.fastingSetupButton, { backgroundColor: getAccentColor() }]}
+              onPress={() => {
+                // This would navigate to settings - you might want to add a callback prop for this
+                Alert.alert('Setup Required', 'Please go to Settings > Fasting Profile to complete your profile setup.');
+              }}
+            >
+              <DynamicText type="card" style={dynamicStyles.fastingSetupButtonText}>
+                ⚙️ Go to Settings
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
+          {t('fastingDisclaimer')}
+        </DynamicText>
+      </Animated.View>
+    );
+  };
+
   const renderHealthInsights = () => (
     <Animated.View 
       style={[
@@ -961,6 +1220,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
 
           {/* AI Features */}
           {renderAIFeatures()}
+
+          {/* Fasting Analytics Section */}
+          {renderFastingAnalytics()}
 
           {/* Health Insights */}
           {renderHealthInsights()}
@@ -1169,5 +1431,132 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     lineHeight: 22,
+  },
+  // Fasting Analytics Styles
+  fastingProfileCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  fastingProfileHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  fastingProfileTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  fastingStatusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  fastingStatusText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  fastingAnalysisResult: {
+    marginBottom: 16,
+  },
+  fastingTimeRecommendation: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  fastingTimeLabel: {
+    fontSize: 14,
+    opacity: 0.8,
+    marginBottom: 4,
+  },
+  fastingTimeValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#10b981',
+  },
+  fastingMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  fastingWarnings: {
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#f59e0b',
+  },
+  fastingWarningsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#f59e0b',
+  },
+  fastingWarningItem: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  fastingAnalysisPrompt: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  fastingAnalysisPromptText: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+  fastingAnalyzeButton: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  fastingAnalyzeButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  fastingNoProfileCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+  },
+  fastingNoProfileTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  fastingNoProfileDescription: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.8,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  fastingSetupButton: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  fastingSetupButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
