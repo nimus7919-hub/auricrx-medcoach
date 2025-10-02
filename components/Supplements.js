@@ -373,7 +373,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView 
+        style={{ flex: 1 }} 
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
       <View style={{ padding: 16 }}>
         {/* Header with Filter and Add buttons */}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 }}>

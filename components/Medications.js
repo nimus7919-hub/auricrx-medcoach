@@ -542,7 +542,11 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView 
+        contentContainerStyle={{ padding: 16, paddingBottom: 20 }} 
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <TouchableOpacity
             onPress={() => setShowFilterModal(true)}
