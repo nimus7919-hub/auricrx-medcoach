@@ -4997,7 +4997,7 @@ function trimTo(str, n) {
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} /> :
+    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} /> :
         route === 'fasting-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :

@@ -14,6 +14,7 @@ import {
   Dimensions,
   Modal,
   TextInput,
+  Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -28,6 +29,7 @@ interface AIHealthScreenProps {
   theme?: any;
   S?: any;
   fastingProfile?: any;
+  medications?: any[];
 }
 
 
@@ -73,7 +75,7 @@ interface DrugInteraction {
 }
 
 
-export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AIHealthScreenProps) {
+export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [] }: AIHealthScreenProps) {
   console.log('AI Health Screen rendering...');
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
@@ -431,6 +433,24 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
     },
     fastingAnalyzeButtonText: {
       color: '#ffffff',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    fastingButtonContainer: {
+      flexDirection: 'row',
+      gap: 12,
+      marginTop: 16,
+    },
+    fastingExportButton: {
+      flex: 1,
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+      borderWidth: 2,
+      backgroundColor: 'transparent',
+    },
+    fastingExportButtonText: {
       fontSize: 14,
       fontWeight: '600',
     },
@@ -855,6 +875,147 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
     }
   };
 
+  const exportToPDF = async () => {
+    try {
+      const currentDate = new Date().toLocaleDateString();
+      
+      // Generate HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Health Report - ${currentDate}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .section { margin-bottom: 25px; }
+            .section-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px; border-left: 4px solid #007bff; padding-left: 10px; }
+            .medication-item { background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 5px; }
+            .profile-item { margin: 8px 0; }
+            .label { font-weight: bold; color: #555; }
+            .value { color: #333; }
+            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 10px 0; }
+            .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin: 10px 0; }
+            .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>AuricRX Health Report</h1>
+            <p>Generated on ${currentDate}</p>
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">Current Medications</h2>
+            ${medications.length > 0 ? 
+              medications.map(med => `
+                <div class="medication-item">
+                  <div class="label">Medication:</div>
+                  <div class="value">${med.name || 'N/A'}</div>
+                  <div class="label">Dosage:</div>
+                  <div class="value">${med.strength || 'N/A'}</div>
+                  <div class="label">Quantity:</div>
+                  <div class="value">${med.quantity || 'N/A'}</div>
+                  <div class="label">Times:</div>
+                  <div class="value">${med.times ? med.times.join(', ') : 'N/A'}</div>
+                  ${med.notes ? `<div class="label">Notes:</div><div class="value">${med.notes}</div>` : ''}
+                </div>
+              `).join('') : 
+              '<p>No medications recorded</p>'
+            }
+          </div>
+
+          <div class="section">
+            <h2 class="section-title">Fasting Profile</h2>
+            ${fastingProfile ? `
+              <div class="profile-item">
+                <span class="label">Weight:</span>
+                <span class="value">${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Height:</span>
+                <span class="value">${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Health Conditions:</span>
+                <span class="value">
+                  ${[
+                    fastingProfile.diabetes ? 'Diabetes' : '',
+                    fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
+                    fastingProfile.heartConditions ? 'Heart Conditions' : '',
+                    fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
+                    fastingProfile.liverDisease ? 'Liver Disease' : '',
+                    fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
+                    fastingProfile.pregnancy ? 'Pregnancy' : '',
+                    fastingProfile.breastfeeding ? 'Breastfeeding' : '',
+                    fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
+                    ...(fastingProfile.otherHealthConditions || [])
+                  ].filter(Boolean).join(', ') || 'None reported'}
+                </span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Activity Level:</span>
+                <span class="value">${fastingProfile.activityLevel || 'Not specified'}</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Primary Goal:</span>
+                <span class="value">${fastingProfile.primaryGoal || 'Not specified'}</span>
+              </div>
+            ` : '<p>No fasting profile completed</p>'}
+          </div>
+
+          ${fastingAnalysis ? `
+            <div class="section">
+              <h2 class="section-title">Fasting Analysis</h2>
+              <div class="${fastingAnalysis.compatible ? 'success' : 'warning'}">
+                <strong>Status:</strong> ${fastingAnalysis.compatible ? 'Compatible' : 'Needs Review'}<br>
+                <strong>Recommended Fasting Window:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}<br>
+                <strong>Analysis:</strong> ${fastingAnalysis.message}
+              </div>
+              ${fastingAnalysis.warnings.length > 0 ? `
+                <div class="warning">
+                  <strong>Important Considerations:</strong>
+                  <ul>
+                    ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
+          <div class="footer">
+            <p>This report was generated by AuricRX Medical Coach</p>
+            <p>Please consult with your healthcare provider before making any changes to your medication or fasting routine.</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // For now, we'll use Share to export as text/HTML
+      // In a full implementation, you'd use a PDF library
+      const shareOptions = {
+        title: 'Health Report',
+        message: `AuricRX Health Report - ${currentDate}\n\nMedications: ${medications.length}\nFasting Profile: ${fastingProfile ? 'Completed' : 'Not completed'}\n\nThis report contains your current medications and fasting profile information.`,
+        url: `data:text/html,${encodeURIComponent(htmlContent)}`
+      };
+
+      await Share.share(shareOptions);
+      
+      Alert.alert(
+        'Export Successful',
+        'Your health report has been prepared for sharing. You can save it as an HTML file and convert to PDF using your device\'s built-in tools.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      Alert.alert(
+        'Export Error',
+        'There was an error preparing your health report. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -1011,14 +1172,25 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile }: AI
               </View>
             )}
 
-            <TouchableOpacity
-              style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: getAccentColor() }]}
-              onPress={analyzeFastingCompatibility}
-            >
-              <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
-                {fastingAnalysis ? 'Re-analyze Fasting' : 'Analyze Fasting Compatibility'}
-              </DynamicText>
-            </TouchableOpacity>
+            <View style={dynamicStyles.fastingButtonContainer}>
+              <TouchableOpacity
+                style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: getAccentColor() }]}
+                onPress={analyzeFastingCompatibility}
+              >
+                <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
+                  {fastingAnalysis ? 'Re-analyze Fasting' : 'Analyze Fasting Compatibility'}
+                </DynamicText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[dynamicStyles.fastingExportButton, { borderColor: getAccentColor() }]}
+                onPress={exportToPDF}
+              >
+                <DynamicText type="card" style={[dynamicStyles.fastingExportButtonText, { color: getAccentColor() }]}>
+                  Export Report
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <View style={dynamicStyles.fastingNoProfileCard}>
