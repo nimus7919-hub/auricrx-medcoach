@@ -672,9 +672,6 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               <DynamicText type="sub" style={{ fontSize: 12, fontFamily: 'Inter_400Regular' }}>
                 {med.times.join(', ')}
               </DynamicText>
-              <DynamicText type="sub" style={{ fontSize: 12, fontFamily: 'Inter_400Regular' }}>
-                {med.dosesLeft} {S.dosesLeft}
-              </DynamicText>
             </View>
 
             {/* Counter and Took Button Row - Compact Corner */}
