@@ -997,7 +997,7 @@ const DosageUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, t
       >
         <View style={{
           position: 'absolute',
-          top: buttonLayout ? buttonLayout.y + buttonLayout.height - 22 : 200,
+          top: buttonLayout ? buttonLayout.y + buttonLayout.height + 10 : 200,
           left: buttonLayout ? buttonLayout.x : 60,
           width: buttonLayout ? buttonLayout.width : 200,
           backgroundColor: getCardBackgroundColor(),
@@ -1011,7 +1011,7 @@ const DosageUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, t
           shadowOpacity: 0.6,
           shadowRadius: 8,
         }}>
-          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ maxHeight: 120 }} showsVerticalScrollIndicator={false}>
             {units.map((unit, index) => (
               <TouchableOpacity
                 key={index}
