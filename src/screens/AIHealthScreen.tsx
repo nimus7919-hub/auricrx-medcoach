@@ -898,7 +898,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       console.log('📝 Creating HTML content for PDF...');
       
       // Get AuricRX logo as base64 (using Image.resolveAssetSource for proper path)
-      const logoSource = require('../../assets/auricrx-logo.png');
+      const logoSource = require('../../assets/sign in logo.png');
       const logoUri = Image.resolveAssetSource(logoSource).uri;
       console.log('🔍 Logo URI resolved:', logoUri);
       
