@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { PDFDocument, rgb, StandardFonts } from 'react-native-pdf-lib';
 // Simplified AI Health - no external service dependencies
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -887,198 +888,178 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     try {
       const currentDate = new Date().toLocaleDateString();
       
-      // Generate HTML content for the report
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Health Report - ${currentDate}</title>
-          <style>
-            @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
-            }
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 20px; 
-              line-height: 1.6; 
-              color: #333;
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 30px; 
-              border-bottom: 2px solid #333; 
-              padding-bottom: 20px; 
-            }
-            .section { margin-bottom: 25px; }
-            .section-title { 
-              font-size: 18px; 
-              font-weight: bold; 
-              color: #333; 
-              margin-bottom: 15px; 
-              border-left: 4px solid #007bff; 
-              padding-left: 10px; 
-            }
-            .medication-item { 
-              background: #f8f9fa; 
-              padding: 10px; 
-              margin: 5px 0; 
-              border-radius: 5px; 
-              border: 1px solid #e9ecef;
-            }
-            .profile-item { margin: 8px 0; }
-            .label { font-weight: bold; color: #555; }
-            .value { color: #333; }
-            .warning { 
-              background: #fff3cd; 
-              border: 1px solid #ffeaa7; 
-              padding: 10px; 
-              border-radius: 5px; 
-              margin: 10px 0; 
-            }
-            .success { 
-              background: #d4edda; 
-              border: 1px solid #c3e6cb; 
-              padding: 10px; 
-              border-radius: 5px; 
-              margin: 10px 0; 
-            }
-            .footer { 
-              margin-top: 30px; 
-              text-align: center; 
-              font-size: 12px; 
-              color: #666; 
-              border-top: 1px solid #ddd; 
-              padding-top: 20px; 
-            }
-            .print-instructions {
-              background: #e3f2fd;
-              border: 1px solid #2196f3;
-              padding: 15px;
-              border-radius: 5px;
-              margin-bottom: 20px;
-              text-align: center;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="print-instructions no-print">
-            <h3>📄 How to Save as PDF:</h3>
-            <p><strong>Desktop:</strong> Press Ctrl+P (Windows) or Cmd+P (Mac), then select "Save as PDF"</p>
-            <p><strong>Mobile:</strong> Use your browser's "Share" or "Print" option and select "Save as PDF"</p>
-          </div>
+      // Request storage permission for Android
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'This app needs storage permission to save the PDF file.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          }
+        );
+        
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission Required', 'Storage permission is required to save the PDF file.');
+          return;
+        }
+      }
 
-          <div class="header">
-            <h1>AuricRX Health Report</h1>
-            <p>Generated on ${currentDate}</p>
-          </div>
-
-          <div class="section">
-            <h2 class="section-title">Current Medications</h2>
-            ${medications.length > 0 ? 
-              medications.map(med => `
-                <div class="medication-item">
-                  <div class="label">Medication:</div>
-                  <div class="value">${med.name || 'N/A'}</div>
-                  <div class="label">Dosage:</div>
-                  <div class="value">${med.strength || 'N/A'}</div>
-                  <div class="label">Quantity:</div>
-                  <div class="value">${med.quantity || 'N/A'}</div>
-                  <div class="label">Times:</div>
-                  <div class="value">${med.times ? med.times.join(', ') : 'N/A'}</div>
-                  ${med.notes ? `<div class="label">Notes:</div><div class="value">${med.notes}</div>` : ''}
-                </div>
-              `).join('') : 
-              '<p>No medications recorded</p>'
-            }
-          </div>
-
-          <div class="section">
-            <h2 class="section-title">Fasting Profile</h2>
-            ${fastingProfile ? `
-              <div class="profile-item">
-                <span class="label">Weight:</span>
-                <span class="value">${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}</span>
-              </div>
-              <div class="profile-item">
-                <span class="label">Height:</span>
-                <span class="value">${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}</span>
-              </div>
-              <div class="profile-item">
-                <span class="label">Health Conditions:</span>
-                <span class="value">
-                  ${[
-                    fastingProfile.diabetes ? 'Diabetes' : '',
-                    fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
-                    fastingProfile.heartConditions ? 'Heart Conditions' : '',
-                    fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
-                    fastingProfile.liverDisease ? 'Liver Disease' : '',
-                    fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
-                    fastingProfile.pregnancy ? 'Pregnancy' : '',
-                    fastingProfile.breastfeeding ? 'Breastfeeding' : '',
-                    fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
-                    ...(fastingProfile.otherHealthConditions || [])
-                  ].filter(Boolean).join(', ') || 'None reported'}
-                </span>
-              </div>
-              <div class="profile-item">
-                <span class="label">Activity Level:</span>
-                <span class="value">${fastingProfile.activityLevel || 'Not specified'}</span>
-              </div>
-              <div class="profile-item">
-                <span class="label">Primary Goal:</span>
-                <span class="value">${fastingProfile.primaryGoal || 'Not specified'}</span>
-              </div>
-            ` : '<p>No fasting profile completed</p>'}
-          </div>
-
-          ${fastingAnalysis ? `
-            <div class="section">
-              <h2 class="section-title">Fasting Analysis</h2>
-              <div class="${fastingAnalysis.compatible ? 'success' : 'warning'}">
-                <strong>Status:</strong> ${fastingAnalysis.compatible ? 'Compatible' : 'Needs Review'}<br>
-                <strong>Recommended Fasting Window:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}<br>
-                <strong>Analysis:</strong> ${fastingAnalysis.message}
-              </div>
-              ${fastingAnalysis.warnings.length > 0 ? `
-                <div class="warning">
-                  <strong>Important Considerations:</strong>
-                  <ul>
-                    ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
-                  </ul>
-                </div>
-              ` : ''}
-            </div>
-          ` : ''}
-
-          <div class="footer">
-            <p>This report was generated by AuricRX Medical Coach</p>
-            <p>Please consult with your healthcare provider before making any changes to your medication or fasting routine.</p>
-          </div>
-        </body>
-        </html>
-      `;
-
-      // Share the HTML content with clear instructions
+      // Create a new PDF document
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage([595, 842]); // A4 size
+      const { width, height } = page.getSize();
+      
+      // Load fonts
+      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      let yPosition = height - 50;
+      const margin = 50;
+      const lineHeight = 20;
+      
+      // Helper function to add text with word wrapping
+      const addText = (text: string, x: number, y: number, fontSize: number, font: any, color = rgb(0, 0, 0)) => {
+        const maxWidth = width - 2 * margin;
+        const words = text.split(' ');
+        let line = '';
+        let currentY = y;
+        
+        for (const word of words) {
+          const testLine = line + word + ' ';
+          const textWidth = font.widthOfTextAtSize(testLine, fontSize);
+          
+          if (textWidth > maxWidth && line !== '') {
+            page.drawText(line, { x, y: currentY, size: fontSize, font, color });
+            line = word + ' ';
+            currentY -= lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        
+        if (line) {
+          page.drawText(line, { x, y: currentY, size: fontSize, font, color });
+        }
+        
+        return currentY - lineHeight;
+      };
+      
+      // Title
+      yPosition = addText('AuricRX Health Report', margin, yPosition, 24, helveticaBold);
+      yPosition = addText(`Generated on ${currentDate}`, margin, yPosition, 12, helvetica);
+      yPosition -= 20;
+      
+      // Draw line
+      page.drawLine({
+        start: { x: margin, y: yPosition },
+        end: { x: width - margin, y: yPosition },
+        thickness: 2,
+        color: rgb(0, 0, 0),
+      });
+      yPosition -= 30;
+      
+      // Medications section
+      yPosition = addText('Current Medications', margin, yPosition, 18, helveticaBold);
+      yPosition -= 10;
+      
+      if (medications.length > 0) {
+        medications.forEach((med, index) => {
+          yPosition = addText(`${index + 1}. ${med.name || 'N/A'}`, margin + 20, yPosition, 14, helveticaBold);
+          yPosition = addText(`   Dosage: ${med.strength || 'N/A'}`, margin + 20, yPosition, 12, helvetica);
+          yPosition = addText(`   Quantity: ${med.quantity || 'N/A'}`, margin + 20, yPosition, 12, helvetica);
+          yPosition = addText(`   Times: ${med.times ? med.times.join(', ') : 'N/A'}`, margin + 20, yPosition, 12, helvetica);
+          if (med.notes) {
+            yPosition = addText(`   Notes: ${med.notes}`, margin + 20, yPosition, 12, helvetica);
+          }
+          yPosition -= 10;
+        });
+      } else {
+        yPosition = addText('No medications recorded', margin + 20, yPosition, 12, helvetica);
+        yPosition -= 10;
+      }
+      
+      yPosition -= 20;
+      
+      // Fasting Profile section
+      yPosition = addText('Fasting Profile', margin, yPosition, 18, helveticaBold);
+      yPosition -= 10;
+      
+      if (fastingProfile) {
+        yPosition = addText(`Weight: ${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}`, margin + 20, yPosition, 12, helvetica);
+        yPosition = addText(`Height: ${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}`, margin + 20, yPosition, 12, helvetica);
+        
+        const healthConditions = [
+          fastingProfile.diabetes ? 'Diabetes' : '',
+          fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
+          fastingProfile.heartConditions ? 'Heart Conditions' : '',
+          fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
+          fastingProfile.liverDisease ? 'Liver Disease' : '',
+          fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
+          fastingProfile.pregnancy ? 'Pregnancy' : '',
+          fastingProfile.breastfeeding ? 'Breastfeeding' : '',
+          fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
+          ...(fastingProfile.otherHealthConditions || [])
+        ].filter(Boolean);
+        
+        yPosition = addText(`Health Conditions: ${healthConditions.length > 0 ? healthConditions.join(', ') : 'None reported'}`, margin + 20, yPosition, 12, helvetica);
+        yPosition = addText(`Activity Level: ${fastingProfile.activityLevel || 'Not specified'}`, margin + 20, yPosition, 12, helvetica);
+        yPosition = addText(`Primary Goal: ${fastingProfile.primaryGoal || 'Not specified'}`, margin + 20, yPosition, 12, helvetica);
+      } else {
+        yPosition = addText('No fasting profile completed', margin + 20, yPosition, 12, helvetica);
+      }
+      
+      yPosition -= 20;
+      
+      // Fasting Analysis section
+      if (fastingAnalysis) {
+        yPosition = addText('Fasting Analysis', margin, yPosition, 18, helveticaBold);
+        yPosition -= 10;
+        
+        yPosition = addText(`Status: ${fastingAnalysis.compatible ? 'Compatible' : 'Needs Review'}`, margin + 20, yPosition, 12, helvetica);
+        yPosition = addText(`Recommended Fasting Window: ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}`, margin + 20, yPosition, 12, helvetica);
+        yPosition = addText(`Analysis: ${fastingAnalysis.message}`, margin + 20, yPosition, 12, helvetica);
+        
+        if (fastingAnalysis.warnings.length > 0) {
+          yPosition = addText('Important Considerations:', margin + 20, yPosition, 12, helveticaBold);
+          fastingAnalysis.warnings.forEach(warning => {
+            yPosition = addText(`• ${warning}`, margin + 40, yPosition, 12, helvetica);
+          });
+        }
+        
+        yPosition -= 20;
+      }
+      
+      // Footer
+      yPosition = addText('This report was generated by AuricRX Medical Coach', margin, yPosition, 10, helvetica);
+      yPosition = addText('Please consult with your healthcare provider before making any changes to your medication or fasting routine.', margin, yPosition, 10, helvetica);
+      
+      // Save the PDF
+      const pdfBytes = await pdfDoc.save();
+      const base64 = Buffer.from(pdfBytes).toString('base64');
+      
+      // Share the PDF
       const shareOptions = {
         title: 'AuricRX Health Report',
-        message: `AuricRX Health Report - ${currentDate}\n\nOpen this file in your browser and use "Print to PDF" to save as PDF.`,
-        url: `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`
+        message: `AuricRX Health Report - ${currentDate}`,
+        url: `data:application/pdf;base64,${base64}`,
+        type: 'application/pdf',
       };
 
       await Share.share(shareOptions);
       
       Alert.alert(
         'Export Successful',
-        'Your health report has been prepared for sharing. Open the HTML file in your browser and use "Print to PDF" to create a PDF version.\n\nInstructions:\n• Desktop: Ctrl+P (Windows) or Cmd+P (Mac)\n• Mobile: Use browser\'s Share/Print option',
+        'Your health report has been generated as a PDF and is ready for sharing.',
         [{ text: 'OK' }]
       );
     } catch (error) {
       console.error('Error exporting PDF:', error);
       Alert.alert(
         'Export Error',
-        'There was an error preparing your health report. Please try again.',
+        'There was an error generating your health report PDF. Please try again.',
         [{ text: 'OK' }]
       );
     }
