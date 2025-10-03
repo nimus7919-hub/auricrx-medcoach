@@ -55,6 +55,7 @@
   },
   "healthProfile": {
     "title": "健康档案",
+    "settings": "健康档案设置",
     "description": "设置您的健康档案以获得个性化建议",
     "basicInfo": "基本信息",
     "weight": "体重",

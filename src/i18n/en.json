@@ -55,6 +55,7 @@
   },
   "healthProfile": {
     "title": "Health Profile",
+    "settings": "Health Profile Settings",
     "description": "Set up your health profile for personalized recommendations",
     "basicInfo": "Basic Information",
     "weight": "Weight",

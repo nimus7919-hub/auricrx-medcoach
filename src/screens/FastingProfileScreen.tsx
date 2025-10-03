@@ -67,7 +67,7 @@ export default function FastingProfileScreen({
     
     Alert.alert(
       t('profileSaved'),
-      t('fastingProfileSavedMessage'),
+      t('healthProfileSavedMessage'),
       [{ text: t('ok') }]
     );
     onClose();
@@ -223,7 +223,7 @@ export default function FastingProfileScreen({
             />
           </TouchableOpacity>
           <DynamicText type="primary" style={[styles.title, { color: getCardTextColor() }]}>
-            {t('fastingProfile')}
+            {t('healthProfile.title')}
           </DynamicText>
         </View>
 

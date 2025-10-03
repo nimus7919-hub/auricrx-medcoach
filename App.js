@@ -3468,6 +3468,7 @@ const S = {
   
   // Health Profile
   healthProfile: t('healthProfile.title'),
+  healthProfileSettings: t('healthProfile.settings'),
   healthProfileDescription: t('healthProfile.description'),
   basicInfo: t('healthProfile.basicInfo'),
   weight: t('healthProfile.weight'),
@@ -4700,7 +4701,7 @@ const handleAskMedicalAI = async () => {
                 fontSize: 15,
                 textAlign: 'center',
                 marginBottom: 4
-              }}>Health Profile Settings</DynamicText>
+              }}>{S.healthProfileSettings}</DynamicText>
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_400Regular', 
                 fontSize: 12, 

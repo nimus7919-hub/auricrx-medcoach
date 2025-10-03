@@ -55,6 +55,7 @@
   },
   "healthProfile": {
     "title": "Perfil de Salud",
+    "settings": "Configuración del Perfil de Salud",
     "description": "Configura tu perfil de salud para recomendaciones personalizadas",
     "basicInfo": "Información Básica",
     "weight": "Peso",
