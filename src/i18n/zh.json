@@ -42,6 +42,7 @@
     "listMedications": "列出您的药物",
     "enterMedicationsPlaceholder": "输入您的药物，用逗号分隔（例如：阿司匹林、二甲双胍、赖诺普利）",
     "check": "检查",
+    "healthInsights": "健康洞察",
     "aiGeneratedInsights": "基于您的健康数据生成的AI洞察",
     "noHealthInsights": "暂无健康洞察",
     "recentAnalyses": "最近分析",

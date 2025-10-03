@@ -42,6 +42,7 @@
     "listMedications": "List your medications",
     "enterMedicationsPlaceholder": "Enter your medications, separated by commas (e.g., aspirin, metformin, lisinopril)",
     "check": "Check",
+    "healthInsights": "Health Insights",
     "aiGeneratedInsights": "AI-generated insights based on your health data",
     "noHealthInsights": "No health insights available yet",
     "recentAnalyses": "Recent Analyses",

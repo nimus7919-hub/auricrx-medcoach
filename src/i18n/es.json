@@ -42,6 +42,7 @@
     "listMedications": "Lista tus medicamentos",
     "enterMedicationsPlaceholder": "Ingresa tus medicamentos, separados por comas (ej., aspirina, metformina, lisinopril)",
     "check": "Verificar",
+    "healthInsights": "Insights de Salud",
     "aiGeneratedInsights": "Insights generados por IA basados en tus datos de salud",
     "noHealthInsights": "Aún no hay insights de salud disponibles",
     "recentAnalyses": "Análisis Recientes",
