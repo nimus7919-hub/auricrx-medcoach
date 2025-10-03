@@ -3470,6 +3470,18 @@ const S = {
   healthProfile: t('healthProfile.title'),
   healthProfileSettings: t('healthProfile.settings'),
   healthProfileDescription: t('healthProfile.description'),
+  
+  // Fasting Profile
+  yourFastingProfile: t('yourFastingProfile'),
+  needsReview: t('needsReview'),
+  compatible: t('compatible'),
+  notAnalyzed: t('notAnalyzed'),
+  recommendedFastingWindow: t('recommendedFastingWindow'),
+  importantConsiderations: t('importantConsiderations'),
+  reAnalyzeFasting: t('reAnalyzeFasting'),
+  analyzeFastingCompatibility: t('analyzeFastingCompatibility'),
+  completeYourFastingProfile: t('completeYourFastingProfile'),
+  exportHealthReport: t('exportHealthReport'),
   basicInfo: t('healthProfile.basicInfo'),
   weight: t('healthProfile.weight'),
   height: t('healthProfile.height'),
