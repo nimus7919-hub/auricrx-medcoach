@@ -900,15 +900,17 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       // Get AuricRX logo as base64 (same approach as ID system)
       let logoBase64 = null;
       try {
-        const logoUri = require('../../assets/auricrx-logo.png');
+        const logoUri = require('../../assets/sign in logo.png');
         logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
         console.log('✅ Logo loaded successfully');
         console.log('📏 Logo base64 length:', logoBase64.length);
         console.log('🔍 Logo base64 preview:', logoBase64.substring(0, 50) + '...');
+        console.log('🔍 Logo base64 ends with:', logoBase64.substring(logoBase64.length - 20));
       } catch (logoError) {
-        console.log('⚠️ Could not load logo, using text fallback:', logoError);
+        console.log('⚠️ Could not load logo:', logoError);
+        console.log('⚠️ Logo error details:', JSON.stringify(logoError, null, 2));
       }
       
       // Create HTML content for PDF (similar to DocumentsScreen)
@@ -1123,6 +1125,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       `;
 
       console.log('📄 HTML content created, length:', html.length);
+      console.log('🔍 HTML contains logo:', html.includes('data:image/png;base64'));
+      console.log('🔍 Logo in HTML preview:', html.substring(html.indexOf('data:image/png;base64'), html.indexOf('data:image/png;base64') + 100));
       
       // Generate PDF using expo-print (same as DocumentsScreen)
       console.log('🖨️ Generating PDF with expo-print...');
