@@ -899,9 +899,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       // Get AuricRX logo as base64 (EXACT same approach as ID system)
       const logoUri = require('../../assets/auricrx-logo.png');
+      console.log('🔍 Logo URI type:', typeof logoUri);
+      console.log('🔍 Logo URI value:', logoUri);
+      
       const logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
+      console.log('✅ Logo loaded successfully, base64 length:', logoBase64.length);
       
       // Create HTML content for PDF (similar to DocumentsScreen)
       const medicationsHtml = medications && medications.length > 0 ? 
