@@ -897,21 +897,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       console.log('📝 Creating HTML content for PDF...');
       
-      // Get AuricRX logo as base64 (same approach as ID system)
-      let logoBase64 = null;
-      try {
-        const logoUri = require('../../assets/sign in logo.png');
-        logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        console.log('✅ Logo loaded successfully');
-        console.log('📏 Logo base64 length:', logoBase64.length);
-        console.log('🔍 Logo base64 preview:', logoBase64.substring(0, 50) + '...');
-        console.log('🔍 Logo base64 ends with:', logoBase64.substring(logoBase64.length - 20));
-      } catch (logoError) {
-        console.log('⚠️ Could not load logo:', logoError);
-        console.log('⚠️ Logo error details:', JSON.stringify(logoError, null, 2));
-      }
+      // Get AuricRX logo as base64 (EXACT same approach as ID system)
+      const logoUri = require('../../assets/auricrx-logo.png');
+      const logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
       
       // Create HTML content for PDF (similar to DocumentsScreen)
       const medicationsHtml = medications && medications.length > 0 ? 
@@ -1098,7 +1088,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           </head>
           <body>
             <div class="header">
-              ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">` : ''}
+              <img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">
               <h1 class="title">AuricRX Health Report</h1>
               <p class="subtitle">Generated on ${currentDate}</p>
             </div>
