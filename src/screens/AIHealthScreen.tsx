@@ -897,6 +897,18 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       console.log('📝 Creating HTML content for PDF...');
       
+      // Get AuricRX logo as base64 (same approach as ID system)
+      let logoBase64 = null;
+      try {
+        const logoUri = require('../../assets/sign in logo.png');
+        logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        console.log('✅ Logo loaded successfully');
+      } catch (logoError) {
+        console.log('⚠️ Could not load logo, using text fallback:', logoError);
+      }
+      
       // Create HTML content for PDF (similar to DocumentsScreen)
       const medicationsHtml = medications && medications.length > 0 ? 
         medications.map((med, index) => `
@@ -1004,6 +1016,12 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               .logo-section {
                 margin-bottom: 20px;
               }
+              .logo-image {
+                max-width: 200px;
+                height: auto;
+                display: block;
+                margin: 0 auto;
+              }
               .logo-text {
                 font-size: 36px;
                 font-weight: bold;
@@ -1094,8 +1112,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <body>
             <div class="header">
               <div class="logo-section">
-                <div class="logo-text">AURICRX</div>
-                <div class="logo-subtitle">Medical Coach</div>
+                ${logoBase64 ? 
+                  `<img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo-image" />` :
+                  `<div class="logo-text">AURICRX</div><div class="logo-subtitle">Medical Coach</div>`
+                }
               </div>
               <div class="document-title">Health Report</div>
               <div class="generation-info">
