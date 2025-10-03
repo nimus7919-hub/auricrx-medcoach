@@ -930,9 +930,36 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             ...(fastingProfile.otherHealthConditions || [])
           ].filter(Boolean).join(', ') || 'None reported'}</p>
           
-          <h3>Lifestyle</h3>
+          <h3>Nutritional Status & Body Composition</h3>
+          <p><strong>Body Fat Level:</strong> ${fastingProfile.bodyFatLevel || 'Not specified'}</p>
+          <p><strong>Muscle Mass:</strong> ${fastingProfile.muscleMass || 'Not specified'}</p>
+          <p><strong>Micronutrient Levels:</strong> ${fastingProfile.micronutrientLevels || 'Not specified'}</p>
+          <p><strong>Hydration Level:</strong> ${fastingProfile.hydrationLevel || 'Not specified'}</p>
+          
+          <h3>Mental Health & Cognitive Demands</h3>
+          <p><strong>High-Stress Environment:</strong> ${fastingProfile.highStressEnvironment ? 'Yes' : 'No'}</p>
+          <p><strong>Intensive Mental Tasks:</strong> ${fastingProfile.intensiveMentalTasks ? 'Yes' : 'No'}</p>
+          <p><strong>Anxiety:</strong> ${fastingProfile.anxiety ? 'Yes' : 'No'}</p>
+          <p><strong>Depression:</strong> ${fastingProfile.depression ? 'Yes' : 'No'}</p>
+          
+          <h3>Lifestyle & Activity Level</h3>
           <p><strong>Activity Level:</strong> ${fastingProfile.activityLevel || 'Not specified'}</p>
+          <p><strong>Physical Labor Job:</strong> ${fastingProfile.physicalLabor ? 'Yes' : 'No'}</p>
+          <p><strong>Long Work Shifts:</strong> ${fastingProfile.longShifts ? 'Yes' : 'No'}</p>
+          <p><strong>Sleep Quality:</strong> ${fastingProfile.sleepQuality || 'Not specified'}</p>
+          
+          <h3>Fasting Protocol Preferences</h3>
+          <p><strong>Preferred Fasting Type:</strong> ${fastingProfile.preferredFastingType || 'Not specified'}</p>
+          <p><strong>Maximum Fasting Hours:</strong> ${fastingProfile.maxFastingHours || 'Not specified'}</p>
+          <p><strong>Fasting Frequency:</strong> ${fastingProfile.fastingFrequency || 'Not specified'}</p>
+          
+          <h3>Goals</h3>
           <p><strong>Primary Goal:</strong> ${fastingProfile.primaryGoal || 'Not specified'}</p>
+          
+          <h3>Medical Supervision & Monitoring</h3>
+          <p><strong>Medical Supervision:</strong> ${fastingProfile.medicalSupervision ? 'Yes' : 'No'}</p>
+          <p><strong>Self-Monitoring:</strong> ${fastingProfile.selfMonitoring ? 'Yes' : 'No'}</p>
+          <p><strong>Wearable Devices:</strong> ${fastingProfile.wearableDevices ? 'Yes' : 'No'}</p>
         </div>
       ` : '<p>No fasting profile completed</p>';
 

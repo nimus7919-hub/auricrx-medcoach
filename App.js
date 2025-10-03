@@ -2063,10 +2063,10 @@ export default function App() {
     customHealthCondition: '', // Current input for new health condition
     
     // Nutritional Status & Body Composition
-    bodyFatLevel: 'normal', // 'low', 'normal', 'high'
-    muscleMass: 'normal', // 'low', 'normal', 'high'
-    micronutrientLevels: 'normal', // 'low', 'normal', 'high'
-    hydrationLevel: 'good', // 'poor', 'good', 'excellent'
+    bodyFatLevel: '', // 'low', 'normal', 'high'
+    muscleMass: '', // 'low', 'normal', 'high'
+    micronutrientLevels: '', // 'low', 'normal', 'high'
+    hydrationLevel: '', // 'poor', 'fair', 'good', 'excellent'
     
     // Mental Health & Cognitive Demands
     highStressEnvironment: false,
@@ -2075,18 +2075,18 @@ export default function App() {
     depression: false,
     
     // Lifestyle & Activity Level
-    activityLevel: 'moderate', // 'sedentary', 'light', 'moderate', 'high', 'athlete'
+    activityLevel: '', // 'sedentary', 'light', 'moderate', 'high', 'athlete'
     physicalLabor: false,
     longShifts: false,
-    sleepQuality: 'good', // 'poor', 'fair', 'good', 'excellent'
+    sleepQuality: '', // 'poor', 'fair', 'good', 'excellent'
     
     // Fasting Protocol Preferences
-    preferredFastingType: 'timeRestricted', // 'timeRestricted', 'alternateDay', 'extended', 'custom'
+    preferredFastingType: '', // 'timeRestricted', 'alternateDay', 'extended', 'custom'
     maxFastingHours: 16,
-    fastingFrequency: 'daily', // 'daily', 'weekly', 'monthly'
+    fastingFrequency: '', // 'daily', 'weekly', 'monthly'
     
-        // Goals
-        primaryGoal: 'generalHealth', // 'weightLoss', 'metabolicHealth', 'generalHealth', 'spiritual', 'medical'
+    // Goals
+    primaryGoal: '', // 'weightLoss', 'metabolicHealth', 'generalHealth', 'spiritual', 'medical'
     
     // Medical Supervision
     medicalSupervision: false,
