@@ -1004,11 +1004,19 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               .logo-section {
                 margin-bottom: 20px;
               }
-              .logo-image {
-                max-width: 200px;
-                height: auto;
-                display: block;
-                margin: 0 auto;
+              .logo-text {
+                font-size: 36px;
+                font-weight: bold;
+                color: #d4af37;
+                letter-spacing: 3px;
+                margin-bottom: 5px;
+                text-align: center;
+              }
+              .logo-subtitle {
+                font-size: 14px;
+                color: #666;
+                text-align: center;
+                font-style: italic;
               }
               .document-title {
                 font-size: 24px;
@@ -1086,9 +1094,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <body>
             <div class="header">
               <div class="logo-section">
-                <img src="./assets/sign in logo.png" alt="AuricRX Logo" class="logo-image" />
+                <div class="logo-text">AURICRX</div>
+                <div class="logo-subtitle">Medical Coach</div>
               </div>
-              <div class="document-title">AuricRX Health Report</div>
+              <div class="document-title">Health Report</div>
               <div class="generation-info">
                 <p>Generated on ${currentDate}</p>
               </div>
