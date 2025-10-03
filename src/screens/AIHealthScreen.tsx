@@ -1007,44 +1007,27 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 line-height: 1.6;
                 color: #333;
               }
-              .header { 
-                text-align: center; 
-                margin-bottom: 30px; 
-                border-bottom: 2px solid #333; 
-                padding-bottom: 20px; 
+              .header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #3B82F6;
+                padding-bottom: 20px;
               }
-              .logo-section {
-                margin-bottom: 20px;
-              }
-              .logo-image {
+              .logo {
                 max-width: 200px;
                 height: auto;
-                display: block;
-                margin: 0 auto;
+                margin-bottom: 10px;
               }
-              .logo-text {
-                font-size: 36px;
-                font-weight: bold;
-                color: #d4af37;
-                letter-spacing: 3px;
-                margin-bottom: 5px;
-                text-align: center;
-              }
-              .logo-subtitle {
-                font-size: 14px;
-                color: #666;
-                text-align: center;
-                font-style: italic;
-              }
-              .document-title {
+              .title {
+                color: #3B82F6;
                 font-size: 24px;
                 font-weight: bold;
-                color: #333;
-                margin-bottom: 15px;
+                margin: 0;
               }
-              .generation-info {
-                font-size: 12px;
-                color: #666;
+              .subtitle {
+                color: #6B7280;
+                font-size: 16px;
+                margin: 5px 0 0 0;
               }
               .section { 
                 margin-bottom: 25px; 
@@ -1111,16 +1094,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           </head>
           <body>
             <div class="header">
-              <div class="logo-section">
-                ${logoBase64 ? 
-                  `<img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo-image" />` :
-                  `<div class="logo-text">AURICRX</div><div class="logo-subtitle">Medical Coach</div>`
-                }
-              </div>
-              <div class="document-title">Health Report</div>
-              <div class="generation-info">
-                <p>Generated on ${currentDate}</p>
-              </div>
+              <img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">
+              <h1 class="title">AuricRX Health Report</h1>
+              <p class="subtitle">Generated on ${currentDate}</p>
             </div>
 
             <div class="section">
