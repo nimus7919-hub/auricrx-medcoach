@@ -1018,10 +1018,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 margin-bottom: 10px;
               }
               .title {
-                color: #3B82F6;
+                color: #D4AF37;
                 font-size: 24px;
                 font-weight: bold;
                 margin: 0;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
               }
               .subtitle {
                 color: #6B7280;
@@ -1036,8 +1037,6 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 font-weight: bold; 
                 color: #333; 
                 margin-bottom: 15px; 
-                border-left: 4px solid #007bff; 
-                padding-left: 10px; 
               }
               .medication-item { 
                 background: #f8f9fa; 
@@ -1048,7 +1047,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               }
               .medication-item h3 {
                 margin-top: 0;
-                color: #007bff;
+                color: #000000;
               }
               .profile-section, .analysis-section {
                 background: #f8f9fa;
@@ -1094,7 +1093,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <body>
             <div class="header">
               <img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">
-              <h1 class="title">AuricRX Health Report</h1>
+              <h1 class="title">Health Report</h1>
               <p class="subtitle">Generated on ${currentDate}</p>
             </div>
 
