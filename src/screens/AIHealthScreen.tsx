@@ -895,10 +895,6 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       const currentDate = new Date().toLocaleDateString();
       console.log('📅 Generated date:', currentDate);
       
-      // Generate a unique report ID (similar to document IDs)
-      const reportId = `AUR-${Date.now().toString().slice(-8)}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-      console.log('🆔 Generated report ID:', reportId);
-      
       console.log('📝 Creating HTML content for PDF...');
       
       // Create HTML content for PDF (similar to DocumentsScreen)
@@ -1008,65 +1004,17 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               .logo-section {
                 margin-bottom: 20px;
               }
-              .logo {
-                position: relative;
-                display: inline-block;
-                margin-bottom: 8px;
-              }
-              .logo-letters {
-                font-size: 48px;
-                font-weight: bold;
-                color: #d4af37;
-                font-family: 'Arial', sans-serif;
-                letter-spacing: -2px;
-                position: relative;
-                z-index: 2;
-              }
-              .logo-pill {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 20px;
-                height: 8px;
-                background: #d4af37;
-                border-radius: 4px;
-                z-index: 1;
-                margin-left: 8px;
-              }
-              .company-name {
-                font-size: 16px;
-                font-weight: bold;
-                color: #d4af37;
-                letter-spacing: 2px;
-                margin-bottom: 15px;
+              .logo-image {
+                max-width: 200px;
+                height: auto;
+                display: block;
+                margin: 0 auto;
               }
               .document-title {
                 font-size: 24px;
                 font-weight: bold;
                 color: #333;
                 margin-bottom: 15px;
-              }
-              .report-id {
-                background: #f8f9fa;
-                border: 2px solid #007bff;
-                border-radius: 8px;
-                padding: 12px 20px;
-                margin-bottom: 15px;
-                display: inline-block;
-                font-family: 'Courier New', monospace;
-              }
-              .id-label {
-                font-weight: bold;
-                color: #007bff;
-                font-size: 14px;
-                margin-right: 10px;
-              }
-              .id-value {
-                font-weight: bold;
-                color: #333;
-                font-size: 16px;
-                letter-spacing: 1px;
               }
               .generation-info {
                 font-size: 12px;
@@ -1138,17 +1086,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <body>
             <div class="header">
               <div class="logo-section">
-                <div class="logo">
-                  <div class="logo-letters">AR</div>
-                  <div class="logo-pill"></div>
-                </div>
-                <div class="company-name">AURICRX</div>
+                <img src="./assets/sign in logo.png" alt="AuricRX Logo" class="logo-image" />
               </div>
               <div class="document-title">AuricRX Health Report</div>
-              <div class="report-id">
-                <span class="id-label">REPORT ID:</span>
-                <span class="id-value">${reportId}</span>
-              </div>
               <div class="generation-info">
                 <p>Generated on ${currentDate}</p>
               </div>
