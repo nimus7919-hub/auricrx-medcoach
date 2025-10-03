@@ -4050,7 +4050,7 @@ const handleAskMedicalAI = async () => {
                 backgroundColor: getCardBackgroundColor() + 'CC', 
                 borderColor: getCardBorderColor(),
                 borderWidth: 2,
-                borderRadius: 18, 
+                borderRadius: 12, 
                 padding: 16, 
                 marginBottom: 12,
                 shadowColor: '#000',
@@ -4343,7 +4343,7 @@ const handleAskMedicalAI = async () => {
                 backgroundColor: getCardBackgroundColor() + 'CC', 
                 borderColor: getCardBorderColor(),
                 borderWidth: 2,
-                borderRadius: 18, 
+                borderRadius: 12, 
                 padding: 16, 
                 marginBottom: 12,
                 shadowColor: '#000',
@@ -4646,7 +4646,7 @@ const handleAskMedicalAI = async () => {
         <Header title={S.settings} />
         
         <CollapsibleSection title={S.profile} sectionKey="profile" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.appDescription}</DynamicText>
             <TouchableOpacity 
               onPress={() => setRoute('admin-profile')}
@@ -4654,9 +4654,9 @@ const handleAskMedicalAI = async () => {
                 backgroundColor: getCardBackgroundColor() + 'CC',
                 borderColor: getCardBorderColor(),
                 borderWidth: 2,
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
+                borderRadius: 12,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
                 alignItems: 'center',
                 justifyContent: 'center',
                 shadowColor: '#000',
@@ -4668,7 +4668,7 @@ const handleAskMedicalAI = async () => {
             >
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_700Bold', 
-                fontSize: 16,
+                fontSize: 15,
                 textAlign: 'center'
               }}>{S.profile}</DynamicText>
             </TouchableOpacity>
@@ -4676,16 +4676,16 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.healthProfile} sectionKey="healthProfile" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 
               onPress={() => setRoute('health-profile')}
               style={[styles.settingsButton, {
                 backgroundColor: getCardBackgroundColor() + 'CC',
                 borderColor: getCardBorderColor(),
                 borderWidth: 2,
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
+                borderRadius: 12,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
                 alignItems: 'center',
                 justifyContent: 'center',
                 shadowColor: '#000',
@@ -4697,7 +4697,7 @@ const handleAskMedicalAI = async () => {
             >
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_700Bold', 
-                fontSize: 16,
+                fontSize: 15,
                 textAlign: 'center',
                 marginBottom: 4
               }}>Health Profile Settings</DynamicText>
@@ -4714,16 +4714,16 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 
               onPress={() => setRoute('wallpaper')}
               style={[styles.settingsButton, {
                 backgroundColor: getCardBackgroundColor() + 'CC',
                 borderColor: getCardBorderColor(),
                 borderWidth: 2,
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
+                borderRadius: 12,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
                 alignItems: 'center',
                 justifyContent: 'center',
                 shadowColor: '#000',
@@ -4735,7 +4735,7 @@ const handleAskMedicalAI = async () => {
             >
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_700Bold', 
-                fontSize: 16,
+                fontSize: 15,
                 textAlign: 'center',
                 marginBottom: 4
               }}>{S.changeWallpaper}</DynamicText>
@@ -4752,7 +4752,7 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.notifications} sectionKey="notifications" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <RowSwitch
               label={S.pushNotifications}
               value={notificationsEnabled}
@@ -4772,16 +4772,16 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.security} sectionKey="security" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 
               onPress={() => setRoute('admin-profile')}
               style={[styles.settingsButton, {
                 backgroundColor: getCardBackgroundColor() + 'CC',
                 borderColor: getCardBorderColor(),
                 borderWidth: 2,
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
+                borderRadius: 12,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
                 alignItems: 'center',
                 justifyContent: 'center',
                 shadowColor: '#000',
@@ -4797,7 +4797,7 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.privacy} sectionKey="privacy" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <RowSwitch
               label={S.dataCollection}
               value={dataCollection}
@@ -4812,7 +4812,7 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.language} sectionKey="language" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <SwitchRow
               label={S.english}
               value={currentLanguage === 'en'}
@@ -4865,7 +4865,7 @@ const handleAskMedicalAI = async () => {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.help} sectionKey="help" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.emailUs}</DynamicText>
             <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{S.emailAddress}</DynamicText>
           </View>
