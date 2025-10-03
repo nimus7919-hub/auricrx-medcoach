@@ -61,6 +61,9 @@
     "analyzeFastingCompatibility": "Analizar Compatibilidad con Ayuno",
     "completeYourFastingProfile": "Completa tu Perfil de Ayuno",
     "exportHealthReport": "Exportar Reporte de Salud",
+    "status": "Estado",
+    "analysis": "Análisis",
+    "fastingAnalysis": "Análisis de Ayuno",
     "fastingDisclaimer": "Esta recomendación es generada por IA y no debe reemplazar el consejo médico profesional.",
     "warnings": "Advertencias"
   },

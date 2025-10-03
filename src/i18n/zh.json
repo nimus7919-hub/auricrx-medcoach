@@ -61,6 +61,9 @@
     "analyzeFastingCompatibility": "分析禁食兼容性",
     "completeYourFastingProfile": "完成您的禁食档案",
     "exportHealthReport": "导出健康报告",
+    "status": "状态",
+    "analysis": "分析",
+    "fastingAnalysis": "禁食分析",
     "fastingDisclaimer": "此建议由AI生成，不应替代专业医疗建议。",
     "warnings": "警告"
   },

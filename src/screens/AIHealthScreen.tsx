@@ -976,11 +976,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
       const fastingAnalysisHtml = fastingAnalysis ? `
         <div class="analysis-section">
-          <h3>Fasting Analysis</h3>
+          <h3>${t('fastingAnalysis')}</h3>
           <div class="analysis-result ${fastingAnalysis.compatible ? 'compatible' : 'needs-review'}">
-            <p><strong>Status:</strong> ${fastingAnalysis.compatible ? t('compatible') : t('needsReview')}</p>
+            <p><strong>${t('status')}:</strong> ${fastingAnalysis.compatible ? t('compatible') : t('needsReview')}</p>
             <p><strong>${t('recommendedFastingWindow')}:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}</p>
-            <p><strong>Analysis:</strong> ${fastingAnalysis.message}</p>
+            <p><strong>${t('analysis')}:</strong> ${fastingAnalysis.message}</p>
           </div>
           ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
             <div class="warnings">

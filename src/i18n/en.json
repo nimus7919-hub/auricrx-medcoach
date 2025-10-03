@@ -61,6 +61,9 @@
     "analyzeFastingCompatibility": "Analyze Fasting Compatibility",
     "completeYourFastingProfile": "Complete Your Fasting Profile",
     "exportHealthReport": "Export Health Report",
+    "status": "Status",
+    "analysis": "Analysis",
+    "fastingAnalysis": "Fasting Analysis",
     "fastingDisclaimer": "This recommendation is AI-generated and should not replace professional medical advice.",
     "warnings": "Warnings"
   },
