@@ -53,9 +53,9 @@
     "fastingDisclaimer": "This recommendation is AI-generated and should not replace professional medical advice.",
     "warnings": "Warnings"
   },
-  "fastingProfile": {
-    "title": "Fasting Profile",
-    "description": "Set up your health profile for personalized fasting recommendations",
+  "healthProfile": {
+    "title": "Health Profile",
+    "description": "Set up your health profile for personalized recommendations",
     "basicInfo": "Basic Information",
     "weight": "Weight",
     "height": "Height",
@@ -130,7 +130,7 @@
     "spiritual": "Spiritual/Religious",
     "medical": "Medical",
     "profileSaved": "Profile Saved",
-    "fastingProfileSavedMessage": "Your fasting profile has been saved and will be used for personalized recommendations.",
+    "healthProfileSavedMessage": "Your health profile has been saved and will be used for personalized recommendations.",
     "saveProfile": "Save Profile"
   },
   "medicalDocuments": {

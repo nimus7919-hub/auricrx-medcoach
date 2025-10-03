@@ -53,9 +53,9 @@
     "fastingDisclaimer": "Esta recomendación es generada por IA y no debe reemplazar el consejo médico profesional.",
     "warnings": "Advertencias"
   },
-  "fastingProfile": {
-    "title": "Perfil de Ayuno",
-    "description": "Configura tu perfil de salud para recomendaciones personalizadas de ayuno",
+  "healthProfile": {
+    "title": "Perfil de Salud",
+    "description": "Configura tu perfil de salud para recomendaciones personalizadas",
     "basicInfo": "Información Básica",
     "weight": "Peso",
     "height": "Altura",
@@ -130,7 +130,7 @@
     "spiritual": "Espiritual/Religioso",
     "medical": "Médico",
     "profileSaved": "Perfil Guardado",
-    "fastingProfileSavedMessage": "Tu perfil de ayuno ha sido guardado y se utilizará para recomendaciones personalizadas.",
+    "healthProfileSavedMessage": "Tu perfil de salud ha sido guardado y se utilizará para recomendaciones personalizadas.",
     "saveProfile": "Guardar Perfil"
   },
   "medicalDocuments": {

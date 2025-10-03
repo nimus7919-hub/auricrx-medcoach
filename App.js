@@ -3466,101 +3466,101 @@ const S = {
   fastingDisclaimer: t('ai.fastingDisclaimer'),
   warnings: t('ai.warnings'),
   
-  // Fasting Profile
-  fastingProfile: t('fastingProfile.title'),
-  fastingProfileDescription: t('fastingProfile.description'),
-  basicInfo: t('fastingProfile.basicInfo'),
-  weight: t('fastingProfile.weight'),
-  height: t('fastingProfile.height'),
-  weightUnit: t('fastingProfile.weightUnit'),
-  heightUnit: t('fastingProfile.heightUnit'),
-  kg: t('fastingProfile.kg'),
-  lbs: t('fastingProfile.lbs'),
-  cm: t('fastingProfile.cm'),
-  ft: t('fastingProfile.ft'),
-  healthConditions: t('fastingProfile.healthConditions'),
-  otherHealthConditions: t('fastingProfile.otherHealthConditions'),
-  addHealthCondition: t('fastingProfile.addHealthCondition'),
-  enterHealthCondition: t('fastingProfile.enterHealthCondition'),
-  removeHealthCondition: t('fastingProfile.removeHealthCondition'),
-  nutritionalStatus: t('fastingProfile.nutritionalStatus'),
-  mentalHealth: t('fastingProfile.mentalHealth'),
-  lifestyleActivity: t('fastingProfile.lifestyleActivity'),
-  fastingPreferences: t('fastingProfile.fastingPreferences'),
-  fastingGoals: t('fastingProfile.fastingGoals'),
-  medicalSupervision: t('fastingProfile.medicalSupervision'),
+  // Health Profile
+  healthProfile: t('healthProfile.title'),
+  healthProfileDescription: t('healthProfile.description'),
+  basicInfo: t('healthProfile.basicInfo'),
+  weight: t('healthProfile.weight'),
+  height: t('healthProfile.height'),
+  weightUnit: t('healthProfile.weightUnit'),
+  heightUnit: t('healthProfile.heightUnit'),
+  kg: t('healthProfile.kg'),
+  lbs: t('healthProfile.lbs'),
+  cm: t('healthProfile.cm'),
+  ft: t('healthProfile.ft'),
+  healthConditions: t('healthProfile.healthConditions'),
+  otherHealthConditions: t('healthProfile.otherHealthConditions'),
+  addHealthCondition: t('healthProfile.addHealthCondition'),
+  enterHealthCondition: t('healthProfile.enterHealthCondition'),
+  removeHealthCondition: t('healthProfile.removeHealthCondition'),
+  nutritionalStatus: t('healthProfile.nutritionalStatus'),
+  mentalHealth: t('healthProfile.mentalHealth'),
+  lifestyleActivity: t('healthProfile.lifestyleActivity'),
+  fastingPreferences: t('healthProfile.fastingPreferences'),
+  fastingGoals: t('healthProfile.fastingGoals'),
+  medicalSupervision: t('healthProfile.medicalSupervision'),
   
   // Health Conditions
-  diabetes: t('fastingProfile.diabetes'),
-  hypoglycemia: t('fastingProfile.hypoglycemia'),
-  heartConditions: t('fastingProfile.heartConditions'),
-  kidneyDisease: t('fastingProfile.kidneyDisease'),
-  liverDisease: t('fastingProfile.liverDisease'),
-  eatingDisorders: t('fastingProfile.eatingDisorders'),
-  pregnancy: t('fastingProfile.pregnancy'),
-  breastfeeding: t('fastingProfile.breastfeeding'),
-  gastrointestinalIssues: t('fastingProfile.gastrointestinalIssues'),
+  diabetes: t('healthProfile.diabetes'),
+  hypoglycemia: t('healthProfile.hypoglycemia'),
+  heartConditions: t('healthProfile.heartConditions'),
+  kidneyDisease: t('healthProfile.kidneyDisease'),
+  liverDisease: t('healthProfile.liverDisease'),
+  eatingDisorders: t('healthProfile.eatingDisorders'),
+  pregnancy: t('healthProfile.pregnancy'),
+  breastfeeding: t('healthProfile.breastfeeding'),
+  gastrointestinalIssues: t('healthProfile.gastrointestinalIssues'),
   
   // Nutritional Status
-  bodyFatLevel: t('fastingProfile.bodyFatLevel'),
-  muscleMass: t('fastingProfile.muscleMass'),
-  micronutrientLevels: t('fastingProfile.micronutrientLevels'),
-  hydrationLevel: t('fastingProfile.hydrationLevel'),
+  bodyFatLevel: t('healthProfile.bodyFatLevel'),
+  muscleMass: t('healthProfile.muscleMass'),
+  micronutrientLevels: t('healthProfile.micronutrientLevels'),
+  hydrationLevel: t('healthProfile.hydrationLevel'),
   
   // Mental Health
-  highStressEnvironment: t('fastingProfile.highStressEnvironment'),
-  intensiveMentalTasks: t('fastingProfile.intensiveMentalTasks'),
-  anxiety: t('fastingProfile.anxiety'),
-  depression: t('fastingProfile.depression'),
+  highStressEnvironment: t('healthProfile.highStressEnvironment'),
+  intensiveMentalTasks: t('healthProfile.intensiveMentalTasks'),
+  anxiety: t('healthProfile.anxiety'),
+  depression: t('healthProfile.depression'),
   
   // Lifestyle
-  activityLevel: t('fastingProfile.activityLevel'),
-  physicalLabor: t('fastingProfile.physicalLabor'),
-  longShifts: t('fastingProfile.longShifts'),
-  sleepQuality: t('fastingProfile.sleepQuality'),
+  activityLevel: t('healthProfile.activityLevel'),
+  physicalLabor: t('healthProfile.physicalLabor'),
+  longShifts: t('healthProfile.longShifts'),
+  sleepQuality: t('healthProfile.sleepQuality'),
   
   // Fasting Preferences
-  preferredFastingType: t('fastingProfile.preferredFastingType'),
-  maxFastingHours: t('fastingProfile.maxFastingHours'),
-  fastingFrequency: t('fastingProfile.fastingFrequency'),
+  preferredFastingType: t('healthProfile.preferredFastingType'),
+  maxFastingHours: t('healthProfile.maxFastingHours'),
+  fastingFrequency: t('healthProfile.fastingFrequency'),
   
   // Goals
-  primaryGoal: t('fastingProfile.primaryGoal'),
+  primaryGoal: t('healthProfile.primaryGoal'),
   
     // Health Monitoring
-    healthMonitoring: t('fastingProfile.healthMonitoring'),
-    selfMonitoring: t('fastingProfile.selfMonitoring'),
-    wearableDevices: t('fastingProfile.wearableDevices'),
+    healthMonitoring: t('healthProfile.healthMonitoring'),
+    selfMonitoring: t('healthProfile.selfMonitoring'),
+    wearableDevices: t('healthProfile.wearableDevices'),
   
   // Options
-  low: t('fastingProfile.low'),
-  normal: t('fastingProfile.normal'),
-  high: t('fastingProfile.high'),
-  poor: t('fastingProfile.poor'),
-  fair: t('fastingProfile.fair'),
-  good: t('fastingProfile.good'),
-  excellent: t('fastingProfile.excellent'),
-  sedentary: t('fastingProfile.sedentary'),
-  light: t('fastingProfile.light'),
-  moderate: t('fastingProfile.moderate'),
-  athlete: t('fastingProfile.athlete'),
-  timeRestricted: t('fastingProfile.timeRestricted'),
-  alternateDay: t('fastingProfile.alternateDay'),
-  extended: t('fastingProfile.extended'),
-  custom: t('fastingProfile.custom'),
-  daily: t('fastingProfile.daily'),
-  weekly: t('fastingProfile.weekly'),
-  monthly: t('fastingProfile.monthly'),
-  weightLoss: t('fastingProfile.weightLoss'),
-  metabolicHealth: t('fastingProfile.metabolicHealth'),
-  generalHealth: t('fastingProfile.generalHealth'),
-  spiritual: t('fastingProfile.spiritual'),
-  medical: t('fastingProfile.medical'),
+  low: t('healthProfile.low'),
+  normal: t('healthProfile.normal'),
+  high: t('healthProfile.high'),
+  poor: t('healthProfile.poor'),
+  fair: t('healthProfile.fair'),
+  good: t('healthProfile.good'),
+  excellent: t('healthProfile.excellent'),
+  sedentary: t('healthProfile.sedentary'),
+  light: t('healthProfile.light'),
+  moderate: t('healthProfile.moderate'),
+  athlete: t('healthProfile.athlete'),
+  timeRestricted: t('healthProfile.timeRestricted'),
+  alternateDay: t('healthProfile.alternateDay'),
+  extended: t('healthProfile.extended'),
+  custom: t('healthProfile.custom'),
+  daily: t('healthProfile.daily'),
+  weekly: t('healthProfile.weekly'),
+  monthly: t('healthProfile.monthly'),
+  weightLoss: t('healthProfile.weightLoss'),
+  metabolicHealth: t('healthProfile.metabolicHealth'),
+  generalHealth: t('healthProfile.generalHealth'),
+  spiritual: t('healthProfile.spiritual'),
+  medical: t('healthProfile.medical'),
   
   // Additional translations
-  profileSaved: t('fastingProfile.profileSaved'),
-  fastingProfileSavedMessage: t('fastingProfile.fastingProfileSavedMessage'),
-  saveProfile: t('fastingProfile.saveProfile'),
+  profileSaved: t('healthProfile.profileSaved'),
+  healthProfileSavedMessage: t('healthProfile.healthProfileSavedMessage'),
+  saveProfile: t('healthProfile.saveProfile'),
 };
 
 
@@ -4773,10 +4773,10 @@ const handleAskMedicalAI = async () => {
           </View>
         </CollapsibleSection>
         
-        <CollapsibleSection title={S.fastingProfile} sectionKey="fastingProfile" onToggle={toggleSection}>
+        <CollapsibleSection title={S.healthProfile} sectionKey="healthProfile" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             <TouchableOpacity 
-              onPress={() => setRoute('fasting-profile')}
+              onPress={() => setRoute('health-profile')}
               style={[styles.settingsButton, {
                 backgroundColor: getCardBackgroundColor() + 'CC',
                 borderColor: getCardBorderColor(),
@@ -4998,7 +4998,7 @@ function trimTo(str, n) {
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} /> :
-        route === 'fasting-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
+        route === 'health-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
      <Dashboard />}

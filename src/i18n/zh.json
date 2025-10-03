@@ -53,9 +53,9 @@
     "fastingDisclaimer": "此建议由AI生成，不应替代专业医疗建议。",
     "warnings": "警告"
   },
-  "fastingProfile": {
-    "title": "禁食档案",
-    "description": "设置您的健康档案以获得个性化禁食建议",
+  "healthProfile": {
+    "title": "健康档案",
+    "description": "设置您的健康档案以获得个性化建议",
     "basicInfo": "基本信息",
     "weight": "体重",
     "height": "身高",
@@ -130,7 +130,7 @@
     "spiritual": "精神/宗教",
     "medical": "医疗",
     "profileSaved": "档案已保存",
-    "fastingProfileSavedMessage": "您的禁食档案已保存，将用于个性化建议。",
+    "healthProfileSavedMessage": "您的健康档案已保存，将用于个性化建议。",
     "saveProfile": "保存档案"
   },
   "medicalDocuments": {

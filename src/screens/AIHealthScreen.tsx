@@ -895,6 +895,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       const currentDate = new Date().toLocaleDateString();
       console.log('📅 Generated date:', currentDate);
       
+      // Generate a unique report ID (similar to document IDs)
+      const reportId = `AUR-${Date.now().toString().slice(-8)}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      console.log('🆔 Generated report ID:', reportId);
+      
       console.log('📝 Creating HTML content for PDF...');
       
       // Create HTML content for PDF (similar to DocumentsScreen)
@@ -1001,6 +1005,27 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 border-bottom: 2px solid #333; 
                 padding-bottom: 20px; 
               }
+              .report-id {
+                background: #f8f9fa;
+                border: 2px solid #007bff;
+                border-radius: 8px;
+                padding: 12px 20px;
+                margin-bottom: 20px;
+                display: inline-block;
+                font-family: 'Courier New', monospace;
+              }
+              .id-label {
+                font-weight: bold;
+                color: #007bff;
+                font-size: 14px;
+                margin-right: 10px;
+              }
+              .id-value {
+                font-weight: bold;
+                color: #333;
+                font-size: 16px;
+                letter-spacing: 1px;
+              }
               .section { 
                 margin-bottom: 25px; 
               }
@@ -1066,6 +1091,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           </head>
           <body>
             <div class="header">
+              <div class="report-id">
+                <span class="id-label">REPORT ID:</span>
+                <span class="id-value">${reportId}</span>
+              </div>
               <h1>AuricRX Health Report</h1>
               <p>Generated on ${currentDate}</p>
             </div>
