@@ -1101,8 +1101,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               ${medicationsHtml}
             </div>
 
-            <div class="section">
-              <h2 class="section-title">Fasting Profile</h2>
+            <div class="section" style="page-break-before: always;">
+              <h2 class="section-title">Health Profile</h2>
               ${fastingProfileHtml}
             </div>
 
