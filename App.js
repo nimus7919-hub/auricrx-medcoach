@@ -4675,6 +4675,82 @@ const handleAskMedicalAI = async () => {
           </View>
         </CollapsibleSection>
         
+        <CollapsibleSection title={S.healthProfile} sectionKey="healthProfile" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <TouchableOpacity 
+              onPress={() => setRoute('health-profile')}
+              style={[styles.settingsButton, {
+                backgroundColor: getCardBackgroundColor() + 'CC',
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_700Bold', 
+                fontSize: 16,
+                textAlign: 'center',
+                marginBottom: 4
+              }}>Health Profile Settings</DynamicText>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_400Regular', 
+                fontSize: 12, 
+                opacity: 0.7,
+                textAlign: 'center'
+              }}>
+                {S.fastingProfileDescription}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+            <TouchableOpacity 
+              onPress={() => setRoute('wallpaper')}
+              style={[styles.settingsButton, {
+                backgroundColor: getCardBackgroundColor() + 'CC',
+                borderColor: getCardBorderColor(),
+                borderWidth: 2,
+                borderRadius: 18,
+                paddingVertical: 16,
+                paddingHorizontal: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_700Bold', 
+                fontSize: 16,
+                textAlign: 'center',
+                marginBottom: 4
+              }}>{S.changeWallpaper}</DynamicText>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_400Regular', 
+                fontSize: 12, 
+                opacity: 0.7,
+                textAlign: 'center'
+              }}>
+                {S.chooseWallpaperDescription}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
         <CollapsibleSection title={S.notifications} sectionKey="notifications" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
             <RowSwitch
@@ -4732,82 +4808,6 @@ const handleAskMedicalAI = async () => {
               value={analytics}
               onValueChange={setAnalytics}
             />
-          </View>
-        </CollapsibleSection>
-        
-        <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
-            <TouchableOpacity 
-              onPress={() => setRoute('wallpaper')}
-              style={[styles.settingsButton, {
-                backgroundColor: getCardBackgroundColor() + 'CC',
-                borderColor: getCardBorderColor(),
-                borderWidth: 2,
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3
-              }]}
-            >
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_700Bold', 
-                fontSize: 16,
-                textAlign: 'center',
-                marginBottom: 4
-              }}>{S.changeWallpaper}</DynamicText>
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_400Regular', 
-                fontSize: 12, 
-                opacity: 0.7,
-                textAlign: 'center'
-              }}>
-                {S.chooseWallpaperDescription}
-              </DynamicText>
-            </TouchableOpacity>
-          </View>
-        </CollapsibleSection>
-        
-        <CollapsibleSection title={S.healthProfile} sectionKey="healthProfile" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
-            <TouchableOpacity 
-              onPress={() => setRoute('health-profile')}
-              style={[styles.settingsButton, {
-                backgroundColor: getCardBackgroundColor() + 'CC',
-                borderColor: getCardBorderColor(),
-                borderWidth: 2,
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3
-              }]}
-            >
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_700Bold', 
-                fontSize: 16,
-                textAlign: 'center',
-                marginBottom: 4
-              }}>{S.fastingProfile}</DynamicText>
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_400Regular', 
-                fontSize: 12, 
-                opacity: 0.7,
-                textAlign: 'center'
-              }}>
-                {S.fastingProfileDescription}
-              </DynamicText>
-            </TouchableOpacity>
           </View>
         </CollapsibleSection>
         
