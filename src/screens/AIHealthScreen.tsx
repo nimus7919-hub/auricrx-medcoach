@@ -905,6 +905,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           encoding: FileSystem.EncodingType.Base64,
         });
         console.log('✅ Logo loaded successfully');
+        console.log('📏 Logo base64 length:', logoBase64.length);
+        console.log('🔍 Logo base64 preview:', logoBase64.substring(0, 50) + '...');
+        
+        // Test if the base64 is valid by checking if it starts with the right format
+        if (!logoBase64.startsWith('iVBORw0KGgo') && !logoBase64.startsWith('/9j/')) {
+          console.log('⚠️ Logo base64 might be invalid format');
+          logoBase64 = null;
+        }
       } catch (logoError) {
         console.log('⚠️ Could not load logo, using text fallback:', logoError);
       }
@@ -1018,6 +1026,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 height: auto;
                 margin-bottom: 10px;
               }
+              .logo-fallback {
+                font-size: 36px;
+                font-weight: bold;
+                color: #3B82F6;
+                margin-bottom: 10px;
+                text-align: center;
+              }
               .title {
                 color: #3B82F6;
                 font-size: 24px;
@@ -1094,7 +1109,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           </head>
           <body>
             <div class="header">
-              <img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">
+              ${logoBase64 ? 
+                `<img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">` :
+                `<div class="logo-fallback">AURICRX</div>`
+              }
               <h1 class="title">AuricRX Health Report</h1>
               <p class="subtitle">Generated on ${currentDate}</p>
             </div>
