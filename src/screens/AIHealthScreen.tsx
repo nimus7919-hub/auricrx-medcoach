@@ -18,6 +18,9 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import * as FileSystem from 'expo-file-system';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 // Simplified AI Health - no external service dependencies
@@ -892,100 +895,218 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       const currentDate = new Date().toLocaleDateString();
       console.log('📅 Generated date:', currentDate);
       
-      console.log('📝 Creating text content...');
-      // Create a comprehensive text report
-      const textContent = `
-AuricRX Health Report - ${currentDate}
+      console.log('📝 Creating HTML content for PDF...');
+      
+      // Create HTML content for PDF (similar to DocumentsScreen)
+      const medicationsHtml = medications && medications.length > 0 ? 
+        medications.map((med, index) => `
+          <div class="medication-item">
+            <h3>${index + 1}. ${med.name || 'N/A'}</h3>
+            <p><strong>Dosage:</strong> ${med.strength || 'N/A'}</p>
+            <p><strong>Quantity:</strong> ${med.quantity || 'N/A'}</p>
+            <p><strong>Times:</strong> ${med.times ? med.times.join(', ') : 'N/A'}</p>
+            ${med.notes ? `<p><strong>Notes:</strong> ${med.notes}</p>` : ''}
+          </div>
+        `).join('') : 
+        '<p>No medications recorded</p>';
 
-═══════════════════════════════════════════════════════════════
+      const fastingProfileHtml = fastingProfile ? `
+        <div class="profile-section">
+          <h3>Basic Information</h3>
+          <p><strong>Weight:</strong> ${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}</p>
+          <p><strong>Height:</strong> ${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}</p>
+          
+          <h3>Health Conditions</h3>
+          <p><strong>Conditions:</strong> ${[
+            fastingProfile.diabetes ? 'Diabetes' : '',
+            fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
+            fastingProfile.heartConditions ? 'Heart Conditions' : '',
+            fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
+            fastingProfile.liverDisease ? 'Liver Disease' : '',
+            fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
+            fastingProfile.pregnancy ? 'Pregnancy' : '',
+            fastingProfile.breastfeeding ? 'Breastfeeding' : '',
+            fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
+            ...(fastingProfile.otherHealthConditions || [])
+          ].filter(Boolean).join(', ') || 'None reported'}</p>
+          
+          <h3>Lifestyle</h3>
+          <p><strong>Activity Level:</strong> ${fastingProfile.activityLevel || 'Not specified'}</p>
+          <p><strong>Primary Goal:</strong> ${fastingProfile.primaryGoal || 'Not specified'}</p>
+        </div>
+      ` : '<p>No fasting profile completed</p>';
 
-MEDICATIONS:
-${medications.length > 0 ? 
-  medications.map((med, index) => 
-    `${index + 1}. ${med.name || 'N/A'}
-   Dosage: ${med.strength || 'N/A'}
-   Quantity: ${med.quantity || 'N/A'}
-   Times: ${med.times ? med.times.join(', ') : 'N/A'}
-   ${med.notes ? `Notes: ${med.notes}` : ''}`
-  ).join('\n\n') : 
-  'No medications recorded'
-}
+      const fastingAnalysisHtml = fastingAnalysis ? `
+        <div class="analysis-section">
+          <h3>Fasting Analysis</h3>
+          <div class="analysis-result ${fastingAnalysis.compatible ? 'compatible' : 'needs-review'}">
+            <p><strong>Status:</strong> ${fastingAnalysis.compatible ? 'Compatible' : 'Needs Review'}</p>
+            <p><strong>Recommended Fasting Window:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}</p>
+            <p><strong>Analysis:</strong> ${fastingAnalysis.message}</p>
+          </div>
+          ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
+            <div class="warnings">
+              <h4>Important Considerations:</h4>
+              <ul>
+                ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        </div>
+      ` : '';
 
-═══════════════════════════════════════════════════════════════
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>AuricRX Health Report</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 20px; 
+                line-height: 1.6;
+                color: #333;
+              }
+              .header { 
+                text-align: center; 
+                margin-bottom: 30px; 
+                border-bottom: 2px solid #333; 
+                padding-bottom: 20px; 
+              }
+              .section { 
+                margin-bottom: 25px; 
+              }
+              .section-title { 
+                font-size: 18px; 
+                font-weight: bold; 
+                color: #333; 
+                margin-bottom: 15px; 
+                border-left: 4px solid #007bff; 
+                padding-left: 10px; 
+              }
+              .medication-item { 
+                background: #f8f9fa; 
+                padding: 15px; 
+                margin: 10px 0; 
+                border-radius: 5px; 
+                border-left: 4px solid #007bff;
+              }
+              .medication-item h3 {
+                margin-top: 0;
+                color: #007bff;
+              }
+              .profile-section, .analysis-section {
+                background: #f8f9fa;
+                padding: 15px;
+                margin: 10px 0;
+                border-radius: 5px;
+              }
+              .analysis-result.compatible {
+                background: #d4edda;
+                border: 1px solid #c3e6cb;
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+              }
+              .analysis-result.needs-review {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+              }
+              .warnings {
+                background: #f8d7da;
+                border: 1px solid #f5c6cb;
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+              }
+              .warnings ul {
+                margin: 5px 0;
+                padding-left: 20px;
+              }
+              .footer { 
+                margin-top: 30px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: #666; 
+                border-top: 1px solid #ddd; 
+                padding-top: 20px; 
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>AuricRX Health Report</h1>
+              <p>Generated on ${currentDate}</p>
+            </div>
 
-FASTING PROFILE:
-${fastingProfile ? `
-Weight: ${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}
-Height: ${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}
-Health Conditions: ${[
-  fastingProfile.diabetes ? 'Diabetes' : '',
-  fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
-  fastingProfile.heartConditions ? 'Heart Conditions' : '',
-  fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
-  fastingProfile.liverDisease ? 'Liver Disease' : '',
-  fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
-  fastingProfile.pregnancy ? 'Pregnancy' : '',
-  fastingProfile.breastfeeding ? 'Breastfeeding' : '',
-  fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
-  ...(fastingProfile.otherHealthConditions || [])
-].filter(Boolean).join(', ') || 'None reported'}
-Activity Level: ${fastingProfile.activityLevel || 'Not specified'}
-Primary Goal: ${fastingProfile.primaryGoal || 'Not specified'}
-` : 'No fasting profile completed'}
+            <div class="section">
+              <h2 class="section-title">Current Medications</h2>
+              ${medicationsHtml}
+            </div>
 
-${fastingAnalysis ? `
-═══════════════════════════════════════════════════════════════
+            <div class="section">
+              <h2 class="section-title">Fasting Profile</h2>
+              ${fastingProfileHtml}
+            </div>
 
-FASTING ANALYSIS:
-Status: ${fastingAnalysis.compatible ? 'Compatible' : 'Needs Review'}
-Recommended Fasting Window: ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}
-Analysis: ${fastingAnalysis.message}
-${fastingAnalysis.warnings.length > 0 ? `
-Important Considerations:
-${fastingAnalysis.warnings.map(warning => `• ${warning}`).join('\n')}
-` : ''}
-` : ''}
+            ${fastingAnalysisHtml}
 
-═══════════════════════════════════════════════════════════════
-
-This report was generated by AuricRX Medical Coach
-Please consult with your healthcare provider before making any changes to your medication or fasting routine.
-
-Generated on: ${currentDate}
+            <div class="footer">
+              <p>This report was generated by AuricRX Medical Coach</p>
+              <p>Please consult with your healthcare provider before making any changes to your medication or fasting routine.</p>
+            </div>
+          </body>
+        </html>
       `;
 
-      console.log('📄 Text content created, length:', textContent.length);
-      console.log('📄 Text content preview (first 200 chars):', textContent.substring(0, 200));
+      console.log('📄 HTML content created, length:', html.length);
       
-      // Share the text content
-      console.log('🔧 Creating share options...');
-      const shareOptions = {
-        title: 'AuricRX Health Report',
-        message: `AuricRX Health Report - ${currentDate}\n\nThis text file contains your complete health information. You can copy this to a document and save as PDF.`,
-        url: `data:text/plain;charset=utf-8,${encodeURIComponent(textContent)}`
-      };
-      console.log('🔧 Share options created:', {
-        title: shareOptions.title,
-        message: shareOptions.message,
-        urlLength: shareOptions.url.length
-      });
-
-      console.log('📤 Attempting to share health report...');
+      // Generate PDF using expo-print (same as DocumentsScreen)
+      console.log('🖨️ Generating PDF with expo-print...');
+      const { uri } = await Print.printToFileAsync({ html });
+      console.log('✅ PDF generated at:', uri);
       
-      // Test if Share API is available
-      if (!Share.share) {
-        console.error('❌ Share API is not available');
-        throw new Error('Share API is not available');
+      // Save to docs directory
+      console.log('💾 Saving PDF to documents directory...');
+      const docsDir = FileSystem.documentDirectory + 'health-reports/';
+      
+      // Ensure directory exists
+      const dirInfo = await FileSystem.getInfoAsync(docsDir);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(docsDir, { intermediates: true });
+        console.log('📁 Created health-reports directory');
       }
       
-      console.log('✅ Share API is available, proceeding...');
-      const shareResult = await Share.share(shareOptions);
-      console.log('📤 Share result:', shareResult);
-      console.log('✅ Health report sharing completed');
+      const fileName = `AuricRX_Health_Report_${currentDate.replace(/\//g, '-')}.pdf`;
+      const finalUri = docsDir + fileName;
+      
+      await FileSystem.moveAsync({
+        from: uri,
+        to: finalUri,
+      });
+      console.log('✅ PDF saved to:', finalUri);
+
+      // Share the PDF using expo-sharing (same as DocumentsScreen)
+      console.log('📤 Sharing PDF with expo-sharing...');
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        throw new Error('Sharing is not available on this platform');
+      }
+      
+      await Sharing.shareAsync(finalUri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'AuricRX Health Report',
+      });
+      
+      console.log('✅ PDF shared successfully');
       
       Alert.alert(
         'Export Successful',
-        'Your health report has been prepared for sharing. You can copy this text to a document and save as PDF using your device\'s built-in tools.',
+        'Your health report has been generated as a PDF and is ready for sharing.',
         [{ text: 'OK' }]
       );
     } catch (error) {
