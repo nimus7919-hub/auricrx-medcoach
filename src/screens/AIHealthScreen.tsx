@@ -897,12 +897,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       console.log('📝 Creating HTML content for PDF...');
       
-      // Get AuricRX logo as base64 (using Image.resolveAssetSource for proper path)
-      const logoSource = require('../../assets/sign in logo.png');
-      const logoUri = Image.resolveAssetSource(logoSource).uri;
-      console.log('🔍 Logo URI resolved:', logoUri);
+      // Get AuricRX logo as base64 (using Asset.fromModule for proper handling)
+      const { Asset } = require('expo-asset');
+      const logoAsset = Asset.fromModule(require('../../assets/sign in logo.png'));
+      await logoAsset.downloadAsync();
+      console.log('🔍 Logo asset loaded:', logoAsset.localUri);
       
-      const logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
+      const logoBase64 = await FileSystem.readAsStringAsync(logoAsset.localUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
       console.log('✅ Logo loaded successfully, base64 length:', logoBase64.length);
