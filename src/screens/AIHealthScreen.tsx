@@ -1043,7 +1043,6 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 padding: 15px; 
                 margin: 10px 0; 
                 border-radius: 5px; 
-                border-left: 4px solid #007bff;
               }
               .medication-item h3 {
                 margin-top: 0;
