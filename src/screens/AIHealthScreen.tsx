@@ -554,7 +554,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const analyzeSymptoms = async () => {
     if (!symptomText.trim()) {
-      Alert.alert('❌ ' + t('error'), t('enterSymptoms'));
+      Alert.alert('❌ Error', 'Please enter your symptoms');
       return;
     }
 
@@ -590,9 +590,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                           analysis.urgency === 'medium' ? '⚡' : 'ℹ️';
       
       Alert.alert(
-        `${urgencyEmoji} ${t('symptomAnalysisComplete')}`,
+        `${urgencyEmoji} Symptom Analysis Complete`,
         `Severity: ${analysis.severity}\nUrgency: ${analysis.urgency}\n\nPossible Conditions:\n${analysis.possibleConditions.map(c => `• ${c.condition} (${(c.probability * 100).toFixed(0)}%)`).join('\n')}\n\nRecommendations:\n${analysis.recommendations.slice(0, 3).map(r => `• ${r}`).join('\n')}`,
-        [{ text: t('ok') }]
+        [{ text: 'OK' }]
       );
     } catch (error) {
       console.error('Failed to analyze symptoms:', error);
@@ -602,7 +602,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const checkDrugInteractions = async () => {
     if (!medicationList.trim()) {
-      Alert.alert('❌ ' + t('error'), t('enterMedications'));
+      Alert.alert('❌ Error', 'Please enter your medications');
       return;
     }
 
@@ -633,16 +633,16 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       triggerHaptic('medium');
       
       if (interactions.length === 0) {
-        Alert.alert('✅ ' + t('noInteractionsFound'), t('noKnownInteractions'));
+        Alert.alert('✅ No Interactions Found', 'No known drug interactions detected');
       } else {
         const interactionText = interactions.map(i => 
           `• ${i.drug1} + ${i.drug2}: ${i.severity.toUpperCase()}\n  ${i.description}`
         ).join('\n\n');
         
         Alert.alert(
-          '⚠️ ' + t('drugInteractionsDetected'),
-          `${t('foundInteractions')} ${interactions.length}:\n\n${interactionText}`,
-          [{ text: t('ok') }]
+          '⚠️ Drug Interactions Detected',
+          `Found ${interactions.length} interactions:\n\n${interactionText}`,
+          [{ text: 'OK' }]
         );
       }
     } catch (error) {
@@ -873,7 +873,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       Alert.alert(
         `${statusEmoji} ${statusTitle}`,
         analysis.message,
-        [{ text: t('ok') }]
+        [{ text: 'OK' }]
       );
     } catch (error) {
       console.error('Failed to analyze fasting compatibility:', error);
@@ -1209,24 +1209,24 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           style={{ width: 24, height: 24, marginRight: 8 }} 
           resizeMode="contain" 
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('aiHealthFeatures')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>AI Health Features</DynamicText>
       </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('intelligentHealthcareFeatures')}
+        Intelligent healthcare features powered by AI
       </DynamicText>
       
       <View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{insights.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('healthInsights')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>Health Insights</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{symptomAnalyses.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('symptomAnalyses')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>Symptom Analyses</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{drugInteractions.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('drugChecks')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>Drug Checks</DynamicText>
         </View>
       </View>
 
@@ -1235,13 +1235,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowSymptomModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>🤒 {t('analyzeSymptoms')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>🤒 Analyze Symptoms</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowDrugCheckModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 {t('checkInteractions')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 Check Interactions</DynamicText>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -1273,11 +1273,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             style={{ width: 24, height: 24, marginRight: 8 }} 
             resizeMode="contain" 
           />
-          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('fastingAnalytics')}</DynamicText>
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>Fasting Analytics</DynamicText>
         </View>
         
         <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-          {t('fastingDescription')}
+          Check if your current medications are compatible with intermittent fasting
         </DynamicText>
 
         {hasProfile ? (
@@ -1362,7 +1362,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         )}
 
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
-          {t('fastingDisclaimer')}
+          Please consult with your healthcare provider before making any changes to your medication schedule or fasting routine.
         </DynamicText>
       </Animated.View>
 
@@ -1379,9 +1379,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {t('healthInsights')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 Health Insights</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('aiGeneratedInsights')}
+        AI-generated insights based on your health data
       </DynamicText>
       
       {insights.slice(0, 5).map(insight => (
@@ -1408,7 +1408,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           {insight.actionable && insight.actionItems.length > 0 && (
             <View style={dynamicStyles.actionItems}>
               <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                {t('actionItems')}
+                Action Items
               </DynamicText>
               {insight.actionItems.slice(0, 3).map((item, index) => (
                 <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
@@ -1422,7 +1422,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       {insights.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noHealthInsights')}
+          No health insights available yet. Complete your health profile and add medications to get personalized insights.
         </DynamicText>
       )}
     </Animated.View>
@@ -1438,9 +1438,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 {t('recentAnalyses')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 Recent Analyses</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('recentSymptomAnalyses')}
+        Your recent symptom analyses and health checks
       </DynamicText>
       
       {symptomAnalyses.slice(0, 3).map(analysis => (
@@ -1471,7 +1471,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       {symptomAnalyses.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noSymptomAnalyses')}
+          No symptom analyses available yet. Use the "Analyze Symptoms" feature to get started.
         </DynamicText>
       )}
     </Animated.View>
@@ -1524,11 +1524,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 resizeMode="contain" 
               />
               <DynamicText type="primary" style={styles.title}>
-                {t('aiHealthAssistant')}
+                AI Health Assistant
               </DynamicText>
             </View>
             <DynamicText type="secondary" style={styles.subtitle}>
-              {t('intelligentHealthcareFeatures')}
+              Intelligent healthcare features powered by AI
             </DynamicText>
           </Animated.View>
 
@@ -1586,13 +1586,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>🤒 {t('symptomAnalysis')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>🤒 Symptom Analysis</DynamicText>
             
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('describeSymptoms')}</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>Describe your symptoms</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
-                placeholder={t('enterSymptomsPlaceholder')}
+                placeholder="Enter your symptoms separated by commas (e.g., headache, fever, nausea)"
                 placeholderTextColor={getCardTextColor() + '80'}
                 value={symptomText}
                 onChangeText={setSymptomText}
@@ -1605,13 +1605,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowSymptomModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeSymptoms}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('analyze')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Analyze</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1627,13 +1627,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>💊 {t('drugInteractionCheck')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>💊 Drug Interaction Check</DynamicText>
             
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('listMedications')}</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>List your medications</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
-                placeholder={t('enterMedicationsPlaceholder')}
+                placeholder="Enter medication names separated by commas (e.g., Aspirin, Metformin, Lisinopril)"
                 placeholderTextColor={getCardTextColor() + '80'}
                 value={medicationList}
                 onChangeText={setMedicationList}
@@ -1646,13 +1646,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowDrugCheckModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={checkDrugInteractions}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('check')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Check</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1668,12 +1668,12 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>⏰ {t('fastingAnalytics')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>⏰ Fasting Analytics</DynamicText>
             
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('fastingCompatibilityCheck')}</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>Fasting Compatibility Check</DynamicText>
               <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-                {t('fastingDescription')}
+                Check if your current medications are compatible with intermittent fasting
               </DynamicText>
             </View>
 
@@ -1701,7 +1701,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 {fastingAnalysis.warnings.length > 0 && (
                   <View style={dynamicStyles.actionItems}>
                     <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                      {t('warnings')}:
+                      Warnings:
                     </DynamicText>
                     {fastingAnalysis.warnings.map((warning, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
@@ -1718,18 +1718,18 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowFastingModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeFastingCompatibility}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('analyze')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Analyze</DynamicText>
               </TouchableOpacity>
             </View>
             
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
-              {t('fastingDisclaimer')}
+              Please consult with your healthcare provider before making any changes to your medication schedule or fasting routine.
             </DynamicText>
           </View>
         </View>
