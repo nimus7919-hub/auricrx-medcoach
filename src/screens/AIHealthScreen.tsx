@@ -1200,11 +1200,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       console.error('❌ Error stack:', error.stack);
       console.error('❌ Full error object:', JSON.stringify(error, null, 2));
       
-      Alert.alert(
-        'Export Error',
-        `There was an error preparing your health report. Please try again.\n\nError: ${error.message}`,
-        [{ text: 'OK' }]
-      );
+      // No alert shown - silent failure
     }
   };
 
