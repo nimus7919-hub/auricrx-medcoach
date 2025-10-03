@@ -81,6 +81,11 @@ interface DrugInteraction {
 export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [] }: AIHealthScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
+  // Translation function using S object with fallbacks
+  const t = (key: string) => {
+    return S?.[key] || key;
+  };
+  
   // Default theme if not provided
   const defaultTheme = {
     card: '#ffffff',
@@ -1209,24 +1214,24 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           style={{ width: 24, height: 24, marginRight: 8 }} 
           resizeMode="contain" 
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>AI Health Features</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('aiHealthFeatures')}</DynamicText>
       </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        Intelligent healthcare features powered by AI
+        {t('intelligentHealthcareFeatures')}
       </DynamicText>
       
       <View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{insights.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>Health Insights</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('healthInsights')}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{symptomAnalyses.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>Symptom Analyses</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('symptomAnalyses')}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{drugInteractions.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>Drug Checks</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('drugChecks')}</DynamicText>
         </View>
       </View>
 
@@ -1235,13 +1240,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowSymptomModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>🤒 Analyze Symptoms</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>🤒 {t('analyzeSymptoms')}</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowDrugCheckModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 Check Interactions</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 {t('checkInteractions')}</DynamicText>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -1273,11 +1278,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             style={{ width: 24, height: 24, marginRight: 8 }} 
             resizeMode="contain" 
           />
-          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>Fasting Analytics</DynamicText>
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('fastingAnalytics')}</DynamicText>
         </View>
         
         <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-          Check if your current medications are compatible with intermittent fasting
+          {t('fastingDescription')}
         </DynamicText>
 
         {hasProfile ? (
@@ -1379,9 +1384,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 Health Insights</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {t('healthInsights')}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        AI-generated insights based on your health data
+        {t('aiGeneratedInsights')}
       </DynamicText>
       
       {insights.slice(0, 5).map(insight => (
@@ -1408,7 +1413,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           {insight.actionable && insight.actionItems.length > 0 && (
             <View style={dynamicStyles.actionItems}>
               <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                Action Items
+                {t('actionItems')}
               </DynamicText>
               {insight.actionItems.slice(0, 3).map((item, index) => (
                 <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
@@ -1422,7 +1427,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       {insights.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          No health insights available yet. Complete your health profile and add medications to get personalized insights.
+          {t('noHealthInsights')}
         </DynamicText>
       )}
     </Animated.View>
@@ -1438,9 +1443,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 Recent Analyses</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 {t('recentAnalyses')}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        Your recent symptom analyses and health checks
+        {t('recentSymptomAnalyses')}
       </DynamicText>
       
       {symptomAnalyses.slice(0, 3).map(analysis => (
@@ -1471,7 +1476,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       {symptomAnalyses.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          No symptom analyses available yet. Use the "Analyze Symptoms" feature to get started.
+          {t('noSymptomAnalyses')}
         </DynamicText>
       )}
     </Animated.View>
@@ -1524,11 +1529,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 resizeMode="contain" 
               />
               <DynamicText type="primary" style={styles.title}>
-                AI Health Assistant
+                {t('aiHealthAssistant')}
               </DynamicText>
             </View>
             <DynamicText type="secondary" style={styles.subtitle}>
-              Intelligent healthcare features powered by AI
+              {t('intelligentHealthcareFeatures')}
             </DynamicText>
           </Animated.View>
 
