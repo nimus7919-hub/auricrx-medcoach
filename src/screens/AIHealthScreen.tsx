@@ -884,10 +884,15 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const exportToPDF = async () => {
     console.log('🚀 Export PDF button pressed');
+    console.log('📊 Medications count:', medications?.length || 0);
+    console.log('👤 Fasting profile exists:', !!fastingProfile);
+    console.log('🧠 Fasting analysis exists:', !!fastingAnalysis);
+    
     try {
       const currentDate = new Date().toLocaleDateString();
       console.log('📅 Generated date:', currentDate);
       
+      console.log('📝 Creating text content...');
       // Create a comprehensive text report
       const textContent = `
 AuricRX Health Report - ${currentDate}
@@ -950,17 +955,33 @@ Generated on: ${currentDate}
       `;
 
       console.log('📄 Text content created, length:', textContent.length);
+      console.log('📄 Text content preview (first 200 chars):', textContent.substring(0, 200));
       
       // Share the text content
+      console.log('🔧 Creating share options...');
       const shareOptions = {
         title: 'AuricRX Health Report',
         message: `AuricRX Health Report - ${currentDate}\n\nThis text file contains your complete health information. You can copy this to a document and save as PDF.`,
         url: `data:text/plain;charset=utf-8,${encodeURIComponent(textContent)}`
       };
+      console.log('🔧 Share options created:', {
+        title: shareOptions.title,
+        message: shareOptions.message,
+        urlLength: shareOptions.url.length
+      });
 
-      console.log('📤 Sharing health report...');
-      await Share.share(shareOptions);
-      console.log('✅ Health report shared successfully');
+      console.log('📤 Attempting to share health report...');
+      
+      // Test if Share API is available
+      if (!Share.share) {
+        console.error('❌ Share API is not available');
+        throw new Error('Share API is not available');
+      }
+      
+      console.log('✅ Share API is available, proceeding...');
+      const shareResult = await Share.share(shareOptions);
+      console.log('📤 Share result:', shareResult);
+      console.log('✅ Health report sharing completed');
       
       Alert.alert(
         'Export Successful',
@@ -968,10 +989,15 @@ Generated on: ${currentDate}
         [{ text: 'OK' }]
       );
     } catch (error) {
-      console.error('Error exporting health report:', error);
+      console.error('❌ Error exporting health report:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      console.error('❌ Full error object:', JSON.stringify(error, null, 2));
+      
       Alert.alert(
         'Export Error',
-        'There was an error preparing your health report. Please try again.',
+        `There was an error preparing your health report. Please try again.\n\nError: ${error.message}`,
         [{ text: 'OK' }]
       );
     }
