@@ -900,7 +900,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       // Get AuricRX logo as base64 (same approach as ID system)
       let logoBase64 = null;
       try {
-        const logoUri = require('../../assets/sign in logo.png');
+        const logoUri = require('../../assets/auricrx-logo.png');
         logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
@@ -1186,7 +1186,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       console.log('✅ PDF shared successfully, result:', shareResult);
       
       // Only show success if sharing was actually completed
-      if (shareResult.action === 'sharedAction' || shareResult.action === 'dismissedAction') {
+      if (shareResult && (shareResult.action === 'sharedAction' || shareResult.action === 'dismissedAction')) {
         Alert.alert(
           'Export Successful',
           'Your health report has been generated as a PDF and is ready for sharing.',
