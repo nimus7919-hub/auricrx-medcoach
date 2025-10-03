@@ -977,15 +977,15 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
       const fastingAnalysisHtml = fastingAnalysis ? `
         <div class="analysis-section">
-          <h3>${S?.fastingAnalysis || 'Fasting Analysis'}</h3>
+          <h3>${t('fastingAnalysis')}</h3>
           <div class="analysis-result ${fastingAnalysis.compatible ? 'compatible' : 'needs-review'}">
-            <p><strong>${S?.status || 'Status'}:</strong> ${fastingAnalysis.compatible ? (S?.compatible || 'Compatible') : (S?.needsReview || 'Needs Review')}</p>
-            <p><strong>${S?.recommendedFastingWindow || 'Recommended Fasting Window'}:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}</p>
-            <p><strong>${S?.analysis || 'Analysis'}:</strong> ${fastingAnalysis.message}</p>
+            <p><strong>${t('status')}:</strong> ${fastingAnalysis.compatible ? t('compatible') : t('needsReview')}</p>
+            <p><strong>${t('recommendedFastingWindow')}:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}</p>
+            <p><strong>${t('analysis')}:</strong> ${fastingAnalysis.message}</p>
           </div>
           ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
             <div class="warnings">
-              <h4>${S?.importantConsiderations || 'Important Considerations'}:</h4>
+              <h4>${t('importantConsiderations')}:</h4>
               <ul>
                 ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
               </ul>
@@ -1289,14 +1289,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <View style={dynamicStyles.fastingProfileCard}>
             <View style={dynamicStyles.fastingProfileHeader}>
               <DynamicText type="card" style={dynamicStyles.fastingProfileTitle}>
-                {S?.yourFastingProfile || 'Your Fasting Profile'}
+                {t('yourFastingProfile')}
               </DynamicText>
               <View style={[
                 dynamicStyles.fastingStatusBadge,
                 { backgroundColor: fastingAnalysis?.compatible ? '#10b981' : '#f59e0b' }
               ]}>
                 <DynamicText type="card" style={dynamicStyles.fastingStatusText}>
-                  {fastingAnalysis ? (fastingAnalysis.compatible ? (S?.compatible || 'Compatible') : (S?.needsReview || 'Needs Review')) : (S?.notAnalyzed || 'Not Analyzed')}
+                  {fastingAnalysis ? (fastingAnalysis.compatible ? t('compatible') : t('needsReview')) : t('notAnalyzed')}
                 </DynamicText>
               </View>
             </View>
@@ -1304,7 +1304,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             {fastingAnalysis ? (
               <View style={dynamicStyles.fastingAnalysisResult}>
                 <View style={dynamicStyles.fastingTimeRecommendation}>
-                  <DynamicText type="card" style={dynamicStyles.fastingTimeLabel}>{S?.recommendedFastingWindow || 'Recommended Fasting Window'}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.fastingTimeLabel}>{t('recommendedFastingWindow')}</DynamicText>
                   <DynamicText type="card" style={dynamicStyles.fastingTimeValue}>
                     {fastingAnalysis.suggestedHours}:{24-fastingAnalysis.suggestedHours}
                   </DynamicText>
@@ -1317,7 +1317,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 {fastingAnalysis.warnings.length > 0 && (
                   <View style={dynamicStyles.fastingWarnings}>
                     <DynamicText type="card" style={dynamicStyles.fastingWarningsTitle}>
-                      {S?.importantConsiderations || 'Important Considerations'}:
+                      {t('importantConsiderations')}:
                     </DynamicText>
                     {fastingAnalysis.warnings.map((warning, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.fastingWarningItem}>
@@ -1340,14 +1340,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               onPress={analyzeFastingCompatibility}
             >
               <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
-                {fastingAnalysis ? (S?.reAnalyzeFasting || 'Re-analyze Fasting') : (S?.analyzeFastingCompatibility || 'Analyze Fasting Compatibility')}
+                {fastingAnalysis ? t('reAnalyzeFasting') : t('analyzeFastingCompatibility')}
               </DynamicText>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={dynamicStyles.fastingNoProfileCard}>
             <DynamicText type="card" style={dynamicStyles.fastingNoProfileTitle}>
-              {S?.completeYourFastingProfile || 'Complete Your Fasting Profile'}
+              {t('completeYourFastingProfile')}
             </DynamicText>
             <DynamicText type="card" style={dynamicStyles.fastingNoProfileDescription}>
               Set up your fasting profile in Settings to get personalized fasting recommendations based on your health conditions, medications, and lifestyle.
@@ -1557,7 +1557,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 style={{ width: 24, height: 24, marginRight: 8 }} 
                 resizeMode="contain" 
               />
-              <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{S?.exportHealthReport || 'Export Health Report'}</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('exportHealthReport')}</DynamicText>
             </View>
             
             <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
@@ -1569,7 +1569,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               onPress={exportToPDF}
             >
               <DynamicText type="card" style={dynamicStyles.exportButtonText}>
-                {S?.exportHealthReport || 'Export Health Report'}
+                {t('exportHealthReport')}
               </DynamicText>
             </TouchableOpacity>
           </Animated.View>
