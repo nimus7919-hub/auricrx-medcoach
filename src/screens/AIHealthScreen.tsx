@@ -80,10 +80,16 @@ interface DrugInteraction {
 
 export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [] }: AIHealthScreenProps) {
   console.log('AI Health Screen rendering...');
+  console.log('S object keys:', Object.keys(S || {}));
+  console.log('S object yourFastingProfile:', S?.yourFastingProfile);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const t = (key: string) => {
+    const translation = S?.[key] || key;
+    console.log(`Translation for ${key}:`, translation, 'S object has key:', !!S?.[key]);
+    return translation;
+  };
   
   // Default theme if not provided
   const defaultTheme = {
