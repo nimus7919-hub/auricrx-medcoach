@@ -755,34 +755,54 @@ app.post('/pharmacies/prices', async (req, res) => {
   
   try {
     console.log('🔍 DEBUG: Attempting enhanced medication search...');
+    console.log('🔍 DEBUG: Medication:', medication);
+    console.log('🔍 DEBUG: Pharmacies count:', pharmacies?.length);
     
     // Try enhanced medication search with Excel data
-    const EnhancedMedicationSearch = require('../services/enhancedMedicationSearch');
-    const enhancedSearch = new EnhancedMedicationSearch();
-    
-    console.log('🔍 DEBUG: Calling enhanced medication search...');
-    const result = await enhancedSearch.searchMedicationPrices(pharmacies, medication, { currency });
-    
-    if (result.prices && result.prices.length > 0) {
-      console.log(`✅ DEBUG: Enhanced search returned ${result.prices.length} prices`);
-      console.log('🔍 DEBUG: Sample prices:', result.prices.slice(0, 3).map(p => ({ 
-        name: p.name, 
-        price: p.price, 
-        priceNotAvailable: p.priceNotAvailable 
-      })));
-      res.json({ ok: true, prices: result.prices, meta: result.meta || { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
-    } else {
-      console.log('⚠️ DEBUG: Enhanced search returned no prices, falling back to "Price not available"');
-      const prices = pharmacies.map(p => ({
-        ...p,
-        price: null, // No price available
-        priceNotAvailable: true,
-        pickup: true,
-        delivery: (p.id.charCodeAt(0) % 2) === 0,
-        requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
-      }));
-      res.json({ ok: true, prices, meta: { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
+    try {
+      const EnhancedMedicationSearch = require('../services/enhancedMedicationSearch');
+      console.log('✅ DEBUG: EnhancedMedicationSearch module loaded successfully');
+      
+      const enhancedSearch = new EnhancedMedicationSearch();
+      console.log('✅ DEBUG: EnhancedMedicationSearch instance created');
+      
+      console.log('🔍 DEBUG: Calling enhanced medication search...');
+      const result = await enhancedSearch.searchMedicationPrices(pharmacies, medication, { currency });
+      console.log('✅ DEBUG: Enhanced search completed, result:', {
+        hasPrices: !!result.prices,
+        pricesLength: result.prices?.length,
+        hasMeta: !!result.meta
+      });
+      
+      if (result.prices && result.prices.length > 0) {
+        console.log(`✅ DEBUG: Enhanced search returned ${result.prices.length} prices`);
+        console.log('🔍 DEBUG: Sample prices:', result.prices.slice(0, 3).map(p => ({ 
+          name: p.name, 
+          price: p.price, 
+          priceNotAvailable: p.priceNotAvailable 
+        })));
+        res.json({ ok: true, prices: result.prices, meta: result.meta || { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
+        return;
+      } else {
+        console.log('⚠️ DEBUG: Enhanced search returned no prices, falling back to "Price not available"');
+      }
+    } catch (enhancedError) {
+      console.error('❌ DEBUG: Enhanced medication search failed:', enhancedError.message);
+      console.error('❌ DEBUG: Enhanced medication search stack:', enhancedError.stack);
+      console.log('⚠️ DEBUG: Falling back to "Price not available" due to enhanced search error');
     }
+    
+    // Fallback: Return "Price not available"
+    const prices = pharmacies.map(p => ({
+      ...p,
+      price: null, // No price available
+      priceNotAvailable: true,
+      pickup: true,
+      delivery: (p.id.charCodeAt(0) % 2) === 0,
+      requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
+    }));
+    console.log('🔍 DEBUG: Returning fallback prices with priceNotAvailable:', prices.map(p => ({ name: p.name, priceNotAvailable: p.priceNotAvailable })));
+    res.json({ ok: true, prices, meta: { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
   } catch (e) {
     console.error('prices error', e.message);
     res.status(500).json({ ok: false, error: 'prices_failed' });
