@@ -41,7 +41,6 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
   },[]);
   const [showAll, setShowAll] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const [currency, setCurrency] = useState<string>('USD');
   const [mockMode, setMockMode] = useState(false);
   const [coordsUsed, setCoordsUsed] = useState<{lat:number; lon:number}|null>(null);
@@ -159,6 +158,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       
       // ENABLED: Excel integration with React Native compatible reader
       console.log('🔍 DEBUG: Attempting Excel integration with React Native compatible reader');
+      console.log('🔍 DEBUG: Input data:', {
+        nearCount: near.length,
+        medication: medication.name,
+        dosage: medication.dosage,
+        currency: determinedCurrency,
+        userCountry: userCountry
+      });
       
       try {
         // Try Excel integration first
@@ -339,19 +345,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       distanceMiles: r.distanceMiles,
       price: r.price
     })));
-    if (activeFilters.size) {
-      list = list.filter(r => {
-        if (activeFilters.has('pickup') && !r.pickup) return false;
-        if (activeFilters.has('delivery') && !r.delivery) return false;
-        if (activeFilters.has('cash')) {
-          // placeholder: assume all support cash; keep for future expansion
-        }
-        if (activeFilters.has('coupon') && !r.requiresCoupon) return false;
-        return true;
-      });
-    }
     return showAll ? list : list.slice(0,5);
-  }, [results, showAll, activeFilters, sort, descending]);
+  }, [results, showAll, sort, descending]);
 
   // Precompute current lowest price once per results array (excluding "price not available" items)
   const lowestPrice = useMemo(() => {
@@ -462,9 +457,10 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Text style={{ color: colors.text, fontSize:16, fontWeight:'600' }}>{item.name}</Text>
             <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
             <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
-              <Text style={{ color: colors.sub, fontSize:11 }}>{productInfo.display}</Text>
-              {item.excelMatch?.unidades && (
-                <Text style={{ color: colors.sub, fontSize:11, marginLeft: 8 }}>{item.excelMatch.unidades}</Text>
+              {item.excelMatch?.Medicinas ? (
+                <Text style={{ color: colors.sub, fontSize:11 }}>{item.excelMatch.Medicinas}</Text>
+              ) : (
+                <Text style={{ color: colors.sub, fontSize:11 }}>{productInfo.display}</Text>
               )}
             </View>
           </View>
@@ -544,32 +540,6 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {`📍 ${coordsUsed.lat.toFixed(4)}, ${coordsUsed.lon.toFixed(4)} • ${currency}`}
               </Text>
             )}
-            <View style={{ flexDirection: "row", flexWrap:'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
-              {[
-                {k:'pickup', label: strings.pickup||'Pickup'},
-                {k:'delivery', label: strings.delivery||'Delivery'},
-                {k:'cash', label: strings.cash||'Cash'},
-                {k:'coupon', label: strings.coupon||'Coupon'}
-              ].map(f => {
-                const active = activeFilters.has(f.k);
-                return (
-                  <Pressable key={f.k} onPress={()=>{
-                    setActiveFilters(prev => {
-                      const n = new Set(prev);
-                      if (n.has(f.k)) n.delete(f.k); else n.add(f.k);
-                      return n;
-                    });
-                  }} style={{ backgroundColor: active? colors.gold: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
-                    <Text style={{ color: active? '#000': colors.text, fontSize: 12 }}>{f.label}</Text>
-                  </Pressable>
-                );
-              })}
-              {activeFilters.size>0 && (
-                <Pressable onPress={()=> setActiveFilters(new Set())} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
-                  <Text style={{ color: colors.text, fontSize: 12 }}>×</Text>
-                </Pressable>
-              )}
-            </View>
             {/* Sorting row */}
             <View style={{ flexDirection:'row', alignItems:'center', flexWrap:'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
               <Text style={{ color: colors.sub, fontSize: 12 }}>{strings.sortBy || 'Sort:'}</Text>
