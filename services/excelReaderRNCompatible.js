@@ -45,22 +45,41 @@ class ExcelReaderRNCompatible {
       }
       
       // Fallback: Try to require the JSON file (for Node.js test environment)
-      const requirePaths = [
-        '../assets/medicationData.json',
-        './assets/medicationData.json',
-        '../medicationData.json',
-        './medicationData.json'
-      ];
+      // Note: Metro bundler requires static require paths, so we try them individually
+      try {
+        console.log('📊 Trying require path: ../assets/medicationData.json');
+        const data = require('../assets/medicationData.json');
+        console.log(`📊 Loaded ${data.length} medications from require() method (../assets/medicationData.json)`);
+        return data;
+      } catch (requireError1) {
+        console.log('📊 Require path ../assets/medicationData.json failed:', requireError1.message);
+      }
       
-      for (const requirePath of requirePaths) {
-        try {
-          console.log(`📊 Trying require path: ${requirePath}`);
-          const data = require(requirePath);
-          console.log(`📊 Loaded ${data.length} medications from require() method (${requirePath})`);
-          return data;
-        } catch (requireError) {
-          console.log(`📊 Require path ${requirePath} failed:`, requireError.message);
-        }
+      try {
+        console.log('📊 Trying require path: ./assets/medicationData.json');
+        const data = require('./assets/medicationData.json');
+        console.log(`📊 Loaded ${data.length} medications from require() method (./assets/medicationData.json)`);
+        return data;
+      } catch (requireError2) {
+        console.log('📊 Require path ./assets/medicationData.json failed:', requireError2.message);
+      }
+      
+      try {
+        console.log('📊 Trying require path: ../medicationData.json');
+        const data = require('../medicationData.json');
+        console.log(`📊 Loaded ${data.length} medications from require() method (../medicationData.json)`);
+        return data;
+      } catch (requireError3) {
+        console.log('📊 Require path ../medicationData.json failed:', requireError3.message);
+      }
+      
+      try {
+        console.log('📊 Trying require path: ./medicationData.json');
+        const data = require('./medicationData.json');
+        console.log(`📊 Loaded ${data.length} medications from require() method (./medicationData.json)`);
+        return data;
+      } catch (requireError4) {
+        console.log('📊 Require path ./medicationData.json failed:', requireError4.message);
       }
       
       console.warn('⚠️ All require methods failed, generating mock data...');
