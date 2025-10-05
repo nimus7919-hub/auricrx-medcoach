@@ -754,21 +754,35 @@ app.post('/pharmacies/prices', async (req, res) => {
   }
   
   try {
-    // DISABLED: Mock price generation - return "Price not available" instead
-    console.log('⚠️ DEBUG: Pharmacy prices API: Returning "Price not available" instead of mock prices');
-    console.log('🔍 DEBUG: Processing pharmacies:', pharmacies.map(p => ({ name: p.name, id: p.id })));
+    console.log('🔍 DEBUG: Attempting enhanced medication search...');
     
-    const prices = pharmacies.map(p => ({
-      ...p,
-      price: null, // No price available
-      priceNotAvailable: true,
-      pickup: true,
-      delivery: (p.id.charCodeAt(0) % 2) === 0,
-      requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
-    }));
+    // Try enhanced medication search with Excel data
+    const EnhancedMedicationSearch = require('../services/enhancedMedicationSearch');
+    const enhancedSearch = new EnhancedMedicationSearch();
     
-    console.log('🔍 DEBUG: Returning prices with priceNotAvailable:', prices.map(p => ({ name: p.name, priceNotAvailable: p.priceNotAvailable })));
-    res.json({ ok: true, prices, meta: { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
+    console.log('🔍 DEBUG: Calling enhanced medication search...');
+    const result = await enhancedSearch.searchMedicationPrices(pharmacies, medication, { currency });
+    
+    if (result.prices && result.prices.length > 0) {
+      console.log(`✅ DEBUG: Enhanced search returned ${result.prices.length} prices`);
+      console.log('🔍 DEBUG: Sample prices:', result.prices.slice(0, 3).map(p => ({ 
+        name: p.name, 
+        price: p.price, 
+        priceNotAvailable: p.priceNotAvailable 
+      })));
+      res.json({ ok: true, prices: result.prices, meta: result.meta || { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
+    } else {
+      console.log('⚠️ DEBUG: Enhanced search returned no prices, falling back to "Price not available"');
+      const prices = pharmacies.map(p => ({
+        ...p,
+        price: null, // No price available
+        priceNotAvailable: true,
+        pickup: true,
+        delivery: (p.id.charCodeAt(0) % 2) === 0,
+        requiresCoupon: (p.id.charCodeAt(1) % 3) === 0,
+      }));
+      res.json({ ok: true, prices, meta: { currency: currency || 'USD', rate: 1, fxTs: Date.now() } });
+    }
   } catch (e) {
     console.error('prices error', e.message);
     res.status(500).json({ ok: false, error: 'prices_failed' });

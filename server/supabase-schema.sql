@@ -67,6 +67,31 @@ CREATE TABLE IF NOT EXISTS user_supplements (
   is_active BOOLEAN DEFAULT TRUE
 );
 
+-- Supplement contributions table
+CREATE TABLE IF NOT EXISTS supplement_contributions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Contribution data
+  supplement_name TEXT NOT NULL,
+  brand TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  quantity TEXT,
+  store_name TEXT NOT NULL,
+  store_address TEXT,
+  pharmacy_id TEXT,
+  currency TEXT DEFAULT 'USD',
+  
+  -- User data
+  user_location JSONB,
+  user_id TEXT,
+  
+  -- Status
+  verified BOOLEAN DEFAULT FALSE,
+  source TEXT DEFAULT 'user_contribution'
+);
+
 -- User doctors table
 CREATE TABLE IF NOT EXISTS user_doctors (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
