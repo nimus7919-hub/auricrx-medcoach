@@ -247,36 +247,45 @@ async function getUserSupplements(userId) {
 
 async function getUserMedications(userId) {
   try {
-    // Use direct query instead of stored function (in case function doesn't exist in DB)
-    const data = await neonClient`
-      SELECT 
-        id,
-        created_at,
-        medication_name,
-        strength_value,
-        strength_unit,
-        status,
-        times,
-        start_date,
-        end_date,
-        notes,
-        doses_left,
-        quantity_value,
-        quantity_unit,
-        last_refill,
-        is_active
-      FROM user_medications 
-      WHERE user_id = ${userId}
-      ORDER BY created_at DESC
-    `;
-    
-    console.log(`📊 Retrieved ${data.length} medications for user ${userId}`);
-    return data;
+    // Try the stored function first
+    try {
+      const data = await neonClient`
+        SELECT * FROM get_user_medications(${userId})
+      `;
+      console.log(`📊 Retrieved ${data.length} medications for user ${userId} using stored function`);
+      return data;
+    } catch (functionError) {
+      console.warn('⚠️ Stored function get_user_medications does not exist, using direct query:', functionError.message);
+      
+      // Fallback to direct query if stored function doesn't exist
+      const data = await neonClient`
+        SELECT 
+          id,
+          created_at,
+          medication_name,
+          strength_value,
+          strength_unit,
+          status,
+          times,
+          start_date,
+          end_date,
+          notes,
+          doses_left,
+          quantity_value,
+          quantity_unit,
+          last_refill,
+          is_active
+        FROM user_medications 
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+      `;
+      
+      console.log(`📊 Retrieved ${data.length} medications for user ${userId} using direct query`);
+      return data;
+    }
   } catch (error) {
     console.error('❌ Failed to get user medications:', error);
-    console.error('❌ Falling back to empty array');
-    // Return empty array instead of throwing error to prevent 500
-    return [];
+    throw error;
   }
 }
 
