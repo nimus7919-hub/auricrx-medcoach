@@ -428,6 +428,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     if (!item || typeof item !== 'object') return null;
     const isLowest = lowestPrice != null && typeof item.price === 'number' && item.price === lowestPrice;
     console.log('[PHARMACY DEBUG] Rendering pharmacy:', item.name, 'excelMatch:', item.excelMatch);
+    console.log('[PHARMACY DEBUG] excelMatch.medicinas:', item.excelMatch?.medicinas);
+    console.log('[PHARMACY DEBUG] excelMatch.unidades:', item.excelMatch?.unidades);
     return (
       <Pressable
         onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
@@ -457,8 +459,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Text style={{ color: colors.text, fontSize:16, fontWeight:'600' }}>{item.name}</Text>
             <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
             <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
-              {item.excelMatch?.Medicinas ? (
-                <Text style={{ color: colors.sub, fontSize:11 }}>{item.excelMatch.Medicinas}</Text>
+              {item.excelMatch?.medicinas ? (
+                <Text style={{ color: colors.sub, fontSize:11 }}>{item.excelMatch.medicinas}</Text>
               ) : (
                 <Text style={{ color: colors.sub, fontSize:11 }}>{productInfo.display}</Text>
               )}
