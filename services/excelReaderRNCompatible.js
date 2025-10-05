@@ -1,6 +1,9 @@
 // services/excelReaderRNCompatible.js
 // React Native/Expo compatible Excel reader using fetch and blob
 
+// Import the medication data directly
+import medicationData from '../assets/medicationData.json';
+
 class ExcelReaderRNCompatible {
   constructor() {
     this.cache = new Map();
@@ -13,77 +16,14 @@ class ExcelReaderRNCompatible {
     try {
       console.log('📊 Loading Excel data for React Native...');
       
-      // Try to load from JSON file first
-      try {
-        // Try different paths for different environments
-        const paths = [
-          './assets/medicationData.json',  // Client-side React Native
-          './medicationData.json',         // Server-side
-          '../assets/medicationData.json', // Alternative client path
-          '../medicationData.json'         // Alternative server path
-        ];
-        
-        for (const path of paths) {
-          try {
-            console.log(`📊 Trying to load from: ${path}`);
-            const response = await fetch(path);
-            if (response.ok) {
-              const data = await response.json();
-              console.log(`📊 Loaded ${data.length} medications from ${path}`);
-              return data;
-            } else {
-              console.log(`📊 Failed to load from ${path}, status: ${response.status}`);
-            }
-          } catch (pathError) {
-            console.log(`📊 Path ${path} failed:`, pathError.message);
-          }
-        }
-        
-        console.log('⚠️ All fetch paths failed, trying require method...');
-      } catch (fetchError) {
-        console.log('⚠️ Fetch failed, trying require method...');
+      // Use the imported medication data directly
+      if (medicationData && Array.isArray(medicationData)) {
+        console.log(`📊 Loaded ${medicationData.length} medications from imported JSON data`);
+        return medicationData;
       }
       
-      // Fallback: Try to require the JSON file (for Node.js test environment)
-      // Note: Metro bundler requires static require paths, so we try them individually
-      try {
-        console.log('📊 Trying require path: ../assets/medicationData.json');
-        const data = require('../assets/medicationData.json');
-        console.log(`📊 Loaded ${data.length} medications from require() method (../assets/medicationData.json)`);
-        return data;
-      } catch (requireError1) {
-        console.log('📊 Require path ../assets/medicationData.json failed:', requireError1.message);
-      }
-      
-      try {
-        console.log('📊 Trying require path: ./assets/medicationData.json');
-        const data = require('./assets/medicationData.json');
-        console.log(`📊 Loaded ${data.length} medications from require() method (./assets/medicationData.json)`);
-        return data;
-      } catch (requireError2) {
-        console.log('📊 Require path ./assets/medicationData.json failed:', requireError2.message);
-      }
-      
-      try {
-        console.log('📊 Trying require path: ../medicationData.json');
-        const data = require('../medicationData.json');
-        console.log(`📊 Loaded ${data.length} medications from require() method (../medicationData.json)`);
-        return data;
-      } catch (requireError3) {
-        console.log('📊 Require path ../medicationData.json failed:', requireError3.message);
-      }
-      
-      try {
-        console.log('📊 Trying require path: ./medicationData.json');
-        const data = require('./medicationData.json');
-        console.log(`📊 Loaded ${data.length} medications from require() method (./medicationData.json)`);
-        return data;
-      } catch (requireError4) {
-        console.log('📊 Require path ./medicationData.json failed:', requireError4.message);
-      }
-      
-      console.warn('⚠️ All require methods failed, generating mock data...');
-      throw new Error('Both fetch and require failed');
+      console.warn('⚠️ Imported medication data is invalid, generating mock data...');
+      throw new Error('Invalid imported data');
       
     } catch (error) {
       console.log('⚠️ Could not load JSON data, using mock data for testing');
