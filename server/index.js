@@ -760,7 +760,7 @@ app.post('/pharmacies/prices', async (req, res) => {
     
     // Try enhanced medication search with Excel data
     try {
-      const EnhancedMedicationSearch = require('../services/enhancedMedicationSearch');
+      const EnhancedMedicationSearch = require('../services/enhancedMedicationSearch.js');
       console.log('✅ DEBUG: EnhancedMedicationSearch module loaded successfully');
       
       const enhancedSearch = new EnhancedMedicationSearch();
