@@ -15,36 +15,56 @@ class ExcelReaderRNCompatible {
       
       // Try to load from JSON file first
       try {
-        // Try server path first (when running on server), then client path
-        const serverPath = './medicationData.json';
-        const clientPath = './assets/medicationData.json';
+        // Try different paths for different environments
+        const paths = [
+          './assets/medicationData.json',  // Client-side React Native
+          './medicationData.json',         // Server-side
+          '../assets/medicationData.json', // Alternative client path
+          '../medicationData.json'         // Alternative server path
+        ];
         
-        let response;
-        try {
-          response = await fetch(serverPath);
-        } catch (serverError) {
-          console.log('📊 Server path failed, trying client path...');
-          response = await fetch(clientPath);
+        for (const path of paths) {
+          try {
+            console.log(`📊 Trying to load from: ${path}`);
+            const response = await fetch(path);
+            if (response.ok) {
+              const data = await response.json();
+              console.log(`📊 Loaded ${data.length} medications from ${path}`);
+              return data;
+            } else {
+              console.log(`📊 Failed to load from ${path}, status: ${response.status}`);
+            }
+          } catch (pathError) {
+            console.log(`📊 Path ${path} failed:`, pathError.message);
+          }
         }
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`📊 Loaded ${data.length} medications from JSON data`);
-          return data;
-        }
+        console.log('⚠️ All fetch paths failed, trying require method...');
       } catch (fetchError) {
         console.log('⚠️ Fetch failed, trying require method...');
       }
       
       // Fallback: Try to require the JSON file (for Node.js test environment)
-      try {
-        const data = require('../assets/medicationData.json');
-        console.log(`📊 Loaded ${data.length} medications from require() method`);
-        return data;
-      } catch (requireError) {
-        console.log('⚠️ Require failed, using mock data for testing');
-        throw new Error('Both fetch and require failed');
+      const requirePaths = [
+        '../assets/medicationData.json',
+        './assets/medicationData.json',
+        '../medicationData.json',
+        './medicationData.json'
+      ];
+      
+      for (const requirePath of requirePaths) {
+        try {
+          console.log(`📊 Trying require path: ${requirePath}`);
+          const data = require(requirePath);
+          console.log(`📊 Loaded ${data.length} medications from require() method (${requirePath})`);
+          return data;
+        } catch (requireError) {
+          console.log(`📊 Require path ${requirePath} failed:`, requireError.message);
+        }
       }
+      
+      console.warn('⚠️ All require methods failed, generating mock data...');
+      throw new Error('Both fetch and require failed');
       
     } catch (error) {
       console.log('⚠️ Could not load JSON data, using mock data for testing');
