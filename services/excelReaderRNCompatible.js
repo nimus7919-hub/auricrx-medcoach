@@ -15,7 +15,17 @@ class ExcelReaderRNCompatible {
       
       // Try to load from JSON file first
       try {
-        const response = await fetch('./assets/medicationData.json');
+        // Try server path first (when running on server), then client path
+        const serverPath = './medicationData.json';
+        const clientPath = './assets/medicationData.json';
+        
+        let response;
+        try {
+          response = await fetch(serverPath);
+        } catch (serverError) {
+          console.log('📊 Server path failed, trying client path...');
+          response = await fetch(clientPath);
+        }
         
         if (response.ok) {
           const data = await response.json();
@@ -38,6 +48,7 @@ class ExcelReaderRNCompatible {
       
     } catch (error) {
       console.log('⚠️ Could not load JSON data, using mock data for testing');
+      console.log('📊 Mock data includes aspirin and other common medications for testing');
       // Fallback to mock data for testing
       return this.generateMockData(1000);
     }
@@ -48,7 +59,7 @@ class ExcelReaderRNCompatible {
     console.log('📊 Generating mock medication data for React Native...');
     const pharmacies = ['Aurrera', 'Farmacia Benavides', 'farmacia del ahorro', 'farmacia guadalajara', 'HEB', 'Farmacia san Angel', 'farmacia San Pablo', 'farmacia similares'];
     const medicationNames = [
-      'Aspirin Protect', 'Advil', 'Viagra', 'Omeprazol', 'Paracetamol', 'Ibuprofeno', 'Amikacin Medimart', 'Ceftriaxone Medimart', 'Postday', 'Fosfonat', 'Aquasol AD.'
+      'Aspirin', 'Aspirin Protect', 'Advil', 'Viagra', 'Omeprazol', 'Paracetamol', 'Ibuprofeno', 'Amikacin Medimart', 'Ceftriaxone Medimart', 'Postday', 'Fosfonat', 'Aquasol AD.'
     ];
     const dosages = ['100 mg', '200 mg', '400 mg', '500 mg', '1 g', '1.5 mg', '5.9 gc/u', '2 ml'];
     const units = ['', '1 AMPULE', '10 Cápsulas', '1 tableta', '1 G'];
@@ -82,11 +93,13 @@ class ExcelReaderRNCompatible {
   async getMedicationData() {
     const cached = this.cache.get('medications');
     if (cached && (Date.now() - cached.timestamp < this.cacheTimeout)) {
-      console.log('📊 Using cached medication data');
+      console.log('📊 Using cached medication data:', cached.data.length, 'medications');
       return cached.data;
     }
     
+    console.log('📊 Loading fresh medication data...');
     const data = await this.loadExcelData();
+    console.log('📊 Loaded medication data:', data.length, 'medications');
     this.cache.set('medications', { data, timestamp: Date.now() });
     return data;
   }
@@ -129,29 +142,64 @@ class ExcelReaderRNCompatible {
   }
 
   async searchMedications(query) {
+    console.log('🔍 DEBUG: searchMedications called with query:', query);
     const medications = await this.getMedicationData();
+    
+    console.log('🔍 DEBUG: Total medications loaded:', medications.length);
+    console.log('🔍 DEBUG: Sample medications:', medications.slice(0, 3).map(m => ({
+      medicinas: m.Medicinas,
+      farmacia: m.Pharmacy,
+      precioOriginal: m['original price']
+    })));
     
     // More precise search for exact matches first
     const normalizedQuery = this.normalizeMedicationName(query);
+    console.log('🔍 DEBUG: Normalized query:', normalizedQuery);
+    
+    // Handle common medication name variations
+    const queryVariations = [normalizedQuery];
+    
+    // Add common variations for aspirin/aspirina
+    if (normalizedQuery.includes('aspirin')) {
+      queryVariations.push(normalizedQuery.replace('aspirin', 'aspirina'));
+    }
+    if (normalizedQuery.includes('aspirina')) {
+      queryVariations.push(normalizedQuery.replace('aspirina', 'aspirin'));
+    }
+    
+    // Add common variations for paracetamol/acetaminophen
+    if (normalizedQuery.includes('paracetamol')) {
+      queryVariations.push(normalizedQuery.replace('paracetamol', 'acetaminofen'));
+    }
+    if (normalizedQuery.includes('acetaminophen')) {
+      queryVariations.push(normalizedQuery.replace('acetaminophen', 'paracetamol'));
+    }
+    
+    console.log(`🔍 Searching for medication: "${query}" with variations:`, queryVariations);
     
     const results = medications.filter(med => {
       const normalizedMed = this.normalizeMedicationName(med.Medicinas);
       
-      // First try exact match
-      if (normalizedMed.includes(normalizedQuery)) {
-        return true;
-      }
-      
-      // Then try partial word matches
-      const queryWords = normalizedQuery.split(' ').filter(w => w.length > 2);
-      const medWords = normalizedMed.split(' ').filter(w => w.length > 2);
-      
-      const wordMatches = queryWords.filter(qWord => 
-        medWords.some(mWord => mWord.includes(qWord) || qWord.includes(mWord))
-      );
-      
-      if (wordMatches.length >= queryWords.length * 0.6) { // At least 60% of words match
-        return true;
+      // Try all query variations
+      for (const variation of queryVariations) {
+        // First try exact match
+        if (normalizedMed.includes(variation)) {
+          console.log(`✅ Exact match found: "${med.Medicinas}" contains "${variation}"`);
+          return true;
+        }
+        
+        // Then try partial word matches
+        const queryWords = variation.split(' ').filter(w => w.length > 2);
+        const medWords = normalizedMed.split(' ').filter(w => w.length > 2);
+        
+        const wordMatches = queryWords.filter(qWord => 
+          medWords.some(mWord => mWord.includes(qWord) || qWord.includes(mWord))
+        );
+        
+        if (wordMatches.length >= queryWords.length * 0.6) { // At least 60% of words match
+          console.log(`✅ Partial match found: "${med.Medicinas}" matches "${variation}" (${wordMatches.length}/${queryWords.length} words)`);
+          return true;
+        }
       }
       
       return false;
@@ -159,6 +207,8 @@ class ExcelReaderRNCompatible {
       ...med,
       similarity: 0.9 // Higher similarity for better matches
     }));
+    
+    console.log(`🔍 Found ${results.length} matches for "${query}"`);
     return results;
   }
 
