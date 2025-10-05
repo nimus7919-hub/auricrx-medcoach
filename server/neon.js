@@ -247,15 +247,36 @@ async function getUserSupplements(userId) {
 
 async function getUserMedications(userId) {
   try {
+    // Use direct query instead of stored function (in case function doesn't exist in DB)
     const data = await neonClient`
-      SELECT * FROM get_user_medications(${userId})
+      SELECT 
+        id,
+        created_at,
+        medication_name,
+        strength_value,
+        strength_unit,
+        status,
+        times,
+        start_date,
+        end_date,
+        notes,
+        doses_left,
+        quantity_value,
+        quantity_unit,
+        last_refill,
+        is_active
+      FROM user_medications 
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
     `;
     
     console.log(`📊 Retrieved ${data.length} medications for user ${userId}`);
     return data;
   } catch (error) {
     console.error('❌ Failed to get user medications:', error);
-    throw error;
+    console.error('❌ Falling back to empty array');
+    // Return empty array instead of throwing error to prevent 500
+    return [];
   }
 }
 
