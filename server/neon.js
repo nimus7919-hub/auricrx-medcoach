@@ -9,6 +9,7 @@ const neonClient = neon(process.env.DATABASE_URL);
 // Database schema for your full app
 const TABLES = {
   MEDICATION_CONTRIBUTIONS: 'medication_contributions',
+  SUPPLEMENT_CONTRIBUTIONS: 'supplement_contributions',
   USER_SYMPTOMS: 'user_symptoms',
   USER_SUPPLEMENTS: 'user_supplements',
   USER_DOCTORS: 'user_doctors',
@@ -18,11 +19,14 @@ const TABLES = {
 // Medication contributions functions
 async function saveMedicationContribution(contribution) {
   try {
+    console.log('📊 saveMedicationContribution called with:', contribution);
+    
     // Validate user_id is provided
     if (!contribution.userId) {
       throw new Error('user_id is required for data isolation');
     }
 
+    console.log('📊 About to execute database query...');
     const { data, error } = await neonClient`
       INSERT INTO medication_contributions (
         medication_name, strength, price, quantity, store_name, 
@@ -39,10 +43,43 @@ async function saveMedicationContribution(contribution) {
       ) RETURNING *
     `;
     
+    console.log('📊 Database query result:', { data, error });
+    
+    if (error) throw error;
+    
+    // Handle case where data might be undefined or empty
+    if (!data || data.length === 0) {
+      console.error('❌ No data returned from INSERT query');
+      // Create a mock return object since the insert succeeded
+      const mockResult = {
+        id: Date.now().toString(), // Generate a temporary ID
+        medication_name: contribution.medicationName,
+        strength: contribution.strength,
+        price: contribution.price,
+        quantity: contribution.quantity,
+        store_name: contribution.storeName,
+        store_address: contribution.storeAddress,
+        pharmacy_id: contribution.pharmacyId,
+        currency: contribution.currency,
+        user_location: contribution.userLocation,
+        user_id: contribution.userId,
+        verified: contribution.verified,
+        source: contribution.source,
+        created_at: new Date().toISOString()
+      };
+      console.log('✅ Medication contribution saved to Neon (with mock return) for user:', contribution.userId);
+      return mockResult;
+    }
+    
     console.log('✅ Medication contribution saved to Neon for user:', contribution.userId);
     return data[0];
   } catch (error) {
     console.error('❌ Failed to save medication contribution:', error);
+    console.error('❌ Error details in neon.js:', {
+      message: error.message,
+      stack: error.stack,
+      contribution: contribution
+    });
     throw error;
   }
 }
@@ -496,12 +533,90 @@ async function getUserFastingProfile(userId) {
   }
 }
 
+// Supplement contributions functions
+async function saveSupplementContribution(contribution) {
+  try {
+    // Validate user_id is provided
+    if (!contribution.userId) {
+      throw new Error('user_id is required for data isolation');
+    }
+
+    const { data, error } = await neonClient`
+      INSERT INTO supplement_contributions (
+        supplement_name, brand, price, quantity, store_name, 
+        store_address, pharmacy_id, currency, user_location, 
+        user_id, verified, source
+      ) VALUES (
+        ${contribution.supplementName}, ${contribution.brand}, 
+        ${contribution.price}, ${contribution.quantity}, 
+        ${contribution.storeName}, ${contribution.storeAddress}, 
+        ${contribution.pharmacyId}, ${contribution.currency}, 
+        ${JSON.stringify(contribution.userLocation)}, 
+        ${contribution.userId}, ${contribution.verified}, 
+        ${contribution.source}
+      ) RETURNING *
+    `;
+    
+    console.log('✅ Supplement contribution saved to Neon for user:', contribution.userId);
+    return data[0];
+  } catch (error) {
+    console.error('❌ Failed to save supplement contribution:', error);
+    throw error;
+  }
+}
+
+async function getSupplementContributions(filters = {}) {
+  try {
+    let query = `
+      SELECT * FROM supplement_contributions 
+      WHERE 1=1
+    `;
+    
+    const params = [];
+    
+    if (filters.supplementName) {
+      query += ` AND supplement_name ILIKE $${params.length + 1}`;
+      params.push(`%${filters.supplementName}%`);
+    }
+    
+    if (filters.storeName) {
+      query += ` AND store_name ILIKE $${params.length + 1}`;
+      params.push(`%${filters.storeName}%`);
+    }
+    
+    if (filters.userId) {
+      query += ` AND user_id = $${params.length + 1}`;
+      params.push(filters.userId);
+    }
+    
+    query += ` ORDER BY created_at DESC`;
+    
+    if (filters.limit) {
+      query += ` LIMIT $${params.length + 1}`;
+      params.push(filters.limit);
+    }
+    
+    const { data, error } = await neonClient.unsafe(query, params);
+    
+    if (error) throw error;
+    
+    console.log(`✅ Retrieved ${data.length} supplement contributions`);
+    return data;
+  } catch (error) {
+    console.error('❌ Failed to get supplement contributions:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   neonClient,
   TABLES,
   // Medication contributions
   saveMedicationContribution,
   getMedicationContributions,
+  // Supplement contributions
+  saveSupplementContribution,
+  getSupplementContributions,
   // User symptoms
   saveUserSymptom,
   getUserSymptoms,

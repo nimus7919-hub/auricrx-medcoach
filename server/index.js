@@ -1219,7 +1219,9 @@ app.post('/medication-contributions', async (req, res) => {
     };
 
     // Save to Neon database
+    console.log('📊 Attempting to save contribution to database:', contribution);
     const savedContribution = await saveMedicationContribution(contribution);
+    console.log('📊 Successfully saved to database:', savedContribution);
     
     // Add to local cache
     medicationContributions.push(savedContribution);
@@ -1239,10 +1241,15 @@ app.post('/medication-contributions', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Failed to save medication contribution:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      stack: error.stack,
+      contribution: req.body
+    });
     res.status(500).json({ 
       ok: false, 
       error: 'save_failed',
-      message: 'Failed to save contribution'
+      message: `Failed to save contribution: ${error.message}`
     });
   }
 });
@@ -1473,6 +1480,134 @@ app.delete('/medication-contributions', async (req, res) => {
       ok: false, 
       error: 'clear_failed',
       message: 'Failed to clear contributions'
+    });
+  }
+});
+
+// POST /supplement-contributions - Save a new supplement contribution
+app.post('/supplement-contributions', async (req, res) => {
+  try {
+    console.log('📊 POST /supplement-contributions endpoint hit');
+    console.log('📊 Request body:', req.body);
+    
+    const { 
+      supplementName, 
+      brand, 
+      price, 
+      quantity, 
+      storeName, 
+      storeAddress, 
+      pharmacyId, 
+      currency, 
+      userLocation, 
+      userId 
+    } = req.body;
+
+    console.log('📊 Received supplement contribution:', {
+      supplementName,
+      brand,
+      price,
+      quantity,
+      storeName,
+      userId
+    });
+
+    // Validate required fields
+    if (!supplementName || !price || !storeName || !userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_fields',
+        message: 'Missing required fields: supplementName, price, storeName, userId'
+      });
+    }
+
+    const contribution = {
+      supplementName: supplementName.trim(),
+      brand: brand ? brand.trim() : null,
+      price: parseFloat(price) || 0,
+      quantity: quantity ? quantity.trim() : null,
+      storeName: storeName.trim(),
+      storeAddress: storeAddress ? storeAddress.trim() : null,
+      pharmacyId: pharmacyId || null,
+      currency: currency || 'USD',
+      userLocation: userLocation || null,
+      userId: userId,
+      verified: false,
+      source: 'user_contribution',
+      createdAt: new Date().toISOString()
+    };
+
+    // Save to Neon database
+    const savedContribution = await saveSupplementContribution(contribution);
+    
+    console.log('📊 New supplement contribution saved:', {
+      id: savedContribution.id,
+      supplement: contribution.supplementName,
+      price: contribution.price,
+      store: contribution.storeName
+    });
+
+    res.json({ 
+      ok: true, 
+      contribution: savedContribution,
+      message: 'Supplement contribution saved successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to save supplement contribution:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'save_failed',
+      message: 'Failed to save supplement contribution'
+    });
+  }
+});
+
+// GET /supplement-contributions - Get all supplement contributions with optional filtering
+app.get('/supplement-contributions', async (req, res) => {
+  try {
+    const { 
+      search, 
+      supplement, 
+      store, 
+      verified, 
+      userId,
+      limit = 50, 
+      offset = 0 
+    } = req.query;
+
+    // Get contributions from Neon database
+    const filters = {};
+    if (search) filters.search = search;
+    if (supplement) filters.supplementName = supplement;
+    if (store) filters.storeName = store;
+    if (verified !== undefined) filters.verified = verified === 'true';
+    if (userId) filters.userId = userId;
+
+    const contributions = await getSupplementContributions(filters);
+
+    // Apply pagination
+    const startIndex = parseInt(offset);
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedContributions = contributions.slice(startIndex, endIndex);
+
+    res.json({ 
+      ok: true, 
+      contributions: paginatedContributions,
+      total: contributions.length,
+      pagination: {
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        hasMore: endIndex < contributions.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to get supplement contributions:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'retrieve_failed',
+      message: 'Failed to retrieve supplement contributions'
     });
   }
 });
@@ -1754,7 +1889,16 @@ app.get('/debug', (_req, res) => {
   res.json({ 
     message: 'Debug endpoint working!', 
     timestamp: new Date().toISOString(),
-    routes: ['/medication-contributions', '/medication-contributions/export', '/api/users']
+    routes: ['/medication-contributions', '/medication-contributions/export', '/supplement-contributions', '/api/users']
+  });
+});
+
+// Test supplement contributions endpoint
+app.get('/supplement-contributions/test', (_req, res) => {
+  res.json({ 
+    message: 'Supplement contributions endpoint is working!', 
+    timestamp: new Date().toISOString(),
+    endpoint: '/supplement-contributions'
   });
 });
 
