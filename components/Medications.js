@@ -8,7 +8,7 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 
 // Medications component moved outside App to prevent remounting
-const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, onNavigateToSettings, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
+const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
@@ -218,49 +218,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     }
   }, [showAdd]);
 
-  // Load medications from database when component mounts
-  useEffect(() => {
-    const loadMedicationsFromDB = async () => {
-      if (user && user.uid) {
-        try {
-          const response = await fetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.medications && result.medications.length > 0) {
-              // Convert database format to local format
-              const dbMeds = result.medications.map(med => ({
-                id: med.id,
-                name: med.medication_name,
-                strength: `${med.strength_value || ''} ${med.strength_unit || ''}`.trim(),
-                strengthValue: med.strength_value || '',
-                strengthUnit: med.strength_unit || 'mg',
-                status: med.status,
-                times: med.times || [],
-                startDate: med.start_date || '',
-                endDate: med.end_date || '',
-                notes: med.notes || '',
-                dosesLeft: med.doses_left || '',
-                quantity: `${med.quantity_value || ''} ${med.quantity_unit || ''}`.trim(),
-                quantityValue: med.quantity_value || '',
-                quantityUnit: med.quantity_unit || 'tablet',
-                lastRefill: med.last_refill || null,
-                dbId: med.id // Store database ID
-              }));
-              
-              console.log('📊 Loaded medications from database:', dbMeds.length);
-              setMeds(dbMeds);
-            }
-          } else {
-            console.error('❌ Failed to load medications from database:', response.status);
-          }
-        } catch (error) {
-          console.error('❌ Error loading medications from database:', error);
-        }
-      }
-    };
-
-    loadMedicationsFromDB();
-  }, [user]);
+  // Note: Medications are now handled locally via AsyncStorage only
+  // Database is only used when user explicitly saves a new medication
 
   const handleAddMed = async () => {
     try {
@@ -326,9 +285,11 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             ));
           } else {
             console.error('❌ Failed to save medication to database:', response.status);
+            console.log('📱 Medication saved locally but not synced to server');
           }
         } catch (dbError) {
           console.error('❌ Database save error:', dbError);
+          console.log('📱 Medication saved locally but not synced to server');
           // Don't fail the entire operation if database save fails
         }
       } else {
@@ -537,16 +498,6 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           {S.medications}
         </DynamicText>
 
-        <TouchableOpacity onPress={onNavigateToSettings} style={{ padding: 8 }}>
-          <Image 
-            source={require('../assets/dashboard Emojies/settings cog.png')} 
-            style={{
-              width: 24,
-              height: 24,
-            }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
       </View>
 
       <ScrollView 
