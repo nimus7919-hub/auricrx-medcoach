@@ -30,7 +30,7 @@ class EnhancedMedicationSearch {
         console.log(`🔍 Filtering by quantity unit: "${quantityUnit}"`);
         
         filteredMatches = excelMatches.filter(match => {
-          const unidades = (match.Unidades || '').toLowerCase();
+          const unidades = (match.unidades || '').toLowerCase();
           const medicinas = (match.Medicinas || '').toLowerCase();
           
           // Check if the quantity unit appears in the medication name or units field
@@ -99,10 +99,8 @@ class EnhancedMedicationSearch {
         });
         
         if (pharmacyMatches.length > 0) {
-          // Use the best match (highest similarity)
-          const bestMatch = pharmacyMatches.reduce((best, current) => 
-            current.similarity > best.similarity ? current : best
-          );
+          // Use the first match (since we don't have similarity scores)
+          const bestMatch = pharmacyMatches[0];
           
           // Log what we found for debugging
           console.log(`🔍 Found ${pharmacyMatches.length} Excel matches for ${pharmacy.name}: ${bestMatch.Medicinas} - MXN ${bestMatch['original price']}`);
