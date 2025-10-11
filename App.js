@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
   import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert,
   Modal, TextInput, Switch, Image, Linking, Platform, Animated, Keyboard,
-  StatusBar, SafeAreaView, AppRegistry, FlatList, ActivityIndicator
+  StatusBar, SafeAreaView, FlatList, ActivityIndicator
 } from 'react-native';
 import TypingEffect from './src/components/TypingEffect';
 import * as ImagePicker from 'expo-image-picker';
@@ -41,6 +41,7 @@ import Reminders from './components/Reminders';
 import SignInScreen from './src/screens/SignInScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import AdminProfileScreen from './src/screens/AdminProfileScreen';
+import LoadingScreen from './src/components/LoadingScreen';
 import { WallpaperProvider, useWallpaper } from './src/contexts/WallpaperContext';
 import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
 import WallpaperWrapper from './src/components/WallpaperWrapper';
@@ -49,6 +50,7 @@ import { useDynamicTheme } from './src/hooks/useDynamicTheme';
 import CustomAlert from './src/components/CustomAlert';
 import { useCustomAlert } from './src/hooks/useCustomAlert';
 import { useTranslation } from './src/hooks/useTranslation';
+import { createTranslationService } from './src/services/translationService';
 import './src/i18n';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
@@ -440,6 +442,7 @@ const STRINGS = {
     errorLoadingPharmacies: 'Failed to load nearby pharmacies. Please try again.',
     errorLoadingLabs: 'Failed to load nearby labs. Please try again.',
     myDoctorAI: 'My Doctor AI',
+    selectAI: 'Select AI Doctor',
     drAlfred: 'Dr. Alfred',
     drMimi: 'Dr. Mimi',
     drPawlmer: 'Dr. Pawlmer',
@@ -1017,6 +1020,7 @@ const STRINGS = {
   errorLoadingPharmacies: 'Error al cargar farmacias cercanas. Inténtalo de nuevo.',
   errorLoadingLabs: 'Error al cargar laboratorios cercanos. Inténtalo de nuevo.',
   myDoctorAI: 'Mis Doctores IA',
+  selectAI: 'Seleccionar Doctor IA',
   drAlfred: 'Dr. Alfred',
   drMimi: 'Dr. Mimi',
   drPawlmer: 'Dr. Pawlmer',
@@ -1623,6 +1627,7 @@ const STRINGS = {
   errorLoadingPharmacies: '加载附近药房失败。请重试。',
   errorLoadingLabs: '加载附近实验室失败。请重试。',
   myDoctorAI: '我的AI医生',
+  selectAI: '选择AI医生',
   drAlfred: 'Alfred医生',
   drMimi: 'Mimi医生',
   drPawlmer: 'Pawlmer医生',
@@ -1861,7 +1866,7 @@ const STORAGE = {
   rxPhotos: 'AURIC_RX_PHOTOS',
   voiceNotes: 'AURIC_VOICE_NOTES',
   meds: 'AURIC_MEDS',
-  selectedDoctor: 'AURIC_SELECTED_DOCTOR',
+  selectedAIDoctor: 'AURIC_SELECTED_AI_DOCTOR',
 };
 
 // Lightweight streaming hook (defined inline to avoid extra files)
@@ -1947,6 +1952,7 @@ export default function App() {
   const [userData, setUserData] = useState(null);
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
   const [isRestoringAuth, setIsRestoringAuth] = useState(true); // Track auth restoration
+  const [isLoading, setIsLoading] = useState(true); // Show loading screen initially
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
@@ -2030,12 +2036,14 @@ export default function App() {
   const [fontColor, setFontColor] = useState('default');
   const [night, setNight] = useState(false);
   const [moodShift, setMoodShift] = useState(true);
-  const [selectedDoctor, setSelectedDoctor] = useState('Dr. Alfred');
   
   // notification settings
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(true);
+  
+  // AI doctor selection
+  const [selectedAIDoctor, setSelectedAIDoctor] = useState('alfred');
   
   // privacy settings
   const [dataCollection, setDataCollection] = useState(true);
@@ -2168,14 +2176,20 @@ export default function App() {
   
   // Use i18n translation hook
   const { t, changeLanguage, currentLanguage, isReady } = useTranslation();
+  
+  // Debug translation system
+  console.log('🌐 Translation Debug:');
+  console.log('isReady:', isReady);
+  console.log('currentLanguage:', currentLanguage);
 
   // Create S object inside component to fix circular dependency
-  const S = useMemo(() => ({
-    // Dashboard
-    dashboard: t('dashboard.title'),
-    healthJournal: t('dashboard.healthJournal'),
-    nextReminder: t('dashboard.nextReminder'),
-    
+  const S = useMemo(() => {
+    if (!isReady) {
+      console.log('⚠️ Translations not ready yet, returning empty object');
+      return {};
+    }
+    console.log('✅ Creating S object with translations');
+    const sObject = {
     // Tiles
     reminders: t('tiles.reminders'),
     pharmacyLocations: t('tiles.pharmacyLocations'),
@@ -2186,9 +2200,17 @@ export default function App() {
     documents: t('tiles.documents'),
     herbs: t('tiles.herbs'),
     supplements: t('tiles.supplements'),
+    smartAlerts: t('tiles.smartAlerts'),
+    healthAnalytics: t('tiles.healthAnalytics'),
+    aiHealth: t('tiles.aiHealth'),
+    
+    // Dashboard
+    dashboard: t('dashboard.title'),
+    healthJournal: t('dashboard.healthJournal'),
+    nextReminder: t('dashboard.nextReminder'),
+    appointmentSubtitle: t('dashboard.appointmentSubtitle'),
     
     // AI
-    aiConsultant: t('ai.consultant'),
     askAI: t('ai.askAI'),
     tapToTalk: t('ai.tapToTalk'),
     aiPlaceholder: t('ai.placeholder'),
@@ -2359,6 +2381,34 @@ export default function App() {
     healthProfile: t('healthProfile.title'),
     healthProfileSettings: t('healthProfile.settings'),
     basicInfo: t('healthProfile.basicInfo'),
+    
+    // AI Doctor Selection
+    myDoctorAI: t('ai.myDoctorAI'),
+    selectAI: t('ai.selectAI'),
+    drAlfred: t('ai.drAlfred'),
+    drAlfredIntro: t('ai.drAlfredIntro'),
+    drMimi: t('ai.drMimi'),
+    drMimiIntro: t('ai.drMimiIntro'),
+    drPawlmer: t('ai.drPawlmer'),
+    drPawlmerIntro: t('ai.drPawlmerIntro'),
+    aiThinking: t('ai.aiThinking'),
+    errorPreparingData: t('ai.errorPreparingData'),
+    networkError: t('ai.networkError'),
+    helpUsGetPrice: t('ai.helpUsGetPrice'),
+    contributionDescription: t('ai.contributionDescription'),
+    contributionError: t('ai.contributionError'),
+    contributionErrorText: t('ai.contributionErrorText'),
+    contributionSuccess: t('ai.contributionSuccess'),
+    contributionSuccessText: t('ai.contributionSuccessText'),
+    submitContribution: t('ai.submitContribution'),
+    supplementName: t('ai.supplementName'),
+    supplementNamePlaceholder: t('ai.supplementNamePlaceholder'),
+    brandPlaceholder: t('ai.brandPlaceholder'),
+    dosagePlaceholder: t('ai.dosagePlaceholder'),
+    pricePlaceholder: t('ai.pricePlaceholder'),
+    quantityPlaceholder: t('ai.quantityPlaceholder'),
+    storeNamePlaceholder: t('ai.storeNamePlaceholder'),
+    storeAddressPlaceholder: t('ai.storeAddressPlaceholder'),
     weight: t('healthProfile.weight'),
     height: t('healthProfile.height'),
     weightUnit: t('healthProfile.weightUnit'),
@@ -2382,11 +2432,655 @@ export default function App() {
     aiGeneratedInsights: t('aiGeneratedInsights'),
     recentSymptomAnalyses: t('recentSymptomAnalyses'),
     
+    // Settings (continued)
+    chooseWallpaperDescription: t('settings.chooseWallpaperDescription'),
+    emailUs: t('settings.emailUs'),
+    emailAddress: t('settings.emailAddress'),
+    signOut: t('settings.signOut'),
+    
+    // Wallpaper
+    wallpaperTitle: t('wallpaper.title'),
+    currentWallpaper: t('wallpaper.currentWallpaper'),
+    default: t('wallpaper.default'),
+    changeWallpaper: t('wallpaper.changeWallpaper'),
+    chooseWallpaper: t('wallpaper.chooseWallpaper'),
+    loadingWallpapers: t('wallpaper.loadingWallpapers'),
+    solidColors: t('wallpaper.solidColors'),
+    wallpaperImages: t('wallpaper.wallpaperImages'),
+    wallpaperChangedSuccessfully: t('wallpaper.wallpaperChangedSuccessfully'),
+    failedToSaveWallpaper: t('wallpaper.failedToSaveWallpaper'),
+    wallpaperSuccess: t('wallpaper.success'),
+    wallpaperError: t('wallpaper.error'),
+    aboutWallpapers: t('wallpaper.aboutWallpapers'),
+    aboutWallpapersDescription: t('wallpaper.aboutWallpapersDescription'),
+    uniqueWallpaperDesigns: t('wallpaper.uniqueWallpaperDesigns'),
+    solidColorOptions: t('wallpaper.solidColorOptions'),
+    instantPreviewAndApplication: t('wallpaper.instantPreviewAndApplication'),
+    settingsSavedAutomatically: t('wallpaper.settingsSavedAutomatically'),
+    white: t('wallpaper.white'),
+    black: t('wallpaper.black'),
+    blackGoldDr: t('wallpaper.blackGoldDr'),
+    blackGold: t('wallpaper.blackGold'),
+    blackSilver: t('wallpaper.blackSilver'),
+    boldCream: t('wallpaper.boldCream'),
+    creamWallpaper: t('wallpaper.creamWallpaper'),
+    darkCream: t('wallpaper.darkCream'),
+    darkGreenGold: t('wallpaper.darkGreenGold'),
+    whiteGoldDr: t('wallpaper.whiteGoldDr'),
+    
+    // Admin Profile
+    adminProfileTitle: t('adminProfile.title'),
+    displayName: t('adminProfile.displayName'),
+    email: t('adminProfile.email'),
+    phoneNumber: t('adminProfile.phoneNumber'),
+    noPhoneNumber: t('adminProfile.noPhoneNumber'),
+    updateProfile: t('adminProfile.updateProfile'),
+    securitySettings: t('adminProfile.securitySettings'),
+    changePassword: t('adminProfile.changePassword'),
+    deleteAccount: t('adminProfile.deleteAccount'),
+    processing: t('adminProfile.processing'),
+    error: t('adminProfile.error'),
+    success: t('adminProfile.success'),
+    ok: t('adminProfile.ok'),
+    displayNameRequired: t('adminProfile.displayNameRequired'),
+    profileUpdatedSuccessfully: t('adminProfile.profileUpdatedSuccessfully'),
+    failedToUpdateProfile: t('adminProfile.failedToUpdateProfile'),
+    changePasswordTitle: t('adminProfile.changePasswordTitle'),
+    passwordResetMessage: t('adminProfile.passwordResetMessage'),
+    sendResetEmail: t('adminProfile.sendResetEmail'),
+    emailRequiredForReset: t('adminProfile.emailRequiredForReset'),
+    passwordResetEmailSent: t('adminProfile.passwordResetEmailSent'),
+    failedToSendResetEmail: t('adminProfile.failedToSendResetEmail'),
+    deleteAccountTitle: t('adminProfile.deleteAccountTitle'),
+    deleteAccountMessage: t('adminProfile.deleteAccountMessage'),
+    confirmDeletion: t('adminProfile.confirmDeletion'),
+    confirmDeletionMessage: t('adminProfile.confirmDeletionMessage'),
+    yesDeleteForever: t('adminProfile.yesDeleteForever'),
+    accountDeleted: t('adminProfile.accountDeleted'),
+    accountDeletedMessage: t('adminProfile.accountDeletedMessage'),
+    
+    // Colors
+    gold: t('settings.colors.gold'),
+    blue: t('settings.colors.blue'),
+    teal: t('settings.colors.teal'),
+    
+    // Languages
+    english: t('settings.languages.en'),
+    spanish: t('settings.languages.es'),
+    chinese: t('settings.languages.zh'),
+    portuguese: t('settings.languages.pt'),
+    french: t('settings.languages.fr'),
+    german: t('settings.languages.de'),
+    
+    // Common (continued)
+    loadingPharmacies: t('common.loadingPharmacies'),
+    loadingLabs: t('common.loadingLabs'),
+    brand: t('common.brand'),
+    send: t('common.send'),
+    stop: t('common.stop'),
+    noData: t('common.noData'),
+    noResponse: t('common.noResponse'),
+    appDescription: t('common.appDescription'),
+    noTime: t('common.noTime'),
+    sortBy: t('common.sortBy'),
+    ascending: t('common.ascending'),
+    descending: t('common.descending'),
+    showAll: t('common.showAll'),
+    fx: t('common.fx'),
+    directions: t('common.directions'),
+    never: t('common.never'),
+    refillComplete: t('common.refillComplete'),
+    saved: t('common.saved'),
+    
+    // Common UI Elements
+    call: t('common.call'),
+    km: t('common.km'),
+    mi: t('common.mi'),
+    tablets: t('common.tablets'),
+    mg: t('common.mg'),
+    mxn: t('common.mxn'),
+    usd: t('common.usd'),
+    exchangeRate: t('common.exchangeRate'),
+    
+    // Smart Notifications
+    smartNotifications: t('tiles.smartAlerts'),
+    smartNotificationsDesc: t('settings.smartNotificationsDesc'),
+    smartNotificationsActive: t('settings.smartNotificationsActive'),
+    smartServiceNotAvailable: t('settings.smartServiceNotAvailable'),
+    smartFeatures: t('settings.smartFeatures'),
+    smartFeaturesDesc: t('settings.smartFeaturesDesc'),
+    smartRefillPredictions: t('settings.smartRefillPredictions'),
+    smartRefillPredictionsDesc: t('settings.smartRefillPredictionsDesc'),
+    intelligentTiming: t('settings.intelligentTiming'),
+    intelligentTimingDesc: t('settings.intelligentTimingDesc'),
+    contextAwareReminders: t('settings.contextAwareReminders'),
+    contextAwareRemindersDesc: t('settings.contextAwareRemindersDesc'),
+    locationBasedReminders: t('settings.locationBasedReminders'),
+    locationBasedRemindersDesc: t('settings.locationBasedRemindersDesc'),
+    weatherBasedAlerts: t('settings.weatherBasedAlerts'),
+    weatherBasedAlertsDesc: t('settings.weatherBasedAlertsDesc'),
+    noLocationReminders: t('settings.noLocationReminders'),
+    noWeatherAlerts: t('settings.noWeatherAlerts'),
+    addLocationReminder: t('settings.addLocationReminder'),
+    addWeatherAlert: t('settings.addWeatherAlert'),
+    active: t('settings.active'),
+    disabled: t('settings.disabled'),
+    initializing: t('settings.initializing'),
+    threshold: t('settings.threshold'),
+    pollenAlert: t('settings.pollenAlert'),
+    temperatureAlert: t('settings.temperatureAlert'),
+    humidityAlert: t('settings.humidityAlert'),
+    airQualityAlert: t('settings.airQualityAlert'),
+    pollenMessage: t('settings.pollenMessage'),
+    temperatureMessage: t('settings.temperatureMessage'),
+    humidityMessage: t('settings.humidityMessage'),
+    airQualityMessage: t('settings.airQualityMessage'),
+    locationReminderAdded: t('settings.locationReminderAdded'),
+    failedToAddLocationReminder: t('settings.failedToAddLocationReminder'),
+    weatherAlertAdded: t('settings.weatherAlertAdded'),
+    failedToAddWeatherAlert: t('settings.failedToAddWeatherAlert'),
+    deleteReminder: t('common.deleteReminder'),
+    deleteReminderConfirm: t('common.deleteReminderConfirm'),
+    deleteAlert: t('common.deleteAlert'),
+    deleteAlertConfirm: t('common.deleteAlertConfirm'),
+    failedToDeleteReminder: t('common.failedToDeleteReminder'),
+    failedToDeleteAlert: t('common.failedToDeleteAlert'),
+    fillBothFields: t('common.fillBothFields'),
+    reminderAdded: t('common.reminderAdded'),
+    failedToAddReminder: t('common.failedToAddReminder'),
+    addLocationReminderTitle: t('common.addLocationReminderTitle'),
+    locationNamePlaceholder: t('common.locationNamePlaceholder'),
+    reminderMessagePlaceholder: t('common.reminderMessagePlaceholder'),
+    addWeatherAlertTitle: t('common.addWeatherAlertTitle'),
+    chooseWeatherCondition: t('common.chooseWeatherCondition'),
+    highPollen: t('common.highPollen'),
+    extremeTemperature: t('common.extremeTemperature'),
+    highHumidity: t('common.highHumidity'),
+    poorAirQuality: t('common.poorAirQuality'),
+    
+    // Medications
+    addMedication: t('medications.addMedication'),
+    editMedication: t('medications.editMedication'),
+    editMed: t('medications.edit'),
+    deleteMed: t('medications.delete'),
+    saveBtn: t('medications.save'),
+    noMedications: t('medications.noMedications'),
+    dosesLeft: t('medications.dosesLeft'),
+    status: t('medications.status'),
+    times: t('medications.times'),
+    refill: t('medications.refill'),
+    taking: t('medications.statuses.taking'),
+    onHold: t('medications.statuses.onhold'),
+    stopped: t('medications.statuses.stopped'),
+    addTime: t('medications.addTime'),
+    lastRefill: t('medications.lastRefill'),
+    lowest: t('medications.lowest'),
+    reserve: t('medications.reserve'),
+    medicationName: t('medications.medicationName'),
+    strengthExample: t('medications.strengthExample'),
+    notesOptional: t('medications.notesOptional'),
+    selectTimes: t('medications.selectTimes'),
+    startDate: t('medications.startDate'),
+    endDateOptional: t('medications.endDateOptional'),
+    
+    // Supplements
+    addSupplement: t('supplements.addSupplement'),
+    editSupplement: t('supplements.editSupplement'),
+    edit: t('supplements.edit'),
+    noSupplements: t('supplements.noSupplements'),
+    pause: t('supplements.pause'),
+    supplementName: t('supplements.supplementName'),
+    dosage: t('supplements.dosage'),
+    resume: t('supplements.resume'),
+    servingsLeft: t('supplements.servingsLeft'),
+    priceVaries: t('supplements.priceVaries'),
+    distanceUnknown: t('supplements.distanceUnknown'),
+    pickupAvailable: t('supplements.pickupAvailable'),
+    deliveryAvailable: t('supplements.deliveryAvailable'),
+    foundStores: t('supplements.foundStores'),
+    updateStatus: t('supplements.updateStatus'),
+    left: t('supplements.left'),
+    took: t('supplements.took'),
+    searchHerbs: t('herbs.search'),
+    searchSupplements: t('supplements.searchSupplements'),
+    priceNotAvailable: t('supplements.priceNotAvailable'),
+
+    // Reminders
+    addReminder: t('reminders.addReminder'),
+    pickTime: t('reminders.pickTime'),
+    namePlaceholder: t('reminders.namePlaceholder'),
+    
+    // Pharmacies
+    pharmacyTitle: t('pharmacies.title'),
+    pharmacyDescription: t('pharmacies.description'),
+    openMaps: t('pharmacies.openMaps'),
+    searchQuery: t('pharmacies.searchQuery'),
+    foundPharmacies: t('pharmacies.foundPharmacies'),
+    findNearbyPharmacies: t('pharmacies.findNearbyPharmacies'),
+    
+    // Labs
+    labsTitle: t('labs.title'),
+    findLabs: t('labs.findLabs'),
+    labsSearchQuery: t('labs.searchQuery'),
+    foundLabs: t('labs.foundLabs'),
+    findNearbyLabs: t('labs.findNearbyLabs'),
+    
+    // Lab Test Types
+    bloodWork: t('labs.testTypes.bloodWork'),
+    pathology: t('labs.testTypes.pathology'),
+    infectiousDisease: t('labs.testTypes.infectiousDisease'),
+    imaging: t('labs.testTypes.imaging'),
+    cardiac: t('labs.testTypes.cardiac'),
+    allergy: t('labs.testTypes.allergy'),
+    specialty: t('labs.testTypes.specialty'),
+    
+    // Lab Buttons
+    callLab: t('labs.buttons.call'),
+    testsLab: t('labs.buttons.tests'),
+    moreLab: t('labs.buttons.more'),
+    
+    // Dashboard Cards
+    smartAlerts: t('tiles.smartAlerts'),
+    healthAnalytics: t('tiles.healthAnalytics'),
+    aiHealth: t('tiles.aiHealth'),
+    
+    // Fasting Profile
+    yourFastingProfile: t('ai.yourFastingProfile'),
+    needsReview: t('ai.needsReview'),
+    compatible: t('ai.compatible'),
+    notAnalyzed: t('ai.notAnalyzed'),
+    recommendedFastingWindow: t('ai.recommendedFastingWindow'),
+    importantConsiderations: t('ai.importantConsiderations'),
+    reAnalyzeFasting: t('ai.reAnalyzeFasting'),
+    analyzeFastingCompatibility: t('ai.analyzeFastingCompatibility'),
+    completeYourFastingProfile: t('ai.completeYourFastingProfile'),
+    exportHealthReport: t('ai.exportHealthReport'),
+    fastingAnalysis: t('ai.fastingAnalysis'),
+    analysis: t('ai.analysis'),
+    
+    // Health Conditions
+    diabetes: t('healthProfile.diabetes'),
+    hypoglycemia: t('healthProfile.hypoglycemia'),
+    heartConditions: t('healthProfile.heartConditions'),
+    kidneyDisease: t('healthProfile.kidneyDisease'),
+    liverDisease: t('healthProfile.liverDisease'),
+    eatingDisorders: t('healthProfile.eatingDisorders'),
+    pregnancy: t('healthProfile.pregnancy'),
+    breastfeeding: t('healthProfile.breastfeeding'),
+    gastrointestinalIssues: t('healthProfile.gastrointestinalIssues'),
+    
+    // Nutritional Status
+    bodyFatLevel: t('healthProfile.bodyFatLevel'),
+    muscleMass: t('healthProfile.muscleMass'),
+    micronutrientLevels: t('healthProfile.micronutrientLevels'),
+    hydrationLevel: t('healthProfile.hydrationLevel'),
+    
+    // Mental Health
+    highStressEnvironment: t('healthProfile.highStressEnvironment'),
+    intensiveMentalTasks: t('healthProfile.intensiveMentalTasks'),
+    anxiety: t('healthProfile.anxiety'),
+    depression: t('healthProfile.depression'),
+    
+    // Lifestyle
+    activityLevel: t('healthProfile.activityLevel'),
+    physicalLabor: t('healthProfile.physicalLabor'),
+    longShifts: t('healthProfile.longShifts'),
+    sleepQuality: t('healthProfile.sleepQuality'),
+    
+    // Fasting Preferences
+    preferredFastingType: t('healthProfile.preferredFastingType'),
+    maxFastingHours: t('healthProfile.maxFastingHours'),
+    fastingFrequency: t('healthProfile.fastingFrequency'),
+    
+    // Goals
+    primaryGoal: t('healthProfile.primaryGoal'),
+    
+    // Health Monitoring
+    healthMonitoring: t('healthProfile.healthMonitoring'),
+    selfMonitoring: t('healthProfile.selfMonitoring'),
+    wearableDevices: t('healthProfile.wearableDevices'),
+    
+    // Options
+    low: t('healthProfile.low'),
+    normal: t('healthProfile.normal'),
+    high: t('healthProfile.high'),
+    poor: t('healthProfile.poor'),
+    fair: t('healthProfile.fair'),
+    good: t('healthProfile.good'),
+    excellent: t('healthProfile.excellent'),
+    sedentary: t('healthProfile.sedentary'),
+    light: t('healthProfile.light'),
+    moderate: t('healthProfile.moderate'),
+    athlete: t('healthProfile.athlete'),
+    timeRestricted: t('healthProfile.timeRestricted'),
+    alternateDay: t('healthProfile.alternateDay'),
+    extended: t('healthProfile.extended'),
+    custom: t('healthProfile.custom'),
+    daily: t('healthProfile.daily'),
+    weekly: t('healthProfile.weekly'),
+    monthly: t('healthProfile.monthly'),
+    weightLoss: t('healthProfile.weightLoss'),
+    metabolicHealth: t('healthProfile.metabolicHealth'),
+    generalHealth: t('healthProfile.generalHealth'),
+    spiritual: t('healthProfile.spiritual'),
+    medical: t('healthProfile.medical'),
+    
     // Additional translations
     profileSaved: t('healthProfile.profileSaved'),
     healthProfileSavedMessage: t('healthProfile.healthProfileSavedMessage'),
     saveProfile: t('healthProfile.saveProfile'),
-  }), [t]);
+    kg: t('healthProfile.kg'),
+    lbs: t('healthProfile.lbs'),
+    cm: t('healthProfile.cm'),
+    ft: t('healthProfile.ft'),
+    healthConditions: t('healthProfile.healthConditions'),
+    otherHealthConditions: t('healthProfile.otherHealthConditions'),
+    addHealthCondition: t('healthProfile.addHealthCondition'),
+    enterHealthCondition: t('healthProfile.enterHealthCondition'),
+    removeHealthCondition: t('healthProfile.removeHealthCondition'),
+    nutritionalStatus: t('healthProfile.nutritionalStatus'),
+    mentalHealth: t('healthProfile.mentalHealth'),
+    lifestyleActivity: t('healthProfile.lifestyleActivity'),
+    fastingPreferences: t('healthProfile.fastingPreferences'),
+    fastingGoals: t('healthProfile.fastingGoals'),
+    medicalSupervision: t('healthProfile.medicalSupervision'),
+    
+    // AI Health Alert Messages
+    pleaseEnterSymptoms: t('ai.pleaseEnterSymptoms'),
+    pleaseEnterMedications: t('ai.pleaseEnterMedications'),
+    symptomAnalysisComplete: t('ai.symptomAnalysisComplete'),
+    noInteractionsFound: t('ai.noInteractionsFound'),
+    noKnownInteractions: t('ai.noKnownInteractions'),
+    foundInteractions: t('ai.foundInteractions'),
+    generalSymptoms: t('ai.generalSymptoms'),
+    multipleSymptomsDescription: t('ai.multipleSymptomsDescription'),
+    monitorSymptomsClosely: t('ai.monitorSymptomsClosely'),
+    considerConsultingProvider: t('ai.considerConsultingProvider'),
+    maintainHydrationRest: t('ai.maintainHydrationRest'),
+    getAdequateRest: t('ai.getAdequateRest'),
+    stayHydrated: t('ai.stayHydrated'),
+    monitorSymptoms: t('ai.monitorSymptoms'),
+    scheduleAppointmentIfPersist: t('ai.scheduleAppointmentIfPersist'),
+    keepSymptomDiary: t('ai.keepSymptomDiary'),
+    potentialMildInteraction: t('ai.potentialMildInteraction'),
+    mildSideEffectsPossible: t('ai.mildSideEffectsPossible'),
+    monitorUnusualSymptoms: t('ai.monitorUnusualSymptoms'),
+    drugInteractionDatabase: t('ai.drugInteractionDatabase'),
+    severity: t('ai.severity'),
+    urgency: t('ai.urgency'),
+    possibleConditions: t('ai.possibleConditions'),
+    recommendations: t('ai.recommendations'),
+    fastingCompatible: t('ai.fastingCompatible'),
+    fastingWarning: t('ai.fastingWarning'),
+    diabetesRequiresSupervision: t('ai.diabetesRequiresSupervision'),
+    pregnancyRequiresSupervision: t('ai.pregnancyRequiresSupervision'),
+    eatingDisordersRequireSupervision: t('ai.eatingDisordersRequireSupervision'),
+    heartKidneyLiverRequireSupervision: t('ai.heartKidneyLiverRequireSupervision'),
+    gastrointestinalIssuesWorsened: t('ai.gastrointestinalIssuesWorsened'),
+    lowBodyFatRisky: t('ai.lowBodyFatRisky'),
+    poorHydrationIncreasesRisks: t('ai.poorHydrationIncreasesRisks'),
+    anxietyDepressionAffected: t('ai.anxietyDepressionAffected'),
+    highActivityRequiresNutrition: t('ai.highActivityRequiresNutrition'),
+    poorSleepAffected: t('ai.poorSleepAffected'),
+    notSpecified: t('ai.notSpecified'),
+    noneReported: t('ai.noneReported'),
+    yes: t('ai.yes'),
+    no: t('ai.no'),
+    basicInformation: t('ai.basicInformation'),
+    nutritionalStatusBodyComposition: t('ai.nutritionalStatusBodyComposition'),
+    mentalHealthCognitiveDemands: t('ai.mentalHealthCognitiveDemands'),
+    lifestyleActivityLevel: t('ai.lifestyleActivityLevel'),
+    fastingProtocolPreferences: t('ai.fastingProtocolPreferences'),
+    goals: t('ai.goals'),
+    medicalSupervisionMonitoring: t('ai.medicalSupervisionMonitoring'),
+    exportSuccessful: t('ai.exportSuccessful'),
+    healthReportGenerated: t('ai.healthReportGenerated'),
+    setupRequired: t('ai.setupRequired'),
+    pleaseGoToSettings: t('ai.pleaseGoToSettings'),
+    info: t('ai.info'),
+    warning: t('ai.warning'),
+    critical: t('ai.critical'),
+    unknown: t('ai.unknown'),
+    
+    // Appointments
+    appointmentManagement: t('appointments.appointmentManagement'),
+    appointmentManagementDesc: t('appointments.appointmentManagementDesc'),
+    appointmentOverview: t('appointments.appointmentOverview'),
+    scheduleAppointment: t('appointments.scheduleAppointment'),
+    appointmentType: t('appointments.appointmentType'),
+    selectAppointmentType: t('appointments.selectAppointmentType'),
+    title: t('appointments.title'),
+    titlePlaceholder: t('appointments.titlePlaceholder'),
+    location: t('appointments.location'),
+    locationPlaceholder: t('appointments.locationPlaceholder'),
+    date: t('appointments.date'),
+    time: t('appointments.time'),
+    notesOptional: t('appointments.notesOptional'),
+    notesPlaceholder: t('appointments.notesPlaceholder'),
+    schedule: t('appointments.schedule'),
+    addDoctor: t('appointments.addDoctor'),
+    addDoctorContact: t('appointments.addDoctorContact'),
+    doctorName: t('appointments.doctorName'),
+    doctorNamePlaceholder: t('appointments.doctorNamePlaceholder'),
+    selectCountry: t('appointments.selectCountry'),
+    doctorEmailAddress: t('appointments.emailAddress'),
+    doctorEmailPlaceholder: t('appointments.doctorEmailPlaceholder'),
+    phoneNumber: t('appointments.phoneNumber'),
+    dialingMethod: t('appointments.dialingMethod'),
+    selectDialingMethod: t('appointments.selectDialingMethod'),
+    howToContactDoctor: t('appointments.howToContactDoctor'),
+    pastAppts: t('appointments.pastAppts'),
+    pastAppointments: t('appointments.pastAppointments'),
+    searchPastAppointments: t('appointments.searchPastAppointments'),
+    noAppointmentsFound: t('appointments.noAppointmentsFound'),
+    noPastAppointments: t('appointments.noPastAppointments'),
+    attended: t('appointments.attended'),
+    missed: t('appointments.missed'),
+    doctorVisit: t('appointments.doctorVisit'),
+    labTest: t('appointments.labTest'),
+    pharmacy: t('appointments.pharmacy'),
+    specialist: t('appointments.specialist'),
+    emergency: t('appointments.emergency'),
+    followUp: t('appointments.followUp'),
+    checkup: t('appointments.checkup'),
+    other: t('appointments.other'),
+    scheduled: t('appointments.scheduled'),
+    confirmed: t('appointments.confirmed'),
+    completed: t('appointments.completed'),
+    cancelled: t('appointments.cancelled'),
+    rescheduled: t('appointments.rescheduled'),
+    unknown: t('appointments.unknown'),
+    totalAppointments: t('appointments.totalAppointments'),
+    upcoming: t('appointments.upcoming'),
+    doctors: t('appointments.doctors'),
+    upcomingAppointments: t('appointments.upcomingAppointments'),
+    upcomingAppointmentsDesc: t('appointments.upcomingAppointmentsDesc'),
+    noUpcomingAppointments: t('appointments.noUpcomingAppointments'),
+    doctorContacts: t('appointments.doctorContacts'),
+    doctorContactsDesc: t('appointments.doctorContactsDesc'),
+    noDoctorContactsYet: t('appointments.noDoctorContactsYet'),
+    phoneOnly: t('appointments.phoneOnly'),
+    whatsappOnly: t('appointments.whatsappOnly'),
+    bothPhoneWhatsapp: t('appointments.bothPhoneWhatsapp'),
+    whatsapp: t('appointments.whatsapp'),
+    primary: t('appointments.primary'),
+    fillAllFields: t('appointments.fillAllFields'),
+    appointmentServiceNotAvailable: t('appointments.appointmentServiceNotAvailable'),
+    appointmentScheduled: t('appointments.appointmentScheduled'),
+    failedToSchedule: t('appointments.failedToSchedule'),
+    doctorContactAdded: t('appointments.doctorContactAdded'),
+    failedToAddDoctor: t('appointments.failedToAddDoctor'),
+    doctorContactUpdated: t('appointments.doctorContactUpdated'),
+    failedToUpdateDoctor: t('appointments.failedToUpdateDoctor'),
+    deleteDoctorContact: t('appointments.deleteDoctorContact'),
+    deleteDoctorConfirm: t('appointments.deleteDoctorConfirm'),
+    doctorContactDeleted: t('appointments.doctorContactDeleted'),
+    failedToDeleteDoctor: t('appointments.failedToDeleteDoctor'),
+    appointmentCompleted: t('appointments.appointmentCompleted'),
+    failedToUpdate: t('appointments.failedToUpdate'),
+    
+    // Medical Documents
+    medicalDocuments: t('medicalDocuments.medicalDocuments'),
+    organizeDocuments: t('medicalDocuments.organizeDocuments'),
+    addDocument: t('medicalDocuments.addDocument'),
+    noDocumentsUploaded: t('medicalDocuments.noDocumentsUploaded'),
+    multiSelectDoc: t('medicalDocuments.multiSelectDoc'),
+    takePhoto: t('medicalDocuments.takePhoto'),
+    uploadFromGallery: t('medicalDocuments.uploadFromGallery'),
+    selectAll: t('medicalDocuments.selectAll'),
+    clear: t('medicalDocuments.clear'),
+    share: t('medicalDocuments.share'),
+    uploadDocument: t('medicalDocuments.uploadDocument'),
+    uploading: t('medicalDocuments.uploading'),
+    noDocumentsYet: t('medicalDocuments.noDocumentsYet'),
+    uploadFirstDocument: t('medicalDocuments.uploadFirstDocument'),
+    photoID: t('medicalDocuments.photoID'),
+    driversLicensePassport: t('medicalDocuments.driversLicensePassport'),
+    frontSide: t('medicalDocuments.frontSide'),
+    backSide: t('medicalDocuments.backSide'),
+    birthCertificate: t('medicalDocuments.birthCertificate'),
+    officialBirthCertificate: t('medicalDocuments.officialBirthCertificate'),
+    insuranceCard: t('medicalDocuments.insuranceCard'),
+    healthInsuranceInfo: t('medicalDocuments.healthInsuranceInfo'),
+    frontOfCard: t('medicalDocuments.frontOfCard'),
+    backOfCard: t('medicalDocuments.backOfCard'),
+    labResults: t('medicalDocuments.labResults'),
+    bloodTestsLabWork: t('medicalDocuments.bloodTestsLabWork'),
+    prescriptions: t('medicalDocuments.prescriptions'),
+    currentAndPastPrescriptions: t('medicalDocuments.currentAndPastPrescriptions'),
+    medicalRecords: t('medicalDocuments.medicalRecords'),
+    medicalHistoryReports: t('medicalDocuments.medicalHistoryReports'),
+    otherDocuments: t('medicalDocuments.otherDocuments'),
+    anyOtherMedicalDocuments: t('medicalDocuments.anyOtherMedicalDocuments'),
+    uploadPDF: t('medicalDocuments.uploadPDF'),
+    uploadImage: t('medicalDocuments.uploadImage'),
+    scanDocument: t('medicalDocuments.scanDocument'),
+    viewDocument: t('medicalDocuments.viewDocument'),
+    shareDocument: t('medicalDocuments.shareDocument'),
+    deleteDocument: t('medicalDocuments.deleteDocument'),
+    editDocument: t('medicalDocuments.editDocument'),
+    documentName: t('medicalDocuments.documentName'),
+    enterDocumentName: t('medicalDocuments.enterDocumentName'),
+    documentCategory: t('medicalDocuments.documentCategory'),
+    selectCategory: t('medicalDocuments.selectCategory'),
+    documentType: t('medicalDocuments.documentType'),
+    front: t('medicalDocuments.front'),
+    back: t('medicalDocuments.back'),
+    single: t('medicalDocuments.single'),
+    pdfDocument: t('medicalDocuments.pdfDocument'),
+    imageDocument: t('medicalDocuments.imageDocument'),
+    uploadSuccess: t('medicalDocuments.uploadSuccess'),
+    uploadFailed: t('medicalDocuments.uploadFailed'),
+    deleteConfirm: t('medicalDocuments.deleteConfirm'),
+    deleteSuccess: t('medicalDocuments.deleteSuccess'),
+    deleteFailed: t('medicalDocuments.deleteFailed'),
+    shareSuccess: t('medicalDocuments.shareSuccess'),
+    shareFailed: t('medicalDocuments.shareFailed'),
+    shareToDoctor: t('medicalDocuments.shareToDoctor'),
+    shareToEmail: t('medicalDocuments.shareToEmail'),
+    shareToWhatsApp: t('medicalDocuments.shareToWhatsApp'),
+    useWhatsApp: t('medicalDocuments.useWhatsApp'),
+    useEmail: t('medicalDocuments.useEmail'),
+    addEmail: t('medicalDocuments.addEmail'),
+    goToAppointmentTracker: t('medicalDocuments.goToAppointmentTracker'),
+    sharingNotAvailable: t('medicalDocuments.sharingNotAvailable'),
+    documentNotFound: t('medicalDocuments.documentNotFound'),
+    pdfCorrupted: t('medicalDocuments.pdfCorrupted'),
+    pdfNotCreated: t('medicalDocuments.pdfNotCreated'),
+    failedToProcessImages: t('medicalDocuments.failedToProcessImages'),
+    secureSharingFailed: t('medicalDocuments.secureSharingFailed'),
+    shareWasDismissed: t('medicalDocuments.shareWasDismissed'),
+    sharingNotAvailablePlatform: t('medicalDocuments.sharingNotAvailablePlatform'),
+    auricrxMedicalID: t('medicalDocuments.auricrxMedicalID'),
+    idFront: t('medicalDocuments.idFront'),
+    idBack: t('medicalDocuments.idBack'),
+    pleaseUseUploadPDF: t('medicalDocuments.pleaseUseUploadPDF'),
+    failedToSavePDF: t('medicalDocuments.failedToSavePDF'),
+    failedToUploadPDF: t('medicalDocuments.failedToUploadPDF'),
+    failedToShareDocument: t('medicalDocuments.failedToShareDocument'),
+    failedToShareToEmail: t('medicalDocuments.failedToShareToEmail'),
+    failedToShareToWhatsApp: t('medicalDocuments.failedToWhatsApp'),
+    failedToShareRegularDocumentEmail: t('medicalDocuments.failedToShareRegularDocumentEmail'),
+    failedToShareRegularDocumentWhatsApp: t('medicalDocuments.failedToShareRegularDocumentWhatsApp'),
+    permissionRequired: t('medicalDocuments.permissionRequired'),
+    grantCameraRollAccess: t('medicalDocuments.grantCameraRollAccess'),
+    grantCameraAccess: t('medicalDocuments.grantCameraAccess'),
+    documentUploadedSuccessfully: t('medicalDocuments.documentUploadedSuccessfully'),
+    photoTakenSuccessfully: t('medicalDocuments.photoTakenSuccessfully'),
+    failedToUploadDocument: t('medicalDocuments.failedToUploadDocument'),
+    failedToTakePhoto: t('medicalDocuments.failedToTakePhoto'),
+    areYouSureDeleteDocument: t('medicalDocuments.areYouSureDeleteDocument'),
+    document: t('medicalDocuments.document'),
+    
+    // Health Analytics
+    healthAnalytics: t('healthAnalytics.healthAnalytics'),
+    healthOverview: t('healthAnalytics.healthOverview'),
+    recentHealthMetrics: t('healthAnalytics.recentHealthMetrics'),
+    trackHealthMetrics: t('healthAnalytics.trackHealthMetrics'),
+    trackVitalSigns: t('healthAnalytics.trackVitalSigns'),
+    noHealthMetrics: t('healthAnalytics.noHealthMetrics'),
+    addHealthMetric: t('healthAnalytics.addHealthMetric'),
+    medicationAdherence: t('healthAnalytics.medicationAdherence'),
+    trackMedicationSchedule: t('healthAnalytics.trackMedicationSchedule'),
+    noAdherenceData: t('healthAnalytics.noAdherenceData'),
+    sideEffectsMonitoring: t('healthAnalytics.sideEffectsMonitoring'),
+    trackSideEffects: t('healthAnalytics.trackSideEffects'),
+    noSideEffectsRecorded: t('healthAnalytics.noSideEffectsRecorded'),
+    recordSideEffect: t('healthAnalytics.recordSideEffect'),
+    generateHealthReport: t('healthAnalytics.generateHealthReport'),
+    metricsRecorded: t('healthAnalytics.metricsRecorded'),
+    adherenceRate: t('healthAnalytics.adherenceRate'),
+    sideEffects: t('healthAnalytics.sideEffects'),
+    medications: t('healthAnalytics.medications'),
+    bloodPressure: t('healthAnalytics.bloodPressure'),
+    weight: t('healthAnalytics.weight'),
+    bloodSugar: t('healthAnalytics.bloodSugar'),
+    heartRate: t('healthAnalytics.heartRate'),
+    temperature: t('healthAnalytics.temperature'),
+    oxygenSaturation: t('healthAnalytics.oxygenSaturation'),
+    painLevel: t('healthAnalytics.painLevel'),
+    mood: t('healthAnalytics.mood'),
+    energyLevel: t('healthAnalytics.energyLevel'),
+    sleepHours: t('healthAnalytics.sleepHours'),
+    steps: t('healthAnalytics.steps'),
+    pleaseEnterValue: t('healthAnalytics.pleaseEnterValue'),
+    pleaseEnterValidNumber: t('healthAnalytics.pleaseEnterValidNumber'),
+    healthMetricAdded: t('healthAnalytics.healthMetricAdded'),
+    failedToAddHealthMetric: t('healthAnalytics.failedToAddHealthMetric'),
+    pleaseEnterSymptom: t('healthAnalytics.pleaseEnterSymptom'),
+    sideEffectRecorded: t('healthAnalytics.sideEffectRecorded'),
+    failedToRecordSideEffect: t('healthAnalytics.failedToRecordSideEffect'),
+    yourHealthMetricsNormal: t('healthAnalytics.yourHealthMetricsNormal'),
+    considerMaintainingSchedule: t('healthAnalytics.considerMaintainingSchedule'),
+    monitorNewSideEffects: t('healthAnalytics.monitorNewSideEffects'),
+    healthReportGenerated: t('healthAnalytics.healthReportGenerated'),
+    summary: t('healthAnalytics.summary'),
+    keyInsights: t('healthAnalytics.keyInsights'),
+    ok: t('healthAnalytics.ok'),
+    failedToGenerateHealthReport: t('healthAnalytics.failedToGenerateHealthReport'),
+    mild: t('healthAnalytics.mild'),
+    moderate: t('healthAnalytics.moderate'),
+    moderateSevere: t('healthAnalytics.moderateSevere'),
+    severe: t('healthAnalytics.severe'),
+    verySevere: t('healthAnalytics.verySevere'),
+    unknown: t('healthAnalytics.unknown'),
+    metricType: t('healthAnalytics.metricType'),
+    selectMetricType: t('healthAnalytics.selectMetricType'),
+    value: t('healthAnalytics.value'),
+    enterValue: t('healthAnalytics.enterValue'),
+    notesOptional: t('healthAnalytics.notesOptional'),
+    addAnyNotes: t('healthAnalytics.addAnyNotes'),
+    addMetric: t('healthAnalytics.addMetric'),
+    symptom: t('healthAnalytics.symptom'),
+    symptomPlaceholder: t('healthAnalytics.symptomPlaceholder'),
+    severity: t('healthAnalytics.severity'),
+    taken: t('healthAnalytics.taken'),
+    missed: t('healthAnalytics.missed'),
+    dayStreak: t('healthAnalytics.dayStreak'),
+    started: t('healthAnalytics.started'),
+    };
+    return sObject;
+  }, [t, isReady]);
 
   // meds/reminders (light placeholder list)
   const [reminders, setReminders] = useState([]);
@@ -2626,8 +3320,50 @@ useEffect(() => {
   }
 }, [aiOpen]);
 const [aiInput, setAiInput] = useState('');
+// Function to get the initial AI message based on selected doctor
+const getInitialAIMessage = (selectedDoctor) => {
+  const introductions = {
+    'alfred': S.drAlfredIntro || "Hello! I'm Dr. Alfred, your AI health consultant. I'm here to help you with medication information, health insights, and answer any medical questions you might have. How can I assist you today?",
+    'mimi': S.drMimiIntro || "Hi there! I'm Dr. Mimi, your friendly AI health assistant. I specialize in providing personalized health advice, medication guidance, and helping you understand your health better. What would you like to know?",
+    'pawlmer': S.drPawlmerIntro || "Meow! I'm Dr. Pawlmer, your purr-fessional AI health companion! As a feline doctor, I bring a unique perspective to healthcare. I'm here to help you with medication management, health tips, and make your healthcare journey more enjoyable. How can I help you today?"
+  };
+  return introductions[selectedDoctor] || introductions['alfred'];
+};
+
+// Function to add cat-like expressions to Dr. Pawlmer's responses
+const addCatExpressions = (response, selectedDoctor, lang) => {
+  if (selectedDoctor !== 'pawlmer') {
+    return response;
+  }
+
+  // Cat expressions based on language
+  const catExpressions = {
+    'en': ['Purr...', 'Meow!', '🐱', 'Purr-fect!', 'Feline-ly speaking...', 'Cat-egorically speaking...'],
+    'es': ['Ronroneo...', '¡Miau!', '🐱', '¡Purr-fecto!', 'Felino-hablando...', 'Categoría-mente hablando...'],
+    'zh': ['呼噜...', '喵！', '🐱', '完美！', '猫科医生说...', '从猫的角度...']
+  };
+
+  const expressions = catExpressions[lang] || catExpressions['en'];
+  
+  // Randomly add cat expressions to responses
+  const shouldAddExpression = Math.random() > 0.7; // 30% chance
+  
+  if (shouldAddExpression) {
+    const randomExpression = expressions[Math.floor(Math.random() * expressions.length)];
+    
+    // Add expression at the beginning or end
+    if (Math.random() > 0.5) {
+      return `${randomExpression} ${response}`;
+    } else {
+      return `${response} ${randomExpression}`;
+    }
+  }
+  
+  return response;
+};
+
 const [aiMessages, setAiMessages] = useState([
-  { role: 'system', text: 'Hi! I can help you with information about your medications and supplements. What would you like to know?' },
+  { role: 'system', text: getInitialAIMessage(selectedAIDoctor) },
 ]);
 const [aiSending, setAiSending] = useState(false);
 
@@ -2636,6 +3372,12 @@ const aiScrollRef = useRef(null);
 useEffect(() => {
   requestAnimationFrame(() => aiScrollRef.current?.scrollToEnd({ animated: true }));
 }, [aiMessages]);
+
+// Update AI messages when selected doctor or language changes
+useEffect(() => {
+  const newIntro = getInitialAIMessage(selectedAIDoctor);
+  setAiMessages([{ role: 'system', text: newIntro }]);
+}, [selectedAIDoctor, lang, S]);
 
 const aiInputRef = useRef(null);
 
@@ -2648,15 +3390,15 @@ const aiInputRef = useRef(null);
     setAiMessages(prev => {
       const last = prev[prev.length - 1];
       if (last?.role === 'assistant') {
-        return [...prev.slice(0, -1), { role: 'assistant', text: streamText }];
+        return [...prev.slice(0, -1), { role: 'assistant', text: addCatExpressions(streamText, selectedAIDoctor, lang) }];
       }
-      return [...prev, { role: 'assistant', text: streamText }];
+      return [...prev, { role: 'assistant', text: addCatExpressions(streamText, selectedAIDoctor, lang) }];
     });
-  }, [streamText]);
+  }, [streamText, selectedAIDoctor, lang]);
 
 
 // send to backend and update UI
-async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
+async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fastingProfile, pharmacies, labs, userCountry) {
   console.log('=== sendAi function called ===');
   const q = aiInput.trim();
   console.log('Input text:', q);
@@ -2680,6 +3422,10 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
   console.log('supplements:', supplements?.length || 0);
   console.log('herbs:', herbs?.length || 0);
   console.log('theme:', theme?.id || 'none');
+  console.log('fastingProfile:', fastingProfile ? 'available' : 'none');
+  console.log('pharmacies:', pharmacies?.length || 0);
+  console.log('labs:', labs?.length || 0);
+  console.log('userCountry:', userCountry || 'none');
 
 
   // Prepare user data for tool calling
@@ -2720,17 +3466,88 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     }));
     console.log('Herbs prepared:', herbsData.length);
 
+    console.log('Preparing health profile...');
+    const healthProfileData = fastingProfile ? {
+      basicInfo: {
+        age: fastingProfile.age || null,
+        gender: fastingProfile.gender || null,
+        weight: fastingProfile.weight || null,
+        height: fastingProfile.height || null,
+        weightUnit: fastingProfile.weightUnit || null,
+        heightUnit: fastingProfile.heightUnit || null
+      },
+      healthConditions: fastingProfile.healthConditions || [],
+      nutritionalStatus: {
+        bodyFatLevel: fastingProfile.bodyFatLevel || null,
+        muscleMass: fastingProfile.muscleMass || null,
+        micronutrientLevels: fastingProfile.micronutrientLevels || null,
+        hydrationLevel: fastingProfile.hydrationLevel || null
+      },
+      mentalHealth: {
+        highStressEnvironment: fastingProfile.highStressEnvironment || null,
+        intensiveMentalTasks: fastingProfile.intensiveMentalTasks || null,
+        anxiety: fastingProfile.anxiety || null,
+        depression: fastingProfile.depression || null
+      },
+      lifestyle: {
+        activityLevel: fastingProfile.activityLevel || null,
+        physicalLabor: fastingProfile.physicalLabor || null,
+        longShifts: fastingProfile.longShifts || null,
+        sleepQuality: fastingProfile.sleepQuality || null
+      },
+      fastingPreferences: {
+        preferredFastingType: fastingProfile.preferredFastingType || null,
+        maxFastingHours: fastingProfile.maxFastingHours || null,
+        fastingFrequency: fastingProfile.fastingFrequency || null
+      },
+      goals: {
+        primaryGoal: fastingProfile.primaryGoal || null,
+        weightLossGoal: fastingProfile.weightLossGoal || null,
+        metabolicHealthGoal: fastingProfile.metabolicHealthGoal || null
+      },
+      medicalSupervision: {
+        selfMonitoring: fastingProfile.selfMonitoring || null,
+        wearableDevices: fastingProfile.wearableDevices || null
+      }
+    } : null;
+    console.log('Health profile prepared:', healthProfileData ? 'available' : 'none');
+
+    console.log('Preparing pharmacy and lab data...');
+    const pharmacyData = (pharmacies || []).slice(0, 10).map(pharmacy => ({
+      name: pharmacy.name,
+      address: pharmacy.address,
+      distance: pharmacy.distanceMiles || pharmacy.distanceKm,
+      phone: pharmacy.phone,
+      rating: pharmacy.rating
+    }));
+    console.log('Pharmacies prepared:', pharmacyData.length);
+
+    const labData = (labs || []).slice(0, 10).map(lab => ({
+      name: lab.name,
+      address: lab.address,
+      distance: lab.distanceMiles || lab.distanceKm,
+      phone: lab.phone,
+      rating: lab.rating,
+      testTypes: lab.testTypes || []
+    }));
+    console.log('Labs prepared:', labData.length);
+
     userData = {
       meds: medsData,
       supplements: supplementsData,
       reminders: remindersData,
-      herbs: herbsData
+      herbs: herbsData,
+      healthProfile: healthProfileData,
+      pharmacies: pharmacyData,
+      labs: labData,
+      userCountry: userCountry,
+      language: lang
     };
 
     console.log('User data prepared for tool calling:', userData);
   } catch (error) {
     console.log('Error preparing user data:', error);
-    setAiMessages(m => [...m, { role: 'assistant', text: 'Error preparing your health data. Please try again.' }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: S.errorPreparingData || 'Error preparing your health data. Please try again.' }]);
     setAiSending(false);
     return;
   }
@@ -2741,7 +3558,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
   console.log('API Base URL:', 'https://auricrx-medcoach.onrender.com');
   
   // Add immediate response
-  setAiMessages(m => [...m, { role: 'assistant', text: 'AI is thinking...' }]);
+  setAiMessages(m => [...m, { role: 'assistant', text: S.aiThinking || 'AI is thinking...' }]);
   
   try {
     console.log('Sending question with user data for tool calling...');
@@ -2766,7 +3583,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     const reply = data.reply || 'No response received';
     console.log('Got response with tool calling:', reply);
     
-      setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
+      setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
     } catch (err) {
     console.log('API Error:', err);
     // Provide a helpful response even if AI is down
@@ -2778,7 +3595,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     } else {
       fallbackResponse += 'Please try again in a moment or consult with a healthcare provider for immediate medical questions.';
     }
-    setAiMessages(m => [...m, { role: 'assistant', text: fallbackResponse }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(fallbackResponse, selectedAIDoctor, lang) }]);
   } finally {
     setAiSending(false);
   }
@@ -2824,7 +3641,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
           AsyncStorage.getItem(STORAGE.rxPhotos),
           AsyncStorage.getItem(STORAGE.voiceNotes),
           AsyncStorage.getItem(STORAGE.meds),
-          AsyncStorage.getItem(STORAGE.selectedDoctor),
+          AsyncStorage.getItem(STORAGE.selectedAIDoctor),
         ]);
 
         if (L) {
@@ -2834,12 +3651,12 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
         if (T) setThemeKey(T);
         if (N) setNight(N === '1');
         if (M) setMoodShift(M === '1');
-        if (SD) setSelectedDoctor(SD);
 
         if (R) { try { setReminders(JSON.parse(R)); } catch {} }
         if (P) { try { setRxPhotos(JSON.parse(P)); } catch {} }
   if (V) { try { setVoiceNotes(JSON.parse(V)); } catch {} }
   if (MD) { try { setMeds(JSON.parse(MD)); } catch {} }
+        if (SD) { try { setSelectedAIDoctor(SD); } catch {} }
       } catch {
         // ignore corrupt storage on boot
       }
@@ -2855,7 +3672,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
   useEffect(() => { AsyncStorage.setItem(STORAGE.rxPhotos, JSON.stringify(rxPhotos)); }, [rxPhotos]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.voiceNotes, JSON.stringify(voiceNotes)); }, [voiceNotes]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);
-  useEffect(() => { AsyncStorage.setItem(STORAGE.selectedDoctor, selectedDoctor); }, [selectedDoctor]);
+  useEffect(() => { AsyncStorage.setItem(STORAGE.selectedAIDoctor, selectedAIDoctor); }, [selectedAIDoctor]);
 
   // Authentication state listener and restoration
   useEffect(() => {
@@ -2919,13 +3736,24 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
           } catch (error) {
             console.error('Failed to get user data after restore:', error);
           }
+          
+          // If user is authenticated, hide loading screen immediately
+          setIsLoading(false);
         } else {
           console.log('ℹ️ No valid auth state to restore - showing sign-in screen');
           setShowAuth(true);
+          // Show loading screen for a bit longer if no auth
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 1500);
         }
       } catch (error) {
         console.error('Failed to restore auth state:', error);
         setShowAuth(true);
+        // Show loading screen for a bit longer on error
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1500);
       } finally {
         setIsRestoringAuth(false);
         isRestoring = false; // Allow auth state changes to be processed
@@ -2938,12 +3766,6 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme) {
     return () => unsubscribe();
   }, []);
 
-  // Update AI greeting when doctor changes
-  useEffect(() => {
-    if (aiMessages.length > 0 && aiMessages[0].role === 'assistant') {
-      setAiMessages([{ role: 'assistant', text: getDoctorGreeting(selectedDoctor) }]);
-    }
-  }, [selectedDoctor]);
 
   // migrate from reminders if meds empty
   useEffect(() => {
@@ -3044,759 +3866,7 @@ useEffect(() => {
   }
 }, [fontsLoaded]);
 
-// Move S object inside component to fix circular dependency
-// const S = {
-  // Dashboard
-  dashboard: t('dashboard.title'),
-  healthJournal: t('dashboard.healthJournal'),
-  nextReminder: t('dashboard.nextReminder'),
-  
-  // Tiles
-  reminders: t('tiles.reminders'),
-  pharmacyLocations: t('tiles.pharmacyLocations'),
-  medications: t('tiles.medications'),
-  labsLocations: t('tiles.labsLocations'),
-  prescription: t('tiles.prescription'),
-  appointmentLog: t('tiles.appointmentLog'),
-  documents: t('tiles.documents'),
-  herbs: t('tiles.herbs'),
-  supplements: t('tiles.supplements'),
-  
-  // AI
-  aiConsultant: t('ai.consultant'),
-  askAI: t('ai.askAI'),
-  tapToTalk: t('ai.tapToTalk'),
-  aiPlaceholder: t('ai.placeholder'),
-  aiShort: t('ai.short'),
-  voiceNote: t('ai.voiceNote'),
-  
-  // Settings
-  settings: t('settings.title'),
-  profile: t('settings.profile'),
-  language: t('settings.language'),
-  colorSettings: t('settings.colorSettings'),
-  dayNight: t('settings.dayNight'),
-  moodShift: t('settings.moodShift'),
-  nightMode: t('settings.nightMode'),
-  autoCalm: t('settings.autoCalm'),
-  help: t('settings.help'),
-  notifications: t('settings.notifications'),
-  security: t('settings.security'),
-  privacy: t('settings.privacy'),
-  wallpaper: t('settings.wallpaper'),
-  pushNotifications: t('settings.pushNotifications'),
-  emailNotifications: t('settings.emailNotifications'),
-  smsNotifications: t('settings.smsNotifications'),
-  changePassword: t('settings.changePassword'),
-  dataCollection: t('settings.dataCollection'),
-  analytics: t('settings.analytics'),
-  changeWallpaper: t('settings.changeWallpaper'),
-  chooseWallpaperDescription: t('settings.chooseWallpaperDescription'),
-  emailUs: t('settings.emailUs'),
-  emailAddress: t('settings.emailAddress'),
-  signOut: t('settings.signOut'),
-  
-  // Colors
-  gold: t('settings.colors.gold'),
-  blue: t('settings.colors.blue'),
-  teal: t('settings.colors.teal'),
-  
-  // Languages
-  english: t('settings.languages.en'),
-  spanish: t('settings.languages.es'),
-  chinese: t('settings.languages.zh'),
-  portuguese: t('settings.languages.pt'),
-  french: t('settings.languages.fr'),
-  german: t('settings.languages.de'),
-  
-  // Common
-  loading: t('common.loading'),
-  loadingPharmacies: t('common.loadingPharmacies'),
-  loadingLabs: t('common.loadingLabs'),
-  error: t('common.error'),
-  success: t('common.success'),
-  close: t('common.close'),
-  back: t('common.back'),
-  brand: t('common.brand'),
-  send: t('common.send'),
-  stop: t('common.stop'),
-  noData: t('common.noData'),
-  noResponse: t('common.noResponse'),
-  appDescription: t('common.appDescription'),
-  noTime: t('common.noTime'),
-  sort: t('common.sort'),
-  sortBy: t('common.sortBy'),
-  ascending: t('common.ascending'),
-  descending: t('common.descending'),
-  refresh: t('common.refresh'),
-  showAll: t('common.showAll'),
-  fx: t('common.fx'),
-  directions: t('common.directions'),
-  never: t('common.never'),
-  refillComplete: t('common.refillComplete'),
-  
-  // Common UI Elements
-  call: t('common.call'),
-  info: t('common.info'),
-  km: t('common.km'),
-  mi: t('common.mi'),
-  tablets: t('common.tablets'),
-  mg: t('common.mg'),
-  mxn: t('common.mxn'),
-  usd: t('common.usd'),
-  exchangeRate: t('common.exchangeRate'),
-  
-  // Smart Notifications
-  smartNotifications: t('tiles.smartAlerts'),
-  smartNotificationsDesc: t('settings.smartNotificationsDesc'),
-  smartNotificationsActive: t('settings.smartNotificationsActive'),
-  smartServiceNotAvailable: t('settings.smartServiceNotAvailable'),
-  smartFeatures: t('settings.smartFeatures'),
-  smartFeaturesDesc: t('settings.smartFeaturesDesc'),
-  smartRefillPredictions: t('settings.smartRefillPredictions'),
-  smartRefillPredictionsDesc: t('settings.smartRefillPredictionsDesc'),
-  intelligentTiming: t('settings.intelligentTiming'),
-  intelligentTimingDesc: t('settings.intelligentTimingDesc'),
-  contextAwareReminders: t('settings.contextAwareReminders'),
-  contextAwareRemindersDesc: t('settings.contextAwareRemindersDesc'),
-  locationBasedReminders: t('settings.locationBasedReminders'),
-  locationBasedRemindersDesc: t('settings.locationBasedRemindersDesc'),
-  weatherBasedAlerts: t('settings.weatherBasedAlerts'),
-  weatherBasedAlertsDesc: t('settings.weatherBasedAlertsDesc'),
-  noLocationReminders: t('settings.noLocationReminders'),
-  noWeatherAlerts: t('settings.noWeatherAlerts'),
-  addLocationReminder: t('settings.addLocationReminder'),
-  addWeatherAlert: t('settings.addWeatherAlert'),
-  active: t('settings.active'),
-  disabled: t('settings.disabled'),
-  initializing: t('settings.initializing'),
-  threshold: t('settings.threshold'),
-  pollenAlert: t('settings.pollenAlert'),
-  temperatureAlert: t('settings.temperatureAlert'),
-  humidityAlert: t('settings.humidityAlert'),
-  airQualityAlert: t('settings.airQualityAlert'),
-  pollenMessage: t('settings.pollenMessage'),
-  temperatureMessage: t('settings.temperatureMessage'),
-  humidityMessage: t('settings.humidityMessage'),
-  airQualityMessage: t('settings.airQualityMessage'),
-  locationReminderAdded: t('settings.locationReminderAdded'),
-  failedToAddLocationReminder: t('settings.failedToAddLocationReminder'),
-  weatherAlertAdded: t('settings.weatherAlertAdded'),
-  failedToAddWeatherAlert: t('settings.failedToAddWeatherAlert'),
-  deleteReminder: t('common.deleteReminder'),
-  deleteReminderConfirm: t('common.deleteReminderConfirm'),
-  deleteAlert: t('common.deleteAlert'),
-  deleteAlertConfirm: t('common.deleteAlertConfirm'),
-  failedToDeleteReminder: t('common.failedToDeleteReminder'),
-  failedToDeleteAlert: t('common.failedToDeleteAlert'),
-  fillBothFields: t('common.fillBothFields'),
-  reminderAdded: t('common.reminderAdded'),
-  failedToAddReminder: t('common.failedToAddReminder'),
-  addLocationReminderTitle: t('common.addLocationReminderTitle'),
-  locationNamePlaceholder: t('common.locationNamePlaceholder'),
-  reminderMessagePlaceholder: t('common.reminderMessagePlaceholder'),
-  addWeatherAlertTitle: t('common.addWeatherAlertTitle'),
-  chooseWeatherCondition: t('common.chooseWeatherCondition'),
-  highPollen: t('common.highPollen'),
-  extremeTemperature: t('common.extremeTemperature'),
-  highHumidity: t('common.highHumidity'),
-  poorAirQuality: t('common.poorAirQuality'),
-  
-  // Common Actions
-  cancel: t('common.cancel'),
-  delete: t('common.delete'),
-  add: t('common.add'),
-  success: t('common.success'),
-  
-  // Medications
-  addMedication: t('medications.addMedication'),
-  editMedication: t('medications.editMedication'),
-  noMedications: t('medications.noMedications'),
-  dosesLeft: t('medications.dosesLeft'),
-  status: t('medications.status'),
-  times: t('medications.times'),
-  add: t('medications.add'),
-  edit: t('medications.edit'),
-  delete: t('medications.delete'),
-  cancel: t('medications.cancel'),
-  save: t('medications.save'),
-  refill: t('medications.refill'),
-  addTime: t('medications.addTime'),
-  lastRefill: t('medications.lastRefill'),
-  lowest: t('medications.lowest'),
-  reserve: t('medications.reserve'),
-  medicationName: t('medications.medicationName'),
-  strengthExample: t('medications.strengthExample'),
-  notesOptional: t('medications.notesOptional'),
-  selectTimes: t('medications.selectTimes'),
-  startDate: t('medications.startDate'),
-  endDateOptional: t('medications.endDateOptional'),
-  
-  // Supplements
-  addSupplement: t('supplements.addSupplement'),
-  editSupplement: t('supplements.editSupplement'),
-  noSupplements: t('supplements.noSupplements'),
-  pause: t('supplements.pause'),
-  supplementName: t('supplements.supplementName'),
-  brand: t('supplements.brand'),
-  dosage: t('supplements.dosage'),
-  resume: t('supplements.resume'),
-  servingsLeft: t('supplements.servingsLeft'),
-  
-  // Reminders
-  addReminder: t('reminders.addReminder'),
-  pickTime: t('reminders.pickTime'),
-  namePlaceholder: t('reminders.namePlaceholder'),
-  
-  // Pharmacies
-  pharmacyTitle: t('pharmacies.title'),
-  pharmacyDescription: t('pharmacies.description'),
-  openMaps: t('pharmacies.openMaps'),
-  searchQuery: t('pharmacies.searchQuery'),
-  foundPharmacies: t('pharmacies.foundPharmacies'),
-  findNearbyPharmacies: t('pharmacies.findNearbyPharmacies'),
-  
-  // Labs
-  labsTitle: t('labs.title'),
-  findLabs: t('labs.findLabs'),
-  labsSearchQuery: t('labs.searchQuery'),
-  foundLabs: t('labs.foundLabs'),
-  findNearbyLabs: t('labs.findNearbyLabs'),
-  
-  // Lab Test Types
-  bloodWork: t('labs.testTypes.bloodWork'),
-  pathology: t('labs.testTypes.pathology'),
-  infectiousDisease: t('labs.testTypes.infectiousDisease'),
-  imaging: t('labs.testTypes.imaging'),
-  cardiac: t('labs.testTypes.cardiac'),
-  allergy: t('labs.testTypes.allergy'),
-  specialty: t('labs.testTypes.specialty'),
-  
-  // Lab Buttons
-  callLab: t('labs.buttons.call'),
-  testsLab: t('labs.buttons.tests'),
-  moreLab: t('labs.buttons.more'),
-  
-  // Dashboard Cards
-  smartAlerts: t('tiles.smartAlerts'),
-  healthAnalytics: t('tiles.healthAnalytics'),
-  aiHealth: t('tiles.aiHealth'),
-  
-  // AI Health Assistant
-  aiHealthAssistant: t('ai.assistant'),
-  intelligentHealthcareFeatures: t('ai.intelligentFeatures'),
-  aiHealthFeatures: t('ai.features'),
-  healthInsights: t('ai.insights'),
-  symptomAnalyses: t('ai.symptomAnalyses'),
-  drugChecks: t('ai.drugChecks'),
-  voiceNotes: t('ai.voiceNotes'),
-  analyzeSymptoms: t('ai.analyzeSymptoms'),
-  checkInteractions: t('ai.checkInteractions'),
-  symptomAnalysis: t('ai.symptomAnalysis'),
-  describeSymptoms: t('ai.describeSymptoms'),
-  enterSymptomsPlaceholder: t('ai.enterSymptomsPlaceholder'),
-  analyze: t('ai.analyze'),
-  drugInteractionCheck: t('ai.drugInteractionCheck'),
-  listMedications: t('ai.listMedications'),
-  enterMedicationsPlaceholder: t('ai.enterMedicationsPlaceholder'),
-  check: t('ai.check'),
-  aiGeneratedInsights: t('ai.aiGeneratedInsights'),
-  noHealthInsights: t('ai.noHealthInsights'),
-  recentAnalyses: t('ai.recentAnalyses'),
-  recentSymptomAnalyses: t('ai.recentSymptomAnalyses'),
-  noSymptomAnalyses: t('ai.noSymptomAnalyses'),
-  // Medical Documents
-  medicalDocumentsTitle: t('medicalDocuments.title'),
-  medicalDocuments: t('medicalDocuments.medicalDocuments'),
-  organizeDocuments: t('medicalDocuments.organizeDocuments'),
-  addDocument: t('medicalDocuments.addDocument'),
-  noDocumentsUploaded: t('medicalDocuments.noDocumentsUploaded'),
-  multiSelectDoc: t('medicalDocuments.multiSelectDoc'),
-  takePhoto: t('medicalDocuments.takePhoto'),
-  uploadFromGallery: t('medicalDocuments.uploadFromGallery'),
-  selectAll: t('medicalDocuments.selectAll'),
-  clear: t('medicalDocuments.clear'),
-  share: t('medicalDocuments.share'),
-  uploadDocument: t('medicalDocuments.uploadDocument'),
-  uploading: t('medicalDocuments.uploading'),
-  noDocumentsYet: t('medicalDocuments.noDocumentsYet'),
-  uploadFirstDocument: t('medicalDocuments.uploadFirstDocument'),
-  photoID: t('medicalDocuments.photoID'),
-  driversLicensePassport: t('medicalDocuments.driversLicensePassport'),
-  frontSide: t('medicalDocuments.frontSide'),
-  backSide: t('medicalDocuments.backSide'),
-  birthCertificate: t('medicalDocuments.birthCertificate'),
-  officialBirthCertificate: t('medicalDocuments.officialBirthCertificate'),
-  insuranceCard: t('medicalDocuments.insuranceCard'),
-  healthInsuranceInfo: t('medicalDocuments.healthInsuranceInfo'),
-  frontOfCard: t('medicalDocuments.frontOfCard'),
-  backOfCard: t('medicalDocuments.backOfCard'),
-  labResults: t('medicalDocuments.labResults'),
-  bloodTestsLabWork: t('medicalDocuments.bloodTestsLabWork'),
-  prescriptions: t('medicalDocuments.prescriptions'),
-  currentAndPastPrescriptions: t('medicalDocuments.currentAndPastPrescriptions'),
-  medicalRecords: t('medicalDocuments.medicalRecords'),
-  medicalHistoryReports: t('medicalDocuments.medicalHistoryReports'),
-  otherDocuments: t('medicalDocuments.otherDocuments'),
-  anyOtherMedicalDocuments: t('medicalDocuments.anyOtherMedicalDocuments'),
-  uploadPDF: t('medicalDocuments.uploadPDF'),
-  uploadImage: t('medicalDocuments.uploadImage'),
-  scanDocument: t('medicalDocuments.scanDocument'),
-  viewDocument: t('medicalDocuments.viewDocument'),
-  shareDocument: t('medicalDocuments.shareDocument'),
-  deleteDocument: t('medicalDocuments.deleteDocument'),
-  editDocument: t('medicalDocuments.editDocument'),
-  documentName: t('medicalDocuments.documentName'),
-  enterDocumentName: t('medicalDocuments.enterDocumentName'),
-  documentCategory: t('medicalDocuments.documentCategory'),
-  selectCategory: t('medicalDocuments.selectCategory'),
-  documentType: t('medicalDocuments.documentType'),
-  front: t('medicalDocuments.front'),
-  back: t('medicalDocuments.back'),
-  single: t('medicalDocuments.single'),
-  pdfDocument: t('medicalDocuments.pdfDocument'),
-  imageDocument: t('medicalDocuments.imageDocument'),
-  uploadSuccess: t('medicalDocuments.uploadSuccess'),
-  uploadFailed: t('medicalDocuments.uploadFailed'),
-  deleteConfirm: t('medicalDocuments.deleteConfirm'),
-  deleteSuccess: t('medicalDocuments.deleteSuccess'),
-  deleteFailed: t('medicalDocuments.deleteFailed'),
-  shareSuccess: t('medicalDocuments.shareSuccess'),
-  shareFailed: t('medicalDocuments.shareFailed'),
-  shareToDoctor: t('medicalDocuments.shareToDoctor'),
-  shareToEmail: t('medicalDocuments.shareToEmail'),
-  shareToWhatsApp: t('medicalDocuments.shareToWhatsApp'),
-  useWhatsApp: t('medicalDocuments.useWhatsApp'),
-  useEmail: t('medicalDocuments.useEmail'),
-  addEmail: t('medicalDocuments.addEmail'),
-  goToAppointmentTracker: t('medicalDocuments.goToAppointmentTracker'),
-  sharingNotAvailable: t('medicalDocuments.sharingNotAvailable'),
-  documentNotFound: t('medicalDocuments.documentNotFound'),
-  pdfCorrupted: t('medicalDocuments.pdfCorrupted'),
-  pdfNotCreated: t('medicalDocuments.pdfNotCreated'),
-  failedToProcessImages: t('medicalDocuments.failedToProcessImages'),
-  secureSharingFailed: t('medicalDocuments.secureSharingFailed'),
-  shareWasDismissed: t('medicalDocuments.shareWasDismissed'),
-  sharingNotAvailablePlatform: t('medicalDocuments.sharingNotAvailablePlatform'),
-  auricrxMedicalID: t('medicalDocuments.auricrxMedicalID'),
-  idFront: t('medicalDocuments.idFront'),
-  idBack: t('medicalDocuments.idBack'),
-  pleaseUseUploadPDF: t('medicalDocuments.pleaseUseUploadPDF'),
-  failedToSavePDF: t('medicalDocuments.failedToSavePDF'),
-  failedToUploadPDF: t('medicalDocuments.failedToUploadPDF'),
-  failedToShareDocument: t('medicalDocuments.failedToShareDocument'),
-  failedToShareToEmail: t('medicalDocuments.failedToShareToEmail'),
-  failedToShareToWhatsApp: t('medicalDocuments.failedToShareToWhatsApp'),
-  failedToShareRegularDocumentEmail: t('medicalDocuments.failedToShareRegularDocumentEmail'),
-  failedToShareRegularDocumentWhatsApp: t('medicalDocuments.failedToShareRegularDocumentWhatsApp'),
-  // Admin Profile
-  adminProfileTitle: t('adminProfile.title'),
-  displayName: t('adminProfile.displayName'),
-  email: t('adminProfile.email'),
-  phoneNumber: t('adminProfile.phoneNumber'),
-  noPhoneNumber: t('adminProfile.noPhoneNumber'),
-  updateProfile: t('adminProfile.updateProfile'),
-  securitySettings: t('adminProfile.securitySettings'),
-  changePassword: t('adminProfile.changePassword'),
-  deleteAccount: t('adminProfile.deleteAccount'),
-  processing: t('adminProfile.processing'),
-  error: t('adminProfile.error'),
-  success: t('adminProfile.success'),
-  ok: t('adminProfile.ok'),
-  displayNameRequired: t('adminProfile.displayNameRequired'),
-  profileUpdatedSuccessfully: t('adminProfile.profileUpdatedSuccessfully'),
-  failedToUpdateProfile: t('adminProfile.failedToUpdateProfile'),
-  changePasswordTitle: t('adminProfile.changePasswordTitle'),
-  passwordResetMessage: t('adminProfile.passwordResetMessage'),
-  sendResetEmail: t('adminProfile.sendResetEmail'),
-  emailRequiredForReset: t('adminProfile.emailRequiredForReset'),
-  passwordResetEmailSent: t('adminProfile.passwordResetEmailSent'),
-  failedToSendResetEmail: t('adminProfile.failedToSendResetEmail'),
-  deleteAccountTitle: t('adminProfile.deleteAccountTitle'),
-  deleteAccountMessage: t('adminProfile.deleteAccountMessage'),
-  confirmDeletion: t('adminProfile.confirmDeletion'),
-  confirmDeletionMessage: t('adminProfile.confirmDeletionMessage'),
-  yesDeleteForever: t('adminProfile.yesDeleteForever'),
-  accountDeleted: t('adminProfile.accountDeleted'),
-  accountDeletedMessage: t('adminProfile.accountDeletedMessage'),
-  // Wallpaper
-  wallpaperTitle: t('wallpaper.title'),
-  currentWallpaper: t('wallpaper.currentWallpaper'),
-  default: t('wallpaper.default'),
-  changeWallpaper: t('wallpaper.changeWallpaper'),
-  chooseWallpaper: t('wallpaper.chooseWallpaper'),
-  loadingWallpapers: t('wallpaper.loadingWallpapers'),
-  solidColors: t('wallpaper.solidColors'),
-  wallpaperImages: t('wallpaper.wallpaperImages'),
-  wallpaperChangedSuccessfully: t('wallpaper.wallpaperChangedSuccessfully'),
-  failedToSaveWallpaper: t('wallpaper.failedToSaveWallpaper'),
-  wallpaperSuccess: t('wallpaper.success'),
-  wallpaperError: t('wallpaper.error'),
-  aboutWallpapers: t('wallpaper.aboutWallpapers'),
-  aboutWallpapersDescription: t('wallpaper.aboutWallpapersDescription'),
-  uniqueWallpaperDesigns: t('wallpaper.uniqueWallpaperDesigns'),
-  solidColorOptions: t('wallpaper.solidColorOptions'),
-  instantPreviewAndApplication: t('wallpaper.instantPreviewAndApplication'),
-  settingsSavedAutomatically: t('wallpaper.settingsSavedAutomatically'),
-  white: t('wallpaper.white'),
-  black: t('wallpaper.black'),
-  blackGoldDr: t('wallpaper.blackGoldDr'),
-  blackGold: t('wallpaper.blackGold'),
-  blackSilver: t('wallpaper.blackSilver'),
-  boldCream: t('wallpaper.boldCream'),
-  creamWallpaper: t('wallpaper.creamWallpaper'),
-  darkCream: t('wallpaper.darkCream'),
-  darkGreenGold: t('wallpaper.darkGreenGold'),
-  whiteGoldDr: t('wallpaper.whiteGoldDr'),
-  
-  // Prescription
-  prescriptionTitle: t('prescription.title'),
-  addPhoto: t('prescription.addPhoto'),
-  createPDF: t('prescription.createPDF'),
-  
-  // Appointments
-  appointmentsTitle: t('appointments.title'),
-  record: t('appointments.record'),
-  recording: t('appointments.recording'),
-  play: t('appointments.play'),
-  appointmentManagement: t('appointments.appointmentManagement'),
-  appointmentManagementDesc: t('appointments.appointmentManagementDesc'),
-  appointmentOverview: t('appointments.appointmentOverview'),
-  totalAppointments: t('appointments.totalAppointments'),
-  upcoming: t('appointments.upcoming'),
-  doctors: t('appointments.doctors'),
-  upcomingAppointments: t('appointments.upcomingAppointments'),
-  upcomingAppointmentsDesc: t('appointments.upcomingAppointmentsDesc'),
-  noUpcomingAppointments: t('appointments.noUpcomingAppointments'),
-  doctorContacts: t('appointments.doctorContacts'),
-  doctorContactsDesc: t('appointments.doctorContactsDesc'),
-  noDoctorContactsYet: t('appointments.noDoctorContactsYet'),
-  scheduleAppointment: t('appointments.scheduleAppointment'),
-  appointmentType: t('appointments.appointmentType'),
-  selectAppointmentType: t('appointments.selectAppointmentType'),
-  title: t('appointments.title'),
-  titlePlaceholder: t('appointments.titlePlaceholder'),
-  location: t('appointments.location'),
-  locationPlaceholder: t('appointments.locationPlaceholder'),
-  date: t('appointments.date'),
-  time: t('appointments.time'),
-  notesOptional: t('appointments.notesOptional'),
-  notesPlaceholder: t('appointments.notesPlaceholder'),
-  schedule: t('appointments.schedule'),
-  addDoctorContact: t('appointments.addDoctorContact'),
-  doctorName: t('appointments.doctorName'),
-  doctorNamePlaceholder: t('appointments.doctorNamePlaceholder'),
-  specialty: t('appointments.specialty'),
-  specialtyPlaceholder: t('appointments.specialtyPlaceholder'),
-  address: t('appointments.address'),
-  addressPlaceholder: t('appointments.addressPlaceholder'),
-  addDoctor: t('appointments.addDoctor'),
-  doctorVisit: t('appointments.doctorVisit'),
-  labTest: t('appointments.labTest'),
-  pharmacy: t('appointments.pharmacy'),
-  specialist: t('appointments.specialist'),
-  emergency: t('appointments.emergency'),
-  followUp: t('appointments.followUp'),
-  checkup: t('appointments.checkup'),
-  other: t('appointments.other'),
-  scheduled: t('appointments.scheduled'),
-  confirmed: t('appointments.confirmed'),
-  completed: t('appointments.completed'),
-  cancelled: t('appointments.cancelled'),
-  rescheduled: t('appointments.rescheduled'),
-  unknown: t('appointments.unknown'),
-  primary: t('appointments.primary'),
-  error: t('appointments.error'),
-  fillAllFields: t('appointments.fillAllFields'),
-  appointmentServiceNotAvailable: t('appointments.appointmentServiceNotAvailable'),
-  success: t('appointments.success'),
-  appointmentScheduled: t('appointments.appointmentScheduled'),
-  failedToSchedule: t('appointments.failedToSchedule'),
-  doctorContactAdded: t('appointments.doctorContactAdded'),
-  failedToAddDoctor: t('appointments.failedToAddDoctor'),
-  appointmentCompleted: t('appointments.appointmentCompleted'),
-  failedToUpdate: t('appointments.failedToUpdate'),
-  phoneOnly: t('appointments.phoneOnly'),
-  whatsappOnly: t('appointments.whatsappOnly'),
-  bothPhoneWhatsapp: t('appointments.bothPhoneWhatsapp'),
-  selectCountry: t('appointments.selectCountry'),
-  chooseCountryCode: t('appointments.chooseCountryCode'),
-  phoneNumber: t('appointments.phoneNumber'),
-  enterPhoneNumber: t('appointments.enterPhoneNumber'),
-  doctorEmailAddress: t('appointments.emailAddress'),
-  doctorEmailPlaceholder: t('appointments.doctorEmailPlaceholder'),
-  dialingMethod: t('appointments.dialingMethod'),
-  selectDialingMethod: t('appointments.selectDialingMethod'),
-  howToContactDoctor: t('appointments.howToContactDoctor'),
-  editDoctorContact: t('appointments.editDoctorContact'),
-  updateDoctor: t('appointments.updateDoctor'),
-  deleteDoctorContact: t('appointments.deleteDoctorContact'),
-  deleteDoctorConfirm: t('appointments.deleteDoctorConfirm'),
-  doctorContactDeleted: t('appointments.doctorContactDeleted'),
-  failedToDeleteDoctor: t('appointments.failedToDeleteDoctor'),
-  doctorContactUpdated: t('appointments.doctorContactUpdated'),
-  failedToUpdateDoctor: t('appointments.failedToUpdateDoctor'),
-  pastAppointments: t('appointments.pastAppointments'),
-  searchPastAppointments: t('appointments.searchPastAppointments'),
-  noAppointmentsFound: t('appointments.noAppointmentsFound'),
-  noPastAppointments: t('appointments.noPastAppointments'),
-  attended: t('appointments.attended'),
-  missed: t('appointments.missed'),
-  close: t('appointments.close'),
-  refresh: t('appointments.refresh'),
-  pastAppts: t('appointments.pastAppts'),
-  call: t('appointments.call'),
-  whatsapp: t('appointments.whatsapp'),
-  
-  // Documents
-  documentsTitle: t('documents.title'),
-  addFromCamera: t('documents.addFromCamera'),
-  addFromGallery: t('documents.addFromGallery'),
-  addPhotos: t('documents.addPhotos'),
-  exportPDF: t('documents.exportPDF'),
-  exporting: t('documents.exporting'),
-  noPages: t('documents.noPages'),
-  cameraNotAvailable: t('documents.cameraNotAvailable'),
-  permissionNeeded: t('documents.permissionNeeded'),
-  galleryPermissionNeeded: t('documents.galleryPermissionNeeded'),
-  failedToCapture: t('documents.failedToCapture'),
-  failedToSelect: t('documents.failedToSelect'),
-  noPagesToExport: t('documents.noPagesToExport'),
-  pdfExported: t('documents.pdfExported'),
-  failedToExport: t('documents.failedToExport'),
-  
-  // Herbs
-  herbsTitle: t('herbs.title'),
-  search: t('herbs.search'),
-  noResults: t('herbs.noResults'),
-  origin: t('herbs.details.origin'),
-  poisonous: t('herbs.details.poisonous'),
-  poisonousYes: t('herbs.details.poisonousYes'),
-  poisonousNo: t('herbs.details.poisonousNo'),
-  summary: t('herbs.details.summary'),
-  
-  // Pharmacy
-  call: t('common.pharmacy.call'),
-  callConfirm: t('common.pharmacy.callConfirm'),
-  callError: t('common.pharmacy.callError'),
-  reserve: t('common.pharmacy.reserve'),
-  reserveConfirm: t('common.pharmacy.reserveConfirm'),
-  reserveNote: t('common.pharmacy.reserveNote'),
-  reserveSuccess: t('common.pharmacy.reserveSuccess'),
-  pickupTime: t('common.pharmacy.pickupTime'),
-  updated: t('common.pharmacy.updated'),
-  pickup: t('common.pharmacy.pickup'),
-  delivery: t('common.pharmacy.delivery'),
-  cash: t('common.pharmacy.cash'),
-  coupon: t('common.pharmacy.coupon'),
-  name: t('common.pharmacy.name'),
-  price: t('common.pharmacy.price'),
-  distance: t('common.pharmacy.distance'),
-  
-  // San Pablo
-  searchTitle: t('common.sanpablo.searchTitle'),
-  searchPlaceholder: t('common.sanpablo.searchPlaceholder'),
-  searchButton: t('common.sanpablo.searchButton'),
-  sanpabloSection: t('common.sanpablo.sanpabloSection'),
-  nearbySection: t('common.sanpablo.nearbySection'),
-  noResults: t('common.sanpablo.noResults'),
-  noLocation: t('common.sanpablo.noLocation'),
-  nearbyError: t('common.sanpablo.nearbyError'),
-  productName: t('common.sanpablo.productName'),
-  priceUnavailable: t('common.sanpablo.priceUnavailable'),
-  chain: t('common.sanpablo.chain'),
-  withPrice: t('common.sanpablo.withPrice'),
-  go: t('common.sanpablo.go'),
-  retry: t('common.sanpablo.retry'),
-  
-  // Alerts
-  locationDenied: t('common.alerts.locationDenied'),
-  enableLocation: t('common.alerts.enableLocation'),
-  
-  // Health Analytics
-  healthOverview: t('healthAnalytics.healthOverview'),
-  recentHealthMetrics: t('healthAnalytics.recentHealthMetrics'),
-  medicationAdherence: t('healthAnalytics.medicationAdherence'),
-  sideEffectsMonitoring: t('healthAnalytics.sideEffectsMonitoring'),
-  trackHealthMetrics: t('healthAnalytics.trackHealthMetrics'),
-  trackVitalSigns: t('healthAnalytics.trackVitalSigns'),
-  trackMedicationSchedule: t('healthAnalytics.trackMedicationSchedule'),
-  trackSideEffects: t('healthAnalytics.trackSideEffects'),
-  generateHealthReport: t('healthAnalytics.generateHealthReport'),
-  addHealthMetric: t('healthAnalytics.addHealthMetric'),
-  recordSideEffect: t('healthAnalytics.recordSideEffect'),
-  metricsRecorded: t('healthAnalytics.metricsRecorded'),
-  adherenceRate: t('healthAnalytics.adherenceRate'),
-  sideEffects: t('healthAnalytics.sideEffects'),
-  medications: t('healthAnalytics.medications'),
-  noHealthMetrics: t('healthAnalytics.noHealthMetrics'),
-  noAdherenceData: t('healthAnalytics.noAdherenceData'),
-  noSideEffectsRecorded: t('healthAnalytics.noSideEffectsRecorded'),
-  bloodPressure: t('healthAnalytics.bloodPressure'),
-  weight: t('healthAnalytics.weight'),
-  bloodSugar: t('healthAnalytics.bloodSugar'),
-  heartRate: t('healthAnalytics.heartRate'),
-  temperature: t('healthAnalytics.temperature'),
-  oxygenSaturation: t('healthAnalytics.oxygenSaturation'),
-  painLevel: t('healthAnalytics.painLevel'),
-  mood: t('healthAnalytics.mood'),
-  energyLevel: t('healthAnalytics.energyLevel'),
-  sleepHours: t('healthAnalytics.sleepHours'),
-  steps: t('healthAnalytics.steps'),
-  pleaseEnterValue: t('healthAnalytics.pleaseEnterValue'),
-  pleaseEnterValidNumber: t('healthAnalytics.pleaseEnterValidNumber'),
-  sideEffectRecorded: t('healthAnalytics.sideEffectRecorded'),
-  yourHealthMetricsNormal: t('healthAnalytics.yourHealthMetricsNormal'),
-  considerMaintainingSchedule: t('healthAnalytics.considerMaintainingSchedule'),
-  monitorNewSideEffects: t('healthAnalytics.monitorNewSideEffects'),
-  healthReportGenerated: t('healthAnalytics.healthReportGenerated'),
-  summary: t('healthAnalytics.summary'),
-  keyInsights: t('healthAnalytics.keyInsights'),
-  ok: t('healthAnalytics.ok'),
-  mild: t('healthAnalytics.mild'),
-  moderate: t('healthAnalytics.moderate'),
-  moderateSevere: t('healthAnalytics.moderateSevere'),
-  severe: t('healthAnalytics.severe'),
-  verySevere: t('healthAnalytics.verySevere'),
-  unknown: t('healthAnalytics.unknown'),
-  metricType: t('healthAnalytics.metricType'),
-  selectMetricType: t('healthAnalytics.selectMetricType'),
-  value: t('healthAnalytics.value'),
-  enterValue: t('healthAnalytics.enterValue'),
-  notesOptional: t('healthAnalytics.notesOptional'),
-  addAnyNotes: t('healthAnalytics.addAnyNotes'),
-  addMetric: t('healthAnalytics.addMetric'),
-  symptom: t('healthAnalytics.symptom'),
-  symptomPlaceholder: t('healthAnalytics.symptomPlaceholder'),
-  severity: t('healthAnalytics.severity'),
-  healthMetricAdded: t('healthAnalytics.healthMetricAdded'),
-  failedToAddHealthMetric: t('healthAnalytics.failedToAddHealthMetric'),
-  failedToRecordSideEffect: t('healthAnalytics.failedToRecordSideEffect'),
-  failedToGenerateHealthReport: t('healthAnalytics.failedToGenerateHealthReport'),
-  taken: t('healthAnalytics.taken'),
-  missed: t('healthAnalytics.missed'),
-  dayStreak: t('healthAnalytics.dayStreak'),
-  started: t('healthAnalytics.started'),
-  
-  // Fasting Analytics
-  fastingAnalytics: t('ai.fastingAnalytics'),
-  fastingCompatibilityCheck: t('ai.fastingCompatibilityCheck'),
-  fastingDescription: t('ai.fastingDescription'),
-  fastingDisclaimer: t('ai.fastingDisclaimer'),
-  warnings: t('ai.warnings'),
-  
-  // Health Profile
-  healthProfile: t('healthProfile.title'),
-  healthProfileSettings: t('healthProfile.settings'),
-  healthProfileDescription: t('healthProfile.description'),
-  
-  // Fasting Profile
-  yourFastingProfile: t('yourFastingProfile'),
-  needsReview: t('needsReview'),
-  compatible: t('compatible'),
-  notAnalyzed: t('notAnalyzed'),
-  recommendedFastingWindow: t('recommendedFastingWindow'),
-  importantConsiderations: t('importantConsiderations'),
-  reAnalyzeFasting: t('reAnalyzeFasting'),
-  analyzeFastingCompatibility: t('analyzeFastingCompatibility'),
-  completeYourFastingProfile: t('completeYourFastingProfile'),
-  exportHealthReport: t('exportHealthReport'),
-  fastingAnalysis: t('fastingAnalysis'),
-  status: t('status'),
-  analysis: t('analysis'),
-  basicInfo: t('healthProfile.basicInfo'),
-  weight: t('healthProfile.weight'),
-  height: t('healthProfile.height'),
-  weightUnit: t('healthProfile.weightUnit'),
-  heightUnit: t('healthProfile.heightUnit'),
-  kg: t('healthProfile.kg'),
-  lbs: t('healthProfile.lbs'),
-  cm: t('healthProfile.cm'),
-  ft: t('healthProfile.ft'),
-  healthConditions: t('healthProfile.healthConditions'),
-  otherHealthConditions: t('healthProfile.otherHealthConditions'),
-  addHealthCondition: t('healthProfile.addHealthCondition'),
-  enterHealthCondition: t('healthProfile.enterHealthCondition'),
-  removeHealthCondition: t('healthProfile.removeHealthCondition'),
-  nutritionalStatus: t('healthProfile.nutritionalStatus'),
-  mentalHealth: t('healthProfile.mentalHealth'),
-  lifestyleActivity: t('healthProfile.lifestyleActivity'),
-  fastingPreferences: t('healthProfile.fastingPreferences'),
-  fastingGoals: t('healthProfile.fastingGoals'),
-  medicalSupervision: t('healthProfile.medicalSupervision'),
-  
-  // Health Conditions
-  diabetes: t('healthProfile.diabetes'),
-  hypoglycemia: t('healthProfile.hypoglycemia'),
-  heartConditions: t('healthProfile.heartConditions'),
-  kidneyDisease: t('healthProfile.kidneyDisease'),
-  liverDisease: t('healthProfile.liverDisease'),
-  eatingDisorders: t('healthProfile.eatingDisorders'),
-  pregnancy: t('healthProfile.pregnancy'),
-  breastfeeding: t('healthProfile.breastfeeding'),
-  gastrointestinalIssues: t('healthProfile.gastrointestinalIssues'),
-  
-  // Nutritional Status
-  bodyFatLevel: t('healthProfile.bodyFatLevel'),
-  muscleMass: t('healthProfile.muscleMass'),
-  micronutrientLevels: t('healthProfile.micronutrientLevels'),
-  hydrationLevel: t('healthProfile.hydrationLevel'),
-  
-  // Mental Health
-  highStressEnvironment: t('healthProfile.highStressEnvironment'),
-  intensiveMentalTasks: t('healthProfile.intensiveMentalTasks'),
-  anxiety: t('healthProfile.anxiety'),
-  depression: t('healthProfile.depression'),
-  
-  // Lifestyle
-  activityLevel: t('healthProfile.activityLevel'),
-  physicalLabor: t('healthProfile.physicalLabor'),
-  longShifts: t('healthProfile.longShifts'),
-  sleepQuality: t('healthProfile.sleepQuality'),
-  
-  // Fasting Preferences
-  preferredFastingType: t('healthProfile.preferredFastingType'),
-  maxFastingHours: t('healthProfile.maxFastingHours'),
-  fastingFrequency: t('healthProfile.fastingFrequency'),
-  
-  // Goals
-  primaryGoal: t('healthProfile.primaryGoal'),
-  
-    // Health Monitoring
-    healthMonitoring: t('healthProfile.healthMonitoring'),
-    selfMonitoring: t('healthProfile.selfMonitoring'),
-    wearableDevices: t('healthProfile.wearableDevices'),
-  
-  // Options
-  low: t('healthProfile.low'),
-  normal: t('healthProfile.normal'),
-  high: t('healthProfile.high'),
-  poor: t('healthProfile.poor'),
-  fair: t('healthProfile.fair'),
-  good: t('healthProfile.good'),
-  excellent: t('healthProfile.excellent'),
-  sedentary: t('healthProfile.sedentary'),
-  light: t('healthProfile.light'),
-  moderate: t('healthProfile.moderate'),
-  athlete: t('healthProfile.athlete'),
-  timeRestricted: t('healthProfile.timeRestricted'),
-  alternateDay: t('healthProfile.alternateDay'),
-  extended: t('healthProfile.extended'),
-  custom: t('healthProfile.custom'),
-  daily: t('healthProfile.daily'),
-  weekly: t('healthProfile.weekly'),
-  monthly: t('healthProfile.monthly'),
-  weightLoss: t('healthProfile.weightLoss'),
-  metabolicHealth: t('healthProfile.metabolicHealth'),
-  generalHealth: t('healthProfile.generalHealth'),
-  spiritual: t('healthProfile.spiritual'),
-  medical: t('healthProfile.medical'),
-  
-  // Additional translations
-  profileSaved: t('healthProfile.profileSaved'),
-  healthProfileSavedMessage: t('healthProfile.healthProfileSavedMessage'),
-  saveProfile: t('healthProfile.saveProfile'),
-// };
+
 
 
   // --------- Helpers ----------
@@ -3814,23 +3884,35 @@ useEffect(() => {
     );
   };
 
-  const AnimatedFloatingButton = () => (
-    <TouchableOpacity
-      style={[styles.fab, { backgroundColor: 'transparent' }]}
-      onPress={() => {
-        setAiOpen(true);
-        // Always show the selected doctor's greeting when opening AI
-        setAiMessages([{ role: 'assistant', text: getDoctorGreeting(selectedDoctor) }]);
-      }}
-      activeOpacity={0.8}
-    >
-      <Image 
-        source={getDoctorImage(selectedDoctor)} 
-        style={{ width: 60, height: 60, borderRadius: 30 }} 
-        resizeMode="contain" 
-      />
-    </TouchableOpacity>
-  );
+  const AnimatedFloatingButton = () => {
+    const getDoctorDisplayName = (doctorKey) => {
+      const names = {
+        'alfred': S.drAlfred || 'Dr. Alfred',
+        'mimi': S.drMimi || 'Dr. Mimi',
+        'pawlmer': S.drPawlmer || 'Dr. Pawlmer'
+      };
+      return names[doctorKey] || (S.drAlfred || 'Dr. Alfred');
+    };
+
+    return (
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: 'transparent' }]}
+        onPress={() => {
+          setAiOpen(true);
+          // Always show the selected doctor's greeting when opening AI
+          const newIntro = getInitialAIMessage(selectedAIDoctor);
+          setAiMessages([{ role: 'assistant', text: newIntro }]);
+        }}
+        activeOpacity={0.8}
+      >
+        <Image 
+          source={getDoctorImage(getDoctorDisplayName(selectedAIDoctor))} 
+          style={{ width: 60, height: 60, borderRadius: 30 }} 
+          resizeMode="contain" 
+        />
+      </TouchableOpacity>
+    );
+  };
 
   const AnimatedButton = ({ onPress, children, style }) => (
     <TouchableOpacity 
@@ -4035,9 +4117,9 @@ const handleAskMedicalAI = async () => {
     });
     const data = await res.json();
     const reply = data?.reply || 'Sorry—no response.';
-    setAiMessages(m => [...m, { role: 'assistant', text: reply }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
   } catch (e) {
-    setAiMessages(m => [...m, { role: 'assistant', text: 'Network error. Try again.' }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: S.networkError || 'Network error. Try again.' }]);
   }
 }
 
@@ -4681,7 +4763,7 @@ const handleAskMedicalAI = async () => {
             }}>
               <Text style={{ 
                 color: theme.text, 
-                fontSize: 18, 
+                fontSize: 14, 
                 fontWeight: '600', 
                 fontFamily: 'Inter_600SemiBold',
                 marginBottom: 16 
@@ -4934,7 +5016,8 @@ const handleAskMedicalAI = async () => {
                 fontFamily: 'Inter_700Bold', 
                 fontSize: 15,
                 textAlign: 'center',
-                marginBottom: 4
+                marginBottom: 4,
+                width: '100%'
               }}>{S.healthProfileSettings}</DynamicText>
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_400Regular', 
@@ -4945,6 +5028,84 @@ const handleAskMedicalAI = async () => {
                 {S.fastingProfileDescription}
               </DynamicText>
             </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title={S.myDoctorAI} sectionKey="aiDoctor" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+            <View style={{ marginBottom: 12 }}>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_600SemiBold', 
+                fontSize: 14,
+                marginBottom: 8,
+                opacity: 0.8
+              }}>{S.selectAI || 'Select AI Doctor'}</DynamicText>
+              
+              <TouchableOpacity 
+                onPress={() => setSelectedAIDoctor('alfred')}
+                style={[styles.settingsButton, {
+                  backgroundColor: selectedAIDoctor === 'alfred' ? theme.accent + 'CC' : getCardBackgroundColor() + 'CC',
+                  borderColor: selectedAIDoctor === 'alfred' ? theme.accent : getCardBorderColor(),
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 8
+                }]}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_700Bold', 
+                  fontSize: 15,
+                  textAlign: 'center',
+                  color: selectedAIDoctor === 'alfred' ? '#fff' : undefined
+                }}>🧑‍⚕️ {S.drAlfred || 'Dr. Alfred'}</DynamicText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={() => setSelectedAIDoctor('mimi')}
+                style={[styles.settingsButton, {
+                  backgroundColor: selectedAIDoctor === 'mimi' ? theme.accent + 'CC' : getCardBackgroundColor() + 'CC',
+                  borderColor: selectedAIDoctor === 'mimi' ? theme.accent : getCardBorderColor(),
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 8
+                }]}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_700Bold', 
+                  fontSize: 15,
+                  textAlign: 'center',
+                  color: selectedAIDoctor === 'mimi' ? '#fff' : undefined
+                }}>👩‍⚕️ {S.drMimi || 'Dr. Mimi'}</DynamicText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={() => setSelectedAIDoctor('pawlmer')}
+                style={[styles.settingsButton, {
+                  backgroundColor: selectedAIDoctor === 'pawlmer' ? theme.accent + 'CC' : getCardBackgroundColor() + 'CC',
+                  borderColor: selectedAIDoctor === 'pawlmer' ? theme.accent : getCardBorderColor(),
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }]}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_700Bold', 
+                  fontSize: 15,
+                  textAlign: 'center',
+                  color: selectedAIDoctor === 'pawlmer' ? '#fff' : undefined
+                }}>🐱 {S.drPawlmer || 'Dr. Pawlmer'}</DynamicText>
+              </TouchableOpacity>
+            </View>
           </View>
         </CollapsibleSection>
         
@@ -5210,6 +5371,8 @@ function trimTo(str, n) {
             </Text>
             <ActivityIndicator size="large" color="#D4AF37" />
           </View>
+        ) : isLoading ? (
+          <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />
         ) : showAuth ? (
           <SignInScreen
             onAuthSuccess={handleAuthSuccess}
@@ -5225,14 +5388,14 @@ function trimTo(str, n) {
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
      route === 'settings' ? <Settings /> :
-     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
+     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
-     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
+     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
      route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'ai-health' ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} /> :
+    route === 'ai-health' ? (isReady ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} /> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading translations...</Text></View>) :
         route === 'health-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
@@ -5253,16 +5416,30 @@ function trimTo(str, n) {
 >
   <View style={styles.sheetBackdrop}>
     <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
-      <View style={styles.sheetHeader}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8 }}>
-            {selectedDoctor}
-        </Text>
-          <Image 
-            source={getDoctorImage(selectedDoctor)} 
-            style={{ width: 24, height: 24 }} 
-            resizeMode="contain" 
-          />
+        <View style={styles.sheetHeader}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8 }}>
+              {(() => {
+                const names = {
+                  'alfred': S.drAlfred || 'Dr. Alfred',
+                  'mimi': S.drMimi || 'Dr. Mimi',
+                  'pawlmer': S.drPawlmer || 'Dr. Pawlmer'
+                };
+                return names[selectedAIDoctor] || (S.drAlfred || 'Dr. Alfred');
+              })()}
+            </Text>
+            <Image 
+              source={getDoctorImage((() => {
+                const names = {
+                  'alfred': 'Dr. Alfred',
+                  'mimi': 'Dr. Mimi',
+                  'pawlmer': 'Dr. Pawlmer'
+                };
+                return names[selectedAIDoctor] || 'Dr. Alfred';
+              })())} 
+              style={{ width: 24, height: 24 }} 
+              resizeMode="contain" 
+            />
         </View>
         <TouchableOpacity onPress={() => setAiOpen(false)}>
           <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>
@@ -5309,7 +5486,7 @@ function trimTo(str, n) {
               ]}
             >
               <TypingEffect 
-                text="AI is thinking..."
+                text={S.aiThinking || "AI is thinking..."}
                 speed={100}
                 style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontStyle: 'italic' }}
                 showCursor={true}
@@ -5342,7 +5519,7 @@ function trimTo(str, n) {
           onChangeText={setAiInput}
           placeholder="Ask about medications, pharmacies…"
           placeholderTextColor={theme.sub}
-            onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)}
+            onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fastingProfile, pharmacies, labs, userCountry)}
           autoCapitalize="none"
           autoCorrect={false}
           blurOnSubmit={false}
@@ -5369,7 +5546,7 @@ function trimTo(str, n) {
           />
           <TouchableOpacity 
             style={[styles.aiBtn, { backgroundColor: theme.accent }]} 
-            onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme)} 
+            onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fastingProfile, pharmacies, labs, userCountry)} 
             disabled={aiSending || streamLoading}
           >
             <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
@@ -5437,10 +5614,10 @@ const styles = StyleSheet.create({
   quick: { fontSize: 14 },
 
   widget: { borderWidth: 2, borderRadius: 18, padding: 12, marginBottom: 16 },
-  widgetTitle: { fontSize: 18, marginBottom: 10 },
+  widgetTitle: { fontSize: 16, marginBottom: 10 },
   widgetInner: { borderRadius: 16, padding: 14 },
   widgetSub: { fontSize: 12, marginBottom: 4 },
-  widgetBig: { fontSize: 22, marginBottom: 4 },
+  widgetBig: { fontSize: 20, marginBottom: 4 },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingBottom: 100 },
 card: {
@@ -5468,7 +5645,7 @@ card: {
     fontSize: 16,
     color: '#0b1117',
   },
-  cardText: { fontSize: 18, textAlign: 'center' },
+  cardText: { fontSize: 16, textAlign: 'center' },
 
   headerTitle: { fontSize: 18 },
   header: {
@@ -5482,7 +5659,7 @@ card: {
   },
 
   section: { borderWidth: 2, borderRadius: 18, padding: 16, marginBottom: 12 },
-  sectionTitle: { fontSize: 18, marginBottom: 8, textAlign: 'center' },
+  sectionTitle: { fontSize: 16, marginBottom: 8, textAlign: 'center' },
   sectionHeader: { 
     flexDirection: 'row', 
     alignItems: 'center', 
@@ -5627,5 +5804,4 @@ const consultStyles = StyleSheet.create({
   },
 });
 
-// Register the app with Expo
-AppRegistry.registerComponent('main', () => App);
+// App registration is handled by index.js

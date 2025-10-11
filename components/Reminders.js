@@ -142,7 +142,7 @@ const Reminders = ({ theme, reminders, setReminders, S, themeKey, onNavigateToDa
             onBlur={() => setInputFocused(false)}
           />
           <TouchableOpacity onPress={()=>setShowPicker(true)} style={[styles.input,{ justifyContent:'center' }]}> 
-            <DynamicText type="card">{time || 'Time'}</DynamicText>
+            <DynamicText type="card">{time || S.pickTime}</DynamicText>
           </TouchableOpacity>
           {showPicker && (
             <DateTimePicker value={new Date()} mode="time" is24Hour display="default" onChange={onPick} />

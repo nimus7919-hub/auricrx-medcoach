@@ -8,7 +8,7 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 
 // Supplements component moved outside App to prevent remounting
-const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashboard, onNavigateToSettings }) => {
+const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
@@ -205,10 +205,10 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       if (data.ok && data.stores && data.stores.length > 0) {
         // Format the results for display
         const storeList = data.stores.map(store => 
-          `🏪 ${store.name}\n📍 ${store.address}\n💰 $${store.price || 'Price varies'}\n📏 ${store.distanceMiles ? `${store.distanceMiles.toFixed(1)} mi` : 'Distance unknown'}\n${store.pickup ? '✅ Pickup available' : ''}${store.delivery ? '🚚 Delivery available' : ''}\n`
+          `🏪 ${store.name}\n📍 ${store.address}\n💰 $${store.price || S.priceVaries}\n📏 ${store.distanceMiles ? `${store.distanceMiles.toFixed(1)} mi` : S.distanceUnknown}\n${store.pickup ? `✅ ${S.pickupAvailable}` : ''}${store.delivery ? `🚚 ${S.deliveryAvailable}` : ''}\n`
         ).join('\n');
         
-        const results = `Found ${data.stores.length} stores selling ${supplementName}:\n\n${storeList}`;
+        const results = `${S.foundStores.replace('{count}', data.stores.length).replace('{name}', supplementName)}\n\n${storeList}`;
         setAiAnalysisQuery(results);
       } else {
         // Fallback to AI-powered search if no specific stores found
@@ -280,6 +280,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       supp.id === suppId ? { ...supp, status: newStatus } : supp
     ));
     setShowStatusSheet(false);
+  };
+
+  const handleRefillComplete = (supplementName) => {
+    // Update the supplement's last refill date
+    const currentDate = new Date().toISOString().split('T')[0];
+    setSupplements(prev => prev.map(s => 
+      s.name === supplementName ? { ...s, lastRefill: currentDate } : s
+    ));
   };
 
   const styles = StyleSheet.create({
@@ -368,9 +376,6 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
           {S.supplements}
         </DynamicText>
 
-        <TouchableOpacity onPress={onNavigateToSettings} style={{ padding: 8 }}>
-          <Text style={{ fontSize: 18, color: theme.accent }}>⚙️</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView 
@@ -445,7 +450,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     }}
                   >
                     <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
-                      Edit
+                      {S.edit}
                     </DynamicText>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -464,7 +469,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     }}
                   >
                     <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
-                      Refill
+                      {S.refill}
                     </DynamicText>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -494,7 +499,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     }}
                   >
                     <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
-                      Delete
+                      {S.delete}
                     </DynamicText>
                   </TouchableOpacity>
                 </View>
@@ -504,7 +509,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
               <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
-                    {parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0')} left
+                    {parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0')} {S.left}
                   </DynamicText>
                   <TextInput
                     placeholder="0"
@@ -558,7 +563,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
                     }}
                   >
                     <DynamicText type="card" style={{ color: '#fff', fontSize: 8, fontFamily: 'Inter_600SemiBold' }}>
-                      Took
+                      {S.took}
                     </DynamicText>
                   </TouchableOpacity>
                 </View>
@@ -726,7 +731,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
       <Modal visible={showStatusSheet} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
-            <DynamicText type="card" style={styles.modalTitle}>Update Status</DynamicText>
+            <DynamicText type="card" style={styles.modalTitle}>{S.updateStatus}</DynamicText>
             
             {getSuppStatuses().map(status => (
               <TouchableOpacity
@@ -946,10 +951,18 @@ const Supplements = ({ supplements, setSupplements, S, theme, onNavigateToDashbo
             name: selectedSupplement.name,
             brand: selectedSupplement.brand,
             dosage: selectedSupplement.dosage,
+            quantity: selectedSupplement.quantity,
+            quantityUnit: selectedSupplement.quantityUnit,
             lastRefill: selectedSupplement.lastRefill
           }}
           strings={S}
-          lang={S.language || 'en'}
+          lang={lang}
+          userCountry={userCountry}
+          onRefillComplete={handleRefillComplete}
+          preloadedPharmacies={preloadedPharmacies}
+          preloadedCoords={preloadedCoords}
+          preloadedCurrency={preloadedCurrency}
+          preloadedFxMeta={preloadedFxMeta}
         />
       )}
 

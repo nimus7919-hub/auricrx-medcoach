@@ -62,19 +62,32 @@ export async function findNearbySupplementStores(lat: number, lon: number, suppl
 
 export async function getSupplementPrices(stores: SupplementStore[], supplementName: string, opts?: { currency?: string }): Promise<{ prices: StorePrice[], meta?: any }> {
   try {
-    // For now, generate mock prices since we don't have a real supplement pricing API
-    const prices: StorePrice[] = stores.map(store => ({
-      ...store,
-      price: Math.random() * 50 + 10, // Random price between $10-$60
-      pickup: Math.random() > 0.3, // 70% chance of pickup
-      delivery: Math.random() > 0.5, // 50% chance of delivery
-      requiresCoupon: Math.random() > 0.8 // 20% chance of requiring coupon
-    }));
+    console.log('🔍 DEBUG: Calling supplement pricing API...');
     
-    return { prices };
-  } catch (error) {
-    console.warn('Supplement pricing failed:', error);
-    return { prices: [] };
+    const url = `${API_BASE}/supplements/prices?supplement=${encodeURIComponent(supplementName)}&currency=${opts?.currency || 'USD'}`;
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    
+    if (!json.ok) {
+      console.log('❌ DEBUG: API returned error:', json.error);
+      throw new Error(json.error || 'api_error');
+    }
+    
+    return { prices: json.prices || [], meta: json.meta };
+  } catch (e) {
+    console.warn('🔍 DEBUG: API call failed, using fallback:', e.message);
+    console.log('🔍 DEBUG: Fallback - returning "Price not available" for all stores');
+    // Fallback: Show "Price not available" instead of mock prices
+    return { prices: stores.map((store) => ({
+      ...store,
+      price: null, // No price available
+      priceNotAvailable: true,
+      pickup: true,
+      delivery: Math.random() > 0.5,
+      requiresCoupon: Math.random() > 0.8
+    })), meta: null };
   }
 }
 

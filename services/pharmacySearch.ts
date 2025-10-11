@@ -126,12 +126,18 @@ export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { 
   } catch (e) {
     console.warn('🔍 DEBUG: API call failed, using fallback:', e.message);
     console.log('🔍 DEBUG: Fallback - returning "Price not available" for all pharmacies');
+    console.log('🔍 DEBUG: Error details:', {
+      error: e.message,
+      stack: e.stack,
+      apiUrl: `${API_BASE}/pharmacies/prices`,
+      medication: medication.name,
+      pharmaciesCount: pharmacies.length
+    });
     // Fallback: Show "Price not available" instead of mock prices
     return { prices: pharmacies.map((p) => ({
       ...p,
       price: null, // No price available
       priceNotAvailable: true,
-      pharmacyNotAvailable: true, // Added pharmacy not available flag
       pickup: true,
       delivery: Math.random() > 0.5,
       requiresCoupon: Math.random() > 0.8,

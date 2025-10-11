@@ -172,11 +172,11 @@ class ExcelReaderRNCompatible {
         const medWords = normalizedMed.split(' ').filter(w => w.length > 2);
         
         const wordMatches = queryWords.filter(qWord => 
-          medWords.some(mWord => mWord.includes(qWord) || qWord.includes(mWord))
+          medWords.some(mWord => mWord === qWord) // Exact word match only (very strict)
         );
         
-        if (wordMatches.length >= queryWords.length * 0.6) { // At least 60% of words match
-          console.log(`✅ Partial match found: "${med.Medicinas}" matches "${variation}" (${wordMatches.length}/${queryWords.length} words)`);
+        if (wordMatches.length >= queryWords.length * 0.9) { // At least 90% of words must match exactly
+          console.log(`✅ Exact word match found: "${med.Medicinas}" matches "${variation}" (${wordMatches.length}/${queryWords.length} words)`);
           return true;
         }
       }

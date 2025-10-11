@@ -14,7 +14,7 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { authService } from '../services/authService';
+import authService from '../services/authService';
 
 const { width, height } = Dimensions.get('window');
 

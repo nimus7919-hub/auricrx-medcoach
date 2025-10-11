@@ -55,8 +55,19 @@ class EnhancedMedicationSearch {
       for (const pharmacy of pharmacies) {
         // Find Excel matches for this specific pharmacy with fuzzy matching
         const normalizedPharmacyName = this.excelReader.normalizePharmacyName(pharmacy.name);
+        
+        // Debug logging for specific pharmacies
+        if (pharmacy.name.toLowerCase().includes('guadalajara') || pharmacy.name.toLowerCase().includes('ahorro')) {
+          console.log(`🔍 DEBUG ${pharmacy.name}: "${pharmacy.name}" -> "${normalizedPharmacyName}"`);
+        }
+        
         const pharmacyMatches = filteredMatches.filter(match => {
           const normalizedExcelPharmacy = this.excelReader.normalizePharmacyName(match.Pharmacy);
+          
+          // Debug logging for specific pharmacies
+          if (pharmacy.name.toLowerCase().includes('guadalajara') || pharmacy.name.toLowerCase().includes('ahorro')) {
+            console.log(`🔍 DEBUG ${pharmacy.name} Excel: "${match.Pharmacy}" -> "${normalizedExcelPharmacy}"`);
+          }
           
           // Exact match
           if (normalizedExcelPharmacy === normalizedPharmacyName) {
@@ -76,11 +87,11 @@ class EnhancedMedicationSearch {
           // This handles specific cases like "H-E-B El Mirador" vs "HEB"
           if (normalizedPharmacyName.includes(normalizedExcelPharmacy) || 
               normalizedExcelPharmacy.includes(normalizedPharmacyName)) {
-            // Only allow subset matching for specific known patterns
+            // Only allow subset matching for very specific known patterns
             const allowedSubsets = [
               { app: 'heb el mirador', excel: 'heb' },
-              { app: 'h-e-b el mirador', excel: 'heb' },
-              { app: 'farmacia guadalajara', excel: 'farmacia guadalajara' }
+              { app: 'h-e-b el mirador', excel: 'heb' }
+              // Removed farmacia guadalajara - let exact matching handle it
             ];
             
             const isAllowedSubset = allowedSubsets.some(pattern => 
@@ -93,9 +104,9 @@ class EnhancedMedicationSearch {
             }
           }
           
-          // If at least 80% of words match (increased from 70%), consider it a match
-          // This prevents partial matches like "Aurrera Store" matching "Aurrera"
-          return matchingWords.length >= Math.max(1, pharmacyWords.length * 0.8);
+          // Require 85% word match for pharmacy names (balanced strictness)
+          // This prevents most false matches while allowing legitimate ones like "Farmacia del Ahorro"
+          return matchingWords.length >= Math.max(1, pharmacyWords.length * 0.85);
         });
         
         if (pharmacyMatches.length > 0) {

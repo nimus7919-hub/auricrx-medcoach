@@ -36,11 +36,11 @@ const LANGUAGE_DETECTOR = {
       //   ? deviceLanguage 
       //   : 'en';
       
-      // For now, just use English as fallback
-      callback('en');
+      // For now, just use Spanish as fallback
+      callback('es');
     } catch (error) {
       console.log('Language detection error:', error);
-      callback('en');
+      callback('es');
     }
   },
   init: () => {},
@@ -60,8 +60,8 @@ try {
     .use(initReactI18next)
     .init({
       resources,
-      fallbackLng: 'en',
-      lng: 'en', // Force English as default
+      fallbackLng: 'es',
+      lng: 'es', // Force Spanish as default
       debug: true, // Enable debug mode to see what's happening
       interpolation: {
         escapeValue: false,
@@ -79,8 +79,8 @@ try {
   // Fallback initialization
   i18n.init({
     resources,
-    fallbackLng: 'en',
-    lng: 'en',
+    fallbackLng: 'es',
+    lng: 'es',
     interpolation: {
       escapeValue: false,
     },

@@ -16,6 +16,7 @@ import {
   Image,
   Linking,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -63,12 +64,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderColor: getCardBorderColor(),
     },
     sectionTitle: {
-      fontSize: 18,
+      fontSize: 10,
       fontWeight: '600',
       marginBottom: 12,
     },
     sectionDescription: {
-      fontSize: 14,
+      fontSize: 10,
       marginBottom: 16,
       lineHeight: 20,
     },
@@ -88,12 +89,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginBottom: 8,
     },
     appointmentTitle: {
-      fontSize: 16,
+      fontSize: 10,
       fontWeight: '600',
       flex: 1,
     },
     appointmentType: {
-      fontSize: 12,
+      fontSize: 10,
       backgroundColor: getCardBackgroundColor() + '80',
       paddingHorizontal: 8,
       paddingVertical: 2,
@@ -101,15 +102,15 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginLeft: 8,
     },
     appointmentDetails: {
-      fontSize: 14,
+      fontSize: 10,
       marginBottom: 4,
     },
     appointmentDateTime: {
-      fontSize: 12,
+      fontSize: 10,
       marginBottom: 4,
     },
     appointmentLocation: {
-      fontSize: 12,
+      fontSize: 10,
     },
     statusBadge: {
       paddingHorizontal: 8,
@@ -118,7 +119,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginTop: 4,
     },
     statusText: {
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: '600',
       color: '#ffffff',
     },
@@ -132,14 +133,14 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     addButtonText: {
       color: getCardTextColor(),
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '600',
     },
     doctorCard: {
       backgroundColor: getCardBackgroundColor() + '80',
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 8,
+      padding: 8,
+      borderRadius: 6,
+      marginBottom: 6,
       flexDirection: 'row',
       alignItems: 'center',
       borderWidth: 1,
@@ -147,28 +148,29 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     doctorInfo: {
       flex: 1,
+      paddingRight: 80, // Add padding to account for absolute positioned action buttons
     },
     doctorName: {
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: '500',
     },
     doctorSpecialty: {
-      fontSize: 12,
-      marginTop: 2,
+      fontSize: 11,
+      marginTop: 1,
     },
     doctorContact: {
-      fontSize: 12,
-      marginTop: 2,
+      fontSize: 11,
+      marginTop: 1,
     },
     primaryBadge: {
       backgroundColor: currentTheme.accent + 'CC',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-      marginLeft: 8,
+      paddingHorizontal: 4,
+      paddingVertical: 1,
+      borderRadius: 3,
+      marginLeft: 6,
     },
     primaryBadgeText: {
-      fontSize: 10,
+      fontSize: 9,
       fontWeight: '600',
       color: '#ffffff',
     },
@@ -193,7 +195,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       fontWeight: 'bold',
     },
     statLabel: {
-      fontSize: 12,
+      fontSize: 10,
       marginTop: 4,
     },
     modalOverlay: {
@@ -223,7 +225,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginBottom: 16,
     },
     inputLabel: {
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '500',
       marginBottom: 8,
     },
@@ -233,7 +235,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       paddingVertical: 10,
       borderRadius: 8,
       color: getCardTextColor(),
-      fontSize: 14,
+      fontSize: 10,
       borderWidth: 1,
       borderColor: getCardBorderColor(),
     },
@@ -250,7 +252,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     pickerText: {
       color: getCardTextColor(),
-      fontSize: 14,
+      fontSize: 10,
     },
     modalButtons: {
       flexDirection: 'row',
@@ -270,7 +272,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       backgroundColor: getCardBackgroundColor() + '80',
     },
     modalButtonText: {
-      fontSize: 16,
+      fontSize: 10,
       fontWeight: '600',
     },
     modalButtonTextPrimary: {
@@ -323,27 +325,27 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       alignItems: 'center',
     },
     countryCodeText: {
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '500',
-      color: '#ffffff',
+      color: getCardTextColor(),
     },
     phoneNumberInput: {
       flex: 1,
     },
     dialingOptions: {
       flexDirection: 'row',
-      gap: 8,
-      marginTop: 8,
+      gap: 6,
+      marginTop: 6,
     },
     dialButton: {
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 4,
       flex: 1,
       alignItems: 'center',
     },
     dialButtonText: {
-      fontSize: 12,
+      fontSize: 11,
       fontWeight: '600',
       color: '#ffffff',
     },
@@ -363,7 +365,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginBottom: 8,
     },
     appointmentTitle: {
-      fontSize: 16,
+      fontSize: 10,
       fontWeight: '600',
       flex: 1,
       marginRight: 8,
@@ -375,21 +377,21 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderWidth: 1,
     },
     statusText: {
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: '600',
       color: '#ffffff',
     },
     appointmentDetails: {
-      fontSize: 14,
+      fontSize: 10,
       marginBottom: 4,
     },
     appointmentDateTime: {
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '500',
       marginBottom: 4,
     },
     appointmentNotes: {
-      fontSize: 14,
+      fontSize: 10,
       fontStyle: 'italic',
       marginTop: 4,
     },
@@ -398,7 +400,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       paddingVertical: 40,
     },
     emptyStateText: {
-      fontSize: 16,
+      fontSize: 10,
       textAlign: 'center',
     },
     // Search styles
@@ -413,45 +415,45 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderRadius: 8,
       paddingHorizontal: 12,
       paddingVertical: 10,
-      fontSize: 14,
+      fontSize: 10,
     },
     // Delete doctor button styles
     deleteDoctorButton: {
       backgroundColor: '#EF4444' + 'CC',
-      borderRadius: 14,
-      width: 28,
-      height: 28,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: '#EF4444',
     },
     deleteDoctorButtonText: {
-      fontSize: 14,
+      fontSize: 10,
       color: '#ffffff',
     },
     // Doctor action buttons container
     doctorActionButtons: {
       position: 'absolute',
-      top: 8,
-      right: 8,
+      top: 6,
+      right: 6,
       flexDirection: 'row',
-      gap: 4,
+      gap: 3,
       alignItems: 'center',
     },
     // Edit doctor button styles
     editDoctorButton: {
       backgroundColor: '#3B82F6' + 'CC',
-      borderRadius: 14,
-      width: 28,
-      height: 28,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: '#3B82F6',
     },
     editDoctorButtonText: {
-      fontSize: 14,
+      fontSize: 10,
       color: '#ffffff',
     },
     // Country picker styles
@@ -470,11 +472,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     countryName: {
       flex: 1,
-      fontSize: 16,
+      fontSize: 10,
       fontWeight: '500',
     },
     countryCode: {
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '600',
       color: currentTheme.accent,
     },
@@ -1293,14 +1295,14 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               style={dynamicStyles.editDoctorButton}
               onPress={() => editDoctorContact(doctor)}
             >
-              <DynamicText type="card" style={dynamicStyles.editDoctorButtonText}>✏️</DynamicText>
+              <Ionicons name="pencil-outline" size={12} color="#ffffff" />
             </TouchableOpacity>
             
             <TouchableOpacity
               style={dynamicStyles.deleteDoctorButton}
               onPress={() => deleteDoctorContact(doctor.id, doctor.name)}
             >
-              <DynamicText type="card" style={dynamicStyles.deleteDoctorButtonText}>🗑️</DynamicText>
+              <Ionicons name="trash-outline" size={12} color="#ffffff" />
             </TouchableOpacity>
           </View>
           
@@ -1545,7 +1547,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
                 <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('specialty')} *</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={t('specialtyPlaceholder')}
+                  placeholder={`${t('enterValue').replace(' value', '')} ${t('specialty')}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorSpecialty}
                   onChangeText={setDoctorSpecialty}
@@ -1577,7 +1579,7 @@ setShowCountryPicker(true)
                   </View>
                   <TextInput
                     style={[dynamicStyles.textInput, dynamicStyles.phoneNumberInput]}
-                    placeholder={t('enterPhoneNumber')}
+                    placeholder={`${t('enterValue').replace(' value', '')} ${t('phoneNumber').replace('Número de ', '')}`}
                     placeholderTextColor="#ffffff80"
                     value={doctorPhone}
                     onChangeText={setDoctorPhone}
@@ -1627,7 +1629,7 @@ setShowCountryPicker(true)
                 <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('address')} *</DynamicText>
                 <TextInput
                   style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                  placeholder={t('addressPlaceholder')}
+                  placeholder={`${t('enterValue').replace(' value', '')} ${t('address')}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorAddress}
                   onChangeText={setDoctorAddress}
@@ -1685,7 +1687,7 @@ setShowCountryPicker(true)
                 <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('specialty')} *</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={t('specialtyPlaceholder')}
+                  placeholder={`${t('enterValue').replace(' value', '')} ${t('specialty')}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorSpecialty}
                   onChangeText={setDoctorSpecialty}
@@ -1717,7 +1719,7 @@ setShowCountryPicker(true)
                   </View>
                   <TextInput
                     style={[dynamicStyles.textInput, dynamicStyles.phoneNumberInput]}
-                    placeholder={t('enterPhoneNumber')}
+                    placeholder={`${t('enterValue').replace(' value', '')} ${t('phoneNumber').replace('Número de ', '')}`}
                     placeholderTextColor="#ffffff80"
                     value={doctorPhone}
                     onChangeText={setDoctorPhone}
@@ -1767,7 +1769,7 @@ setShowCountryPicker(true)
                 <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('address')} *</DynamicText>
                 <TextInput
                   style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                  placeholder={t('addressPlaceholder')}
+                  placeholder={`${t('enterValue').replace(' value', '')} ${t('address')}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorAddress}
                   onChangeText={setDoctorAddress}

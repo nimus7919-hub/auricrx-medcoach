@@ -135,7 +135,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <DynamicText type="primary" style={[styles.title, { position: 'absolute', left: '50%', transform: [{ translateX: -50 }] }]}>Herbs</DynamicText>
+        <DynamicText type="primary" style={[styles.title, { position: 'absolute', left: '50%', transform: [{ translateX: -50 }] }]}>{t('herbs')}</DynamicText>
         <View style={styles.placeholder} />
       </View>
 
@@ -150,7 +150,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
         }]}>
           <TextInput
             style={{
-              color: '#ffffff', // Force white color
+              color: getCardTextColor(), // Use theme-based text color
               fontSize: 14, // Smaller font size
               fontFamily: 'Inter_400Regular', 
               flex: 1,
@@ -164,8 +164,8 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
               textDecorationLine: 'none',
               minHeight: 48 // Ensure minimum height
             }}
-            placeholder="Search herbs..."
-            placeholderTextColor="#ffffff80" // Force white placeholder for testing
+            placeholder={t('searchHerbs')}
+            placeholderTextColor={getCardTextColor() + '80'} // Use theme-based placeholder color
             value={searchQuery}
             onChangeText={(text) => {
               console.log('🌿 HerbsScreen - TextInput onChangeText:', text);
@@ -173,7 +173,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
             }}
             autoCorrect={false}
             autoCapitalize="none"
-            selectionColor="#ffffff"
+            selectionColor={getCardTextColor()}
             underlineColorAndroid="transparent"
             keyboardType="default"
             returnKeyType="search"

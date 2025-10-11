@@ -23,6 +23,8 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { createAIHealthTranslations } from '../services/aiHealthTranslations';
+import { useTranslation } from 'react-i18next';
 // Simplified AI Health - no external service dependencies
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -81,9 +83,15 @@ interface DrugInteraction {
 export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [] }: AIHealthScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
-  // Translation function using S object with fallbacks
+  // Use translation hook directly for AI Health
+  const { t: i18nT } = useTranslation();
+  
+  // AI Health specific translations
+  const aiTranslations = createAIHealthTranslations(i18nT);
+  
+  // Translation function using aiTranslations object
   const t = (key: string) => {
-    return S?.[key] || key;
+    return aiTranslations[key] || key;
   };
   
   // Default theme if not provided
@@ -110,14 +118,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       borderColor: getCardBorderColor(),
     },
     sectionTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '600',
       marginBottom: 12,
     },
     sectionDescription: {
-      fontSize: 14,
+      fontSize: 12,
       marginBottom: 16,
-      lineHeight: 20,
+      lineHeight: 18,
     },
     insightCard: {
       backgroundColor: getCardBackgroundColor() + '80',
@@ -134,7 +142,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       marginBottom: 8,
     },
     insightTitle: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: '600',
       flex: 1,
     },
@@ -559,7 +567,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const analyzeSymptoms = async () => {
     if (!symptomText.trim()) {
-      Alert.alert('❌ Error', 'Please enter your symptoms');
+      Alert.alert('❌ Error', t('pleaseEnterSymptoms'));
       return;
     }
 
@@ -572,14 +580,14 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         symptoms,
         severity: symptoms.length > 3 ? 'moderate' : 'mild',
         possibleConditions: [{
-          condition: 'General Symptoms',
+          condition: t('generalSymptoms'),
           probability: 0.7,
-          description: 'Multiple symptoms that may indicate various conditions',
-          recommendations: ['Monitor symptoms closely', 'Consider consulting healthcare provider', 'Maintain good hydration and rest']
+          description: t('multipleSymptomsDescription'),
+          recommendations: [t('monitorSymptomsClosely'), t('considerConsultingProvider'), t('maintainHydrationRest')]
         }],
         urgency: symptoms.some(s => s.toLowerCase().includes('severe')) ? 'high' : 'low',
-        recommendations: ['Get adequate rest', 'Stay hydrated', 'Monitor symptoms'],
-        followUpActions: ['Schedule appointment if symptoms persist', 'Keep symptom diary'],
+        recommendations: [t('getAdequateRest'), t('stayHydrated'), t('monitorSymptoms')],
+        followUpActions: [t('scheduleAppointmentIfPersist'), t('keepSymptomDiary')],
         createdAt: new Date().toISOString()
       };
       
@@ -595,19 +603,19 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                           analysis.urgency === 'medium' ? '⚡' : 'ℹ️';
       
       Alert.alert(
-        `${urgencyEmoji} Symptom Analysis Complete`,
-        `Severity: ${analysis.severity}\nUrgency: ${analysis.urgency}\n\nPossible Conditions:\n${analysis.possibleConditions.map(c => `• ${c.condition} (${(c.probability * 100).toFixed(0)}%)`).join('\n')}\n\nRecommendations:\n${analysis.recommendations.slice(0, 3).map(r => `• ${r}`).join('\n')}`,
+        `${urgencyEmoji} ${t('symptomAnalysisComplete')}`,
+        `${t('severity')}: ${analysis.severity}\n${t('urgency')}: ${analysis.urgency}\n\n${t('possibleConditions')}:\n${analysis.possibleConditions.map(c => `• ${c.condition} (${(c.probability * 100).toFixed(0)}%)`).join('\n')}\n\n${t('recommendations')}:\n${analysis.recommendations.slice(0, 3).map(r => `• ${r}`).join('\n')}`,
         [{ text: 'OK' }]
       );
     } catch (error) {
       console.error('Failed to analyze symptoms:', error);
-      Alert.alert('❌ Error', 'Failed to analyze symptoms');
+      Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToAnalyzeSymptoms);
     }
   };
 
   const checkDrugInteractions = async () => {
     if (!medicationList.trim()) {
-      Alert.alert('❌ Error', 'Please enter your medications');
+      Alert.alert('❌ Error', t('pleaseEnterMedications'));
       return;
     }
 
@@ -624,10 +632,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           drug1: medications[0],
           drug2: medications[1],
           severity: 'minor',
-          description: 'Potential mild interaction - monitor for side effects',
-          clinicalEffects: ['Mild side effects possible'],
-          management: 'Monitor for any unusual symptoms',
-          references: ['Drug Interaction Database']
+          description: t('potentialMildInteraction'),
+          clinicalEffects: [t('mildSideEffectsPossible')],
+          management: t('monitorUnusualSymptoms'),
+          references: [t('drugInteractionDatabase')]
         });
       }
       
@@ -638,21 +646,21 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       triggerHaptic('medium');
       
       if (interactions.length === 0) {
-        Alert.alert('✅ No Interactions Found', 'No known drug interactions detected');
+        Alert.alert('✅ ' + t('noInteractionsFound'), t('noKnownInteractions'));
       } else {
         const interactionText = interactions.map(i => 
           `• ${i.drug1} + ${i.drug2}: ${i.severity.toUpperCase()}\n  ${i.description}`
         ).join('\n\n');
         
         Alert.alert(
-          '⚠️ Drug Interactions Detected',
-          `Found ${interactions.length} interactions:\n\n${interactionText}`,
+          `⚠️ ${t('foundInteractions').replace('{count}', interactions.length.toString())}`,
+          `${t('foundInteractions').replace('{count}', interactions.length.toString())}:\n\n${interactionText}`,
           [{ text: 'OK' }]
         );
       }
     } catch (error) {
       console.error('Failed to check drug interactions:', error);
-      Alert.alert('❌ Error', 'Failed to check drug interactions');
+      Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToCheckDrugInteractions);
     }
   };
 
@@ -715,11 +723,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       // BMI (Body Mass Index) considerations
       if (bmi !== null) {
         if (bmi < 18.5) {
-          warnings.push('Low BMI (Body Mass Index) may make extended fasting risky.');
+          warnings.push(aiTranslations.lowBMIRisk);
           suggestedFastingHours = Math.min(suggestedFastingHours, 12);
           riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
         } else if (bmi > 30) {
-          warnings.push('Higher BMI (Body Mass Index) may benefit from medical supervision during fasting.');
+          warnings.push(aiTranslations.higherBMIRisk);
           suggestedFastingHours = Math.min(suggestedFastingHours, 14);
           riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
         }
@@ -753,67 +761,67 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       if (profile.diabetes || profile.hypoglycemia) {
         fastingSafe = false;
         riskLevel = 'critical';
-        warnings.push('Diabetes or hypoglycemia requires medical supervision for fasting.');
+        warnings.push(t('diabetesRequiresSupervision'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 8);
       }
 
       if (profile.pregnancy || profile.breastfeeding) {
         fastingSafe = false;
         riskLevel = 'critical';
-        warnings.push('Pregnancy and breastfeeding require medical supervision for fasting.');
+        warnings.push(t('pregnancyRequiresSupervision'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 8);
       }
 
       if (profile.eatingDisorders) {
         fastingSafe = false;
         riskLevel = 'high';
-        warnings.push('Eating disorders require medical supervision for fasting.');
+        warnings.push(t('eatingDisordersRequireSupervision'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 8);
       }
 
       // High-risk conditions
       if (profile.heartConditions || profile.kidneyDisease || profile.liverDisease) {
         riskLevel = 'high';
-        warnings.push('Heart, kidney, or liver conditions require medical supervision for fasting.');
+        warnings.push(t('heartKidneyLiverRequireSupervision'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 12);
       }
 
       // Medium-risk conditions
       if (profile.gastrointestinalIssues) {
         riskLevel = 'medium';
-        warnings.push('Gastrointestinal issues may be worsened by fasting.');
+        warnings.push(t('gastrointestinalIssuesWorsened'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 14);
       }
 
       // Nutritional status considerations
       if (profile.bodyFatLevel === 'low' || profile.muscleMass === 'low') {
         riskLevel = 'medium';
-        warnings.push('Low body fat or muscle mass may make fasting risky.');
+        warnings.push(t('lowBodyFatRisky'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 12);
       }
 
       if (profile.hydrationLevel === 'poor') {
         riskLevel = 'medium';
-        warnings.push('Poor hydration increases fasting risks.');
+        warnings.push(t('poorHydrationIncreasesRisks'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 12);
       }
 
       // Mental health considerations
       if (profile.anxiety || profile.depression) {
         riskLevel = 'medium';
-        warnings.push('Anxiety or depression may be affected by fasting.');
+        warnings.push(t('anxietyDepressionAffected'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 14);
       }
 
       // Activity level considerations
       if (profile.activityLevel === 'athlete' || profile.physicalLabor) {
-        warnings.push('High activity levels may require more frequent nutrition.');
+        warnings.push(t('highActivityRequiresNutrition'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 12);
       }
 
       // Sleep quality considerations
       if (profile.sleepQuality === 'poor') {
-        warnings.push('Poor sleep quality may be affected by fasting.');
+        warnings.push(t('poorSleepAffected'));
         suggestedFastingHours = Math.min(suggestedFastingHours, 14);
       }
 
@@ -830,13 +838,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                      riskLevel === 'medium' ? '⚡' : '✅';
 
     if (riskLevel === 'critical' || !fastingSafe) {
-      message = `${riskEmoji} Fasting is NOT recommended for your current health profile. ${warnings.join(' ')} Please consult your healthcare provider before considering any fasting protocol.`;
+      message = `${riskEmoji} ${t('fastingNotRecommended')} ${warnings.join(' ')} ${t('pleaseConsultHealthcareProvider')}`;
     } else if (riskLevel === 'high') {
-      message = `${riskEmoji} Fasting requires medical supervision for your health profile. ${warnings.join(' ')} Consider a shorter fasting period of ${suggestedFastingHours}:${24-suggestedFastingHours} hours and consult your healthcare provider.`;
+      message = `${riskEmoji} ${t('fastingRequiresSupervision')} ${warnings.join(' ')} ${t('considerShorterFastingPeriod').replace('{hours}', suggestedFastingHours.toString()).replace('{remaining}', (24-suggestedFastingHours).toString())}`;
     } else if (riskLevel === 'medium') {
-      message = `${riskEmoji} Fasting may be suitable with caution. ${warnings.join(' ')} A ${suggestedFastingHours}:${24-suggestedFastingHours} hour fasting window may be appropriate, but monitor your health closely.`;
+      message = `${riskEmoji} ${t('fastingMayBeSuitableWithCaution')} ${warnings.join(' ')} ${t('hourFastingWindowAppropriate').replace('{hours}', suggestedFastingHours.toString()).replace('{remaining}', (24-suggestedFastingHours).toString())}`;
     } else {
-      message = `${riskEmoji} Fasting appears compatible with your health profile. A ${suggestedFastingHours}:${24-suggestedFastingHours} hour fasting window may be suitable. Always listen to your body and consult your healthcare provider if you have concerns.`;
+      message = `${riskEmoji} ${t('fastingAppearsCompatible')} ${t('hourFastingWindowSuitable').replace('{hours}', suggestedFastingHours.toString()).replace('{remaining}', (24-suggestedFastingHours).toString())}`;
     }
 
     return {
@@ -858,9 +866,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       // Get medications from the app's medication data
       // For now, we'll use a mock list - in a real app, this would come from the medication state
       const mockMedications = [
-        { name: 'Metformin', strength: '500mg', times: ['08:00', '20:00'] },
-        { name: 'Aspirin', strength: '81mg', times: ['08:00'] },
-        { name: 'Vitamin D', strength: '1000 IU', times: ['08:00'] }
+        { name: aiTranslations.metformin, strength: '500mg', times: ['08:00', '20:00'] },
+        { name: aiTranslations.aspirin, strength: '81mg', times: ['08:00'] },
+        { name: aiTranslations.vitaminD, strength: '1000 IU', times: ['08:00'] }
       ];
       
       // Enhanced analysis using fasting profile
@@ -873,7 +881,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       // Show analysis results
       const statusEmoji = analysis.compatible ? '✅' : '⚠️';
-      const statusTitle = analysis.compatible ? 'Fasting Compatible' : 'Fasting Warning';
+      const statusTitle = analysis.compatible ? t('fastingCompatible') : t('fastingWarning');
       
       Alert.alert(
         `${statusEmoji} ${statusTitle}`,
@@ -882,8 +890,41 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       );
     } catch (error) {
       console.error('Failed to analyze fasting compatibility:', error);
-      Alert.alert('❌ Error', 'Failed to analyze fasting compatibility');
+      Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToAnalyzeFastingCompatibility);
     }
+  };
+
+  // Helper function to translate stored values
+  const translateValue = (value: string | undefined, translationKey: string) => {
+    if (!value) return t('notSpecified');
+    
+    // Map stored values to translation keys
+    const valueTranslations: { [key: string]: string } = {
+      'normal': t('normal'),
+      'high': t('high'),
+      'low': t('low'),
+      'poor': t('poor'),
+      'fair': t('fair'),
+      'good': t('good'),
+      'excellent': t('excellent'),
+      'sedentary': t('sedentary'),
+      'light': t('light'),
+      'moderate': t('moderate'),
+      'athlete': t('athlete'),
+      'timeRestricted': t('timeRestricted'),
+      'alternateDay': t('alternateDay'),
+      'extended': t('extended'),
+      'custom': t('custom'),
+      'daily': t('daily'),
+      'weekly': t('weekly'),
+      'monthly': t('monthly'),
+      'weightLoss': t('weightLoss'),
+      'metabolicHealth': t('metabolicHealth'),
+      'generalHealth': t('generalHealth'),
+      'spiritual': t('spiritual'),
+    };
+    
+    return valueTranslations[value] || value;
   };
 
   const exportToPDF = async () => {
@@ -914,66 +955,66 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         medications.map((med, index) => `
           <div class="medication-item">
             <h3>${index + 1}. ${med.name || 'N/A'}</h3>
-            <p><strong>Dosage:</strong> ${med.strength || 'N/A'}</p>
-            <p><strong>Quantity:</strong> ${med.quantity || 'N/A'}</p>
-            <p><strong>Times:</strong> ${med.times ? med.times.join(', ') : 'N/A'}</p>
-            ${med.notes ? `<p><strong>Notes:</strong> ${med.notes}</p>` : ''}
+            <p><strong>${t('dosage')}:</strong> ${med.strength || 'N/A'}</p>
+            <p><strong>${t('quantity')}:</strong> ${med.quantity || 'N/A'}</p>
+            <p><strong>${t('times')}:</strong> ${med.times ? med.times.join(', ') : 'N/A'}</p>
+            ${med.notes ? `<p><strong>${t('notes')}:</strong> ${med.notes}</p>` : ''}
           </div>
         `).join('') : 
-        '<p>No medications recorded</p>';
+        `<p>${t('noMedicationsRecorded')}</p>`;
 
       const fastingProfileHtml = fastingProfile ? `
         <div class="profile-section">
-          <h3>Basic Information</h3>
-          <p><strong>Weight:</strong> ${fastingProfile.weight || 'Not specified'} ${fastingProfile.weightUnit || 'kg'}</p>
-          <p><strong>Height:</strong> ${fastingProfile.height || 'Not specified'} ${fastingProfile.heightUnit || 'cm'}</p>
+          <h3>${t('basicInformation')}</h3>
+          <p><strong>${t('healthProfile.weight')}:</strong> ${fastingProfile.weight || t('notSpecified')} ${fastingProfile.weightUnit || 'kg'}</p>
+          <p><strong>${t('healthProfile.height')}:</strong> ${fastingProfile.height || t('notSpecified')} ${fastingProfile.heightUnit || 'cm'}</p>
           
-          <h3>Health Conditions</h3>
-          <p><strong>Conditions:</strong> ${[
-            fastingProfile.diabetes ? 'Diabetes' : '',
-            fastingProfile.hypoglycemia ? 'Hypoglycemia' : '',
-            fastingProfile.heartConditions ? 'Heart Conditions' : '',
-            fastingProfile.kidneyDisease ? 'Kidney Disease' : '',
-            fastingProfile.liverDisease ? 'Liver Disease' : '',
-            fastingProfile.eatingDisorders ? 'Eating Disorders' : '',
-            fastingProfile.pregnancy ? 'Pregnancy' : '',
-            fastingProfile.breastfeeding ? 'Breastfeeding' : '',
-            fastingProfile.gastrointestinalIssues ? 'Gastrointestinal Issues' : '',
+          <h3>${t('healthConditions')}</h3>
+          <p><strong>${t('healthConditions')}:</strong> ${[
+            fastingProfile.diabetes ? t('diabetes') : '',
+            fastingProfile.hypoglycemia ? t('hypoglycemia') : '',
+            fastingProfile.heartConditions ? t('heartConditions') : '',
+            fastingProfile.kidneyDisease ? t('kidneyDisease') : '',
+            fastingProfile.liverDisease ? t('liverDisease') : '',
+            fastingProfile.eatingDisorders ? t('eatingDisorders') : '',
+            fastingProfile.pregnancy ? t('pregnancy') : '',
+            fastingProfile.breastfeeding ? t('breastfeeding') : '',
+            fastingProfile.gastrointestinalIssues ? t('gastrointestinalIssues') : '',
             ...(fastingProfile.otherHealthConditions || [])
-          ].filter(Boolean).join(', ') || 'None reported'}</p>
+          ].filter(Boolean).join(', ') || t('noneReported')}</p>
           
-          <h3>Nutritional Status & Body Composition</h3>
-          <p><strong>Body Fat Level:</strong> ${fastingProfile.bodyFatLevel || 'Not specified'}</p>
-          <p><strong>Muscle Mass:</strong> ${fastingProfile.muscleMass || 'Not specified'}</p>
-          <p><strong>Micronutrient Levels:</strong> ${fastingProfile.micronutrientLevels || 'Not specified'}</p>
-          <p><strong>Hydration Level:</strong> ${fastingProfile.hydrationLevel || 'Not specified'}</p>
+          <h3>${t('nutritionalStatusBodyComposition')}</h3>
+          <p><strong>${t('bodyFatLevel')}:</strong> ${translateValue(fastingProfile.bodyFatLevel, 'bodyFatLevel')}</p>
+          <p><strong>${t('muscleMass')}:</strong> ${translateValue(fastingProfile.muscleMass, 'muscleMass')}</p>
+          <p><strong>${t('micronutrientLevels')}:</strong> ${translateValue(fastingProfile.micronutrientLevels, 'micronutrientLevels')}</p>
+          <p><strong>${t('hydrationLevel')}:</strong> ${translateValue(fastingProfile.hydrationLevel, 'hydrationLevel')}</p>
           
-          <h3>Mental Health & Cognitive Demands</h3>
-          <p><strong>High-Stress Environment:</strong> ${fastingProfile.highStressEnvironment ? 'Yes' : 'No'}</p>
-          <p><strong>Intensive Mental Tasks:</strong> ${fastingProfile.intensiveMentalTasks ? 'Yes' : 'No'}</p>
-          <p><strong>Anxiety:</strong> ${fastingProfile.anxiety ? 'Yes' : 'No'}</p>
-          <p><strong>Depression:</strong> ${fastingProfile.depression ? 'Yes' : 'No'}</p>
+          <h3>${t('mentalHealthCognitiveDemands')}</h3>
+          <p><strong>${t('highStressEnvironment')}:</strong> ${fastingProfile.highStressEnvironment ? t('yes') : t('no')}</p>
+          <p><strong>${t('intensiveMentalTasks')}:</strong> ${fastingProfile.intensiveMentalTasks ? t('yes') : t('no')}</p>
+          <p><strong>${t('anxiety')}:</strong> ${fastingProfile.anxiety ? t('yes') : t('no')}</p>
+          <p><strong>${t('depression')}:</strong> ${fastingProfile.depression ? t('yes') : t('no')}</p>
           
-          <h3>Lifestyle & Activity Level</h3>
-          <p><strong>Activity Level:</strong> ${fastingProfile.activityLevel || 'Not specified'}</p>
-          <p><strong>Physical Labor Job:</strong> ${fastingProfile.physicalLabor ? 'Yes' : 'No'}</p>
-          <p><strong>Long Work Shifts:</strong> ${fastingProfile.longShifts ? 'Yes' : 'No'}</p>
-          <p><strong>Sleep Quality:</strong> ${fastingProfile.sleepQuality || 'Not specified'}</p>
+          <h3>${t('lifestyleActivityLevel')}</h3>
+          <p><strong>${t('activityLevel')}:</strong> ${translateValue(fastingProfile.activityLevel, 'activityLevel')}</p>
+          <p><strong>${t('physicalLaborJob')}:</strong> ${fastingProfile.physicalLabor ? t('yes') : t('no')}</p>
+          <p><strong>${t('longWorkShifts')}:</strong> ${fastingProfile.longShifts ? t('yes') : t('no')}</p>
+          <p><strong>${t('sleepQuality')}:</strong> ${translateValue(fastingProfile.sleepQuality, 'sleepQuality')}</p>
           
-          <h3>Fasting Protocol Preferences</h3>
-          <p><strong>Preferred Fasting Type:</strong> ${fastingProfile.preferredFastingType || 'Not specified'}</p>
-          <p><strong>Maximum Fasting Hours:</strong> ${fastingProfile.maxFastingHours || 'Not specified'}</p>
-          <p><strong>Fasting Frequency:</strong> ${fastingProfile.fastingFrequency || 'Not specified'}</p>
+          <h3>${t('fastingProtocolPreferences')}</h3>
+          <p><strong>${t('preferredFastingType')}:</strong> ${translateValue(fastingProfile.preferredFastingType, 'preferredFastingType')}</p>
+          <p><strong>${t('maximumFastingHours')}:</strong> ${fastingProfile.maxFastingHours || t('notSpecified')}</p>
+          <p><strong>${t('fastingFrequency')}:</strong> ${translateValue(fastingProfile.fastingFrequency, 'fastingFrequency')}</p>
           
-          <h3>Goals</h3>
-          <p><strong>Primary Goal:</strong> ${fastingProfile.primaryGoal || 'Not specified'}</p>
+          <h3>${t('goals')}</h3>
+          <p><strong>${t('primaryGoal')}:</strong> ${translateValue(fastingProfile.primaryGoal, 'primaryGoal')}</p>
           
-          <h3>Medical Supervision & Monitoring</h3>
-          <p><strong>Medical Supervision:</strong> ${fastingProfile.medicalSupervision ? 'Yes' : 'No'}</p>
-          <p><strong>Self-Monitoring:</strong> ${fastingProfile.selfMonitoring ? 'Yes' : 'No'}</p>
-          <p><strong>Wearable Devices:</strong> ${fastingProfile.wearableDevices ? 'Yes' : 'No'}</p>
+          <h3>${t('medicalSupervisionMonitoring')}</h3>
+          <p><strong>${t('medicalSupervision')}:</strong> ${fastingProfile.medicalSupervision ? t('yes') : t('no')}</p>
+          <p><strong>${t('selfMonitoring')}:</strong> ${fastingProfile.selfMonitoring ? t('yes') : t('no')}</p>
+          <p><strong>${t('wearableDevices')}:</strong> ${fastingProfile.wearableDevices ? t('yes') : t('no')}</p>
         </div>
-      ` : '<p>No fasting profile completed</p>';
+      ` : `<p>${t('noFastingProfileCompleted')}</p>`;
 
       const fastingAnalysisHtml = fastingAnalysis ? `
         <div class="analysis-section">
@@ -999,7 +1040,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         <html>
           <head>
             <meta charset="utf-8">
-            <title>AuricRX Health Report</title>
+            <title>${aiTranslations.auricrxHealthReport}</title>
             <style>
               body { 
                 font-family: Arial, sans-serif; 
@@ -1093,26 +1134,26 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           <body>
             <div class="header">
               <img src="data:image/png;base64,${logoBase64}" alt="AuricRX Logo" class="logo">
-              <h1 class="title">Health Report</h1>
-              <p class="subtitle">Generated on ${currentDate}</p>
+              <h1 class="title">${aiTranslations.healthReport}</h1>
+              <p class="subtitle">${aiTranslations.generatedOn} ${currentDate}</p>
             </div>
 
             <div class="section">
-              <h2 class="section-title">Current Medications</h2>
+              <h2 class="section-title">${t('currentMedications')}</h2>
               ${medicationsHtml}
             </div>
 
             <div class="section" style="page-break-before: always;">
-              <h2 class="section-title">Health Profile</h2>
+              <h2 class="section-title">${t('healthProfile')}</h2>
               ${fastingProfileHtml}
             </div>
 
             ${fastingAnalysisHtml}
 
             <div class="footer">
-              <p>AuricRX Health Report</p>
-              <p>This report was generated by AuricRX Medical Coach</p>
-              <p>Please consult with your healthcare provider before making any changes to your medication or fasting routine.</p>
+              <p>${aiTranslations.auricrxHealthReport}</p>
+              <p>${aiTranslations.thisReportWasGenerated}</p>
+              <p>${aiTranslations.consultHealthcareProvider}</p>
             </div>
           </body>
         </html>
@@ -1156,7 +1197,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       const shareResult = await Sharing.shareAsync(finalUri, {
         mimeType: 'application/pdf',
-        dialogTitle: 'AuricRX Health Report',
+        dialogTitle: aiTranslations.auricrxHealthReport,
       });
       
       console.log('✅ PDF shared successfully, result:', shareResult);
@@ -1164,8 +1205,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       // Only show success if sharing was actually completed
       if (shareResult && (shareResult.action === 'sharedAction' || shareResult.action === 'dismissedAction')) {
         Alert.alert(
-          'Export Successful',
-          'Your health report has been generated as a PDF and is ready for sharing.',
+          t('exportSuccessful'),
+          t('healthReportGenerated'),
           [{ text: 'OK' }]
         );
       }
@@ -1191,10 +1232,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const getSeverityLabel = (severity: string) => {
     switch (severity) {
-      case 'info': return 'Info';
-      case 'warning': return 'Warning';
-      case 'critical': return 'Critical';
-      default: return 'Unknown';
+      case 'info': return t('info');
+      case 'warning': return t('warning');
+      case 'critical': return t('critical');
+      default: return t('unknown');
     }
   };
 
@@ -1330,7 +1371,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             ) : (
               <View style={dynamicStyles.fastingAnalysisPrompt}>
                 <DynamicText type="card" style={dynamicStyles.fastingAnalysisPromptText}>
-                  Tap below to analyze your fasting compatibility based on your profile
+                  {t('fastingCompatibilityDescription')}
                 </DynamicText>
               </View>
             )}
@@ -1356,7 +1397,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               style={[dynamicStyles.fastingSetupButton, { backgroundColor: getAccentColor() }]}
               onPress={() => {
                 // This would navigate to settings - you might want to add a callback prop for this
-                Alert.alert('Setup Required', 'Please go to Settings > Fasting Profile to complete your profile setup.');
+                Alert.alert(t('setupRequired'), t('pleaseGoToSettings'));
               }}
             >
               <DynamicText type="card" style={dynamicStyles.fastingSetupButtonText}>
@@ -1367,7 +1408,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         )}
 
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
-          Please consult with your healthcare provider before making any changes to your medication schedule or fasting routine.
+          {t('consultHealthcareProviderDisclaimer')}
         </DynamicText>
       </Animated.View>
 
@@ -1561,7 +1602,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             </View>
             
             <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-              Generate a comprehensive health report including your medications and fasting profile for sharing with healthcare providers.
+              {t('generateHealthReportDescription')}
             </DynamicText>
 
             <TouchableOpacity
@@ -1597,7 +1638,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               <DynamicText type="card" style={dynamicStyles.inputLabel}>Describe your symptoms</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
-                placeholder="Enter your symptoms separated by commas (e.g., headache, fever, nausea)"
+                placeholder={aiTranslations.enterSymptomsPlaceholder}
                 placeholderTextColor={getCardTextColor() + '80'}
                 value={symptomText}
                 onChangeText={setSymptomText}
@@ -1638,7 +1679,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               <DynamicText type="card" style={dynamicStyles.inputLabel}>List your medications</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
-                placeholder="Enter medication names separated by commas (e.g., Aspirin, Metformin, Lisinopril)"
+                placeholder={aiTranslations.enterMedicationsPlaceholder}
                 placeholderTextColor={getCardTextColor() + '80'}
                 value={medicationList}
                 onChangeText={setMedicationList}
@@ -1734,7 +1775,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
             </View>
             
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
-              Please consult with your healthcare provider before making any changes to your medication schedule or fasting routine.
+              {t('consultHealthcareProviderDisclaimer')}
             </DynamicText>
           </View>
         </View>

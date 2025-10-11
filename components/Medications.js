@@ -595,7 +595,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
-                    {S.edit}
+                    {S.editMed}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -621,7 +621,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#fff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
-                    {S.delete}
+                    {S.deleteMed}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
@@ -1438,7 +1438,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     }}
                   >
                     <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_700Bold' }}>
-                      {S.delete}
+                      {S.deleteMed}
                     </DynamicText>
                   </TouchableOpacity>
                   

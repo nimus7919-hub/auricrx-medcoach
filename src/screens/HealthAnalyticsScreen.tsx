@@ -82,7 +82,7 @@ interface HealthReport {
 }
 
 export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnalyticsScreenProps) {
-  const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
   // Create translation function from S object
   const t = (key: string) => {
@@ -116,14 +116,14 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       borderColor: getCardBorderColor(),
     },
     sectionTitle: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '600',
       marginBottom: 12,
     },
     sectionDescription: {
-      fontSize: 14,
+      fontSize: 12,
       marginBottom: 16,
-      lineHeight: 20,
+      lineHeight: 18,
     },
     metricCard: {
       backgroundColor: getCardBackgroundColor() + '80',
@@ -140,15 +140,15 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       flex: 1,
     },
     metricName: {
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: '500',
     },
     metricValue: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: 'bold',
     },
     metricDate: {
-      fontSize: 12,
+      fontSize: 10,
       marginTop: 2,
     },
     trendIndicator: {
@@ -247,7 +247,9 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       borderRadius: 12,
       padding: 24,
       width: '90%',
-      maxHeight: '80%',
+      maxHeight: '85%',
+      marginTop: 'auto',
+      marginBottom: 'auto',
     },
     modalTitle: {
       fontSize: 20,
@@ -314,6 +316,90 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
     modalButtonTextSecondary: {
       color: '#ffffff',
     },
+    // Health Report Modal Styles
+    reportContent: {
+      marginVertical: 16,
+    },
+    reportSection: {
+      marginBottom: 16,
+    },
+    reportSectionTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+      color: getCardTextColor(),
+    },
+    reportText: {
+      fontSize: 14,
+      lineHeight: 20,
+      marginBottom: 4,
+      color: getCardTextColor(),
+    },
+    // Multiple Metrics Modal Styles
+    modalScrollView: {
+      maxHeight: 400,
+      marginBottom: 16,
+    },
+    metricEntry: {
+      backgroundColor: getCardBackgroundColor() + '40',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: getCardBorderColor(),
+    },
+    metricEntryHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    metricEntryTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: getCardTextColor(),
+    },
+    removeMetricButton: {
+      backgroundColor: '#ef4444' + 'CC',
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    removeMetricButtonText: {
+      fontSize: 12,
+      color: '#ffffff',
+      fontWeight: 'bold',
+    },
+    addAnotherButton: {
+      backgroundColor: currentTheme.accent + '20',
+      borderRadius: 8,
+      padding: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: currentTheme.accent + '40',
+      borderStyle: 'dashed',
+    },
+    addAnotherButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: currentTheme.accent,
+    },
+    addAnotherButtonTop: {
+      backgroundColor: currentTheme.accent + '30',
+      borderRadius: 12,
+      padding: 16,
+      alignItems: 'center',
+      marginBottom: 16,
+      borderWidth: 2,
+      borderColor: currentTheme.accent + '60',
+    },
+    addAnotherButtonTextTop: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: currentTheme.accent,
+    },
     statsGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -348,12 +434,26 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
   const [overallAdherence, setOverallAdherence] = useState(0);
   const [showAddMetricModal, setShowAddMetricModal] = useState(false);
   const [showAddSideEffectModal, setShowAddSideEffectModal] = useState(false);
+  const [showHealthReportModal, setShowHealthReportModal] = useState(false);
+  const [healthReportData, setHealthReportData] = useState<any>(null);
   const [selectedMetricType, setSelectedMetricType] = useState<MetricType>('blood_pressure');
   const [metricValue, setMetricValue] = useState('');
   const [metricNotes, setMetricNotes] = useState('');
+  const [multipleMetrics, setMultipleMetrics] = useState<Array<{
+    id: string;
+    type: MetricType;
+    value: string;
+    notes: string;
+  }>>([{ id: '1', type: 'blood_pressure', value: '', notes: '' }]);
   const [sideEffectSymptom, setSideEffectSymptom] = useState('');
   const [sideEffectSeverity, setSideEffectSeverity] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [sideEffectNotes, setSideEffectNotes] = useState('');
+  const [multipleSideEffects, setMultipleSideEffects] = useState<Array<{
+    id: string;
+    symptom: string;
+    severity: 1 | 2 | 3 | 4 | 5;
+    notes: string;
+  }>>([{ id: '1', symptom: '', severity: 1, notes: '' }]);
   
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -441,6 +541,61 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
     }
   };
 
+  const addMultipleMetrics = async () => {
+    // Validate all metrics
+    const validMetrics = multipleMetrics.filter(metric => metric.value.trim());
+    if (validMetrics.length === 0) {
+      Alert.alert('❌ ' + t('error'), t('pleaseEnterValue'));
+      return;
+    }
+
+    try {
+      const newMetrics: HealthMetric[] = validMetrics.map(metric => {
+        const value = parseFloat(metric.value);
+        if (isNaN(value)) {
+          throw new Error('Invalid value');
+        }
+        const selectedType = metricTypes.find(t => t.value === metric.type);
+        return {
+          id: `metric_${Date.now()}_${Math.random()}`,
+          type: metric.type,
+          value,
+          unit: selectedType?.unit || '',
+          timestamp: new Date().toISOString(),
+          notes: metric.notes.trim() || undefined
+        };
+      });
+
+      setMetrics(prev => [...newMetrics, ...prev]);
+      setMultipleMetrics([{ id: '1', type: 'blood_pressure', value: '', notes: '' }]);
+      setShowAddMetricModal(false);
+      triggerHaptic('medium');
+      Alert.alert(`✅ ${t('success')}`, `${validMetrics.length} ${t('healthMetricsAdded')}`);
+    } catch (error) {
+      console.error('Failed to add metrics:', error);
+      Alert.alert(`❌ ${t('error')}`, t('failedToAddHealthMetric'));
+    }
+  };
+
+  const addNewMetricEntry = () => {
+    const newId = (multipleMetrics.length + 1).toString();
+    setMultipleMetrics(prev => [...prev, { id: newId, type: 'blood_pressure', value: '', notes: '' }]);
+    triggerHaptic('light');
+  };
+
+  const removeMetricEntry = (id: string) => {
+    if (multipleMetrics.length > 1) {
+      setMultipleMetrics(prev => prev.filter(metric => metric.id !== id));
+      triggerHaptic('light');
+    }
+  };
+
+  const updateMetricEntry = (id: string, field: 'type' | 'value' | 'notes', value: string | MetricType) => {
+    setMultipleMetrics(prev => prev.map(metric => 
+      metric.id === id ? { ...metric, [field]: value } : metric
+    ));
+  };
+
   const addSideEffect = async () => {
     if (!sideEffectSymptom) {
       Alert.alert(`❌ ${t('error')}`, t('pleaseEnterSymptom'));
@@ -473,6 +628,56 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
     }
   };
 
+  const addMultipleSideEffects = async () => {
+    // Validate all side effects
+    const validSideEffects = multipleSideEffects.filter(effect => effect.symptom.trim());
+    if (validSideEffects.length === 0) {
+      Alert.alert('❌ ' + t('error'), t('pleaseEnterSymptom'));
+      return;
+    }
+
+    try {
+      const newSideEffects: SideEffect[] = validSideEffects.map(effect => ({
+        id: `side_effect_${Date.now()}_${Math.random()}`,
+        medicationId: 'general',
+        medicationName: 'General',
+        effect: effect.symptom,
+        severity: effect.severity === 1 ? 'mild' : effect.severity === 2 ? 'moderate' : 'severe',
+        duration: 0,
+        notes: effect.notes.trim() || undefined,
+        reportedAt: new Date().toISOString()
+      }));
+
+      setSideEffects(prev => [...newSideEffects, ...prev]);
+      setMultipleSideEffects([{ id: '1', symptom: '', severity: 1, notes: '' }]);
+      setShowAddSideEffectModal(false);
+      triggerHaptic('medium');
+      Alert.alert(`✅ ${t('success')}`, `${validSideEffects.length} ${t('sideEffectsRecorded')}`);
+    } catch (error) {
+      console.error('Failed to add side effects:', error);
+      Alert.alert(`❌ ${t('error')}`, t('failedToRecordSideEffect'));
+    }
+  };
+
+  const addNewSideEffectEntry = () => {
+    const newId = (multipleSideEffects.length + 1).toString();
+    setMultipleSideEffects(prev => [...prev, { id: newId, symptom: '', severity: 1, notes: '' }]);
+    triggerHaptic('light');
+  };
+
+  const removeSideEffectEntry = (id: string) => {
+    if (multipleSideEffects.length > 1) {
+      setMultipleSideEffects(prev => prev.filter(effect => effect.id !== id));
+      triggerHaptic('light');
+    }
+  };
+
+  const updateSideEffectEntry = (id: string, field: 'symptom' | 'severity' | 'notes', value: string | number) => {
+    setMultipleSideEffects(prev => prev.map(effect => 
+      effect.id === id ? { ...effect, [field]: value } : effect
+    ));
+  };
+
   const generateHealthReport = async () => {
     try {
       // Simplified report generation - create mock data
@@ -489,11 +694,9 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         }
       };
       
-      Alert.alert(
-        `📊 ${t('healthReportGenerated')}`,
-        `${t('summary')}:\n• ${report.summary.totalMetrics} ${t('metricsRecorded').toLowerCase()}\n• ${report.summary.adherenceRate.toFixed(1)}% ${t('adherenceRate').toLowerCase()}\n• ${report.summary.sideEffects} ${t('sideEffects').toLowerCase()}\n\n${t('keyInsights')}:\n${report.summary.keyInsights.slice(0, 3).join('\n')}`,
-        [{ text: t('ok') }]
-      );
+      setHealthReportData(report);
+      setShowHealthReportModal(true);
+      triggerHaptic('medium');
     } catch (error) {
       console.error('Failed to generate report:', error);
       Alert.alert(`❌ ${t('error')}`, t('failedToGenerateHealthReport'));
@@ -769,64 +972,98 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           <View style={dynamicStyles.modalContent}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>📈 {t('addHealthMetric')}</DynamicText>
             
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('metricType')}</DynamicText>
+            <ScrollView 
+              style={dynamicStyles.modalScrollView}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {multipleMetrics.map((metric, index) => (
+                <View key={metric.id} style={dynamicStyles.metricEntry}>
+                  <View style={dynamicStyles.metricEntryHeader}>
+                    <DynamicText type="card" style={dynamicStyles.metricEntryTitle}>
+                      {t('addHealthMetric').replace('Add ', '')} {index + 1}
+                    </DynamicText>
+                    {multipleMetrics.length > 1 && (
+                      <TouchableOpacity
+                        style={dynamicStyles.removeMetricButton}
+                        onPress={() => removeMetricEntry(metric.id)}
+                      >
+                        <DynamicText type="card" style={dynamicStyles.removeMetricButtonText}>✕</DynamicText>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  <View style={dynamicStyles.inputGroup}>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('metricType')}</DynamicText>
+                    <TouchableOpacity
+                      style={dynamicStyles.pickerButton}
+                      onPress={() => {
+                        Alert.alert(
+                          t('selectMetricType'),
+                          '',
+                          metricTypes.map(type => ({
+                            text: `${type.icon} ${type.label}`,
+                            onPress: () => updateMetricEntry(metric.id, 'type', type.value)
+                          }))
+                        );
+                      }}
+                    >
+                      <DynamicText type="card" style={dynamicStyles.pickerText}>
+                        {metricTypes.find(t => t.value === metric.type)?.icon} {metricTypes.find(t => t.value === metric.type)?.label}
+                      </DynamicText>
+                      <DynamicText type="card" style={dynamicStyles.pickerText}>▼</DynamicText>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={dynamicStyles.inputGroup}>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('value')}</DynamicText>
+                    <TextInput
+                      style={dynamicStyles.textInput}
+                      placeholder={t('enterValue')}
+                      placeholderTextColor="#ffffff80"
+                      value={metric.value}
+                      onChangeText={(value) => updateMetricEntry(metric.id, 'value', value)}
+                      keyboardType="numeric"
+                    />
+                  </View>
+
+                  <View style={dynamicStyles.inputGroup}>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
+                    <TextInput
+                      style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
+                      placeholder={t('addAnyNotes')}
+                      placeholderTextColor="#ffffff80"
+                      value={metric.notes}
+                      onChangeText={(value) => updateMetricEntry(metric.id, 'notes', value)}
+                      multiline
+                    />
+                  </View>
+                </View>
+              ))}
+
               <TouchableOpacity
-                style={dynamicStyles.pickerButton}
-                onPress={() => {
-                  Alert.alert(
-                    t('selectMetricType'),
-                    '',
-                    metricTypes.map(type => ({
-                      text: `${type.icon} ${type.label}`,
-                      onPress: () => setSelectedMetricType(type.value)
-                    }))
-                  );
-                }}
+                style={dynamicStyles.addAnotherButton}
+                onPress={addNewMetricEntry}
               >
-                <DynamicText type="card" style={dynamicStyles.pickerText}>
-                  {metricTypes.find(t => t.value === selectedMetricType)?.icon} {metricTypes.find(t => t.value === selectedMetricType)?.label}
-                </DynamicText>
-                <DynamicText type="card" style={dynamicStyles.pickerText}>▼</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.addAnotherButtonText}>+ {t('add')}</DynamicText>
               </TouchableOpacity>
-            </View>
-
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('value')}</DynamicText>
-              <TextInput
-                style={dynamicStyles.textInput}
-                placeholder={t('enterValue')}
-                placeholderTextColor="#ffffff80"
-                value={metricValue}
-                onChangeText={setMetricValue}
-                keyboardType="numeric"
-              />
-            </View>
-
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
-              <TextInput
-                style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                placeholder={t('addAnyNotes')}
-                placeholderTextColor="#ffffff80"
-                value={metricNotes}
-                onChangeText={setMetricNotes}
-                multiline
-              />
-            </View>
+            </ScrollView>
 
             <View style={dynamicStyles.modalButtons}>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowAddMetricModal(false)}
+                onPress={() => {
+                  setShowAddMetricModal(false);
+                  setMultipleMetrics([{ id: '1', type: 'blood_pressure', value: '', notes: '' }]);
+                }}
               >
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={addMetric}
+                onPress={addMultipleMetrics}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('addMetric')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('ok')}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -844,66 +1081,149 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           <View style={dynamicStyles.modalContent}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>⚠️ {t('recordSideEffect')}</DynamicText>
             
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('symptom')}</DynamicText>
-              <TextInput
-                style={dynamicStyles.textInput}
-                placeholder={t('symptomPlaceholder')}
-                placeholderTextColor="#ffffff80"
-                value={sideEffectSymptom}
-                onChangeText={setSideEffectSymptom}
-              />
-            </View>
+            <ScrollView 
+              style={dynamicStyles.modalScrollView}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {multipleSideEffects.map((effect, index) => (
+                <View key={effect.id} style={dynamicStyles.metricEntry}>
+                  <View style={dynamicStyles.metricEntryHeader}>
+                    <DynamicText type="card" style={dynamicStyles.metricEntryTitle}>
+                      {t('recordSideEffect').replace('Record ', '')} {index + 1}
+                    </DynamicText>
+                    {multipleSideEffects.length > 1 && (
+                      <TouchableOpacity
+                        style={dynamicStyles.removeMetricButton}
+                        onPress={() => removeSideEffectEntry(effect.id)}
+                      >
+                        <DynamicText type="card" style={dynamicStyles.removeMetricButtonText}>✕</DynamicText>
+                      </TouchableOpacity>
+                    )}
+                  </View>
 
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('severity')}</DynamicText>
+                  <View style={dynamicStyles.inputGroup}>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('symptom')}</DynamicText>
+                    <TextInput
+                      style={dynamicStyles.textInput}
+                      placeholder={t('symptomPlaceholder')}
+                      placeholderTextColor="#ffffff80"
+                      value={effect.symptom}
+                      onChangeText={(value) => updateSideEffectEntry(effect.id, 'symptom', value)}
+                    />
+                  </View>
+
+                  <View style={dynamicStyles.inputGroup}>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('severity')}</DynamicText>
+                    <TouchableOpacity
+                      style={dynamicStyles.pickerButton}
+                      onPress={() => {
+                        Alert.alert(
+                          t('severity'),
+                          '',
+                          [
+                            { text: `1 - ${t('mild')}`, onPress: () => updateSideEffectEntry(effect.id, 'severity', 1) },
+                            { text: `2 - ${t('moderate')}`, onPress: () => updateSideEffectEntry(effect.id, 'severity', 2) },
+                            { text: `3 - ${t('moderateSevere')}`, onPress: () => updateSideEffectEntry(effect.id, 'severity', 3) },
+                            { text: `4 - ${t('severe')}`, onPress: () => updateSideEffectEntry(effect.id, 'severity', 4) },
+                            { text: `5 - ${t('verySevere')}`, onPress: () => updateSideEffectEntry(effect.id, 'severity', 5) },
+                          ]
+                        );
+                      }}
+                    >
+                      <DynamicText type="card" style={dynamicStyles.pickerText}>
+                        {effect.severity} - {getSeverityLabel(effect.severity)}
+                      </DynamicText>
+                      <DynamicText type="card" style={dynamicStyles.pickerText}>▼</DynamicText>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={dynamicStyles.inputGroup}>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
+                    <TextInput
+                      style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
+                      placeholder={t('addAnyNotes')}
+                      placeholderTextColor="#ffffff80"
+                      value={effect.notes}
+                      onChangeText={(value) => updateSideEffectEntry(effect.id, 'notes', value)}
+                      multiline
+                    />
+                  </View>
+                </View>
+              ))}
+
               <TouchableOpacity
-                style={dynamicStyles.pickerButton}
-                onPress={() => {
-                  Alert.alert(
-                    t('severity'),
-                    '',
-                    [
-                      { text: `1 - ${t('mild')}`, onPress: () => setSideEffectSeverity(1) },
-                      { text: `2 - ${t('moderate')}`, onPress: () => setSideEffectSeverity(2) },
-                      { text: `3 - ${t('moderateSevere')}`, onPress: () => setSideEffectSeverity(3) },
-                      { text: `4 - ${t('severe')}`, onPress: () => setSideEffectSeverity(4) },
-                      { text: `5 - ${t('verySevere')}`, onPress: () => setSideEffectSeverity(5) },
-                    ]
-                  );
-                }}
+                style={dynamicStyles.addAnotherButtonTop}
+                onPress={addNewSideEffectEntry}
               >
-                <DynamicText type="card" style={dynamicStyles.pickerText}>
-                  {sideEffectSeverity} - {getSeverityLabel(sideEffectSeverity)}
-                </DynamicText>
-                <DynamicText type="card" style={dynamicStyles.pickerText}>▼</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.addAnotherButtonTextTop}>+ {t('add')}</DynamicText>
               </TouchableOpacity>
-            </View>
-
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
-              <TextInput
-                style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                placeholder={t('addAnyNotes')}
-                placeholderTextColor="#ffffff80"
-                value={sideEffectNotes}
-                onChangeText={setSideEffectNotes}
-                multiline
-              />
-            </View>
+            </ScrollView>
 
             <View style={dynamicStyles.modalButtons}>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowAddSideEffectModal(false)}
+                onPress={() => {
+                  setShowAddSideEffectModal(false);
+                  setMultipleSideEffects([{ id: '1', symptom: '', severity: 1, notes: '' }]);
+                }}
               >
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={addSideEffect}
+                onPress={addMultipleSideEffects}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('recordSideEffect')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('ok')}</DynamicText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Health Report Modal */}
+      <Modal
+        visible={showHealthReportModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowHealthReportModal(false)}
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={dynamicStyles.modalContent}>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📊 {t('healthReportGenerated')}</DynamicText>
+            
+            {healthReportData && (
+              <View style={dynamicStyles.reportContent}>
+                <View style={dynamicStyles.reportSection}>
+                  <DynamicText type="card" style={dynamicStyles.reportSectionTitle}>{t('summary')}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.reportText}>
+                    • {healthReportData.summary.totalMetrics} {t('metricsRecorded').toLowerCase()}
+                  </DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.reportText}>
+                    • {healthReportData.summary.adherenceRate.toFixed(1)}% {t('adherenceRate').toLowerCase()}
+                  </DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.reportText}>
+                    • {healthReportData.summary.sideEffects} {t('sideEffects').toLowerCase()}
+                  </DynamicText>
+                </View>
+
+                <View style={dynamicStyles.reportSection}>
+                  <DynamicText type="card" style={dynamicStyles.reportSectionTitle}>{t('keyInsights')}</DynamicText>
+                  {healthReportData.summary.keyInsights.slice(0, 3).map((insight: string, index: number) => (
+                    <DynamicText key={index} type="card" style={dynamicStyles.reportText}>
+                      • {insight}
+                    </DynamicText>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={() => setShowHealthReportModal(false)}
+              >
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('ok')}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>

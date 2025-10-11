@@ -424,6 +424,37 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     return formatted;
   };
 
+  // Extract strength and quantity from Excel medication data
+  const extractStrengthAndQuantity = (medicinas: string, unidades: string = '') => {
+    if (!medicinas) return '';
+    
+    // Extract strength patterns (e.g., 400 mg, 500mg, 100/25 mg, 250mg/5ml)
+    const strengthRegex = /(\d+(?:\/\d+)?\s*(?:mg|g|ml|mcg|iu|%))/gi;
+    const strengthMatches = medicinas.match(strengthRegex);
+    
+    // Extract quantity patterns (e.g., 20 tablets, 30 caps, 1 ampoule, 10 ml)
+    const quantityRegex = /(\d+)\s*(?:tablet|tab|capsule|cap|ampoule|ml|vial|strip|piece|pieza|aplicador|sobre|frasco)/gi;
+    const quantityMatches = medicinas.match(quantityRegex);
+    
+    // Also check unidades field for quantity
+    let unidadesQuantity = '';
+    if (unidades) {
+      const unidadesMatch = unidades.match(/(\d+)\s*(?:tablet|tab|capsule|cap|ampoule|ml|vial|strip|piece|pieza|aplicador|sobre|frasco)/gi);
+      if (unidadesMatch) {
+        unidadesQuantity = unidadesMatch[0];
+      }
+    }
+    
+    // Combine strength and quantity
+    const strength = strengthMatches ? strengthMatches.join(' ') : '';
+    const quantity = quantityMatches ? quantityMatches[0] : unidadesQuantity;
+    
+    const result = [strength, quantity].filter(Boolean).join(' • ');
+    console.log(`🔍 Extract strength/quantity: "${medicinas}" + "${unidades}" -> "${result}"`);
+    
+    return result || medicinas; // Fallback to full name if no extraction possible
+  };
+
   function renderItem({ item }: { item: StorePrice }) {
     if (!item || typeof item !== 'object') return null;
     const isLowest = lowestPrice != null && typeof item.price === 'number' && item.price === lowestPrice;
@@ -460,7 +491,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
             <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
               {item.excelMatch?.medicinas ? (
-                <Text style={{ color: colors.sub, fontSize:11 }}>{item.excelMatch.medicinas}</Text>
+                <Text style={{ color: colors.sub, fontSize:11 }}>
+                  {extractStrengthAndQuantity(item.excelMatch.medicinas, item.excelMatch.unidades)}
+                </Text>
               ) : (
                 <Text style={{ color: colors.sub, fontSize:11 }}>{productInfo.display}</Text>
               )}

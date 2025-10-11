@@ -46,12 +46,12 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
         setCurrentWallpaper(wallpaper);
       } else {
         console.log('🎨 WallpaperContext - No saved wallpaper found, setting default');
-        // Set default wallpaper to match the app's default theme
+        // Set default wallpaper to Black Silver for new users
         const defaultWallpaper = {
-          id: 'default_gold',
-          name: 'Default Gold',
-          type: 'color',
-          value: '#faf8f5'
+          id: 'black_silver',
+          name: 'Black Silver',
+          type: 'image',
+          value: 'Black Silver.png'
         };
         setCurrentWallpaper(defaultWallpaper);
       }
@@ -60,10 +60,10 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
       console.error('Failed to load wallpaper:', error);
       // Set default wallpaper even on error
       const defaultWallpaper = {
-        id: 'default_gold',
-        name: 'Default Gold',
-        type: 'color',
-        value: '#faf8f5'
+        id: 'black_silver',
+        name: 'Black Silver',
+        type: 'image',
+        value: 'Black Silver.png'
       };
       setCurrentWallpaper(defaultWallpaper);
       setIsLoading(false);
@@ -88,7 +88,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     if (!currentWallpaper) {
       console.log('🎨 WallpaperContext - No wallpaper, using default background');
       return {
-        backgroundColor: '#faf8f5', // Default background
+        backgroundColor: '#1a1a1a', // Dark background to match Black Silver theme
       };
     }
 

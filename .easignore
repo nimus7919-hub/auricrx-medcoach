@@ -1,17 +1,8 @@
-# EAS Build ignore file
-# Exclude large or problematic assets that might cause build issues
-
-# Exclude other potentially problematic files
-node_modules/
-.git/
+node_modules
+.git
+.expo
+android/app/build
+ios/build
 *.log
-*.tmp
 .DS_Store
 Thumbs.db
-
-# Exclude development files
-.env.local
-.env.development
-.env.test
-
-# Note: Herb images are now included since we fixed the bundling issue

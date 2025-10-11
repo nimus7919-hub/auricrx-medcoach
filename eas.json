@@ -4,25 +4,21 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "dev-apk": {
+    "development": {
       "developmentClient": true,
       "distribution": "internal",
       "android": { 
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
+        "buildType": "apk"
       },
-      "node": "18.18.0"
+      "node": "22.20.0"
     },
     "preview": { 
       "distribution": "internal", 
-      "node": "18.18.0",
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      }
+      "node": "22.20.0"
     },
     "production": { 
       "autoIncrement": true, 
-      "node": "18.18.0",
+      "node": "22.20.0",
       "android": {
         "gradleCommand": ":app:assembleRelease"
       }

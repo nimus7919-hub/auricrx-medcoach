@@ -10,16 +10,30 @@ import {
   updateProfile,
   PhoneAuthProvider,
   signInWithCredential,
+  signInWithCustomToken,
   RecaptchaVerifier,
   GoogleAuthProvider,
 } from 'firebase/auth';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri } from 'expo-auth-session';
 
 class AuthService {
   constructor() {
     this.auth = auth;
+    // this.configureGoogleSignIn();
+  }
+
+  // Configure Google Sign-In
+  configureGoogleSignIn() {
+    // GoogleSignin.configure({
+    //   webClientId: '1043512593259-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com', // From Firebase Console
+    //   offlineAccess: true,
+    //   hostedDomain: '',
+    //   forceCodeForRefreshToken: true,
+    // });
   }
 
   // Email/Password Authentication
@@ -168,19 +182,107 @@ class AuthService {
   // Google Sign-In (Web-based for Expo Go compatibility)
   async signInWithGoogle() {
     try {
-      // For now, simulate Google Sign-In success
-      // In a production app, you would implement web-based Google OAuth
-      // or use a development build with native modules
+      console.log('Starting web-based Google Sign-In...');
+      
+      // Google OAuth configuration
+      const redirectUri = makeRedirectUri({
+        scheme: 'auricrx-medcoach',
+        path: 'auth',
+      });
+      
+      const authUrl = `https://accounts.google.com/oauth/authorize?` +
+        `client_id=1043512593259-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `response_type=code&` +
+        `scope=openid%20email%20profile&` +
+        `access_type=offline`;
+      
+      console.log('Opening Google OAuth URL:', authUrl);
+      
+      // Open the OAuth URL in a web browser
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+      
+      if (result.type === 'success' && result.url) {
+        // Parse the authorization code from the URL
+        const url = new URL(result.url);
+        const code = url.searchParams.get('code');
+        
+        if (code) {
+          // Exchange the authorization code for tokens
+          const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              client_id: '1043512593259-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+              client_secret: 'YOUR_CLIENT_SECRET',
+              code: code,
+              grant_type: 'authorization_code',
+              redirect_uri: redirectUri,
+            }),
+          });
+          
+          const tokens = await tokenResponse.json();
+          
+          if (tokens.access_token) {
+            // Get user info from Google
+            const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokens.access_token}`);
+            const userInfo = await userInfoResponse.json();
+            
+            // Create a custom token for Firebase
+            const customTokenResponse = await fetch('https://auricrx-medcoach.onrender.com/api/auth/google', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                idToken: tokens.id_token,
+                accessToken: tokens.access_token,
+                userInfo: userInfo,
+              }),
+            });
+            
+            const customTokenData = await customTokenResponse.json();
+            
+            if (customTokenData.customToken) {
+              // Sign in to Firebase with the custom token
+              const userCredential = await signInWithCustomToken(this.auth, customTokenData.customToken);
+              const user = userCredential.user;
+              
+              console.log('Google Sign-In successful:', user.uid);
+              
+              // Store authentication state
+              await this.storeAuthState({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                emailVerified: user.emailVerified,
+              });
+              
+              return {
+                success: true,
+                user: {
+                  uid: user.uid,
+                  email: user.email,
+                  displayName: user.displayName,
+                  emailVerified: user.emailVerified,
+                },
+              };
+            }
+          }
+        }
+      }
       
       return {
         success: false,
-        error: 'Google Sign-In requires a development build. Please use email/password for now.',
+        error: 'Google Sign-In was cancelled or failed',
       };
     } catch (error) {
-      console.log('Google Sign-In Error:', error);
+      console.error('Google Sign-In Error:', error);
       return {
         success: false,
-        error: this.getErrorMessage(error.code) || error.message || 'Google Sign-In failed',
+        error: 'Google Sign-In failed. Please try again.',
       };
     }
   }

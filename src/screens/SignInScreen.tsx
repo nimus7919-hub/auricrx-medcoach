@@ -24,6 +24,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
 import Svg, { Rect, Defs, RadialGradient, Stop, Polygon } from "react-native-svg";
 import SignUpForm from "./SignUpForm";
+import authService from '../services/authService';
 
 /** ====== GOLD PALETTE ====== */
 const GOLD = {
@@ -38,7 +39,7 @@ const GOLD = {
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
-export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLanguageChange }: any) {
+export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLanguageChange, resetToSignIn }: any) {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [showSignUpForm, setShowSignUpForm] = useState(false);
@@ -46,6 +47,13 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [staySignedIn, setStaySignedIn] = useState(false);
+
+  // Reset to sign-in form when resetToSignIn is called
+  useEffect(() => {
+    if (resetToSignIn) {
+      setShowSignUpForm(false);
+    }
+  }, [resetToSignIn]);
 
   // where is the logo? (to aim the beam)
   const [logoBox, setLogoBox] = useState<{ y: number; h: number }>({ y: 160, h: 56 });
@@ -110,6 +118,29 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await authService.signInWithGoogle();
+      if (result.success) {
+        // Call the auth success handler
+        onAuthSuccess({
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName,
+          isSignUp: false, // Google sign-in is treated as sign-in, not sign-up
+        });
+      } else {
+        Alert.alert('Error', result.error || 'Google sign-in failed');
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      Alert.alert('Error', 'Google sign-in failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getLanguageLabel = (lang: string) => {
     switch (lang) {
       case 'en': return 'English';
@@ -131,7 +162,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         signIn: "Sign In",
         signUp: "Sign Up",
         dontHaveAccount: "Don't have an account?",
-        continueWithApple: "🍎 Continue with Apple",
+        continueWithApple: "iOS Coming Soon",
         continueWithGoogle: "G   Continue with Google",
         legal: "By signing in, you agree to our Terms of Service and Privacy Policy"
       },
@@ -141,7 +172,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         signIn: "Iniciar Sesión",
         signUp: "Registrarse",
         dontHaveAccount: "¿No tienes una cuenta?",
-        continueWithApple: "🍎 Continuar con Apple",
+        continueWithApple: "iOS Próximamente",
         continueWithGoogle: "G   Continuar con Google",
         legal: "Al iniciar sesión, aceptas nuestros Términos de Servicio y Política de Privacidad"
       },
@@ -151,7 +182,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         signIn: "Entrar",
         signUp: "Cadastrar",
         dontHaveAccount: "Não tem uma conta?",
-        continueWithApple: "🍎 Continuar com Apple",
+        continueWithApple: "iOS Em Breve",
         continueWithGoogle: "G   Continuar com Google",
         legal: "Ao fazer login, você concorda com nossos Termos de Serviço e Política de Privacidade"
       },
@@ -161,7 +192,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         signIn: "Se connecter",
         signUp: "S'inscrire",
         dontHaveAccount: "Vous n'avez pas de compte ?",
-        continueWithApple: "🍎 Continuer avec Apple",
+        continueWithApple: "iOS Bientôt Disponible",
         continueWithGoogle: "G   Continuer avec Google",
         legal: "En vous connectant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité"
       },
@@ -171,7 +202,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         signIn: "Anmelden",
         signUp: "Registrieren",
         dontHaveAccount: "Haben Sie kein Konto?",
-        continueWithApple: "🍎 Mit Apple fortfahren",
+        continueWithApple: "iOS Bald Verfügbar",
         continueWithGoogle: "G   Mit Google fortfahren",
         legal: "Durch die Anmeldung stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu"
       },
@@ -181,7 +212,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         signIn: "登录",
         signUp: "注册",
         dontHaveAccount: "没有账户？",
-        continueWithApple: "🍎 使用 Apple 继续",
+        continueWithApple: "iOS 即将推出",
         continueWithGoogle: "G   使用 Google 继续",
         legal: "登录即表示您同意我们的服务条款和隐私政策"
       }
@@ -352,7 +383,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
             <Text style={styles.rowText}>{t.continueWithApple}</Text>
           </GoldRow>
           <View style={{ height: 12 }} />
-          <GoldRow>
+          <GoldRow onPress={handleGoogleSignIn}>
             <Text style={styles.rowText}>{t.continueWithGoogle}</Text>
           </GoldRow>
 
@@ -401,12 +432,19 @@ function TopSlitOverLogoCone({
   const apexHalfW = Math.max(8, width * 0.04);
   const baseY = h;
   const baseHalfW = width * 0.35;    // widen as it travels downward
+  
+  // Calculate the center of the logo area for proper beam centering
+  // Logo has marginTop: 100 and height: 200, so center is at 100 + 100 = 200 from top
+  const logoCenterY = Math.min(h * 0.75, 200); // Ensure it doesn't exceed the beam height
+  
+  // Adjust horizontal position slightly to the left
+  const logoCenterX = width / 2 - 25; // Move 25px to the left
 
-  // Polygon points for the cone (trapezoid)
-  const p1x = width / 2 - apexHalfW, p1y = apexY;
-  const p2x = width / 2 + apexHalfW, p2y = apexY;
-  const p3x = width / 2 + baseHalfW, p3y = baseY;
-  const p4x = width / 2 - baseHalfW, p4y = baseY;
+  // Polygon points for the cone (trapezoid) - shifted to match logoCenterX
+  const p1x = logoCenterX - apexHalfW, p1y = apexY;
+  const p2x = logoCenterX + apexHalfW, p2y = apexY;
+  const p3x = logoCenterX + baseHalfW, p3y = baseY;
+  const p4x = logoCenterX - baseHalfW, p4y = baseY;
   const points = `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y} ${p4x},${p4y}`;
 
   return (
@@ -452,7 +490,7 @@ function TopSlitOverLogoCone({
           {/* Radial spotlight that peaks near the logo area */}
           <Svg width={width} height={h} viewBox={`0 0 ${width} ${h}`} style={StyleSheet.absoluteFill}>
             <Defs>
-              <RadialGradient id="spot" cx={width / 2} cy={h * 0.55} r={h * 0.9} gradientUnits="userSpaceOnUse">
+              <RadialGradient id="spot" cx={logoCenterX} cy={logoCenterY} r={h * 0.9} gradientUnits="userSpaceOnUse">
                 <Stop offset="0" stopColor="rgba(255,208,128,0.12)" />
                 <Stop offset="0.4" stopColor="rgba(255,208,128,0.05)" />
                 <Stop offset="1" stopColor="rgba(0,0,0,0)" />
@@ -519,7 +557,14 @@ function GoldOutline({ children }: { children: React.ReactNode }) {
   return <View style={styles.goldOutline}>{children}</View>;
 }
 
-function GoldRow({ children }: { children: React.ReactNode }) {
+function GoldRow({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) {
+  if (onPress) {
+    return (
+      <TouchableOpacity style={styles.goldRow} onPress={onPress} activeOpacity={0.8}>
+        {children}
+      </TouchableOpacity>
+    );
+  }
   return <View style={styles.goldRow}>{children}</View>;
 }
 

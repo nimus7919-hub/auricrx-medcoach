@@ -108,6 +108,27 @@ class AppointmentService {
     }
   }
 
+  // Generate or retrieve a unique user ID for database operations
+  private async getOrCreateUserId(): Promise<string> {
+    try {
+      const USER_ID_KEY = 'AURIC_USER_ID';
+      let userId = await AsyncStorage.getItem(USER_ID_KEY);
+      
+      if (!userId) {
+        // Generate a unique anonymous user ID
+        userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        await AsyncStorage.setItem(USER_ID_KEY, userId);
+        console.log('🆔 Generated new anonymous user ID:', userId);
+      }
+      
+      return userId;
+    } catch (error) {
+      console.error('❌ Failed to get/create user ID:', error);
+      // Fallback to a temporary ID
+      return `temp_user_${Date.now()}`;
+    }
+  }
+
   async initialize() {
     try {
       // Load saved data first (this should always work)
@@ -354,8 +375,32 @@ class AppointmentService {
       createdAt: new Date().toISOString()
     };
 
+    // Save to AsyncStorage for local access
     this.doctorContacts.push(newDoctor);
     await this.saveData();
+
+    // Also save to database for persistence and data collection
+    try {
+      const { saveUserDoctor } = require('../../server/neon');
+      const userId = await this.getOrCreateUserId();
+      
+      await saveUserDoctor(userId, {
+        doctorName: newDoctor.name,
+        specialty: newDoctor.specialty,
+        phoneNumber: newDoctor.phoneNumber,
+        email: newDoctor.email || '',
+        address: newDoctor.address,
+        notes: newDoctor.notes || '',
+        preferredContactMethod: newDoctor.dialingMethod,
+        countryCode: newDoctor.countryCode
+      });
+      
+      console.log('✅ Doctor contact saved to database:', newDoctor.name);
+    } catch (error) {
+      console.warn('⚠️ Failed to save doctor contact to database (continuing with local storage):', error);
+      // Continue with local storage even if database save fails
+    }
+
     return newDoctor;
   }
 
@@ -365,12 +410,63 @@ class AppointmentService {
 
     this.doctorContacts[index] = { ...this.doctorContacts[index], ...updates };
     await this.saveData();
+
+    // Also update in database for persistence
+    try {
+      const { saveUserDoctor } = require('../../server/neon');
+      const userId = await this.getOrCreateUserId();
+      
+      await saveUserDoctor(userId, {
+        doctorName: this.doctorContacts[index].name,
+        specialty: this.doctorContacts[index].specialty,
+        phoneNumber: this.doctorContacts[index].phoneNumber,
+        email: this.doctorContacts[index].email || '',
+        address: this.doctorContacts[index].address,
+        notes: this.doctorContacts[index].notes || '',
+        preferredContactMethod: this.doctorContacts[index].dialingMethod,
+        countryCode: this.doctorContacts[index].countryCode
+      });
+      
+      console.log('✅ Doctor contact updated in database:', this.doctorContacts[index].name);
+    } catch (error) {
+      console.warn('⚠️ Failed to update doctor contact in database (continuing with local storage):', error);
+    }
+
     return this.doctorContacts[index];
   }
 
   async deleteDoctorContact(id: string): Promise<boolean> {
+    // Find the doctor before deleting to save deletion record
+    const doctorToDelete = this.doctorContacts.find(doctor => doctor.id === id);
+    
+    // Remove from local storage
     this.doctorContacts = this.doctorContacts.filter(doctor => doctor.id !== id);
     await this.saveData();
+
+    // Save deletion record to database (but keep the original doctor record for data collection)
+    if (doctorToDelete) {
+      try {
+        const { saveUserDoctor } = require('../../server/neon');
+        const userId = await this.getOrCreateUserId();
+        
+        // Save a deletion record with a special note
+        await saveUserDoctor(userId, {
+          doctorName: doctorToDelete.name,
+          specialty: doctorToDelete.specialty,
+          phoneNumber: doctorToDelete.phoneNumber,
+          email: doctorToDelete.email || '',
+          address: doctorToDelete.address,
+          notes: `[DELETED ${new Date().toISOString()}] ${doctorToDelete.notes || ''}`,
+          preferredContactMethod: doctorToDelete.dialingMethod,
+          countryCode: doctorToDelete.countryCode
+        });
+        
+        console.log('✅ Doctor contact deletion recorded in database:', doctorToDelete.name);
+      } catch (error) {
+        console.warn('⚠️ Failed to record doctor deletion in database:', error);
+      }
+    }
+
     return true;
   }
 

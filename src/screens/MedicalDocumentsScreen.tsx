@@ -128,55 +128,63 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   const getDynamicStyles = () => StyleSheet.create({
     categoryCard: {
       backgroundColor: getCardBackgroundColor() + 'CC',
-      padding: 16,
-      borderRadius: 12,
-      marginBottom: 12,
+      padding: 10,
+      borderRadius: 8,
+      marginBottom: 8,
       borderWidth: 1,
       borderColor: getCardBorderColor(),
     },
     categoryHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 8,
+      justifyContent: 'space-between',
+      marginBottom: 4,
     },
     categoryIcon: {
-      fontSize: 24,
-      marginRight: 12,
+      fontSize: 18,
+      marginRight: 8,
     },
     categoryTitle: {
-      fontSize: 18,
+      fontSize: 13,
       fontWeight: '600',
       flex: 1,
     },
+    categoryTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
     categoryDescription: {
-      fontSize: 14,
-      marginBottom: 12,
+      fontSize: 10,
+      marginBottom: 6,
+      opacity: 0.8,
     },
     documentItem: {
       backgroundColor: getCardBackgroundColor() + '80',
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 8,
+      padding: 8,
+      borderRadius: 6,
+      marginBottom: 6,
       flexDirection: 'row',
       alignItems: 'center',
       borderColor: getCardBorderColor(),
       borderWidth: 1,
     },
     documentImage: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      marginRight: 12,
+      width: 28,
+      height: 28,
+      borderRadius: 4,
+      marginRight: 8,
     },
     documentInfo: {
       flex: 1,
     },
     documentName: {
-      fontSize: 14,
+      fontSize: 10,
       fontWeight: '500',
     },
     documentType: {
-      fontSize: 12,
+      fontSize: 8,
+      opacity: 0.7,
     },
     fileExtensionLabel: {
       paddingHorizontal: 6,
@@ -191,35 +199,36 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     },
     actionButton: {
       backgroundColor: currentTheme.accent + 'CC',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 6,
-      marginLeft: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 4,
+      marginLeft: 6,
     },
     actionButtonText: {
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: '600',
     },
     scanButton: {
       backgroundColor: currentTheme.accent + 'CC',
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 5,
       flexDirection: 'row',
       alignItems: 'center',
     },
     scanButtonText: {
-      fontSize: 14,
+      fontSize: 11,
       fontWeight: '600',
-      marginLeft: 8,
+      marginLeft: 5,
     },
     emptyState: {
       alignItems: 'center',
-      paddingVertical: 20,
+      paddingVertical: 6,
     },
     emptyStateText: {
-      fontSize: 14,
+      fontSize: 11,
       textAlign: 'center',
+      opacity: 0.6,
     },
     modalContainer: {
       flex: 1,
@@ -2785,8 +2794,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         ]}
       >
         <View style={dynamicStyles.categoryHeader}>
-          <DynamicText type="card" style={dynamicStyles.categoryIcon}>{categoryInfo.icon}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.categoryTitle}>{categoryInfo.title}</DynamicText>
+          <View style={dynamicStyles.categoryTitleContainer}>
+            <DynamicText type="card" style={dynamicStyles.categoryIcon}>{categoryInfo.icon}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.categoryTitle}>{categoryInfo.title}</DynamicText>
+          </View>
           <TouchableOpacity
             style={dynamicStyles.scanButton}
             onPress={() => {
@@ -3031,7 +3042,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📄 Upload PDF Document
+                      📄 {t('uploadPDF')}
                     </DynamicText>
                   </TouchableOpacity>
                 </>
