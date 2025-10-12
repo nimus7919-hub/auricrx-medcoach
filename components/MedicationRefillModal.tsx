@@ -396,8 +396,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       return `${mi.toFixed(1)} mi`;
     }
     const km = mi * 1.60934;
-    console.log('🔍 Conversion: ${mi} miles × 1.60934 = ${km} km`);
-    console.log('🔍 Final display:', `${km.toFixed(1)} km`);
+    console.log(`🔍 Conversion: ${mi} miles × 1.60934 = ${km} km`);
+    console.log(`🔍 Final display: ${km.toFixed(1)} km`);
     return `${km.toFixed(1)} km`;
   }
   // currency formatting
