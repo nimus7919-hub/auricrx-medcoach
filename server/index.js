@@ -269,11 +269,13 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
                 places.forEach((place, index) => {
                   const element = distanceJson.rows[0].elements[index];
                   if (element.status === 'OK' && element.distance) {
-                    // Convert meters to miles
-                    const distanceKm = element.distance.value / 1000;
-                    const distanceMiles = distanceKm * 0.621371;
+                    // Distance Matrix API returns distance in meters when units=metric
+                    // Convert meters to kilometers, then kilometers to miles
+                    const distanceMeters = element.distance.value;
+                    const distanceKm = distanceMeters / 1000;
+                    const distanceMiles = distanceKm * 0.621371; // Convert KM to Miles
                     place.distanceMiles = Number(distanceMiles.toFixed(2));
-                    console.log(`📍 ${place.name}: ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} miles) - driving distance`);
+                    console.log(`📍 ${place.name}: ${distanceMeters}m = ${distanceKm.toFixed(2)}km = ${distanceMiles.toFixed(2)} miles - driving distance`);
                   }
                 });
               }
@@ -404,12 +406,13 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
                 const element = distanceJson.rows[0].elements[index];
                 console.log(`🗺️ Processing ${place.name}: element status = ${element.status}`);
                 if (element.status === 'OK' && element.distance) {
-                  // Convert meters to km and miles
-                  const distanceKm = element.distance.value / 1000;
-                  const distanceMiles = distanceKm * 0.621371;
+                  // Distance Matrix API returns distance in meters when units=metric
+                  const distanceMeters = element.distance.value;
+                  const distanceKm = distanceMeters / 1000;
+                  const distanceMiles = distanceKm * 0.621371; // Convert KM to Miles
                   const oldDistance = place.distanceMiles;
                   place.distanceMiles = Number(distanceMiles.toFixed(2));
-                  console.log(`📍 ${place.name}: ${oldDistance}km (straight) → ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} mi) - DRIVING distance`);
+                  console.log(`📍 ${place.name}: ${oldDistance} mi (straight-line) → ${distanceMeters}m = ${distanceKm.toFixed(2)}km = ${distanceMiles.toFixed(2)} mi (driving)`);
                 } else {
                   console.warn(`⚠️ ${place.name}: Distance element status = ${element.status}, keeping straight-line distance`);
                 }
@@ -580,12 +583,13 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
                 const element = distanceJson.rows[0].elements[index];
                 console.log(`🗺️ Processing ${lab.name}: element status = ${element.status}`);
                 if (element.status === 'OK' && element.distance) {
-                  // Convert meters to km and miles
-                  const distanceKm = element.distance.value / 1000;
-                  const distanceMiles = distanceKm * 0.621371;
+                  // Distance Matrix API returns distance in meters when units=metric
+                  const distanceMeters = element.distance.value;
+                  const distanceKm = distanceMeters / 1000;
+                  const distanceMiles = distanceKm * 0.621371; // Convert KM to Miles
                   const oldDistance = lab.distanceMiles;
                   lab.distanceMiles = Number(distanceMiles.toFixed(2));
-                  console.log(`🧪 ${lab.name}: ${oldDistance}km (straight) → ${distanceKm.toFixed(2)}km (${distanceMiles.toFixed(2)} mi) - DRIVING distance`);
+                  console.log(`🧪 ${lab.name}: ${oldDistance} mi (straight-line) → ${distanceMeters}m = ${distanceKm.toFixed(2)}km = ${distanceMiles.toFixed(2)} mi (driving)`);
                 } else {
                   console.warn(`⚠️ ${lab.name}: Distance element status = ${element.status}, keeping straight-line distance`);
                 }
