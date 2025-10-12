@@ -1,7 +1,7 @@
 {
   "name": "auricrx-medcoach",
   "version": "1.0.0",
-  "main": "App.js",
+  "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
