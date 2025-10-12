@@ -49,9 +49,9 @@ import DynamicText from './src/components/DynamicText';
 import { useDynamicTheme } from './src/hooks/useDynamicTheme';
 import CustomAlert from './src/components/CustomAlert';
 import { useCustomAlert } from './src/hooks/useCustomAlert';
-// import { useTranslation } from './src/hooks/useTranslation'; // Temporarily commented out
-// import { createTranslationService } from './src/services/translationService'; // Temporarily commented out
-// import './src/i18n'; // Temporarily commented out for Node.js 22 compatibility
+import { useTranslation } from './src/hooks/useTranslation';
+import { createTranslationService } from './src/services/translationService';
+import './src/i18n';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
 
