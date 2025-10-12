@@ -104,6 +104,25 @@ server/.env
 server/.env.*
 
 # -----------------------------
+# Backup files
+# -----------------------------
+*.backup
+*.bak
+*.orig
+*_backup.*
+*_backup_*
+*.backup.*
+backup-*
+*-backup
+index.backup.*
+App.backup.*
+package.backup.*
+*.backup.js
+*.backup.json
+*.backup.ts
+*.backup.tsx
+
+# -----------------------------
 # OS junk
 # -----------------------------
 .DS_Store
