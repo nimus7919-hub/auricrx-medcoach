@@ -3,6 +3,7 @@
     "name": "AuricRX MedCoach",
     "slug": "auricrx-medcoach",
     "version": "1.0.0",
+    "main": "index.js",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -31,8 +32,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-google-signin/google-signin",
-      "expo-router"
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "eas": {
