@@ -443,16 +443,17 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
 
   // Use country-based distance units: miles for USA, kilometers for other countries
   const useKm = userCountry !== 'US';
-  console.log('🔍 SupplementRefillModal - userCountry:', userCountry, 'useKm:', useKm);
+  console.log('💊 SUPPLEMENT SupplementRefillModal - userCountry:', userCountry, 'useKm:', useKm);
   function formatDistance(mi?: number) {
-    console.log('🔍 formatDistance called with:', { mi, useKm, userCountry });
+    console.log('💊 SUPPLEMENT formatDistance called with:', { mi, useKm, userCountry });
     if (mi == null) return '';
     if (!useKm) {
-      console.log('🔍 Using miles:', `${mi.toFixed(1)} mi`);
+      console.log('💊 SUPPLEMENT Using miles:', `${mi.toFixed(1)} mi`);
       return `${mi.toFixed(1)} mi`;
     }
     const km = mi * 1.60934;
-    console.log('🔍 Using km:', `${km.toFixed(1)} km`);
+    console.log(`💊 SUPPLEMENT Conversion: ${mi} miles × 1.60934 = ${km} km`);
+    console.log(`💊 SUPPLEMENT Final display: ${km.toFixed(1)} km`);
     return `${km.toFixed(1)} km`;
   }
   // currency formatting (same as medication refill modal)

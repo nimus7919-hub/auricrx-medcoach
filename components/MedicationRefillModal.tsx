@@ -387,17 +387,17 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
 
   // Use country-based distance units: miles for USA, kilometers for other countries
   const useKm = userCountry !== 'US';
-  console.log('🔍 MedicationRefillModal - userCountry:', userCountry, 'useKm:', useKm);
+  console.log('💊 MEDICATION MedicationRefillModal - userCountry:', userCountry, 'useKm:', useKm);
   function formatDistance(mi?: number) {
-    console.log('🔍 formatDistance called with:', { mi, useKm, userCountry });
+    console.log('💊 MEDICATION formatDistance called with:', { mi, useKm, userCountry });
     if (mi == null) return '';
     if (!useKm) {
-      console.log('🔍 Using miles:', `${mi.toFixed(1)} mi`);
+      console.log('💊 MEDICATION Using miles:', `${mi.toFixed(1)} mi`);
       return `${mi.toFixed(1)} mi`;
     }
     const km = mi * 1.60934;
-    console.log(`🔍 Conversion: ${mi} miles × 1.60934 = ${km} km`);
-    console.log(`🔍 Final display: ${km.toFixed(1)} km`);
+    console.log(`💊 MEDICATION Conversion: ${mi} miles × 1.60934 = ${km} km`);
+    console.log(`💊 MEDICATION Final display: ${km.toFixed(1)} km`);
     return `${km.toFixed(1)} km`;
   }
   // currency formatting
