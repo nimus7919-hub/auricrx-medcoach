@@ -399,12 +399,14 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
             const distanceJson = await distResp.json();
             console.log('🗺️ Distance Matrix API status:', distanceJson.status);
             console.log('🗺️ Distance Matrix API rows:', distanceJson.rows?.length || 0);
+            console.log('🗺️ Distance Matrix API FULL RESPONSE (first element):', JSON.stringify(distanceJson.rows?.[0]?.elements?.[0], null, 2));
             
             if (distanceJson.status === 'OK' && distanceJson.rows?.[0]?.elements) {
               console.log('🗺️ Distance Matrix API elements:', distanceJson.rows[0].elements.length);
               placesArr.forEach((place, index) => {
                 const element = distanceJson.rows[0].elements[index];
                 console.log(`🗺️ Processing ${place.name}: element status = ${element.status}`);
+                console.log(`🗺️ RAW element.distance for ${place.name}:`, JSON.stringify(element.distance));
                 if (element.status === 'OK' && element.distance) {
                   // Distance Matrix API returns distance in meters when units=metric
                   const distanceMeters = element.distance.value;
@@ -412,7 +414,8 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
                   const distanceMiles = distanceKm * 0.621371; // Convert KM to Miles
                   const oldDistance = place.distanceMiles;
                   place.distanceMiles = Number(distanceMiles.toFixed(2));
-                  console.log(`📍 ${place.name}: ${oldDistance} mi (straight-line) → ${distanceMeters}m = ${distanceKm.toFixed(2)}km = ${distanceMiles.toFixed(2)} mi (driving)`);
+                  console.log(`📍 ${place.name}: ${oldDistance} mi (straight-line) → RAW API: ${distanceMeters}m = ${distanceKm.toFixed(2)}km = ${distanceMiles.toFixed(2)} mi (driving)`);
+                  console.log(`📍 ${place.name}: FINAL distanceMiles being sent to client: ${place.distanceMiles}`);
                 } else {
                   console.warn(`⚠️ ${place.name}: Distance element status = ${element.status}, keeping straight-line distance`);
                 }
