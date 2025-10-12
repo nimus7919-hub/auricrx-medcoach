@@ -4502,10 +4502,14 @@ const handleAskMedicalAI = async () => {
 
     const formatDistance = (miles) => {
       // Use location-based units: miles for USA, kilometers for other countries
+      console.log(`🧪 LAB formatDistance called with:`, { miles, userCountry });
       if (userCountry === 'US') {
+        console.log(`🧪 LAB Using miles: ${miles.toFixed(1)} mi`);
         return `${miles.toFixed(1)} ${S.mi}`;
       } else {
         const km = miles * 1.60934;
+        console.log(`🧪 LAB Conversion: ${miles} miles × 1.60934 = ${km} km`);
+        console.log(`🧪 LAB Final display: ${km.toFixed(1)} km`);
         return `${km.toFixed(1)} ${S.km}`;
       }
     };
