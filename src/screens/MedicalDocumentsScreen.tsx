@@ -1960,10 +1960,18 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const isIDDocument = (document: DocumentItem): boolean => {
     const name = document.name.toLowerCase();
-    return name.includes('id') || name.includes('license') || name.includes('passport') || 
+    const result = name.includes('id') || name.includes('license') || name.includes('passport') || 
            name.includes('front') || name.includes('back') || name.includes('side') ||
            name.includes('credencial') || name.includes('votar') || name.includes('elector') ||
            name.includes('cedula') || name.includes('identidad');
+    
+    console.log('🆔 isIDDocument check:', { 
+      name: document.name, 
+      lowercase: name, 
+      isID: result 
+    });
+    
+    return result;
   };
 
   
@@ -2392,13 +2400,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       triggerHaptic('light');
       
       const selectedDocs = documents.filter(doc => selectedDocuments.has(doc.id));
-      console.log('Sharing selected documents:', selectedDocs.map(d => d.name));
+      console.log('📄 Sharing selected documents:', selectedDocs.map(d => ({ name: d.name, type: d.type })));
+      console.log('📄 Selected document IDs:', Array.from(selectedDocuments));
+      console.log('📄 Total documents available:', documents.length);
 
       if (selectedDocs.length === 1) {
         // Single document - use existing logic
+        console.log('📄 Single document selected, using shareDocument');
         await shareDocument(selectedDocs[0]);
       } else {
         // Multiple documents - create a combined approach
+        console.log('📄 Multiple documents selected, using shareMultipleDocuments');
         await shareMultipleDocuments(selectedDocs);
       }
 
@@ -2414,10 +2426,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const shareMultipleDocuments = async (docs: DocumentItem[]) => {
     try {
-      console.log('🔄 Sharing multiple documents:', docs.map(d => d.name));
+      console.log('🔄 Sharing multiple documents:', docs.map(d => ({ name: d.name, type: d.type })));
       
       // Check if all documents are ID documents that can be combined
       const allIDDocs = docs.every(doc => isIDDocument(doc));
+      console.log('🔄 All documents are ID documents:', allIDDocs);
+      console.log('🔄 Document count:', docs.length);
       
       if (allIDDocs && docs.length === 2) {
         // For 2 ID documents, try to create a combined PDF
@@ -2425,7 +2439,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         await shareCombinedIDDocuments(docs);
       } else {
         // For other combinations, use Android's multiple file sharing
-        console.log('🔄 Using multiple file sharing...');
+        console.log('🔄 Using multiple file sharing (not ID documents or wrong count)...');
+        console.log('🔄 Reason: allIDDocs =', allIDDocs, ', docs.length =', docs.length);
         await shareMultipleFiles(docs);
       }
     } catch (error) {
@@ -2456,15 +2471,22 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         let logoBase64 = null;
         try {
           const logoSource = require('../../assets/AuricRX Document Logo.png');
-          const logoUri = Image.resolveAssetSource(logoSource).uri;
-          const response = await fetch(logoUri);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          logoBase64 = await new Promise((resolve, reject) => {
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
+          const logoAssetInfo = Image.resolveAssetSource(logoSource);
+          console.log('📄 Loading logo for combined ID PDF:', logoAssetInfo.uri);
+          
+          // Download asset to cache and convert to base64
+          const logoDownload = await FileSystem.downloadAsync(
+            logoAssetInfo.uri,
+            FileSystem.cacheDirectory + 'auricrx-doc-logo-temp.png'
+          );
+          
+          const logoBase64Data = await FileSystem.readAsStringAsync(logoDownload.uri, {
+            encoding: FileSystem.EncodingType.Base64,
           });
+          
+          // Create data URI
+          logoBase64 = `data:image/png;base64,${logoBase64Data}`;
+          console.log('✅ Logo loaded successfully for combined ID PDF');
         } catch (logoError) {
           console.log('⚠️ Failed to load logo, proceeding without it:', logoError);
         }
