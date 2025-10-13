@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.auricrxmedcoach"
+    namespace "com.auricrx.medcoach"
     defaultConfig {
-        applicationId "com.auricrxmedcoach"
+        applicationId "com.auricrx.medcoach"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -102,6 +102,9 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+    }
+    buildFeatures {
+        buildConfig true  // Ensure BuildConfig is generated
     }
     buildTypes {
         debug {
@@ -176,39 +179,49 @@ dependencies {
     }
 }
 
-// Auto-fix BuildConfig imports in generated Kotlin files BEFORE compilation
-task fixKotlinImports {
+// Gradle safety net: Ensure BuildConfig and R imports in Kotlin files
+tasks.register("ensureKotlinImports") {
     doLast {
-        def mainActivityFile = file('src/main/java/com/auricrx/medcoach/MainActivity.kt')
-        def mainApplicationFile = file('src/main/java/com/auricrx/medcoach/MainApplication.kt')
+        def ns = android.namespace ?: "com.auricrx.medcoach"
+        def dir = file("src/main/java/${ns.replace('.', '/')}")
         
-        println "🔧 Checking Kotlin files for BuildConfig import..."
+        println "🔧 [Gradle Safety Net] Checking Kotlin imports for namespace: ${ns}"
         
-        [mainActivityFile, mainApplicationFile].each { kotlinFile ->
-            if (kotlinFile.exists()) {
-                def content = kotlinFile.text
-                if (!content.contains('import com.auricrx.medcoach.BuildConfig')) {
-                    println "⚠️  ${kotlinFile.name} missing BuildConfig import, adding it now..."
-                    // Add import after the package declaration and existing imports
-                    content = content.replaceFirst(
-                        /(package com\.auricrx\.medcoach\s*\n)/,
-                        '$1\nimport com.auricrx.medcoach.BuildConfig\n'
-                    )
-                    kotlinFile.text = content
-                    println "✅ Auto-added BuildConfig import to ${kotlinFile.name}"
-                } else {
-                    println "✓ ${kotlinFile.name} already has BuildConfig import"
-                }
+        ["MainActivity.kt", "MainApplication.kt"].each { name ->
+            def f = new File(dir, name)
+            if (!f.exists()) {
+                println "⚠️  ${name} does not exist"
+                return
+            }
+            
+            def txt = f.getText("UTF-8")
+            def modified = false
+            
+            // Add BuildConfig import if missing
+            if (!(txt =~ /import\s+${ns}\.BuildConfig/)) {
+                txt = txt.replaceFirst(/(package\s+.*\n)/) { it[0] + "import ${ns}.BuildConfig\n" }
+                modified = true
+                println "✅ Added BuildConfig import to ${name}"
+            }
+            
+            // Add R import if missing
+            if (!(txt =~ /import\s+${ns}\.R/)) {
+                txt = txt.replaceFirst(/(package\s+.*\n)/) { it[0] + "import ${ns}.R\n" }
+                modified = true
+                println "✅ Added R import to ${name}"
+            }
+            
+            if (modified) {
+                f.write(txt, "UTF-8")
             } else {
-                println "⚠️  ${kotlinFile.name} does not exist yet"
+                println "✓ ${name} already has required imports"
             }
         }
+        println "✅ ensureKotlinImports completed"
     }
 }
 
-// Run fixKotlinImports before any Kotlin compilation
-tasks.whenTaskAdded { task ->
-    if (task.name.contains('compileKotlin')) {
-        task.dependsOn fixKotlinImports
-    }
+// Run before preBuild to catch files early
+tasks.named("preBuild").configure { 
+    dependsOn("ensureKotlinImports") 
 }
