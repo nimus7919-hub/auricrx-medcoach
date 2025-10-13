@@ -1994,56 +1994,60 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     try {
       console.log('🔍 Looking for ID pair for:', document.name);
       
-      // Check if this is a front or back document (more flexible matching)
+      // First try the name-based approach
       const docName = document.name.toLowerCase();
       const isFront = docName.includes('front') || docName.includes('frente') || docName.includes('anverso');
       const isBack = docName.includes('back') || docName.includes('reverso') || docName.includes('atras');
       
-      console.log('🔍 ID Pair detection:', {
-        documentName: document.name,
-        isFront,
-        isBack,
-        allDocuments: documents.map(d => d.name)
-      });
-      
-      if (!isFront && !isBack) {
-        console.log('⚠️ Document is not identified as front or back - treating as single ID');
-        return null;
-      }
-      
-      // Find the corresponding pair
-      const pair = documents.find(doc => {
-        if (doc.id === document.id) return false; // Don't match itself
+      if (isFront || isBack) {
+        console.log('🔍 Using name-based pairing');
+        const pair = documents.find(doc => {
+          if (doc.id === document.id) return false;
+          
+          const otherDocName = doc.name.toLowerCase();
+          const docIsFront = otherDocName.includes('front') || otherDocName.includes('frente') || otherDocName.includes('anverso');
+          const docIsBack = otherDocName.includes('back') || otherDocName.includes('reverso') || otherDocName.includes('atras');
+          
+          if (isFront && docIsBack) return true;
+          if (isBack && docIsFront) return true;
+          return false;
+        });
         
-        const otherDocName = doc.name.toLowerCase();
-        const docIsFront = otherDocName.includes('front') || otherDocName.includes('frente') || otherDocName.includes('anverso');
-        const docIsBack = otherDocName.includes('back') || otherDocName.includes('reverso') || otherDocName.includes('atras');
-        
-        // Check if it's the opposite side
-        if (isFront && docIsBack) return true;
-        if (isBack && docIsFront) return true;
-        
-        return false;
-      });
-      
-      if (pair) {
-        console.log('✅ Found ID pair:', pair.name);
-        const result = {
-          front: isFront ? document : pair,
-          back: isBack ? document : pair
-        };
-        
-        // Ensure both front and back are not null
-        if (!result.front || !result.back) {
-          console.log('⚠️ ID pair is incomplete:', result);
-          return null;
+        if (pair) {
+          const result = {
+            front: isFront ? document : pair,
+            back: isBack ? document : pair
+          };
+          console.log('✅ Found name-based ID pair:', { front: result.front?.name, back: result.back?.name });
+          return result;
         }
-        
-        return result;
-      } else {
-        console.log('⚠️ No ID pair found');
-        return null;
       }
+      
+      // Fallback: Group ID documents by category and creation time (within 5 minutes)
+      console.log('🔍 Trying time-based pairing for ID documents');
+      const idDocuments = documents.filter(doc => 
+        doc.id !== document.id && 
+        isIDDocument(doc) &&
+        Math.abs(new Date(doc.createdAt).getTime() - new Date(document.createdAt).getTime()) < 5 * 60 * 1000 // 5 minutes
+      );
+      
+      console.log('🔍 Found ID documents within time window:', idDocuments.map(d => d.name));
+      
+      if (idDocuments.length > 0) {
+        // If we have exactly 2 ID documents created close together, pair them
+        if (idDocuments.length === 1) {
+          const otherDoc = idDocuments[0];
+          const result = {
+            front: document.createdAt < otherDoc.createdAt ? document : otherDoc,
+            back: document.createdAt < otherDoc.createdAt ? otherDoc : document
+          };
+          console.log('✅ Found time-based ID pair:', { front: result.front?.name, back: result.back?.name });
+          return result;
+        }
+      }
+      
+      console.log('⚠️ No ID pair found');
+      return null;
     } catch (error) {
       console.error('❌ Error finding ID pair:', error);
       return null;
