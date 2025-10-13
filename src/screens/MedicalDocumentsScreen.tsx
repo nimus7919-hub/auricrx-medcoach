@@ -1968,7 +1968,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     console.log('🆔 isIDDocument check:', { 
       name: document.name, 
       lowercase: name, 
-      isID: result 
+      isID: result,
+      checks: {
+        hasId: name.includes('id'),
+        hasLicense: name.includes('license'),
+        hasPassport: name.includes('passport'),
+        hasFront: name.includes('front'),
+        hasBack: name.includes('back'),
+        hasSide: name.includes('side'),
+        hasCredencial: name.includes('credencial'),
+        hasVotar: name.includes('votar'),
+        hasElector: name.includes('elector'),
+        hasCedula: name.includes('cedula'),
+        hasIdentidad: name.includes('identidad')
+      }
     });
     
     return result;
