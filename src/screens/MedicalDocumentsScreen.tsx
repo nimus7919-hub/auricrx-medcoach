@@ -2763,10 +2763,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             <DynamicText type="card" style={dynamicStyles.actionButtonText}>👁️</DynamicText>
           </TouchableOpacity>
           <TouchableOpacity
-            style={dynamicStyles.actionButton}
-            onPress={() => shareDocument(document)}
+            style={[dynamicStyles.actionButton, { backgroundColor: '#10B981' + 'CC' }]}
+            onPress={() => {
+              if (hasBackSide && pair) {
+                // Create combined PDF for ID documents with both sides
+                shareCombinedIDDocuments([pair.front!, pair.back!]);
+              } else {
+                // Single ID document - use regular sharing
+                shareDocument(document);
+              }
+            }}
           >
-            <DynamicText type="card" style={dynamicStyles.actionButtonText}>📤</DynamicText>
+            <DynamicText type="card" style={[dynamicStyles.actionButtonText, { fontSize: 10 }]}>
+              {hasBackSide ? '📄 Merge' : '📤 Share'}
+            </DynamicText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[dynamicStyles.actionButton, { backgroundColor: '#dc2626' + 'CC' }]}
