@@ -62,6 +62,23 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   // Use S object for translations, fallback to key if not available
   const t = (key: string) => S?.[key] || key;
   
+  // Check if expo-print is available (diagnostic)
+  useEffect(() => {
+    console.log('📄 PDF Module Check:', {
+      printAvailable: !!Print,
+      printToFileAsync: !!Print?.printToFileAsync,
+      webViewAvailable: !!WebView,
+      fileSystemAvailable: !!FileSystem,
+    });
+    
+    if (!Print || !Print.printToFileAsync) {
+      console.error('❌ expo-print is not available! PDF features will not work.');
+      console.error('❌ This usually means you need a development build with expo-print included.');
+    } else {
+      console.log('✅ expo-print is available and ready');
+    }
+  }, []);
+  
   const DOCUMENT_CATEGORIES = {
     photo_id: {
       title: t('photoID'),
@@ -2100,10 +2117,29 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       });
       
       // Get AuricRX logo as base64
-      const logoUri = require('../../assets/auricrx-logo.png');
-      const logoBase64 = await FileSystem.readAsStringAsync(logoUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const logoSource = require('../../assets/auricrx-logo.png');
+      const logoAssetInfo = Image.resolveAssetSource(logoSource);
+      console.log('📄 Logo asset info:', logoAssetInfo);
+      
+      // For bundled assets, we need to fetch and convert to base64
+      let logoBase64 = '';
+      try {
+        // Download the asset to a temporary location
+        const logoDownload = await FileSystem.downloadAsync(
+          logoAssetInfo.uri,
+          FileSystem.cacheDirectory + 'auricrx-logo-temp.png'
+        );
+        console.log('📄 Logo downloaded to:', logoDownload.uri);
+        
+        // Read as base64
+        logoBase64 = await FileSystem.readAsStringAsync(logoDownload.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        console.log('📄 Logo base64 length:', logoBase64.length);
+      } catch (logoError) {
+        console.error('⚠️ Failed to load logo, continuing without it:', logoError);
+        // Continue without logo rather than failing completely
+      }
       
       // Create HTML content for PDF
       const htmlContent = `
