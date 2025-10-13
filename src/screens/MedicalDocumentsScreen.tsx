@@ -1994,12 +1994,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     try {
       console.log('🔍 Looking for ID pair for:', document.name);
       
-      // Check if this is a front or back document
-      const isFront = document.name.toLowerCase().includes('front');
-      const isBack = document.name.toLowerCase().includes('back');
+      // Check if this is a front or back document (more flexible matching)
+      const docName = document.name.toLowerCase();
+      const isFront = docName.includes('front') || docName.includes('frente') || docName.includes('anverso');
+      const isBack = docName.includes('back') || docName.includes('reverso') || docName.includes('atras');
+      
+      console.log('🔍 ID Pair detection:', {
+        documentName: document.name,
+        isFront,
+        isBack,
+        allDocuments: documents.map(d => d.name)
+      });
       
       if (!isFront && !isBack) {
-        console.log('⚠️ Document is not identified as front or back');
+        console.log('⚠️ Document is not identified as front or back - treating as single ID');
         return null;
       }
       
@@ -2007,8 +2015,9 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       const pair = documents.find(doc => {
         if (doc.id === document.id) return false; // Don't match itself
         
-        const docIsFront = doc.name.toLowerCase().includes('front');
-        const docIsBack = doc.name.toLowerCase().includes('back');
+        const otherDocName = doc.name.toLowerCase();
+        const docIsFront = otherDocName.includes('front') || otherDocName.includes('frente') || otherDocName.includes('anverso');
+        const docIsBack = otherDocName.includes('back') || otherDocName.includes('reverso') || otherDocName.includes('atras');
         
         // Check if it's the opposite side
         if (isFront && docIsBack) return true;
@@ -2695,8 +2704,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       const isFront = pair && pair.front && pair.front.uri === document.uri;
       const isBack = pair && pair.back && pair.back.uri === document.uri;
       
+      console.log('🔍 ID Document rendering check:', {
+        documentName: document.name,
+        hasPair: !!pair,
+        isFront,
+        isBack,
+        pair: pair ? { front: pair.front?.name, back: pair.back?.name } : null
+      });
+      
       // Only render the front document, skip the back to avoid duplication
       if (isBack) {
+        console.log('⏭️ Skipping back document to avoid duplication');
         return null;
       }
       
