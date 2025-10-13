@@ -176,27 +176,39 @@ dependencies {
     }
 }
 
-// Auto-fix BuildConfig imports in generated Kotlin files
-tasks.whenTaskAdded { task ->
-    if (task.name == 'compileReleaseKotlin' || task.name == 'compileDebugKotlin') {
-        task.doFirst {
-            def mainActivityFile = file('src/main/java/com/auricrx/medcoach/MainActivity.kt')
-            def mainApplicationFile = file('src/main/java/com/auricrx/medcoach/MainApplication.kt')
-            
-            [mainActivityFile, mainApplicationFile].each { kotlinFile ->
-                if (kotlinFile.exists()) {
-                    def content = kotlinFile.text
-                    if (!content.contains('import com.auricrx.medcoach.BuildConfig')) {
-                        // Find the package line and add import after it
-                        content = content.replaceFirst(
-                            /(package com\.auricrx\.medcoach\s*\n)/,
-                            '$1\nimport com.auricrx.medcoach.BuildConfig\n'
-                        )
-                        kotlinFile.text = content
-                        println "✅ Auto-added BuildConfig import to ${kotlinFile.name}"
-                    }
+// Auto-fix BuildConfig imports in generated Kotlin files BEFORE compilation
+task fixKotlinImports {
+    doLast {
+        def mainActivityFile = file('src/main/java/com/auricrx/medcoach/MainActivity.kt')
+        def mainApplicationFile = file('src/main/java/com/auricrx/medcoach/MainApplication.kt')
+        
+        println "🔧 Checking Kotlin files for BuildConfig import..."
+        
+        [mainActivityFile, mainApplicationFile].each { kotlinFile ->
+            if (kotlinFile.exists()) {
+                def content = kotlinFile.text
+                if (!content.contains('import com.auricrx.medcoach.BuildConfig')) {
+                    println "⚠️  ${kotlinFile.name} missing BuildConfig import, adding it now..."
+                    // Add import after the package declaration and existing imports
+                    content = content.replaceFirst(
+                        /(package com\.auricrx\.medcoach\s*\n)/,
+                        '$1\nimport com.auricrx.medcoach.BuildConfig\n'
+                    )
+                    kotlinFile.text = content
+                    println "✅ Auto-added BuildConfig import to ${kotlinFile.name}"
+                } else {
+                    println "✓ ${kotlinFile.name} already has BuildConfig import"
                 }
+            } else {
+                println "⚠️  ${kotlinFile.name} does not exist yet"
             }
         }
+    }
+}
+
+// Run fixKotlinImports before any Kotlin compilation
+tasks.whenTaskAdded { task ->
+    if (task.name.contains('compileKotlin')) {
+        task.dependsOn fixKotlinImports
     }
 }
