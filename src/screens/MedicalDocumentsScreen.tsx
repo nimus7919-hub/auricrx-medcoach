@@ -2459,10 +2459,16 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         console.log('🔄 Creating combined PDF with both ID images...');
         
         // Convert images to base64 for embedding in PDF
+        console.log('📄 Converting front image:', frontDoc.uri);
         const frontBase64 = await convertImageToDataUri(frontDoc.uri);
+        console.log('📄 Converting back image:', backDoc.uri);
         const backBase64 = await convertImageToDataUri(backDoc.uri);
         
+        console.log('📄 Front image converted:', !!frontBase64);
+        console.log('📄 Back image converted:', !!backBase64);
+        
         if (!frontBase64 || !backBase64) {
+          console.error('❌ Failed to convert images to base64');
           Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
           return;
         }
@@ -2575,10 +2581,16 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         `;
 
         // Generate PDF using expo-print
+        console.log('📄 About to generate PDF with expo-print...');
+        console.log('📄 HTML length:', html.length);
+        console.log('📄 Print.printToFileAsync available:', !!Print?.printToFileAsync);
+        
         const { uri } = await Print.printToFileAsync({
           html: html,
           base64: false,
         });
+        
+        console.log('📄 PDF generated successfully at:', uri);
         
         // Copy PDF to a more accessible location for sharing
         const shareableUri = `${FileSystem.documentDirectory}Combined_ID_Document_${Date.now()}.pdf`;
