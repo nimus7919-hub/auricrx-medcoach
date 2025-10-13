@@ -4,9 +4,6 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "hooks": {
-      "postInstall": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh"
-    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
@@ -23,7 +20,8 @@
       "node": "22.20.0",
       "env": {
         "NODE_ENV": "production"
-      }
+      },
+      "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh"
     },
     "production": { 
       "autoIncrement": true, 
@@ -33,7 +31,8 @@
       },
       "env": {
         "NODE_ENV": "production"
-      }
+      },
+      "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh"
     }
   },
   "submit": {
