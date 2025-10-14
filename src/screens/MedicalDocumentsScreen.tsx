@@ -506,7 +506,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   const [isProcessing, setIsProcessing] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showPDFViewer, setShowPDFViewer] = useState(false);
-  // Removed selectedDocument and showSharingModal - now using direct sharing
+  const [selectedDocument, setSelectedDocument] = useState<DocumentItem | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageDataUri, setImageDataUri] = useState<string | null>(null);
@@ -2295,10 +2295,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     try {
       triggerHaptic('light');
       
-      console.log('Opening document:', {
+      console.log('📄 Opening document:', {
         name: document.name,
         uri: document.uri,
-        type: document.type
+        type: document.type,
+        isPDF: isPDFFile(document),
+        isImage: isImageFile(document),
+        isID: isIDDocument(document)
       });
       
       // Check file type using helper functions
@@ -2391,8 +2394,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       }
       
     } catch (error) {
-      console.error('Failed to view document:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to open document');
+      console.error('❌ Failed to view document:', error);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      console.error('❌ Document that failed:', {
+        name: document.name,
+        uri: document.uri,
+        type: document.type
+      });
+      Alert.alert('❌ ' + t('error'), `Failed to open document: ${error.message || 'Unknown error'}`);
     }
   };
 
