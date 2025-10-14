@@ -2477,9 +2477,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const shareCombinedIDDocuments = async (docs: DocumentItem[]) => {
     try {
+      console.log('🚀 shareCombinedIDDocuments called with:', docs.map(d => ({ name: d.name, uri: d.uri })));
+      
       // Find the ID pair
       const frontDoc = docs.find(doc => doc.name.toLowerCase().includes('front') || doc.name.toLowerCase().includes('id'));
       const backDoc = docs.find(doc => doc.name.toLowerCase().includes('back'));
+      
+      console.log('🔍 Found documents:', { 
+        frontDoc: frontDoc?.name, 
+        backDoc: backDoc?.name,
+        totalDocs: docs.length 
+      });
       
       if (frontDoc && backDoc) {
         console.log('🔄 Creating combined PDF with both ID images...');
@@ -2787,10 +2795,19 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           <TouchableOpacity
             style={[dynamicStyles.actionButton, { backgroundColor: '#10B981' + 'CC' }]}
             onPress={() => {
+              console.log('🔘 Merge/Share button pressed:', {
+                documentName: document.name,
+                hasBackSide,
+                hasPair: !!pair,
+                pairInfo: pair ? { front: pair.front?.name, back: pair.back?.name } : null
+              });
+              
               if (hasBackSide && pair) {
+                console.log('📄 Calling shareCombinedIDDocuments with both documents');
                 // Create combined PDF for ID documents with both sides
                 shareCombinedIDDocuments([pair.front!, pair.back!]);
               } else {
+                console.log('📤 Calling regular shareDocument for single document');
                 // Single ID document - use regular sharing
                 shareDocument(document);
               }
