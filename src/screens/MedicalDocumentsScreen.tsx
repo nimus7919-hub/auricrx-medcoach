@@ -2875,15 +2875,28 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         });
         
         // Share the PDF
-        const { isAvailable } = await Sharing.isAvailableAsync();
-        if (isAvailable) {
-          await Sharing.shareAsync(shareableUri, {
-            mimeType: 'application/pdf',
-            dialogTitle: `Share ID Document`,
-          });
-          console.log('✅ Single ID PDF shared successfully');
-        } else {
-          Alert.alert('❌ Error', 'Sharing not available on this device');
+        console.log('📤 Attempting to share single ID PDF (duplicate section):', shareableUri);
+        try {
+          const { isAvailable } = await Sharing.isAvailableAsync();
+          console.log('📤 Sharing availability check (duplicate section):', isAvailable);
+          
+          if (isAvailable) {
+            await Sharing.shareAsync(shareableUri, {
+              mimeType: 'application/pdf',
+              dialogTitle: `Share ID Document`,
+            });
+            console.log('✅ Single ID PDF shared successfully (duplicate section)');
+          } else {
+            console.log('⚠️ Sharing not available, trying direct share anyway (duplicate section)...');
+            await Sharing.shareAsync(shareableUri, {
+              mimeType: 'application/pdf',
+              dialogTitle: `Share ID Document`,
+            });
+            console.log('✅ Single ID PDF shared successfully (duplicate section fallback)');
+          }
+        } catch (shareError) {
+          console.error('❌ Single ID PDF sharing failed (duplicate section):', shareError);
+          Alert.alert('❌ Error', `Failed to share PDF: ${shareError.message || 'Unknown error'}`);
         }
       } else if (docs.length === 1) {
         console.log('🔄 Creating PDF with single ID document...');
