@@ -2479,9 +2479,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     try {
       console.log('🚀 shareCombinedIDDocuments called with:', docs.map(d => ({ name: d.name, uri: d.uri })));
       
-      // Find the ID pair
-      const frontDoc = docs.find(doc => doc.name.toLowerCase().includes('front') || doc.name.toLowerCase().includes('id'));
-      const backDoc = docs.find(doc => doc.name.toLowerCase().includes('back'));
+      // Find the ID pair - use more flexible detection
+      const frontDoc = docs.find(doc => {
+        const name = doc.name.toLowerCase();
+        return name.includes('front') || name.includes('frontal') || name.includes('frente') || 
+               name.includes('anverso') || name.includes('id');
+      });
+      const backDoc = docs.find(doc => {
+        const name = doc.name.toLowerCase();
+        return name.includes('back') || name.includes('trasero') || name.includes('reverso') || 
+               name.includes('atras') || name.includes('lado trasero');
+      });
       
       console.log('🔍 Found documents:', { 
         frontDoc: frontDoc?.name, 
