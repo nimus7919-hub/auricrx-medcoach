@@ -942,15 +942,29 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             console.log('✅ PDF copied to shareable location:', shareableUri);
             
             // Share the PDF
-            const isAvailable = await Sharing.isAvailableAsync();
-            if (isAvailable) {
-              await Sharing.shareAsync(shareableUri, {
-                mimeType: 'application/pdf',
-                dialogTitle: `Share AuricRX ID Document: ${pair.front.name}`,
-              });
-              console.log('✅ ID PDF shared successfully');
-            } else {
-              Alert.alert('❌ ' + t('error'), t('sharingNotAvailable'));
+            console.log('📤 Attempting to share ID PDF from shareDocument:', shareableUri);
+            try {
+              const isAvailable = await Sharing.isAvailableAsync();
+              console.log('📤 Sharing availability check:', isAvailable);
+              
+              if (isAvailable) {
+                await Sharing.shareAsync(shareableUri, {
+                  mimeType: 'application/pdf',
+                  dialogTitle: `Share AuricRX ID Document: ${pair.front.name}`,
+                });
+                console.log('✅ ID PDF shared successfully');
+              } else {
+                console.log('⚠️ Sharing not available, trying direct share anyway...');
+                // Try sharing anyway - sometimes the availability check fails in dev builds
+                await Sharing.shareAsync(shareableUri, {
+                  mimeType: 'application/pdf',
+                  dialogTitle: `Share AuricRX ID Document: ${pair.front.name}`,
+                });
+                console.log('✅ ID PDF shared successfully (fallback)');
+              }
+            } catch (shareError) {
+              console.error('❌ ID PDF sharing failed:', shareError);
+              Alert.alert('❌ Error', `Failed to share PDF: ${shareError.message || 'Unknown error'}`);
             }
             
           } catch (pdfError) {
@@ -958,39 +972,84 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             Alert.alert('❌ Error', 'Failed to create PDF. Sharing original image instead.');
             
             // Fallback to sharing the original image
-            const shareableUri = await convertToShareableUri(document.uri);
-            const isAvailable = await Sharing.isAvailableAsync();
-            if (isAvailable) {
-              await Sharing.shareAsync(shareableUri, {
-                mimeType: document.mimeType,
-                dialogTitle: `Share ${document.name}`,
-              });
+            console.log('📤 Fallback: sharing original image:', document.uri);
+            try {
+              const shareableUri = await convertToShareableUri(document.uri);
+              const isAvailable = await Sharing.isAvailableAsync();
+              console.log('📤 Fallback sharing availability check:', isAvailable);
+              
+              if (isAvailable) {
+                await Sharing.shareAsync(shareableUri, {
+                  mimeType: document.mimeType,
+                  dialogTitle: `Share ${document.name}`,
+                });
+                console.log('✅ Fallback sharing successful');
+              } else {
+                console.log('⚠️ Fallback sharing not available, trying direct share anyway...');
+                await Sharing.shareAsync(shareableUri, {
+                  mimeType: document.mimeType,
+                  dialogTitle: `Share ${document.name}`,
+                });
+                console.log('✅ Fallback sharing successful (fallback)');
+              }
+            } catch (fallbackError) {
+              console.error('❌ Fallback sharing failed:', fallbackError);
+              Alert.alert('❌ Error', `Failed to share document: ${fallbackError.message || 'Unknown error'}`);
             }
           }
         } else {
           console.log('⚠️ Could not find ID pair, using regular sharing...');
           // Fallback to regular sharing
+          console.log('📤 Regular sharing for ID document without pair:', document.uri);
+          try {
+            const shareableUri = await convertToShareableUri(document.uri);
+            const isAvailable = await Sharing.isAvailableAsync();
+            console.log('📤 Regular sharing availability check:', isAvailable);
+            
+            if (isAvailable) {
+              await Sharing.shareAsync(shareableUri, {
+                mimeType: document.mimeType,
+                dialogTitle: `Share ${document.name}`,
+              });
+              console.log('✅ Regular sharing successful');
+            } else {
+              console.log('⚠️ Regular sharing not available, trying direct share anyway...');
+              await Sharing.shareAsync(shareableUri, {
+                mimeType: document.mimeType,
+                dialogTitle: `Share ${document.name}`,
+              });
+              console.log('✅ Regular sharing successful (fallback)');
+            }
+          } catch (regularError) {
+            console.error('❌ Regular sharing failed:', regularError);
+            Alert.alert('❌ Error', `Failed to share document: ${regularError.message || 'Unknown error'}`);
+          }
+        }
+      } else {
+        // For non-ID documents, use regular sharing
+        console.log('📤 Regular sharing for non-ID document:', document.uri);
+        try {
           const shareableUri = await convertToShareableUri(document.uri);
           const isAvailable = await Sharing.isAvailableAsync();
+          console.log('📤 Non-ID sharing availability check:', isAvailable);
+          
           if (isAvailable) {
             await Sharing.shareAsync(shareableUri, {
               mimeType: document.mimeType,
               dialogTitle: `Share ${document.name}`,
             });
+            console.log('✅ Non-ID sharing successful');
+          } else {
+            console.log('⚠️ Non-ID sharing not available, trying direct share anyway...');
+            await Sharing.shareAsync(shareableUri, {
+              mimeType: document.mimeType,
+              dialogTitle: `Share ${document.name}`,
+            });
+            console.log('✅ Non-ID sharing successful (fallback)');
           }
-        }
-      } else {
-        // For non-ID documents, use regular sharing
-        const shareableUri = await convertToShareableUri(document.uri);
-        const isAvailable = await Sharing.isAvailableAsync();
-        
-        if (isAvailable) {
-          await Sharing.shareAsync(shareableUri, {
-            mimeType: document.mimeType,
-            dialogTitle: `Share ${document.name}`,
-          });
-        } else {
-          Alert.alert('❌ ' + t('error'), t('sharingNotAvailable'));
+        } catch (nonIdError) {
+          console.error('❌ Non-ID sharing failed:', nonIdError);
+          Alert.alert('❌ Error', `Failed to share document: ${nonIdError.message || 'Unknown error'}`);
         }
       }
       
