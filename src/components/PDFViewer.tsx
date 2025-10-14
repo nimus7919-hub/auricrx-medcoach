@@ -324,7 +324,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <View style={dynamicStyles.header}>
         <View style={dynamicStyles.logoContainer}>
           <Image 
-            source={require('../../assets/auricrx-logo.png')} 
+            source={require('../../assets/sign in logo.png')} 
             style={dynamicStyles.logo}
             resizeMode="contain"
           />
