@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Dimensions,
   StatusBar,
+  Image,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system';
@@ -85,6 +86,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       backgroundColor: currentTheme.background,
       borderBottomWidth: 1,
       borderBottomColor: currentTheme.border,
+    },
+    logoContainer: {
+      width: 40,
+      height: 40,
+      marginRight: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    logo: {
+      width: 30,
+      height: 30,
     },
     headerText: {
       flex: 1,
@@ -308,8 +320,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
     <View style={dynamicStyles.container}>
       <StatusBar barStyle={currentTheme.statusBarStyle} />
       
-      {/* Header */}
+      {/* Header with Logo */}
       <View style={dynamicStyles.header}>
+        <View style={dynamicStyles.logoContainer}>
+          <Image 
+            source={require('../../assets/auricrx-logo.png')} 
+            style={dynamicStyles.logo}
+            resizeMode="contain"
+          />
+        </View>
         <DynamicText type="card" style={dynamicStyles.headerText} numberOfLines={1}>
           {name}
         </DynamicText>
