@@ -3169,24 +3169,151 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             </TouchableOpacity>
           )}
           
-          {/* Dual image preview for ID documents */}
-          <View style={[dynamicStyles.documentImage, { flexDirection: 'row', padding: 2 }]}>
-      <Image 
-        source={{ uri: document.uri }} 
-              style={[dynamicStyles.documentImage, { flex: 1, marginRight: hasBackSide ? 1 : 0, borderRadius: 4 }]}
-        onError={(error) => {
-                console.error('Failed to load front ID thumbnail:', error);
-              }}
-            />
-            {hasBackSide && pair && pair.back && (
-              <Image 
-                source={{ uri: pair.back.uri }} 
-                style={[dynamicStyles.documentImage, { flex: 1, marginLeft: 1, borderRadius: 4 }]}
-                onError={(error) => {
-                  console.error('Failed to load back ID thumbnail:', error);
-                }}
-              />
+          {/* Formatted ID document preview that matches exported PDF */}
+          <View style={[dynamicStyles.documentImage, { 
+            backgroundColor: '#f8f9fa', 
+            padding: 8, 
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#e9ecef'
+          }]}>
+            {/* AuricRX Header */}
+            <View style={{
+              alignItems: 'center',
+              marginBottom: 8,
+              paddingBottom: 6,
+              borderBottomWidth: 1,
+              borderBottomColor: '#C5860A'
+            }}>
+              <DynamicText style={{
+                fontSize: 10,
+                fontWeight: 'bold',
+                color: '#333',
+                textAlign: 'center'
+              }}>
+                AuricRX Medical ID
+              </DynamicText>
+            </View>
+            
+            {/* ID Images Container */}
+            {hasBackSide && pair && pair.back ? (
+              // Dual ID layout - side by side like exported PDF
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                gap: 4
+              }}>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <DynamicText style={{
+                    fontSize: 8,
+                    fontWeight: 'bold',
+                    color: '#666',
+                    marginBottom: 2,
+                    backgroundColor: '#f8f9fa',
+                    paddingHorizontal: 4,
+                    paddingVertical: 1,
+                    borderRadius: 3
+                  }}>
+                    Front
+                  </DynamicText>
+                  <Image 
+                    source={{ uri: document.uri }} 
+                    style={{
+                      width: '100%',
+                      height: 60,
+                      borderRadius: 4,
+                      borderWidth: 1,
+                      borderColor: '#dee2e6'
+                    }}
+                    resizeMode="cover"
+                    onError={(error) => {
+                      console.error('Failed to load front ID thumbnail:', error);
+                    }}
+                  />
+                </View>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <DynamicText style={{
+                    fontSize: 8,
+                    fontWeight: 'bold',
+                    color: '#666',
+                    marginBottom: 2,
+                    backgroundColor: '#f8f9fa',
+                    paddingHorizontal: 4,
+                    paddingVertical: 1,
+                    borderRadius: 3
+                  }}>
+                    Back
+                  </DynamicText>
+                  <Image 
+                    source={{ uri: pair.back.uri }} 
+                    style={{
+                      width: '100%',
+                      height: 60,
+                      borderRadius: 4,
+                      borderWidth: 1,
+                      borderColor: '#dee2e6'
+                    }}
+                    resizeMode="cover"
+                    onError={(error) => {
+                      console.error('Failed to load back ID thumbnail:', error);
+                    }}
+                  />
+                </View>
+              </View>
+            ) : (
+              // Single ID layout - centered like exported PDF
+              <View style={{ alignItems: 'center' }}>
+                <DynamicText style={{
+                  fontSize: 8,
+                  fontWeight: 'bold',
+                  color: '#666',
+                  marginBottom: 4,
+                  backgroundColor: '#f8f9fa',
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  borderRadius: 4,
+                  borderLeftWidth: 2,
+                  borderLeftColor: '#C5860A'
+                }}>
+                  ID Document
+                </DynamicText>
+                <Image 
+                  source={{ uri: document.uri }} 
+                  style={{
+                    width: '80%',
+                    height: 60,
+                    borderRadius: 6,
+                    borderWidth: 2,
+                    borderColor: '#e9ecef',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4
+                  }}
+                  resizeMode="cover"
+                  onError={(error) => {
+                    console.error('Failed to load ID thumbnail:', error);
+                  }}
+                />
+              </View>
             )}
+            
+            {/* Footer */}
+            <View style={{
+              marginTop: 6,
+              paddingTop: 4,
+              borderTopWidth: 1,
+              borderTopColor: '#dee2e6',
+              alignItems: 'center'
+            }}>
+              <DynamicText style={{
+                fontSize: 6,
+                color: '#666',
+                textAlign: 'center'
+              }}>
+                Generated by AuricRX
+              </DynamicText>
+            </View>
           </View>
           
       <View style={dynamicStyles.documentInfo}>
