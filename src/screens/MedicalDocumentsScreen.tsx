@@ -2304,7 +2304,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       // Check file type using helper functions
       if (isPDFFile(document)) {
         // For PDFs, open in built-in PDF viewer
-        console.log('Opening PDF in built-in viewer...');
+        console.log('📄 Opening PDF in built-in viewer:', {
+          name: document.name,
+          uri: document.uri,
+          isPDF: true
+        });
         setSelectedDocument(document);
         setShowPDFViewer(true);
       } else if (isImageFile(document)) {
