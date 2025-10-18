@@ -16,6 +16,7 @@ import {
   TextInput,
   Share,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as FileSystem from 'expo-file-system';
@@ -25,8 +26,6 @@ import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { createAIHealthTranslations } from '../services/aiHealthTranslations';
 import { useTranslation } from 'react-i18next';
-// Simplified AI Health - no external service dependencies
-
 const { width: screenWidth } = Dimensions.get('window');
 
 interface AIHealthScreenProps {
@@ -35,6 +34,7 @@ interface AIHealthScreenProps {
   S?: any;
   fastingProfile?: any;
   medications?: any[];
+  supplements?: any[];
 }
 
 
@@ -79,8 +79,31 @@ interface DrugInteraction {
   references: string[];
 }
 
+// Simple symptom tracking function (no AI analysis/diagnosis)
+const analyzeSymptomsWithAI = (symptoms: string[], t: any, S: any): SymptomAnalysis => {
+  const id = `symptom_${Date.now()}`;
+  
+  // Just store symptoms without any diagnosis
+  return {
+    id,
+    symptoms,
+    severity: 'mild',
+    possibleConditions: [],  // No diagnosis
+    urgency: 'low',
+    recommendations: [
+      S?.trackOverTime || 'Track your symptoms over time',
+      S?.monitorChanges || 'Monitor any changes in severity or frequency',
+      S?.contactDoctorImmediately || 'Contact your doctor if symptoms worsen'
+    ],
+    followUpActions: [
+      S?.contactDoctorImmediately || 'Contact your doctor immediately if symptoms worsen',
+      S?.exportSymptomReport || 'Export your symptom report to share with your healthcare provider'
+    ],
+    createdAt: new Date().toISOString()
+  };
+};
 
-export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [] }: AIHealthScreenProps) {
+export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   // Use translation hook directly for AI Health
@@ -300,6 +323,121 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     modalButtonTextSecondary: {
       color: getCardTextColor(),
     },
+    modalHeader: {
+      marginBottom: 16,
+    },
+    analysisSection: {
+      marginBottom: 20,
+    },
+    analysisLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      marginBottom: 8,
+    },
+    analysisValue: {
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    conditionCard: {
+      backgroundColor: getCardBackgroundColor() + '60',
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+      borderLeftWidth: 4,
+      borderLeftColor: currentTheme.accent,
+    },
+    conditionTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 6,
+    },
+    conditionDescription: {
+      fontSize: 13,
+      marginBottom: 8,
+      opacity: 0.8,
+    },
+    recommendationsContainer: {
+      marginTop: 8,
+    },
+    recommendationsTitle: {
+      fontSize: 12,
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+    recommendationItem: {
+      fontSize: 12,
+      marginBottom: 2,
+      opacity: 0.9,
+    },
+    followUpItem: {
+      fontSize: 13,
+      marginBottom: 4,
+    },
+    insightFooter: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    insightActions: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionButton: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+      minWidth: 60,
+      alignItems: 'center',
+    },
+    storeButton: {
+      backgroundColor: currentTheme.accent + '40',
+      borderColor: currentTheme.accent,
+      borderWidth: 1,
+    },
+    deleteButton: {
+      backgroundColor: '#ef444440',
+      borderColor: '#ef4444',
+      borderWidth: 1,
+    },
+    actionButtonText: {
+      fontSize: 11,
+      fontWeight: '500',
+    },
+    viewAllButton: {
+      backgroundColor: currentTheme.accent + '40',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 12,
+      borderColor: currentTheme.accent,
+      borderWidth: 1,
+    },
+    viewAllButtonText: {
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    doctorWarningCard: {
+      backgroundColor: '#ff444420',
+      borderRadius: 8,
+      padding: 12,
+      borderLeftWidth: 4,
+      borderLeftColor: '#ff4444',
+      marginBottom: 16,
+    },
+    doctorWarningTitle: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      color: '#ff4444',
+      marginBottom: 8,
+    },
+    doctorWarningText: {
+      fontSize: 12,
+      color: '#ff4444',
+      marginBottom: 4,
+      fontWeight: '500',
+    },
     statsGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -513,9 +651,54 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   // Simplified state - no external service
   const [insights, setInsights] = useState<HealthInsight[]>([]);
   const [symptomAnalyses, setSymptomAnalyses] = useState<SymptomAnalysis[]>([]);
+  const [storedSymptomAnalyses, setStoredSymptomAnalyses] = useState<SymptomAnalysis[]>([]);
   const [drugInteractions, setDrugInteractions] = useState<DrugInteraction[]>([]);
+
+  // Load symptom analyses from AsyncStorage on mount
+  useEffect(() => {
+    loadSymptomAnalyses();
+  }, []);
+
+  // Load saved symptom analyses
+  const loadSymptomAnalyses = async () => {
+    try {
+      const savedSymptoms = await AsyncStorage.getItem('symptom_analyses');
+      const savedStoredSymptoms = await AsyncStorage.getItem('stored_symptom_analyses');
+      
+      if (savedSymptoms) {
+        const parsed = JSON.parse(savedSymptoms);
+        setSymptomAnalyses(parsed);
+      }
+      
+      if (savedStoredSymptoms) {
+        const parsed = JSON.parse(savedStoredSymptoms);
+        setStoredSymptomAnalyses(parsed);
+      }
+    } catch (error) {
+      console.error('Failed to load symptom analyses:', error);
+    }
+  };
+
+  // Save symptom analyses to AsyncStorage whenever they change
+  useEffect(() => {
+    saveSymptomAnalyses();
+  }, [symptomAnalyses, storedSymptomAnalyses]);
+
+  const saveSymptomAnalyses = async () => {
+    try {
+      await AsyncStorage.setItem('symptom_analyses', JSON.stringify(symptomAnalyses));
+      await AsyncStorage.setItem('stored_symptom_analyses', JSON.stringify(storedSymptomAnalyses));
+    } catch (error) {
+      console.error('Failed to save symptom analyses:', error);
+    }
+  };
+
+
   const [showSymptomModal, setShowSymptomModal] = useState(false);
   const [showDrugCheckModal, setShowDrugCheckModal] = useState(false);
+  const [showSymptomResultModal, setShowSymptomResultModal] = useState(false);
+  const [showSymptomHistoryModal, setShowSymptomHistoryModal] = useState(false);
+  const [currentSymptomAnalysis, setCurrentSymptomAnalysis] = useState<SymptomAnalysis | null>(null);
   const [symptomText, setSymptomText] = useState('');
   const [medicationList, setMedicationList] = useState('');
   
@@ -565,6 +748,41 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     ]).start();
   }, []);
 
+  const deleteSymptomAnalysis = (id: string) => {
+    setSymptomAnalyses(prev => prev.filter(analysis => analysis.id !== id));
+    triggerHaptic('light');
+  };
+
+  const storeSymptomAnalysis = (id: string) => {
+    const analysis = symptomAnalyses.find(a => a.id === id);
+    if (analysis) {
+      setStoredSymptomAnalyses(prev => [analysis, ...prev]);
+      setSymptomAnalyses(prev => prev.filter(a => a.id !== id));
+      triggerHaptic('medium');
+    }
+  };
+
+  const emptyAllSymptoms = () => {
+    Alert.alert(
+      S?.confirmEmptySymptoms || 'Empty All Symptoms',
+      S?.confirmEmptySymptomsMessage || 'Are you sure you want to delete all tracked symptoms? This cannot be undone.',
+      [
+        {
+          text: S?.cancel || 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: S?.delete || 'Delete All',
+          style: 'destructive',
+          onPress: () => {
+            setSymptomAnalyses([]);
+            triggerHaptic('heavy');
+          }
+        }
+      ]
+    );
+  };
+
   const analyzeSymptoms = async () => {
     if (!symptomText.trim()) {
       Alert.alert('❌ Error', t('pleaseEnterSymptoms'));
@@ -574,22 +792,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     try {
       const symptoms = symptomText.split(',').map(s => s.trim()).filter(s => s.length > 0);
       
-      // Simplified analysis - create mock data
-      const analysis: SymptomAnalysis = {
-        id: `symptom_${Date.now()}`,
-        symptoms,
-        severity: symptoms.length > 3 ? 'moderate' : 'mild',
-        possibleConditions: [{
-          condition: t('generalSymptoms'),
-          probability: 0.7,
-          description: t('multipleSymptomsDescription'),
-          recommendations: [t('monitorSymptomsClosely'), t('considerConsultingProvider'), t('maintainHydrationRest')]
-        }],
-        urgency: symptoms.some(s => s.toLowerCase().includes('severe')) ? 'high' : 'low',
-        recommendations: [t('getAdequateRest'), t('stayHydrated'), t('monitorSymptoms')],
-        followUpActions: [t('scheduleAppointmentIfPersist'), t('keepSymptomDiary')],
-        createdAt: new Date().toISOString()
-      };
+      // Enhanced AI-driven analysis based on symptom patterns
+      const analysis = analyzeSymptomsWithAI(symptoms, t, S);
       
       setSymptomAnalyses(prev => [analysis, ...prev]);
       setSymptomText('');
@@ -597,16 +801,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       triggerHaptic('medium');
       
-      // Show analysis results
-      const urgencyEmoji = analysis.urgency === 'emergency' ? '🚨' : 
-                          analysis.urgency === 'high' ? '⚠️' : 
-                          analysis.urgency === 'medium' ? '⚡' : 'ℹ️';
-      
-      Alert.alert(
-        `${urgencyEmoji} ${t('symptomAnalysisComplete')}`,
-        `${t('severity')}: ${analysis.severity}\n${t('urgency')}: ${analysis.urgency}\n\n${t('possibleConditions')}:\n${analysis.possibleConditions.map(c => `• ${c.condition} (${(c.probability * 100).toFixed(0)}%)`).join('\n')}\n\n${t('recommendations')}:\n${analysis.recommendations.slice(0, 3).map(r => `• ${r}`).join('\n')}`,
-        [{ text: 'OK' }]
-      );
+      // Show analysis results in custom modal
+      setCurrentSymptomAnalysis(analysis);
+      setShowSymptomResultModal(true);
     } catch (error) {
       console.error('Failed to analyze symptoms:', error);
       Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToAnalyzeSymptoms);
@@ -614,53 +811,195 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   };
 
   const checkDrugInteractions = async () => {
-    if (!medicationList.trim()) {
-      Alert.alert('❌ Error', t('pleaseEnterMedications'));
+    // Combine medications and supplements
+    const allItems = [
+      ...(medications || []).map((m: any) => ({
+        name: m.name,
+        strength: m.components && m.components.length > 0 
+          ? m.components.map((c: any) => `${c.strength}${c.unit}`).join('+')
+          : m.strengthValue ? `${m.strengthValue}${m.strengthUnit}` : '',
+        type: 'medication'
+      })),
+      ...(supplements || []).map((s: any) => ({
+        name: s.name,
+        strength: s.strengthValue ? `${s.strengthValue}${s.strengthUnit}` : '',
+        type: 'supplement'
+      }))
+    ];
+
+    if (allItems.length < 2) {
+      Alert.alert(
+        '❌ ' + (S?.error || 'Error'), 
+        S?.needTwoItems || 'You need at least 2 medications or supplements to check for interactions.'
+      );
       return;
     }
 
     try {
-      const medications = medicationList.split(',').map(m => m.trim()).filter(m => m.length > 0);
-      
-      // Simplified interaction check - create mock data
-      const interactions: DrugInteraction[] = [];
-      
-      // Simple mock interaction check
-      if (medications.length > 1) {
-        interactions.push({
-          id: `interaction_${Date.now()}`,
-          drug1: medications[0],
-          drug2: medications[1],
-          severity: 'minor',
-          description: t('potentialMildInteraction'),
-          clinicalEffects: [t('mildSideEffectsPossible')],
-          management: t('monitorUnusualSymptoms'),
-          references: [t('drugInteractionDatabase')]
-        });
-      }
-      
-      setDrugInteractions(prev => [...interactions, ...prev]);
-      setMedicationList('');
       setShowDrugCheckModal(false);
       
-      triggerHaptic('medium');
+      // Show loading state
+      Alert.alert(
+        '🔄 ' + (S?.analyzing || 'Analyzing...'),
+        S?.checkingInteractions || 'Checking for drug interactions using AI...'
+      );
+
+      // Prepare the medication list for AI
+      const itemList = allItems.map(item => 
+        `${item.name}${item.strength ? ' (' + item.strength + ')' : ''} [${item.type}]`
+      ).join('\n');
+
+      // Call AI API - Use Render service (cloud)
+      const apiUrl = 'https://auricrx-medcoach.onrender.com/api/ai/drug-interactions';
       
-      if (interactions.length === 0) {
-        Alert.alert('✅ ' + t('noInteractionsFound'), t('noKnownInteractions'));
-      } else {
-        const interactionText = interactions.map(i => 
-          `• ${i.drug1} + ${i.drug2}: ${i.severity.toUpperCase()}\n  ${i.description}`
-        ).join('\n\n');
-        
-        Alert.alert(
-          `⚠️ ${t('foundInteractions').replace('{count}', interactions.length.toString())}`,
-          `${t('foundInteractions').replace('{count}', interactions.length.toString())}:\n\n${interactionText}`,
-          [{ text: 'OK' }]
-        );
+      console.log('Calling AI API:', apiUrl);
+      console.log('Items to check:', allItems);
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout - AI server may not be running')), 15000); // 15 second timeout
+      });
+
+      // Race between fetch and timeout
+      const fetchPromise = fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: allItems,
+          messages: [
+            {
+              role: 'system',
+              content: `You are a clinical pharmacist AI assistant. Analyze drug and supplement interactions comprehensively. 
+              
+IMPORTANT: Always provide a medical disclaimer that this is for educational purposes only and users should consult their healthcare provider.
+
+For each interaction found, provide:
+1. The two interacting items
+2. Severity level (Minor, Moderate, Major, or Contraindicated)
+3. Description of the interaction
+4. Clinical effects
+5. Management recommendations
+
+If no significant interactions are found, state that clearly but still recommend consulting a pharmacist or doctor.
+
+Format your response as JSON with this structure:
+{
+  "disclaimer": "Your medical disclaimer text",
+  "interactions": [
+    {
+      "item1": "Drug A",
+      "item2": "Drug B",
+      "severity": "Moderate",
+      "description": "Description of interaction",
+      "clinicalEffects": ["Effect 1", "Effect 2"],
+      "management": "How to manage this interaction",
+      "urgency": "immediate|monitor|routine"
+    }
+  ],
+  "overallRisk": "low|moderate|high",
+  "summary": "Brief overall summary"
+}`
+            },
+            {
+              role: 'user',
+              content: `Please analyze these medications and supplements for potential interactions:\n\n${itemList}`
+            }
+          ]
+        })
+      });
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
+        throw new Error(`Server responded with ${response.status}: ${errorText}`);
       }
-    } catch (error) {
+
+      const data = await response.json();
+      console.log('Received data:', data);
+      
+      // Parse AI response
+      let aiResult;
+      try {
+        aiResult = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+      } catch {
+        aiResult = {
+          disclaimer: data.result || 'Unable to parse response',
+          interactions: [],
+          overallRisk: 'unknown',
+          summary: data.result
+        };
+      }
+
+      // Save to AsyncStorage
+      const interactionCheck = {
+        id: `check_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        items: allItems,
+        result: aiResult,
+        itemCount: allItems.length
+      };
+
+      const saved = await AsyncStorage.getItem('drug_interaction_checks');
+      const checks = saved ? JSON.parse(saved) : [];
+      checks.unshift(interactionCheck);
+      await AsyncStorage.setItem('drug_interaction_checks', JSON.stringify(checks.slice(0, 20))); // Keep last 20
+
+      triggerHaptic('medium');
+
+      // Show results
+      const interactionCount = aiResult.interactions?.length || 0;
+      const severity = aiResult.overallRisk || 'unknown';
+      
+      let icon = '✅';
+      if (severity === 'high') icon = '🚨';
+      else if (severity === 'moderate') icon = '⚠️';
+      else if (severity === 'low') icon = 'ℹ️';
+
+      const message = `${aiResult.disclaimer || ''}\n\n${aiResult.summary || ''}\n\n${
+        interactionCount > 0 
+          ? `Found ${interactionCount} interaction(s):\n\n` + aiResult.interactions.map((int: any, idx: number) => 
+              `${idx + 1}. ${int.item1} + ${int.item2}\n   Severity: ${int.severity}\n   ${int.description}`
+            ).join('\n\n')
+          : 'No significant interactions found.'
+      }`;
+
+      Alert.alert(
+        `${icon} ${S?.interactionResults || 'Interaction Check Results'}`,
+        message,
+        [
+          { text: S?.ok || 'OK', style: 'default' }
+        ]
+      );
+
+    } catch (error: any) {
       console.error('Failed to check drug interactions:', error);
-      Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToCheckDrugInteractions);
+      console.error('Error details:', error.message);
+      
+      let errorMessage = S?.failedToCheckInteractions || 'Failed to check interactions.';
+      
+      // Check for timeout
+      if (error.message?.includes('timeout')) {
+        errorMessage = '⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   node aI-stream.js\n\n2. Check that port 3001 is available\n\n3. Verify your .env file has OPENAI_API_KEY';
+      }
+      // Check for network errors
+      else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
+        errorMessage = '🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: node server/aI-stream.js\n2. Check if running on port 3001\n3. Make sure firewall allows the connection';
+      }
+      // Add error details for other errors
+      else if (error.message) {
+        errorMessage += `\n\nDetails: ${error.message}`;
+      }
+      
+      Alert.alert(
+        '❌ ' + (S?.error || 'Error'), 
+        errorMessage
+      );
     }
   };
 
@@ -691,7 +1030,11 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       if (requiresFood) {
         fastingSafe = false;
-        warnings.push(`${med.name} should be taken with food.`);
+        const foodText = S?.shouldBeTakenWithFood || 'should be taken with food.';
+        console.log('🔍 Debug - S object:', S);
+        console.log('🔍 Debug - shouldBeTakenWithFood:', S?.shouldBeTakenWithFood);
+        console.log('🔍 Debug - final foodText:', foodText);
+        warnings.push(`${med.name} ${foodText}`);
         suggestedFastingHours = Math.min(suggestedFastingHours, 12);
       }
     });
@@ -879,15 +1222,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       triggerHaptic('medium');
       
-      // Show analysis results
-      const statusEmoji = analysis.compatible ? '✅' : '⚠️';
-      const statusTitle = analysis.compatible ? t('fastingCompatible') : t('fastingWarning');
-      
-      Alert.alert(
-        `${statusEmoji} ${statusTitle}`,
-        analysis.message,
-        [{ text: 'OK' }]
-      );
+      // Analysis results are now displayed on screen via fastingResult state
     } catch (error) {
       console.error('Failed to analyze fasting compatibility:', error);
       Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToAnalyzeFastingCompatibility);
@@ -939,13 +1274,18 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       console.log('📝 Creating HTML content for PDF...');
       
-      // Get AuricRX logo as base64 (using Asset.fromModule for proper handling)
-      const { Asset } = require('expo-asset');
-      const logoAsset = Asset.fromModule(require('../../assets/sign in logo.png'));
-      await logoAsset.downloadAsync();
-      console.log('🔍 Logo asset loaded:', logoAsset.localUri);
+      // Get AuricRX logo as base64 (using Image.resolveAssetSource for proper handling)
+      const logoSource = Image.resolveAssetSource(require('../../assets/sign in logo.png'));
+      console.log('🔍 Logo source:', logoSource);
       
-      const logoBase64 = await FileSystem.readAsStringAsync(logoAsset.localUri, {
+      // Download the logo to local storage
+      const logoUri = await FileSystem.downloadAsync(
+        logoSource.uri,
+        FileSystem.documentDirectory + 'sign-in-logo.png'
+      );
+      console.log('🔍 Logo downloaded to:', logoUri.uri);
+      
+      const logoBase64 = await FileSystem.readAsStringAsync(logoUri.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
       console.log('✅ Logo loaded successfully, base64 length:', logoBase64.length);
@@ -1026,7 +1366,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           </div>
           ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
             <div class="warnings">
-              <h4>${t('importantConsiderations')}:</h4>
+              <h4>${S?.importantConsiderations || 'Important Considerations'}:</h4>
               <ul>
                 ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
               </ul>
@@ -1226,6 +1566,19 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       case 'info': return '#3b82f6'; // blue
       case 'warning': return '#f59e0b'; // yellow
       case 'critical': return '#ef4444'; // red
+      case 'severe': return '#ef4444'; // red
+      case 'moderate': return '#f59e0b'; // yellow
+      case 'mild': return '#3b82f6'; // blue
+      default: return '#6b7280'; // gray
+    }
+  };
+
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
+      case 'emergency': return '#ef4444'; // red
+      case 'high': return '#f59e0b'; // yellow
+      case 'medium': return '#3b82f6'; // blue
+      case 'low': return '#10b981'; // green
       default: return '#6b7280'; // gray
     }
   };
@@ -1264,7 +1617,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       <View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{insights.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('healthInsights')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{S?.healthInsights || 'Health Insights'}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{symptomAnalyses.length}</DynamicText>
@@ -1358,7 +1711,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 {fastingAnalysis.warnings.length > 0 && (
                   <View style={dynamicStyles.fastingWarnings}>
                     <DynamicText type="card" style={dynamicStyles.fastingWarningsTitle}>
-                      {t('importantConsiderations')}:
+                      {S?.importantConsiderations || 'Important Considerations'}:
                     </DynamicText>
                     {fastingAnalysis.warnings.map((warning, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.fastingWarningItem}>
@@ -1381,7 +1734,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               onPress={analyzeFastingCompatibility}
             >
               <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
-                {fastingAnalysis ? t('reAnalyzeFasting') : t('analyzeFastingCompatibility')}
+                {fastingAnalysis ? (S?.reAnalyzeFasting || 'Re-analyze Fasting') : (S?.analyzeFastingCompatibility || 'Analyze Fasting Compatibility')}
               </DynamicText>
             </TouchableOpacity>
           </View>
@@ -1425,9 +1778,9 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {t('healthInsights')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {S?.healthInsights || 'Health Insights'}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('aiGeneratedInsights')}
+        {S?.aiGeneratedInsights || 'AI-generated insights based on your health data'}
       </DynamicText>
       
       {insights.slice(0, 5).map(insight => (
@@ -1454,7 +1807,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           {insight.actionable && insight.actionItems.length > 0 && (
             <View style={dynamicStyles.actionItems}>
               <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                {t('actionItems')}
+                {S?.actionItems || 'Action Items'}
               </DynamicText>
               {insight.actionItems.slice(0, 3).map((item, index) => (
                 <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
@@ -1468,7 +1821,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       {insights.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noHealthInsights')}
+          {S?.noHealthInsights || 'No health insights available yet'}
         </DynamicText>
       )}
     </Animated.View>
@@ -1500,18 +1853,37 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
               { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
             ]}>
               <DynamicText type="card" style={dynamicStyles.severityText}>
-                {analysis.urgency.toUpperCase()}
+                {S?.[analysis.urgency] || analysis.urgency.toUpperCase()}
               </DynamicText>
             </View>
           </View>
           
           <DynamicText type="card" style={dynamicStyles.insightDescription}>
-            {analysis.possibleConditions[0]?.condition} ({(analysis.possibleConditions[0]?.probability * 100).toFixed(0)}% probability)
-          </DynamicText>
-          
-          <DynamicText type="card" style={dynamicStyles.actionItem}>
             {new Date(analysis.createdAt).toLocaleDateString()}
           </DynamicText>
+          
+          <View style={dynamicStyles.insightFooter}>
+            
+            <View style={dynamicStyles.insightActions}>
+              <TouchableOpacity
+                style={[dynamicStyles.actionButton, dynamicStyles.storeButton]}
+                onPress={() => storeSymptomAnalysis(analysis.id)}
+              >
+                <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                  📁 {S?.store || 'Store'}
+                </DynamicText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[dynamicStyles.actionButton, dynamicStyles.deleteButton]}
+                onPress={() => deleteSymptomAnalysis(analysis.id)}
+              >
+                <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                  🗑️ {S?.delete || 'Delete'}
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       ))}
       
@@ -1520,6 +1892,18 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           {t('noSymptomAnalyses')}
         </DynamicText>
       )}
+      
+      <TouchableOpacity
+        style={dynamicStyles.viewAllButton}
+        onPress={() => {
+          setShowSymptomHistoryModal(true);
+          triggerHaptic('light');
+        }}
+      >
+        <DynamicText type="card" style={dynamicStyles.viewAllButtonText}>
+          📋 {S?.viewAllSymptoms || 'View All Symptoms'} ({symptomAnalyses.length})
+        </DynamicText>
+      </TouchableOpacity>
     </Animated.View>
   );
 
@@ -1672,33 +2056,306 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         onRequestClose={() => setShowDrugCheckModal(false)}
       >
         <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>💊 Drug Interaction Check</DynamicText>
+          <View style={[dynamicStyles.modalContent, { maxHeight: '85%' }]}>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>💊 {S?.drugInteractionCheck || 'Drug Interaction Check'}</DynamicText>
             
-            <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>List your medications</DynamicText>
-              <TextInput
-                style={dynamicStyles.multilineInput}
-                placeholder={aiTranslations.enterMedicationsPlaceholder}
-                placeholderTextColor={getCardTextColor() + '80'}
-                value={medicationList}
-                onChangeText={setMedicationList}
-                multiline
-              />
+            {/* Medical Disclaimer */}
+            <View style={[dynamicStyles.doctorWarningCard, { marginBottom: 16 }]}>
+              <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
+                ⚠️ {S?.medicalDisclaimer || 'Medical Disclaimer'}
+              </DynamicText>
+              <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
+                {S?.interactionDisclaimerText || 'This is AI-generated information for educational purposes only. Always consult your doctor or pharmacist before making any changes to your medications.'}
+              </DynamicText>
             </View>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              {/* Medications Section */}
+              {medications && medications.length > 0 && (
+                <View style={dynamicStyles.inputGroup}>
+                  <DynamicText type="card" style={dynamicStyles.inputLabel}>
+                    📋 {S?.yourMedications || 'Your Medications'} ({medications.length})
+                  </DynamicText>
+                  {medications.map((med: any, index: number) => (
+                    <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 8 }]}>
+                      <DynamicText type="card" style={{ fontWeight: '600', fontSize: 13 }}>
+                        {med.name}
+                      </DynamicText>
+                      {med.strengthValue && (
+                        <DynamicText type="card" style={{ fontSize: 12, marginTop: 2 }}>
+                          {med.strengthValue} {med.strengthUnit}
+                        </DynamicText>
+                      )}
+                      {med.components && med.components.length > 0 && (
+                        <DynamicText type="card" style={{ fontSize: 12, marginTop: 2 }}>
+                          {med.components.map((c: any) => `${c.strength} ${c.unit}`).join(' + ')}
+                        </DynamicText>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Supplements Section */}
+              {supplements && supplements.length > 0 && (
+                <View style={dynamicStyles.inputGroup}>
+                  <DynamicText type="card" style={dynamicStyles.inputLabel}>
+                    💊 {S?.yourSupplements || 'Your Supplements'} ({supplements.length})
+                  </DynamicText>
+                  {supplements.map((sup: any, index: number) => (
+                    <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 8 }]}>
+                      <DynamicText type="card" style={{ fontWeight: '600', fontSize: 13 }}>
+                        {sup.name}
+                      </DynamicText>
+                      {sup.strengthValue && (
+                        <DynamicText type="card" style={{ fontSize: 12, marginTop: 2 }}>
+                          {sup.strengthValue} {sup.strengthUnit}
+                        </DynamicText>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Empty State */}
+              {(!medications || medications.length === 0) && (!supplements || supplements.length === 0) && (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <DynamicText type="secondary" style={{ textAlign: 'center', fontStyle: 'italic' }}>
+                    {S?.noMedicationsToCheck || 'No medications or supplements found. Please add them in the Medications or Supplements cards first.'}
+                  </DynamicText>
+                </View>
+              )}
+            </ScrollView>
 
             <View style={dynamicStyles.modalButtons}>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowDrugCheckModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
+                  {S?.cancel || 'Cancel'}
+                </DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                style={[
+                  dynamicStyles.modalButton, 
+                  dynamicStyles.modalButtonPrimary,
+                  ((medications?.length || 0) + (supplements?.length || 0) < 2) && { opacity: 0.5 }
+                ]}
                 onPress={checkDrugInteractions}
+                disabled={(medications?.length || 0) + (supplements?.length || 0) < 2}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Check</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary, { textAlign: 'center' }]}>
+                  {S?.checkInteractions || 'Check Interactions'}
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Symptom Analysis Result Modal */}
+      <Modal
+        visible={showSymptomResultModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSymptomResultModal(false)}
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={[dynamicStyles.modalContent, { maxHeight: '80%' }]}>
+            {currentSymptomAnalysis && (
+              <>
+                <View style={dynamicStyles.modalHeader}>
+                  <DynamicText type="primary" style={dynamicStyles.modalTitle}>
+                    {currentSymptomAnalysis.urgency === 'emergency' ? '🚨' : 
+                     currentSymptomAnalysis.urgency === 'high' ? '⚠️' : 
+                     currentSymptomAnalysis.urgency === 'medium' ? '⚡' : 'ℹ️'} {S?.symptomAnalysisComplete || 'Symptom Analysis Complete'}
+                  </DynamicText>
+                </View>
+
+                <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                  <View style={dynamicStyles.analysisSection}>
+                    <DynamicText type="card" style={dynamicStyles.analysisLabel}>
+                      {S?.severity || 'Severity'}: <DynamicText type="card" style={[dynamicStyles.analysisValue, { color: getSeverityColor(currentSymptomAnalysis.severity) }]}>
+                        {currentSymptomAnalysis.severity}
+                      </DynamicText>
+                    </DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.analysisLabel}>
+                      {S?.urgency || 'Urgency'}: <DynamicText type="card" style={[dynamicStyles.analysisValue, { color: getUrgencyColor(currentSymptomAnalysis.urgency) }]}>
+                        {currentSymptomAnalysis.urgency}
+                      </DynamicText>
+                    </DynamicText>
+                  </View>
+
+                  <View style={dynamicStyles.analysisSection}>
+                    <DynamicText type="card" style={dynamicStyles.sectionTitle}>
+                      {S?.possibleConditions || 'Possible Conditions'}:
+                    </DynamicText>
+                    {currentSymptomAnalysis.possibleConditions.map((condition, index) => (
+                      <View key={index} style={dynamicStyles.conditionCard}>
+                        <DynamicText type="card" style={dynamicStyles.conditionTitle}>
+                          • {condition.condition} ({Math.round(condition.probability * 100)}%)
+                        </DynamicText>
+                        <DynamicText type="card" style={dynamicStyles.conditionDescription}>
+                          {condition.description}
+                        </DynamicText>
+                        <View style={dynamicStyles.recommendationsContainer}>
+                          <DynamicText type="card" style={dynamicStyles.recommendationsTitle}>
+                            {S?.recommendations || 'Recommendations'}:
+                          </DynamicText>
+                          {condition.recommendations.map((rec, recIndex) => (
+                            <DynamicText key={recIndex} type="card" style={dynamicStyles.recommendationItem}>
+                              • {rec}
+                            </DynamicText>
+                          ))}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Doctor Contact Warning */}
+                  <View style={[dynamicStyles.analysisSection, dynamicStyles.doctorWarningCard]}>
+                    <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
+                      ⚠️ {S?.importantNotice || 'Important Notice'}
+                    </DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
+                      {S?.contactDoctorImmediately || 'Contact your doctor immediately if symptoms worsen'}
+                    </DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
+                      {S?.exportSymptomReport || 'Export your symptom report to share with your healthcare provider'}
+                    </DynamicText>
+                  </View>
+
+                  <View style={dynamicStyles.analysisSection}>
+                    <DynamicText type="card" style={dynamicStyles.sectionTitle}>
+                      {S?.followUpActions || 'Follow-up Actions'}:
+                    </DynamicText>
+                    {currentSymptomAnalysis.followUpActions.map((action, index) => (
+                      <DynamicText key={index} type="card" style={dynamicStyles.followUpItem}>
+                        • {action}
+                      </DynamicText>
+                    ))}
+                  </View>
+                </ScrollView>
+
+                <View style={dynamicStyles.modalButtons}>
+                  <TouchableOpacity
+                    style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                    onPress={() => {
+                      setShowSymptomResultModal(false);
+                      setCurrentSymptomAnalysis(null);
+                    }}
+                  >
+                    <DynamicText type="card" style={dynamicStyles.modalButtonTextPrimary}>
+                      {S?.ok || 'OK'}
+                    </DynamicText>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Symptom History Modal - View All Symptoms */}
+      <Modal
+        visible={showSymptomHistoryModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSymptomHistoryModal(false)}
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={[dynamicStyles.modalContent, { maxHeight: '85%' }]}>
+            <View style={dynamicStyles.modalHeader}>
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>
+                📋 {S?.symptomHistory || 'Symptom History'}
+              </DynamicText>
+              <TouchableOpacity
+                onPress={() => setShowSymptomHistoryModal(false)}
+                style={{ position: 'absolute', right: 0, top: 0, padding: 8 }}
+              >
+                <DynamicText type="primary" style={{ fontSize: 24 }}>×</DynamicText>
+              </TouchableOpacity>
+            </View>
+
+            <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { marginBottom: 12 }]}>
+              {S?.totalSymptoms || 'Total symptoms tracked'}: {symptomAnalyses.length}
+            </DynamicText>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              {symptomAnalyses.map((analysis) => (
+                <View key={analysis.id} style={dynamicStyles.insightCard}>
+                  <View style={dynamicStyles.insightHeader}>
+                    <DynamicText type="card" style={[dynamicStyles.insightTitle, { flex: 1 }]}>
+                      {analysis.symptoms.join(', ')}
+                    </DynamicText>
+                    <View style={[
+                      dynamicStyles.insightSeverity,
+                      { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
+                    ]}>
+                      <DynamicText type="card" style={dynamicStyles.severityText}>
+                        {S?.[analysis.urgency] || analysis.urgency.toUpperCase()}
+                      </DynamicText>
+                    </View>
+                  </View>
+                  
+                  <DynamicText type="card" style={dynamicStyles.insightDescription}>
+                    {new Date(analysis.createdAt).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </DynamicText>
+                  
+                  <View style={dynamicStyles.insightFooter}>
+                    <View style={dynamicStyles.insightActions}>
+                      <TouchableOpacity
+                        style={[dynamicStyles.actionButton, dynamicStyles.storeButton]}
+                        onPress={() => {
+                          storeSymptomAnalysis(analysis.id);
+                        }}
+                      >
+                        <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                          📁 {S?.store || 'Store'}
+                        </DynamicText>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity
+                        style={[dynamicStyles.actionButton, dynamicStyles.deleteButton]}
+                        onPress={() => {
+                          deleteSymptomAnalysis(analysis.id);
+                        }}
+                      >
+                        <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                          🗑️ {S?.delete || 'Delete'}
+                        </DynamicText>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+
+              {symptomAnalyses.length === 0 && (
+                <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic', marginTop: 20 }]}>
+                  {S?.noSymptomAnalyses || 'No symptoms tracked yet'}
+                </DynamicText>
+              )}
+            </ScrollView>
+
+            <View style={dynamicStyles.modalButtons}>
+              {symptomAnalyses.length > 0 && (
+                <TouchableOpacity
+                  style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary, { marginBottom: 8 }]}
+                  onPress={emptyAllSymptoms}
+                >
+                  <DynamicText type="card" style={dynamicStyles.modalButtonTextSecondary}>
+                    🗑️ {S?.emptyAllSymptoms || 'Empty All Symptoms'}
+                  </DynamicText>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
+                onPress={() => setShowSymptomHistoryModal(false)}
+              >
+                <DynamicText type="card" style={dynamicStyles.modalButtonTextPrimary}>
+                  {S?.close || 'Close'}
+                </DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1770,7 +2427,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeFastingCompatibility}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Analyze</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyzeFastingCompatibility || 'Analyze'}</DynamicText>
               </TouchableOpacity>
             </View>
             

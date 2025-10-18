@@ -6,12 +6,15 @@ import * as Location from 'expo-location';
 import MedicationRefillModal from './MedicationRefillModal';
 import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
+import { formatTime } from '../src/utils/time';
+import { useTimeFormat } from '../src/hooks/useTimeFormat';
 
 // Medications component moved outside App to prevent remounting
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
+  const { timeFormat } = useTimeFormat();
   
   // Unit options for strength and quantity (sorted alphabetically)
   const strengthUnits = [
@@ -85,8 +88,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     if (showAdd) {
       setAddForm({ 
         name:'', 
-        strengthValue:'', 
-        strengthUnit:'mg', 
+        components: [{ strength: '', unit: 'mg' }], // Multi-component system
         times:'', 
         status:'taking', 
         startDate:'', 
@@ -122,8 +124,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const [holdUntil, setHoldUntil] = useState('');
   const [addForm, setAddForm] = useState({ 
     name:'', 
-    strengthValue:'', 
-    strengthUnit:'mg', 
+    components: [{ strength: '', unit: 'mg' }], // Multi-component system
     times:'', 
     status:'taking', 
     startDate:'', 
@@ -140,6 +141,10 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateTarget, setDateTarget] = useState(null); // 'add' | 'edit'
   const [dateField, setDateField] = useState(null); // 'startDate' | 'endDate'
+  
+  // Component management states
+  const [showUnitDropdown, setShowUnitDropdown] = useState(false);
+  const [currentComponentIndex, setCurrentComponentIndex] = useState(0);
   const onMedTimePicked = (_, date) => {
     setShowMedTimePicker(false);
     if (date) {
@@ -175,6 +180,33 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     setDateTarget(null);
     setDateField(null);
   };
+
+  // Component management functions
+  const addComponent = () => {
+    setAddForm(prev => ({
+      ...prev,
+      components: [...prev.components, { strength: '', unit: 'mg' }]
+    }));
+  };
+
+  const removeComponent = (index) => {
+    if (addForm.components.length > 1) {
+      setAddForm(prev => ({
+        ...prev,
+        components: prev.components.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const updateComponent = (index, field, value) => {
+    setAddForm(prev => ({
+      ...prev,
+      components: prev.components.map((comp, i) => 
+        i === index ? { ...comp, [field]: value } : comp
+      )
+    }));
+  };
+
   const [showEdit, setShowEdit] = useState(false);
   const [editForm, setEditForm] = useState({ 
     id:'', 
@@ -229,9 +261,15 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       const newMed = {
         id: `${Date.now()}`,
         name: addForm.name.trim(),
-        strength: `${addForm.strengthValue.trim()} ${addForm.strengthUnit}`.trim(),
-        strengthValue: addForm.strengthValue.trim(),
-        strengthUnit: addForm.strengthUnit,
+        strength: addForm.components ? 
+          addForm.components.map(comp => `${comp.strength}${comp.unit}`).join('/') : 
+          '500mg',
+        strengthValue: addForm.components ? 
+          addForm.components.map(comp => comp.strength).join('/') : 
+          '500',
+        strengthUnit: addForm.components ? 
+          addForm.components[0]?.unit || 'mg' : 
+          'mg',
         status: addForm.status,
         times: addTimes,
         startDate: addForm.startDate,
@@ -263,6 +301,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               medicationName: newMed.name,
               strengthValue: newMed.strengthValue,
               strengthUnit: newMed.strengthUnit,
+              components: addForm.components,
               status: newMed.status,
               times: newMed.times,
               startDate: newMed.startDate,
@@ -298,8 +337,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       
       setAddForm({ 
         name:'', 
-        strengthValue:'', 
-        strengthUnit:'mg', 
+        components: [{ strength: '', unit: 'mg' }], // Multi-component system
         times:'', 
         status:'taking', 
         startDate:'', 
@@ -567,7 +605,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   </DynamicText>
                 )}
                 <DynamicText type="sub" style={{ fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 2 }}>
-                  {med.times.join(', ')}
+                  {med.times.map(time => formatTime(time, { format: timeFormat })).join(', ')}
                 </DynamicText>
                 {/* DEBUG: Show quantity info */}
                 {console.log('[MEDICATIONS DEBUG] Rendering medication:', med.name, 'quantity:', med.quantity, 'has quantity:', !!med.quantity)}
@@ -779,73 +817,155 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   returnKeyType="next"
                 />
 
-                {/* Strength Value and Unit */}
-                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-                  <TextInput
-                    placeholder="500"
-                    placeholderTextColor={getSubTextColor()}
-                    value={addForm.strengthValue}
-                    onChangeText={(text) => setAddForm(prev => ({ ...prev, strengthValue: text }))}
-                    style={{
-                      flex: 1,
-                      backgroundColor: getCardBackgroundColor(),
-                      borderRadius: 12,
-                      padding: 16,
-                      color: getCardTextColor(),
-                      fontFamily: 'Inter_400Regular',
-                      borderWidth: 1,
-                      borderColor: getCardBorderColor()
-                    }}
-                    onFocus={() => setInputFocused(true)}
-                    onBlur={() => setInputFocused(false)}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    keyboardType="numeric"
-                  />
-                  
-                  <TouchableOpacity
-                    ref={strengthUnitButtonRef}
-                    onPress={() => {
-                      strengthUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
-                        setStrengthUnitButtonLayout({ x, y, width, height });
-                      });
-                      setShowStrengthUnitDropdown(true);
-                    }}
-                    style={{
-                      backgroundColor: getCardBackgroundColor(),
-                      borderRadius: 12,
-                      borderWidth: 1,
-                      borderColor: getCardBorderColor(),
-                      paddingHorizontal: 16,
-                      paddingVertical: 16,
-                      minWidth: 80,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      gap: 4
-                    }}
-                  >
-                    <DynamicText 
-                      type="card" 
-                      style={{ 
-                        fontSize: 14,
-                        color: getCardTextColor(),
-                        fontFamily: 'Inter_600SemiBold'
+                {/* Components */}
+                <View style={{ marginBottom: 12 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
+                      {S?.components || 'Components'} ({addForm.components.length})
+                    </DynamicText>
+                    <TouchableOpacity
+                      onPress={addComponent}
+                      style={{
+                        backgroundColor: theme.accent,
+                        borderRadius: 20,
+                        width: 32,
+                        height: 32,
+                        justifyContent: 'center',
+                        alignItems: 'center'
                       }}
                     >
-                      {addForm.strengthUnit}
-                    </DynamicText>
-                    <DynamicText 
-                      type="sub" 
-                      style={{ 
-                        fontSize: 12,
-                        color: getSubTextColor()
-                      }}
-                    >
-                      ▼
-                    </DynamicText>
-                  </TouchableOpacity>
+                      <DynamicText type="card" style={{ color: '#ffffff', fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>
+                        +
+                      </DynamicText>
+                    </TouchableOpacity>
+                  </View>
+
+                  {addForm.components.map((component, index) => (
+                    <View key={index} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                      {/* Component Number Badge */}
+                      <View style={{
+                        backgroundColor: theme.accent + '20',
+                        borderRadius: 12,
+                        width: 32,
+                        height: 32,
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}>
+                        <DynamicText type="card" style={{ 
+                          fontSize: 12, 
+                          fontFamily: 'Inter_700Bold', 
+                          color: theme.accent 
+                        }}>
+                          {index + 1}
+                        </DynamicText>
+                      </View>
+
+                      {/* Strength Input */}
+                      <TextInput
+                        placeholder={index === 0 ? "50" : "500"}
+                        placeholderTextColor={getSubTextColor()}
+                        value={component.strength}
+                        onChangeText={(text) => updateComponent(index, 'strength', text)}
+                        style={{
+                          flex: 1,
+                          backgroundColor: getCardBackgroundColor(),
+                          borderRadius: 12,
+                          padding: 16,
+                          color: getCardTextColor(),
+                          fontFamily: 'Inter_400Regular',
+                          borderWidth: 1,
+                          borderColor: getCardBorderColor()
+                        }}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => setInputFocused(false)}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        returnKeyType="next"
+                        keyboardType="numeric"
+                      />
+                      
+                      {/* Unit Dropdown */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowUnitDropdown(true);
+                          setCurrentComponentIndex(index);
+                        }}
+                        style={{
+                          backgroundColor: getCardBackgroundColor(),
+                          borderRadius: 12,
+                          borderWidth: 1,
+                          borderColor: getCardBorderColor(),
+                          paddingHorizontal: 12,
+                          paddingVertical: 16,
+                          minWidth: 70,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          flexDirection: 'row',
+                          gap: 4
+                        }}
+                      >
+                        <DynamicText 
+                          type="card" 
+                          style={{ 
+                            fontSize: 12,
+                            color: getCardTextColor(),
+                            fontFamily: 'Inter_600SemiBold'
+                          }}
+                        >
+                          {component.unit}
+                        </DynamicText>
+                        <DynamicText 
+                          type="sub" 
+                          style={{ 
+                            fontSize: 10,
+                            color: getCardTextColor() + '80'
+                          }}
+                        >
+                          ▼
+                        </DynamicText>
+                      </TouchableOpacity>
+
+                      {/* Remove Component Button */}
+                      {addForm.components.length > 1 && (
+                        <TouchableOpacity
+                          onPress={() => removeComponent(index)}
+                          style={{
+                            backgroundColor: '#f87171',
+                            borderRadius: 20,
+                            width: 32,
+                            height: 32,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <DynamicText type="card" style={{ color: '#ffffff', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>
+                            ×
+                          </DynamicText>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ))}
+
+                  {/* Component Summary */}
+                  {addForm.components.length > 1 && (
+                    <View style={{
+                      backgroundColor: getCardBackgroundColor() + '50',
+                      borderRadius: 8,
+                      padding: 12,
+                      marginTop: 8,
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor() + '50'
+                    }}>
+                      <DynamicText type="card" style={{ 
+                        fontSize: 12, 
+                        fontFamily: 'Inter_500Medium', 
+                        color: getCardTextColor() + '80',
+                        textAlign: 'center'
+                      }}>
+                        Total: {addForm.components.map(comp => `${comp.strength || '0'}${comp.unit}`).join(' / ')}
+                      </DynamicText>
+                    </View>
+                  )}
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -867,7 +987,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     }}
                   >
                     <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
-                      {addTimes.length > 0 ? addTimes.join(', ') : S.selectTimes}
+                      {addTimes.length > 0 ? addTimes.map(time => formatTime(time, { format: timeFormat })).join(', ') : S.selectTimes}
                     </DynamicText>
                     <DynamicText type="sub">⏰</DynamicText>
                   </TouchableOpacity>
@@ -1237,7 +1357,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
-                    {editTimes.length > 0 ? editTimes.join(', ') : S.selectTimes}
+                    {editTimes.length > 0 ? editTimes.map(time => formatTime(time, { format: timeFormat })).join(', ') : S.selectTimes}
                   </DynamicText>
                   <DynamicText type="sub">⏰</DynamicText>
                 </TouchableOpacity>
@@ -1469,7 +1589,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           <DateTimePicker
             value={new Date()}
             mode="time"
-            is24Hour={true}
+            is24Hour={timeFormat === '24h'}
             display="default"
             onChange={onMedTimePicked}
           />
@@ -1519,6 +1639,63 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         getCardTextColor={getCardTextColor}
         buttonLayout={strengthUnitButtonLayout}
       />
+
+      {/* Component Unit Dropdown */}
+      <Modal
+        visible={showUnitDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUnitDropdown(false)}
+      >
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setShowUnitDropdown(false)}
+        >
+          <View
+            style={{
+              backgroundColor: getCardBackgroundColor(),
+              borderRadius: 12,
+              padding: 16,
+              marginHorizontal: 32,
+              minWidth: 200,
+              borderWidth: 1,
+              borderColor: getCardBorderColor()
+            }}
+            onStartShouldSetResponder={() => true}
+          >
+            <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
+              {S?.selectUnit || 'Select Unit'}
+            </DynamicText>
+            {['mg', 'g', 'ml', 'tablets', 'capsules', 'units'].map((unit) => (
+              <TouchableOpacity
+                key={unit}
+                onPress={() => {
+                  updateComponent(currentComponentIndex, 'unit', unit);
+                  setShowUnitDropdown(false);
+                }}
+                style={{
+                  backgroundColor: addForm.components[currentComponentIndex]?.unit === unit ? theme.accent : 'transparent',
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 4
+                }}
+              >
+                <DynamicText 
+                  type="card" 
+                  style={{ 
+                    fontSize: 14,
+                    color: addForm.components[currentComponentIndex]?.unit === unit ? '#ffffff' : getCardTextColor(),
+                    fontFamily: 'Inter_500Medium'
+                  }}
+                >
+                  {S?.units?.[unit] || unit}
+                </DynamicText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <QuantityUnitDropdown
         visible={showQuantityUnitDropdown}

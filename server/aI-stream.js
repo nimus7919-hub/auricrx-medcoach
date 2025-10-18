@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -35,6 +39,26 @@ app.post("/api/ai/stream", async (req, res) => {
     console.error("stream error", err);
     res.write("\n[STREAM_ERROR]\n");
     res.end();
+  }
+});
+
+// Drug interaction check endpoint (non-streaming)
+app.post("/api/ai/drug-interactions", async (req, res) => {
+  const { messages } = req.body;
+  
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages,
+      temperature: 0.3,
+      max_tokens: 1500,
+    });
+
+    const result = completion.choices[0]?.message?.content || "";
+    res.json({ result });
+  } catch (err) {
+    console.error("Drug interaction check error:", err);
+    res.status(500).json({ error: "Failed to check drug interactions" });
   }
 });
 

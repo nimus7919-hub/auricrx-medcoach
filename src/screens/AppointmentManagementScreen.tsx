@@ -64,12 +64,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderColor: getCardBorderColor(),
     },
     sectionTitle: {
-      fontSize: 10,
+      fontSize: 8,
       fontWeight: '600',
       marginBottom: 12,
     },
     sectionDescription: {
-      fontSize: 10,
+      fontSize: 13,
       marginBottom: 16,
       lineHeight: 20,
     },
@@ -89,12 +89,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginBottom: 8,
     },
     appointmentTitle: {
-      fontSize: 10,
+      fontSize: 8,
       fontWeight: '600',
       flex: 1,
     },
     appointmentType: {
-      fontSize: 10,
+      fontSize: 13,
       backgroundColor: getCardBackgroundColor() + '80',
       paddingHorizontal: 8,
       paddingVertical: 2,
@@ -102,15 +102,15 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginLeft: 8,
     },
     appointmentDetails: {
-      fontSize: 10,
+      fontSize: 13,
       marginBottom: 4,
     },
     appointmentDateTime: {
-      fontSize: 10,
+      fontSize: 13,
       marginBottom: 4,
     },
     appointmentLocation: {
-      fontSize: 10,
+      fontSize: 13,
     },
     statusBadge: {
       paddingHorizontal: 8,
@@ -119,7 +119,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginTop: 4,
     },
     statusText: {
-      fontSize: 10,
+      fontSize: 13,
       fontWeight: '600',
       color: '#ffffff',
     },
@@ -133,7 +133,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     addButtonText: {
       color: getCardTextColor(),
-      fontSize: 10,
+      fontSize: 13,
       fontWeight: '600',
     },
     doctorCard: {
@@ -151,15 +151,15 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       paddingRight: 80, // Add padding to account for absolute positioned action buttons
     },
     doctorName: {
-      fontSize: 13,
+      fontSize: 11,
       fontWeight: '500',
     },
     doctorSpecialty: {
-      fontSize: 11,
+      fontSize: 13,
       marginTop: 1,
     },
     doctorContact: {
-      fontSize: 11,
+      fontSize: 13,
       marginTop: 1,
     },
     primaryBadge: {
@@ -191,11 +191,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderColor: getCardBorderColor(),
     },
     statValue: {
-      fontSize: 24,
+      fontSize: 18,
       fontWeight: 'bold',
     },
     statLabel: {
-      fontSize: 10,
+      fontSize: 13,
       marginTop: 4,
     },
     modalOverlay: {
@@ -217,7 +217,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       maxHeight: '80%',
     },
     modalTitle: {
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: 'bold',
       marginBottom: 16,
     },
@@ -225,7 +225,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginBottom: 16,
     },
     inputLabel: {
-      fontSize: 10,
+      fontSize: 8,
       fontWeight: '500',
       marginBottom: 8,
     },
@@ -235,7 +235,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       paddingVertical: 10,
       borderRadius: 8,
       color: getCardTextColor(),
-      fontSize: 10,
+      fontSize: 13,
       borderWidth: 1,
       borderColor: getCardBorderColor(),
     },
@@ -252,7 +252,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     pickerText: {
       color: getCardTextColor(),
-      fontSize: 10,
+      fontSize: 13,
     },
     modalButtons: {
       flexDirection: 'row',

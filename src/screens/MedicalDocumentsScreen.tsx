@@ -3483,7 +3483,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             }}
           >
             <DynamicText type="card" style={[dynamicStyles.actionButtonText, { fontSize: 10 }]}>
-              📄 Merge
+              📤 Share
             </DynamicText>
           </TouchableOpacity>
           <TouchableOpacity

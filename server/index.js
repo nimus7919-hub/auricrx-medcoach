@@ -2182,6 +2182,41 @@ app.post('/api/generate-health-report', async (req, res) => {
   }
 });
 
+// Drug Interaction Check Endpoint
+app.post('/api/ai/drug-interactions', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'Invalid request - messages array required' 
+      });
+    }
+
+    console.log('🔍 Checking drug interactions...');
+    
+    const completion = await client.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages,
+      temperature: 0.3,
+      max_tokens: 1500,
+    });
+
+    const result = completion.choices[0]?.message?.content || "";
+    console.log('✅ Drug interaction check complete');
+    
+    res.json({ result });
+  } catch (error) {
+    console.error("Drug interaction check error:", error);
+    res.status(500).json({ 
+      ok: false, 
+      error: "Failed to check drug interactions",
+      message: error.message 
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
   console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');

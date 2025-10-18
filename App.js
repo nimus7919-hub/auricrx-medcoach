@@ -44,6 +44,8 @@ import AdminProfileScreen from './src/screens/AdminProfileScreen';
 import LoadingScreen from './src/components/LoadingScreen';
 import { WallpaperProvider, useWallpaper } from './src/contexts/WallpaperContext';
 import WallpaperSettingsScreen from './src/screens/WallpaperSettingsScreen';
+import { useTimeFormat } from './src/hooks/useTimeFormat';
+import { formatTime, TIME_FORMAT_LABELS } from './src/utils/time';
 import WallpaperWrapper from './src/components/WallpaperWrapper';
 import DynamicText from './src/components/DynamicText';
 import { useDynamicTheme } from './src/hooks/useDynamicTheme';
@@ -2418,19 +2420,19 @@ export default function App() {
     aiHealthAssistant: t('aiHealthAssistant'),
     intelligentHealthcareFeatures: t('intelligentHealthcareFeatures'),
     aiHealthFeatures: t('aiHealthFeatures'),
-    healthInsights: t('healthInsights'),
-    symptomAnalyses: t('symptomAnalyses'),
-    drugChecks: t('drugChecks'),
-    analyzeSymptoms: t('analyzeSymptoms'),
-    checkInteractions: t('checkInteractions'),
-    recentAnalyses: t('recentAnalyses'),
-    noHealthInsights: t('noHealthInsights'),
-    noSymptomAnalyses: t('noSymptomAnalyses'),
+    healthInsights: t('ai.healthInsights'),
+    symptomAnalyses: t('ai.symptomAnalyses'),
+    drugChecks: t('ai.drugChecks'),
+    analyzeSymptoms: t('ai.analyzeSymptoms'),
+    checkInteractions: t('ai.checkInteractions'),
+    recentAnalyses: t('ai.recentAnalyses'),
+    noHealthInsights: t('ai.noHealthInsights'),
+    noSymptomAnalyses: t('ai.noSymptomAnalyses'),
     fastingAnalytics: t('fastingAnalytics'),
     fastingDescription: t('fastingDescription'),
     actionItems: t('actionItems'),
-    aiGeneratedInsights: t('aiGeneratedInsights'),
-    recentSymptomAnalyses: t('recentSymptomAnalyses'),
+    aiGeneratedInsights: t('ai.aiGeneratedInsights'),
+    recentSymptomAnalyses: t('ai.recentSymptomAnalyses'),
     
     // Settings (continued)
     chooseWallpaperDescription: t('settings.chooseWallpaperDescription'),
@@ -2618,6 +2620,7 @@ export default function App() {
     reserve: t('medications.reserve'),
     medicationName: t('medications.medicationName'),
     strengthExample: t('medications.strengthExample'),
+    components: t('medications.components'),
     notesOptional: t('medications.notesOptional'),
     selectTimes: t('medications.selectTimes'),
     startDate: t('medications.startDate'),
@@ -2649,6 +2652,40 @@ export default function App() {
     addReminder: t('reminders.addReminder'),
     pickTime: t('reminders.pickTime'),
     namePlaceholder: t('reminders.namePlaceholder'),
+    editReminder: t('reminders.editReminder'),
+    updateReminder: t('reminders.updateReminder'),
+    reminderType: t('reminders.type'),
+    frequency: t('reminders.frequency'),
+    medication: t('reminders.medication'),
+    appointment: t('reminders.appointment'),
+    exercise: t('reminders.exercise'),
+    other: t('reminders.other'),
+    daily: t('reminders.daily'),
+    weekly: t('reminders.weekly'),
+    monthly: t('reminders.monthly'),
+    custom: t('reminders.custom'),
+    medicationDetails: t('reminders.medicationDetails'),
+    medicationNamePlaceholder: t('reminders.medicationNamePlaceholder'),
+    appointmentDetails: t('reminders.appointmentDetails'),
+    addressPlaceholder: t('reminders.addressPlaceholder'),
+    startDateOptional: t('reminders.startDateOptional'),
+    endDateOptional: t('reminders.endDateOptional'),
+    notesOptional: t('reminders.notesOptional'),
+    selectTime: t('reminders.selectTime'),
+    total: t('reminders.total'),
+    selectUnit: t('reminders.selectUnit'),
+    selectQuantityUnit: t('reminders.selectQuantityUnit'),
+    
+    // Units translations
+    units: {
+      mg: t('reminders.units.mg'),
+      g: t('reminders.units.g'),
+      ml: t('reminders.units.ml'),
+      tablets: t('reminders.units.tablets'),
+      capsules: t('reminders.units.capsules'),
+      units: t('reminders.units.units'),
+      pills: t('reminders.units.pills')
+    },
     
     // Pharmacies
     pharmacyTitle: t('pharmacies.title'),
@@ -2697,6 +2734,7 @@ export default function App() {
     exportHealthReport: t('ai.exportHealthReport'),
     fastingAnalysis: t('ai.fastingAnalysis'),
     analysis: t('ai.analysis'),
+    shouldBeTakenWithFood: t('ai.shouldBeTakenWithFood'),
     
     // Health Conditions
     diabetes: t('healthProfile.diabetes'),
@@ -2792,6 +2830,62 @@ export default function App() {
     noInteractionsFound: t('ai.noInteractionsFound'),
     noKnownInteractions: t('ai.noKnownInteractions'),
     foundInteractions: t('ai.foundInteractions'),
+    severity: t('ai.severity'),
+    urgency: t('ai.urgency'),
+    possibleConditions: t('ai.possibleConditions'),
+    recommendations: t('ai.recommendations'),
+    followUpActions: t('ai.followUpActions'),
+    store: t('ai.store'),
+    delete: t('ai.delete'),
+    viralInfection: t('ai.viralInfection'),
+    commonCold: t('ai.commonCold'),
+    gastroenteritis: t('ai.gastroenteritis'),
+    foodIntolerance: t('ai.foodIntolerance'),
+    tensionHeadache: t('ai.tensionHeadache'),
+    tensionHeadacheWithDizziness: t('ai.tensionHeadacheWithDizziness'),
+    sinusCongestion: t('ai.sinusCongestion'),
+    allergies: t('ai.allergies'),
+    soreThroat: t('ai.soreThroat'),
+    cough: t('ai.cough'),
+    backStrain: t('ai.backStrain'),
+    arthritis: t('ai.arthritis'),
+    menstrualCramps: t('ai.menstrualCramps'),
+    constipation: t('ai.constipation'),
+    diarrhea: t('ai.diarrhea'),
+    reflux: t('ai.reflux'),
+    sprainBruise: t('ai.sprainBruise'),
+    skinIrritation: t('ai.skinIrritation'),
+    viralSyndrome: t('ai.viralSyndrome'),
+    stomachUpset: t('ai.stomachUpset'),
+    probability: t('ai.probability'),
+    low: t('ai.low'),
+    medium: t('ai.medium'),
+    high: t('ai.high'),
+    emergency: t('ai.emergency'),
+    mild: t('ai.mild'),
+    moderate: t('ai.moderate'),
+    severe: t('ai.severe'),
+    contactDoctorImmediately: t('ai.contactDoctorImmediately'),
+    exportSymptomReport: t('ai.exportSymptomReport'),
+    importantNotice: t('ai.importantNotice'),
+    viewAllSymptoms: t('ai.viewAllSymptoms'),
+    symptomHistory: t('ai.symptomHistory'),
+    totalSymptoms: t('ai.totalSymptoms'),
+    emptyAllSymptoms: t('ai.emptyAllSymptoms'),
+    confirmEmptySymptoms: t('ai.confirmEmptySymptoms'),
+    confirmEmptySymptomsMessage: t('ai.confirmEmptySymptomsMessage'),
+    close: t('ai.close'),
+    drugInteractionCheck: t('ai.drugInteractionCheck'),
+    medicalDisclaimer: t('ai.medicalDisclaimer'),
+    interactionDisclaimerText: t('ai.interactionDisclaimerText'),
+    yourMedications: t('ai.yourMedications'),
+    yourSupplements: t('ai.yourSupplements'),
+    noMedicationsToCheck: t('ai.noMedicationsToCheck'),
+    needTwoItems: t('ai.needTwoItems'),
+    analyzing: t('ai.analyzing'),
+    checkingInteractions: t('ai.checkingInteractions'),
+    interactionResults: t('ai.interactionResults'),
+    failedToCheckInteractions: t('ai.failedToCheckInteractions'),
     generalSymptoms: t('ai.generalSymptoms'),
     multipleSymptomsDescription: t('ai.multipleSymptomsDescription'),
     monitorSymptomsClosely: t('ai.monitorSymptomsClosely'),
@@ -4947,6 +5041,7 @@ const handleAskMedicalAI = async () => {
 
   const Settings = () => {
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    const { timeFormat, setTimeFormat, getTimeFormatOptions, getTimeFormatLabel } = useTimeFormat();
     
     const toggleSection = (section) => {
       setExpandedSections(prev => ({
@@ -5148,6 +5243,81 @@ const handleAskMedicalAI = async () => {
                 {S.chooseWallpaperDescription}
               </DynamicText>
             </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
+        <CollapsibleSection title="Time Format" sectionKey="timeFormat" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+            <DynamicText type="card" style={{ 
+              fontFamily: 'Inter_400Regular', 
+              fontSize: 12, 
+              opacity: 0.7,
+              marginBottom: 12,
+              textAlign: 'center'
+            }}>
+              Choose how times are displayed throughout the app
+            </DynamicText>
+            
+            {getTimeFormatOptions().map((option) => (
+              <TouchableOpacity
+                key={option.key}
+                onPress={() => setTimeFormat(option.value)}
+                style={{
+                  backgroundColor: timeFormat === option.value ? theme.accent : getCardBackgroundColor(),
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 8,
+                  borderWidth: 1,
+                  borderColor: timeFormat === option.value ? theme.accent : getCardBorderColor(),
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_600SemiBold', 
+                  fontSize: 14,
+                  color: timeFormat === option.value ? '#ffffff' : undefined
+                }}>
+                  {option.label}
+                </DynamicText>
+                {timeFormat === option.value && (
+                  <DynamicText type="card" style={{ 
+                    fontSize: 16,
+                    color: '#ffffff'
+                  }}>
+                    ✓
+                  </DynamicText>
+                )}
+              </TouchableOpacity>
+            ))}
+            
+            {/* Preview */}
+            <View style={{
+              backgroundColor: getCardBackgroundColor() + '50',
+              borderRadius: 8,
+              padding: 12,
+              marginTop: 8,
+              borderWidth: 1,
+              borderColor: getCardBorderColor() + '50'
+            }}>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_500Medium', 
+                fontSize: 12, 
+                opacity: 0.8,
+                textAlign: 'center',
+                marginBottom: 4
+              }}>
+                Preview:
+              </DynamicText>
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_600SemiBold', 
+                fontSize: 14,
+                textAlign: 'center'
+              }}>
+                {formatTime('13:30', { format: timeFormat })}
+              </DynamicText>
+            </View>
           </View>
         </CollapsibleSection>
         
@@ -5399,7 +5569,7 @@ function trimTo(str, n) {
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'ai-health' ? (isReady ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} /> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading translations...</Text></View>) :
+    route === 'ai-health' ? (isReady ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} supplements={supplements} /> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading translations...</Text></View>) :
         route === 'health-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
