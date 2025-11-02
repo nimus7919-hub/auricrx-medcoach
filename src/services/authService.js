@@ -67,6 +67,7 @@ class AuthService {
           displayName: user.displayName,
           emailVerified: user.emailVerified,
         },
+        firebaseUser: user, // Return Firebase user object for trial start
         message: 'Account created successfully! Please check your email (including spam folder) for a verification link.',
       };
     } catch (error) {
@@ -337,8 +338,8 @@ class AuthService {
           console.log('User data stored:', storeResult);
           
           // Start 14-day trial automatically for new users
-          // Get Firebase user to pass to trial service for ID token
-          const firebaseUser = this.auth.currentUser;
+          // Use Firebase user from sign-up result (before any sign-out can happen)
+          const firebaseUser = result.firebaseUser;
           if (firebaseUser) {
             try {
               console.log('🚀 Starting 14-day trial for new user...');
