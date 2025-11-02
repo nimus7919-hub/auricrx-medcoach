@@ -1982,7 +1982,12 @@ export default function App() {
           return; // Don't proceed to dashboard
         }
         
-        setUser(result.user);
+        // Get Firebase user object for token refresh
+        const firebaseUser = authService.getCurrentUser();
+        setUser({
+          ...result.user,
+          firebaseUser: firebaseUser, // Store Firebase user object for token refresh
+        });
         setShowAuth(false);
         
         // If it's a sign-up, store the user data
@@ -3881,6 +3886,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
           emailVerified: firebaseUser.emailVerified,
+          firebaseUser: firebaseUser, // Store Firebase user object for token refresh
         });
         setShowAuth(false);
         setIsRestoringAuth(false);
@@ -3994,7 +4000,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       (async () => {
         try {
           console.log('📊 Loading subscription status...');
-          const status = await getSubscriptionStatus();
+          const status = await getSubscriptionStatus(user.firebaseUser);
           if (status.ok) {
             console.log('✅ Subscription status loaded:', status);
             setSubscriptionStatus(status);
@@ -5972,7 +5978,7 @@ function trimTo(str, n) {
       onSuccess={async () => {
         // Refresh subscription status after successful payment
         try {
-          const status = await getSubscriptionStatus();
+          const status = await getSubscriptionStatus(user?.firebaseUser);
           if (status.ok) {
             setSubscriptionStatus(status);
           }

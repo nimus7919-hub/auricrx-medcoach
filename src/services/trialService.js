@@ -95,12 +95,13 @@ export async function startTrial(phoneE164, user = null) {
 
 /**
  * Get current subscription status
+ * @param {Object} [user] - Firebase user object (optional, for fresh token)
  * @returns {Promise<Object>} - Subscription status
  */
-export async function getSubscriptionStatus() {
+export async function getSubscriptionStatus(user = null) {
   try {
     console.log('🔍 DEBUG: Starting getSubscriptionStatus...');
-    const token = await getAuthToken();
+    const token = await getAuthToken(user);
     
     if (!token) {
       console.error('❌ DEBUG: No auth token found');
