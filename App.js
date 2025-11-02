@@ -5975,6 +5975,7 @@ function trimTo(str, n) {
       visible={showCheckout}
       onClose={() => setShowCheckout(false)}
       theme={theme}
+      country={userCountry || (userData?.country || 'US')}
       onSuccess={async () => {
         // Refresh subscription status after successful payment
         try {
