@@ -4000,7 +4000,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       (async () => {
         try {
           console.log('📊 Loading subscription status...');
-          const status = await getSubscriptionStatus(user.firebaseUser);
+          const status = await getSubscriptionStatus(user.firebaseUser || null);
           if (status.ok) {
             console.log('✅ Subscription status loaded:', status);
             setSubscriptionStatus(status);
