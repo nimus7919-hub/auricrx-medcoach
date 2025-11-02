@@ -2321,7 +2321,16 @@ app.post('/api/trial/start', async (req, res) => {
       WHERE user_id = ${uid}
     `;
     
-    if (eligible.length === 0 || (eligible[0].trial_used_at && eligible[0].trial_eligible === false)) {
+    // If user doesn't exist yet, create profile (they're signing up)
+    if (eligible.length === 0) {
+      // User is new, create their profile
+      await neonClient`
+        INSERT INTO user_profiles (user_id, email, trial_eligible, created_at)
+        VALUES (${uid}, ${email}, true, NOW())
+      `;
+      console.log(`✅ Created new user profile for ${uid}`);
+    } else if (eligible[0].trial_used_at && eligible[0].trial_eligible === false) {
+      // User already used their trial
       return res.status(403).json({
         ok: false,
         error: 'TRIAL_NOT_ELIGIBLE',
