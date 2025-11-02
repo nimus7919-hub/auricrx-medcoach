@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -44,7 +44,6 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
     phoneNumber: "",
   });
   const [loading, setLoading] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState([]);
   const [currentLanguage, setCurrentLanguage] = useState(selectedLanguage);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -116,12 +115,6 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Validate password in real-time
-    if (field === 'password') {
-      const errors = validatePassword(value);
-      setPasswordErrors(errors);
-    }
   };
 
   const validateForm = () => {
@@ -337,9 +330,27 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
 
   const t = getTranslations(currentLanguage);
 
-  // Password matching validation
-  const passwordsMatch = formData.password === formData.confirmPassword && formData.password.length > 0 && formData.confirmPassword.length > 0;
-  const passwordsDontMatch = formData.password !== formData.confirmPassword && formData.password.length > 0 && formData.confirmPassword.length > 0;
+  // Password matching validation - memoized to prevent re-renders
+  const passwordsMatch = React.useMemo(() => 
+    formData.password === formData.confirmPassword && formData.password.length > 0 && formData.confirmPassword.length > 0,
+    [formData.password, formData.confirmPassword]
+  );
+  
+  const passwordsDontMatch = React.useMemo(() => 
+    formData.password !== formData.confirmPassword && formData.password.length > 0 && formData.confirmPassword.length > 0,
+    [formData.password, formData.confirmPassword]
+  );
+
+  // Memoize password requirements to prevent flickering
+  const passwordRequirements = React.useMemo(() => {
+    const password = formData.password;
+    return [
+      { text: "At least 8 characters", isValid: password.length >= 8 },
+      { text: "At least 1 uppercase letter", isValid: /[A-Z]/.test(password) },
+      { text: "At least 1 lowercase letter", isValid: /[a-z]/.test(password) },
+      { text: "At least 1 special character", isValid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) }
+    ];
+  }, [formData.password]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -450,22 +461,13 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
               {t.passwordRequirements}
             </Text>
             <View style={styles.requirementsList}>
-              <RequirementItem 
-                text="At least 8 characters" 
-                isValid={formData.password.length >= 8} 
-              />
-              <RequirementItem 
-                text="At least 1 uppercase letter" 
-                isValid={/[A-Z]/.test(formData.password)} 
-              />
-              <RequirementItem 
-                text="At least 1 lowercase letter" 
-                isValid={/[a-z]/.test(formData.password)} 
-              />
-              <RequirementItem 
-                text="At least 1 special character" 
-                isValid={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password)} 
-              />
+              {passwordRequirements.map((req, idx) => (
+                <RequirementItem 
+                  key={idx}
+                  text={req.text} 
+                  isValid={req.isValid} 
+                />
+              ))}
             </View>
 
             <View style={{ height: 16 }} />

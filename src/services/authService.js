@@ -8,17 +8,16 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   updateProfile,
-  PhoneAuthProvider,
-  signInWithCredential,
   signInWithCustomToken,
-  RecaptchaVerifier,
   GoogleAuthProvider,
 } from 'firebase/auth';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
+import * as FileSystem from 'expo-file-system';
 import { makeRedirectUri } from 'expo-auth-session';
+import { startTrial } from './trialService';
 
 class AuthService {
   constructor() {
@@ -124,43 +123,22 @@ class AuthService {
     }
   }
 
-  // Phone Authentication
-  async sendPhoneVerification(phoneNumber, recaptchaVerifier) {
-    try {
-      const phoneAuthProvider = new PhoneAuthProvider(this.auth);
-      const verificationId = await phoneAuthProvider.verifyPhoneNumber(phoneNumber, recaptchaVerifier);
-      
-      return {
-        success: true,
-        verificationId,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.code),
-      };
-    }
+  // Phone Authentication (placeholder - requires native build)
+  async sendPhoneVerification(phoneNumber) {
+    console.warn('⚠️ Phone verification requires native build with @react-native-firebase');
+    return {
+      success: false,
+      error: 'Phone verification requires native build',
+      message: 'Phone verification will be available after building with EAS'
+    };
   }
 
-  async verifyPhoneCode(verificationId, verificationCode) {
-    try {
-      const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-      const userCredential = await signInWithCredential(this.auth, credential);
-      const user = userCredential.user;
-
-      return {
-        success: true,
-        user: {
-          uid: user.uid,
-          phoneNumber: user.phoneNumber,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: this.getErrorMessage(error.code),
-      };
-    }
+  async verifyPhoneCode(confirmation, verificationCode) {
+    console.warn('⚠️ Phone verification requires native build with @react-native-firebase');
+    return {
+      success: false,
+      error: 'Phone verification requires native build',
+    };
   }
 
   // Password Reset
@@ -358,10 +336,26 @@ class AuthService {
           });
           console.log('User data stored:', storeResult);
           
+          // Start 14-day trial automatically for new users
+          // Get Firebase user to pass to trial service for ID token
+          const firebaseUser = this.auth.currentUser;
+          if (firebaseUser) {
+            try {
+              console.log('🚀 Starting 14-day trial for new user...');
+              const trialResult = await startTrial(userData.phoneNumber || '', firebaseUser);
+              console.log('✅ Trial started:', trialResult);
+            } catch (trialError) {
+              // Don't fail sign-up if trial start fails, just log it
+              console.error('⚠️ Trial start failed (non-critical):', trialError);
+            }
+          } else {
+            console.warn('⚠️ No Firebase user available for trial start');
+          }
+          
           return {
             ...result,
             needsEmailVerification: true,
-            message: 'Account created successfully! Please check your email to verify your account before signing in.'
+            message: 'Account created successfully! Your 14-day free trial has started. Please check your email to verify your account.'
           };
         } else {
           console.error('Sign up failed:', result.error);
@@ -466,8 +460,20 @@ class AuthService {
   // Persistent Authentication Methods
   async storeAuthState(userData) {
     try {
+      // Get current auth token
+      const currentUser = auth.currentUser;
+      let idToken = null;
+      if (currentUser) {
+        try {
+          idToken = await currentUser.getIdToken();
+        } catch (tokenError) {
+          console.warn('⚠️ Could not get ID token:', tokenError);
+        }
+      }
+      
       const authState = {
         ...userData,
+        idToken, // Store ID token for server authentication
         timestamp: Date.now(),
         staySignedIn: true,
       };
@@ -502,8 +508,46 @@ class AuthService {
 
   async clearAuthState() {
     try {
+      // Clear authentication state
       await AsyncStorage.removeItem('AURIC_AUTH_STATE');
-      console.log('✅ Auth state cleared');
+      
+      // Clear all user-specific data
+      await Promise.all([
+        AsyncStorage.removeItem('AURIC_REMINDERS'),
+        AsyncStorage.removeItem('AURIC_RX_PHOTOS'),
+        AsyncStorage.removeItem('AURIC_VOICE_NOTES'),
+        AsyncStorage.removeItem('AURIC_MEDS'),
+        AsyncStorage.removeItem('AURIC_SELECTED_AI_DOCTOR'),
+        AsyncStorage.removeItem('health_metrics'),
+        AsyncStorage.removeItem('medication_adherence'),
+        AsyncStorage.removeItem('side_effects'),
+        AsyncStorage.removeItem('drug_interactions'),
+        AsyncStorage.removeItem('drug_interaction_checks'),
+        AsyncStorage.removeItem('symptom_analyses'),
+        AsyncStorage.removeItem('stored_symptom_analyses'),
+        AsyncStorage.removeItem('medication_recommendations'),
+        AsyncStorage.removeItem('health_insights'),
+        AsyncStorage.removeItem('appointments'),
+        AsyncStorage.removeItem('doctor_contacts'),
+        AsyncStorage.removeItem('appointment_reminders'),
+        AsyncStorage.removeItem('smart_notifications'),
+        AsyncStorage.removeItem('location_reminders'),
+        AsyncStorage.removeItem('weather_alerts'),
+        AsyncStorage.removeItem('usage_patterns'),
+      ]);
+      
+      // Clear file system documents
+      try {
+        const medicalDocsFile = `${FileSystem.documentDirectory}medical_documents.json`;
+        const medicalDocsInfo = await FileSystem.getInfoAsync(medicalDocsFile);
+        if (medicalDocsInfo.exists) {
+          await FileSystem.deleteAsync(medicalDocsFile, { idempotent: true });
+        }
+      } catch (fileError) {
+        console.warn('⚠️ Could not delete medical documents file:', fileError);
+      }
+      
+      console.log('✅ Auth state and user data cleared');
     } catch (error) {
       console.error('❌ Failed to clear auth state:', error);
     }

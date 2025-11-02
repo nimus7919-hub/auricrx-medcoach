@@ -2217,6 +2217,717 @@ app.post('/api/ai/drug-interactions', async (req, res) => {
   }
 });
 
+// ========================================
+// TRIAL & SUBSCRIPTION ENDPOINTS
+// ========================================
+
+// Import utilities
+const { hash, normalizeEmail, normalizePhone, verifyToken } = require('./auth-utils');
+const { neonClient } = require('./neon');
+
+// Trial eligibility endpoint
+app.post('/api/trial/eligibility', async (req, res) => {
+  try {
+    // Verify auth token
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+
+    const { email, phoneE164, deviceId } = req.body;
+
+    // Compute hashes
+    const email_hash = email ? hash(normalizeEmail(email)) : null;
+    const phone_hash = phoneE164 ? hash(normalizePhone(phoneE164)) : null;
+    const device_hash = deviceId ? hash(deviceId) : null;
+
+    // Check for existing trial usage
+    const matches = [];
+    let trialUsedAt = null;
+
+    if (email_hash) {
+      const result = await neonClient`
+        SELECT trial_used_at FROM user_profiles 
+        WHERE email_hash = ${email_hash} AND trial_used_at IS NOT NULL
+        LIMIT 1
+      `;
+      if (result.length > 0) {
+        matches.push('EMAIL');
+        trialUsedAt = result[0].trial_used_at;
+      }
+    }
+
+    if (phone_hash && matches.length === 0) {
+      const result = await neonClient`
+        SELECT trial_used_at FROM user_profiles 
+        WHERE phone_hash = ${phone_hash} AND trial_used_at IS NOT NULL
+        LIMIT 1
+      `;
+      if (result.length > 0) {
+        matches.push('PHONE');
+        trialUsedAt = result[0].trial_used_at;
+      }
+    }
+
+    if (device_hash && matches.length === 0) {
+      const result = await neonClient`
+        SELECT trial_used_at FROM user_profiles 
+        WHERE device_hash = ${device_hash} AND trial_used_at IS NOT NULL
+        LIMIT 1
+      `;
+      if (result.length > 0) {
+        matches.push('DEVICE');
+        trialUsedAt = result[0].trial_used_at;
+      }
+    }
+
+    const eligible = matches.length === 0;
+
+    res.json({
+      ok: true,
+      eligible,
+      matches,
+      trialUsedAt
+    });
+  } catch (error) {
+    console.error('❌ Trial eligibility check failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'eligibility_check_failed',
+      message: error.message
+    });
+  }
+});
+
+// Start trial endpoint
+app.post('/api/trial/start', async (req, res) => {
+  try {
+    // Verify auth token
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    const email = decoded.email;
+
+    const { phoneE164, deviceId } = req.body;
+
+    // Compute hashes
+    const email_hash = email ? hash(normalizeEmail(email)) : null;
+    const phone_e164 = phoneE164 ? normalizePhone(phoneE164) : null;
+    const phone_hash = phone_e164 ? hash(phone_e164) : null;
+    const device_hash = deviceId ? hash(deviceId) : null;
+
+    // Check eligibility
+    const eligible = await neonClient`
+      SELECT * FROM user_profiles 
+      WHERE user_id = ${uid}
+    `;
+    
+    if (eligible.length === 0 || (eligible[0].trial_used_at && eligible[0].trial_eligible === false)) {
+      return res.status(403).json({
+        ok: false,
+        error: 'TRIAL_NOT_ELIGIBLE',
+        message: 'Trial already used'
+      });
+    }
+
+    // Start trial
+    const trial_start = new Date();
+    const trial_end = new Date(trial_start.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days
+
+    await neonClient`
+      UPDATE user_profiles 
+      SET 
+        plan = 'trial',
+        trial_start = ${trial_start.toISOString()},
+        trial_end = ${trial_end.toISOString()},
+        trial_used_at = ${trial_start.toISOString()},
+        trial_eligible = false,
+        trial_granted_by = 'auto',
+        email_hash = COALESCE(${email_hash}, email_hash),
+        phone_e164 = COALESCE(${phone_e164}, phone_e164),
+        phone_hash = COALESCE(${phone_hash}, phone_hash),
+        device_hash = COALESCE(${device_hash}, device_hash)
+      WHERE user_id = ${uid}
+    `;
+
+    console.log(`✅ Trial started for user ${uid}`);
+
+    res.json({
+      ok: true,
+      message: 'Trial started successfully',
+      trial: {
+        start: trial_start.toISOString(),
+        end: trial_end.toISOString(),
+        days: 14
+      }
+    });
+  } catch (error) {
+    console.error('❌ Trial start failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'trial_start_failed',
+      message: error.message
+    });
+  }
+});
+
+// Get subscription status
+app.get('/api/me/subscription', async (req, res) => {
+  console.log('🔍 SERVER: /api/me/subscription called');
+  try {
+    // Verify auth token
+    const token = req.headers.authorization?.split(' ')[1];
+    console.log('🔍 SERVER: Token received:', token ? 'YES' : 'NO');
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    console.log('🔍 SERVER: User ID:', uid);
+
+    // Try using SQL function first, fallback to direct query if function doesn't exist
+    try {
+      console.log('🔍 SERVER: Attempting SQL function query');
+      const result = await neonClient`
+        SELECT get_user_subscription_status(${uid}) as status
+      `;
+
+      if (result.length === 0) {
+        console.log('⚠️ SERVER: No user found');
+        return res.status(404).json({
+          ok: false,
+          error: 'USER_NOT_FOUND'
+        });
+      }
+
+      const status = result[0].status;
+      console.log('✅ SERVER: SQL function succeeded');
+      res.json({
+        ok: true,
+        ...status
+      });
+    } catch (sqlError) {
+      // If function doesn't exist, fallback to direct query
+      console.warn('⚠️ SQL function not found, using fallback query:', sqlError.message);
+      
+      console.log('🔍 SERVER: Trying fallback direct query');
+      const profile = await neonClient`
+        SELECT 
+          plan,
+          trial_start,
+          trial_end,
+          trial_eligible,
+          trial_used_at,
+          grace_expires_at,
+          current_period_end
+        FROM user_profiles
+        WHERE user_id = ${uid}
+      `;
+
+      if (profile.length === 0) {
+        console.log('⚠️ SERVER: No user found in fallback');
+        return res.status(404).json({
+          ok: false,
+          error: 'USER_NOT_FOUND'
+        });
+      }
+      
+      console.log('✅ SERVER: Fallback query succeeded');
+
+      const p = profile[0];
+      let daysLeft = 0;
+      let planStatus = 'unknown';
+
+      if (p.plan === 'trial') {
+        if (!p.trial_end) {
+          daysLeft = 0;
+          planStatus = 'unknown';
+        } else if (new Date() > new Date(p.trial_end)) {
+          daysLeft = 0;
+          planStatus = 'expired';
+        } else {
+          daysLeft = Math.ceil((new Date(p.trial_end) - new Date()) / (1000 * 60 * 60 * 24));
+          planStatus = 'active';
+        }
+      } else if (p.plan === 'pro') {
+        if (!p.current_period_end) {
+          daysLeft = -1;
+          planStatus = 'unknown';
+        } else if (new Date() > new Date(p.current_period_end)) {
+          daysLeft = 0;
+          planStatus = 'expired';
+        } else {
+          daysLeft = Math.ceil((new Date(p.current_period_end) - new Date()) / (1000 * 60 * 60 * 24));
+          planStatus = 'active';
+        }
+      } else if (p.plan === 'expired') {
+        daysLeft = 0;
+        planStatus = 'expired';
+      }
+
+      res.json({
+        ok: true,
+        plan: p.plan || 'trial',
+        daysLeft,
+        status: planStatus,
+        trial: {
+          eligible: p.trial_eligible !== false,
+          startedAt: p.trial_start,
+          endsAt: p.trial_end,
+          usedAt: p.trial_used_at,
+          grantedBy: null
+        },
+        graceExpiresAt: p.grace_expires_at,
+        currentPeriodEnd: p.current_period_end
+      });
+    }
+  } catch (error) {
+    console.error('❌ Subscription status check failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'subscription_check_failed',
+      message: error.message
+    });
+  }
+});
+
+// ========================================
+// STRIPE CHECKOUT
+// ========================================
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+/**
+ * Create Stripe checkout session
+ */
+app.post('/api/stripe/create-checkout', async (req, res) => {
+  try {
+    // Verify auth token
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    const email = decoded.email;
+
+    // Get user profile to check for existing Stripe customer
+    const profile = await neonClient`
+      SELECT stripe_customer_id FROM user_profiles WHERE user_id = ${uid}
+    `;
+
+    let customerId = profile.length > 0 ? profile[0].stripe_customer_id : null;
+
+    // Create or retrieve Stripe customer
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: email,
+        metadata: {
+          firebase_uid: uid
+        }
+      });
+      customerId = customer.id;
+      
+      // Save customer ID to database
+      await neonClient`
+        UPDATE user_profiles 
+        SET stripe_customer_id = ${customerId}
+        WHERE user_id = ${uid}
+      `;
+    }
+
+    // Create checkout session
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'AuricRx MedCoach Pro',
+              description: 'Unlimited access to all features',
+            },
+            unit_amount: 999, // $9.99 per month
+            recurring: {
+              interval: 'month',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/cancel`,
+      metadata: {
+        firebase_uid: uid,
+      },
+    });
+
+    res.json({
+      ok: true,
+      sessionId: session.id,
+      url: session.url,
+    });
+  } catch (error) {
+    console.error('❌ Stripe checkout creation failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'checkout_failed',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Handle Stripe webhook (for production, set webhook secret in env)
+ * This will update the user's plan when payment succeeds
+ */
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    console.warn('⚠️ STRIPE_WEBHOOK_SECRET not set, skipping webhook verification');
+    // In development, allow without verification
+    return res.json({ received: true });
+  }
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error('❌ Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const firebaseUid = session.metadata?.firebase_uid;
+
+    if (firebaseUid) {
+      // Update user plan to 'pro'
+      await neonClient`
+        UPDATE user_profiles
+        SET plan = 'pro',
+            current_period_end = to_timestamp(${session.subscription ? Date.now() / 1000 + 2592000 : null}) -- 30 days from now
+        WHERE user_id = ${firebaseUid}
+      `;
+      console.log(`✅ Updated user ${firebaseUid} to pro plan`);
+    }
+  } else if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object;
+    const customerId = subscription.customer;
+    
+    // Find user by customer ID
+    const profile = await neonClient`
+      SELECT user_id FROM user_profiles WHERE stripe_customer_id = ${customerId}
+    `;
+
+    if (profile.length > 0) {
+      const uid = profile[0].user_id;
+      
+      if (subscription.status === 'active') {
+        await neonClient`
+          UPDATE user_profiles
+          SET plan = 'pro',
+              current_period_end = to_timestamp(${subscription.current_period_end})
+          WHERE user_id = ${uid}
+        `;
+      } else {
+        // Subscription cancelled or past due
+        await neonClient`
+          UPDATE user_profiles
+          SET plan = 'expired',
+              current_period_end = to_timestamp(${subscription.current_period_end})
+          WHERE user_id = ${uid}
+        `;
+      }
+      console.log(`✅ Updated subscription for user ${uid}: ${subscription.status}`);
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// ========================================
+// MIDDLEWARE: PLAN ENFORCEMENT
+// ========================================
+
+/**
+ * Middleware to verify user and enforce plan restrictions
+ * Attach this to protected routes
+ */
+async function verifyUser(req, res, next) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+
+    // Ensure profile exists
+    const profileResult = await neonClient`
+      SELECT * FROM user_profiles WHERE user_id = ${uid}
+    `;
+    
+    let profile = profileResult[0];
+    
+    if (!profile) {
+      // Create profile if it doesn't exist
+      await neonClient`
+        INSERT INTO user_profiles (user_id, email, plan)
+        VALUES (${uid}, ${decoded.email || null}, 'trial')
+      `;
+      
+      const newProfile = await neonClient`
+        SELECT * FROM user_profiles WHERE user_id = ${uid}
+      `;
+      profile = newProfile[0];
+    }
+
+    // Trial expiration check
+    const now = new Date();
+    if (profile.plan === 'trial' && profile.trial_end && now > new Date(profile.trial_end)) {
+      // Mark as expired and set grace period
+      await neonClient`
+        UPDATE user_profiles 
+        SET plan = 'expired', grace_expires_at = NOW() + INTERVAL '30 days'
+        WHERE user_id = ${uid}
+      `;
+      return res.status(401).json({ 
+        ok: false,
+        reason: 'SUBSCRIPTION_EXPIRED',
+        message: 'Your trial has expired. Please upgrade to continue.'
+      });
+    }
+
+    // Check expired accounts
+    if (profile.plan === 'expired') {
+      if (profile.grace_expires_at && now > new Date(profile.grace_expires_at)) {
+        return res.status(401).json({ 
+          ok: false,
+          reason: 'ACCOUNT_DELETED',
+          message: 'Your account has been deleted after grace period.'
+        });
+      }
+      return res.status(401).json({ 
+        ok: false,
+        reason: 'SUBSCRIPTION_EXPIRED',
+        message: 'Your subscription has expired. Please upgrade to continue.'
+      });
+    }
+
+    // Attach profile to request
+    req.profile = profile;
+    req.userId = uid;
+    next();
+  } catch (error) {
+    console.error('❌ User verification failed:', error.message);
+    return res.status(401).json({ 
+      ok: false,
+      reason: 'INVALID_TOKEN',
+      message: 'Invalid or expired authentication token.'
+    });
+  }
+}
+
+/**
+ * Helper to require specific plan levels
+ * Usage: app.post('/protected', verifyUser, requirePlan(['trial', 'pro']), handler)
+ */
+function requirePlan(allowedPlans) {
+  return (req, res, next) => {
+    if (!allowedPlans.includes(req.profile.plan)) {
+      return res.status(402).json({ 
+        ok: false,
+        code: 'UPGRADE_REQUIRED',
+        plan: req.profile.plan,
+        message: 'This feature requires an active subscription.'
+      });
+    }
+    next();
+  };
+}
+
+// ========================================
+// CLOUD SYNC: HEALTH DATA ENDPOINTS
+// ========================================
+
+// Push health data to cloud
+app.post('/api/sync/push', verifyUser, async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    
+    const { dataType, payload } = req.body;
+    
+    if (!dataType || !payload) {
+      return res.status(400).json({
+        ok: false,
+        error: 'MISSING_FIELDS',
+        message: 'dataType and payload are required'
+      });
+    }
+    
+    // Check if exists
+    const existing = await neonClient`
+      SELECT id, sync_version FROM health_data 
+      WHERE user_id = ${uid} AND data_type = ${dataType} AND is_deleted = false
+      LIMIT 1
+    `;
+    
+    let result;
+    if (existing.length > 0) {
+      // Update existing
+      result = await neonClient`
+        UPDATE health_data 
+        SET 
+          payload = ${JSON.stringify(payload)},
+          updated_at = NOW(),
+          sync_version = ${existing[0].sync_version + 1}
+        WHERE id = ${existing[0].id}
+        RETURNING *
+      `;
+    } else {
+      // Insert new
+      result = await neonClient`
+        INSERT INTO health_data (user_id, data_type, payload, device_info)
+        VALUES (${uid}, ${dataType}, ${JSON.stringify(payload)}, ${JSON.stringify({ platform: 'react-native' })})
+        RETURNING *
+      `;
+    }
+    
+    console.log(`✅ Health data synced: ${dataType} for user ${uid}`);
+    
+    res.json({
+      ok: true,
+      message: 'Data synced successfully',
+      data: result[0]
+    });
+  } catch (error) {
+    console.error('❌ Sync push failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'sync_failed',
+      message: error.message
+    });
+  }
+});
+
+// Pull health data from cloud
+app.get('/api/sync/pull/:dataType', verifyUser, async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    
+    const { dataType } = req.params;
+    
+    const result = await neonClient`
+      SELECT * FROM health_data 
+      WHERE user_id = ${uid} AND data_type = ${dataType} AND is_deleted = false
+      ORDER BY updated_at DESC
+      LIMIT 1
+    `;
+    
+    if (result.length === 0) {
+      return res.json({
+        ok: true,
+        hasData: false,
+        data: null
+      });
+    }
+    
+    res.json({
+      ok: true,
+      hasData: true,
+      data: result[0]
+    });
+  } catch (error) {
+    console.error('❌ Sync pull failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'sync_failed',
+      message: error.message
+    });
+  }
+});
+
+// Pull all active data types for a user
+app.get('/api/sync/pull', verifyUser, async (req, res) => {
+  console.log('🔍 SERVER: /api/sync/pull called');
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    console.log('🔍 SERVER: User ID:', uid);
+    
+    try {
+      console.log('🔍 SERVER: Attempting health_data query');
+      const result = await neonClient`
+        SELECT DISTINCT ON (data_type) 
+          id, data_type, payload, updated_at, sync_version
+        FROM health_data 
+        WHERE user_id = ${uid} AND is_deleted = false
+        ORDER BY data_type, updated_at DESC
+      `;
+      
+      console.log('✅ SERVER: health_data query succeeded, rows:', result.length);
+      
+      // Format as map
+      const dataMap = {};
+      result.forEach(row => {
+        dataMap[row.data_type] = row.payload;
+      });
+      
+      res.json({
+        ok: true,
+        data: dataMap
+      });
+    } catch (tableError) {
+      // If health_data table doesn't exist yet, return empty data
+      console.warn('⚠️ health_data table not found, returning empty data:', tableError.message);
+      res.json({
+        ok: true,
+        data: {}
+      });
+    }
+  } catch (error) {
+    console.error('❌ Sync pull all failed:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({
+      ok: false,
+      error: 'sync_failed',
+      message: error.message
+    });
+  }
+});
+
+// Delete health data (soft delete)
+app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    
+    const { dataType } = req.params;
+    
+    await neonClient`
+      UPDATE health_data 
+      SET is_deleted = true, deleted_at = NOW()
+      WHERE user_id = ${uid} AND data_type = ${dataType}
+    `;
+    
+    console.log(`✅ Health data deleted: ${dataType} for user ${uid}`);
+    
+    res.json({
+      ok: true,
+      message: 'Data deleted successfully'
+    });
+  } catch (error) {
+    console.error('❌ Sync delete failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'delete_failed',
+      message: error.message
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
   console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');

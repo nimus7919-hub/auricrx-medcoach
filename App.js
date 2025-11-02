@@ -18,6 +18,9 @@ import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import authService from './src/services/authService';
+import { getSubscriptionStatus } from './src/services/trialService';
+import cloudSyncService from './src/services/cloudSyncService';
+import StripeCheckoutModal from './src/components/StripeCheckoutModal';
 import * as Location from 'expo-location';
 import { Audio } from 'expo-audio';
 import { Video } from 'expo-video';
@@ -1955,6 +1958,7 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
   const [isRestoringAuth, setIsRestoringAuth] = useState(true); // Track auth restoration
   const [isLoading, setIsLoading] = useState(true); // Show loading screen initially
+  const [resetAuthToSignIn, setResetAuthToSignIn] = useState(0); // Counter to trigger reset
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
@@ -1970,9 +1974,9 @@ export default function App() {
             message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
             buttonText: 'Back to Sign In',
             onPress: () => {
-              // Keep auth screen open, user needs to verify email first
+              // Trigger reset to show sign-in form
               console.log('User needs to verify email before accessing dashboard');
-              // The auth screen will remain open for them to sign in after verification
+              setResetAuthToSignIn(prev => prev + 1);
             }
           });
           return; // Don't proceed to dashboard
@@ -2050,6 +2054,10 @@ export default function App() {
   // privacy settings
   const [dataCollection, setDataCollection] = useState(true);
   const [analytics, setAnalytics] = useState(true);
+  
+  // subscription & trial state
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false);
   
   // fasting profile settings
   const [fastingProfile, setFastingProfile] = useState({
@@ -2178,6 +2186,12 @@ export default function App() {
   
   // Use i18n translation hook
   const { t, changeLanguage, currentLanguage, isReady } = useTranslation();
+  
+  // Combined language change handler
+  const handleLanguageChange = async (language) => {
+    setLang(language);
+    await changeLanguage(language);
+  };
   
   // Debug translation system
   console.log('🌐 Translation Debug:');
@@ -2356,13 +2370,22 @@ export default function App() {
     october: t('common.october'),
     november: t('common.november'),
     december: t('common.december'),
-    monday: t('common.monday'),
-    tuesday: t('common.tuesday'),
-    wednesday: t('common.wednesday'),
-    thursday: t('common.thursday'),
-    friday: t('common.friday'),
-    saturday: t('common.saturday'),
-    sunday: t('common.sunday'),
+    monday: t('reminders.monday'),
+    tuesday: t('reminders.tuesday'),
+    wednesday: t('reminders.wednesday'),
+    thursday: t('reminders.thursday'),
+    friday: t('reminders.friday'),
+    saturday: t('reminders.saturday'),
+    sunday: t('reminders.sunday'),
+    mondayShort: t('reminders.mondayShort'),
+    tuesdayShort: t('reminders.tuesdayShort'),
+    wednesdayShort: t('reminders.wednesdayShort'),
+    thursdayShort: t('reminders.thursdayShort'),
+    fridayShort: t('reminders.fridayShort'),
+    saturdayShort: t('reminders.saturdayShort'),
+    sundayShort: t('reminders.sundayShort'),
+    selectDays: t('reminders.selectDays'),
+    selected: t('reminders.selected'),
     
     // Fasting Profile
     yourFastingProfile: t('yourFastingProfile'),
@@ -2532,7 +2555,10 @@ export default function App() {
     directions: t('common.directions'),
     never: t('common.never'),
     refillComplete: t('common.refillComplete'),
-    saved: t('common.saved'),
+    saved: t('ai.saved'),
+    searchingPharmacies: t('medications.searchingPharmacies'),
+    pleaseWait: t('common.pleaseWait'),
+    singleComponent: t('medications.singleComponent'),
     
     // Common UI Elements
     call: t('common.call'),
@@ -2620,6 +2646,7 @@ export default function App() {
     reserve: t('medications.reserve'),
     medicationName: t('medications.medicationName'),
     strengthExample: t('medications.strengthExample'),
+    strengthPlaceholder: t('medications.strengthPlaceholder'),
     components: t('medications.components'),
     notesOptional: t('medications.notesOptional'),
     selectTimes: t('medications.selectTimes'),
@@ -2630,9 +2657,12 @@ export default function App() {
     addSupplement: t('supplements.addSupplement'),
     editSupplement: t('supplements.editSupplement'),
     edit: t('supplements.edit'),
+    save: t('supplements.save'),
+    cancel: t('common.cancel'),
     noSupplements: t('supplements.noSupplements'),
     pause: t('supplements.pause'),
     supplementName: t('supplements.supplementName'),
+    supplementBrand: t('supplements.supplementBrand'),
     dosage: t('supplements.dosage'),
     resume: t('supplements.resume'),
     servingsLeft: t('supplements.servingsLeft'),
@@ -2872,8 +2902,22 @@ export default function App() {
     symptomHistory: t('ai.symptomHistory'),
     totalSymptoms: t('ai.totalSymptoms'),
     emptyAllSymptoms: t('ai.emptyAllSymptoms'),
+    exportPDF: t('documents.exportPDF'),
+    symptomTrackerReport: t('ai.symptomTrackerReport'),
+    auricrxMedCoach: t('ai.auricrxMedCoach'),
+    symptomTrackerDisclaimer: t('ai.symptomTrackerDisclaimer'),
+    storedSymptoms: t('ai.storedSymptoms'),
+    exportFailed: t('ai.exportFailed'),
+    symptomReportFailed: t('ai.symptomReportFailed'),
+    noSymptomsToExport: t('ai.noSymptomsToExport'),
+    noSymptomsMessage: t('ai.noSymptomsMessage'),
     confirmEmptySymptoms: t('ai.confirmEmptySymptoms'),
     confirmEmptySymptomsMessage: t('ai.confirmEmptySymptomsMessage'),
+    activeSymptomReport: t('ai.activeSymptomReport'),
+    activeSymptoms: t('ai.activeSymptoms'),
+    noActiveSymptoms: t('ai.noActiveSymptoms'),
+    noActiveSymptomsMessage: t('ai.noActiveSymptomsMessage'),
+    generatedOn: t('ai.generatedOn'),
     close: t('ai.close'),
     drugInteractionCheck: t('ai.drugInteractionCheck'),
     medicalDisclaimer: t('ai.medicalDisclaimer'),
@@ -2882,10 +2926,18 @@ export default function App() {
     yourSupplements: t('ai.yourSupplements'),
     noMedicationsToCheck: t('ai.noMedicationsToCheck'),
     needTwoItems: t('ai.needTwoItems'),
+    analyze: t('ai.analyze'),
     analyzing: t('ai.analyzing'),
     checkingInteractions: t('ai.checkingInteractions'),
     interactionResults: t('ai.interactionResults'),
+    generalSummary: t('ai.generalSummary'),
     failedToCheckInteractions: t('ai.failedToCheckInteractions'),
+    foundInteractions: t('ai.foundInteractions'),
+    noInteractionsFound: t('ai.noInteractionsFound'),
+    noInteractionsMessage: t('ai.noInteractionsMessage'),
+    clinicalEffects: t('ai.clinicalEffects'),
+    management: t('ai.management'),
+    summary: t('ai.summary'),
     generalSymptoms: t('ai.generalSymptoms'),
     multipleSymptomsDescription: t('ai.multipleSymptomsDescription'),
     monitorSymptomsClosely: t('ai.monitorSymptomsClosely'),
@@ -2960,6 +3012,7 @@ export default function App() {
     doctorEmailAddress: t('appointments.emailAddress'),
     doctorEmailPlaceholder: t('appointments.doctorEmailPlaceholder'),
     phoneNumber: t('appointments.phoneNumber'),
+    address: t('appointments.address'),
     dialingMethod: t('appointments.dialingMethod'),
     selectDialingMethod: t('appointments.selectDialingMethod'),
     howToContactDoctor: t('appointments.howToContactDoctor'),
@@ -3127,6 +3180,10 @@ export default function App() {
     sideEffects: t('healthAnalytics.sideEffects'),
     medications: t('healthAnalytics.medications'),
     bloodPressure: t('healthAnalytics.bloodPressure'),
+    systolic: t('healthAnalytics.systolic'),
+    diastolic: t('healthAnalytics.diastolic'),
+    enterSystolic: t('healthAnalytics.enterSystolic'),
+    enterDiastolic: t('healthAnalytics.enterDiastolic'),
     weight: t('healthAnalytics.weight'),
     bloodSugar: t('healthAnalytics.bloodSugar'),
     heartRate: t('healthAnalytics.heartRate'),
@@ -3160,6 +3217,7 @@ export default function App() {
     unknown: t('healthAnalytics.unknown'),
     metricType: t('healthAnalytics.metricType'),
     selectMetricType: t('healthAnalytics.selectMetricType'),
+    selectUnit: t('healthAnalytics.selectUnit'),
     value: t('healthAnalytics.value'),
     enterValue: t('healthAnalytics.enterValue'),
     notesOptional: t('healthAnalytics.notesOptional'),
@@ -3172,6 +3230,9 @@ export default function App() {
     missed: t('healthAnalytics.missed'),
     dayStreak: t('healthAnalytics.dayStreak'),
     started: t('healthAnalytics.started'),
+    viewAllMetrics: t('healthAnalytics.viewAllMetrics'),
+    metricsHistory: t('healthAnalytics.metricsHistory'),
+    totalMetrics: t('healthAnalytics.totalMetrics'),
     };
     return sObject;
   }, [t, isReady]);
@@ -3741,6 +3802,16 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (L) {
           console.log('🔍 App - Loading language from storage:', L);
           setLang(L);
+          // i18n will be initialized by LANGUAGE_DETECTOR, but we need to sync if different
+          // Only call if i18n is ready and the language differs from what i18n detected
+          if (isReady && currentLanguage !== L) {
+            console.log(`🔄 App - Syncing language: i18n has '${currentLanguage}', storage has '${L}', updating i18n...`);
+            changeLanguage(L);
+          } else if (isReady) {
+            console.log(`✅ App - Language already synced: i18n has '${currentLanguage}', matches storage`);
+          } else {
+            console.log('⏳ App - i18n not ready yet, will sync when ready');
+          }
         }
         if (T) setThemeKey(T);
         if (N) setNight(N === '1');
@@ -3756,6 +3827,14 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       }
     })();
   }, []);
+
+  // Sync lang state with i18n when it becomes ready
+  useEffect(() => {
+    if (isReady && currentLanguage && currentLanguage !== lang) {
+      console.log(`🔄 App - Syncing lang state with i18n: '${lang}' -> '${currentLanguage}'`);
+      setLang(currentLanguage);
+    }
+  }, [isReady, currentLanguage, lang]);
 
   // persist basics
   useEffect(() => { AsyncStorage.setItem(STORAGE.lang, lang); }, [lang]);
@@ -3783,6 +3862,20 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       
       if (firebaseUser) {
         // User is signed in
+        
+        // IMPORTANT: Check email verification before allowing access
+        if (!firebaseUser.emailVerified && !isRestoring) {
+          // New sign-up without verified email - force sign out
+          console.log('⚠️ User signed in without verified email, signing out...');
+          await authService.signOut();
+          showAlert({
+            title: 'Email Verification Required',
+            message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
+            buttonText: 'OK',
+          });
+          return;
+        }
+        
         setUser({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
@@ -3894,6 +3987,98 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       return additions.length ? [...prev, ...additions] : prev;
     });
   }, [reminders]);
+
+  // Load subscription status and cloud sync when user is authenticated
+  useEffect(() => {
+    if (user && !showAuth) {
+      (async () => {
+        try {
+          console.log('📊 Loading subscription status...');
+          const status = await getSubscriptionStatus();
+          if (status.ok) {
+            console.log('✅ Subscription status loaded:', status);
+            setSubscriptionStatus(status);
+          } else {
+            console.log('⚠️ Failed to load subscription status:', status);
+          }
+        } catch (error) {
+          console.error('❌ Error loading subscription status:', error);
+        }
+
+        // Cloud sync - pull all active data from cloud
+        try {
+          console.log('☁️ Pulling cloud data...');
+          const cloudResult = await cloudSyncService.pullAll();
+          
+          if (cloudResult.success && cloudResult.data) {
+            const cloudData = cloudResult.data;
+            console.log('📦 Cloud data received:', Object.keys(cloudData));
+            
+            // Merge medications - cloudData.medications is the payload array directly
+            if (cloudData.medications && Array.isArray(cloudData.medications)) {
+              const cloudMeds = cloudData.medications;
+              console.log('💊 Merging medications from cloud:', cloudMeds.length, 'items');
+              setMeds(prev => {
+                const merged = [...prev];
+                cloudMeds.forEach(cloudMed => {
+                  const existingIndex = merged.findIndex(m => m.id === cloudMed.id);
+                  if (existingIndex >= 0) {
+                    merged[existingIndex] = cloudMed;
+                  } else {
+                    merged.push(cloudMed);
+                  }
+                });
+                return merged;
+              });
+            }
+            
+            // Merge reminders - cloudData.reminders is the payload array directly
+            if (cloudData.reminders && Array.isArray(cloudData.reminders)) {
+              const cloudReminders = cloudData.reminders;
+              console.log('⏰ Merging reminders from cloud:', cloudReminders.length, 'items');
+              setReminders(prev => {
+                const merged = [...prev];
+                cloudReminders.forEach(cloudRem => {
+                  const existingIndex = merged.findIndex(r => r.id === cloudRem.id);
+                  if (existingIndex >= 0) {
+                    merged[existingIndex] = cloudRem;
+                  } else {
+                    merged.push(cloudRem);
+                  }
+                });
+                return merged;
+              });
+            }
+            
+            // Merge appointments
+            if (cloudData.appointments && Array.isArray(cloudData.appointments)) {
+              console.log('📅 Found appointments in cloud:', cloudData.appointments.length, 'items');
+              await AsyncStorage.setItem('AURIC_CLOUD_APPOINTMENTS', JSON.stringify(cloudData.appointments));
+            }
+            
+            // Merge doctors
+            if (cloudData.doctors && Array.isArray(cloudData.doctors)) {
+              console.log('👨‍⚕️ Found doctors in cloud:', cloudData.doctors.length, 'items');
+              await AsyncStorage.setItem('AURIC_CLOUD_DOCTORS', JSON.stringify(cloudData.doctors));
+            }
+            
+            // Merge AI doctor preference
+            if (cloudData.ai_doctor && cloudData.ai_doctor.doctor) {
+              const cloudAIDoctor = cloudData.ai_doctor.doctor;
+              console.log('🤖 Found AI doctor preference in cloud:', cloudAIDoctor);
+              setSelectedAIDoctor(cloudAIDoctor);
+            }
+            
+            console.log('✅ Cloud sync complete');
+          } else {
+            console.log('ℹ️ No cloud data found or sync failed');
+          }
+        } catch (error) {
+          console.error('❌ Cloud sync error:', error);
+        }
+      })();
+    }
+  }, [user, showAuth]);
 
   // mood shift color tweak (toy demo: if last AI message contains "stress", switch to teal)
   const theme = useMemo(() => {
@@ -4018,6 +4203,49 @@ useEffect(() => {
     </TouchableOpacity>
   );
 
+  // Trial countdown widget
+  const TrialWidget = () => {
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    
+    if (!subscriptionStatus || subscriptionStatus.plan === 'pro') {
+      return null;
+    }
+    
+    const daysLeft = subscriptionStatus.daysLeft || 0;
+    const isExpired = subscriptionStatus.status === 'expired';
+    const isGrace = subscriptionStatus.status === 'grace';
+    
+    return (
+      <TouchableOpacity
+        onPress={() => setShowCheckout(true)}
+        activeOpacity={0.7}
+        style={{
+          marginRight: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 12,
+          backgroundColor: getCardBackgroundColor() + 'DD',
+          borderWidth: 1,
+          borderColor: getCardBorderColor(),
+        }}
+      >
+        {isExpired ? (
+          <Text style={{ color: '#ef4444', fontSize: 11, fontFamily: 'Inter_700Bold' }}>
+            Trial Expired
+          </Text>
+        ) : isGrace ? (
+          <Text style={{ color: '#f59e0b', fontSize: 11, fontFamily: 'Inter_700Bold' }}>
+            Grace: {daysLeft}d
+          </Text>
+        ) : (
+          <Text style={{ color: '#22c55e', fontSize: 11, fontFamily: 'Inter_700Bold' }}>
+            Trial: {daysLeft}d
+          </Text>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   const TopBar = () => (
   <View style={[styles.topbar, { borderColor: theme.chip }]}>
     <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.brandButton, { marginLeft: -65 }]}>
@@ -4029,6 +4257,7 @@ useEffect(() => {
     </AnimatedButton>
     <View style={{ flex: 1 }} />
     
+    <TrialWidget />
     
     <AnimatedButton onPress={() => setRoute('settings')}>
       <Image 
@@ -5041,7 +5270,13 @@ const handleAskMedicalAI = async () => {
 
   const Settings = () => {
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
-    const { timeFormat, setTimeFormat, getTimeFormatOptions, getTimeFormatLabel } = useTimeFormat();
+    const { timeFormat, setTimeFormat, getTimeFormatOptions, getTimeFormatLabel } = useTimeFormat({
+      translations: {
+        useDeviceSetting: t('settings.useDeviceSetting'),
+        twelveHour: t('settings.twelveHour'),
+        twentyFourHour: t('settings.twentyFourHour'),
+      }
+    });
     
     const toggleSection = (section) => {
       setExpandedSections(prev => ({
@@ -5157,8 +5392,7 @@ const handleAskMedicalAI = async () => {
                 <DynamicText type="card" style={{ 
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
-                  textAlign: 'center',
-                  color: selectedAIDoctor === 'alfred' ? '#fff' : undefined
+                  textAlign: 'center'
                 }}>🧑‍⚕️ {S.drAlfred || 'Dr. Alfred'}</DynamicText>
               </TouchableOpacity>
               
@@ -5179,8 +5413,7 @@ const handleAskMedicalAI = async () => {
                 <DynamicText type="card" style={{ 
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
-                  textAlign: 'center',
-                  color: selectedAIDoctor === 'mimi' ? '#fff' : undefined
+                  textAlign: 'center'
                 }}>👩‍⚕️ {S.drMimi || 'Dr. Mimi'}</DynamicText>
               </TouchableOpacity>
               
@@ -5200,8 +5433,7 @@ const handleAskMedicalAI = async () => {
                 <DynamicText type="card" style={{ 
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
-                  textAlign: 'center',
-                  color: selectedAIDoctor === 'pawlmer' ? '#fff' : undefined
+                  textAlign: 'center'
                 }}>🐱 {S.drPawlmer || 'Dr. Pawlmer'}</DynamicText>
               </TouchableOpacity>
             </View>
@@ -5246,7 +5478,7 @@ const handleAskMedicalAI = async () => {
           </View>
         </CollapsibleSection>
         
-        <CollapsibleSection title="Time Format" sectionKey="timeFormat" onToggle={toggleSection}>
+        <CollapsibleSection title={t('settings.timeFormat')} sectionKey="timeFormat" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <DynamicText type="card" style={{ 
               fontFamily: 'Inter_400Regular', 
@@ -5255,7 +5487,7 @@ const handleAskMedicalAI = async () => {
               marginBottom: 12,
               textAlign: 'center'
             }}>
-              Choose how times are displayed throughout the app
+              {t('settings.timeFormatDescription')}
             </DynamicText>
             
             {getTimeFormatOptions().map((option) => (
@@ -5276,15 +5508,13 @@ const handleAskMedicalAI = async () => {
               >
                 <DynamicText type="card" style={{ 
                   fontFamily: 'Inter_600SemiBold', 
-                  fontSize: 14,
-                  color: timeFormat === option.value ? '#ffffff' : undefined
+                  fontSize: 14
                 }}>
                   {option.label}
                 </DynamicText>
                 {timeFormat === option.value && (
                   <DynamicText type="card" style={{ 
-                    fontSize: 16,
-                    color: '#ffffff'
+                    fontSize: 16
                   }}>
                     ✓
                   </DynamicText>
@@ -5308,7 +5538,7 @@ const handleAskMedicalAI = async () => {
                 textAlign: 'center',
                 marginBottom: 4
               }}>
-                Preview:
+                {t('settings.preview')}:
               </DynamicText>
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_600SemiBold', 
@@ -5386,50 +5616,32 @@ const handleAskMedicalAI = async () => {
             <SwitchRow
               label={S.english}
               value={currentLanguage === 'en'}
-              onValueChange={() => {
-                setLang('en');
-                changeLanguage('en');
-              }}
+              onValueChange={() => handleLanguageChange('en')}
             />
             <SwitchRow
               label={S.spanish}
               value={currentLanguage === 'es'}
-              onValueChange={() => {
-                setLang('es');
-                changeLanguage('es');
-              }}
+              onValueChange={() => handleLanguageChange('es')}
             />
             <SwitchRow
               label={S.portuguese}
               value={currentLanguage === 'pt'}
-              onValueChange={() => {
-                setLang('pt');
-                changeLanguage('pt');
-              }}
+              onValueChange={() => handleLanguageChange('pt')}
             />
             <SwitchRow
               label={S.french}
               value={currentLanguage === 'fr'}
-              onValueChange={() => {
-                setLang('fr');
-                changeLanguage('fr');
-              }}
+              onValueChange={() => handleLanguageChange('fr')}
             />
             <SwitchRow
               label={S.german}
               value={currentLanguage === 'de'}
-              onValueChange={() => {
-                setLang('de');
-                changeLanguage('de');
-              }}
+              onValueChange={() => handleLanguageChange('de')}
             />
             <SwitchRow
               label={S.chinese}
               value={currentLanguage === 'zh'}
-              onValueChange={() => {
-                setLang('zh');
-                changeLanguage('zh');
-              }}
+              onValueChange={() => handleLanguageChange('zh')}
             />
           </View>
         </CollapsibleSection>
@@ -5551,18 +5763,19 @@ function trimTo(str, n) {
           <SignInScreen
             onAuthSuccess={handleAuthSuccess}
             onClose={handleAuthClose}
-            onLanguageChange={setLang}
+            onLanguageChange={handleLanguageChange}
+            resetToSignIn={resetAuthToSignIn}
           />
         ) : (
       /* Main App Content - Only show after authentication */
       <>
         {route === 'dashboard' ? <Dashboard /> :
-     route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} /> :
+     route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
      route === 'settings' ? <Settings /> :
-     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
+     route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
      route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
@@ -5749,6 +5962,24 @@ function trimTo(str, n) {
       message={alert?.message || ''}
       buttonText={alert?.buttonText || 'OK'}
       onPress={handlePress}
+    />
+
+    {/* Stripe Checkout Modal */}
+    <StripeCheckoutModal
+      visible={showCheckout}
+      onClose={() => setShowCheckout(false)}
+      theme={theme}
+      onSuccess={async () => {
+        // Refresh subscription status after successful payment
+        try {
+          const status = await getSubscriptionStatus();
+          if (status.ok) {
+            setSubscriptionStatus(status);
+          }
+        } catch (error) {
+          console.error('Failed to refresh subscription status:', error);
+        }
+      }}
     />
     </WallpaperWrapper>
   </WallpaperProvider>

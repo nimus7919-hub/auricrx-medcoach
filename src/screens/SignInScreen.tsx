@@ -50,7 +50,8 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
 
   // Reset to sign-in form when resetToSignIn is called
   useEffect(() => {
-    if (resetToSignIn) {
+    if (resetToSignIn > 0) {
+      console.log('🔄 Resetting to sign-in form');
       setShowSignUpForm(false);
     }
   }, [resetToSignIn]);
