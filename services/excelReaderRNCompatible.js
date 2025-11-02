@@ -120,6 +120,754 @@ class ExcelReaderRNCompatible {
     return match ? parseInt(match[1], 10) : null;
   }
 
+  // Brand name to generic name mapping
+  getBrandNameAliases() {
+    return {
+      // ============================================
+      // DIABETES MEDICATIONS
+      // ============================================
+      
+      // Metformin (Biguanides)
+      'glucophage': ['metformin', 'metformina'],
+      'glucophage xr': ['metformin extended release', 'metformina liberacion prolongada'],
+      'fortamet': ['metformin', 'metformina'],
+      'glumetza': ['metformin', 'metformina'],
+      'riomet': ['metformin', 'metformina'],
+      'treda': ['metformin', 'metformina'],
+      'dabex': ['metformin', 'metformina'],
+      'glafornil': ['metformin', 'metformina'],
+      'dianben': ['metformin', 'metformina'],
+      
+      // Metformin + DPP-4 Inhibitors
+      'galvus met': ['metformin vildagliptin', 'metformina vildagliptina', 'vildagliptin metformin', 'galvusmet'],
+      'galvusmet': ['metformin vildagliptin', 'metformina vildagliptina', 'vildagliptin metformin', 'galvus met'],
+      'janumet': ['metformin sitagliptin', 'metformina sitagliptina', 'sitagliptin metformin'],
+      'janumet xr': ['metformin sitagliptin', 'metformina sitagliptina', 'sitagliptin metformin'],
+      'jentadueto': ['metformin linagliptin', 'metformina linagliptina', 'linagliptin metformin'],
+      'kombiglyze': ['metformin saxagliptin', 'metformina saxagliptina', 'saxagliptin metformin'],
+      'kazano': ['metformin alogliptin', 'metformina alogliptina', 'alogliptin metformin'],
+      
+      // Metformin + SGLT2 Inhibitors
+      'synjardy': ['metformin empagliflozin', 'metformina empagliflozina', 'empagliflozin metformin'],
+      'synjardy xr': ['metformin empagliflozin', 'metformina empagliflozina', 'empagliflozin metformin'],
+      'xigduo': ['metformin dapagliflozin', 'metformina dapagliflozina', 'dapagliflozin metformin'],
+      'xigduo xr': ['metformin dapagliflozin', 'metformina dapagliflozina', 'dapagliflozin metformin'],
+      'invokamet': ['metformin canagliflozin', 'metformina canagliflozina', 'canagliflozin metformin'],
+      'invokamet xr': ['metformin canagliflozin', 'metformina canagliflozina', 'canagliflozin metformin'],
+      'segluromet': ['metformin ertugliflozin', 'metformina ertugliflozina', 'ertugliflozin metformin'],
+      
+      // Metformin + Sulfonylureas
+      'glucovance': ['metformin glibenclamide', 'metformina glibenclamida', 'glyburide metformin', 'metformin glyburide'],
+      'metaglip': ['metformin glipizide', 'metformina glipizida', 'glipizide metformin'],
+      'avandamet': ['metformin rosiglitazone', 'metformina rosiglitazona', 'rosiglitazone metformin'],
+      'actosplus met': ['metformin pioglitazone', 'metformina pioglitazona', 'pioglitazone metformin'],
+      
+      // DPP-4 Inhibitors (Gliptins)
+      'januvia': ['sitagliptin', 'sitagliptina'],
+      'galvus': ['vildagliptin', 'vildagliptina'],
+      'onglyza': ['saxagliptin', 'saxagliptina'],
+      'trajenta': ['linagliptin', 'linagliptina'],
+      'tradjenta': ['linagliptin', 'linagliptina'],
+      'nesina': ['alogliptin', 'alogliptina'],
+      'vipidia': ['alogliptin', 'alogliptina'],
+      
+      // SGLT2 Inhibitors (Gliflozins)
+      'jardiance': ['empagliflozin', 'empagliflozina'],
+      'farxiga': ['dapagliflozin', 'dapagliflozina'],
+      'forxiga': ['dapagliflozin', 'dapagliflozina'],
+      'invokana': ['canagliflozin', 'canagliflozina'],
+      'steglatro': ['ertugliflozin', 'ertugliflozina'],
+      'suglat': ['ipragliflozin', 'ipragliflozina'],
+      
+      // GLP-1 Receptor Agonists
+      'victoza': ['liraglutide', 'liraglutida'],
+      'saxenda': ['liraglutide', 'liraglutida'],
+      'ozempic': ['semaglutide', 'semaglutida'],
+      'rybelsus': ['semaglutide oral', 'semaglutida oral'],
+      'wegovy': ['semaglutide', 'semaglutida'],
+      'trulicity': ['dulaglutide', 'dulaglutida'],
+      'bydureon': ['exenatide', 'exenatida'],
+      'byetta': ['exenatide', 'exenatida'],
+      'adlyxin': ['lixisenatide', 'lixisenatida'],
+      'lyxumia': ['lixisenatide', 'lixisenatida'],
+      'mounjaro': ['tirzepatide', 'tirzepatida'],
+      'zepbound': ['tirzepatide', 'tirzepatida'],
+      
+      // Sulfonylureas
+      'amaryl': ['glimepiride', 'glimepirida'],
+      'diabeta': ['glyburide', 'glibenclamida'],
+      'micronase': ['glyburide', 'glibenclamida'],
+      'glynase': ['glyburide', 'glibenclamida'],
+      'glucotrol': ['glipizide', 'glipizida'],
+      'glucotrol xl': ['glipizide', 'glipizida'],
+      'diabinese': ['chlorpropamide', 'clorpropamida'],
+      'tolinase': ['tolazamide', 'tolazamida'],
+      'daonil': ['glibenclamide', 'glyburide'],
+      'euglucon': ['glibenclamide', 'glyburide'],
+      
+      // Thiazolidinediones (TZDs)
+      'actos': ['pioglitazone', 'pioglitazona'],
+      'avandia': ['rosiglitazone', 'rosiglitazona'],
+      
+      // Insulin
+      'lantus': ['insulin glargine', 'insulina glargina'],
+      'basaglar': ['insulin glargine', 'insulina glargina'],
+      'toujeo': ['insulin glargine', 'insulina glargina'],
+      'tresiba': ['insulin degludec', 'insulina degludec'],
+      'levemir': ['insulin detemir', 'insulina detemir'],
+      'novolog': ['insulin aspart', 'insulina aspart'],
+      'novorapid': ['insulin aspart', 'insulina aspart'],
+      'humalog': ['insulin lispro', 'insulina lispro'],
+      'apidra': ['insulin glulisine', 'insulina glulisina'],
+      'fiasp': ['insulin aspart', 'insulina aspart'],
+      'humulin': ['human insulin', 'insulina humana'],
+      'novolin': ['human insulin', 'insulina humana'],
+      
+      // ============================================
+      // CARDIOVASCULAR MEDICATIONS
+      // ============================================
+      
+      // Statins (Cholesterol)
+      'lipitor': ['atorvastatin', 'atorvastatina'],
+      'crestor': ['rosuvastatin', 'rosuvastatina'],
+      'zocor': ['simvastatin', 'simvastatina'],
+      'pravachol': ['pravastatin', 'pravastatina'],
+      'lescol': ['fluvastatin', 'fluvastatina'],
+      'livalo': ['pitavastatin', 'pitavastatina'],
+      'mevacor': ['lovastatin', 'lovastatina'],
+      
+      // ACE Inhibitors
+      'zestril': ['lisinopril'],
+      'prinivil': ['lisinopril'],
+      'vasotec': ['enalapril'],
+      'altace': ['ramipril'],
+      'accupril': ['quinapril'],
+      'mavik': ['trandolapril'],
+      'lotensin': ['benazepril'],
+      'aceon': ['perindopril'],
+      'univasc': ['moexipril'],
+      'capoten': ['captopril'],
+      
+      // ARBs (Angiotensin Receptor Blockers)
+      'cozaar': ['losartan', 'losartan'],
+      'diovan': ['valsartan', 'valsartan'],
+      'avapro': ['irbesartan', 'irbesartan'],
+      'atacand': ['candesartan'],
+      'micardis': ['telmisartan'],
+      'benicar': ['olmesartan'],
+      'edarbi': ['azilsartan'],
+      'teveten': ['eprosartan'],
+      
+      // Calcium Channel Blockers
+      'norvasc': ['amlodipine', 'amlodipino'],
+      'cardizem': ['diltiazem'],
+      'cartia': ['diltiazem'],
+      'tiazac': ['diltiazem'],
+      'procardia': ['nifedipine', 'nifedipino'],
+      'adalat': ['nifedipine', 'nifedipino'],
+      'calan': ['verapamil'],
+      'isoptin': ['verapamil'],
+      'plendil': ['felodipine', 'felodipino'],
+      'dynacirc': ['isradipine'],
+      
+      // Beta Blockers
+      'lopressor': ['metoprolol'],
+      'toprol xl': ['metoprolol'],
+      'tenormin': ['atenolol'],
+      'coreg': ['carvedilol'],
+      'bystolic': ['nebivolol'],
+      'inderal': ['propranolol'],
+      'sectral': ['acebutolol'],
+      'zebeta': ['bisoprolol'],
+      
+      // Diuretics
+      'lasix': ['furosemide', 'furosemida'],
+      'bumex': ['bumetanide'],
+      'demadex': ['torsemide'],
+      'hydrodiuril': ['hydrochlorothiazide', 'hidroclorotiazida'],
+      'microzide': ['hydrochlorothiazide', 'hidroclorotiazida'],
+      'aldactone': ['spironolactone', 'espironolactona'],
+      'inspra': ['eplerenone'],
+      
+      // Anticoagulants
+      'coumadin': ['warfarin', 'warfarina'],
+      'jantoven': ['warfarin', 'warfarina'],
+      'xarelto': ['rivaroxaban'],
+      'eliquis': ['apixaban'],
+      'pradaxa': ['dabigatran'],
+      'savaysa': ['edoxaban'],
+      'plavix': ['clopidogrel'],
+      'effient': ['prasugrel'],
+      'brilinta': ['ticagrelor'],
+      
+      // ============================================
+      // PAIN & INFLAMMATION
+      // ============================================
+      
+      // NSAIDs
+      'advil': ['ibuprofen', 'ibuprofeno'],
+      'motrin': ['ibuprofen', 'ibuprofeno'],
+      'aleve': ['naproxen', 'naproxeno'],
+      'naprosyn': ['naproxen', 'naproxeno'],
+      'celebrex': ['celecoxib'],
+      'voltaren': ['diclofenac', 'diclofenaco'],
+      'cataflam': ['diclofenac', 'diclofenaco'],
+      'indocin': ['indomethacin', 'indometacina'],
+      'mobic': ['meloxicam'],
+      'relafen': ['nabumetone'],
+      'toradol': ['ketorolac', 'ketorolaco'],
+      
+      // Acetaminophen
+      'tylenol': ['acetaminophen', 'paracetamol'],
+      'panadol': ['acetaminophen', 'paracetamol'],
+      'tempra': ['acetaminophen', 'paracetamol'],
+      
+      // Aspirin
+      'aspirin protect': ['aspirin', 'aspirina'],
+      'bayer': ['aspirin', 'aspirina'],
+      'ecotrin': ['aspirin', 'aspirina'],
+      'bufferin': ['aspirin', 'aspirina'],
+      
+      // ============================================
+      // GASTROINTESTINAL
+      // ============================================
+      
+      // Proton Pump Inhibitors (PPIs)
+      'prilosec': ['omeprazole', 'omeprazol'],
+      'nexium': ['esomeprazole', 'esomeprazol'],
+      'prevacid': ['lansoprazole', 'lansoprazol'],
+      'protonix': ['pantoprazole', 'pantoprazol'],
+      'aciphex': ['rabeprazole', 'rabeprazol'],
+      'dexilant': ['dexlansoprazole'],
+      
+      // H2 Blockers
+      'zantac': ['ranitidine', 'ranitidina'],
+      'pepcid': ['famotidine', 'famotidina'],
+      'tagamet': ['cimetidine', 'cimetidina'],
+      'axid': ['nizatidine'],
+      
+      // Antacids
+      'maalox': ['aluminum magnesium hydroxide', 'hidroxido de aluminio y magnesio'],
+      'mylanta': ['aluminum magnesium simethicone', 'aluminio magnesio simeticona'],
+      'tums': ['calcium carbonate', 'carbonato de calcio'],
+      'rolaids': ['calcium magnesium', 'calcio magnesio'],
+      
+      // ============================================
+      // RESPIRATORY
+      // ============================================
+      
+      // Asthma & COPD
+      'advair': ['fluticasone salmeterol', 'fluticasona salmeterol'],
+      'symbicort': ['budesonide formoterol', 'budesonida formoterol'],
+      'breo': ['fluticasone vilanterol', 'fluticasona vilanterol'],
+      'dulera': ['mometasone formoterol', 'mometasona formoterol'],
+      'spiriva': ['tiotropium', 'tiotropio'],
+      'ventolin': ['albuterol', 'albuterol', 'salbutamol'],
+      'proventil': ['albuterol', 'albuterol', 'salbutamol'],
+      'proair': ['albuterol', 'albuterol', 'salbutamol'],
+      'xopenex': ['levalbuterol'],
+      'singulair': ['montelukast'],
+      'flovent': ['fluticasone', 'fluticasona'],
+      'pulmicort': ['budesonide', 'budesonida'],
+      'qvar': ['beclomethasone', 'beclometasona'],
+      
+      // ============================================
+      // ANTIBIOTICS
+      // ============================================
+      
+      // Penicillins
+      'amoxil': ['amoxicillin', 'amoxicilina'],
+      'augmentin': ['amoxicillin clavulanate', 'amoxicilina clavulanato'],
+      'unasyn': ['ampicillin sulbactam', 'ampicilina sulbactam'],
+      
+      // Cephalosporins
+      'keflex': ['cephalexin', 'cefalexina'],
+      'ceftin': ['cefuroxime', 'cefuroxima'],
+      'rocephin': ['ceftriaxone', 'ceftriaxona'],
+      'suprax': ['cefixime', 'cefixima'],
+      
+      // Macrolides
+      'zithromax': ['azithromycin', 'azitromicina'],
+      'z-pak': ['azithromycin', 'azitromicina'],
+      'biaxin': ['clarithromycin', 'claritromicina'],
+      'erythrocin': ['erythromycin', 'eritromicina'],
+      
+      // Fluoroquinolones
+      'cipro': ['ciprofloxacin', 'ciprofloxacino', 'ciprofloxacina'],
+      'levaquin': ['levofloxacin', 'levofloxacino', 'levofloxacina'],
+      'avelox': ['moxifloxacin', 'moxifloxacino', 'moxifloxacina'],
+      
+      // Other Antibiotics
+      'bactrim': ['trimethoprim sulfamethoxazole', 'trimetoprima sulfametoxazol'],
+      'septra': ['trimethoprim sulfamethoxazole', 'trimetoprima sulfametoxazol'],
+      'flagyl': ['metronidazole', 'metronidazol'],
+      'cleocin': ['clindamycin', 'clindamicina'],
+      'vibramycin': ['doxycycline', 'doxiciclina'],
+      
+      // ============================================
+      // MENTAL HEALTH
+      // ============================================
+      
+      // SSRIs
+      'prozac': ['fluoxetine', 'fluoxetina'],
+      'zoloft': ['sertraline', 'sertralina'],
+      'lexapro': ['escitalopram'],
+      'celexa': ['citalopram'],
+      'paxil': ['paroxetine', 'paroxetina'],
+      'luvox': ['fluvoxamine', 'fluvoxamina'],
+      
+      // SNRIs
+      'cymbalta': ['duloxetine', 'duloxetina'],
+      'effexor': ['venlafaxine', 'venlafaxina'],
+      'pristiq': ['desvenlafaxine'],
+      
+      // Benzodiazepines
+      'xanax': ['alprazolam'],
+      'ativan': ['lorazepam'],
+      'valium': ['diazepam'],
+      'klonopin': ['clonazepam'],
+      
+      // Antipsychotics
+      'abilify': ['aripiprazole'],
+      'seroquel': ['quetiapine', 'quetiapina'],
+      'zyprexa': ['olanzapine', 'olanzapina'],
+      'risperdal': ['risperidone', 'risperidona'],
+      
+      // ============================================
+      // THYROID
+      // ============================================
+      'synthroid': ['levothyroxine', 'levotiroxina'],
+      'levoxyl': ['levothyroxine', 'levotiroxina'],
+      'armour thyroid': ['thyroid desiccated', 'tiroides desecada'],
+      'cytomel': ['liothyronine'],
+      
+      // ============================================
+      // OSTEOPOROSIS
+      // ============================================
+      'fosamax': ['alendronate', 'alendronato'],
+      'actonel': ['risedronate', 'risedronato'],
+      'boniva': ['ibandronate', 'ibandronato'],
+      'prolia': ['denosumab'],
+      'forteo': ['teriparatide'],
+      
+      // ============================================
+      // ERECTILE DYSFUNCTION
+      // ============================================
+      'viagra': ['sildenafil'],
+      'cialis': ['tadalafil'],
+      'levitra': ['vardenafil'],
+      
+      // ============================================
+      // CONTRACEPTIVES
+      // ============================================
+      'postday': ['levonorgestrel', 'levonorgestrel'],
+      'plan b': ['levonorgestrel', 'levonorgestrel'],
+      'yasmin': ['drospirenone ethinyl estradiol', 'drospirenona etinilestradiol'],
+      'yaz': ['drospirenone ethinyl estradiol', 'drospirenona etinilestradiol'],
+      'ortho tri cyclen': ['norgestimate ethinyl estradiol', 'norgestimato etinilestradiol'],
+      
+      // ============================================
+      // ALLERGY
+      // ============================================
+      'zyrtec': ['cetirizine', 'cetirizina'],
+      'claritin': ['loratadine', 'loratadina'],
+      'claritin d': ['loratadine pseudoephedrine', 'loratadina pseudoefedrina'],
+      'clarinex': ['desloratadine'],
+      'allegra': ['fexofenadine', 'fexofenadina'],
+      'allegra d': ['fexofenadine pseudoephedrine', 'fexofenadina pseudoefedrina'],
+      'benadryl': ['diphenhydramine', 'difenhidramina'],
+      'flonase': ['fluticasone', 'fluticasona'],
+      'nasonex': ['mometasone', 'mometasona'],
+      'nasacort': ['triamcinolone', 'triamcinolona'],
+      'xyzal': ['levocetirizine'],
+      'zyrtec d': ['cetirizine pseudoephedrine', 'cetirizina pseudoefedrina'],
+      'astepro': ['azelastine'],
+      
+      // ============================================
+      // BIOLOGICS & IMMUNOLOGY
+      // ============================================
+      'humira': ['adalimumab'],
+      'enbrel': ['etanercept'],
+      'remicade': ['infliximab'],
+      'stelara': ['ustekinumab'],
+      'cosentyx': ['secukinumab'],
+      'skyrizi': ['risankizumab'],
+      'taltz': ['ixekizumab'],
+      'simponi': ['golimumab'],
+      'cimzia': ['certolizumab'],
+      'orencia': ['abatacept'],
+      'actemra': ['tocilizumab'],
+      'rituxan': ['rituximab'],
+      'entyvio': ['vedolizumab'],
+      'xeljanz': ['tofacitinib'],
+      'rinvoq': ['upadacitinib'],
+      'olumiant': ['baricitinib'],
+      'otezla': ['apremilast'],
+      'dupixent': ['dupilumab'],
+      'fasenra': ['benralizumab'],
+      'nucala': ['mepolizumab'],
+      'xolair': ['omalizumab'],
+      'ilaris': ['canakinumab'],
+      'kineret': ['anakinra'],
+      'kevzara': ['sarilumab'],
+      
+      // ============================================
+      // MIGRAINE
+      // ============================================
+      'imitrex': ['sumatriptan'],
+      'maxalt': ['rizatriptan'],
+      'zomig': ['zolmitriptan'],
+      'relpax': ['eletriptan'],
+      'amerge': ['naratriptan'],
+      'frova': ['frovatriptan'],
+      'axert': ['almotriptan'],
+      'aimovig': ['erenumab'],
+      'ajovy': ['fremanezumab'],
+      'emgality': ['galcanezumab'],
+      'nurtec': ['rimegepant'],
+      'ubrelvy': ['ubrogepant'],
+      'topamax': ['topiramate'],
+      
+      // ============================================
+      // SLEEP AIDS
+      // ============================================
+      'ambien': ['zolpidem'],
+      'ambien cr': ['zolpidem extended release'],
+      'lunesta': ['eszopiclone'],
+      'sonata': ['zaleplon'],
+      'restoril': ['temazepam'],
+      'halcion': ['triazolam'],
+      'rozerem': ['ramelteon'],
+      'belsomra': ['suvorexant'],
+      'silenor': ['doxepin'],
+      
+      // ============================================
+      // ADHD MEDICATIONS
+      // ============================================
+      'adderall': ['amphetamine dextroamphetamine', 'anfetamina dextroanfetamina'],
+      'adderall xr': ['amphetamine dextroamphetamine extended release'],
+      'ritalin': ['methylphenidate', 'metilfenidato'],
+      'concerta': ['methylphenidate extended release', 'metilfenidato liberacion prolongada'],
+      'vyvanse': ['lisdexamfetamine', 'lisdexanfetamina'],
+      'focalin': ['dexmethylphenidate'],
+      'strattera': ['atomoxetine', 'atomoxetina'],
+      'intuniv': ['guanfacine'],
+      'kapvay': ['clonidine'],
+      'daytrana': ['methylphenidate patch'],
+      'quillivant': ['methylphenidate liquid'],
+      'mydayis': ['amphetamine dextroamphetamine'],
+      'dexedrine': ['dextroamphetamine'],
+      
+      // ============================================
+      // URINARY & PROSTATE
+      // ============================================
+      'flomax': ['tamsulosin'],
+      'rapaflo': ['silodosin'],
+      'uroxatral': ['alfuzosin'],
+      'cardura': ['doxazosin'],
+      'hytrin': ['terazosin'],
+      'proscar': ['finasteride'],
+      'avodart': ['dutasteride'],
+      'jalyn': ['dutasteride tamsulosin'],
+      'detrol': ['tolterodine'],
+      'detrol la': ['tolterodine extended release'],
+      'ditropan': ['oxybutynin', 'oxibutinina'],
+      'enablex': ['darifenacin'],
+      'toviaz': ['fesoterodine'],
+      'vesicare': ['solifenacin'],
+      'myrbetriq': ['mirabegron'],
+      'gemtesa': ['vibegron'],
+      
+      // ============================================
+      // OPHTHALMOLOGY (EYE)
+      // ============================================
+      'xalatan': ['latanoprost'],
+      'lumigan': ['bimatoprost'],
+      'travatan': ['travoprost'],
+      'alphagan': ['brimonidine'],
+      'alphagan p': ['brimonidine'],
+      'combigan': ['brimonidine timolol'],
+      'cosopt': ['dorzolamide timolol'],
+      'timoptic': ['timolol'],
+      'trusopt': ['dorzolamide'],
+      'azopt': ['brinzolamide'],
+      'rhopressa': ['netarsudil'],
+      'rocklatan': ['netarsudil latanoprost'],
+      'pataday': ['olopatadine'],
+      'pazeo': ['olopatadine'],
+      'restasis': ['cyclosporine ophthalmic'],
+      'xiidra': ['lifitegrast'],
+      'bepreve': ['bepotastine'],
+      'alrex': ['loteprednol'],
+      
+      // ============================================
+      // ANTICOAGULANTS & ANTIPLATELETS (Additional)
+      // ============================================
+      'aggrenox': ['aspirin dipyridamole', 'aspirina dipiridamol'],
+      'persantine': ['dipyridamole'],
+      'ticlid': ['ticlopidine'],
+      'pletal': ['cilostazol'],
+      'arixtra': ['fondaparinux'],
+      'fragmin': ['dalteparin'],
+      'innohep': ['tinzaparin'],
+      
+      // ============================================
+      // DERMATOLOGY
+      // ============================================
+      'retin a': ['tretinoin', 'tretinoina'],
+      'renova': ['tretinoin', 'tretinoina'],
+      'tazorac': ['tazarotene'],
+      'differin': ['adapalene'],
+      'epiduo': ['adapalene benzoyl peroxide'],
+      'onexton': ['clindamycin benzoyl peroxide'],
+      'aczone': ['dapsone gel'],
+      'benzaclin': ['benzoyl peroxide clindamycin'],
+      'protopic': ['tacrolimus topical'],
+      'elidel': ['pimecrolimus'],
+      'eucrisa': ['crisaborole'],
+      'dupixent': ['dupilumab'],
+      'aldara': ['imiquimod'],
+      'efudex': ['fluorouracil topical'],
+      'solaraze': ['diclofenac topical'],
+      
+      // ============================================
+      // ANTIFUNGALS (Additional)
+      // ============================================
+      'sporanox': ['itraconazole'],
+      'noxafil': ['posaconazole'],
+      'vfend': ['voriconazole'],
+      'onmel': ['itraconazole'],
+      'jublia': ['efinaconazole'],
+      'kerydin': ['tavaborole'],
+      
+      // ============================================
+      // ANTIVIRALS (Additional)
+      // ============================================
+      'harvoni': ['ledipasvir sofosbuvir'],
+      'sovaldi': ['sofosbuvir'],
+      'epclusa': ['sofosbuvir velpatasvir'],
+      'mavyret': ['glecaprevir pibrentasvir'],
+      'zepatier': ['elbasvir grazoprevir'],
+      'viread': ['tenofovir'],
+      'truvada': ['emtricitabine tenofovir'],
+      'descovy': ['emtricitabine tenofovir alafenamide'],
+      'atripla': ['efavirenz emtricitabine tenofovir'],
+      'complera': ['emtricitabine rilpivirine tenofovir'],
+      'genvoya': ['elvitegravir cobicistat emtricitabine tenofovir'],
+      'biktarvy': ['bictegravir emtricitabine tenofovir'],
+      'triumeq': ['abacavir dolutegravir lamivudine'],
+      'combivir': ['lamivudine zidovudine'],
+      'epzicom': ['abacavir lamivudine'],
+      'kaletra': ['lopinavir ritonavir'],
+      'norvir': ['ritonavir'],
+      'prezista': ['darunavir'],
+      'reyataz': ['atazanavir'],
+      'isentress': ['raltegravir'],
+      'tivicay': ['dolutegravir'],
+      'edurant': ['rilpivirine'],
+      'sustiva': ['efavirenz'],
+      'viramune': ['nevirapine'],
+      'rescriptor': ['delavirdine'],
+      'intelence': ['etravirine'],
+      'selzentry': ['maraviroc'],
+      'fuzeon': ['enfuvirtide'],
+      
+      // ============================================
+      // SMOKING CESSATION
+      // ============================================
+      'chantix': ['varenicline', 'vareniclina'],
+      'zyban': ['bupropion'],
+      'nicoderm': ['nicotine patch', 'parche de nicotina'],
+      'nicoderm cq': ['nicotine patch', 'parche de nicotina'],
+      'nicorette': ['nicotine gum', 'chicle de nicotina'],
+      'nicotrol': ['nicotine inhaler', 'inhalador de nicotina'],
+      'commit': ['nicotine lozenge'],
+      
+      // ============================================
+      // WEIGHT LOSS / OBESITY
+      // ============================================
+      'saxenda': ['liraglutide', 'liraglutida'],
+      'wegovy': ['semaglutide', 'semaglutida'],
+      'qsymia': ['phentermine topiramate', 'fentermina topiramato'],
+      'contrave': ['naltrexone bupropion', 'naltrexona bupropion'],
+      'xenical': ['orlistat'],
+      'alli': ['orlistat'],
+      'adipex': ['phentermine', 'fentermina'],
+      'adipex p': ['phentermine', 'fentermina'],
+      'bontril': ['phendimetrazine'],
+      'didrex': ['benzphetamine'],
+      
+      // ============================================
+      // NAUSEA & ANTIEMETICS (Additional)
+      // ============================================
+      'zofran': ['ondansetron'],
+      'phenergan': ['promethazine', 'prometazina'],
+      'reglan': ['metoclopramide', 'metoclopramida'],
+      'compazine': ['prochlorperazine'],
+      'emend': ['aprepitant'],
+      'aloxi': ['palonosetron'],
+      'anzemet': ['dolasetron'],
+      'kytril': ['granisetron'],
+      'sancuso': ['granisetron patch'],
+      'marinol': ['dronabinol'],
+      'cesamet': ['nabilone'],
+      'diclegis': ['doxylamine pyridoxine'],
+      'bonjesta': ['doxylamine pyridoxine'],
+      
+      // ============================================
+      // MUSCLE RELAXANTS (Additional)
+      // ============================================
+      'flexeril': ['cyclobenzaprine', 'ciclobenzaprina'],
+      'soma': ['carisoprodol'],
+      'robaxin': ['methocarbamol', 'metocarbamol'],
+      'zanaflex': ['tizanidine', 'tizanidina'],
+      'skelaxin': ['metaxalone'],
+      'norflex': ['orphenadrine'],
+      'parafon forte': ['chlorzoxazone'],
+      'lioresal': ['baclofen'],
+      
+      // ============================================
+      // GOUT
+      // ============================================
+      'zyloprim': ['allopurinol'],
+      'uloric': ['febuxostat'],
+      'zurampic': ['lesinurad'],
+      'duzallo': ['allopurinol lesinurad'],
+      'colcrys': ['colchicine', 'colchicina'],
+      'mitigare': ['colchicine', 'colchicina'],
+      'benemid': ['probenecid'],
+      'krystexxa': ['pegloticase'],
+      
+      // ============================================
+      // COUGH & COLD
+      // ============================================
+      'robitussin': ['guaifenesin', 'guaifenesina'],
+      'mucinex': ['guaifenesin', 'guaifenesina'],
+      'mucinex dm': ['guaifenesin dextromethorphan'],
+      'delsym': ['dextromethorphan'],
+      'tessalon perles': ['benzonatate'],
+      'tessalon': ['benzonatate'],
+      'sudafed': ['pseudoephedrine', 'pseudoefedrina'],
+      'sudafed pe': ['phenylephrine', 'fenilefrina'],
+      'afrin': ['oxymetazoline'],
+      'neo synephrine': ['phenylephrine', 'fenilefrina'],
+      
+      // ============================================
+      // LAXATIVES & BOWEL
+      // ============================================
+      'miralax': ['polyethylene glycol', 'polietilenglicol'],
+      'dulcolax': ['bisacodyl'],
+      'colace': ['docusate', 'docusato'],
+      'senokot': ['senna'],
+      'metamucil': ['psyllium'],
+      'citrucel': ['methylcellulose'],
+      'fiber con': ['polycarbophil'],
+      'fleet': ['sodium phosphate'],
+      'golytely': ['polyethylene glycol electrolyte'],
+      'moviprep': ['polyethylene glycol electrolyte'],
+      'suprep': ['sodium sulfate'],
+      'plenvu': ['polyethylene glycol electrolyte'],
+      'linzess': ['linaclotide'],
+      'amitiza': ['lubiprostone'],
+      'trulance': ['plecanatide'],
+      'motegrity': ['prucalopride'],
+      
+      // ============================================
+      // HORMONES & FERTILITY
+      // ============================================
+      'premarin': ['conjugated estrogens', 'estrogenos conjugados'],
+      'estrace': ['estradiol'],
+      'climara': ['estradiol patch'],
+      'vivelle dot': ['estradiol patch'],
+      'divigel': ['estradiol gel'],
+      'evamist': ['estradiol spray'],
+      'provera': ['medroxyprogesterone', 'medroxiprogesterona'],
+      'prometrium': ['progesterone', 'progesterona'],
+      'prempro': ['conjugated estrogens medroxyprogesterone'],
+      'premphase': ['conjugated estrogens medroxyprogesterone'],
+      'activella': ['estradiol norethindrone'],
+      'combipatch': ['estradiol norethindrone patch'],
+      'femhrt': ['ethinyl estradiol norethindrone'],
+      'androgel': ['testosterone gel', 'gel de testosterona'],
+      'testim': ['testosterone gel'],
+      'fortesta': ['testosterone gel'],
+      'axiron': ['testosterone topical'],
+      'androderm': ['testosterone patch'],
+      'depo testosterone': ['testosterone injection'],
+      'clomid': ['clomiphene'],
+      'serophene': ['clomiphene'],
+      'femara': ['letrozole'],
+      'gonal f': ['follitropin alfa'],
+      'follistim': ['follitropin beta'],
+      'menopur': ['menotropins'],
+      'ovidrel': ['choriogonadotropin alfa'],
+      'pregnyl': ['chorionic gonadotropin'],
+      'crinone': ['progesterone gel'],
+      
+      // ============================================
+      // ANTI-INFLAMMATORY (Additional)
+      // ============================================
+      'pennsaid': ['diclofenac topical'],
+      'flector': ['diclofenac patch'],
+      'arthrotec': ['diclofenac misoprostol'],
+      'duexis': ['ibuprofen famotidine'],
+      'vimovo': ['naproxen esomeprazole'],
+      'zipsor': ['diclofenac'],
+      'zorvolex': ['diclofenac'],
+      'sprix': ['ketorolac nasal'],
+      'cambia': ['diclofenac powder'],
+      
+      // ============================================
+      // MISCELLANEOUS HIGH-VALUE
+      // ============================================
+      'eliquis': ['apixaban'],
+      'xarelto': ['rivaroxaban'],
+      'keytruda': ['pembrolizumab'],
+      'opdivo': ['nivolumab'],
+      'yervoy': ['ipilimumab'],
+      'tecfidera': ['dimethyl fumarate'],
+      'gilenya': ['fingolimod'],
+      'copaxone': ['glatiramer'],
+      'aubagio': ['teriflunomide'],
+      'tysabri': ['natalizumab'],
+      'ocrevus': ['ocrelizumab'],
+      'mavenclad': ['cladribine'],
+      'zeposia': ['ozanimod'],
+      'vumerity': ['diroximel fumarate'],
+      'bafiertam': ['monomethyl fumarate'],
+      'aricept': ['donepezil'],
+      'exelon': ['rivastigmine'],
+      'razadyne': ['galantamine'],
+      'namenda': ['memantine'],
+      'namzaric': ['donepezil memantine'],
+      'aduhelm': ['aducanumab'],
+      'leqembi': ['lecanemab'],
+      'botox': ['onabotulinumtoxin a'],
+      'dysport': ['abobotulinumtoxin a'],
+      'xeomin': ['incobotulinumtoxin a'],
+      'myobloc': ['rimabotulinumtoxin b'],
+      'synagis': ['palivizumab'],
+      'soliris': ['eculizumab'],
+      'ultomiris': ['ravulizumab'],
+      'nucala': ['mepolizumab'],
+      'cinqair': ['reslizumab'],
+      'trelegy': ['fluticasone umeclidinium vilanterol'],
+      'anoro': ['umeclidinium vilanterol'],
+      'stiolto': ['tiotropium olodaterol'],
+      'bevespi': ['glycopyrrolate formoterol'],
+      'incruse': ['umeclidinium'],
+      'tudorza': ['aclidinium'],
+      'lonhala': ['glycopyrrolate'],
+      'seebri': ['glycopyrrolate'],
+      'brovana': ['arformoterol'],
+      'perforomist': ['formoterol'],
+      'arcapta': ['indacaterol'],
+      'striverdi': ['olodaterol'],
+      'serevent': ['salmeterol'],
+      'foradil': ['formoterol'],
+    };
+  }
+
   async searchMedications(query) {
     console.log('🔍 DEBUG: searchMedications called with query:', query);
     const medications = await this.getMedicationData();
@@ -138,6 +886,41 @@ class ExcelReaderRNCompatible {
     // Handle common medication name variations
     const queryVariations = [normalizedQuery];
     
+    // Check if the query is a brand name and add generic name variations
+    const brandAliases = this.getBrandNameAliases();
+    const lowerQuery = normalizedQuery.toLowerCase();
+    
+    for (const [brandName, genericNames] of Object.entries(brandAliases)) {
+      const normalizedBrand = this.normalizeMedicationName(brandName);
+      
+      // Use word boundary matching to prevent "galvus" from matching "galvus met"
+      // Only match if it's an exact match or matches complete words
+      const queryWords = lowerQuery.split(' ');
+      const brandWords = normalizedBrand.split(' ');
+      
+      // Check for exact match first
+      const isExactMatch = lowerQuery === normalizedBrand;
+      
+      // Check if all brand words appear in query (for multi-word brands like "galvus met")
+      const allBrandWordsInQuery = brandWords.every(bWord => queryWords.includes(bWord));
+      
+      if (isExactMatch || allBrandWordsInQuery) {
+        console.log(`🔍 Brand name detected: "${brandName}" -> Adding generic variations:`, genericNames);
+        queryVariations.push(...genericNames.map(g => this.normalizeMedicationName(g)));
+      }
+      
+      // Also check if query matches any generic name and add the brand
+      for (const genericName of genericNames) {
+        const normalizedGeneric = this.normalizeMedicationName(genericName);
+        if (lowerQuery.includes(normalizedGeneric) || normalizedGeneric.includes(lowerQuery)) {
+          console.log(`🔍 Generic name detected: "${genericName}" -> Adding brand: "${brandName}"`);
+          queryVariations.push(normalizedBrand);
+          queryVariations.push(...genericNames.map(g => this.normalizeMedicationName(g)));
+          break;
+        }
+      }
+    }
+    
     // Add common variations for aspirin/aspirina
     if (normalizedQuery.includes('aspirin')) {
       queryVariations.push(normalizedQuery.replace('aspirin', 'aspirina'));
@@ -154,28 +937,60 @@ class ExcelReaderRNCompatible {
       queryVariations.push(normalizedQuery.replace('acetaminophen', 'paracetamol'));
     }
     
+    // Add Spanish/English variations for common supplement terms
+    if (normalizedQuery.includes('vitamin')) {
+      queryVariations.push(normalizedQuery.replace(/vitamin/g, 'vitamina'));
+    }
+    if (normalizedQuery.includes('vitamina')) {
+      queryVariations.push(normalizedQuery.replace(/vitamina/g, 'vitamin'));
+    }
+    if (normalizedQuery.includes('calcium')) {
+      queryVariations.push(normalizedQuery.replace(/calcium/g, 'calcio'));
+    }
+    if (normalizedQuery.includes('calcio')) {
+      queryVariations.push(normalizedQuery.replace(/calcio/g, 'calcium'));
+    }
+    if (normalizedQuery.includes('magnesium')) {
+      queryVariations.push(normalizedQuery.replace(/magnesium/g, 'magnesio'));
+    }
+    if (normalizedQuery.includes('magnesio')) {
+      queryVariations.push(normalizedQuery.replace(/magnesio/g, 'magnesium'));
+    }
+    
     console.log(`🔍 Searching for medication: "${query}" with variations:`, queryVariations);
     
     const results = medications.filter(med => {
       const normalizedMed = this.normalizeMedicationName(med.Medicinas);
+      const normalizedMedNoSpace = normalizedMed.replace(/\s+/g, ''); // Remove ALL spaces for flexible matching
       
       // Try all query variations
       for (const variation of queryVariations) {
-        // First try exact match
+        const variationNoSpace = variation.replace(/\s+/g, ''); // Remove ALL spaces
+        
+        // First try exact match (with spaces)
         if (normalizedMed.includes(variation)) {
           console.log(`✅ Exact match found: "${med.Medicinas}" contains "${variation}"`);
           return true;
         }
         
+        // Try space-agnostic match (handles "GalvusMet" vs "Galvus Met")
+        if (normalizedMedNoSpace.includes(variationNoSpace)) {
+          console.log(`✅ Space-agnostic match found: "${med.Medicinas}" (no spaces: "${normalizedMedNoSpace}") contains "${variation}" (no spaces: "${variationNoSpace}")`);
+          return true;
+        }
+        
         // Then try partial word matches
-        const queryWords = variation.split(' ').filter(w => w.length > 2);
-        const medWords = normalizedMed.split(' ').filter(w => w.length > 2);
+        const queryWords = variation.split(' ').filter(w => w.length >= 1); // Include ALL words, even single chars like "d" in "d3"
+        const medWords = normalizedMed.split(' ').filter(w => w.length >= 1);
         
         const wordMatches = queryWords.filter(qWord => 
           medWords.some(mWord => mWord === qWord) // Exact word match only (very strict)
         );
         
-        if (wordMatches.length >= queryWords.length * 0.9) { // At least 90% of words must match exactly
+        // For multi-word queries, require ALL words to match (not just 90%)
+        const requiredMatches = queryWords.length > 1 ? queryWords.length : Math.ceil(queryWords.length * 0.9);
+        
+        if (wordMatches.length >= requiredMatches) {
           console.log(`✅ Exact word match found: "${med.Medicinas}" matches "${variation}" (${wordMatches.length}/${queryWords.length} words)`);
           return true;
         }

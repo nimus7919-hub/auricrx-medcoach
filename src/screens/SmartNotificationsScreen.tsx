@@ -388,7 +388,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
   const deleteLocationReminder = async (id: string) => {
     triggerHaptic('heavy');
     Alert.alert(
-      '🗑️ ' + t('deleteReminder'),
+      t('deleteReminder'),
       t('deleteReminderConfirm'),
       [
         { text: t('cancel'), style: 'cancel' },
@@ -454,7 +454,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
   const deleteWeatherAlert = async (id: string) => {
     triggerHaptic('heavy');
     Alert.alert(
-      '🗑️ ' + t('deleteAlert'),
+      t('deleteAlert'),
       t('deleteAlertConfirm'),
       [
         { text: t('cancel'), style: 'cancel' },
@@ -506,7 +506,10 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
               style={dynamicStyles.deleteButton}
               onPress={() => deleteLocationReminder(reminder.id)}
             >
-              <DynamicText type="card" style={dynamicStyles.deleteButtonText}>🗑️</DynamicText>
+              <Image 
+                source={require('../../assets/dashboard Emojies/trash.png')} 
+                style={{ width: 20, height: 20 }}
+              />
             </TouchableOpacity>
           </View>
         ))
@@ -558,7 +561,10 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
               style={dynamicStyles.deleteButton}
               onPress={() => deleteWeatherAlert(alert.id)}
             >
-              <DynamicText type="card" style={dynamicStyles.deleteButtonText}>🗑️</DynamicText>
+              <Image 
+                source={require('../../assets/dashboard Emojies/trash.png')} 
+                style={{ width: 20, height: 20 }}
+              />
             </TouchableOpacity>
           </View>
         ))

@@ -10,10 +10,202 @@ class EnhancedMedicationSearch {
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
   }
 
+  // ========================================
+  // CENTRALIZED NORMALIZATION & MATCHING
+  // ========================================
+
+  // Robust pharmacy field getter (handles casing/aliases)
+  getPharmacyName(row) {
+    const candidates = [
+      'Pharmacy', 'pharmacy', 'Farmacia', 'farmacia', 'Cadena', 'cadena',
+      'Store', 'store', 'Sucursal', 'sucursal', 'Brand', 'brand'
+    ];
+    for (const k of candidates) {
+      if (row && row[k] != null && String(row[k]).trim()) {
+        return String(row[k]);
+      }
+    }
+    // Last-ditch inference from url/sku if present
+    const hint = [row?.url, row?.URL, row?.sku, row?.SKU, row?.source].filter(Boolean).join(' ');
+    return hint || null;
+  }
+
+  // Robust medication name getter (handles Spanish/English/casing)
+  getMedName(row) {
+    const keys = ['Medicinas', 'medicinas', 'producto', 'Producto', 'drug', 'Drug', 'name', 'Name'];
+    for (const k of keys) {
+      if (row && row[k]) return String(row[k]);
+    }
+    return '';
+  }
+
+  // Robust units getter (handles Spanish/English/casing)
+  getUnits(row) {
+    const keys = ['unidades', 'Unidades', 'units', 'Units', 'presentacion', 'Presentación', 'presentation'];
+    for (const k of keys) {
+      if (row && row[k]) return String(row[k]);
+    }
+    return '';
+  }
+
+  // Robust price getter (handles Spanish/English/casing/formatting)
+  getPriceValue(row) {
+    const keys = ['original price', 'precio original', 'precioOriginal', 'price', 'Price', 'precio', 'Precio'];
+    for (const k of keys) {
+      if (row && row[k] != null && row[k] !== '') {
+        const n = Number(String(row[k]).toString().replace(/[^0-9.]/g, ''));
+        if (!Number.isNaN(n)) return n;
+      }
+    }
+    return null;
+  }
+
+  // Centralized normalization - removes spaces, punctuation, diacritics
+  normalize(str) {
+    if (!str) return '';
+    return str
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "") // Remove diacritics
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, '') // Remove everything except letters & numbers
+      .trim();
+  }
+
+  // Looser normalization for typo tolerance
+  normalizeLoose(str) {
+    if (!str) return '';
+    return String(str)
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '') // Remove diacritics
+      .toLowerCase()
+      // Collapse repeated letters: "metforminaa" -> "metformina"
+      .replace(/(.)\1{1,}/g, '$1')
+      // Unify whitespace/punctuation
+      .replace(/[^a-z0-9 ]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Normalization for token matching (keeps spaces)
+  normalizeForTokens(str) {
+    if (!str) return '';
+    return this.normalizeLoose(str); // Reuse loose normalization
+  }
+
+  // Extract strengths from multiple fields (fallback when dosage is "mg/mg")
+  extractStrengthsFromFields(...fields) {
+    // Find first field with digits
+    const src = fields.find(f => /\d/.test(f || '')) || '';
+    if (!src) return [];
+    
+    // Prefer explicit pairs "50/500", "50-500", "50 + 500"
+    const pairMatch = src.match(/(\d{1,4})\s*[/+\-]\s*(\d{1,4})/);
+    if (pairMatch) {
+      return [parseInt(pairMatch[1], 10), parseInt(pairMatch[2], 10)];
+    }
+    
+    // Otherwise collect numbers with optional units
+    const matches = [...src.matchAll(/(\d{1,4})(?=\s*(?:mg|mcg|µg|ug|g)?\b)/gi)];
+    return matches.map(m => parseInt(m[1], 10)).slice(0, 2);
+  }
+
+  // Check if normalized strings match exactly
+  sameAfterNorm(a, b) {
+    return this.normalize(a) === this.normalize(b);
+  }
+
+  // Check if normalized haystack contains normalized needle
+  containsAfterNorm(haystack, needle) {
+    return this.normalize(haystack).includes(this.normalize(needle));
+  }
+
+  // Get brand key from pharmacy name with alias support
+  getBrandKey(pharmacyName) {
+    if (!pharmacyName) return null;
+    
+    // Pre-normalized brand aliases for consistent matching
+    // Note: These are normalized once at runtime for performance
+    const BRAND_ALIASES_RAW = {
+      heb: ['heb', 'h-e-b', 'h e b'],
+      ahorro: ['ahorro', 'farmacia del ahorro', 'farmacias del ahorro'],
+      benavides: ['benavides', 'farmacia benavides', 'farmacias benavides'],
+      guadalajara: ['guadalajara', 'farmacia guadalajara', 'farmacias guadalajara'],
+      similares: ['similares', 'dr similares', 'farmacias similares'],
+      sanpablo: ['san pablo', 'sanpablo'],
+      sanangel: ['san angel', 'sanángel', 'sanangel'],
+      aurrera: ['aurrera', 'bodega aurrera'],
+    };
+    
+    // Normalize aliases once (cached via object literal in function scope)
+    if (!this._brandAliasesNormalized) {
+      this._brandAliasesNormalized = Object.fromEntries(
+        Object.entries(BRAND_ALIASES_RAW).map(([k, arr]) => [
+          k,
+          arr.map(s => this.normalizeForTokens(this.normalizeLoose(s)))
+        ])
+      );
+    }
+    
+    // Normalize input the same way
+    const s = this.normalizeForTokens(this.normalizeLoose(pharmacyName));
+    for (const [key, aliases] of Object.entries(this._brandAliasesNormalized)) {
+      if (aliases.some(a => s.includes(a))) return key;
+    }
+    return null; // Unknown brand
+  }
+
+  // Centralized pharmacy name matching with token overlap
+  matchPharmacyNames(appName, excelName) {
+    const a = this.normalize(appName);
+    const b = this.normalize(excelName);
+    if (!a || !b) return false;
+    
+    // Exact substring match (handles "H-E-B" vs "H-E-B El Mirador")
+    if (a.includes(b) || b.includes(a)) return true;
+    
+    // Token-based overlap (handles variations like "HEB" vs "H-E-B El Mirador")
+    const aTok = this.normalizeForTokens(appName).split(' ').filter(t => t.length > 1);
+    const bTok = this.normalizeForTokens(excelName).split(' ').filter(t => t.length > 1);
+    const overlap = aTok.filter(t => bTok.some(u => u.includes(t) || t.includes(u)));
+    
+    // 60% token overlap required
+    return overlap.length >= Math.max(1, Math.ceil(aTok.length * 0.6));
+  }
+
+  // Brand-gated pharmacy matching (STRICT - same brand required first!)
+  pharmacyMatchStrict(excelPharmacy, appPharmacy) {
+    const excelBrand = this.getBrandKey(excelPharmacy);
+    const appBrand = this.getBrandKey(appPharmacy);
+
+    // BRAND GATE: Must have same brand key first!
+    if (!excelBrand || !appBrand || excelBrand !== appBrand) {
+      return false;
+    }
+
+    // Same brand confirmed: now check for substring match
+    // Simple case: "H-E-B" is in "H-E-B El Mirador"
+    if (this.containsAfterNorm(appPharmacy, excelPharmacy) || 
+        this.containsAfterNorm(excelPharmacy, appPharmacy)) {
+      return true;
+    }
+
+    // Complex case: Handle "Farmacia del Ahorro" vs "Farmacias del Ahorro" (singular/plural)
+    // Strip common stopwords and check if brand name is present
+    const stopwords = ['farmacia', 'farmacias', 'del', 'de', 'la', 'el', 'los', 'las'];
+    const excelTokens = this.normalize(excelPharmacy).split('').filter(c => c).join('').split(/(?=[a-z])/).join('');
+    const appTokens = this.normalize(appPharmacy).split('').filter(c => c).join('').split(/(?=[a-z])/).join('');
+    
+    // If both contain the brand keyword, it's a match
+    // e.g., both "farmaciadelahorro" and "farmaciasdelahorrogomezmorin" contain "ahorro"
+    return true; // Since brands match, allow the match
+  }
+
   // Search for medication prices using Excel data
   async searchMedicationPrices(pharmacies, medication, options = {}) {
     try {
+      console.log('🚨🚨🚨 NEW ENHANCED SEARCH CODE RUNNING - VERSION 2.0 🚨🚨🚨');
       console.log('🔍 Enhanced medication search for:', medication.name);
+      console.log('🔍 Medication dosage:', medication.dosage);
       
       // Get Excel medication data
       const excelMedications = await this.excelReader.getMedicationData();
@@ -22,124 +214,493 @@ class EnhancedMedicationSearch {
       const excelMatches = await this.excelReader.searchMedications(medication.name);
       
       console.log(`📊 Found ${excelMatches.length} Excel matches for "${medication.name}"`);
+      if (excelMatches.length > 0) {
+        console.log('📊 Sample matches:', excelMatches.slice(0, 3).map(m => ({
+          medicinas: m.Medicinas,
+          unidades: m.unidades
+        })));
+      }
+
+      // 🚨 DIAGNOSTIC: Count medications by pharmacy brand
+      const brandCounts = {};
+      for (const row of excelMatches) {
+        const pharmacyName = this.getPharmacyName(row);
+        const brand = this.getBrandKey(pharmacyName) || 'unknown';
+        brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+      }
+      console.log('📊 [EXCEL BRAND COUNTS for initial matches]', brandCounts);
+      console.log('📊 [Any HEB rows?]', (brandCounts['heb'] || 0) > 0, `(${brandCounts['heb'] || 0} rows)`);
+      console.log('📊 [Any Ahorro rows?]', (brandCounts['ahorro'] || 0) > 0, `(${brandCounts['ahorro'] || 0} rows)`);
+      console.log('📊 [Any Benavides rows?]', (brandCounts['benavides'] || 0) > 0, `(${brandCounts['benavides'] || 0} rows)`);
+      console.log('📊 [Any Aurrera rows?]', (brandCounts['aurrera'] || 0) > 0, `(${brandCounts['aurrera'] || 0} rows)`);
+      console.log('📊 [Any H-E-B rows?]', (brandCounts['h-e-b'] || 0) > 0, `(${brandCounts['h-e-b'] || 0} rows)`);
+      
+      // ========================================
+      // STEP 1: Build candidate pool (brand + generic rows)
+      // ========================================
+      // Start with brand matches from searchMedications()
+      let candidateRows = excelMatches;
+      
+      // Define multi-component drugs
+      const multiComponentDrugs = {
+        'galvus met': ['vildagliptin', 'vildagliptina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+        'janumet': ['sitagliptin', 'sitagliptina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+        'xigduo': ['dapagliflozin', 'dapagliflozina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+        'kombiglyze': ['saxagliptin', 'saxagliptina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+        'invokamet': ['canagliflozin', 'canagliflozina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+        'synjardy': ['empagliflozin', 'empagliflozina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+        'jardianz duo': ['empagliflozin', 'empagliflozina', 'metformin', 'metformina', 'metparamin', 'metparamina'],
+      };
+      
+      const medicationLower = medication.name.toLowerCase();
+      console.log(`🔍 Checking if "${medicationLower}" is a multi-component medication...`);
+      
+      // If multi-component, pull generic ingredient rows from full dataset
+      const multiKey = Object.keys(multiComponentDrugs).find(k => medicationLower.includes(k));
+      if (multiKey) {
+        const groups = [
+          multiComponentDrugs[multiKey].slice(0, 2), // First active ingredient variants
+          multiComponentDrugs[multiKey].slice(2)     // Second active ingredient variants
+        ];
+        
+        // Find rows with both ingredient groups (using loose matching for typos)
+        const ingredientRows = excelMedications.filter(r => {
+          const nm = this.normalizeLoose(r.Medicinas || '');
+          // At least one variant from each group (handles typos like "metforminaa")
+          return groups.every(g => g.some(ing => nm.includes(this.normalizeLoose(ing))));
+        });
+        
+        // Merge with brand matches, remove duplicates
+        const seen = new Set();
+        candidateRows = [...excelMatches, ...ingredientRows].filter(r => {
+          const k = `${this.normalize(this.getPharmacyName(r))}|${this.normalize(r.Medicinas)}|${this.normalize(r.unidades)}`;
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+        
+        console.log(`📦 Multi-component: added ${ingredientRows.length} generic rows. Candidates: ${candidateRows.length} (was ${excelMatches.length})`);
+        
+        // Log brand counts for candidates
+        const candidateBrandCounts = candidateRows.reduce((m, r) => {
+          const b = this.getBrandKey(this.getPharmacyName(r)) || 'unknown';
+          m[b] = (m[b] || 0) + 1;
+          return m;
+        }, {});
+        console.log('📊 Candidate rows by brand:', candidateBrandCounts);
+      }
+      
+      // ========================================
+      // STEP 2: Apply component count filter (single vs multi)
+      // ========================================
+      let filteredMatches = candidateRows;
+      
+      // Check if user specified single-component only
+      const isSingleComponent = medication.isSingleComponent !== undefined ? medication.isSingleComponent : true;
+      console.log(`🔍 Component filter received: isSingleComponent = ${medication.isSingleComponent} (raw from medication object)`);
+      console.log(`🔍 Component filter resolved: ${isSingleComponent ? 'SINGLE component only' : 'MULTI component allowed'}`);
+      
+      if (isSingleComponent) {
+        console.log(`🔍 Filtering for SINGLE component medications only...`);
+        console.log(`🔍 Before single-component filter: ${candidateRows.length} candidates`);
+
+        //
+        // Helper 1: escapeRegex
+        // Safely escapes any special regex chars in the ingredient text.
+        //
+        function escapeRegex(str) {
+          return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        //
+        // Helper 2: ingredientInName(lowerName, ing)
+        // Accent-safe "whole word" style match.
+        //
+        // We consider something a match if:
+        // - it's at the start of the string OR preceded by a non-letter/number (including punctuation, slash, space)
+        // - followed by end of string OR a non-letter/number
+        //
+        // We explicitly treat áéíóúñü as "letters" so Spanish ingredient names like
+        // "dapagliflozina", "ácido", etc. work.
+        //
+        function ingredientInName(lowerName, ing) {
+          const pattern = new RegExp(
+            `(^|[^a-záéíóúñü0-9])${escapeRegex(ing)}(?=$|[^a-záéíóúñü0-9])`,
+            'i'
+          );
+          return pattern.test(lowerName);
+        }
+
+        // combo brand map already defined earlier:
+        // const multiComponentDrugs = { ... }
+
+        // 1. Normalize known combo brand names for match checks
+        const comboBrandNames = Object.keys(multiComponentDrugs).map(b => b.toLowerCase());
+
+        // 2. Build a de-duplicated list of all known ingredient variants
+        //    (metformina, metformin, sitagliptina, sitagliptin, etc.)
+        //    These are the active ingredients from multi-component drugs.
+        //
+        const uniqueIngredients = Array.from(
+          new Set(
+            Object.values(multiComponentDrugs)
+              .flat()
+              .map(ing => ing.toLowerCase().trim())
+          )
+        );
+
+        // 3. Words that strongly imply a combo drug.
+        // NOTE: We do NOT include "metformina"/"metformin" here because
+        // pure metformin is allowed in single-component mode.
+        //
+        const multiComponentIndicators = [
+          'sitagliptin', 'sitagliptina',
+          'vildagliptin', 'vildagliptina',
+          'glibenclamide', 'glimepiride', 
+          'empagliflozin', 'empagliflozina',
+          'dapagliflozin', 'dapagliflozina',
+          'canagliflozin', 'canagliflozina',
+          'alogliptin', 'linagliptin', 'saxagliptin', 'gemigliptin',
+          'glipizide', 'chlorpropamide',
+          'resveratrol', 'pioglitazone', 'pioglitazona',
+          'rosiglitazone', 'rosiglitazona'
+        ];
+
+        filteredMatches = candidateRows.filter(match => {
+          const rawName = match.Medicinas || '';
+          const lowerName = rawName.toLowerCase();
+          const noSpaceName = lowerName.replace(/\s+/g, ''); // "Galvus Met" -> "galvusmet"
+
+          //
+          // ---- Check #1: slash like "50/500" or "metformina/sitagliptina"
+          //
+          const hasSlash = lowerName.includes('/');
+
+          //
+          // ---- Check #2: known combo brand ("janumet", "galvus met", etc)
+          // We match with and without spaces so "GalvusMet" also triggers.
+          //
+          const isKnownComboBrand = comboBrandNames.some(brand => {
+            const brandNoSpace = brand.replace(/\s+/g, '');
+            return (
+              lowerName.includes(brand) ||        // "galvus met"
+              noSpaceName.includes(brandNoSpace)  // "galvusmet"
+            );
+          });
+
+          //
+          // ---- Check #3: detect DISTINCT active ingredients in the string
+          //
+          // We scan the medication name for known ingredient variants
+          // and collect which unique ingredients are present.
+          // If we find TWO OR MORE distinct actives, it's a combo.
+          //
+          // IMPORTANT:
+          // We use ingredientInName() instead of .includes() to avoid:
+          // - counting "metformin" and "metformina" as two DIFFERENT ingredients
+          //   just because one string contains the other
+          // - breaking on accents in Spanish
+          //
+          const foundIngredients = new Set();
+          for (const ing of uniqueIngredients) {
+            if (ingredientInName(lowerName, ing)) {
+              foundIngredients.add(ing);
+              if (foundIngredients.size >= 2) break;
+            }
+          }
+          const hasMultipleDistinctIngredients = foundIngredients.size >= 2;
+
+          //
+          // ---- Check #4: indicator words
+          //
+          // If we see certain combo-only actives (like "sitagliptina"),
+          // we treat it as a combo EVEN IF metformin isn't explicitly spelled out yet.
+          //
+          const containsComboIndicator = multiComponentIndicators.some(indicator =>
+            ingredientInName(lowerName, indicator)
+          );
+
+          //
+          // ---- Final decision:
+          //
+          // A medication is considered MULTI-COMPONENT if ANY of these are true:
+          //   - it has a slash dose (e.g. "50/500")
+          //   - it matches a known combo brand (Janumet, Galvus Met, etc.)
+          //   - we found 2+ distinct active ingredients
+          //   - it contains known combo-only indicators
+          //
+          const isMultiComponentDrug =
+            hasSlash ||
+            isKnownComboBrand ||
+            hasMultipleDistinctIngredients ||
+            containsComboIndicator;
+
+          //
+          // ---- For SINGLE-COMPONENT MODE:
+          // We KEEP ONLY meds that are NOT multi.
+          //
+          const keep = !isMultiComponentDrug;
+
+          if (!keep) {
+            console.log(`❌ REJECTED (multi-component): "${rawName}"`, {
+              hasSlash,
+              isKnownComboBrand,
+              foundIngredients: Array.from(foundIngredients),
+              hasMultipleDistinctIngredients,
+              containsComboIndicator
+            });
+          } else {
+            console.log(`✅ KEPT (single-component): "${rawName}"`, {
+              foundIngredients: Array.from(foundIngredients)
+            });
+          }
+
+          return keep;
+        });
+
+        console.log(`📊 After single-component filter: ${filteredMatches.length} matches (was ${candidateRows.length})`);
+      } else {
+        // User wants multi-component medications - apply the existing multi-component filter
+        for (const [brandName, requiredIngredients] of Object.entries(multiComponentDrugs)) {
+          if (medicationLower.includes(brandName)) {
+            console.log(`🔍 ✅ Multi-component medication detected: "${brandName}"`);
+            console.log(`🔍 Requiring ALL of these ingredients: ${requiredIngredients.join(', ')}`);
+            console.log(`🔍 Before filtering: ${candidateRows.length} candidates`);
+          
+          // Split ingredients into two groups:
+          // Group 1: vildagliptin variants (first active ingredient)
+          // Group 2: metformin/metparamin variants (second active ingredient)
+          const ingredientPairs = [
+            requiredIngredients.slice(0, 2), // First active ingredient variants
+            requiredIngredients.slice(2)     // Second active ingredient variants (all metformin variants)
+          ];
+          
+          console.log(`🔍 Ingredient pairs to match:`, ingredientPairs);
+          
+          // Filter: medication must contain at least ONE variant from EACH ingredient pair
+          // OR contain the brand name itself (e.g., "GalvusMet" is proof of having both ingredients)
+          filteredMatches = candidateRows.filter(match => {
+            const medicinas = match.Medicinas || '';
+            
+            // First check: Does it contain the brand name? (space-agnostic)
+            const containsBrandName = this.containsAfterNorm(medicinas, brandName);
+            
+            // Second check: Does it contain all required ingredient names spelled out?
+            const hasAllIngredients = ingredientPairs.every(pair => 
+              pair.some(ingredient => this.containsAfterNorm(medicinas, ingredient))
+            );
+            
+            // Pass if EITHER the brand name is present OR all ingredients are spelled out
+            const passes = containsBrandName || hasAllIngredients;
+            
+            if (passes) {
+              if (containsBrandName) {
+                console.log(`✅ Multi-component MATCH: "${match.Medicinas}" contains brand name "${brandName}"`);
+              } else {
+                console.log(`✅ Multi-component MATCH: "${match.Medicinas}" contains all required ingredients`);
+              }
+            } else {
+              console.log(`❌ REJECTED: "${match.Medicinas}" - missing brand name AND required ingredients`);
+            }
+            
+            return passes;
+          });
+          
+          console.log(`📊 ✅ After multi-component ingredient filtering: ${filteredMatches.length} matches (was ${candidateRows.length})`);
+          break; // Stop after first match
+          }
+        }
+        
+        if (medicationLower.includes('galvus met')) {
+          if (filteredMatches.length === candidateRows.length) {
+            console.log(`⚠️ WARNING: Multi-component filter did NOT reduce results! Still have ${filteredMatches.length} matches.`);
+          }
+        }
+      }
+      
+      // Filter by dosage/strength if available (for multi-component medications like "50mg/500mg")
+      if (medication.dosage && medication.dosage !== 'N/A') {
+        const dosage = medication.dosage.toLowerCase().trim();
+        console.log(`🔍 Filtering by dosage/strength: "${dosage}"`);
+        console.log(`🔍 Filtering FROM: ${filteredMatches.length} matches (after previous filters)`);
+        
+        // Extract strength values from dosage string (e.g., "50mg/500mg" -> ["50", "500"])
+        const strengthValues = dosage.match(/\d+/g) || [];
+        console.log(`🔍 Extracted strength values:`, strengthValues);
+        
+        if (strengthValues.length > 0) {
+          // For multi-component medications (2+ strengths), require STRICT matching
+          const isMultiComponent = strengthValues.length >= 2;
+          
+          filteredMatches = filteredMatches.filter(match => {
+            const unidades = (match.unidades || '').toLowerCase();
+            const medicinas = (match.Medicinas || '').toLowerCase();
+            const combined = `${medicinas} ${unidades}`.toLowerCase();
+            
+            if (isMultiComponent) {
+              // STRICT MODE: For multi-component meds, ALL strength values must appear
+              // AND they must appear in close proximity (within 50 characters of each other)
+              // to ensure they're part of the same medication formulation
+              
+              const allStrengthsPresent = strengthValues.every(value => combined.includes(value));
+              
+              if (!allStrengthsPresent) {
+                return false; // Reject if any strength is missing
+              }
+              
+              // Find positions of each strength value
+              const positions = strengthValues.map(value => combined.indexOf(value));
+              const minPos = Math.min(...positions);
+              const maxPos = Math.max(...positions);
+              const spread = maxPos - minPos;
+              
+              // Require strengths to be close together (within 50 chars)
+              // This prevents matching "50mg" medication with "500mg" medication separately
+              const isCloseProximity = spread <= 50;
+              
+              if (allStrengthsPresent && isCloseProximity) {
+                console.log(`✅ STRICT Match: ${medicinas} (${unidades}) - All strengths [${strengthValues.join(', ')}] within ${spread} chars`);
+                return true;
+              } else {
+                console.log(`❌ Rejected: ${medicinas} - strengths too far apart (spread: ${spread} chars)`);
+                return false;
+              }
+            } else {
+              // Single-component medication: just check if the strength appears
+              const strengthMatch = combined.includes(strengthValues[0]);
+              if (strengthMatch) {
+                console.log(`✅ Match found: ${medicinas} (${unidades}) contains strength: ${strengthValues[0]}`);
+              }
+              return strengthMatch;
+            }
+          });
+          
+          console.log(`📊 After ${isMultiComponent ? 'STRICT' : 'standard'} dosage/strength filtering: ${filteredMatches.length} matches`);
+        }
+      }
       
       // Filter by quantity unit if available
-      let filteredMatches = excelMatches;
+      let strictMatches = filteredMatches;
       if (medication.quantityUnit) {
         const quantityUnit = medication.quantityUnit.toLowerCase();
         console.log(`🔍 Filtering by quantity unit: "${quantityUnit}"`);
+        console.log(`🔍 Filtering FROM: ${filteredMatches.length} matches (after previous filters)`);
         
-        filteredMatches = excelMatches.filter(match => {
+        strictMatches = filteredMatches.filter(match => {
           const unidades = (match.unidades || '').toLowerCase();
           const medicinas = (match.Medicinas || '').toLowerCase();
+          const combined = `${medicinas} ${unidades}`;
+          
+          // Normalize the quantity unit to handle plurals and variations
+          const normalizedUnit = quantityUnit.replace(/s$/, ''); // Remove trailing 's' (tablets -> tablet)
           
           // Check if the quantity unit appears in the medication name or units field
-          const hasUnitMatch = unidades.includes(quantityUnit) || 
-                              medicinas.includes(quantityUnit) ||
-                              // Handle common variations
-                              (quantityUnit === 'tablet' && (unidades.includes('tab') || medicinas.includes('tab'))) ||
-                              (quantityUnit === 'capsule' && (unidades.includes('cap') || medicinas.includes('cap'))) ||
-                              (quantityUnit === 'gel cap' && (unidades.includes('gel') || medicinas.includes('gel'))) ||
-                              (quantityUnit === 'ml' && (unidades.includes('ml') || medicinas.includes('ml'))) ||
-                              (quantityUnit === 'mg' && (unidades.includes('mg') || medicinas.includes('mg')));
+          const hasUnitMatch = combined.includes(quantityUnit) || 
+                              combined.includes(normalizedUnit) ||
+                              // Handle Spanish/English variations
+                              (normalizedUnit === 'tablet' && (combined.includes('tab') || combined.includes('tableta'))) ||
+                              (normalizedUnit === 'capsule' && (combined.includes('cap') || combined.includes('capsula'))) ||
+                              (normalizedUnit === 'gel cap' && (combined.includes('gel cap') || combined.includes('capsula gel') || combined.includes('softgel'))) ||
+                              (normalizedUnit === 'suspension' && (combined.includes('suspension') || combined.includes('susplumas') || combined.includes('jarabe'))) ||
+                              (normalizedUnit === 'drop' && (combined.includes('drop') || combined.includes('gota'))) ||
+                              (normalizedUnit === 'syrup' && (combined.includes('syrup') || combined.includes('jarabe'))) ||
+                              (normalizedUnit === 'gel' && combined.includes('gel')) ||
+                              (normalizedUnit === 'cream' && (combined.includes('cream') || combined.includes('crema'))) ||
+                              (normalizedUnit === 'ointment' && (combined.includes('ointment') || combined.includes('pomada') || combined.includes('ungüento'))) ||
+                              (normalizedUnit === 'suppository' && (combined.includes('suppository') || combined.includes('suppositories') || combined.includes('supositorio'))) ||
+                              (normalizedUnit === 'patch' && (combined.includes('patch') || combined.includes('parche'))) ||
+                              (normalizedUnit === 'injection' && (combined.includes('injection') || combined.includes('injectable') || combined.includes('inyección') || combined.includes('inyectable'))) ||
+                              (normalizedUnit === 'vial' && (combined.includes('vial') || combined.includes('ampolla') || combined.includes('ampoule'))) ||
+                              (normalizedUnit === 'ml' && combined.includes('ml')) ||
+                              (normalizedUnit === 'mg' && combined.includes('mg')) ||
+                              (normalizedUnit === 'bottle' && (combined.includes('bottle') || combined.includes('botella') || combined.includes('frasco'))) ||
+                              (normalizedUnit === 'box' && (combined.includes('box') || combined.includes('caja'))) ||
+                              (normalizedUnit === 'pack' && (combined.includes('pack') || combined.includes('paquete')));
           
           return hasUnitMatch;
         });
         
-        console.log(`📊 After quantity unit filtering: ${filteredMatches.length} matches`);
+        console.log(`📊 After quantity unit filtering: ${strictMatches.length} matches`);
+        
+        // SMART FALLBACK: If too few results, run relaxed search (ignore quantity unit)
+        const FALLBACK_THRESHOLD = 5;
+        if (strictMatches.length <= FALLBACK_THRESHOLD && strictMatches.length < filteredMatches.length) {
+          console.log(`⚠️ Only ${strictMatches.length} strict matches found. Running relaxed search (ignoring quantity unit)...`);
+          
+          // Keep strict matches first, then add relaxed matches that aren't already included
+          const strictIds = new Set(strictMatches.map(m => `${this.normalize(m.Medicinas)}|${this.normalize(m.unidades || '')}`));
+          const relaxedMatches = filteredMatches.filter(m => {
+            const id = `${this.normalize(m.Medicinas)}|${this.normalize(m.unidades || '')}`;
+            return !strictIds.has(id);
+          });
+          
+          filteredMatches = [...strictMatches, ...relaxedMatches];
+          console.log(`✅ Expanded to ${filteredMatches.length} matches (${strictMatches.length} exact + ${relaxedMatches.length} other forms)`);
+          console.log(`📋 Showing all available forms: tablets, suspensions, gels, suppositories, etc.`);
+        } else {
+          filteredMatches = strictMatches;
+        }
       }
       
       // Create enhanced results by combining pharmacy locations with Excel prices
       const enhancedResults = [];
       
       for (const pharmacy of pharmacies) {
-        // Find Excel matches for this specific pharmacy with fuzzy matching
-        const normalizedPharmacyName = this.excelReader.normalizePharmacyName(pharmacy.name);
+        const appName = pharmacy.name || '';
+        const normalizedPharmacyName = this.normalizeForTokens(appName); // For debug logs
+        const appBrand = this.getBrandKey(appName);
         
         // Debug logging for specific pharmacies
-        if (pharmacy.name.toLowerCase().includes('guadalajara') || pharmacy.name.toLowerCase().includes('ahorro')) {
-          console.log(`🔍 DEBUG ${pharmacy.name}: "${pharmacy.name}" -> "${normalizedPharmacyName}"`);
+        if (['heb','ahorro','benavides','guadalajara','similares'].includes(appBrand)) {
+          console.log(`🧪 Matching "${appName}" (brand: ${appBrand}) vs ${filteredMatches.length} rows`);
         }
         
-        const pharmacyMatches = filteredMatches.filter(match => {
-          const normalizedExcelPharmacy = this.excelReader.normalizePharmacyName(match.Pharmacy);
+        const pharmacyMatches = filteredMatches.filter(row => {
+          const exName = this.getPharmacyName(row) || '';
+          const exBrand = this.getBrandKey(exName);
           
-          // Debug logging for specific pharmacies
-          if (pharmacy.name.toLowerCase().includes('guadalajara') || pharmacy.name.toLowerCase().includes('ahorro')) {
-            console.log(`🔍 DEBUG ${pharmacy.name} Excel: "${match.Pharmacy}" -> "${normalizedExcelPharmacy}"`);
+          // Brand gate: if both brands are recognized, they must match
+          if (appBrand && exBrand && appBrand !== exBrand) {
+            return false;
           }
           
-          // Exact match
-          if (normalizedExcelPharmacy === normalizedPharmacyName) {
-            return true;
-          }
-          
-          // Fuzzy match for variations (e.g., "H-E-B El Mirador" vs "HEB")
-          const pharmacyWords = normalizedPharmacyName.split(' ').filter(w => w.length > 1);
-          const excelWords = normalizedExcelPharmacy.split(' ').filter(w => w.length > 1);
-          
-          // Check if any significant words match
-          const matchingWords = pharmacyWords.filter(pWord => 
-            excelWords.some(eWord => eWord.includes(pWord) || pWord.includes(eWord))
-          );
-          
-          // Special case: if one name is a subset of the other, but only for specific known cases
-          // This handles specific cases like "H-E-B El Mirador" vs "HEB"
-          if (normalizedPharmacyName.includes(normalizedExcelPharmacy) || 
-              normalizedExcelPharmacy.includes(normalizedPharmacyName)) {
-            // Only allow subset matching for very specific known patterns
-            const allowedSubsets = [
-              { app: 'heb el mirador', excel: 'heb' },
-              { app: 'h-e-b el mirador', excel: 'heb' }
-              // Removed farmacia guadalajara - let exact matching handle it
-            ];
-            
-            const isAllowedSubset = allowedSubsets.some(pattern => 
-              (normalizedPharmacyName.includes(pattern.app) && normalizedExcelPharmacy.includes(pattern.excel)) ||
-              (normalizedExcelPharmacy.includes(pattern.app) && normalizedPharmacyName.includes(pattern.excel))
-            );
-            
-            if (isAllowedSubset) {
-              return true;
-            }
-          }
-          
-          // Require 85% word match for pharmacy names (balanced strictness)
-          // This prevents most false matches while allowing legitimate ones like "Farmacia del Ahorro"
-          return matchingWords.length >= Math.max(1, pharmacyWords.length * 0.85);
+          // Use centralized matching function
+          return this.matchPharmacyNames(appName, exName);
         });
         
         if (pharmacyMatches.length > 0) {
           // Use the first match (since we don't have similarity scores)
           const bestMatch = pharmacyMatches[0];
           
+          // Get price using robust getter
+          let finalPrice = this.getPriceValue(bestMatch);
+          
           // Log what we found for debugging
-          console.log(`🔍 Found ${pharmacyMatches.length} Excel matches for ${pharmacy.name}: ${bestMatch.Medicinas} - MXN ${bestMatch['original price']}`);
+          console.log(`🔍 Found ${pharmacyMatches.length} Excel matches for ${pharmacy.name}: ${this.getMedName(bestMatch)} - MXN ${finalPrice}`);
           
           // Convert MXN price to target currency if needed
-          let finalPrice = bestMatch['original price'];
-          if (options.currency && options.currency !== 'MXN') {
+          if (finalPrice != null && options.currency && options.currency !== 'MXN') {
             finalPrice = await this.convertCurrency(finalPrice, 'MXN', options.currency);
           }
           
           enhancedResults.push({
             ...pharmacy,
             price: finalPrice,
+            priceNotAvailable: finalPrice == null,
             pickup: true,
             delivery: Math.random() > 0.5, // Random for now
             requiresCoupon: Math.random() > 0.8, // Random for now
             excelMatch: {
-              medicinas: bestMatch.Medicinas,
-              precioOriginal: bestMatch['original price'],
-              unidades: bestMatch.unidades,
-              similarity: bestMatch.similarity
+              medicinas: this.getMedName(bestMatch),
+              precioOriginal: this.getPriceValue(bestMatch),
+              unidades: this.getUnits(bestMatch)
             }
           });
         } else {
           // Debug: Log why no matches were found
           console.log(`🔍 No Excel matches for ${pharmacy.name} (normalized: "${normalizedPharmacyName}")`);
-          const sampleExcelPharmacies = [...new Set(excelMatches.slice(0, 10).map(m => m.Pharmacy))];
-          console.log(`🔍 Sample Excel pharmacies: ${sampleExcelPharmacies.join(', ')}`);
+          const sampleExcelPharmacies = [...new Set(filteredMatches.slice(0, 10).map(m => this.getPharmacyName(m)))];
+          console.log(`🔍 Sample filtered pharmacies: ${sampleExcelPharmacies.join(', ')}`);
           // No Excel match found - show "Price not available"
           enhancedResults.push({
             ...pharmacy,
@@ -152,8 +713,21 @@ class EnhancedMedicationSearch {
         }
       }
       
-      // Sort by price (lowest first)
-      enhancedResults.sort((a, b) => (a.price || 0) - (b.price || 0));
+      // Sort by price (lowest first), with "no price" at the bottom
+      // Sort results: Similares first (by price), then others by price
+      enhancedResults.sort((a, b) => {
+        const aIsSimilares = this.getBrandKey(this.getPharmacyName(a)) === 'similares';
+        const bIsSimilares = this.getBrandKey(this.getPharmacyName(b)) === 'similares';
+        
+        // If one is Similares and the other isn't, Similares goes first
+        if (aIsSimilares && !bIsSimilares) return -1;
+        if (!aIsSimilares && bIsSimilares) return 1;
+        
+        // Otherwise sort by price (null prices go to the end)
+        const av = a.price == null ? Number.POSITIVE_INFINITY : a.price;
+        const bv = b.price == null ? Number.POSITIVE_INFINITY : b.price;
+        return av - bv;
+      });
       
       console.log(`✅ Enhanced search completed: ${enhancedResults.length} results`);
       

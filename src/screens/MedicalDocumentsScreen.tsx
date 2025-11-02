@@ -515,6 +515,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   const [idPair, setIDPair] = useState<{ front: DocumentItem | null, back: DocumentItem | null }>({ front: null, back: null });
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+  const [showCustomAlert, setShowCustomAlert] = useState(false);
+  const [customAlertMessage, setCustomAlertMessage] = useState({ title: '', message: '', type: 'success' as 'success' | 'error' });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmCallback, setDeleteConfirmCallback] = useState<(() => void) | null>(null);
+  const [deleteConfirmTitle, setDeleteConfirmTitle] = useState('');
+  const [deleteConfirmMessage, setDeleteConfirmMessage] = useState('');
   const imageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Animation refs
@@ -532,7 +538,25 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       Vibration.vibrate(type === 'light' ? 50 : type === 'medium' ? 100 : 200);
     }
   };
-
+  
+  // Custom alert helper
+  const showCustomAlertMsg = (title: string, message: string, type: 'success' | 'error' = 'success') => {
+    setCustomAlertMessage({ title, message, type });
+    setShowCustomAlert(true);
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      setShowCustomAlert(false);
+    }, 3000);
+  };
+  
+  // Delete confirmation helper
+  const showDeleteConfirmDialog = (title: string, message: string, onConfirm: () => void) => {
+    setDeleteConfirmTitle(title);
+    setDeleteConfirmMessage(message);
+    setDeleteConfirmCallback(() => onConfirm);
+    setShowDeleteConfirm(true);
+  };
+  
   // Removed loadDoctorContacts function - no longer using doctor contacts
 
   useEffect(() => {
@@ -636,11 +660,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         await saveDocuments(updatedDocuments);
         
         triggerHaptic('medium');
-        Alert.alert('✅ ' + t('success'), t('documentUploadedSuccessfully'));
+        showCustomAlertMsg(t('success'), t('documentUploadedSuccessfully'), 'success');
       }
     } catch (error) {
       console.error('Failed to upload document:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToUploadDocument'));
+      showCustomAlertMsg(t('error'), t('failedToUploadDocument'), 'error');
     }
   };
 
@@ -697,18 +721,18 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       await saveDocuments(updatedDocuments);
                       
                       triggerHaptic('medium');
-                      Alert.alert('✅ ' + t('success'), t('uploadSuccess'));
+                      showCustomAlertMsg(t('success'), t('uploadSuccess'), 'success');
                     } catch (copyError) {
                       console.error('Failed to copy PDF:', copyError);
-                      Alert.alert('❌ ' + t('error'), t('failedToSavePDF'));
+                      showCustomAlertMsg(t('error'), t('failedToSavePDF'), 'error');
                     }
         } else {
-          Alert.alert('❌ ' + t('error'), 'Please select a PDF file. The selected file is not a PDF document.');
+          showCustomAlertMsg(t('error'), 'Please select a PDF file. The selected file is not a PDF document.', 'error');
         }
       }
     } catch (error) {
       console.error('Failed to upload PDF:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToUploadPDF'));
+      showCustomAlertMsg(t('error'), t('failedToUploadPDF'), 'error');
     }
   };
 
@@ -749,31 +773,25 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         await saveDocuments(updatedDocuments);
         
         triggerHaptic('medium');
-        Alert.alert('✅ ' + t('success'), t('photoTakenSuccessfully'));
+        showCustomAlertMsg(t('success'), t('photoTakenSuccessfully'), 'success');
       }
     } catch (error) {
       console.error('Failed to take photo:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToTakePhoto'));
+      showCustomAlertMsg(t('error'), t('failedToTakePhoto'), 'error');
     }
   };
 
   const deleteDocument = async (documentId: string) => {
     triggerHaptic('heavy');
-    Alert.alert(
-      '🗑️ ' + t('deleteDocument'),
+    showDeleteConfirmDialog(
+      t('deleteDocument'),
       t('areYouSureDeleteDocument'),
-      [
-        { text: t('cancel'), style: 'cancel' },
-        { 
-          text: t('delete'), 
-          style: 'destructive',
-          onPress: async () => {
-            const updatedDocuments = documents.filter(doc => doc.id !== documentId);
-            await saveDocuments(updatedDocuments);
-            triggerHaptic('medium');
-          }
-        }
-      ]
+      async () => {
+        const updatedDocuments = documents.filter(doc => doc.id !== documentId);
+        await saveDocuments(updatedDocuments);
+        triggerHaptic('medium');
+        setShowDeleteConfirm(false);
+      }
     );
   };
 
@@ -2970,7 +2988,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         // Share the PDF
         console.log('📤 Attempting to share combined ID PDF:', shareableUri);
         try {
-          const { isAvailable } = await Sharing.isAvailableAsync();
+          const isAvailable = await Sharing.isAvailableAsync();
           console.log('📤 Sharing availability check:', isAvailable);
           
           if (isAvailable) {
@@ -3129,7 +3147,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         // Share the PDF
         console.log('📤 Attempting to share single ID PDF (duplicate section):', shareableUri);
         try {
-          const { isAvailable } = await Sharing.isAvailableAsync();
+          const isAvailable = await Sharing.isAvailableAsync();
           console.log('📤 Sharing availability check (duplicate section):', isAvailable);
           
           if (isAvailable) {
@@ -3287,7 +3305,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         // Share the PDF
         console.log('📤 Attempting to share single ID PDF:', shareableUri);
         try {
-          const { isAvailable } = await Sharing.isAvailableAsync();
+          const isAvailable = await Sharing.isAvailableAsync();
           console.log('📤 Sharing availability check:', isAvailable);
           
           if (isAvailable) {
@@ -3483,34 +3501,30 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             }}
           >
             <DynamicText type="card" style={[dynamicStyles.actionButtonText, { fontSize: 10 }]}>
-              📤 Share
+              📤
             </DynamicText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[dynamicStyles.actionButton, { backgroundColor: '#dc2626' + 'CC' }]}
             onPress={() => {
               if (hasBackSide) {
-                Alert.alert(
+                showDeleteConfirmDialog(
                   'Delete ID Documents',
                   'Are you sure you want to delete both front and back ID documents?',
-                  [
-                    { text: t('cancel'), style: 'cancel' },
-                    { 
-                      text: 'Delete', 
-                      style: 'destructive',
-                      onPress: () => {
-                        deleteDocument(document.id);
-                        if (pair && pair.back) deleteDocument(pair.back.id);
-                      }
-                    }
-                  ]
+                  () => {
+                    deleteDocument(document.id);
+                    if (pair && pair.back) deleteDocument(pair.back.id);
+                  }
                 );
               } else {
                 deleteDocument(document.id);
               }
             }}
           >
-            <DynamicText type="card" style={dynamicStyles.actionButtonText}>🗑️</DynamicText>
+            <Image 
+              source={require('../../assets/dashboard Emojies/trash.png')} 
+              style={{ width: 20, height: 20 }}
+            />
         </TouchableOpacity>
       </View>
       );
@@ -3573,7 +3587,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         style={[dynamicStyles.actionButton, { backgroundColor: '#dc2626' + 'CC' }]}
         onPress={() => deleteDocument(document.id)}
       >
-        <DynamicText type="card" style={dynamicStyles.actionButtonText}>🗑️</DynamicText>
+        <Image 
+          source={require('../../assets/dashboard Emojies/trash.png')} 
+          style={{ width: 20, height: 20 }}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -4323,7 +4340,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       deleteDocument(selectedDocument.id);
                     }}
                   >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>🗑️ Delete</DynamicText>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                      <Image 
+                        source={require('../../assets/dashboard Emojies/trash.png')} 
+                        style={{ width: 16, height: 16, marginRight: 6 }}
+                      />
+                      <DynamicText type="card" style={dynamicStyles.modalButtonText}>Delete</DynamicText>
+                    </View>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -4833,27 +4856,26 @@ startxref
                       alignItems: 'center',
                     }]}
                     onPress={() => {
-                      Alert.alert(
+                      showDeleteConfirmDialog(
                         'Delete ID Documents',
                         'Are you sure you want to delete both front and back ID documents?',
-                        [
-                          { text: t('cancel'), style: 'cancel' },
-                          { 
-                            text: 'Delete', 
-                            style: 'destructive',
-                            onPress: () => {
-                              if (idPair && idPair.front) deleteDocument(idPair.front);
-                              if (idPair && idPair.back) deleteDocument(idPair.back);
-                              setShowDualIDViewer(false);
-                            }
-                          }
-                        ]
+                        () => {
+                          if (idPair && idPair.front) deleteDocument(idPair.front);
+                          if (idPair && idPair.back) deleteDocument(idPair.back);
+                          setShowDualIDViewer(false);
+                        }
                       );
                     }}
                   >
-                    <DynamicText type="card" style={[dynamicStyles.modalButtonText, { fontSize: 12, textAlign: 'center' }]}>
-                      🗑️ Delete
-                    </DynamicText>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                      <Image 
+                        source={require('../../assets/dashboard Emojies/trash.png')} 
+                        style={{ width: 14, height: 14, marginRight: 4 }}
+                      />
+                      <DynamicText type="card" style={[dynamicStyles.modalButtonText, { fontSize: 12, textAlign: 'center' }]}>
+                        Delete
+                      </DynamicText>
+                    </View>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -4864,6 +4886,114 @@ startxref
         {/* Removed Sharing Options Modal - now using direct sharing */}
 
         {/* Removed Doctor Selection Modal - no longer using doctor contacts */}
+
+        {/* Custom Alert Modal */}
+        <Modal
+          visible={showCustomAlert}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowCustomAlert(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowCustomAlert(false)}
+          >
+            <View style={[styles.customAlertContainer, { 
+              backgroundColor: getCardBackgroundColor(), 
+              borderColor: getCardBorderColor() 
+            }]}>
+              <View style={styles.customAlertContent}>
+                <View style={[styles.customAlertIcon, { 
+                  backgroundColor: customAlertMessage.type === 'success' ? '#22c55e' : '#ef4444' 
+                }]}>
+                  <DynamicText type="card" style={styles.customAlertIconText}>
+                    {customAlertMessage.type === 'success' ? '✓' : '✕'}
+                  </DynamicText>
+                </View>
+                <DynamicText type="primary" style={styles.customAlertTitle}>
+                  {customAlertMessage.title}
+                </DynamicText>
+                <DynamicText type="secondary" style={styles.customAlertMessage}>
+                  {customAlertMessage.message}
+                </DynamicText>
+                <TouchableOpacity
+                  style={[styles.customAlertButton, { 
+                    backgroundColor: getCardBorderColor() 
+                  }]}
+                  onPress={() => setShowCustomAlert(false)}
+                >
+                  <DynamicText type="card" style={styles.customAlertButtonText}>
+                    OK
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          visible={showDeleteConfirm}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDeleteConfirm(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowDeleteConfirm(false)}
+          >
+            <View style={[styles.customAlertContainer, { 
+              backgroundColor: getCardBackgroundColor(), 
+              borderColor: getCardBorderColor() 
+            }]}>
+              <View style={styles.customAlertContent}>
+                <View style={[styles.customAlertIcon, { 
+                  backgroundColor: '#ef4444' 
+                }]}>
+                  <DynamicText type="card" style={styles.customAlertIconText}>
+                    ⚠
+                  </DynamicText>
+                </View>
+                <DynamicText type="primary" style={styles.customAlertTitle}>
+                  {deleteConfirmTitle}
+                </DynamicText>
+                <DynamicText type="secondary" style={styles.customAlertMessage}>
+                  {deleteConfirmMessage}
+                </DynamicText>
+                <View style={styles.deleteConfirmButtons}>
+                  <TouchableOpacity
+                    style={[styles.deleteCancelButton, { 
+                      backgroundColor: 'transparent',
+                      borderWidth: 1,
+                      borderColor: getCardBorderColor() 
+                    }]}
+                    onPress={() => setShowDeleteConfirm(false)}
+                  >
+                    <DynamicText type="card" style={styles.deleteCancelButtonText}>
+                      {t('cancel')}
+                    </DynamicText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.deleteConfirmButton, { 
+                      backgroundColor: '#ef4444' 
+                    }]}
+                    onPress={() => {
+                      if (deleteConfirmCallback) {
+                        deleteConfirmCallback();
+                      }
+                    }}
+                  >
+                    <DynamicText type="card" style={styles.deleteConfirmButtonText}>
+                      {t('delete')}
+                    </DynamicText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
     </View>
   );
@@ -5059,5 +5189,89 @@ const styles = StyleSheet.create({
   },
   checkboxText: {
     fontSize: 16,
+  },
+  // Custom Alert Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  customAlertContainer: {
+    width: '85%',
+    maxWidth: 400,
+    borderRadius: 16,
+    borderWidth: 2,
+    overflow: 'hidden',
+  },
+  customAlertContent: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  customAlertIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  customAlertIconText: {
+    fontSize: 32,
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  customAlertTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  customAlertMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    opacity: 0.9,
+  },
+  customAlertButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    minWidth: 120,
+  },
+  customAlertButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  // Delete Confirmation styles
+  deleteConfirmButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+    width: '100%',
+  },
+  deleteCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+  },
+  deleteCancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  deleteConfirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+  },
+  deleteConfirmButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+    textAlign: 'center',
   },
 });

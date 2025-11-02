@@ -13,33 +13,40 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
 
-  // Unit options for supplements (common supplement dosage forms and units)
+  // Unit options for supplements (dosage strength units only - NOT package types)
   const dosageUnits = [
     // Mass units
-    'mcg', 'mg', 'g', 'kg',
+    'Mcg', 'Mg', 'G', 'Kg',
     // International units
     'IU',
     // Special vitamin units
-    'mcg DFE', 'mg NE', 'mg alpha-tocopherol',
+    'Mcg DFE', 'Mg NE', 'Mg alpha-tocopherol',
     // Probiotics
-    'CFU', 'billion CFU',
+    'CFU', 'Billion CFU',
     // Enzyme activity units
     'HUT', 'DU', 'FIP', 'ALU', 'GDU', 'FCC units',
-    // Dosage forms - solids
-    'tablet', 'tablets', 'capsule', 'capsules', 'softgel', 'softgels', 'caplet', 'caplets', 
-    'lozenge', 'lozenges', 'gummy', 'gummies', 'chewable', 'chewables',
-    // Dosage forms - powders
-    'scoop', 'scoops', 'tsp', 'tbsp',
-    // Dosage forms - liquids
-    'mL', 'L', 'drop', 'drops', 'spray', 'sprays', 'puff', 'puffs', 'actuation', 'actuations',
-    // Dosage forms - others
-    'patch', 'patches', 'sachet', 'sachets', 'stick pack', 'stick packs',
+    // Liquid volumes
+    'mL', 'L',
     // Concentrations
-    'mg/mL', 'mcg/mL', 'mg/5mL', '% w/w', '% w/v', '% v/v',
+    'Mg/mL', 'Mcg/mL', 'Mg/5mL', '% w/w', '% w/v', '% v/v',
     // Ratios
     '1:1', '1:2', '1:5',
+    // Powder measurements
+    'Tsp', 'Tbsp', 'Scoop',
     // General
-    'serving', 'servings', 'unit', 'units'
+    'Unit', 'Units'
+  ];
+
+  // Quantity unit options (package/container types)
+  const quantityUnits = [
+    'Tablet', 'Tablets', 'Capsule', 'Capsules', 'Softgel', 'Softgels', 'Gel cap', 'Gel caps',
+    'Caplet', 'Caplets', 'Lozenge', 'Lozenges', 'Gummy', 'Gummies', 'Chewable', 'Chewables',
+    'mL', 'L', 'Bottle', 'Bottles', 'Vial', 'Vials', 'Ampoule', 'Ampoules',
+    'Drop', 'Drops', 'Spray', 'Sprays', 'Puff', 'Puffs',
+    'Patch', 'Patches', 'Suppository', 'Suppositories',
+    'Sachet', 'Sachets', 'Stick pack', 'Stick packs', 'Scoop', 'Scoops',
+    'Box', 'Boxes', 'Pack', 'Packs', 'Jar', 'Jars', 'Container', 'Containers',
+    'Serving', 'Servings', 'Dose', 'Doses', 'Unit', 'Units'
   ];
   useEffect(() => {
     mounted.current += 1;
@@ -67,7 +74,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
     notes: '', 
     dosesLeft: '', 
     dosageValue: '', 
-    dosageUnit: 'mg',
+    dosageUnit: 'Mg',
+    quantityValue: '',
+    quantityUnit: 'Tablet',
     brand: '' 
   });
   const [addTimes, setAddTimes] = useState([]);
@@ -89,7 +98,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
     notes: '', 
     dosesLeft: '', 
     dosageValue: '', 
-    dosageUnit: 'mg',
+    dosageUnit: 'Mg',
+    quantityValue: '',
+    quantityUnit: 'Tablet',
     brand: '' 
   });
   const [editingSupplement, setEditingSupplement] = useState(null);
@@ -97,14 +108,25 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
   // Unit dropdown states
   const [showDosageUnitDropdown, setShowDosageUnitDropdown] = useState(false);
   const [showEditDosageUnitDropdown, setShowEditDosageUnitDropdown] = useState(false);
+  const [showQuantityUnitDropdown, setShowQuantityUnitDropdown] = useState(false);
+  const [showEditQuantityUnitDropdown, setShowEditQuantityUnitDropdown] = useState(false);
 
   // Refs for unit buttons to measure their position
   const dosageUnitButtonRef = useRef(null);
   const editDosageUnitButtonRef = useRef(null);
+  const quantityUnitButtonRef = useRef(null);
+  const editQuantityUnitButtonRef = useRef(null);
 
   // State to store layout of unit buttons
   const [dosageUnitButtonLayout, setDosageUnitButtonLayout] = useState(null);
   const [editDosageUnitButtonLayout, setEditDosageUnitButtonLayout] = useState(null);
+  const [quantityUnitButtonLayout, setQuantityUnitButtonLayout] = useState(null);
+  const [editQuantityUnitButtonLayout, setEditQuantityUnitButtonLayout] = useState(null);
+
+  // Date picker states
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateField, setDateField] = useState(null); // 'startDate' or 'endDate'
+  const [dateTarget, setDateTarget] = useState(null); // 'add' or 'edit'
 
 
   // Add keyboard event listeners to prevent modal from closing due to keyboard events
@@ -234,17 +256,20 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       dosage: `${addForm.dosageValue.trim()} ${addForm.dosageUnit}`.trim(),
       dosageValue: addForm.dosageValue.trim(),
       dosageUnit: addForm.dosageUnit,
-      times: addTimes,
+      quantity: addForm.quantityValue ? `${addForm.quantityValue.trim()} ${addForm.quantityUnit}`.trim() : '',
+      quantityValue: addForm.quantityValue ? addForm.quantityValue.trim() : '',
+      quantityUnit: addForm.quantityUnit,
+      times: addTimes.join(', '),
       status: addForm.status,
       startDate: addForm.startDate,
       endDate: addForm.endDate,
       notes: addForm.notes ? addForm.notes.trim() : '',
       dosesLeft: addForm.dosesLeft ? addForm.dosesLeft.trim() : '',
-      remainingQuantity: addForm.dosageValue ? addForm.dosageValue : '0',
+      remainingQuantity: addForm.quantityValue ? addForm.quantityValue : '0',
       refillSoon: false
     };
     setSupplements(prev => [...prev, newSupp]);
-    setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'tablet', brand: '' });
+    setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'Mg', quantityValue: '', quantityUnit: 'Tablet', brand: '' });
     setAddTimes([]);
     setShowAdd(false);
   };
@@ -260,6 +285,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
             dosage: `${editForm.dosageValue.trim()} ${editForm.dosageUnit}`.trim(),
             dosageValue: editForm.dosageValue.trim(),
             dosageUnit: editForm.dosageUnit,
+            quantity: editForm.quantityValue ? `${editForm.quantityValue.trim()} ${editForm.quantityUnit}`.trim() : '',
+            quantityValue: editForm.quantityValue ? editForm.quantityValue.trim() : '',
+            quantityUnit: editForm.quantityUnit,
             times: editTimes.join(', '),
             status: editForm.status,
             startDate: editForm.startDate,
@@ -269,7 +297,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
           }
         : supp
     ));
-    setEditForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'tablet', brand: '' });
+    setEditForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'Mg', quantityValue: '', quantityUnit: 'Tablet', brand: '' });
     setEditTimes([]);
     setEditingSupplement(null);
     setShowEdit(false);
@@ -386,19 +414,37 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       >
       <View style={{ padding: 16 }}>
         {/* Header with Filter and Add buttons */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 12 }}>
-          <TouchableOpacity 
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <TouchableOpacity
             onPress={() => setShowFilterModal(true)}
-            style={[styles.section, { backgroundColor: getCardBackgroundColor() + '80', padding: 12, width: 50, height: 50, justifyContent: 'center', alignItems: 'center', borderColor: getCardBorderColor() }]}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              borderWidth: 1,
+              borderColor: getCardBorderColor(),
+              backgroundColor: getCardBackgroundColor(),
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 12
+            }}
           >
             <Image source={require('../icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: getCardTextColor() }} />
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setShowAdd(true)}
-            style={[styles.section, { backgroundColor: theme.accent + 'CC', borderColor: theme.accent, padding: 12, flex: 1 }]}
+            style={{
+              flex: 1,
+              backgroundColor: theme.accent,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 12,
+              alignItems: 'center'
+            }}
           >
-            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>+ {S.addSupplement}</DynamicText>
+            <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
+              {S.addSupplement}
+            </DynamicText>
           </TouchableOpacity>
         </View>
 
@@ -410,46 +456,57 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
           return (
             <View
               key={supp.id}
-              style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginBottom: 12, padding: 16 }]}
+              style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), padding: 12 }]}
             >
               {/* Header row */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <View style={{ flex: 1 }}>
-                  <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 4 }}>
+                  <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_700Bold', marginBottom: 2 }}>
                     {supp.name}
                   </DynamicText>
                   {supp.brand && (
-                    <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
+                    <DynamicText type="card" style={{ fontSize: 13, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                       {supp.brand}
                     </DynamicText>
                   )}
                   {supp.dosage && (
-                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 2 }}>
+                    <DynamicText type="card" style={{ fontSize: 11, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 1 }}>
                       {supp.dosage}
                     </DynamicText>
                   )}
+                  {supp.quantity && (
+                    <DynamicText type="card" style={{ fontSize: 11, fontFamily: 'Inter_500Medium', opacity: 0.8, marginTop: 1 }}>
+                      {supp.quantity}
+                    </DynamicText>
+                  )}
                   {supp.times && (
-                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_400Regular', opacity: 0.6, marginTop: 2 }}>
+                    <DynamicText type="sub" style={{ fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 2 }}>
                       {supp.times}
                     </DynamicText>
                   )}
                 </View>
-                <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={{ flexDirection: 'row', gap: 6 }}>
                   <TouchableOpacity
                     onPress={() => {
-                      setDetailSupp(supp);
-                      setShowStatusSheet(true);
+                      setEditForm({
+                        ...supp,
+                        dosageValue: supp.dosageValue || supp.dosage?.split(' ')[0] || '',
+                        dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || 'Mg',
+                        quantityValue: supp.quantityValue || supp.quantity?.split(' ')[0] || '',
+                        quantityUnit: supp.quantityUnit || supp.quantity?.split(' ').slice(1).join(' ') || 'Tablet'
+                      });
+                      setEditTimes(supp.times ? (typeof supp.times === 'string' ? supp.times.split(', ') : supp.times) : []);
+                      setEditingSupplement(supp);
+                      setShowEdit(true);
                     }}
                     style={{
                       backgroundColor: theme.accent,
-                      borderRadius: 8,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderWidth: 1,
-                      borderColor: theme.accent
+                      paddingHorizontal: 10,
+                      paddingVertical: 5,
+                      borderRadius: 6
                     }}
                   >
-                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
+                    <DynamicText type="card" style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                       {S.edit}
                     </DynamicText>
                   </TouchableOpacity>
@@ -460,15 +517,13 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       setShowRefillModal(true);
                     }}
                     style={{
-                      backgroundColor: '#4CAF50',
-                      borderRadius: 8,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderWidth: 1,
-                      borderColor: '#4CAF50'
+                      backgroundColor: '#2dd4bf',
+                      paddingHorizontal: 10,
+                      paddingVertical: 5,
+                      borderRadius: 6
                     }}
                   >
-                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
+                    <DynamicText type="card" style={{ color: '#2c2c2c', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                       {S.refill}
                     </DynamicText>
                   </TouchableOpacity>
@@ -490,15 +545,13 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       );
                     }}
                     style={{
-                      backgroundColor: '#ff4444',
-                      borderRadius: 8,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderWidth: 1,
-                      borderColor: '#ff4444'
+                      backgroundColor: '#f87171',
+                      paddingHorizontal: 10,
+                      paddingVertical: 5,
+                      borderRadius: 6
                     }}
                   >
-                    <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>
+                    <DynamicText type="card" style={{ color: '#fff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                       {S.delete}
                     </DynamicText>
                   </TouchableOpacity>
@@ -506,7 +559,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
               </View>
 
               {/* Counter and Took Button Row - Compact Corner */}
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 8 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 6 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
                     {parseFloat(supp.remainingQuantity || supp.quantity?.replace(/[^\d.]/g, '') || '0')} {S.left}
@@ -583,148 +636,384 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       </ScrollView>
 
       {/* Add Supplement Modal */}
-      <Modal visible={showAdd} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
-            <DynamicText type="card" style={styles.modalTitle}>{S.addSupplement}</DynamicText>
-            
-            <TextInput
-              placeholder={S.supplementName}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={addForm.name}
-              onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="next"
-            />
-            
-            <TextInput
-              placeholder={S.brand}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={addForm.brand}
-              onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
-              autoCapitalize="words"
-              autoCorrect={false}
-              returnKeyType="next"
-            />
-            
-            {/* Dosage Value and Unit */}
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+      <Modal 
+        visible={showAdd} 
+        animationType="slide" 
+        transparent
+        statusBarTranslucent
+        onRequestClose={() => {
+          setShowAdd(false);
+          setInputFocused(false);
+        }}
+      >
+        {/* Backdrop: closes on outside press */}
+        <TouchableOpacity 
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
+          activeOpacity={1}
+          onPress={() => {
+            if (!inputFocused && showAdd) {
+              setShowAdd(false);
+              setInputFocused(false);
+            }
+          }}
+        >
+          {/* Modal Content Container */}
+          <View
+            style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginHorizontal: 16, width: '90%', maxHeight: '80%', padding: 20 }]}
+            onStartShouldSetResponder={() => true}
+          >
+            <ScrollView 
+              contentContainerStyle={{ padding: 16, width: '100%' }} 
+              keyboardShouldPersistTaps="always"
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  {S.addSupplement}
+                </DynamicText>
+                <TouchableOpacity onPress={() => {
+                  setShowAdd(false);
+                  setInputFocused(false);
+                }}>
+                  <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
+                </TouchableOpacity>
+              </View>
+
               <TextInput
-                placeholder="30"
+                placeholder={S.supplementName}
                 placeholderTextColor={getSubTextColor()}
-                value={addForm.dosageValue}
-                onChangeText={(text) => setAddForm(prev => ({ ...prev, dosageValue: text }))}
+                value={addForm.name}
+                onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
                 style={{
-                  flex: 1,
                   backgroundColor: getCardBackgroundColor(),
                   borderRadius: 12,
                   padding: 16,
+                  marginBottom: 12,
                   color: getCardTextColor(),
                   fontFamily: 'Inter_400Regular',
                   borderWidth: 1,
                   borderColor: getCardBorderColor()
                 }}
                 onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                autoCapitalize="none"
+                onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                autoCapitalize="words"
                 autoCorrect={false}
                 returnKeyType="next"
-                keyboardType="numeric"
               />
-              
+
+              <TextInput
+                placeholder={S.supplementBrand}
+                placeholderTextColor={getSubTextColor()}
+                value={addForm.brand}
+                onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 12,
+                  color: getCardTextColor(),
+                  fontFamily: 'Inter_400Regular',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="next"
+              />
+
+              {/* Dosage Value and Unit */}
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                <TextInput
+                  placeholder="1000"
+                  placeholderTextColor={getSubTextColor()}
+                  value={addForm.dosageValue}
+                  onChangeText={(text) => setAddForm(prev => ({ ...prev, dosageValue: text }))}
+                  style={{
+                    flex: 1,
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  keyboardType="numeric"
+                />
+                
+                <TouchableOpacity
+                  ref={dosageUnitButtonRef}
+                  onPress={() => {
+                    dosageUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                      setDosageUnitButtonLayout({ x, y, width, height });
+                    });
+                    setShowDosageUnitDropdown(true);
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                    minWidth: 80,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 4
+                  }}
+                >
+                  <DynamicText 
+                    type="card" 
+                    style={{ 
+                      fontSize: 14,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_600SemiBold'
+                    }}
+                  >
+                    {addForm.dosageUnit}
+                  </DynamicText>
+                  <DynamicText 
+                    type="sub" 
+                    style={{ 
+                      fontSize: 12,
+                      color: getCardTextColor() + '80'
+                    }}
+                  >
+                    ▼
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
+
+              {/* Times Picker */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setTimeTarget('add');
+                    setShowSuppTimePicker(true);
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    flex: 1
+                  }}
+                >
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                    {addTimes.length > 0 ? addTimes.join(', ') : S.selectTimes}
+                  </DynamicText>
+                  <DynamicText type="sub">⏰</DynamicText>
+                </TouchableOpacity>
+                
+                {addTimes.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setAddTimes([])}
+                    style={{
+                      backgroundColor: '#f87171',
+                      borderRadius: 8,
+                      padding: 8,
+                      width: 32,
+                      height: 32,
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <DynamicText type="card" style={{ color: '#fff', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>
+                      ×
+                    </DynamicText>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Start Date Picker */}
               <TouchableOpacity
-                ref={dosageUnitButtonRef}
                 onPress={() => {
-                  dosageUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
-                    setDosageUnitButtonLayout({ x, y, width, height });
-                  });
-                  setShowDosageUnitDropdown(true);
+                  setDateTarget('add');
+                  setDateField('startDate');
+                  setShowDatePicker(true);
                 }}
                 style={{
                   backgroundColor: getCardBackgroundColor(),
                   borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: getCardBorderColor(),
-                  paddingHorizontal: 16,
-                  paddingVertical: 16,
-                  minWidth: 80,
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  padding: 16,
+                  marginBottom: 12,
                   flexDirection: 'row',
-                  gap: 4
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
                 }}
               >
-                <DynamicText 
-                  type="card" 
-                  style={{ 
-                    fontSize: 14,
-                    color: getCardTextColor(),
-                    fontFamily: 'Inter_600SemiBold'
-                  }}
-                >
-                  {addForm.dosageUnit}
+                <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                  {addForm.startDate || S.startDate}
                 </DynamicText>
-                <DynamicText 
-                  type="sub" 
-                  style={{ 
-                    fontSize: 12,
-                    color: getSubTextColor()
-                  }}
-                >
-                  ▼
-                </DynamicText>
+                <DynamicText type="sub">📅</DynamicText>
               </TouchableOpacity>
-            </View>
-            
-            <TextInput
-              placeholder={S.notesOptional}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={addForm.notes}
-              onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
-              onFocus={() => setInputFocused(true)}
-              onBlur={() => setInputFocused(false)}
-              autoCapitalize="sentences"
-              autoCorrect={true}
-              returnKeyType="default"
-            />
 
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-              <TouchableOpacity 
-                onPress={() => setShowAdd(false)}
-                style={[styles.button, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor(), flex: 1 }]}
+              {/* End Date Picker */}
+              <TouchableOpacity
+                onPress={() => {
+                  setDateTarget('add');
+                  setDateField('endDate');
+                  setShowDatePicker(true);
+                }}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 12,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
               >
-                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>{S.cancel}</DynamicText>
+                <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                  {addForm.endDate || S.endDateOptional}
+                </DynamicText>
+                <DynamicText type="sub">📅</DynamicText>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                onPress={addSupplement}
-                style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
-              >
-                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>{S.addSupplement}</DynamicText>
-              </TouchableOpacity>
-            </View>
+
+              <TextInput
+                placeholder={S.notesOptional}
+                placeholderTextColor={getSubTextColor()}
+                value={addForm.notes}
+                onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 12,
+                  color: getCardTextColor(),
+                  fontFamily: 'Inter_400Regular',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+                multiline
+                numberOfLines={3}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                autoCapitalize="sentences"
+                autoCorrect={true}
+                returnKeyType="default"
+              />
+
+              {/* Quantity Value and Unit */}
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                <TextInput
+                  placeholder="60"
+                  placeholderTextColor={getSubTextColor()}
+                  value={addForm.quantityValue}
+                  onChangeText={(text) => setAddForm(prev => ({ ...prev, quantityValue: text }))}
+                  style={{
+                    flex: 1,
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  keyboardType="numeric"
+                />
+                
+                <TouchableOpacity
+                  ref={quantityUnitButtonRef}
+                  onPress={() => {
+                    quantityUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                      setQuantityUnitButtonLayout({ x, y, width, height });
+                    });
+                    setShowQuantityUnitDropdown(true);
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                    minWidth: 80,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 4
+                  }}
+                >
+                  <DynamicText 
+                    type="card" 
+                    style={{ 
+                      fontSize: 14,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_600SemiBold'
+                    }}
+                  >
+                    {addForm.quantityUnit}
+                  </DynamicText>
+                  <DynamicText 
+                    type="sub" 
+                    style={{ 
+                      fontSize: 12,
+                      color: getCardTextColor() + '80'
+                    }}
+                  >
+                    ▼
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setShowAdd(false);
+                    setInputFocused(false);
+                  }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    alignItems: 'center'
+                  }}
+                >
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>{S.cancel}</DynamicText>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  onPress={addSupplement}
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.accent,
+                    borderRadius: 12,
+                    padding: 16,
+                    alignItems: 'center'
+                  }}
+                >
+                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold' }}>{S.addSupplement}</DynamicText>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
 
       {/* Status Update Modal */}
@@ -790,153 +1079,384 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       </Modal>
 
       {/* Edit Supplement Modal */}
-      <Modal visible={showEdit} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
-            <DynamicText type="card" style={styles.modalTitle}>{S.editSupplement || 'Edit Supplement'}</DynamicText>
-            
-            <TextInput
-              placeholder={S.supplementName}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={editForm.name}
-              onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
-            />
-            
-            <TextInput
-              placeholder={S.brand}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={editForm.brand}
-              onChangeText={(text) => setEditForm(prev => ({ ...prev, brand: text }))}
-            />
-            
-            {/* Dosage Value and Unit */}
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+      <Modal 
+        visible={showEdit} 
+        animationType="slide" 
+        transparent
+        statusBarTranslucent
+        onRequestClose={() => {
+          setShowEdit(false);
+          setInputFocused(false);
+        }}
+      >
+        {/* Backdrop: closes on outside press */}
+        <TouchableOpacity 
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
+          activeOpacity={1}
+          onPress={() => {
+            if (!inputFocused && showEdit) {
+              setShowEdit(false);
+              setInputFocused(false);
+            }
+          }}
+        >
+          {/* Modal Content Container */}
+          <View
+            style={[styles.section, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginHorizontal: 16, width: '90%', maxHeight: '80%', padding: 20 }]}
+            onStartShouldSetResponder={() => true}
+          >
+            <ScrollView 
+              contentContainerStyle={{ padding: 16, width: '100%' }} 
+              keyboardShouldPersistTaps="always"
+            >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  {S.editSupplement || 'Edit Supplement'}
+                </DynamicText>
+                <TouchableOpacity onPress={() => {
+                  setShowEdit(false);
+                  setInputFocused(false);
+                }}>
+                  <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
+                </TouchableOpacity>
+              </View>
+
               <TextInput
-                placeholder="30"
+                placeholder={S.supplementName}
                 placeholderTextColor={getSubTextColor()}
-                value={editForm.dosageValue}
-                onChangeText={(text) => setEditForm(prev => ({ ...prev, dosageValue: text }))}
+                value={editForm.name}
+                onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
                 style={{
-                  flex: 1,
                   backgroundColor: getCardBackgroundColor(),
                   borderRadius: 12,
                   padding: 16,
+                  marginBottom: 12,
                   color: getCardTextColor(),
                   fontFamily: 'Inter_400Regular',
                   borderWidth: 1,
                   borderColor: getCardBorderColor()
                 }}
                 onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                autoCapitalize="none"
+                onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                autoCapitalize="words"
                 autoCorrect={false}
                 returnKeyType="next"
-                keyboardType="numeric"
               />
-              
+
+              <TextInput
+                placeholder={S.supplementBrand}
+                placeholderTextColor={getSubTextColor()}
+                value={editForm.brand}
+                onChangeText={(text) => setEditForm(prev => ({ ...prev, brand: text }))}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 12,
+                  color: getCardTextColor(),
+                  fontFamily: 'Inter_400Regular',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="next"
+              />
+
+              {/* Dosage Value and Unit */}
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                <TextInput
+                  placeholder="1000"
+                  placeholderTextColor={getSubTextColor()}
+                  value={editForm.dosageValue}
+                  onChangeText={(text) => setEditForm(prev => ({ ...prev, dosageValue: text }))}
+                  style={{
+                    flex: 1,
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    color: getCardTextColor(),
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  keyboardType="numeric"
+                />
+                
+                <TouchableOpacity
+                  ref={editDosageUnitButtonRef}
+                  onPress={() => {
+                    editDosageUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                      setEditDosageUnitButtonLayout({ x, y, width, height });
+                    });
+                    setShowEditDosageUnitDropdown(true);
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                    minWidth: 80,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 4
+                  }}
+                >
+                  <DynamicText 
+                    type="card" 
+                    style={{ 
+                      fontSize: 14,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_600SemiBold'
+                    }}
+                  >
+                    {editForm.dosageUnit}
+                  </DynamicText>
+                  <DynamicText 
+                    type="sub" 
+                    style={{ 
+                      fontSize: 12,
+                      color: getCardTextColor() + '80'
+                    }}
+                  >
+                    ▼
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
+
+              {/* Times Picker */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setTimeTarget('edit');
+                    setShowSuppTimePicker(true);
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    flex: 1
+                  }}
+                >
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                    {editTimes.length > 0 ? editTimes.join(', ') : S.selectTimes}
+                  </DynamicText>
+                  <DynamicText type="sub">⏰</DynamicText>
+                </TouchableOpacity>
+                
+                {editTimes.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setEditTimes([])}
+                    style={{
+                      backgroundColor: '#f87171',
+                      borderRadius: 8,
+                      padding: 8,
+                      width: 32,
+                      height: 32,
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <DynamicText type="card" style={{ color: '#fff', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>
+                      ×
+                    </DynamicText>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Start Date Picker */}
               <TouchableOpacity
-                ref={editDosageUnitButtonRef}
                 onPress={() => {
-                  editDosageUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
-                    setEditDosageUnitButtonLayout({ x, y, width, height });
-                  });
-                  setShowEditDosageUnitDropdown(true);
+                  setDateTarget('edit');
+                  setDateField('startDate');
+                  setShowDatePicker(true);
                 }}
                 style={{
                   backgroundColor: getCardBackgroundColor(),
                   borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: getCardBorderColor(),
-                  paddingHorizontal: 16,
-                  paddingVertical: 16,
-                  minWidth: 80,
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  padding: 16,
+                  marginBottom: 12,
                   flexDirection: 'row',
-                  gap: 4
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
                 }}
               >
-                <DynamicText 
-                  type="card" 
-                  style={{ 
-                    fontSize: 14,
+                <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                  {editForm.startDate || S.startDate}
+                </DynamicText>
+                <DynamicText type="sub">📅</DynamicText>
+              </TouchableOpacity>
+
+              {/* End Date Picker */}
+              <TouchableOpacity
+                onPress={() => {
+                  setDateTarget('edit');
+                  setDateField('endDate');
+                  setShowDatePicker(true);
+                }}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 12,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+              >
+                <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
+                  {editForm.endDate || S.endDateOptional}
+                </DynamicText>
+                <DynamicText type="sub">📅</DynamicText>
+              </TouchableOpacity>
+
+              <TextInput
+                placeholder={S.notesOptional}
+                placeholderTextColor={getSubTextColor()}
+                value={editForm.notes}
+                onChangeText={(text) => setEditForm(prev => ({ ...prev, notes: text }))}
+                style={{
+                  backgroundColor: getCardBackgroundColor(),
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 12,
+                  color: getCardTextColor(),
+                  fontFamily: 'Inter_400Regular',
+                  borderWidth: 1,
+                  borderColor: getCardBorderColor()
+                }}
+                multiline
+                numberOfLines={3}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                autoCapitalize="sentences"
+                autoCorrect={true}
+                returnKeyType="default"
+              />
+
+              {/* Quantity Value and Unit */}
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                <TextInput
+                  placeholder="60"
+                  placeholderTextColor={getSubTextColor()}
+                  value={editForm.quantityValue}
+                  onChangeText={(text) => setEditForm(prev => ({ ...prev, quantityValue: text }))}
+                  style={{
+                    flex: 1,
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
                     color: getCardTextColor(),
-                    fontFamily: 'Inter_600SemiBold'
+                    fontFamily: 'Inter_400Regular',
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor()
+                  }}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setTimeout(() => setInputFocused(false), 100)}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  keyboardType="numeric"
+                />
+                
+                <TouchableOpacity
+                  ref={editQuantityUnitButtonRef}
+                  onPress={() => {
+                    editQuantityUnitButtonRef.current?.measureInWindow((x, y, width, height) => {
+                      setEditQuantityUnitButtonLayout({ x, y, width, height });
+                    });
+                    setShowEditQuantityUnitDropdown(true);
+                  }}
+                  style={{
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                    minWidth: 80,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 4
                   }}
                 >
-                  {editForm.dosageUnit}
-                </DynamicText>
-                <DynamicText 
-                  type="sub" 
-                  style={{ 
-                    fontSize: 12,
-                    color: getSubTextColor()
+                  <DynamicText 
+                    type="card" 
+                    style={{ 
+                      fontSize: 14,
+                      color: getCardTextColor(),
+                      fontFamily: 'Inter_600SemiBold'
+                    }}
+                  >
+                    {editForm.quantityUnit}
+                  </DynamicText>
+                  <DynamicText 
+                    type="sub" 
+                    style={{ 
+                      fontSize: 12,
+                      color: getCardTextColor() + '80'
+                    }}
+                  >
+                    ▼
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setShowEdit(false);
+                    setInputFocused(false);
+                  }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: getCardBackgroundColor(),
+                    borderRadius: 12,
+                    padding: 16,
+                    borderWidth: 1,
+                    borderColor: getCardBorderColor(),
+                    alignItems: 'center'
                   }}
                 >
-                  ▼
-                </DynamicText>
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity
-              style={[styles.input, { 
-                backgroundColor: getCardBackgroundColor(), 
-                borderColor: getCardBorderColor(), 
-                flexDirection: 'row', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
-              }]}
-              onPress={() => {
-                setTimeTarget('edit');
-                setShowSuppTimePicker(true);
-              }}
-            >
-              <DynamicText type="card" style={{ color: editTimes.length > 0 ? getCardTextColor() : getSubTextColor() }}>
-                {editTimes.length > 0 ? editTimes.join(', ') : S.selectTimes}
-              </DynamicText>
-              <DynamicText type="sub">🕐</DynamicText>
-            </TouchableOpacity>
-            
-            <TextInput
-              placeholder={S.notesOptional}
-              placeholderTextColor={getSubTextColor()}
-              style={[styles.input, { 
-                color: getCardTextColor(), 
-                borderColor: getCardBorderColor(),
-                backgroundColor: getCardBackgroundColor()
-              }]}
-              value={editForm.notes}
-              onChangeText={(text) => setEditForm(prev => ({ ...prev, notes: text }))}
-              multiline
-            />
-            
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-              <TouchableOpacity 
-                onPress={() => setShowEdit(false)}
-                style={[styles.button, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor(), flex: 1 }]}
-              >
-                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>{S.cancel}</DynamicText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                onPress={updateSupplement}
-                style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
-              >
-                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>{S.save || 'Save'}</DynamicText>
-              </TouchableOpacity>
-            </View>
+                  <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>{S.cancel}</DynamicText>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  onPress={updateSupplement}
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.accent,
+                    borderRadius: 12,
+                    padding: 16,
+                    alignItems: 'center'
+                  }}
+                >
+                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold' }}>{S.save || 'Save'}</DynamicText>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
 
       {/* Supplement Refill Modal */}
@@ -1003,6 +1523,53 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         getCardTextColor={getCardTextColor}
         buttonLayout={editDosageUnitButtonLayout}
       />
+
+      {/* Quantity Unit Dropdowns */}
+      <DosageUnitDropdown
+        visible={showQuantityUnitDropdown}
+        units={quantityUnits}
+        selectedUnit={addForm.quantityUnit}
+        onSelect={(unit) => setAddForm(prev => ({ ...prev, quantityUnit: unit }))}
+        onClose={() => setShowQuantityUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+        buttonLayout={quantityUnitButtonLayout}
+      />
+
+      <DosageUnitDropdown
+        visible={showEditQuantityUnitDropdown}
+        units={quantityUnits}
+        selectedUnit={editForm.quantityUnit}
+        onSelect={(unit) => setEditForm(prev => ({ ...prev, quantityUnit: unit }))}
+        onClose={() => setShowEditQuantityUnitDropdown(false)}
+        theme={theme}
+        getCardBackgroundColor={getCardBackgroundColor}
+        getCardBorderColor={getCardBorderColor}
+        getCardTextColor={getCardTextColor}
+        buttonLayout={editQuantityUnitButtonLayout}
+      />
+
+      {/* Date Picker */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate && dateTarget && dateField) {
+              const formattedDate = selectedDate.toISOString().split('T')[0];
+              if (dateTarget === 'add') {
+                setAddForm(prev => ({ ...prev, [dateField]: formattedDate }));
+              } else if (dateTarget === 'edit') {
+                setEditForm(prev => ({ ...prev, [dateField]: formattedDate }));
+              }
+            }
+          }}
+        />
+      )}
     </View>
   );
 };

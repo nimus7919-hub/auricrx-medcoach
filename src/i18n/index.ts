@@ -25,9 +25,13 @@ const LANGUAGE_DETECTOR = {
   async: true,
   detect: async (callback: (lng: string) => void) => {
     try {
+      console.log('🔍 LANGUAGE_DETECTOR: Starting language detection...');
       const savedLanguage = await AsyncStorage.getItem('AURIC_LANG');
+      console.log('🔍 LANGUAGE_DETECTOR: Retrieved from storage:', savedLanguage);
       if (savedLanguage) {
-        return callback(savedLanguage);
+        console.log('✅ LANGUAGE_DETECTOR: Using saved language:', savedLanguage);
+        callback(savedLanguage);
+        return;
       }
       
       // Fallback to device locale (temporarily disabled)
@@ -37,18 +41,23 @@ const LANGUAGE_DETECTOR = {
       //   : 'en';
       
       // For now, just use Spanish as fallback
+      console.log('⚠️ LANGUAGE_DETECTOR: No saved language found, using fallback: es');
       callback('es');
     } catch (error) {
-      console.log('Language detection error:', error);
+      console.error('❌ LANGUAGE_DETECTOR: Language detection error:', error);
       callback('es');
     }
   },
-  init: () => {},
+  init: () => {
+    console.log('🔧 LANGUAGE_DETECTOR: Initialized');
+  },
   cacheUserLanguage: async (lng: string) => {
     try {
+      console.log('💾 LANGUAGE_DETECTOR: Caching user language:', lng);
       await AsyncStorage.setItem('AURIC_LANG', lng);
+      console.log('✅ LANGUAGE_DETECTOR: Language cached successfully');
     } catch (error) {
-      console.log('Error saving language:', error);
+      console.error('❌ LANGUAGE_DETECTOR: Error saving language:', error);
     }
   },
 };
@@ -61,7 +70,7 @@ try {
     .init({
       resources,
       fallbackLng: 'es',
-      lng: 'es', // Force Spanish as default
+      // Don't set lng here - let LANGUAGE_DETECTOR determine it
       debug: true, // Enable debug mode to see what's happening
       interpolation: {
         escapeValue: false,
@@ -80,7 +89,7 @@ try {
   i18n.init({
     resources,
     fallbackLng: 'es',
-    lng: 'es',
+    // Don't set lng in fallback either - let LANGUAGE_DETECTOR handle it
     interpolation: {
       escapeValue: false,
     },

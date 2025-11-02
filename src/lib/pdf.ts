@@ -247,7 +247,7 @@ export class PdfGenerator {
         margin: ${margin}mm;
       }
       body {
-        font-family: 'Arial', sans-serif;
+        font-family: 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
         font-size: ${fontSize}px;
         line-height: 1.6;
         color: #333;

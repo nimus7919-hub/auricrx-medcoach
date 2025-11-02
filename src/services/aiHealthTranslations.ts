@@ -19,6 +19,10 @@ export const createAIHealthTranslations = (t: (key: string) => string) => {
     consultHealthcareProvider: t('ai.consultHealthcareProvider'),
     enterSymptomsPlaceholder: t('ai.enterSymptomsPlaceholder'),
     enterMedicationsPlaceholder: t('ai.enterMedicationsPlaceholder'),
+    symptomAnalysis: t('ai.symptomAnalysis'),
+    describeSymptoms: t('ai.describeSymptoms'),
+    cancel: t('common.cancel'),
+    analyze: t('ai.analyze'),
     
     // Additional AI Health keys used in the screen
     pleaseEnterSymptoms: t('ai.pleaseEnterSymptoms'),
@@ -121,6 +125,50 @@ export const createAIHealthTranslations = (t: (key: string) => string) => {
     noFastingProfileCompleted: t('ai.noFastingProfileCompleted'),
     healthProfile: t('ai.healthProfile'),
     currentMedications: t('ai.currentMedications'),
+    
+    // PDF Export - Section headings
+    basicInformation: t('ai.basicInformation'),
+    nutritionalStatusBodyComposition: t('ai.nutritionalStatusBodyComposition'),
+    mentalHealthCognitiveDemands: t('ai.mentalHealthCognitiveDemands'),
+    lifestyleActivityLevel: t('ai.lifestyleActivityLevel'),
+    fastingProtocolPreferences: t('ai.fastingProtocolPreferences'),
+    goals: t('ai.goals'),
+    medicalSupervisionMonitoring: t('ai.medicalSupervisionMonitoring'),
+    fastingAnalysis: t('ai.fastingAnalysis'),
+    importantConsiderations: t('ai.importantConsiderations'),
+    
+    // PDF Export - Health Profile nested keys (need to handle healthProfile.* keys)
+    'healthProfile.weight': t('healthProfile.weight'),
+    'healthProfile.height': t('healthProfile.height'),
+    
+    // PDF Export - Common values
+    notSpecified: t('ai.notSpecified'),
+    yes: t('ai.yes'),
+    no: t('ai.no'),
+    
+    // PDF Export - Health Profile value translations
+    normal: t('healthProfile.normal'),
+    high: t('healthProfile.high'),
+    low: t('healthProfile.low'),
+    poor: t('healthProfile.poor'),
+    fair: t('healthProfile.fair'),
+    good: t('healthProfile.good'),
+    excellent: t('healthProfile.excellent'),
+    sedentary: t('healthProfile.sedentary'),
+    light: t('healthProfile.light'),
+    moderate: t('healthProfile.moderate'),
+    athlete: t('healthProfile.athlete'),
+    timeRestricted: t('healthProfile.timeRestricted'),
+    alternateDay: t('healthProfile.alternateDay'),
+    extended: t('healthProfile.extended'),
+    custom: t('healthProfile.custom'),
+    daily: t('healthProfile.daily'),
+    weekly: t('healthProfile.weekly'),
+    monthly: t('healthProfile.monthly'),
+    weightLoss: t('healthProfile.weightLoss'),
+    metabolicHealth: t('healthProfile.metabolicHealth'),
+    generalHealth: t('healthProfile.generalHealth'),
+    spiritual: t('healthProfile.spiritual'),
     
     // Additional button and feature labels (these are in ai namespace)
     analyzeSymptoms: t('ai.analyzeSymptoms'),

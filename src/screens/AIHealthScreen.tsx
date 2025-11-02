@@ -22,6 +22,7 @@ import * as Haptics from 'expo-haptics';
 import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as ImageManipulator from 'expo-image-manipulator';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { createAIHealthTranslations } from '../services/aiHealthTranslations';
@@ -66,6 +67,7 @@ interface SymptomAnalysis {
   recommendations: string[];
   followUpActions: string[];
   createdAt: string;
+  notes?: string;
 }
 
 interface DrugInteraction {
@@ -107,7 +109,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   // Use translation hook directly for AI Health
-  const { t: i18nT } = useTranslation();
+  const { t: i18nT, i18n } = useTranslation();
   
   // AI Health specific translations
   const aiTranslations = createAIHealthTranslations(i18nT);
@@ -234,21 +236,30 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       right: 0,
       bottom: 0,
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       alignItems: 'center',
+      paddingTop: 10,
+      paddingBottom: 10,
       zIndex: 1000,
     },
     modalContent: {
-      backgroundColor: getCardBackgroundColor() + 'F0',
+      backgroundColor: getCardBackgroundColor(),
       borderRadius: 12,
-      padding: 24,
-      width: '90%',
-      maxHeight: '80%',
+      padding: 16,
+      width: '95%',
+      flex: 1,
+      maxHeight: '100%',
+      alignSelf: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
     },
     modalTitle: {
-      fontSize: 20,
+      fontSize: 16,
       fontWeight: 'bold',
-      marginBottom: 16,
+      marginBottom: 10,
     },
     inputGroup: {
       marginBottom: 16,
@@ -405,16 +416,15 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       fontWeight: '500',
     },
     viewAllButton: {
-      backgroundColor: currentTheme.accent + '40',
+      backgroundColor: '#D4AF37',
       paddingHorizontal: 16,
-      paddingVertical: 10,
+      paddingVertical: 12,
       borderRadius: 8,
       alignItems: 'center',
       marginTop: 12,
-      borderColor: currentTheme.accent,
-      borderWidth: 1,
     },
     viewAllButtonText: {
+      color: '#ffffff',
       fontSize: 13,
       fontWeight: '600',
     },
@@ -698,6 +708,10 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   const [showDrugCheckModal, setShowDrugCheckModal] = useState(false);
   const [showSymptomResultModal, setShowSymptomResultModal] = useState(false);
   const [showSymptomHistoryModal, setShowSymptomHistoryModal] = useState(false);
+  const [showInteractionResultModal, setShowInteractionResultModal] = useState(false);
+  const [showInteractionLoadingModal, setShowInteractionLoadingModal] = useState(false);
+  const [interactionResult, setInteractionResult] = useState<any>(null);
+  const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
   const [currentSymptomAnalysis, setCurrentSymptomAnalysis] = useState<SymptomAnalysis | null>(null);
   const [symptomText, setSymptomText] = useState('');
   const [medicationList, setMedicationList] = useState('');
@@ -756,9 +770,25 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   const storeSymptomAnalysis = (id: string) => {
     const analysis = symptomAnalyses.find(a => a.id === id);
     if (analysis) {
-      setStoredSymptomAnalyses(prev => [analysis, ...prev]);
-      setSymptomAnalyses(prev => prev.filter(a => a.id !== id));
+      // Add to stored list
+      setStoredSymptomAnalyses(prev => {
+        // Check if already stored to avoid duplicates
+        const alreadyStored = prev.some(item => item.id === id);
+        if (!alreadyStored) {
+          return [analysis, ...prev];
+        }
+        return prev;
+      });
+      
+      // Keep symptom in current list - only delete when user explicitly clicks Delete
+      
       triggerHaptic('medium');
+      
+      // Show brief confirmation
+      setShowSavedConfirmation(true);
+      setTimeout(() => {
+        setShowSavedConfirmation(false);
+      }, 1500);
     }
   };
 
@@ -838,11 +868,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
     try {
       setShowDrugCheckModal(false);
       
-      // Show loading state
-      Alert.alert(
-        '🔄 ' + (S?.analyzing || 'Analyzing...'),
-        S?.checkingInteractions || 'Checking for drug interactions using AI...'
-      );
+      // Show loading modal
+      setShowInteractionLoadingModal(true);
 
       // Prepare the medication list for AI
       const itemList = allItems.map(item => 
@@ -860,6 +887,13 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
         setTimeout(() => reject(new Error('Request timeout - AI server may not be running')), 15000); // 15 second timeout
       });
 
+      // Detect current language
+      const currentLanguage = i18n.language === 'es' ? 'Spanish' : 
+                             i18n.language === 'zh' ? 'Chinese' : 
+                             i18n.language === 'fr' ? 'French' : 
+                             i18n.language === 'de' ? 'German' : 
+                             i18n.language === 'pt' ? 'Portuguese' : 'English';
+
       // Race between fetch and timeout
       const fetchPromise = fetch(apiUrl, {
         method: 'POST',
@@ -871,40 +905,54 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           messages: [
             {
               role: 'system',
-              content: `You are a clinical pharmacist AI assistant. Analyze drug and supplement interactions comprehensively. 
-              
-IMPORTANT: Always provide a medical disclaimer that this is for educational purposes only and users should consult their healthcare provider.
+              content: `You are a clinical pharmacist AI assistant. 
+
+CRITICAL: You MUST respond ENTIRELY in ${currentLanguage}. Every single word, sentence, and phrase in your response must be written in ${currentLanguage}. This includes:
+- The medical disclaimer
+- All interaction descriptions
+- All clinical effects
+- All management recommendations
+- The summary
+- Everything else
+
+DO NOT use English or any other language. ONLY use ${currentLanguage}.
+
+Analyze drug and supplement interactions comprehensively.
+
+Always provide a medical disclaimer that this is for educational purposes only and users should consult their healthcare provider.
 
 For each interaction found, provide:
-1. The two interacting items
-2. Severity level (Minor, Moderate, Major, or Contraindicated)
-3. Description of the interaction
-4. Clinical effects
-5. Management recommendations
+1. The two interacting items (keep drug names as provided)
+2. Severity level: Minor, Moderate, Major, or Contraindicated (translate this to ${currentLanguage})
+3. Description of the interaction (in ${currentLanguage})
+4. Clinical effects (in ${currentLanguage})
+5. Management recommendations (in ${currentLanguage})
 
-If no significant interactions are found, state that clearly but still recommend consulting a pharmacist or doctor.
+If no significant interactions are found, state that clearly in ${currentLanguage} but still recommend consulting a pharmacist or doctor.
 
 Format your response as JSON with this structure:
 {
-  "disclaimer": "Your medical disclaimer text",
+  "disclaimer": "Your medical disclaimer text IN ${currentLanguage}",
   "interactions": [
     {
       "item1": "Drug A",
       "item2": "Drug B",
-      "severity": "Moderate",
-      "description": "Description of interaction",
-      "clinicalEffects": ["Effect 1", "Effect 2"],
-      "management": "How to manage this interaction",
+      "severity": "Severity level IN ${currentLanguage}",
+      "description": "Description of interaction IN ${currentLanguage}",
+      "clinicalEffects": ["Effect 1 IN ${currentLanguage}", "Effect 2 IN ${currentLanguage}"],
+      "management": "Management recommendations IN ${currentLanguage}",
       "urgency": "immediate|monitor|routine"
     }
   ],
   "overallRisk": "low|moderate|high",
-  "summary": "Brief overall summary"
-}`
+  "summary": "Brief overall summary IN ${currentLanguage}"
+}
+
+REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for drug names.`
             },
             {
               role: 'user',
-              content: `Please analyze these medications and supplements for potential interactions:\n\n${itemList}`
+              content: `Please analyze these medications and supplements for potential interactions. Remember to respond ENTIRELY in ${currentLanguage}:\n\n${itemList}`
             }
           ]
         })
@@ -952,32 +1000,15 @@ Format your response as JSON with this structure:
 
       triggerHaptic('medium');
 
-      // Show results
-      const interactionCount = aiResult.interactions?.length || 0;
-      const severity = aiResult.overallRisk || 'unknown';
-      
-      let icon = '✅';
-      if (severity === 'high') icon = '🚨';
-      else if (severity === 'moderate') icon = '⚠️';
-      else if (severity === 'low') icon = 'ℹ️';
-
-      const message = `${aiResult.disclaimer || ''}\n\n${aiResult.summary || ''}\n\n${
-        interactionCount > 0 
-          ? `Found ${interactionCount} interaction(s):\n\n` + aiResult.interactions.map((int: any, idx: number) => 
-              `${idx + 1}. ${int.item1} + ${int.item2}\n   Severity: ${int.severity}\n   ${int.description}`
-            ).join('\n\n')
-          : 'No significant interactions found.'
-      }`;
-
-      Alert.alert(
-        `${icon} ${S?.interactionResults || 'Interaction Check Results'}`,
-        message,
-        [
-          { text: S?.ok || 'OK', style: 'default' }
-        ]
-      );
+      // Hide loading, show results in modal
+      setShowInteractionLoadingModal(false);
+      setInteractionResult(aiResult);
+      setShowInteractionResultModal(true);
 
     } catch (error: any) {
+      // Hide loading modal
+      setShowInteractionLoadingModal(false);
+      
       console.error('Failed to check drug interactions:', error);
       console.error('Error details:', error.message);
       
@@ -1285,10 +1316,24 @@ Format your response as JSON with this structure:
       );
       console.log('🔍 Logo downloaded to:', logoUri.uri);
       
-      const logoBase64 = await FileSystem.readAsStringAsync(logoUri.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      console.log('✅ Logo loaded successfully, base64 length:', logoBase64.length);
+      // Compress the logo to reduce file size for PDF
+      console.log('📦 Compressing logo for PDF...');
+      const compressedLogo = await ImageManipulator.manipulateAsync(
+        logoUri.uri,
+        [{ resize: { width: 400 } }], // Resize to 400px width for PDF
+        { 
+          compress: 0.7, // 70% quality
+          format: ImageManipulator.SaveFormat.PNG,
+          base64: true 
+        }
+      );
+      
+      if (!compressedLogo.base64) {
+        throw new Error('Failed to compress logo');
+      }
+      
+      const logoBase64 = compressedLogo.base64;
+      console.log('✅ Logo compressed successfully, base64 length:', logoBase64.length);
       
       // Create HTML content for PDF (similar to DocumentsScreen)
       const medicationsHtml = medications && medications.length > 0 ? 
@@ -1383,7 +1428,7 @@ Format your response as JSON with this structure:
             <title>${aiTranslations.auricrxHealthReport}</title>
             <style>
               body { 
-                font-family: Arial, sans-serif; 
+                font-family: Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif; 
                 margin: 20px; 
                 line-height: 1.6;
                 color: #333;
@@ -1505,6 +1550,11 @@ Format your response as JSON with this structure:
       
       // Generate PDF using expo-print (same as DocumentsScreen)
       console.log('🖨️ Generating PDF with expo-print...');
+      console.log('📄 HTML length:', html.length);
+      console.log('🌐 Language:', i18n.language);
+      
+      // Don't use timeout wrapper as it can cause issues with large PDFs or special characters
+      // expo-print will handle the generation time naturally
       const { uri } = await Print.printToFileAsync({ html });
       console.log('✅ PDF generated at:', uri);
       
@@ -1535,29 +1585,379 @@ Format your response as JSON with this structure:
         throw new Error('Sharing is not available on this platform');
       }
       
-      const shareResult = await Sharing.shareAsync(finalUri, {
-        mimeType: 'application/pdf',
-        dialogTitle: aiTranslations.auricrxHealthReport,
-      });
-      
-      console.log('✅ PDF shared successfully, result:', shareResult);
-      
-      // Only show success if sharing was actually completed
-      if (shareResult && (shareResult.action === 'sharedAction' || shareResult.action === 'dismissedAction')) {
-        Alert.alert(
-          t('exportSuccessful'),
-          t('healthReportGenerated'),
-          [{ text: 'OK' }]
-        );
+      // Share the PDF with timeout to prevent app hang if dialog doesn't close properly
+      console.log('📤 Opening share dialog...');
+      try {
+        await Promise.race([
+          Sharing.shareAsync(finalUri, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Share Health Report',
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Share timeout')), 10000)
+          )
+        ]);
+        console.log('✅ PDF share completed');
+      } catch (shareError) {
+        // If timeout or error, just log and continue - don't crash the app
+        console.warn('⚠️ Share dialog issue (this is OK):', shareError);
       }
     } catch (error) {
       console.error('❌ Error exporting health report:', error);
       console.error('❌ Error type:', typeof error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error stack:', error.stack);
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+      }
       console.error('❌ Full error object:', JSON.stringify(error, null, 2));
       
-      // No alert shown - silent failure
+      // Show error to user so they know what happened
+      Alert.alert(
+        'Error',
+        'Failed to export health report. This may be due to large file size or special characters in the content. Please try again or contact support if the issue persists.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Export ACTIVE symptoms only (unsaved symptoms)
+  const exportActiveSymptomsToPDF = async () => {
+    console.log('🚀 Export Active Symptoms PDF button pressed');
+    console.log('📊 Active symptoms count:', symptomAnalyses?.length || 0);
+    
+    if (!symptomAnalyses || symptomAnalyses.length === 0) {
+      Alert.alert(
+        S?.noActiveSymptoms || 'No Active Symptoms',
+        S?.noActiveSymptomsMessage || 'There are no active symptoms to export.',
+        [{ text: S?.ok || 'OK' }]
+      );
+      return;
+    }
+    
+    try {
+      const currentDate = new Date().toLocaleDateString();
+      console.log('📅 Generated date:', currentDate);
+      
+      console.log('📝 Creating HTML content for Active Symptoms PDF...');
+      
+      // Try to load logo with better error handling
+      let logoBase64 = '';
+      try {
+        const logoAsset = require('../../assets/sign in logo.png');
+        const logoSource = Image.resolveAssetSource(logoAsset);
+        console.log('🔍 Logo source:', logoSource);
+        
+        // Try to download and convert to base64
+        const downloadPath = FileSystem.documentDirectory + 'temp-logo-active.png';
+        await FileSystem.downloadAsync(logoSource.uri, downloadPath);
+        
+        // Compress the logo for PDF to reduce file size
+        console.log('📦 Compressing logo for PDF...');
+        const compressedLogo = await ImageManipulator.manipulateAsync(
+          downloadPath,
+          [{ resize: { width: 400 } }],
+          { 
+            compress: 0.7,
+            format: ImageManipulator.SaveFormat.PNG,
+            base64: true 
+          }
+        );
+        
+        if (!compressedLogo.base64) {
+          throw new Error('Failed to compress logo');
+        }
+        logoBase64 = compressedLogo.base64;
+        console.log('✅ Logo compressed, size:', logoBase64.length);
+        
+        // Clean up temp file
+        await FileSystem.deleteAsync(downloadPath, { idempotent: true });
+      } catch (error) {
+        console.warn('⚠️ Logo load failed, using text header:', error);
+      }
+      
+      // Create HTML content for ACTIVE symptoms only
+      const symptomsHtml = symptomAnalyses.map((analysis, index) => `
+        <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
+          <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;">[${S?.[analysis.urgency] || analysis.urgency}]</span></p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || 'Date'}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || 'Notes'}: ${analysis.notes}</p>` : ''}
+        </div>
+      `).join('');
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>${S?.activeSymptomReport || 'Active Symptom Report'}</title>
+            <style>
+              body { font-family: Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif; margin: 20px; }
+              .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #D4AF37; }
+              .logo { max-width: 120px; height: auto; margin-bottom: 10px; }
+              h1 { color: #D4AF37; margin: 10px 0; font-size: 22px; }
+              h2 { color: #333; margin: 5px 0; font-size: 18px; }
+              p { margin: 5px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" alt="Logo" class="logo">` : ''}
+              <h1>${S?.auricrxMedCoach || 'AuricRX MedCoach'}</h1>
+              <h2>${S?.activeSymptomReport || 'Active Symptom Report'}</h2>
+              <p style="color: #666; font-size: 12px;">${S?.generatedOn || 'Generated on'}: ${currentDate}</p>
+            </div>
+            <div style="margin: 15px 0; padding: 10px; background: #f0f9ff; border-left: 3px solid #0284c7;">
+              <p><strong>${S?.activeSymptoms || 'Active symptoms'}:</strong> ${symptomAnalyses.length}</p>
+            </div>
+            ${symptomsHtml}
+            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center;">
+              <p style="font-size: 10px; color: #666;">${S?.symptomTrackerDisclaimer || 'This symptom tracker report is for personal health monitoring purposes only.'}</p>
+            </div>
+          </body>
+        </html>
+      `;
+
+      console.log('📄 HTML content created, length:', html.length);
+      
+      // Generate PDF using expo-print (Active Symptoms)
+      console.log('🖨️ Generating PDF with expo-print...');
+      console.log('📄 HTML length:', html.length);
+      const pdfResult = await Print.printToFileAsync({ html });
+      const { uri } = pdfResult;
+      console.log('✅ PDF generated at:', uri);
+      
+      // Save to docs directory
+      console.log('💾 Saving PDF to documents directory...');
+      const docsDir = FileSystem.documentDirectory + 'symptom-reports/';
+      
+      // Ensure directory exists
+      const dirInfo = await FileSystem.getInfoAsync(docsDir);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(docsDir, { intermediates: true });
+        console.log('📁 Created symptom-reports directory');
+      }
+      
+      const fileName = `AuricRX_Active_Symptoms_${currentDate.replace(/\//g, '-')}.pdf`;
+      const finalUri = docsDir + fileName;
+      
+      await FileSystem.moveAsync({
+        from: uri,
+        to: finalUri,
+      });
+      console.log('✅ PDF saved to:', finalUri);
+
+      // Share the PDF using expo-sharing (CORRECT - no destructuring!)
+      console.log('📤 Sharing PDF with expo-sharing...');
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        throw new Error('Sharing is not available on this platform');
+      }
+      
+      // Share the PDF with timeout to prevent app hang if dialog doesn't close properly
+      console.log('📤 Opening share dialog...');
+      try {
+        await Promise.race([
+          Sharing.shareAsync(finalUri, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Share Symptom Report',
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Share timeout')), 10000)
+          )
+        ]);
+        console.log('✅ PDF share completed');
+      } catch (shareError) {
+        // If timeout or error, just log and continue - don't crash the app
+        console.warn('⚠️ Share dialog issue (this is OK):', shareError);
+      }
+      
+      // No alert - silent success
+    } catch (error) {
+      console.error('❌ Error exporting active symptom report:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+      }
+      
+      Alert.alert(
+        S?.exportFailed || 'Export Failed',
+        S?.symptomReportFailed || 'Failed to generate symptom report. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Export ALL symptoms (stored + active history)
+  const exportAllSymptomsToPDF = async () => {
+    console.log('🚀 Export All Symptoms PDF button pressed');
+    const allSymptoms = [...storedSymptomAnalyses, ...symptomAnalyses];
+    console.log('📊 Total symptoms count:', allSymptoms.length);
+    
+    if (allSymptoms.length === 0) {
+      Alert.alert(
+        S?.noSymptomsToExport || 'No Symptoms to Export',
+        S?.noSymptomsMessage || 'There are no symptoms to export.',
+        [{ text: S?.ok || 'OK' }]
+      );
+      return;
+    }
+    
+    try {
+      const currentDate = new Date().toLocaleDateString();
+      console.log('📅 Generated date:', currentDate);
+      
+      console.log('📝 Creating HTML content for Complete Symptom History PDF...');
+      
+      // Try to load logo with better error handling
+      let logoBase64 = '';
+      try {
+        const logoAsset = require('../../assets/sign in logo.png');
+        const logoSource = Image.resolveAssetSource(logoAsset);
+        console.log('🔍 Logo source:', logoSource);
+        
+        // Try to download and convert to base64
+        const downloadPath = FileSystem.documentDirectory + 'temp-logo-all.png';
+        await FileSystem.downloadAsync(logoSource.uri, downloadPath);
+        
+        // Compress the logo for PDF to reduce file size
+        console.log('📦 Compressing logo for PDF...');
+        const compressedLogo = await ImageManipulator.manipulateAsync(
+          downloadPath,
+          [{ resize: { width: 400 } }],
+          { 
+            compress: 0.7,
+            format: ImageManipulator.SaveFormat.PNG,
+            base64: true 
+          }
+        );
+        
+        if (!compressedLogo.base64) {
+          throw new Error('Failed to compress logo');
+        }
+        logoBase64 = compressedLogo.base64;
+        console.log('✅ Logo compressed, size:', logoBase64.length);
+        
+        // Clean up temp file
+        await FileSystem.deleteAsync(downloadPath, { idempotent: true });
+      } catch (error) {
+        console.warn('⚠️ Logo load failed, using text header:', error);
+      }
+      
+      // Sort all symptoms by date (newest first)
+      const sortedSymptoms = allSymptoms.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      
+      // Create HTML content for ALL symptoms
+      const symptomsHtml = sortedSymptoms.map((analysis, index) => `
+        <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
+          <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;">[${S?.[analysis.urgency] || analysis.urgency}]</span></p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || 'Date'}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || 'Notes'}: ${analysis.notes}</p>` : ''}
+        </div>
+      `).join('');
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>${S?.symptomTrackerReport || 'Symptom Tracker Report'}</title>
+            <style>
+              body { font-family: Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif; margin: 20px; }
+              .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #D4AF37; }
+              .logo { max-width: 120px; height: auto; margin-bottom: 10px; }
+              h1 { color: #D4AF37; margin: 10px 0; font-size: 22px; }
+              h2 { color: #333; margin: 5px 0; font-size: 18px; }
+              p { margin: 5px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" alt="Logo" class="logo">` : ''}
+              <h1>${S?.auricrxMedCoach || 'AuricRX MedCoach'}</h1>
+              <h2>${S?.symptomTrackerReport || 'Symptom Tracker Report'}</h2>
+              <p style="color: #666; font-size: 12px;">${S?.generatedOn || 'Generated on'}: ${currentDate}</p>
+            </div>
+            <div style="margin: 15px 0; padding: 10px; background: #f0f9ff; border-left: 3px solid #0284c7;">
+              <p><strong>${S?.totalSymptoms || 'Total symptoms'}:</strong> ${allSymptoms.length}</p>
+              <p><strong>${S?.storedSymptoms || 'Stored'}:</strong> ${storedSymptomAnalyses.length} | <strong>${S?.activeSymptoms || 'Active'}:</strong> ${symptomAnalyses.length}</p>
+            </div>
+            ${symptomsHtml}
+            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center;">
+              <p style="font-size: 10px; color: #666;">${S?.symptomTrackerDisclaimer || 'This symptom tracker report is for personal health monitoring purposes only.'}</p>
+            </div>
+          </body>
+        </html>
+      `;
+
+      console.log('📄 HTML content created, length:', html.length);
+      
+      // Generate PDF using expo-print (All Symptoms)
+      console.log('🖨️ Generating PDF with expo-print...');
+      console.log('📄 HTML length:', html.length);
+      const pdfResult = await Print.printToFileAsync({ html });
+      const { uri } = pdfResult;
+      console.log('✅ PDF generated at:', uri);
+      
+      // Save to docs directory
+      console.log('💾 Saving PDF to documents directory...');
+      const docsDir = FileSystem.documentDirectory + 'symptom-reports/';
+      
+      // Ensure directory exists
+      const dirInfo = await FileSystem.getInfoAsync(docsDir);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(docsDir, { intermediates: true });
+        console.log('📁 Created symptom-reports directory');
+      }
+      
+      const fileName = `AuricRX_Complete_Symptom_History_${currentDate.replace(/\//g, '-')}.pdf`;
+      const finalUri = docsDir + fileName;
+      
+      await FileSystem.moveAsync({
+        from: uri,
+        to: finalUri,
+      });
+      console.log('✅ PDF saved to:', finalUri);
+
+      // Share the PDF using expo-sharing (CORRECT - no destructuring!)
+      console.log('📤 Sharing PDF with expo-sharing...');
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        throw new Error('Sharing is not available on this platform');
+      }
+      
+      // Share the PDF with timeout to prevent app hang if dialog doesn't close properly
+      console.log('📤 Opening share dialog...');
+      try {
+        await Promise.race([
+          Sharing.shareAsync(finalUri, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Share Symptom Tracker Report',
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Share timeout')), 10000)
+          )
+        ]);
+        console.log('✅ PDF share completed');
+      } catch (shareError) {
+        // If timeout or error, just log and continue - don't crash the app
+        console.warn('⚠️ Share dialog issue (this is OK):', shareError);
+      }
+      
+      // No alert - silent success
+    } catch (error) {
+      console.error('❌ Error exporting complete symptom history:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+      }
+      
+      Alert.alert(
+        S?.exportFailed || 'Export Failed',
+        S?.symptomReportFailed || 'Failed to generate symptom report. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -1634,13 +2034,25 @@ Format your response as JSON with this structure:
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowSymptomModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>🤒 {t('analyzeSymptoms')}</DynamicText>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image 
+              source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+              style={{ width: 18, height: 18, marginRight: 6 }}
+            />
+            <DynamicText type="card" style={dynamicStyles.quickActionText}>{t('analyzeSymptoms')}</DynamicText>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowDrugCheckModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>💊 {t('checkInteractions')}</DynamicText>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image 
+              source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
+              style={{ width: 18, height: 18, marginRight: 6 }}
+            />
+            <DynamicText type="card" style={dynamicStyles.quickActionText}>{t('checkInteractions')}</DynamicText>
+          </View>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -1730,7 +2142,7 @@ Format your response as JSON with this structure:
             )}
 
             <TouchableOpacity
-              style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: getAccentColor() }]}
+              style={[dynamicStyles.fastingAnalyzeButton, { backgroundColor: '#D4AF37' }]}
               onPress={analyzeFastingCompatibility}
             >
               <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
@@ -1837,7 +2249,37 @@ Format your response as JSON with this structure:
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 {t('recentAnalyses')}</DynamicText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <Image 
+            source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+            style={{ width: 20, height: 20, marginRight: 8 }}
+          />
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('recentAnalyses')}</DynamicText>
+        </View>
+        
+        {/* Export Active Symptoms Button - Small, Top Right */}
+        {symptomAnalyses.length > 0 && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: getAccentColor() + '20',
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: getAccentColor() + '60',
+            }}
+            onPress={() => {
+              exportActiveSymptomsToPDF();
+              triggerHaptic('light');
+            }}
+          >
+            <DynamicText type="card" style={{ fontSize: 12, fontWeight: '600', letterSpacing: 0.3 }}>
+              {S?.export || 'Export'}
+            </DynamicText>
+          </TouchableOpacity>
+        )}
+      </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
         {t('recentSymptomAnalyses')}
       </DynamicText>
@@ -1878,9 +2320,15 @@ Format your response as JSON with this structure:
                 style={[dynamicStyles.actionButton, dynamicStyles.deleteButton]}
                 onPress={() => deleteSymptomAnalysis(analysis.id)}
               >
-                <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                  🗑️ {S?.delete || 'Delete'}
-                </DynamicText>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image 
+                    source={require('../../assets/dashboard Emojies/trash.png')} 
+                    style={{ width: 16, height: 16, marginRight: 4 }}
+                  />
+                  <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                    {S?.delete || 'Delete'}
+                  </DynamicText>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
@@ -1900,9 +2348,15 @@ Format your response as JSON with this structure:
           triggerHaptic('light');
         }}
       >
-        <DynamicText type="card" style={dynamicStyles.viewAllButtonText}>
-          📋 {S?.viewAllSymptoms || 'View All Symptoms'} ({symptomAnalyses.length})
-        </DynamicText>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image 
+            source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+            style={{ width: 16, height: 16, marginRight: 6 }}
+          />
+          <DynamicText type="card" style={dynamicStyles.viewAllButtonText}>
+            {S?.viewAllSymptoms || 'View All Symptoms'} ({symptomAnalyses.length + storedSymptomAnalyses.length})
+          </DynamicText>
+        </View>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -1990,7 +2444,7 @@ Format your response as JSON with this structure:
             </DynamicText>
 
             <TouchableOpacity
-              style={[dynamicStyles.exportButton, { backgroundColor: getAccentColor() }]}
+              style={[dynamicStyles.exportButton, { backgroundColor: '#D4AF37' }]}
               onPress={exportToPDF}
             >
               <DynamicText type="card" style={dynamicStyles.exportButtonText}>
@@ -2016,7 +2470,13 @@ Format your response as JSON with this structure:
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>🤒 Symptom Analysis</DynamicText>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+                style={{ width: 24, height: 24, marginRight: 8 }}
+              />
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>Symptom Analysis</DynamicText>
+            </View>
             
             <View style={dynamicStyles.inputGroup}>
               <DynamicText type="card" style={dynamicStyles.inputLabel}>Describe your symptoms</DynamicText>
@@ -2035,13 +2495,13 @@ Format your response as JSON with this structure:
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowSymptomModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{S?.cancel || 'Cancel'}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeSymptoms}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>Analyze</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyze || 'Analyze'}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -2057,13 +2517,25 @@ Format your response as JSON with this structure:
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={[dynamicStyles.modalContent, { maxHeight: '85%' }]}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>💊 {S?.drugInteractionCheck || 'Drug Interaction Check'}</DynamicText>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
+                style={{ width: 24, height: 24, marginRight: 8 }}
+              />
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{S?.drugInteractionCheck || 'Drug Interaction Check'}</DynamicText>
+            </View>
             
             {/* Medical Disclaimer */}
             <View style={[dynamicStyles.doctorWarningCard, { marginBottom: 16 }]}>
-              <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
-                ⚠️ {S?.medicalDisclaimer || 'Medical Disclaimer'}
-              </DynamicText>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image 
+                  source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
+                  style={{ width: 18, height: 18, marginRight: 6 }}
+                />
+                <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
+                  {S?.medicalDisclaimer || 'Medical Disclaimer'}
+                </DynamicText>
+              </View>
               <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
                 {S?.interactionDisclaimerText || 'This is AI-generated information for educational purposes only. Always consult your doctor or pharmacist before making any changes to your medications.'}
               </DynamicText>
@@ -2073,9 +2545,15 @@ Format your response as JSON with this structure:
               {/* Medications Section */}
               {medications && medications.length > 0 && (
                 <View style={dynamicStyles.inputGroup}>
-                  <DynamicText type="card" style={dynamicStyles.inputLabel}>
-                    📋 {S?.yourMedications || 'Your Medications'} ({medications.length})
-                  </DynamicText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Image 
+                      source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
+                      style={{ width: 18, height: 18, marginRight: 6 }}
+                    />
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>
+                      {S?.yourMedications || 'Your Medications'} ({medications.length})
+                    </DynamicText>
+                  </View>
                   {medications.map((med: any, index: number) => (
                     <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 8 }]}>
                       <DynamicText type="card" style={{ fontWeight: '600', fontSize: 13 }}>
@@ -2099,9 +2577,15 @@ Format your response as JSON with this structure:
               {/* Supplements Section */}
               {supplements && supplements.length > 0 && (
                 <View style={dynamicStyles.inputGroup}>
-                  <DynamicText type="card" style={dynamicStyles.inputLabel}>
-                    💊 {S?.yourSupplements || 'Your Supplements'} ({supplements.length})
-                  </DynamicText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Image 
+                      source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
+                      style={{ width: 18, height: 18, marginRight: 6 }}
+                    />
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>
+                      {S?.yourSupplements || 'Your Supplements'} ({supplements.length})
+                    </DynamicText>
+                  </View>
                   {supplements.map((sup: any, index: number) => (
                     <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 8 }]}>
                       <DynamicText type="card" style={{ fontWeight: '600', fontSize: 13 }}>
@@ -2166,11 +2650,17 @@ Format your response as JSON with this structure:
             {currentSymptomAnalysis && (
               <>
                 <View style={dynamicStyles.modalHeader}>
-                  <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                    {currentSymptomAnalysis.urgency === 'emergency' ? '🚨' : 
-                     currentSymptomAnalysis.urgency === 'high' ? '⚠️' : 
-                     currentSymptomAnalysis.urgency === 'medium' ? '⚡' : 'ℹ️'} {S?.symptomAnalysisComplete || 'Symptom Analysis Complete'}
-                  </DynamicText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {(currentSymptomAnalysis.urgency === 'emergency' || currentSymptomAnalysis.urgency === 'high') && (
+                      <Image 
+                        source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
+                        style={{ width: 24, height: 24, marginRight: 8 }}
+                      />
+                    )}
+                    <DynamicText type="primary" style={dynamicStyles.modalTitle}>
+                      {S?.symptomAnalysisComplete || 'Symptom Analysis Complete'}
+                    </DynamicText>
+                  </View>
                 </View>
 
                 <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
@@ -2215,9 +2705,15 @@ Format your response as JSON with this structure:
 
                   {/* Doctor Contact Warning */}
                   <View style={[dynamicStyles.analysisSection, dynamicStyles.doctorWarningCard]}>
-                    <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
-                      ⚠️ {S?.importantNotice || 'Important Notice'}
-                    </DynamicText>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Image 
+                        source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
+                        style={{ width: 18, height: 18, marginRight: 6 }}
+                      />
+                      <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
+                        {S?.importantNotice || 'Important Notice'}
+                      </DynamicText>
+                    </View>
                     <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
                       {S?.contactDoctorImmediately || 'Contact your doctor immediately if symptoms worsen'}
                     </DynamicText>
@@ -2265,11 +2761,17 @@ Format your response as JSON with this structure:
         onRequestClose={() => setShowSymptomHistoryModal(false)}
       >
         <View style={dynamicStyles.modalOverlay}>
-          <View style={[dynamicStyles.modalContent, { maxHeight: '85%' }]}>
+          <View style={[dynamicStyles.modalContent, { maxHeight: '85%', display: 'flex', flexDirection: 'column' }]}>
             <View style={dynamicStyles.modalHeader}>
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                📋 {S?.symptomHistory || 'Symptom History'}
-              </DynamicText>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image 
+                  source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+                  style={{ width: 24, height: 24, marginRight: 8 }}
+                />
+                <DynamicText type="primary" style={dynamicStyles.modalTitle}>
+                  {S?.symptomHistory || 'Symptom History'}
+                </DynamicText>
+              </View>
               <TouchableOpacity
                 onPress={() => setShowSymptomHistoryModal(false)}
                 style={{ position: 'absolute', right: 0, top: 0, padding: 8 }}
@@ -2279,10 +2781,66 @@ Format your response as JSON with this structure:
             </View>
 
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { marginBottom: 12 }]}>
-              {S?.totalSymptoms || 'Total symptoms tracked'}: {symptomAnalyses.length}
+              {S?.totalSymptoms || 'Total symptoms tracked'}: {symptomAnalyses.length + storedSymptomAnalyses.length}
             </DynamicText>
 
-            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={true}>
+              {/* Show Stored/Saved Symptoms First */}
+              {storedSymptomAnalyses.map((analysis) => (
+                <View key={analysis.id} style={dynamicStyles.insightCard}>
+                  <View style={dynamicStyles.insightHeader}>
+                    <DynamicText type="card" style={[dynamicStyles.insightTitle, { flex: 1 }]}>
+                      {analysis.symptoms.join(', ')}
+                    </DynamicText>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <View style={[
+                        dynamicStyles.insightSeverity,
+                        { backgroundColor: '#22c55e', paddingHorizontal: 8, paddingVertical: 3 }
+                      ]}>
+                        <DynamicText type="card" style={[dynamicStyles.severityText, { fontSize: 10 }]}>
+                          {S?.saved || 'SAVED'}
+                        </DynamicText>
+                      </View>
+                      <View style={[
+                        dynamicStyles.insightSeverity,
+                        { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
+                      ]}>
+                        <DynamicText type="card" style={dynamicStyles.severityText}>
+                          {S?.[analysis.urgency] || analysis.urgency.toUpperCase()}
+                        </DynamicText>
+                      </View>
+                    </View>
+                  </View>
+                  
+                  <DynamicText type="card" style={dynamicStyles.insightDescription}>
+                    {new Date(analysis.createdAt).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </DynamicText>
+                  
+                  <View style={dynamicStyles.insightFooter}>
+                    <View style={dynamicStyles.insightActions}>
+                      <TouchableOpacity
+                        style={[dynamicStyles.actionButton, dynamicStyles.deleteButton]}
+                        onPress={() => {
+                          setStoredSymptomAnalyses(prev => prev.filter(item => item.id !== analysis.id));
+                          triggerHaptic('light');
+                        }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Image 
+                            source={require('../../assets/dashboard Emojies/trash.png')} 
+                            style={{ width: 16, height: 16, marginRight: 4 }}
+                          />
+                          <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                            {S?.delete || 'Delete'}
+                          </DynamicText>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+
+              {/* Show Current Symptoms */}
               {symptomAnalyses.map((analysis) => (
                 <View key={analysis.id} style={dynamicStyles.insightCard}>
                   <View style={dynamicStyles.insightHeader}>
@@ -2322,42 +2880,165 @@ Format your response as JSON with this structure:
                           deleteSymptomAnalysis(analysis.id);
                         }}
                       >
-                        <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                          🗑️ {S?.delete || 'Delete'}
-                        </DynamicText>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Image 
+                            source={require('../../assets/dashboard Emojies/trash.png')} 
+                            style={{ width: 16, height: 16, marginRight: 4 }}
+                          />
+                          <DynamicText type="card" style={dynamicStyles.actionButtonText}>
+                            {S?.delete || 'Delete'}
+                          </DynamicText>
+                        </View>
                       </TouchableOpacity>
                     </View>
                   </View>
                 </View>
               ))}
 
-              {symptomAnalyses.length === 0 && (
+              {symptomAnalyses.length === 0 && storedSymptomAnalyses.length === 0 && (
                 <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic', marginTop: 20 }]}>
                   {S?.noSymptomAnalyses || 'No symptoms tracked yet'}
                 </DynamicText>
               )}
             </ScrollView>
 
-            <View style={dynamicStyles.modalButtons}>
-              {symptomAnalyses.length > 0 && (
+            {(symptomAnalyses.length > 0 || storedSymptomAnalyses.length > 0) && (
+              <View style={[dynamicStyles.modalButtons, { marginTop: 16, flexShrink: 0 }]}>
                 <TouchableOpacity
-                  style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary, { marginBottom: 8 }]}
-                  onPress={emptyAllSymptoms}
+                  style={[
+                    dynamicStyles.modalButton, 
+                    { 
+                      backgroundColor: getCardBackgroundColor(),
+                      marginBottom: 8,
+                      borderWidth: 1.5,
+                      borderColor: getAccentColor(),
+                      borderRadius: 6,
+                      paddingVertical: 8,
+                      paddingHorizontal: 14,
+                      shadowColor: getAccentColor(),
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 2,
+                      elevation: 2,
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }
+                  ]}
+                  onPress={exportAllSymptomsToPDF}
                 >
-                  <DynamicText type="card" style={dynamicStyles.modalButtonTextSecondary}>
-                    🗑️ {S?.emptyAllSymptoms || 'Empty All Symptoms'}
+                  <DynamicText type="card" style={{ 
+                    fontSize: 13, 
+                    fontWeight: '600',
+                    fontFamily: 'Inter_600SemiBold',
+                    textAlign: 'center',
+                    letterSpacing: 0.3,
+                    width: '100%'
+                  }}>
+                    {S?.exportPDF || 'Export PDF'}
                   </DynamicText>
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
-                onPress={() => setShowSymptomHistoryModal(false)}
-              >
-                <DynamicText type="card" style={dynamicStyles.modalButtonTextPrimary}>
-                  {S?.close || 'Close'}
-                </DynamicText>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  style={[
+                    dynamicStyles.modalButton, 
+                    { 
+                      backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                      marginBottom: 8,
+                      borderWidth: 1.5,
+                      borderColor: 'rgba(239, 68, 68, 0.5)',
+                      borderRadius: 6,
+                      paddingVertical: 8,
+                      paddingHorizontal: 14,
+                      shadowColor: '#ef4444',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 2,
+                      elevation: 2,
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }
+                  ]}
+                  onPress={emptyAllSymptoms}
+                >
+                  <Text style={{ 
+                    color: '#ef4444', 
+                    fontSize: 13, 
+                    fontWeight: '600',
+                    fontFamily: 'Inter_600SemiBold',
+                    textAlign: 'center',
+                    letterSpacing: 0.3,
+                    width: '100%'
+                  }}>
+                    {S?.emptyAllSymptoms || 'Empty All Symptoms'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Close Button - Separate with explicit dimensions */}
+            <TouchableOpacity
+              style={{ 
+                width: 280,
+                height: 34,
+                backgroundColor: getCardBackgroundColor(),
+                marginTop: (symptomAnalyses.length > 0 || storedSymptomAnalyses.length > 0) ? 0 : 16,
+                borderWidth: 1.5,
+                borderColor: getAccentColor(),
+                borderRadius: 6,
+                alignSelf: 'center',
+                justifyContent: 'center',
+                alignItems: 'center',
+                shadowColor: getAccentColor(),
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.25,
+                shadowRadius: 2,
+                elevation: 2
+              }}
+              onPress={() => setShowSymptomHistoryModal(false)}
+            >
+              <DynamicText type="card" style={{ 
+                fontSize: 13, 
+                fontWeight: '600',
+                fontFamily: 'Inter_600SemiBold',
+                textAlign: 'center',
+                letterSpacing: 0.3
+              }}>
+                {S?.close || 'Close'}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Saved Confirmation Modal */}
+      <Modal
+        visible={showSavedConfirmation}
+        transparent
+        animationType="fade"
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={{
+            backgroundColor: getCardBackgroundColor(),
+            borderRadius: 12,
+            padding: 24,
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: 200,
+            borderWidth: 2,
+            borderColor: getAccentColor(),
+            shadowColor: getAccentColor(),
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8
+          }}>
+            <DynamicText type="primary" style={{ 
+              fontSize: 20, 
+              fontWeight: '700',
+              fontFamily: 'Inter_700Bold',
+              textAlign: 'center'
+            }}>
+              ✅ {S?.saved || 'Saved'}
+            </DynamicText>
           </View>
         </View>
       </Modal>
@@ -2371,7 +3052,13 @@ Format your response as JSON with this structure:
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>⏰ Fasting Analytics</DynamicText>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+                style={{ width: 24, height: 24, marginRight: 8 }}
+              />
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>Fasting Analytics</DynamicText>
+            </View>
             
             <View style={dynamicStyles.inputGroup}>
               <DynamicText type="card" style={dynamicStyles.inputLabel}>Fasting Compatibility Check</DynamicText>
@@ -2386,9 +3073,17 @@ Format your response as JSON with this structure:
                 marginBottom: 16 
               }]}>
                 <View style={dynamicStyles.insightHeader}>
-                  <DynamicText type="card" style={dynamicStyles.insightTitle}>
-                    {fastingAnalysis.compatible ? '✅ Compatible' : '⚠️ Warning'}
-                  </DynamicText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {!fastingAnalysis.compatible && (
+                      <Image 
+                        source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
+                        style={{ width: 18, height: 18, marginRight: 6 }}
+                      />
+                    )}
+                    <DynamicText type="card" style={dynamicStyles.insightTitle}>
+                      {fastingAnalysis.compatible ? 'Compatible' : 'Warning'}
+                    </DynamicText>
+                  </View>
                   <View style={[
                     dynamicStyles.insightSeverity,
                     { backgroundColor: fastingAnalysis.compatible ? '#10b981' : '#f59e0b' }
@@ -2421,7 +3116,7 @@ Format your response as JSON with this structure:
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowFastingModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>Cancel</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{S?.cancel || 'Cancel'}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
@@ -2434,6 +3129,152 @@ Format your response as JSON with this structure:
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
               {t('consultHealthcareProviderDisclaimer')}
             </DynamicText>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Drug Interaction Loading Modal - Centered and Compact */}
+      <Modal
+        visible={showInteractionLoadingModal}
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <View style={[dynamicStyles.modalOverlay, { justifyContent: 'center' }]}>
+          <View style={[dynamicStyles.modalContent, { 
+            maxWidth: 280, 
+            width: '80%',
+            maxHeight: 'auto',
+            flex: 0,
+            padding: 24 
+          }]}>
+            <View style={{ alignItems: 'center' }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/AI Health.png')} 
+                style={{ width: 48, height: 48, marginBottom: 16 }}
+              />
+              <DynamicText type="primary" style={[dynamicStyles.modalTitle, { textAlign: 'center', marginBottom: 8 }]}>
+                {S?.analyzing || 'Analyzing...'}
+              </DynamicText>
+              <DynamicText type="secondary" style={{ textAlign: 'center', fontSize: 13, lineHeight: 20 }}>
+                {S?.checkingInteractions || 'Checking for drug interactions using AI...'}
+              </DynamicText>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Drug Interaction Results Modal */}
+      <Modal
+        visible={showInteractionResultModal}
+        animationType="fade"
+        onRequestClose={() => setShowInteractionResultModal(false)}
+      >
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={[dynamicStyles.modalContent, { flex: 1 }]}>
+            {/* Title with Icon */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <Image 
+                source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
+                style={{ width: 20, height: 20, marginRight: 8 }}
+              />
+              <DynamicText type="primary" style={[dynamicStyles.modalTitle, { flex: 1 }]}>
+                {S?.interactionResults || 'Interaction Check Results'}
+              </DynamicText>
+            </View>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={true}>
+              {/* Disclaimer */}
+              {interactionResult?.disclaimer && (
+                <View style={[dynamicStyles.doctorWarningCard, { marginBottom: 16 }]}>
+                  <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
+                    {interactionResult.disclaimer}
+                  </DynamicText>
+                </View>
+              )}
+
+              {/* Summary */}
+              {interactionResult?.summary && (
+                <View style={[dynamicStyles.insightCard, { marginBottom: 16 }]}>
+                  <DynamicText type="card" style={{ fontSize: 14, fontWeight: '600', marginBottom: 8 }}>
+                    {S?.generalSummary || 'General Summary'}
+                  </DynamicText>
+                  <DynamicText type="card" style={{ fontSize: 13, lineHeight: 20 }}>
+                    {interactionResult.summary}
+                  </DynamicText>
+                </View>
+              )}
+
+              {/* Interactions List */}
+              {interactionResult?.interactions && interactionResult.interactions.length > 0 ? (
+                <View style={{ marginBottom: 16 }}>
+                  <DynamicText type="card" style={{ fontSize: 14, fontWeight: '600', marginBottom: 12 }}>
+                    {S?.foundInteractions || `Found ${interactionResult.interactions.length} interaction(s):`}
+                  </DynamicText>
+                  
+                  {interactionResult.interactions.map((interaction: any, index: number) => (
+                    <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 12 }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                        <DynamicText type="card" style={{ fontSize: 13, fontWeight: '700', flex: 1 }}>
+                          {index + 1}. {interaction.item1} + {interaction.item2}
+                        </DynamicText>
+                      </View>
+                      
+                      <View style={{ marginBottom: 6 }}>
+                        <DynamicText type="card" style={{ fontSize: 12, fontWeight: '600', color: '#D4AF37' }}>
+                          {S?.severity || 'Severity'}: {interaction.severity}
+                        </DynamicText>
+                      </View>
+                      
+                      <DynamicText type="card" style={{ fontSize: 12, lineHeight: 18, marginBottom: 8 }}>
+                        {interaction.description}
+                      </DynamicText>
+                      
+                      {interaction.clinicalEffects && interaction.clinicalEffects.length > 0 && (
+                        <View style={{ marginBottom: 8 }}>
+                          <DynamicText type="card" style={{ fontSize: 11, fontWeight: '600', marginBottom: 4 }}>
+                            {S?.clinicalEffects || 'Clinical Effects'}:
+                          </DynamicText>
+                          {interaction.clinicalEffects.map((effect: string, i: number) => (
+                            <DynamicText key={i} type="card" style={{ fontSize: 11, lineHeight: 16, marginLeft: 8 }}>
+                              • {effect}
+                            </DynamicText>
+                          ))}
+                        </View>
+                      )}
+                      
+                      {interaction.management && (
+                        <View>
+                          <DynamicText type="card" style={{ fontSize: 11, fontWeight: '600', marginBottom: 4 }}>
+                            {S?.management || 'Management'}:
+                          </DynamicText>
+                          <DynamicText type="card" style={{ fontSize: 11, lineHeight: 16 }}>
+                            {interaction.management}
+                          </DynamicText>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View style={[dynamicStyles.insightCard, { marginBottom: 16 }]}>
+                  <DynamicText type="card" style={{ fontSize: 13, textAlign: 'center', fontStyle: 'italic' }}>
+                    {S?.noInteractionsFound || 'No significant interactions found.'}
+                  </DynamicText>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Close Button */}
+            <View style={dynamicStyles.modalButtons}>
+              <TouchableOpacity
+                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary, { width: '100%' }]}
+                onPress={() => setShowInteractionResultModal(false)}
+              >
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
+                  {S?.ok || 'OK'}
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

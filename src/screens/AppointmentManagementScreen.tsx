@@ -64,7 +64,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderColor: getCardBorderColor(),
     },
     sectionTitle: {
-      fontSize: 8,
+      fontSize: 16,
       fontWeight: '600',
       marginBottom: 12,
     },
@@ -225,7 +225,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       marginBottom: 16,
     },
     inputLabel: {
-      fontSize: 8,
+      fontSize: 13,
       fontWeight: '500',
       marginBottom: 8,
     },
@@ -270,9 +270,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     modalButtonSecondary: {
       backgroundColor: getCardBackgroundColor() + '80',
+      borderWidth: 1.5,
+      borderColor: currentTheme.accent,
     },
     modalButtonText: {
-      fontSize: 10,
+      fontSize: 14,
       fontWeight: '600',
     },
     modalButtonTextPrimary: {
@@ -1034,7 +1036,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     }
 
     Alert.alert(
-      '🗑️ ' + t('deleteDoctorContact'),
+      t('deleteDoctorContact'),
       `${t('deleteDoctorConfirm')}`,
       [
         {
@@ -1123,7 +1125,13 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📊 {t('appointmentOverview')}</DynamicText>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Image 
+          source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
+          style={{ width: 20, height: 20, marginRight: 8 }}
+        />
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('appointmentOverview')}</DynamicText>
+      </View>
       
       {stats && (
         <View style={dynamicStyles.statsGrid}>

@@ -18,7 +18,9 @@ const Reminders = ({
   onNavigateToDashboard, 
   onNavigateToSettings,
   onAddMedicationFromReminder,
-  onAddAppointmentFromReminder
+  onAddAppointmentFromReminder,
+  meds,
+  setMeds
 }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
@@ -54,15 +56,17 @@ const Reminders = ({
     time: '',
     type: 'medication',
     frequency: 'daily',
+    customDays: [], // Array of day names for custom frequency (e.g., ['Monday', 'Wednesday', 'Friday'])
     priority: 'medium',
     startDate: '',
     endDate: '',
     notes: '',
     // Medication-specific fields
     medicationName: '',
-    components: [{ strength: '', unit: 'mg' }], // Array for multiple components
+    components: [{ strength: '', unit: 'Mg' }], // Array for multiple components
     quantity: '',
-    quantityUnit: 'tablets',
+    quantityUnit: 'Tablets',
+    isSingleComponent: true, // Default to single component
     // Appointment-specific fields
     address: ''
   });
@@ -107,15 +111,17 @@ const Reminders = ({
         time: '',
         type: 'medication',
         frequency: 'daily',
+        customDays: [],
         priority: 'medium',
         startDate: '',
         endDate: '',
         notes: '',
         // Medication-specific fields
         medicationName: '',
-        components: [{ strength: '', unit: 'mg' }],
+        components: [{ strength: '', unit: 'Mg' }],
         quantity: '',
-        quantityUnit: 'tablets',
+        quantityUnit: 'Tablets',
+        isSingleComponent: true, // Default to single component
         // Appointment-specific fields
         address: ''
       });
@@ -133,9 +139,10 @@ const Reminders = ({
       // Clear medication fields when switching away from medication
       ...(newType !== 'medication' && {
         medicationName: '',
-        components: [{ strength: '', unit: 'mg' }],
+        components: [{ strength: '', unit: 'Mg' }],
         quantity: '',
-        quantityUnit: 'tablets',
+        quantityUnit: 'Tablets',
+        isSingleComponent: true,
       }),
       // Clear appointment fields when switching away from appointment
       ...(newType !== 'appointment' && {
@@ -148,7 +155,7 @@ const Reminders = ({
   const addComponent = () => {
     setAddForm(prev => ({
       ...prev,
-      components: [...prev.components, { strength: '', unit: 'mg' }]
+      components: [...prev.components, { strength: '', unit: 'Mg' }]
     }));
   };
 
@@ -193,6 +200,7 @@ const Reminders = ({
           quantity: reminderData.quantity ? `${reminderData.quantity} ${reminderData.quantityUnit}` : '30 tablets',
           quantityValue: reminderData.quantity || '30',
           quantityUnit: reminderData.quantityUnit || 'tablets',
+          isSingleComponent: reminderData.isSingleComponent !== undefined ? reminderData.isSingleComponent : true,
           times: [reminderData.time],
           status: 'taking',
           startDate: reminderData.startDate || new Date().toISOString().split('T')[0],
@@ -266,6 +274,27 @@ const Reminders = ({
     }
   };
 
+  // Delete reminder and corresponding medication/appointment
+  const handleDeleteReminder = (reminderId) => {
+    // Find the reminder to check its type
+    const reminderToDelete = reminders.find(r => r.id === reminderId);
+    
+    // Delete the reminder
+    setReminders(prev => prev.filter(r => r.id !== reminderId));
+    
+    // If this reminder created a medication, also delete the medication
+    if (reminderToDelete?.type === 'medication' && setMeds && meds) {
+      const correspondingMed = meds.find(med => med.reminderId === reminderId);
+      if (correspondingMed) {
+        console.log('🗑️ Also deleting corresponding medication:', correspondingMed.id);
+        setMeds(prev => prev.filter(med => med.reminderId !== reminderId));
+      }
+    }
+    
+    // Note: For appointments, we would do the same if we had access to appointments state
+    // This can be added when appointments functionality is fully integrated
+  };
+
   return (
     <View style={{ flex: 1 }}>
       {/* Header with AuricRX home button */}
@@ -312,7 +341,7 @@ const Reminders = ({
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Add Reminder Button */}
-        <TouchableOpacity
+          <TouchableOpacity
           onPress={() => setShowAdd(true)}
           style={{
             backgroundColor: theme.accent,
@@ -326,7 +355,7 @@ const Reminders = ({
           <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold', fontSize: 16 }}>
             {S.addReminder}
           </DynamicText>
-        </TouchableOpacity>
+          </TouchableOpacity>
         {reminders.map(r => (
           <View key={r.id} style={[styles.row, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_700Bold' }}>
@@ -347,14 +376,16 @@ const Reminders = ({
                     time: r.time,
                     type: r.type || 'medication',
                     frequency: r.frequency || 'daily',
+                    customDays: r.customDays || [],
                     priority: r.priority || 'medium',
                     startDate: r.startDate || '',
                     endDate: r.endDate || '',
                     notes: r.notes || '',
                     medicationName: r.medicationName || '',
-                    components: r.components || [{ strength: '', unit: 'mg' }],
+                    components: r.components || [{ strength: '', unit: 'Mg' }],
                     quantity: r.quantity || '',
-                    quantityUnit: r.quantityUnit || 'tablets',
+                    quantityUnit: r.quantityUnit || 'Tablets',
+                    isSingleComponent: r.isSingleComponent !== undefined ? r.isSingleComponent : true,
                     address: r.address || ''
                   };
                   
@@ -377,7 +408,7 @@ const Reminders = ({
 
               {/* Delete Button */}
               <TouchableOpacity 
-                onPress={() => setReminders((all) => all.filter(x => x.id !== r.id))}
+                onPress={() => handleDeleteReminder(r.id)}
                 style={{
                   backgroundColor: '#f87171',
                   borderRadius: 6,
@@ -575,6 +606,68 @@ const Reminders = ({
                   </View>
                 </View>
 
+                {/* Custom Days Selection (only show when frequency is 'custom') */}
+                {addForm.frequency === 'custom' && (
+                  <View style={{ marginBottom: 12 }}>
+                    <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
+                      {S.selectDays || 'Select Days'}
+                    </DynamicText>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                      {[
+                        { full: 'Monday', shortKey: 'mondayShort' },
+                        { full: 'Tuesday', shortKey: 'tuesdayShort' },
+                        { full: 'Wednesday', shortKey: 'wednesdayShort' },
+                        { full: 'Thursday', shortKey: 'thursdayShort' },
+                        { full: 'Friday', shortKey: 'fridayShort' },
+                        { full: 'Saturday', shortKey: 'saturdayShort' },
+                        { full: 'Sunday', shortKey: 'sundayShort' }
+                      ].map((day) => {
+                        const isSelected = addForm.customDays.includes(day.full);
+                        return (
+                          <TouchableOpacity
+                            key={day.full}
+                            onPress={() => {
+                              setAddForm(prev => ({
+                                ...prev,
+                                customDays: isSelected
+                                  ? prev.customDays.filter(d => d !== day.full)
+                                  : [...prev.customDays, day.full]
+                              }));
+                            }}
+                            style={{
+                              backgroundColor: isSelected ? theme.accent : getCardBackgroundColor(),
+                              borderRadius: 16,
+                              width: 32,
+                              height: 32,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              borderWidth: 1.5,
+                              borderColor: isSelected ? theme.accent : getCardBorderColor()
+                            }}
+                          >
+                            <DynamicText 
+                              type="card" 
+                              style={{ 
+                                fontSize: 14,
+                                color: isSelected ? '#ffffff' : getCardTextColor(),
+                                fontFamily: 'Inter_700Bold',
+                                textAlign: 'center'
+                              }}
+                            >
+                              {S[day.shortKey] || day.full.charAt(0)}
+                            </DynamicText>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                    {addForm.customDays.length > 0 && (
+                      <DynamicText type="sub" style={{ fontSize: 10, marginTop: 8, color: getCardTextColor() + '80' }}>
+                        {S.selected || 'Selected'}: {addForm.customDays.join(', ')}
+                      </DynamicText>
+                    )}
+                  </View>
+                )}
+
                 {/* Medication-specific fields */}
                 {addForm.type === 'medication' && (
                   <View style={{ marginBottom: 12 }}>
@@ -608,11 +701,43 @@ const Reminders = ({
                     {/* Components */}
                     <View style={{ marginBottom: 12 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
-                          {S?.components || 'Components'} ({addForm.components.length})
-                        </DynamicText>
-                        <TouchableOpacity
-                          onPress={addComponent}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
+                            {S?.components || 'Components'} ({addForm.components.length})
+                          </DynamicText>
+                          
+                          {/* Compact Multi-Component Checkbox */}
+                          <TouchableOpacity
+                            onPress={() => setAddForm(prev => ({ ...prev, isSingleComponent: !prev.isSingleComponent }))}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: 4
+                            }}
+                          >
+                            <View style={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: 4,
+                              borderWidth: 1.5,
+                              borderColor: theme.accent,
+                              backgroundColor: !addForm.isSingleComponent ? theme.accent : 'transparent',
+                              justifyContent: 'center',
+                              alignItems: 'center'
+                            }}>
+                              {!addForm.isSingleComponent && (
+                                <DynamicText type="card" style={{ fontSize: 10, color: '#000', lineHeight: 10 }}>✓</DynamicText>
+                              )}
+                            </View>
+                            <DynamicText type="sub" style={{ fontSize: 10 }}>
+                              multi
+                            </DynamicText>
+                          </TouchableOpacity>
+                        </View>
+                        
+                        {!addForm.isSingleComponent && (
+                          <TouchableOpacity
+                            onPress={addComponent}
                           style={{
                             backgroundColor: theme.accent,
                             borderRadius: 20,
@@ -626,6 +751,7 @@ const Reminders = ({
                             +
                           </DynamicText>
                         </TouchableOpacity>
+                        )}
                       </View>
 
                       {addForm.components.map((component, index) => (
@@ -650,7 +776,7 @@ const Reminders = ({
 
                           {/* Strength Input */}
                           <TextInput
-                            placeholder={index === 0 ? "50" : "500"}
+                            placeholder=""
                             placeholderTextColor={getCardTextColor() + '80'}
                             value={component.strength}
                             onChangeText={(text) => updateComponent(index, 'strength', text)}
@@ -715,7 +841,7 @@ const Reminders = ({
                           </TouchableOpacity>
 
                           {/* Remove Component Button */}
-                          {addForm.components.length > 1 && (
+                          {!addForm.isSingleComponent && addForm.components.length > 1 && (
                             <TouchableOpacity
                               onPress={() => removeComponent(index)}
                               style={{
@@ -736,7 +862,7 @@ const Reminders = ({
                       ))}
 
                       {/* Component Summary */}
-                      {addForm.components.length > 1 && (
+                      {!addForm.isSingleComponent && addForm.components.length > 1 && (
                         <View style={{
                           backgroundColor: getCardBackgroundColor() + '50',
                           borderRadius: 8,
@@ -760,7 +886,7 @@ const Reminders = ({
                     {/* Quantity */}
                     <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                       <TextInput
-                        placeholder="30"
+                        placeholder=""
                         placeholderTextColor={getCardTextColor() + '80'}
                         value={addForm.quantity}
                         onChangeText={(text) => setAddForm(prev => ({ ...prev, quantity: text }))}
@@ -944,6 +1070,7 @@ const Reminders = ({
                       time: addForm.time,
                       type: addForm.type,
                       frequency: addForm.frequency,
+                      customDays: addForm.customDays,
                       priority: addForm.priority,
                       startDate: addForm.startDate,
                       endDate: addForm.endDate,
@@ -953,7 +1080,8 @@ const Reminders = ({
                         medicationName: addForm.medicationName,
                         components: addForm.components,
                         quantity: addForm.quantity,
-                        quantityUnit: addForm.quantityUnit
+                        quantityUnit: addForm.quantityUnit,
+                        isSingleComponent: addForm.isSingleComponent
                       }),
                       ...(addForm.type === 'appointment' && {
                         address: addForm.address
@@ -1037,7 +1165,7 @@ const Reminders = ({
               <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
                 {S?.selectUnit || 'Select Unit'}
               </DynamicText>
-              {['mg', 'g', 'ml', 'tablets', 'capsules', 'units'].map((unit) => (
+              {['Mg', 'G', 'Ml', 'Tablets', 'Capsules', 'Units'].map((unit) => (
                 <TouchableOpacity
                   key={unit}
                   onPress={() => {
@@ -1094,7 +1222,7 @@ const Reminders = ({
               <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
                 {S?.selectQuantityUnit || 'Select Quantity Unit'}
               </DynamicText>
-              {['tablets', 'capsules', 'ml', 'mg', 'g', 'units', 'pills'].map((unit) => (
+              {['Tablets', 'Capsules', 'Ml', 'Mg', 'G', 'Units', 'Pills'].map((unit) => (
                 <TouchableOpacity
                   key={unit}
                   onPress={() => {

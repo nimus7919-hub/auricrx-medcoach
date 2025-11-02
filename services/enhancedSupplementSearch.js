@@ -148,23 +148,67 @@ class EnhancedSupplementSearch {
           }
         }
         
-        // Only apply quantity unit filtering if it would help narrow down results
-        if (supplement.quantityUnit && filteredMatches.length > 5) {
+        // Filter by quantity unit if available (with smart fallback)
+        let strictMatches = filteredMatches;
+        if (supplement.quantityUnit) {
           const quantityUnit = supplement.quantityUnit.toLowerCase();
-          console.log(`🔍 Filtering by quantity unit: "${quantityUnit}" (${filteredMatches.length} -> ?)`);
+          console.log(`🔍 Filtering by quantity unit: "${quantityUnit}"`);
+          console.log(`🔍 Filtering FROM: ${filteredMatches.length} matches (after previous filters)`);
           
-          const unitFiltered = filteredMatches.filter(match => {
+          strictMatches = filteredMatches.filter(match => {
             const unidades = (match.unidades || '').toLowerCase();
-            return unidades.includes(quantityUnit) || 
-                   unidades.includes(supplement.quantityUnit.toLowerCase());
+            const medicinas = (match.Medicinas || '').toLowerCase();
+            const combined = `${medicinas} ${unidades}`;
+            
+            // Normalize the quantity unit to handle plurals and variations
+            const normalizedUnit = quantityUnit.replace(/s$/, ''); // Remove trailing 's' (tablets -> tablet)
+            
+            // Check if the quantity unit appears in the supplement name or units field
+            const hasUnitMatch = combined.includes(quantityUnit) || 
+                                combined.includes(normalizedUnit) ||
+                                // Handle Spanish/English variations
+                                (normalizedUnit === 'tablet' && (combined.includes('tab') || combined.includes('tableta'))) ||
+                                (normalizedUnit === 'capsule' && (combined.includes('cap') || combined.includes('capsula'))) ||
+                                (normalizedUnit === 'gel cap' && (combined.includes('gel cap') || combined.includes('capsula gel') || combined.includes('softgel'))) ||
+                                (normalizedUnit === 'suspension' && (combined.includes('suspension') || combined.includes('susplumas') || combined.includes('jarabe'))) ||
+                                (normalizedUnit === 'drop' && (combined.includes('drop') || combined.includes('gota'))) ||
+                                (normalizedUnit === 'syrup' && (combined.includes('syrup') || combined.includes('jarabe'))) ||
+                                (normalizedUnit === 'gel' && combined.includes('gel')) ||
+                                (normalizedUnit === 'cream' && (combined.includes('cream') || combined.includes('crema'))) ||
+                                (normalizedUnit === 'ointment' && (combined.includes('ointment') || combined.includes('pomada') || combined.includes('ungüento'))) ||
+                                (normalizedUnit === 'suppository' && (combined.includes('suppository') || combined.includes('suppositories') || combined.includes('supositorio'))) ||
+                                (normalizedUnit === 'patch' && (combined.includes('patch') || combined.includes('parche'))) ||
+                                (normalizedUnit === 'injection' && (combined.includes('injection') || combined.includes('injectable') || combined.includes('inyección') || combined.includes('inyectable'))) ||
+                                (normalizedUnit === 'vial' && (combined.includes('vial') || combined.includes('ampolla') || combined.includes('ampoule'))) ||
+                                (normalizedUnit === 'ml' && combined.includes('ml')) ||
+                                (normalizedUnit === 'mg' && combined.includes('mg')) ||
+                                (normalizedUnit === 'bottle' && (combined.includes('bottle') || combined.includes('botella') || combined.includes('frasco'))) ||
+                                (normalizedUnit === 'box' && (combined.includes('box') || combined.includes('caja'))) ||
+                                (normalizedUnit === 'pack' && (combined.includes('pack') || combined.includes('paquete')));
+            
+            return hasUnitMatch;
           });
           
-          // Only use unit filtering if it still leaves us with results
-          if (unitFiltered.length > 0) {
-            filteredMatches = unitFiltered;
-            console.log(`📊 Unit filtering result: ${filteredMatches.length} matches`);
+          console.log(`📊 After quantity unit filtering: ${strictMatches.length} matches`);
+          
+          // SMART FALLBACK: If too few results, run relaxed search (ignore quantity unit)
+          const FALLBACK_THRESHOLD = 5;
+          if (strictMatches.length <= FALLBACK_THRESHOLD && strictMatches.length < filteredMatches.length) {
+            console.log(`⚠️ Only ${strictMatches.length} strict matches found. Running relaxed search (ignoring quantity unit)...`);
+            
+            // Keep strict matches first, then add relaxed matches that aren't already included
+            const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const strictIds = new Set(strictMatches.map(m => `${normalize(m.Medicinas)}|${normalize(m.unidades || '')}`));
+            const relaxedMatches = filteredMatches.filter(m => {
+              const id = `${normalize(m.Medicinas)}|${normalize(m.unidades || '')}`;
+              return !strictIds.has(id);
+            });
+            
+            filteredMatches = [...strictMatches, ...relaxedMatches];
+            console.log(`✅ Expanded to ${filteredMatches.length} matches (${strictMatches.length} exact + ${relaxedMatches.length} other forms)`);
+            console.log(`📋 Showing all available forms: tablets, capsules, powders, liquids, etc.`);
           } else {
-            console.log(`📊 Unit filtering too strict, keeping ${filteredMatches.length} matches`);
+            filteredMatches = strictMatches;
           }
         }
         

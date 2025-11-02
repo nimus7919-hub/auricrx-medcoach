@@ -60,10 +60,10 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
 
   useEffect(() => {
     if (visible) {
-      Animated.timing(slide, { toValue: 1, duration: 220, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      Animated.timing(slide, { toValue: 1, duration: 150, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
       load();
     } else {
-      Animated.timing(slide, { toValue: 0, duration: 180, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start();
+      Animated.timing(slide, { toValue: 0, duration: 120, easing: Easing.in(Easing.ease), useNativeDriver: true }).start();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
@@ -429,28 +429,40 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   const extractStrengthAndQuantity = (medicinas: string, unidades: string = '') => {
     if (!medicinas) return '';
     
-    // Extract strength patterns (e.g., 400 mg, 500mg, 100/25 mg, 250mg/5ml)
-    const strengthRegex = /(\d+(?:\/\d+)?\s*(?:mg|g|ml|mcg|iu|%))/gi;
-    const strengthMatches = medicinas.match(strengthRegex);
+    const combined = `${medicinas} ${unidades}`.toLowerCase();
     
-    // Extract quantity patterns (e.g., 20 tablets, 30 caps, 1 ampoule, 10 ml)
-    const quantityRegex = /(\d+)\s*(?:tablet|tab|capsule|cap|ampoule|ml|vial|strip|piece|pieza|aplicador|sobre|frasco)/gi;
-    const quantityMatches = medicinas.match(quantityRegex);
+    // Extract multi-component strength patterns (e.g., "50 mg / 500 mg", "50mg/500mg", "100/25 mg")
+    // This regex captures patterns like: "50 mg / 500 mg", "50mg/500mg", "50/500 mg"
+    const multiStrengthRegex = /(\d+\s*(?:mg|mcg|g|ml|iu|%)\s*\/\s*\d+\s*(?:mg|mcg|g|ml|iu|%))/i;
+    const multiStrengthMatch = combined.match(multiStrengthRegex);
     
-    // Also check unidades field for quantity
-    let unidadesQuantity = '';
-    if (unidades) {
-      const unidadesMatch = unidades.match(/(\d+)\s*(?:tablet|tab|capsule|cap|ampoule|ml|vial|strip|piece|pieza|aplicador|sobre|frasco)/gi);
-      if (unidadesMatch) {
-        unidadesQuantity = unidadesMatch[0];
-      }
+    // If multi-component strength found, use it directly
+    let strength = '';
+    if (multiStrengthMatch) {
+      strength = multiStrengthMatch[0].trim();
+    } else {
+      // Extract single strength patterns (e.g., "400 mg", "500mg", "250mg/5ml")
+      const strengthRegex = /(\d+(?:\/\d+)?\s*(?:mg|g|ml|mcg|iu|%))/gi;
+      const strengthMatches = combined.match(strengthRegex);
+      strength = strengthMatches ? strengthMatches.join(' / ') : '';
     }
     
-    // Combine strength and quantity
-    const strength = strengthMatches ? strengthMatches.join(' ') : '';
-    const quantity = quantityMatches ? quantityMatches[0] : unidadesQuantity;
+    // Extract quantity patterns (e.g., "20 tablets", "30 tabs", "60 comprimidos")
+    // Enhanced to capture more variations including Spanish
+    const quantityRegex = /(\d+)\s*(?:tablet|tab|capsule|cap|pill|comprimido|tableta|capsula|ampoule|ampolla|ml|vial|strip|tira|piece|pieza|aplicador|sobre|frasco|softgel|gragea)/gi;
+    let quantityMatches = combined.match(quantityRegex);
     
-    const result = [strength, quantity].filter(Boolean).join(' • ');
+    // If quantity not found in combined string, try just the unidades field
+    if (!quantityMatches && unidades) {
+      quantityMatches = unidades.match(quantityRegex);
+    }
+    
+    const quantity = quantityMatches ? quantityMatches[0] : '';
+    
+    // Format the result: "Strength • Quantity" or just "Strength" if no quantity
+    const parts = [strength, quantity].filter(Boolean);
+    const result = parts.join(' • ');
+    
     console.log(`🔍 Extract strength/quantity: "${medicinas}" + "${unidades}" -> "${result}"`);
     
     return result || medicinas; // Fallback to full name if no extraction possible
@@ -496,7 +508,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                   {extractStrengthAndQuantity(item.excelMatch.medicinas, item.excelMatch.unidades)}
                 </Text>
               ) : (
-                <Text style={{ color: colors.sub, fontSize:11 }}>{productInfo.display}</Text>
+                <Text style={{ color: colors.sub, fontSize:11, fontStyle: 'italic' }}>
+                  {strings.productInfoNotAvailable || 'Product details not available'}
+                </Text>
               )}
             </View>
           </View>
@@ -542,7 +556,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   }
 
   return (
-    <Modal visible={visible} animationType="none" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
         <Animated.View style={{
           transform: [{ translateY }],

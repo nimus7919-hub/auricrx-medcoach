@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
+import * as Haptics from 'expo-haptics';
 import MedicationRefillModal from './MedicationRefillModal';
 import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
@@ -10,25 +11,33 @@ import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
 
 // Medications component moved outside App to prevent remounting
-const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
+const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   const { timeFormat } = useTimeFormat();
   
+  // Helper function to convert unit to sentence case
+  const toSentenceCase = (str) => {
+    if (!str) return '';
+    const s = String(str).trim();
+    if (s.length === 0) return '';
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  };
+  
   // Unit options for strength and quantity (sorted alphabetically)
   const strengthUnits = [
     '% v/v', '% w/v', '% w/w', 'FTU', 'IU', 'IU/mL', 'L', 'U', 'U/kg', 'U/mL', 'U/hour',
-    'actuations', 'drops', 'g', 'mcg', 'mcg/kg', 'mcg/kg/min', 'mcg/hour', 'mcg/mL',
-    'mg', 'mg/kg', 'mg/m²', 'mg/day', 'mg/hour', 'mg/mL', 'mg/5mL', 'mL', 'mL/hour',
-    'mEq', 'mEq/L', 'mmol', 'mmol/L', 'puffs', 'units', 'USP units'
+    'Actuations', 'Drops', 'G', 'Mcg', 'Mcg/kg', 'Mcg/kg/min', 'Mcg/hour', 'Mcg/mL',
+    'Mg', 'Mg/kg', 'Mg/m²', 'Mg/day', 'Mg/hour', 'Mg/mL', 'Mg/5mL', 'ML', 'ML/hour',
+    'MEq', 'MEq/L', 'Mmol', 'Mmol/L', 'Puffs', 'Units', 'USP units'
   ];
   
   const quantityUnits = [
-    'ampule', 'ampules', 'bottle', 'bottles', 'box', 'boxes', 'capsule', 'capsules',
-    'drop', 'drops', 'pack', 'packs', 'piece', 'pieces', 'puff', 'puffs', 'pump', 'pumps',
-    'sachet', 'sachets', 'strip', 'strips', 'suppository', 'suppositories',
-    'tablet', 'tablets', 'unit', 'units', 'vial', 'vials'
+    'Ampule', 'Ampules', 'Bottle', 'Bottles', 'Box', 'Boxes', 'Capsule', 'Capsules',
+    'Drop', 'Drops', 'Pack', 'Packs', 'Piece', 'Pieces', 'Puff', 'Puffs', 'Pump', 'Pumps',
+    'Sachet', 'Sachets', 'Strip', 'Strips', 'Suppository', 'Suppositories',
+    'Tablet', 'Tablets', 'Unit', 'Units', 'Vial', 'Vials'
   ];
   
   useEffect(() => {
@@ -46,6 +55,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   // Refill modal state
   const [refillMed, setRefillMed] = useState(null);
   const [showRefillModal, setShowRefillModal] = useState(false);
+  const [showRefillLoading, setShowRefillLoading] = useState(false);
 
   const [showAdd, setShowAdd] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
@@ -88,7 +98,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     if (showAdd) {
       setAddForm({ 
         name:'', 
-        components: [{ strength: '', unit: 'mg' }], // Multi-component system
+        components: [{ strength: '', unit: 'Mg' }], // Multi-component system
         times:'', 
         status:'taking', 
         startDate:'', 
@@ -96,7 +106,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         notes:'', 
         dosesLeft:'', 
         quantityValue:'', 
-        quantityUnit:'tablet' 
+        quantityUnit:'tablet',
+        isSingleComponent: true // Default to single component
       });
     } else {
       setInputFocused(false); // Reset input focus when modal closes
@@ -124,7 +135,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const [holdUntil, setHoldUntil] = useState('');
   const [addForm, setAddForm] = useState({ 
     name:'', 
-    components: [{ strength: '', unit: 'mg' }], // Multi-component system
+    components: [{ strength: '', unit: 'Mg' }], // Multi-component system
     times:'', 
     status:'taking', 
     startDate:'', 
@@ -132,7 +143,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     notes:'', 
     dosesLeft:'', 
     quantityValue:'', 
-    quantityUnit:'tablet' 
+    quantityUnit:'tablet',
+    isSingleComponent: true // Default to single component (multi unchecked)
   });
   const [addTimes, setAddTimes] = useState([]); // array of HH:MM
   const [editTimes, setEditTimes] = useState([]);
@@ -185,7 +197,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const addComponent = () => {
     setAddForm(prev => ({
       ...prev,
-      components: [...prev.components, { strength: '', unit: 'mg' }]
+      components: [...prev.components, { strength: '', unit: 'Mg' }]
     }));
   };
 
@@ -212,15 +224,16 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     id:'', 
     name:'', 
     strengthValue:'', 
-    strengthUnit:'mg', 
+    strengthUnit:'Mg', 
     times:'', 
     status:'taking', 
     startDate:'', 
-    endDate:'', 
+    endDate:'',
+    isSingleComponent: true, 
     notes:'', 
     dosesLeft:'', 
     quantityValue:'', 
-    quantityUnit:'tablet' 
+    quantityUnit:'Tablet' 
   });
 
   // Unit dropdown states
@@ -268,8 +281,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           addForm.components.map(comp => comp.strength).join('/') : 
           '500',
         strengthUnit: addForm.components ? 
-          addForm.components[0]?.unit || 'mg' : 
-          'mg',
+          addForm.components[0]?.unit || 'Mg' : 
+          'Mg',
         status: addForm.status,
         times: addTimes,
         startDate: addForm.startDate,
@@ -280,7 +293,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         quantityValue: addForm.quantityValue.trim(),
         quantityUnit: addForm.quantityUnit,
         remainingQuantity: addForm.quantityValue ? addForm.quantityValue : '0',
-        lastRefill: null // No refill yet
+        lastRefill: null, // No refill yet
+        isSingleComponent: addForm.isSingleComponent // Single or multi-component flag
       };
       
       console.log('[MEDICATIONS DEBUG] New medication object:', newMed);
@@ -310,7 +324,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               dosesLeft: newMed.dosesLeft,
               quantityValue: newMed.quantityValue,
               quantityUnit: newMed.quantityUnit,
-              lastRefill: newMed.lastRefill
+              lastRefill: newMed.lastRefill,
+              isSingleComponent: newMed.isSingleComponent
             })
           });
           
@@ -337,7 +352,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       
       setAddForm({ 
         name:'', 
-        components: [{ strength: '', unit: 'mg' }], // Multi-component system
+        components: [{ strength: '', unit: 'Mg' }], // Multi-component system
         times:'', 
         status:'taking', 
         startDate:'', 
@@ -345,7 +360,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         notes:'', 
         dosesLeft:'', 
         quantityValue:'', 
-        quantityUnit:'tablet' 
+        quantityUnit:'tablet',
+        isSingleComponent: true // Reset to default
       });
       setAddTimes([]);
       // Close modal immediately after successful add
@@ -391,7 +407,17 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   };
 
   const handleDeleteMed = (id) => {
+    // Find the medication to check if it was created from a reminder
+    const medToDelete = meds.find(med => med.id === id);
+    
+    // Delete the medication
     setMeds(prev => prev.filter(med => med.id !== id));
+    
+    // If this medication was created from a reminder, also delete the reminder
+    if (medToDelete?.fromReminder && medToDelete?.reminderId && setReminders) {
+      console.log('🗑️ Also deleting corresponding reminder:', medToDelete.reminderId);
+      setReminders(prev => prev.filter(r => r.id !== medToDelete.reminderId));
+    }
   };
 
   // Handle refill completion - update lastRefill date
@@ -407,10 +433,40 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
 
   // Refill medication function
   const findNearbyMedications = async (medication) => {
+    // Haptic feedback to confirm button press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    // Show loading overlay IMMEDIATELY
+    setShowRefillLoading(true);
+    
+    // Small delay to ensure loading modal renders before heavy processing
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Set up medication info for the refill modal
+    const medicationInfo = {
+      name: medication.name,
+      dosage: medication.strength || 'N/A',
+      quantity: medication.quantity || 'N/A',
+      quantityUnit: medication.quantityUnit || undefined, // Only include if explicitly set (avoid defaulting to 'tablet')
+      lastRefill: medication.lastRefill || S.never || 'Never',
+      isSingleComponent: medication.isSingleComponent !== undefined ? medication.isSingleComponent : true // Default to true for existing meds
+    };
+    
+    console.log('🔍 [MEDICATIONS] Refill button pressed for:', medication.name);
+    console.log('🔍 [MEDICATIONS] medication.isSingleComponent (from saved data):', medication.isSingleComponent);
+    console.log('🔍 [MEDICATIONS] medicationInfo.isSingleComponent (being passed to modal):', medicationInfo.isSingleComponent);
+    
+    // Show main modal and hide loading overlay
+    setRefillMed(medicationInfo);
+    setShowRefillModal(true);
+    setShowRefillLoading(false);
+    
+    // The modal will handle location checks and loading internally
     try {
       // First check if location services are available
       const locationEnabled = await Location.hasServicesEnabledAsync();
       if (!locationEnabled) {
+        // Modal is already open, just show alert
         Alert.alert(
           'Location Services Disabled',
           'Please enable location services in your device settings to find nearby pharmacies.',
@@ -425,6 +481,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
+        // Modal is already open, just show alert
         Alert.alert(
           'Location Permission Required',
           'This app needs location permission to find nearby pharmacies. Please grant permission in settings.',
@@ -442,18 +499,6 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         timeout: 10000, // 10 second timeout
         maximumAge: 300000 // 5 minutes
       });
-      
-      // Set up medication info for the refill modal
-      const medicationInfo = {
-        name: medication.name,
-        dosage: medication.strength || 'N/A',
-        quantity: medication.quantity || 'N/A',
-        quantityUnit: medication.quantityUnit || 'tablet', // Include quantity unit for better search
-        lastRefill: medication.lastRefill || S.never || 'Never'
-      };
-      
-      setRefillMed(medicationInfo);
-      setShowRefillModal(true);
     } catch (error) {
       console.error('Error finding nearby medications:', error);
       
@@ -618,9 +663,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                       ...med, 
                       times: med.times.join(', '),
                       strengthValue: med.strengthValue || med.strength?.split(' ')[0] || '',
-                      strengthUnit: med.strengthUnit || med.strength?.split(' ').slice(1).join(' ') || 'mg',
+                      strengthUnit: toSentenceCase(med.strengthUnit || med.strength?.split(' ').slice(1).join(' ') || 'Mg'),
                       quantityValue: med.quantityValue || med.quantity?.split(' ')[0] || '',
-                      quantityUnit: med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || 'tablet'
+                      quantityUnit: toSentenceCase(med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || 'Tablet')
                     });
                     setEditTimes([...med.times]);
                     setShowEdit(true);
@@ -669,7 +714,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
-                  {parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0')} left
+                  {parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0')} {S?.left || 'left'}
                 </DynamicText>
                 <TextInput
                   placeholder="0"
@@ -723,7 +768,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#fff', fontSize: 8, fontFamily: 'Inter_600SemiBold' }}>
-                    Took
+                    {S?.took || 'Took'}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
@@ -820,14 +865,46 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 {/* Components */}
                 <View style={{ marginBottom: 12 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
-                      {S?.components || 'Components'} ({addForm.components.length})
-                    </DynamicText>
-                    <TouchableOpacity
-                      onPress={addComponent}
-                      style={{
-                        backgroundColor: theme.accent,
-                        borderRadius: 20,
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
+                        {S?.components || 'Components'} ({addForm.components.length})
+                      </DynamicText>
+                      
+                      {/* Compact Multi-Component Checkbox */}
+                      <TouchableOpacity
+                        onPress={() => setAddForm(prev => ({ ...prev, isSingleComponent: !prev.isSingleComponent }))}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                      >
+                        <View style={{
+                          width: 16,
+                          height: 16,
+                          borderRadius: 4,
+                          borderWidth: 1.5,
+                          borderColor: theme.accent,
+                          backgroundColor: !addForm.isSingleComponent ? theme.accent : 'transparent',
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}>
+                          {!addForm.isSingleComponent && (
+                            <DynamicText type="card" style={{ fontSize: 10, color: '#000', lineHeight: 10 }}>✓</DynamicText>
+                          )}
+                        </View>
+                        <DynamicText type="sub" style={{ fontSize: 10 }}>
+                          multi
+                        </DynamicText>
+                      </TouchableOpacity>
+                    </View>
+                    {/* Only show Add Component button when multi is checked */}
+                    {!addForm.isSingleComponent && (
+                      <TouchableOpacity
+                        onPress={addComponent}
+                        style={{
+                          backgroundColor: theme.accent,
+                          borderRadius: 20,
                         width: 32,
                         height: 32,
                         justifyContent: 'center',
@@ -838,6 +915,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         +
                       </DynamicText>
                     </TouchableOpacity>
+                    )}
                   </View>
 
                   {addForm.components.map((component, index) => (
@@ -862,7 +940,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
 
                       {/* Strength Input */}
                       <TextInput
-                        placeholder={index === 0 ? "50" : "500"}
+                        placeholder=""
                         placeholderTextColor={getSubTextColor()}
                         value={component.strength}
                         onChangeText={(text) => updateComponent(index, 'strength', text)}
@@ -912,7 +990,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                             fontFamily: 'Inter_600SemiBold'
                           }}
                         >
-                          {component.unit}
+                          {toSentenceCase(component.unit)}
                         </DynamicText>
                         <DynamicText 
                           type="sub" 
@@ -925,8 +1003,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         </DynamicText>
                       </TouchableOpacity>
 
-                      {/* Remove Component Button */}
-                      {addForm.components.length > 1 && (
+                      {/* Remove Component Button - only show in multi mode */}
+                      {!addForm.isSingleComponent && addForm.components.length > 1 && (
                         <TouchableOpacity
                           onPress={() => removeComponent(index)}
                           style={{
@@ -946,8 +1024,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     </View>
                   ))}
 
-                  {/* Component Summary */}
-                  {addForm.components.length > 1 && (
+                  {/* Component Summary - only show in multi mode */}
+                  {!addForm.isSingleComponent && addForm.components.length > 1 && (
                     <View style={{
                       backgroundColor: getCardBackgroundColor() + '50',
                       borderRadius: 8,
@@ -1085,7 +1163,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 {/* Quantity Value and Unit */}
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                   <TextInput
-                    placeholder="30"
+                    placeholder=""
                     placeholderTextColor={getSubTextColor()}
                     value={addForm.quantityValue}
                     onChangeText={(text) => {
@@ -1140,7 +1218,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         fontFamily: 'Inter_600SemiBold'
                       }}
                     >
-                      {addForm.quantityUnit}
+                      {toSentenceCase(addForm.quantityUnit)}
                     </DynamicText>
                     <DynamicText 
                       type="sub" 
@@ -1273,7 +1351,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 {/* Strength Value and Unit */}
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                   <TextInput
-                    placeholder="500"
+                    placeholder=""
                     placeholderTextColor={getSubTextColor()}
                     value={editForm.strengthValue}
                     onChangeText={(text) => setEditForm(prev => ({ ...prev, strengthValue: text }))}
@@ -1435,7 +1513,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 {/* Quantity Value and Unit */}
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                   <TextInput
-                    placeholder="30"
+                    placeholder=""
                     placeholderTextColor={getSubTextColor()}
                     value={editForm.quantityValue}
                     onChangeText={(text) => {
@@ -1490,7 +1568,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         fontFamily: 'Inter_600SemiBold'
                       }}
                     >
-                      {editForm.quantityUnit}
+                      {toSentenceCase(editForm.quantityUnit)}
                     </DynamicText>
                     <DynamicText 
                       type="sub" 
@@ -1624,6 +1702,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             preloadedFxMeta={preloadedFxMeta}
           />
         )}
+
       </ScrollView>
 
       {/* Dropdown Components - Render at the very end */}
@@ -1658,7 +1737,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               borderRadius: 12,
               padding: 16,
               marginHorizontal: 32,
-              minWidth: 200,
+              maxWidth: 300,
+              maxHeight: '70%',
               borderWidth: 1,
               borderColor: getCardBorderColor()
             }}
@@ -1667,32 +1747,34 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
               {S?.selectUnit || 'Select Unit'}
             </DynamicText>
-            {['mg', 'g', 'ml', 'tablets', 'capsules', 'units'].map((unit) => (
-              <TouchableOpacity
-                key={unit}
-                onPress={() => {
-                  updateComponent(currentComponentIndex, 'unit', unit);
-                  setShowUnitDropdown(false);
-                }}
-                style={{
-                  backgroundColor: addForm.components[currentComponentIndex]?.unit === unit ? theme.accent : 'transparent',
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 4
-                }}
-              >
-                <DynamicText 
-                  type="card" 
-                  style={{ 
-                    fontSize: 14,
-                    color: addForm.components[currentComponentIndex]?.unit === unit ? '#ffffff' : getCardTextColor(),
-                    fontFamily: 'Inter_500Medium'
+            <ScrollView>
+              {strengthUnits.map((unit) => (
+                <TouchableOpacity
+                  key={unit}
+                  onPress={() => {
+                    updateComponent(currentComponentIndex, 'unit', unit);
+                    setShowUnitDropdown(false);
+                  }}
+                  style={{
+                    backgroundColor: addForm.components[currentComponentIndex]?.unit === unit ? theme.accent : 'transparent',
+                    borderRadius: 8,
+                    padding: 12,
+                    marginBottom: 4
                   }}
                 >
-                  {S?.units?.[unit] || unit}
-                </DynamicText>
-              </TouchableOpacity>
-            ))}
+                  <DynamicText 
+                    type="card" 
+                    style={{ 
+                      fontSize: 14,
+                      color: addForm.components[currentComponentIndex]?.unit === unit ? '#ffffff' : getCardTextColor(),
+                      fontFamily: 'Inter_500Medium'
+                    }}
+                  >
+                    {S?.units?.[unit] || unit}
+                  </DynamicText>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -1736,6 +1818,66 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         getCardTextColor={getCardTextColor}
         buttonLayout={editQuantityUnitButtonLayout}
       />
+
+      {/* Refill Loading Overlay - Outside ScrollView */}
+      {showRefillLoading && (
+        <View 
+          key="refill-loading-overlay"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}>
+          <View style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 12,
+            padding: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 240,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+          }}>
+            <Image
+              source={require('../assets/dashboard Emojies/standard pill emoji.png')}
+              style={{ width: 36, height: 36, marginBottom: 10 }}
+            />
+            <ActivityIndicator 
+              key={Date.now()}
+              size="large" 
+              color={theme.accent} 
+              animating={true}
+              hidesWhenStopped={false}
+              style={{ marginVertical: 10 }}
+            />
+            <Text style={{
+              fontSize: 14,
+              fontFamily: 'Inter_600SemiBold',
+              marginBottom: 4,
+              textAlign: 'center',
+              color: theme.text,
+            }}>
+              {S?.searchingPharmacies || 'Searching for pharmacies...'}
+            </Text>
+            <Text style={{
+              fontSize: 11,
+              textAlign: 'center',
+              color: theme.subtext,
+            }}>
+              {S?.pleaseWait || 'Please wait'}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
