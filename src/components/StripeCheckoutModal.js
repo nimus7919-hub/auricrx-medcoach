@@ -215,6 +215,14 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
               onLoadEnd={() => {
                 console.log('✅ WebView finished loading');
               }}
+              onContentProcessDidTerminate={() => {
+                console.error('❌ WebView content process terminated (iOS crash)');
+                setError('WebView crashed. Please try again.');
+              }}
+              onRenderProcessGone={(syntheticEvent) => {
+                console.error('❌ WebView render process crashed:', syntheticEvent);
+                setError('WebView crashed. Please try again.');
+              }}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 console.error('❌ WebView error: ', nativeEvent);
