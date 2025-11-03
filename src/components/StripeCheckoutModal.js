@@ -87,8 +87,11 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
   const handleNavigationStateChange = (navState) => {
     const { url } = navState;
     
+    console.log('🔍 Stripe checkout navigation:', url);
+    
     // Check if user completed checkout (success page)
-    if (url.includes('/success') || url.includes('checkout.stripe.com') && url.includes('success')) {
+    if (url.includes('/success') || (url.includes('checkout.stripe.com') && url.includes('success'))) {
+      console.log('✅ Checkout successful, closing modal');
       // Close modal and refresh subscription status
       if (onSuccess) {
         onSuccess();
@@ -98,6 +101,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
     
     // Check if user cancelled
     if (url.includes('/cancel')) {
+      console.log('❌ Checkout cancelled');
       onClose();
     }
   };
