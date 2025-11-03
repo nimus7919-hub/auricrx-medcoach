@@ -2513,6 +2513,20 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
     const uid = decoded.uid;
     const email = decoded.email;
 
+    // Get country from request body or default to US
+    const country = req.body.country || 'US';
+
+    // Determine price based on country
+    let currency = 'usd';
+    let unitAmount = 300; // $3.00 USD for US
+    
+    if (country === 'MX') {
+      currency = 'mxn';
+      unitAmount = 5000; // 50.00 MXN for Mexico
+    }
+    
+    console.log(`💰 Creating checkout for ${country}: ${currency.toUpperCase()} ${unitAmount / 100}`);
+
     // Get user profile to check for existing Stripe customer
     const profile = await neonClient`
       SELECT stripe_customer_id FROM user_profiles WHERE user_id = ${uid}
@@ -2546,12 +2560,12 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: currency,
             product_data: {
               name: 'AuricRx MedCoach Pro',
               description: 'Unlimited access to all features',
             },
-            unit_amount: 999, // $9.99 per month
+            unit_amount: unitAmount,
             recurring: {
               interval: 'month',
             },

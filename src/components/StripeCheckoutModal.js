@@ -38,17 +38,17 @@ async function getAuthToken() {
   return null;
 }
 
-export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess }) {
+export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess, country = 'US' }) {
   const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
   const [loading, setLoading] = useState(true);
   const [checkoutUrl, setCheckoutUrl] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (visible && !checkoutUrl) {
+    if (visible) {
       createCheckoutSession();
     }
-  }, [visible]);
+  }, [visible, country]); // Reset checkoutUrl when country changes
 
   const createCheckoutSession = async () => {
     try {
@@ -66,6 +66,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({ country }),
       });
 
       const data = await response.json();
