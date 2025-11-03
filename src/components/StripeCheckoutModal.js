@@ -86,24 +86,34 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
   };
 
   const handleNavigationStateChange = (navState) => {
-    const { url } = navState;
-    
-    console.log('🔍 Stripe checkout navigation:', url);
-    
-    // Check if user completed checkout (success page)
-    if (url.includes('/success') || (url.includes('checkout.stripe.com') && url.includes('success'))) {
-      console.log('✅ Checkout successful, closing modal');
-      // Close modal and refresh subscription status
-      if (onSuccess) {
-        onSuccess();
+    try {
+      const { url } = navState;
+      
+      if (!url) {
+        console.log('⚠️ Navigation state missing URL');
+        return;
       }
-      onClose();
-    }
-    
-    // Check if user cancelled
-    if (url.includes('/cancel')) {
-      console.log('❌ Checkout cancelled');
-      onClose();
+      
+      console.log('🔍 Stripe checkout navigation:', url);
+      
+      // Check if user completed checkout (success page)
+      if (url.includes('/success') || (url.includes('checkout.stripe.com') && url.includes('success'))) {
+        console.log('✅ Checkout successful, closing modal');
+        // Close modal and refresh subscription status
+        if (onSuccess) {
+          onSuccess();
+        }
+        onClose();
+      }
+      
+      // Check if user cancelled
+      if (url.includes('/cancel')) {
+        console.log('❌ Checkout cancelled');
+        onClose();
+      }
+    } catch (error) {
+      console.error('❌ Navigation handler error:', error);
+      // Don't crash the app, just log the error
     }
   };
 
@@ -180,6 +190,11 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
               source={{ uri: checkoutUrl }}
               style={styles.webview}
               onNavigationStateChange={handleNavigationStateChange}
+              onShouldStartLoadWithRequest={(request) => {
+                console.log('🔍 WebView load request:', request.navigationType, request.url);
+                // Allow all Stripe navigation
+                return true;
+              }}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 console.error('WebView error: ', nativeEvent);
@@ -192,6 +207,12 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
                   setError('Checkout page error');
                 }
               }}
+              renderLoading={() => (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <ActivityIndicator size="large" color={theme?.accent || '#d4af37'} />
+                </View>
+              )}
+              startInLoadingState={true}
             />
           )}
         </View>
