@@ -176,6 +176,21 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
               source={{ uri: checkoutUrl }}
               style={styles.webview}
               onNavigationStateChange={handleNavigationStateChange}
+              onShouldStartLoadWithRequest={(request) => {
+                console.log('🔍 WebView navigation request:', request.navigationType, request.url);
+                // Allow navigation within Stripe checkout
+                if (request.url.includes('checkout.stripe.com') || request.url.includes('stripe.com')) {
+                  return true;
+                }
+                // Handle success/cancel redirects
+                if (request.url.includes('/success') || request.url.includes('/cancel')) {
+                  handleNavigationStateChange({ url: request.url });
+                  return false; // Prevent actual navigation
+                }
+                // Block all other navigation
+                console.log('⚠️ Blocking navigation to:', request.url);
+                return false;
+              }}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 console.error('WebView error: ', nativeEvent);
