@@ -1,7 +1,7 @@
 // src/components/StripeCheckoutModal.js
 // Stripe checkout modal matching app theme
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Modal,
@@ -44,14 +44,9 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
   const [checkoutUrl, setCheckoutUrl] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (visible) {
-      createCheckoutSession();
-    }
-  }, [visible, country]); // Reset checkoutUrl when country changes
-
-  const createCheckoutSession = async () => {
+  const createCheckoutSession = useCallback(async () => {
     try {
+      console.log('🔍 Creating checkout session for country:', country);
       setLoading(true);
       setError(null);
       
@@ -60,6 +55,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
         throw new Error('Not authenticated');
       }
 
+      console.log('🔍 Fetching checkout URL from:', `${API_BASE_URL}/api/stripe/create-checkout`);
       const response = await fetch(`${API_BASE_URL}/api/stripe/create-checkout`, {
         method: 'POST',
         headers: {
@@ -70,8 +66,10 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
       });
 
       const data = await response.json();
+      console.log('🔍 Checkout response:', data);
       
       if (data.ok && data.url) {
+        console.log('✅ Checkout URL received, setting...');
         setCheckoutUrl(data.url);
       } else {
         throw new Error(data.message || 'Failed to create checkout session');
@@ -83,7 +81,23 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
     } finally {
       setLoading(false);
     }
-  };
+  }, [country]);
+
+  useEffect(() => {
+    if (visible) {
+      console.log('🔍 Modal opened, creating checkout session...');
+      createCheckoutSession();
+    }
+    
+    // Cleanup when modal closes
+    return () => {
+      if (!visible) {
+        console.log('🔍 Modal closed, resetting state...');
+        setCheckoutUrl(null);
+        setError(null);
+      }
+    };
+  }, [visible, createCheckoutSession]);
 
   const handleNavigationStateChange = (navState) => {
     try {
@@ -195,23 +209,32 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
                 // Allow all Stripe navigation
                 return true;
               }}
+              onLoadStart={() => {
+                console.log('🔍 WebView started loading...');
+              }}
+              onLoadEnd={() => {
+                console.log('✅ WebView finished loading');
+              }}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
-                console.error('WebView error: ', nativeEvent);
+                console.error('❌ WebView error: ', nativeEvent);
                 setError('Failed to load checkout page');
               }}
               onHttpError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
-                console.error('WebView HTTP error: ', nativeEvent);
+                console.error('❌ WebView HTTP error: ', nativeEvent);
                 if (nativeEvent.statusCode >= 400) {
                   setError('Checkout page error');
                 }
               }}
-              renderLoading={() => (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                  <ActivityIndicator size="large" color={theme?.accent || '#d4af37'} />
-                </View>
-              )}
+              renderLoading={() => {
+                console.log('🔍 Rendering WebView loading state...');
+                return (
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color={theme?.accent || '#d4af37'} />
+                  </View>
+                );
+              }}
               startInLoadingState={true}
             />
           )}
