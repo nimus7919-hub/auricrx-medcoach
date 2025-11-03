@@ -10,9 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
-  Linking,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
+import * as WebBrowser from 'expo-web-browser';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';
 import { auth } from '../config/firebase';
@@ -40,13 +39,12 @@ async function getAuthToken() {
 
 export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess, country = 'US' }) {
   const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
-  const [loading, setLoading] = useState(true);
-  const [checkoutUrl, setCheckoutUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const createCheckoutSession = useCallback(async () => {
+  const openCheckoutInBrowser = useCallback(async () => {
     try {
-      console.log('🔍 Creating checkout session for country:', country);
+      console.log('🔍 Opening checkout in browser for country:', country);
       setLoading(true);
       setError(null);
       
@@ -69,8 +67,25 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
       console.log('🔍 Checkout response:', data);
       
       if (data.ok && data.url) {
-        console.log('✅ Checkout URL received, setting...');
-        setCheckoutUrl(data.url);
+        console.log('✅ Opening checkout in browser...');
+        // Open in Expo WebBrowser instead of WebView
+        const result = await WebBrowser.openBrowserAsync(data.url);
+        console.log('✅ Browser closed:', result);
+        
+        // Check if user completed the checkout
+        if (result.type === 'dismiss') {
+          console.log('ℹ️ User dismissed checkout');
+        } else if (result.type === 'cancel') {
+          console.log('❌ User cancelled checkout');
+        }
+        
+        // Close modal
+        onClose();
+        
+        // Refresh subscription status
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         throw new Error(data.message || 'Failed to create checkout session');
       }
@@ -81,61 +96,15 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
     } finally {
       setLoading(false);
     }
-  }, [country]);
+  }, [country, onClose, onSuccess]);
 
   useEffect(() => {
     if (visible) {
-      console.log('🔍 Modal opened, creating checkout session...');
-      createCheckoutSession();
+      console.log('🔍 Modal opened, opening checkout...');
+      openCheckoutInBrowser();
     }
-    
-    // Cleanup when modal closes
-    return () => {
-      if (!visible) {
-        console.log('🔍 Modal closed, resetting state...');
-        setCheckoutUrl(null);
-        setError(null);
-      }
-    };
-  }, [visible, createCheckoutSession]);
+  }, [visible, openCheckoutInBrowser]);
 
-  const handleNavigationStateChange = (navState) => {
-    try {
-      const { url } = navState;
-      
-      if (!url) {
-        console.log('⚠️ Navigation state missing URL');
-        return;
-      }
-      
-      console.log('🔍 Stripe checkout navigation:', url);
-      
-      // Check if user completed checkout (success page)
-      if (url.includes('/success') || (url.includes('checkout.stripe.com') && url.includes('success'))) {
-        console.log('✅ Checkout successful, closing modal');
-        // Close modal and refresh subscription status
-        if (onSuccess) {
-          onSuccess();
-        }
-        onClose();
-      }
-      
-      // Check if user cancelled
-      if (url.includes('/cancel')) {
-        console.log('❌ Checkout cancelled');
-        onClose();
-      }
-    } catch (error) {
-      console.error('❌ Navigation handler error:', error);
-      // Don't crash the app, just log the error
-    }
-  };
-
-  const handleOpenInBrowser = () => {
-    if (checkoutUrl) {
-      Linking.openURL(checkoutUrl);
-    }
-  };
 
   return (
     <Modal
@@ -181,70 +150,12 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
                 {error}
               </DynamicText>
               <TouchableOpacity
-                onPress={createCheckoutSession}
+                onPress={openCheckoutInBrowser}
                 style={[styles.retryButton, { backgroundColor: theme?.accent || '#d4af37' }]}
               >
                 <DynamicText type="primary" style={styles.retryText}>Retry</DynamicText>
               </TouchableOpacity>
-              {checkoutUrl && (
-                <TouchableOpacity
-                  onPress={handleOpenInBrowser}
-                  style={[styles.browserButton, { borderColor: getCardBorderColor() }]}
-                >
-                  <DynamicText type="primary" style={styles.browserText}>
-                    Open in Browser
-                  </DynamicText>
-                </TouchableOpacity>
-              )}
             </View>
-          )}
-
-          {checkoutUrl && !error && (
-            <WebView
-              source={{ uri: checkoutUrl }}
-              style={styles.webview}
-              onNavigationStateChange={handleNavigationStateChange}
-              onShouldStartLoadWithRequest={(request) => {
-                console.log('🔍 WebView load request:', request.navigationType, request.url);
-                // Allow all Stripe navigation
-                return true;
-              }}
-              onLoadStart={() => {
-                console.log('🔍 WebView started loading...');
-              }}
-              onLoadEnd={() => {
-                console.log('✅ WebView finished loading');
-              }}
-              onContentProcessDidTerminate={() => {
-                console.error('❌ WebView content process terminated (iOS crash)');
-                setError('WebView crashed. Please try again.');
-              }}
-              onRenderProcessGone={(syntheticEvent) => {
-                console.error('❌ WebView render process crashed:', syntheticEvent);
-                setError('WebView crashed. Please try again.');
-              }}
-              onError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                console.error('❌ WebView error: ', nativeEvent);
-                setError('Failed to load checkout page');
-              }}
-              onHttpError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                console.error('❌ WebView HTTP error: ', nativeEvent);
-                if (nativeEvent.statusCode >= 400) {
-                  setError('Checkout page error');
-                }
-              }}
-              renderLoading={() => {
-                console.log('🔍 Rendering WebView loading state...');
-                return (
-                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color={theme?.accent || '#d4af37'} />
-                  </View>
-                );
-              }}
-              startInLoadingState={true}
-            />
           )}
         </View>
       </View>
@@ -320,20 +231,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
-  },
-  browserButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 10,
-    borderWidth: 2,
-  },
-  browserText: {
-    fontSize: 16,
-    fontFamily: 'Inter_700Bold',
-  },
-  webview: {
-    flex: 1,
   },
 });
 
