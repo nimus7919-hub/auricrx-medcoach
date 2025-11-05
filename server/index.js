@@ -2550,35 +2550,151 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
         SET stripe_customer_id = ${customerId}
         WHERE user_id = ${uid}
       `;
+    } else {
+      // Verify customer exists in current Stripe environment (handles test/live key switching)
+      try {
+        await stripe.customers.retrieve(customerId);
+      } catch (verifyError) {
+        const errorMessage = verifyError.message || verifyError.toString() || '';
+        if (errorMessage.includes('No such customer') || 
+            errorMessage.includes('No such Customer') ||
+            verifyError.type === 'StripeInvalidRequestError') {
+          console.log('⚠️ Stored customer ID invalid, clearing and will create new one...');
+          // Clear invalid customer ID
+          await neonClient`
+            UPDATE user_profiles 
+            SET stripe_customer_id = NULL
+            WHERE user_id = ${uid}
+          `;
+          customerId = null;
+        } else {
+          // Unexpected error, re-throw
+          throw verifyError;
+        }
+      }
+      
+      // If customer ID was invalid, create a new one
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: email,
+          metadata: {
+            firebase_uid: uid
+          }
+        });
+        customerId = customer.id;
+        
+        // Save new customer ID to database
+        await neonClient`
+          UPDATE user_profiles 
+          SET stripe_customer_id = ${customerId}
+          WHERE user_id = ${uid}
+        `;
+      }
     }
 
     // Create checkout session
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [
-        {
-          price_data: {
-            currency: currency,
-            product_data: {
-              name: 'AuricRx MedCoach Pro',
-              description: 'Unlimited access to all features',
+    // If customer ID is invalid (e.g., from different Stripe environment), create new customer
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        mode: 'subscription',
+        line_items: [
+          {
+            price_data: {
+              currency: currency,
+              product_data: {
+                name: 'AuricRx MedCoach Pro',
+                description: 'Unlimited access to all features',
+              },
+              unit_amount: unitAmount,
+              recurring: {
+                interval: 'month',
+              },
             },
-            unit_amount: unitAmount,
-            recurring: {
-              interval: 'month',
-            },
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/cancel`,
+        metadata: {
+          firebase_uid: uid,
         },
-      ],
-      success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/cancel`,
-      metadata: {
-        firebase_uid: uid,
-      },
-    });
+      });
+    } catch (checkoutError) {
+      // If customer doesn't exist (e.g., switched from test to live mode), create new customer
+      // Check for Stripe error in multiple ways (message, type, code)
+      const errorMessage = checkoutError.message || checkoutError.toString() || '';
+      const isCustomerNotFound = 
+        errorMessage.includes('No such customer') ||
+        errorMessage.includes('No such Customer') ||
+        checkoutError.type === 'StripeInvalidRequestError' ||
+        (checkoutError.code && checkoutError.code === 'resource_missing');
+      
+      if (isCustomerNotFound && customerId) {
+        console.log('⚠️ Invalid customer ID detected, creating new customer...');
+        console.log('⚠️ Error details:', {
+          message: checkoutError.message,
+          type: checkoutError.type,
+          code: checkoutError.code
+        });
+        
+        // Clear invalid customer ID from database
+        await neonClient`
+          UPDATE user_profiles 
+          SET stripe_customer_id = NULL
+          WHERE user_id = ${uid}
+        `;
+        
+        // Create new customer
+        const customer = await stripe.customers.create({
+          email: email,
+          metadata: {
+            firebase_uid: uid
+          }
+        });
+        customerId = customer.id;
+        
+        // Save new customer ID to database
+        await neonClient`
+          UPDATE user_profiles 
+          SET stripe_customer_id = ${customerId}
+          WHERE user_id = ${uid}
+        `;
+        
+        // Retry checkout session creation with new customer
+        session = await stripe.checkout.sessions.create({
+          customer: customerId,
+          payment_method_types: ['card'],
+          mode: 'subscription',
+          line_items: [
+            {
+              price_data: {
+                currency: currency,
+                product_data: {
+                  name: 'AuricRx MedCoach Pro',
+                  description: 'Unlimited access to all features',
+                },
+                unit_amount: unitAmount,
+                recurring: {
+                  interval: 'month',
+                },
+              },
+              quantity: 1,
+            },
+          ],
+          success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/cancel`,
+          metadata: {
+            firebase_uid: uid,
+          },
+        });
+      } else {
+        // Re-throw if it's a different error
+        throw checkoutError;
+      }
+    }
 
     res.json({
       ok: true,
@@ -2604,9 +2720,41 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.warn('⚠️ STRIPE_WEBHOOK_SECRET not set, skipping webhook verification');
-    // In development, allow without verification
-    return res.json({ received: true });
+    console.warn('⚠️ STRIPE_WEBHOOK_SECRET not set, attempting to process without verification');
+    // In development/test mode, try to process events without verification
+    // NOTE: This is less secure but allows testing without webhook setup
+    try {
+      const event = JSON.parse(req.body.toString());
+      console.log('📥 Webhook event received (no verification):', event.type);
+      
+      // Process the event
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        const firebaseUid = session.metadata?.firebase_uid;
+
+        if (firebaseUid) {
+          let periodEnd = null;
+          if (session.subscription?.current_period_end) {
+            periodEnd = session.subscription.current_period_end;
+          } else {
+            periodEnd = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60);
+          }
+
+          await neonClient`
+            UPDATE user_profiles
+            SET plan = 'pro',
+                current_period_end = to_timestamp(${periodEnd})
+            WHERE user_id = ${firebaseUid}
+          `;
+          console.log(`✅ Updated user ${firebaseUid} to pro plan (unverified webhook)`);
+        }
+      }
+      
+      return res.json({ received: true, note: 'Processed without verification' });
+    } catch (parseError) {
+      console.error('❌ Failed to process webhook without verification:', parseError);
+      return res.status(400).json({ error: 'Invalid webhook payload' });
+    }
   }
 
   let event;
@@ -2665,6 +2813,210 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
   }
 
   res.json({ received: true });
+});
+
+/**
+ * Manual subscription verification endpoint
+ * Use this to manually update a subscription if webhook/success page didn't fire
+ * GET /api/stripe/verify-subscription?customer_id=cus_xxx
+ */
+app.get('/api/stripe/verify-subscription', async (req, res) => {
+  try {
+    const customerId = req.query.customer_id;
+    
+    if (!customerId) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_customer_id',
+        message: 'customer_id parameter required'
+      });
+    }
+
+    console.log('🔍 Verifying subscription for customer:', customerId);
+
+    // Find user by customer ID
+    const profile = await neonClient`
+      SELECT user_id FROM user_profiles WHERE stripe_customer_id = ${customerId}
+    `;
+
+    if (profile.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        error: 'user_not_found',
+        message: 'No user found with this customer ID'
+      });
+    }
+
+    const uid = profile[0].user_id;
+
+    // Get customer's subscriptions from Stripe
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 10
+    });
+
+    if (subscriptions.data.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        error: 'no_subscription',
+        message: 'No subscriptions found for this customer'
+      });
+    }
+
+    // Find active subscription
+    const activeSubscription = subscriptions.data.find(sub => sub.status === 'active');
+
+    if (activeSubscription) {
+      // Update user plan to 'pro'
+      await neonClient`
+        UPDATE user_profiles
+        SET plan = 'pro',
+            current_period_end = to_timestamp(${activeSubscription.current_period_end})
+        WHERE user_id = ${uid}
+      `;
+
+      console.log(`✅ Updated user ${uid} to pro plan via manual verification`);
+      
+      return res.json({
+        ok: true,
+        message: 'Subscription verified and updated',
+        user_id: uid,
+        subscription_id: activeSubscription.id,
+        current_period_end: new Date(activeSubscription.current_period_end * 1000).toISOString()
+      });
+    } else {
+      return res.status(400).json({
+        ok: false,
+        error: 'no_active_subscription',
+        message: 'No active subscription found',
+        subscriptions: subscriptions.data.map(sub => ({
+          id: sub.id,
+          status: sub.status
+        }))
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error verifying subscription:', error);
+    return res.status(500).json({
+      ok: false,
+      error: 'verification_failed',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Success page handler - processes payment after Stripe redirect
+ * This is a fallback if webhooks don't fire immediately
+ */
+app.get('/success', async (req, res) => {
+  try {
+    const sessionId = req.query.session_id;
+    
+    if (!sessionId) {
+      console.warn('⚠️ Success page accessed without session_id');
+      return res.status(400).send('Missing session_id parameter');
+    }
+
+    console.log('✅ Success page accessed with session_id:', sessionId);
+
+    // Retrieve the checkout session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription']
+    });
+
+    console.log('📋 Checkout session retrieved:', {
+      id: session.id,
+      payment_status: session.payment_status,
+      customer: session.customer,
+      subscription: session.subscription?.id,
+      metadata: session.metadata
+    });
+
+    // Check if payment was successful
+    if (session.payment_status === 'paid') {
+      const firebaseUid = session.metadata?.firebase_uid;
+
+      if (firebaseUid) {
+        // Calculate subscription end date (30 days from now, or use subscription period_end if available)
+        let periodEnd = null;
+        if (session.subscription?.current_period_end) {
+          periodEnd = session.subscription.current_period_end;
+        } else {
+          // Default to 30 days from now
+          periodEnd = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60);
+        }
+
+        // Update user plan to 'pro'
+        await neonClient`
+          UPDATE user_profiles
+          SET plan = 'pro',
+              current_period_end = to_timestamp(${periodEnd})
+          WHERE user_id = ${firebaseUid}
+        `;
+
+        console.log(`✅ Updated user ${firebaseUid} to pro plan via success page`);
+        console.log(`📅 Subscription period end: ${new Date(periodEnd * 1000).toISOString()}`);
+
+        // Return success page HTML
+        return res.send(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Payment Successful</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  min-height: 100vh;
+                  margin: 0;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: white;
+                  text-align: center;
+                  padding: 20px;
+                }
+                .container {
+                  background: rgba(255, 255, 255, 0.1);
+                  backdrop-filter: blur(10px);
+                  border-radius: 20px;
+                  padding: 40px;
+                  max-width: 500px;
+                  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+                }
+                h1 { margin: 0 0 20px 0; font-size: 2em; }
+                p { margin: 10px 0; font-size: 1.1em; opacity: 0.9; }
+                .success-icon {
+                  font-size: 4em;
+                  margin-bottom: 20px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="success-icon">✅</div>
+                <h1>Payment Successful!</h1>
+                <p>Your subscription has been activated.</p>
+                <p>You can now close this window and return to the app.</p>
+              </div>
+            </body>
+          </html>
+        `);
+      } else {
+        console.warn('⚠️ Session missing firebase_uid in metadata');
+        return res.status(400).send('Session missing required metadata');
+      }
+    } else {
+      console.warn('⚠️ Payment not completed yet:', session.payment_status);
+      return res.status(400).send(`Payment status: ${session.payment_status}`);
+    }
+  } catch (error) {
+    console.error('❌ Error processing success page:', error);
+    return res.status(500).send(`Error: ${error.message}`);
+  }
 });
 
 // ========================================
