@@ -258,6 +258,7 @@ async function getUserMedications(userId) {
       console.warn('⚠️ Stored function get_user_medications does not exist, using direct query:', functionError.message);
       
       // Fallback to direct query if stored function doesn't exist
+      // Only return active medications (is_active = true)
       const data = await neonClient`
         SELECT 
           id,
@@ -276,7 +277,7 @@ async function getUserMedications(userId) {
           last_refill,
           is_active
         FROM user_medications 
-        WHERE user_id = ${userId}
+        WHERE user_id = ${userId} AND is_active = true
         ORDER BY created_at DESC
       `;
       

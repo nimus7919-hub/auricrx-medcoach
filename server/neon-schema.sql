@@ -441,7 +441,7 @@ BEGIN
     um.last_refill,
     um.is_active
   FROM user_medications um
-  WHERE um.user_id = p_user_id
+  WHERE um.user_id = p_user_id AND um.is_active = true
   ORDER BY um.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

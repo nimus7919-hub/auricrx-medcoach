@@ -406,17 +406,43 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     }
   };
 
-  const handleDeleteMed = (id) => {
+  const handleDeleteMed = async (id) => {
     // Find the medication to check if it was created from a reminder
     const medToDelete = meds.find(med => med.id === id);
     
-    // Delete the medication
+    // Delete the medication from local state first for immediate UI update
     setMeds(prev => prev.filter(med => med.id !== id));
     
     // If this medication was created from a reminder, also delete the reminder
     if (medToDelete?.fromReminder && medToDelete?.reminderId && setReminders) {
       console.log('🗑️ Also deleting corresponding reminder:', medToDelete.reminderId);
       setReminders(prev => prev.filter(r => r.id !== medToDelete.reminderId));
+    }
+    
+    // Sync deletion to cloud if user is authenticated and medication has database ID
+    if (user && user.uid && (medToDelete?.dbId || medToDelete?.id)) {
+      try {
+        const medicationId = medToDelete.dbId || medToDelete.id;
+        const response = await fetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}&medicationId=${medicationId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        if (response.ok) {
+          console.log('✅ Medication deleted from database:', medicationId);
+        } else {
+          console.error('❌ Failed to delete medication from database:', response.status);
+          console.log('📱 Medication deleted locally but not synced to server');
+        }
+      } catch (dbError) {
+        console.error('❌ Database delete error:', dbError);
+        console.log('📱 Medication deleted locally but not synced to server');
+        // Don't fail the entire operation if database delete fails
+      }
+    } else {
+      console.log('⚠️ User not authenticated or medication has no database ID, medication deleted locally only');
     }
   };
 

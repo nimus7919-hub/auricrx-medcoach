@@ -2040,17 +2040,18 @@ export default function App() {
           if (status.ok) {
             setSubscriptionStatus(status);
             
-            // If subscription is cancelled or expired, show resubscribe option
-            const isCancelled = status.subscription_cancelled_at || false;
-            const isExpired = status.status === 'expired' || (status.daysLeft || 0) === 0;
+            // Only block access if subscription is EXPIRED (0 days left)
+            // Cancelled subscriptions should still allow access until period ends
+            const daysLeft = status.daysLeft || 0;
+            const isExpired = status.status === 'expired' || daysLeft === 0;
             
-            if (isCancelled || isExpired) {
-              // Keep auth screen open so user can resubscribe
-              // Don't navigate to dashboard yet
-              console.log('⚠️ Subscription cancelled or expired - keeping auth screen open for resubscribe');
+            if (isExpired) {
+              // Subscription expired - keep auth screen open so user can resubscribe
+              console.log('⚠️ Subscription expired - keeping auth screen open for resubscribe');
               setShowResubscribeButton(true); // Show resubscribe button on sign-in screen
             } else {
-              // Subscription is active, proceed normally
+              // Subscription is active (even if cancelled, they still have days left)
+              // Allow access until period ends
               setShowAuth(false);
               setRoute('dashboard');
               setShowResubscribeButton(false);
@@ -2183,6 +2184,81 @@ export default function App() {
       let errorMessage = S.cancelMembershipFailed || 'Failed to cancel membership. Please try again or contact support.';
       
       // Provide more specific error messages
+      if (error.message && error.message.includes('JSON Parse error')) {
+        errorMessage = 'Server error: Invalid response from server. Please try again later or contact support.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setMembershipResult({
+        type: 'error',
+        title: S.error || 'Error',
+        message: errorMessage
+      });
+      setShowMembershipResultModal(true);
+    }
+  };
+
+  const handleRestartMembership = async () => {
+    try {
+      // Get auth token
+      const token = user?.firebaseUser ? await user.firebaseUser.getIdToken() : null;
+      if (!token) {
+        setMembershipResult({
+          type: 'error',
+          title: S.error || 'Error',
+          message: S.error || 'Not authenticated. Please sign in again.'
+        });
+        setShowMembershipResultModal(true);
+        return;
+      }
+
+      // Call resubscribe API
+      const response = await fetch('https://auricrx-medcoach.onrender.com/api/subscription/resubscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user?.uid,
+        }),
+      });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('❌ Non-JSON response from resubscribe endpoint:', text.substring(0, 200));
+        throw new Error('Server returned an invalid response. Please try again later.');
+      }
+
+      const result = await response.json();
+
+      if (response.ok && result.ok) {
+        setMembershipResult({
+          type: 'success',
+          title: S.success || 'Success',
+          message: S.membershipRestarted || 'Your membership has been restarted successfully.'
+        });
+        setShowMembershipResultModal(true);
+        // Refresh subscription status
+        if (user?.firebaseUser) {
+          const status = await getSubscriptionStatus(user.firebaseUser);
+          setSubscriptionStatus(status);
+        }
+      } else {
+        setMembershipResult({
+          type: 'error',
+          title: S.error || 'Error',
+          message: result.message || result.error || S.restartMembershipFailed || 'Failed to restart membership. Please try again or contact support.'
+        });
+        setShowMembershipResultModal(true);
+      }
+    } catch (error) {
+      console.error('Restart membership error:', error);
+      let errorMessage = S.restartMembershipFailed || 'Failed to restart membership. Please try again or contact support.';
+      
       if (error.message && error.message.includes('JSON Parse error')) {
         errorMessage = 'Server error: Invalid response from server. Please try again later or contact support.';
       } else if (error.message) {
@@ -2645,11 +2721,18 @@ export default function App() {
     proPlan: t('settings.proPlan'),
     trial: t('settings.trial'),
     daysRemaining: t('settings.daysRemaining'),
+    status: t('settings.status'),
     cancelMembership: t('settings.cancelMembership'),
+    restartMembership: t('settings.restartMembership'),
     cancelMembershipConfirm: t('settings.cancelMembershipConfirm'),
+    restartMembershipConfirm: t('settings.restartMembershipConfirm'),
     confirmCancel: t('settings.confirmCancel'),
+    confirmRestart: t('settings.confirmRestart'),
     membershipCancelled: t('settings.membershipCancelled'),
+    membershipRestarted: t('settings.membershipRestarted'),
     cancelMembershipFailed: t('settings.cancelMembershipFailed'),
+    restartMembershipFailed: t('settings.restartMembershipFailed'),
+    daysUntilCancellation: t('settings.daysUntilCancellation'),
     
     // Wallpaper
     wallpaperTitle: t('wallpaper.title'),
@@ -6313,53 +6396,96 @@ const handleAskMedicalAI = async () => {
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             {subscriptionStatus && (
               <View style={{ marginBottom: 12 }}>
-                <DynamicText type="card" style={{ 
-                  fontFamily: 'Inter_600SemiBold', 
-                  fontSize: 14,
-                  marginBottom: 8,
-                  opacity: 0.8
-                }}>
-                  {S.currentPlan || 'Current Plan'}: {subscriptionStatus.plan === 'pro' ? (S.proPlan || 'Pro') : (S.trial || 'Trial')}
-                </DynamicText>
-                {subscriptionStatus.daysLeft !== undefined && subscriptionStatus.plan !== 'pro' && (
+                {/* Status: Pro (only show days if cancelled) */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
                   <DynamicText type="card" style={{ 
-                    fontFamily: 'Inter_400Regular', 
-                    fontSize: 12,
-                    opacity: 0.7,
-                    marginBottom: 12
+                    fontFamily: 'Inter_600SemiBold', 
+                    fontSize: 14,
+                    opacity: 0.8,
+                    marginRight: 8
                   }}>
-                    {S.daysRemaining || 'Days Remaining'}: {subscriptionStatus.daysLeft}
+                    {S.status || 'Status'}:
                   </DynamicText>
-                )}
+                  <DynamicText type="card" style={{ 
+                    fontFamily: 'Inter_700Bold', 
+                    fontSize: 14,
+                    color: subscriptionStatus.plan === 'pro' ? '#22c55e' : '#f59e0b',
+                    marginRight: 8
+                  }}>
+                    {subscriptionStatus.plan === 'pro' ? (S.proPlan || 'Pro') : (S.trial || 'Trial')}
+                  </DynamicText>
+                  {/* Only show days if subscription is cancelled */}
+                  {subscriptionStatus.subscription_cancelled_at && subscriptionStatus.daysLeft !== undefined && subscriptionStatus.daysLeft >= 0 && (
+                    <DynamicText type="card" style={{ 
+                      fontFamily: 'Inter_400Regular', 
+                      fontSize: 12,
+                      opacity: 0.7
+                    }}>
+                      ({subscriptionStatus.daysLeft} {S.daysUntilCancellation || 'days until cancellation'})
+                    </DynamicText>
+                  )}
+                </View>
               </View>
             )}
-            <TouchableOpacity 
-              onPress={handleCancelMembership}
-              style={[styles.settingsButton, {
-                backgroundColor: '#f59e0b',
-                borderColor: '#d97706',
-                borderWidth: 2,
-                borderRadius: 12,
-                paddingVertical: 12,
-                paddingHorizontal: 16,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: '#f59e0b',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                elevation: 3
-              }]}
-            >
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_700Bold',
-                color: '#ffffff',
-                fontSize: 15,
-                textAlign: 'center'
-              }}>
-                {S.cancelMembership || 'Cancel Membership'}
-              </DynamicText>
-            </TouchableOpacity>
+            
+            {/* Cancel or Restart Button */}
+            {subscriptionStatus && subscriptionStatus.subscription_cancelled_at ? (
+              <TouchableOpacity 
+                onPress={handleRestartMembership}
+                style={[styles.settingsButton, {
+                  backgroundColor: '#22c55e',
+                  borderColor: '#16a34a',
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#22c55e',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 3
+                }]}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_700Bold',
+                  color: '#ffffff',
+                  fontSize: 15,
+                  textAlign: 'center'
+                }}>
+                  {S.restartMembership || 'Restart Membership'}
+                </DynamicText>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity 
+                onPress={handleCancelMembership}
+                style={[styles.settingsButton, {
+                  backgroundColor: '#f59e0b',
+                  borderColor: '#d97706',
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#f59e0b',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 3
+                }]}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_700Bold',
+                  color: '#ffffff',
+                  fontSize: 15,
+                  textAlign: 'center'
+                }}>
+                  {S.cancelMembership || 'Cancel Membership'}
+                </DynamicText>
+              </TouchableOpacity>
+            )}
           </View>
         </CollapsibleSection>
         

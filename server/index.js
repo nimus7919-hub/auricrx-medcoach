@@ -1736,10 +1736,10 @@ app.get('/api/medications', async (req, res) => {
       });
     }
 
-    // Get medications from Neon database
+    // Get medications from Neon database (only active ones)
     const medications = await getUserMedications(userId);
     
-    console.log(`📊 Retrieved ${medications.length} medications for user ${userId}`);
+    console.log(`📊 Retrieved ${medications.length} active medications for user ${userId}`);
     
     res.json({ 
       ok: true, 
@@ -1752,6 +1752,42 @@ app.get('/api/medications', async (req, res) => {
       ok: false, 
       error: 'retrieve_failed',
       message: 'Failed to retrieve medications'
+    });
+  }
+});
+
+// DELETE /api/medications - Delete (soft delete) a user medication
+app.delete('/api/medications', async (req, res) => {
+  try {
+    const { userId, medicationId } = req.query;
+
+    if (!userId || !medicationId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_required_fields',
+        message: 'userId and medicationId are required'
+      });
+    }
+
+    // Soft delete: set is_active = false
+    await neonClient`
+      UPDATE user_medications
+      SET is_active = false, updated_at = NOW()
+      WHERE user_id = ${userId} AND id = ${medicationId}
+    `;
+    
+    console.log(`🗑️ Soft deleted medication ${medicationId} for user ${userId}`);
+    
+    res.json({ 
+      ok: true, 
+      message: 'Medication deleted successfully'
+    });
+  } catch (error) {
+    console.error('❌ Failed to delete medication:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'delete_failed',
+      message: 'Failed to delete medication'
     });
   }
 });
