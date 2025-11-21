@@ -2600,114 +2600,38 @@ app.get('/api/me/subscription', async (req, res) => {
     const uid = decoded.uid;
     console.log('🔍 SERVER: User ID:', uid);
 
-    // Try using SQL function first, fallback to direct query if function doesn't exist
-    try {
-      console.log('🔍 SERVER: Attempting SQL function query');
-      const result = await neonClient`
-        SELECT get_user_subscription_status(${uid}) as status
-      `;
+    // Use SQL function - NO FALLBACK. Must succeed or fail hard.
+    console.log('🔍 SERVER: Attempting SQL function query');
+    const result = await neonClient`
+      SELECT get_user_subscription_status(${uid}) as status
+    `;
 
-      if (result.length === 0) {
-        console.log('⚠️ SERVER: No user found');
-        return res.status(404).json({
-          ok: false,
-          error: 'USER_NOT_FOUND'
-        });
-      }
-
-      const status = result[0].status;
-      console.log('✅ SERVER: SQL function succeeded');
-      res.json({
-        ok: true,
-        ...status
-      });
-    } catch (sqlError) {
-      // If function doesn't exist, fallback to direct query
-      console.warn('⚠️ SQL function not found, using fallback query:', sqlError.message);
-      
-      console.log('🔍 SERVER: Trying fallback direct query');
-      const profile = await neonClient`
-        SELECT 
-          plan,
-          trial_start,
-          trial_end,
-          trial_eligible,
-          trial_used_at,
-          grace_expires_at,
-          current_period_end,
-          subscription_cancelled_at
-        FROM user_profiles
-        WHERE user_id = ${uid}
-      `;
-
-      if (profile.length === 0) {
-        console.log('⚠️ SERVER: No user found in fallback');
-        return res.status(404).json({
-          ok: false,
-          error: 'USER_NOT_FOUND'
-        });
-      }
-      
-      console.log('✅ SERVER: Fallback query succeeded');
-
-      const p = profile[0];
-      let daysLeft = 0;
-      let planStatus = 'unknown';
-
-      if (p.plan === 'trial') {
-        if (!p.trial_end) {
-          daysLeft = 0;
-          planStatus = 'unknown';
-        } else if (new Date() > new Date(p.trial_end)) {
-          daysLeft = 0;
-          planStatus = 'expired';
-        } else {
-          daysLeft = Math.ceil((new Date(p.trial_end) - new Date()) / (1000 * 60 * 60 * 24));
-          planStatus = 'active';
-        }
-      } else if (p.plan === 'pro') {
-        if (!p.current_period_end) {
-          daysLeft = -1;
-          planStatus = 'unknown';
-        } else if (new Date() > new Date(p.current_period_end)) {
-          daysLeft = 0;
-          planStatus = 'expired';
-        } else {
-          daysLeft = Math.ceil((new Date(p.current_period_end) - new Date()) / (1000 * 60 * 60 * 24));
-          planStatus = 'active';
-        }
-      } else if (p.plan === 'expired') {
-        daysLeft = 0;
-        planStatus = 'expired';
-        
-        // If grace period hasn't been set yet, set it now
-        if (!p.grace_expires_at) {
-          await neonClient`
-            UPDATE user_profiles
-            SET grace_expires_at = NOW() + INTERVAL '30 days'
-            WHERE user_id = ${uid} AND grace_expires_at IS NULL
-          `;
-          console.log(`✅ Set grace period for expired user ${uid}`);
-        }
-      }
-
-      res.json({
-        ok: true,
-        plan: p.plan || 'trial',
-        daysLeft,
-        status: planStatus,
-        subscription_cancelled_at: p.subscription_cancelled_at,
-        trial: {
-          eligible: p.trial_eligible !== false,
-          startedAt: p.trial_start,
-          endsAt: p.trial_end,
-          usedAt: p.trial_used_at,
-          grantedBy: null
-        },
-        graceExpiresAt: p.grace_expires_at,
-        currentPeriodEnd: p.current_period_end
+    if (result.length === 0) {
+      console.log('⚠️ SERVER: No user found');
+      return res.status(404).json({
+        ok: false,
+        error: 'USER_NOT_FOUND',
+        message: 'User profile not found'
       });
     }
+
+    const status = result[0].status;
+    
+    // Check if function returned an error
+    if (status.error) {
+      console.error('❌ SERVER: SQL function returned error:', status.error);
+      return res.status(404).json({
+        ok: false,
+        error: status.error,
+        message: 'User profile not found'
+      });
+    }
+    
+    console.log('✅ SERVER: SQL function succeeded');
+    res.json({
+      ok: true,
+      ...status
+    });
   } catch (error) {
     console.error('❌ Subscription status check failed:', error);
     res.status(500).json({

@@ -134,6 +134,7 @@ BEGIN
     'plan', v_profile.plan,
     'daysLeft', v_days_left,
     'status', v_plan_status,
+    'subscription_cancelled_at', v_profile.subscription_cancelled_at,
     'trial', json_build_object(
       'eligible', COALESCE(v_profile.trial_eligible, true),
       'startedAt', v_profile.trial_start,
