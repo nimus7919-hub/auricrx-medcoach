@@ -16,6 +16,7 @@ import {
   FlatList,
   Modal,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 
 // Expo:
@@ -25,6 +26,7 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import Svg, { Rect, Defs, RadialGradient, Stop, Polygon } from "react-native-svg";
 import SignUpForm from "./SignUpForm";
 import authService from '../services/authService';
+import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
 /** ====== GOLD PALETTE ====== */
 const GOLD = {
@@ -39,14 +41,19 @@ const GOLD = {
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
-export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLanguageChange, resetToSignIn }: any) {
+export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLanguageChange, resetToSignIn, onResubscribe }: any) {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showSignUpForm, setShowSignUpForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState('es');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [staySignedIn, setStaySignedIn] = useState(false);
+  const [legalModalVisible, setLegalModalVisible] = useState(false);
+  const [legalModalTitle, setLegalModalTitle] = useState('');
+  const [legalModalContent, setLegalModalContent] = useState('');
+  const [legalModalLoading, setLegalModalLoading] = useState(false);
 
   // Reset to sign-in form when resetToSignIn is called
   useEffect(() => {
@@ -98,7 +105,18 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         await onAuthSuccess({ email, password: pw, isSignUp: false, staySignedIn });
       }
     } catch (error) {
-      console.error('Auth error:', error);
+      console.error('❌ Auth error in SignInScreen:', error);
+      // Log crash for debugging
+      try {
+        const CrashLogger = require('../../utils/crashLogger').default;
+        CrashLogger.logError(error, {
+          context: 'sign_in',
+          email: email ? email.substring(0, 3) + '***' : 'none',
+          hasStaySignedIn: staySignedIn,
+        }).catch(e => console.error('Failed to log crash:', e));
+      } catch (e) {
+        console.error('Failed to import CrashLogger:', e);
+      }
       Alert.alert('Error', 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);
@@ -116,29 +134,6 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     setShowLanguageDropdown(false);
     if (onLanguageChange) {
       onLanguageChange(lang);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const result = await authService.signInWithGoogle();
-      if (result.success) {
-        // Call the auth success handler
-        onAuthSuccess({
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName,
-          isSignUp: false, // Google sign-in is treated as sign-in, not sign-up
-        });
-      } else {
-        Alert.alert('Error', result.error || 'Google sign-in failed');
-      }
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      Alert.alert('Error', 'Google sign-in failed. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -165,7 +160,15 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         dontHaveAccount: "Don't have an account?",
         continueWithApple: "iOS Coming Soon",
         continueWithGoogle: "G   Continue with Google",
-        legal: "By signing in, you agree to our Terms of Service and Privacy Policy"
+        staySignedIn: "Stay signed in",
+        legalPrefix: "By signing in, you agree to our ",
+        legalConnector: " and ",
+        legalSuffix: ".",
+        termsOfService: "Terms of Service",
+        privacyPolicy: "Privacy Policy",
+        close: "Close",
+        loadingDocument: "Loading legal document...",
+        resubscribe: "Resubscribe"
       },
       es: {
         email: "Correo",
@@ -175,7 +178,15 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         dontHaveAccount: "¿No tienes una cuenta?",
         continueWithApple: "iOS Próximamente",
         continueWithGoogle: "G   Continuar con Google",
-        legal: "Al iniciar sesión, aceptas nuestros Términos de Servicio y Política de Privacidad"
+        staySignedIn: "Mantenerme conectado",
+        legalPrefix: "Al iniciar sesión aceptas nuestros ",
+        legalConnector: " y nuestra ",
+        legalSuffix: ".",
+        termsOfService: "Términos de Servicio",
+        privacyPolicy: "Política de Privacidad",
+        close: "Cerrar",
+        loadingDocument: "Cargando documento legal...",
+        resubscribe: "Reactivar Suscripción"
       },
       pt: {
         email: "Email",
@@ -185,7 +196,15 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         dontHaveAccount: "Não tem uma conta?",
         continueWithApple: "iOS Em Breve",
         continueWithGoogle: "G   Continuar com Google",
-        legal: "Ao fazer login, você concorda com nossos Termos de Serviço e Política de Privacidade"
+        staySignedIn: "Manter-me conectado",
+        legalPrefix: "Ao fazer login, você concorda com nossos ",
+        legalConnector: " e nossa ",
+        legalSuffix: ".",
+        termsOfService: "Termos de Serviço",
+        privacyPolicy: "Política de Privacidade",
+        close: "Fechar",
+        loadingDocument: "Carregando documento legal...",
+        resubscribe: "Reativar Assinatura"
       },
       fr: {
         email: "Email",
@@ -195,7 +214,15 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         dontHaveAccount: "Vous n'avez pas de compte ?",
         continueWithApple: "iOS Bientôt Disponible",
         continueWithGoogle: "G   Continuer avec Google",
-        legal: "En vous connectant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité"
+        staySignedIn: "Rester connecté",
+        legalPrefix: "En vous connectant, vous acceptez nos ",
+        legalConnector: " et notre ",
+        legalSuffix: ".",
+        termsOfService: "Conditions d'utilisation",
+        privacyPolicy: "Politique de confidentialité",
+        close: "Fermer",
+        loadingDocument: "Chargement du document légal...",
+        resubscribe: "Réabonner"
       },
       de: {
         email: "E-Mail",
@@ -205,7 +232,15 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         dontHaveAccount: "Haben Sie kein Konto?",
         continueWithApple: "iOS Bald Verfügbar",
         continueWithGoogle: "G   Mit Google fortfahren",
-        legal: "Durch die Anmeldung stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu"
+        staySignedIn: "Angemeldet bleiben",
+        legalPrefix: "Durch die Anmeldung stimmen Sie unseren ",
+        legalConnector: " und unserer ",
+        legalSuffix: " zu.",
+        termsOfService: "Nutzungsbedingungen",
+        privacyPolicy: "Datenschutzerklärung",
+        close: "Schließen",
+        loadingDocument: "Rechtlichen Text laden...",
+        resubscribe: "Erneut Abonnieren"
       },
       zh: {
         email: "邮箱",
@@ -215,13 +250,49 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         dontHaveAccount: "没有账户？",
         continueWithApple: "iOS 即将推出",
         continueWithGoogle: "G   使用 Google 继续",
-        legal: "登录即表示您同意我们的服务条款和隐私政策"
+        staySignedIn: "保持登录",
+        legalPrefix: "登录即表示您同意我们的",
+        legalConnector: "和",
+        legalSuffix: "。",
+        termsOfService: "服务条款",
+        privacyPolicy: "隐私政策",
+        close: "关闭",
+        loadingDocument: "正在加载法律文档...",
+        resubscribe: "重新订阅"
       }
     };
     return translations[lang as keyof typeof translations] || translations.en;
   };
 
   const t = getTranslations(selectedLanguage);
+
+  const handleOpenLegal = async (type: 'terms' | 'privacy') => {
+    try {
+      setLegalModalVisible(true);
+      setLegalModalLoading(true);
+      setLegalModalContent('');
+      if (type === 'terms') {
+        setLegalModalTitle(t.termsOfService);
+        const content = await loadTermsText(selectedLanguage);
+        setLegalModalContent(content);
+      } else {
+        setLegalModalTitle(t.privacyPolicy);
+        const content = await loadPrivacyText(selectedLanguage);
+        setLegalModalContent(content);
+      }
+    } catch (error) {
+      console.error('Failed to load legal document:', error);
+      Alert.alert('Error', 'Unable to load legal document. Please try again later.');
+      setLegalModalVisible(false);
+    } finally {
+      setLegalModalLoading(false);
+    }
+  };
+
+  const handleCloseLegalModal = () => {
+    setLegalModalVisible(false);
+    setLegalModalContent('');
+  };
 
   if (showSignUpForm) {
     return (
@@ -240,6 +311,34 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <Modal
+          visible={legalModalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={handleCloseLegalModal}
+        >
+          <View style={styles.legalModalBackdrop}>
+            <View style={styles.legalModalContainer}>
+              <View style={styles.legalModalHeader}>
+                <Text style={styles.legalModalTitle}>{legalModalTitle}</Text>
+                <TouchableOpacity onPress={handleCloseLegalModal}>
+                  <Text style={styles.legalModalClose}>{t.close}</Text>
+                </TouchableOpacity>
+              </View>
+              {legalModalLoading ? (
+                <View style={styles.legalModalLoadingContainer}>
+                  <ActivityIndicator size="large" color={GOLD.a400} />
+                  <Text style={styles.legalModalLoadingText}>{t.loadingDocument}</Text>
+                </View>
+              ) : (
+                <ScrollView style={styles.legalModalScroll} showsVerticalScrollIndicator>
+                  <Text style={styles.legalModalText}>{legalModalContent}</Text>
+                </ScrollView>
+              )}
+            </View>
+          </View>
+        </Modal>
+
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -338,14 +437,24 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           <View style={{ height: 14 }} />
 
           <GoldOutline>
-            <TextInput
-              value={pw}
-              onChangeText={setPw}
-              placeholder={t.password}
-              placeholderTextColor="#CBA24F"
-              secureTextEntry
-              style={styles.input}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                value={pw}
+                onChangeText={setPw}
+                placeholder={t.password}
+                placeholderTextColor="#CBA24F"
+                secureTextEntry={!showPassword}
+                style={styles.passwordInput}
+              />
+              <TouchableOpacity
+                onPressIn={() => setShowPassword(true)}
+                onPressOut={() => setShowPassword(false)}
+                style={styles.eyeButton}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.eyeIcon}>👁</Text>
+              </TouchableOpacity>
+            </View>
           </GoldOutline>
 
           <View style={{ height: 18 }} />
@@ -365,7 +474,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
                   <Text style={styles.checkmark}>✓</Text>
                 )}
               </View>
-              <Text style={styles.staySignedInText}>Stay signed in</Text>
+              <Text style={styles.staySignedInText}>{t.staySignedIn}</Text>
             </TouchableOpacity>
           </View>
 
@@ -377,18 +486,23 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
             disabled={loading}
           />
 
-          <View style={{ height: 16 }} />
-
-          {/* SSO rows */}
-          <GoldRow>
-            <Text style={styles.rowText}>{t.continueWithApple}</Text>
-          </GoldRow>
-          <View style={{ height: 12 }} />
-          <GoldRow onPress={handleGoogleSignIn}>
-            <Text style={styles.rowText}>{t.continueWithGoogle}</Text>
-          </GoldRow>
-
           <View style={{ height: 20 }} />
+
+          {/* Resubscribe Button - Shows when subscription is cancelled/expired */}
+          {onResubscribe && (
+            <>
+              <TouchableOpacity
+                onPress={onResubscribe}
+                style={styles.resubscribeButton}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.resubscribeText}>
+                  {t.resubscribe || 'Resubscribe'}
+                </Text>
+              </TouchableOpacity>
+              <View style={{ height: 16 }} />
+            </>
+          )}
 
           <View style={styles.signUpContainer}>
             <Text style={styles.signUp}>
@@ -403,8 +517,16 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           </View>
 
           <View style={{ height: 18 }} />
-          <Text style={styles.legal}>
-            {t.legal}
+          <Text style={styles.legalText}>
+            {t.legalPrefix}
+            <Text style={styles.legalLink} onPress={() => handleOpenLegal('terms')}>
+              {t.termsOfService}
+            </Text>
+            {t.legalConnector}
+            <Text style={styles.legalLink} onPress={() => handleOpenLegal('privacy')}>
+              {t.privacyPolicy}
+            </Text>
+            {t.legalSuffix}
           </Text>
         </View>
         </ScrollView>
@@ -621,6 +743,28 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "rgba(0,0,0,0.60)",
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.60)",
+    borderRadius: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: "#E9C978",
+  },
+  eyeButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eyeIcon: {
+    fontSize: 20,
+    opacity: 0.5,
+  },
 
   goldBtnWrap: { borderRadius: 18, overflow: "hidden" },
   goldBtnDisabled: { opacity: 0.6 },
@@ -683,6 +827,27 @@ const styles = StyleSheet.create({
     color: GOLD.y400, 
     fontWeight: "700"
   },
+  resubscribeButton: {
+    backgroundColor: GOLD.a500,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: GOLD.y600,
+    shadowColor: GOLD.a500,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  resubscribeText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
+  },
 
   legal: { color: "#AAAAAA", textAlign: "center", fontSize: 12, lineHeight: 18 },
   
@@ -717,9 +882,68 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   staySignedInText: {
-    color: '#E9C978',
+    color: '#CBA24F',
     fontSize: 14,
     fontWeight: '500',
+  },
+  legalText: {
+    color: '#CBA24F',
+    textAlign: 'center',
+    fontSize: 12,
+    lineHeight: 16,
+    paddingHorizontal: 16,
+  },
+  legalLink: {
+    color: GOLD.a300,
+    textDecorationLine: 'underline',
+  },
+  legalModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  legalModalContainer: {
+    backgroundColor: '#1c1c1c',
+    borderRadius: 16,
+    padding: 16,
+    maxHeight: '85%',
+    borderWidth: 1,
+    borderColor: 'rgba(252, 211, 77, 0.3)'
+  },
+  legalModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  legalModalTitle: {
+    color: GOLD.a200,
+    fontSize: 18,
+    fontWeight: '600',
+    flex: 1,
+  },
+  legalModalClose: {
+    color: GOLD.a400,
+    fontSize: 14,
+  },
+  legalModalScroll: {
+    maxHeight: '80%',
+  },
+  legalModalText: {
+    color: '#F1DDA5',
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  legalModalLoadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+  },
+  legalModalLoadingText: {
+    color: '#E9C978',
+    marginTop: 12,
+    fontSize: 12,
   },
   
   // Language dropdown styles

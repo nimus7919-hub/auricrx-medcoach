@@ -2379,6 +2379,216 @@ app.post('/api/trial/start', async (req, res) => {
   }
 });
 
+// ========================================
+// SUBSCRIPTION MANAGEMENT ENDPOINTS
+// ========================================
+
+// Cancel subscription endpoint
+app.post('/api/subscription/cancel', async (req, res) => {
+  console.log('🚫 /api/subscription/cancel endpoint called');
+  try {
+    // Verify auth token
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({
+        ok: false,
+        error: 'UNAUTHORIZED',
+        message: 'Authentication token required'
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = await verifyToken(token);
+    } catch (authError) {
+      console.error('❌ Token verification failed:', authError);
+      return res.status(401).json({
+        ok: false,
+        error: 'INVALID_TOKEN',
+        message: 'Invalid or expired authentication token'
+      });
+    }
+
+    const uid = decoded.uid;
+    if (!uid) {
+      return res.status(401).json({
+        ok: false,
+        error: 'INVALID_TOKEN',
+        message: 'User ID not found in token'
+      });
+    }
+
+    console.log(`🚫 User ${uid} requesting subscription cancellation`);
+
+    // Get current subscription status
+    const profile = await neonClient`
+      SELECT 
+        plan,
+        current_period_end,
+        trial_end,
+        stripe_customer_id,
+        subscription_cancelled_at
+      FROM user_profiles
+      WHERE user_id = ${uid}
+    `;
+
+    if (profile.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        error: 'USER_NOT_FOUND',
+        message: 'User profile not found'
+      });
+    }
+
+    const userProfile = profile[0];
+
+    // Check if already cancelled
+    if (userProfile.subscription_cancelled_at) {
+      return res.json({
+        ok: true,
+        message: 'Subscription already cancelled',
+        cancelledAt: userProfile.subscription_cancelled_at,
+        accessUntil: userProfile.current_period_end || userProfile.trial_end
+      });
+    }
+
+    // Cancel Stripe subscription if exists
+    if (userProfile.stripe_customer_id) {
+      try {
+        // Get active subscriptions for this customer
+        const subscriptions = await stripe.subscriptions.list({
+          customer: userProfile.stripe_customer_id,
+          status: 'active',
+          limit: 1
+        });
+
+        if (subscriptions.data.length > 0) {
+          const subscription = subscriptions.data[0];
+          // Cancel at period end (don't cancel immediately)
+          await stripe.subscriptions.update(subscription.id, {
+            cancel_at_period_end: true
+          });
+          console.log(`✅ Stripe subscription ${subscription.id} set to cancel at period end`);
+        }
+      } catch (stripeError) {
+        console.error('⚠️ Error cancelling Stripe subscription:', stripeError);
+        // Continue with database update even if Stripe fails
+      }
+    }
+
+    // Update database: mark as cancelled but keep access until period end
+    const cancelledAt = new Date();
+    await neonClient`
+      UPDATE user_profiles
+      SET 
+        subscription_cancelled_at = ${cancelledAt.toISOString()},
+        updated_at = NOW()
+      WHERE user_id = ${uid}
+    `;
+
+    console.log(`✅ Subscription cancelled for user ${uid}. Access until: ${userProfile.current_period_end || userProfile.trial_end}`);
+
+    res.json({
+      ok: true,
+      message: 'Subscription cancelled successfully. You will retain access until the end of your current billing period.',
+      cancelledAt: cancelledAt.toISOString(),
+      accessUntil: userProfile.current_period_end || userProfile.trial_end,
+      plan: userProfile.plan
+    });
+  } catch (error) {
+    console.error('❌ Subscription cancellation failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'cancellation_failed',
+      message: error.message
+    });
+  }
+});
+
+// Resubscribe endpoint - Reactivate cancelled subscription
+app.post('/api/subscription/resubscribe', async (req, res) => {
+  try {
+    // Verify auth token
+    const token = req.headers.authorization?.split(' ')[1];
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+
+    console.log(`🔄 User ${uid} requesting resubscription`);
+
+    // Get current subscription status
+    const profile = await neonClient`
+      SELECT 
+        plan,
+        subscription_cancelled_at,
+        stripe_customer_id
+      FROM user_profiles
+      WHERE user_id = ${uid}
+    `;
+
+    if (profile.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        error: 'USER_NOT_FOUND',
+        message: 'User profile not found'
+      });
+    }
+
+    const userProfile = profile[0];
+
+    // If subscription was cancelled, reactivate Stripe subscription if exists
+    if (userProfile.subscription_cancelled_at && userProfile.stripe_customer_id) {
+      try {
+        // Get cancelled subscriptions for this customer
+        const subscriptions = await stripe.subscriptions.list({
+          customer: userProfile.stripe_customer_id,
+          status: 'all',
+          limit: 10
+        });
+
+        // Find subscription that was set to cancel at period end
+        const cancelledSubscription = subscriptions.data.find(
+          sub => sub.cancel_at_period_end === true && sub.status === 'active'
+        );
+
+        if (cancelledSubscription) {
+          // Reactivate subscription by removing cancel_at_period_end
+          await stripe.subscriptions.update(cancelledSubscription.id, {
+            cancel_at_period_end: false
+          });
+          console.log(`✅ Reactivated Stripe subscription ${cancelledSubscription.id}`);
+        }
+      } catch (stripeError) {
+        console.error('⚠️ Error reactivating Stripe subscription:', stripeError);
+        // Continue with database update even if Stripe fails
+      }
+    }
+
+    // Clear cancellation flag in database
+    await neonClient`
+      UPDATE user_profiles
+      SET 
+        subscription_cancelled_at = NULL,
+        updated_at = NOW()
+      WHERE user_id = ${uid}
+    `;
+
+    console.log(`✅ Subscription reactivated for user ${uid}`);
+
+    res.json({
+      ok: true,
+      message: 'Subscription reactivated successfully',
+      plan: userProfile.plan
+    });
+  } catch (error) {
+    console.error('❌ Resubscription failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'resubscription_failed',
+      message: error.message
+    });
+  }
+});
+
 // Get subscription status
 app.get('/api/me/subscription', async (req, res) => {
   console.log('🔍 SERVER: /api/me/subscription called');
@@ -2424,7 +2634,8 @@ app.get('/api/me/subscription', async (req, res) => {
           trial_eligible,
           trial_used_at,
           grace_expires_at,
-          current_period_end
+          current_period_end,
+          subscription_cancelled_at
         FROM user_profiles
         WHERE user_id = ${uid}
       `;
@@ -2468,6 +2679,16 @@ app.get('/api/me/subscription', async (req, res) => {
       } else if (p.plan === 'expired') {
         daysLeft = 0;
         planStatus = 'expired';
+        
+        // If grace period hasn't been set yet, set it now
+        if (!p.grace_expires_at) {
+          await neonClient`
+            UPDATE user_profiles
+            SET grace_expires_at = NOW() + INTERVAL '30 days'
+            WHERE user_id = ${uid} AND grace_expires_at IS NULL
+          `;
+          console.log(`✅ Set grace period for expired user ${uid}`);
+        }
       }
 
       res.json({
@@ -2475,6 +2696,7 @@ app.get('/api/me/subscription', async (req, res) => {
         plan: p.plan || 'trial',
         daysLeft,
         status: planStatus,
+        subscription_cancelled_at: p.subscription_cancelled_at,
         trial: {
           eligible: p.trial_eligible !== false,
           startedAt: p.trial_start,
@@ -2800,19 +3022,108 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           WHERE user_id = ${uid}
         `;
       } else {
-        // Subscription cancelled or past due
+        // Subscription cancelled or past due - set grace period
         await neonClient`
           UPDATE user_profiles
           SET plan = 'expired',
-              current_period_end = to_timestamp(${subscription.current_period_end})
+              current_period_end = to_timestamp(${subscription.current_period_end}),
+              grace_expires_at = NOW() + INTERVAL '30 days'
           WHERE user_id = ${uid}
         `;
+        console.log(`⚠️ Subscription expired for user ${uid}, grace period started (30 days)`);
       }
       console.log(`✅ Updated subscription for user ${uid}: ${subscription.status}`);
     }
   }
 
   res.json({ received: true });
+});
+
+/**
+ * Scheduled job to delete user data after grace period expires
+ * This should be called daily via cron or scheduled task
+ * POST /api/admin/cleanup-expired-accounts
+ */
+app.post('/api/admin/cleanup-expired-accounts', async (req, res) => {
+  try {
+    // Only allow if admin key is provided (set in env)
+    const adminKey = process.env.ADMIN_CLEANUP_KEY;
+    if (req.headers['x-admin-key'] !== adminKey && !adminKey) {
+      return res.status(401).json({ ok: false, error: 'unauthorized' });
+    }
+
+    console.log('🧹 Starting cleanup of expired accounts...');
+
+    // Find users whose grace period has expired
+    const expiredUsers = await neonClient`
+      SELECT user_id, email 
+      FROM user_profiles 
+      WHERE plan = 'expired' 
+        AND grace_expires_at IS NOT NULL 
+        AND grace_expires_at < NOW()
+    `;
+
+    console.log(`📋 Found ${expiredUsers.length} accounts past grace period`);
+
+    let deletedCount = 0;
+    for (const expiredUser of expiredUsers) {
+      const userId = expiredUser.user_id;
+      
+      try {
+        // Delete all user data
+        await neonClient`
+          DELETE FROM health_data WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM user_medications WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM user_supplements WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM user_symptoms WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM user_doctors WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM user_fasting_profiles WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM medication_contributions WHERE user_id = ${userId}
+        `;
+        await neonClient`
+          DELETE FROM supplement_contributions WHERE user_id = ${userId}
+        `;
+        
+        // Mark profile as deleted (don't delete profile to keep audit trail)
+        await neonClient`
+          UPDATE user_profiles
+          SET plan = 'deleted',
+              grace_expires_at = NULL
+          WHERE user_id = ${userId}
+        `;
+
+        console.log(`🗑️ Deleted data for user ${userId} (${expiredUser.email})`);
+        deletedCount++;
+      } catch (error) {
+        console.error(`❌ Failed to delete data for user ${userId}:`, error);
+      }
+    }
+
+    res.json({
+      ok: true,
+      deletedCount,
+      message: `Deleted data for ${deletedCount} expired accounts`
+    });
+  } catch (error) {
+    console.error('❌ Cleanup job failed:', error);
+    res.status(500).json({
+      ok: false,
+      error: 'cleanup_failed',
+      message: error.message
+    });
+  }
 });
 
 /**
@@ -3306,4 +3617,8 @@ app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
   console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');
+  console.log('📋 Registered subscription endpoints:');
+  console.log('   POST /api/subscription/cancel');
+  console.log('   POST /api/subscription/resubscribe');
+  console.log('   GET  /api/me/subscription');
 });

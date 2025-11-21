@@ -57,11 +57,50 @@ import { useCustomAlert } from './src/hooks/useCustomAlert';
 import { useTranslation } from './src/hooks/useTranslation';
 import { createTranslationService } from './src/services/translationService';
 import './src/i18n';
+import CrashLogger from './src/utils/crashLogger';
+import SubscriptionExpiredModal from './src/components/SubscriptionExpiredModal';
 
 const USING_EXPO_GO = Constants.appOwnership === "expo";
 
 // Test console log to verify logging works
 console.log('🚀 AuricRx MedCoach App Starting...', { USING_EXPO_GO });
+
+// ========================================
+// GLOBAL ERROR HANDLERS - Setup immediately
+// ========================================
+// Handle unhandled promise rejections
+if (typeof global !== 'undefined' && !global.__unhandledRejectionHandlerSet) {
+  global.__unhandledRejectionHandlerSet = true;
+  
+  // Capture unhandled promise rejections
+  const originalHandler = global.ErrorUtils?.getGlobalHandler?.();
+  
+  global.ErrorUtils?.setGlobalHandler?.((error, isFatal) => {
+    console.error('💥 GLOBAL ERROR HANDLER:', { error, isFatal, message: error?.message, stack: error?.stack });
+    CrashLogger.logUnhandledError(error, isFatal).catch(e => {
+      console.error('Failed to log crash:', e);
+    });
+    
+    // Call original handler if it exists
+    if (originalHandler) {
+      originalHandler(error, isFatal);
+    }
+  });
+
+  // Handle unhandled promise rejections
+  if (typeof Promise !== 'undefined' && Promise.reject) {
+    const originalReject = Promise.reject;
+    Promise.reject = function(reason) {
+      console.error('💥 UNHANDLED PROMISE REJECTION:', reason);
+      CrashLogger.logUnhandledRejection(reason).catch(e => {
+        console.error('Failed to log unhandled rejection:', e);
+      });
+      return originalReject.call(this, reason);
+    };
+  }
+}
+
+console.log('✅ Global error handlers initialized');
 
 import {
   useFonts,
@@ -1951,6 +1990,11 @@ export default function App() {
 
   // Put hooks/state INSIDE the component, before returns
   const [route, setRoute] = useState('dashboard');
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showCancelMembershipModal, setShowCancelMembershipModal] = useState(false);
+  const [showMembershipResultModal, setShowMembershipResultModal] = useState(false);
+  const [membershipResult, setMembershipResult] = useState({ type: 'success', title: '', message: '' });
+  const [showResubscribeButton, setShowResubscribeButton] = useState(false);
   
   // Authentication state
   const [user, setUser] = useState(null);
@@ -1962,8 +2006,9 @@ export default function App() {
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
-    console.log('Auth success:', authData);
+    console.log('✅ Auth success:', authData);
     try {
+      console.log('🔄 Processing auth data...');
       const result = await authService.handleAuth(authData);
       
       if (result.success) {
@@ -1988,7 +2033,39 @@ export default function App() {
           ...result.user,
           firebaseUser: firebaseUser, // Store Firebase user object for token refresh
         });
-        setShowAuth(false);
+        
+        // Check subscription status after sign-in
+        try {
+          const status = await getSubscriptionStatus(firebaseUser);
+          if (status.ok) {
+            setSubscriptionStatus(status);
+            
+            // If subscription is cancelled or expired, show resubscribe option
+            const isCancelled = status.subscription_cancelled_at || false;
+            const isExpired = status.status === 'expired' || (status.daysLeft || 0) === 0;
+            
+            if (isCancelled || isExpired) {
+              // Keep auth screen open so user can resubscribe
+              // Don't navigate to dashboard yet
+              console.log('⚠️ Subscription cancelled or expired - keeping auth screen open for resubscribe');
+              setShowResubscribeButton(true); // Show resubscribe button on sign-in screen
+            } else {
+              // Subscription is active, proceed normally
+              setShowAuth(false);
+              setRoute('dashboard');
+              setShowResubscribeButton(false);
+            }
+          } else {
+            // If status check fails, proceed normally
+            setShowAuth(false);
+            setRoute('dashboard');
+          }
+        } catch (error) {
+          console.error('❌ Error checking subscription status:', error);
+          // If status check fails, proceed normally
+          setShowAuth(false);
+          setRoute('dashboard');
+        }
         
         // If it's a sign-up, store the user data
         if (authData.isSignUp) {
@@ -2033,10 +2110,105 @@ export default function App() {
       setUser(null);
       setUserData(null);
       setShowAuth(true);
+      setShowSubscriptionExpiredModal(false);
       console.log('👋 User signed out');
     } catch (error) {
       console.error('Sign out error:', error);
     }
+  };
+
+  const handleCancelMembership = () => {
+    setShowCancelMembershipModal(true);
+  };
+
+  const confirmCancelMembership = async () => {
+    setShowCancelMembershipModal(false);
+    try {
+      // Get auth token
+      const token = user?.firebaseUser ? await user.firebaseUser.getIdToken() : null;
+      if (!token) {
+        setMembershipResult({
+          type: 'error',
+          title: S.error || 'Error',
+          message: S.error || 'Not authenticated. Please sign in again.'
+        });
+        setShowMembershipResultModal(true);
+        return;
+      }
+
+      // Call cancel subscription API
+      const response = await fetch('https://auricrx-medcoach.onrender.com/api/subscription/cancel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user?.uid,
+        }),
+      });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('❌ Non-JSON response from cancel endpoint:', text.substring(0, 200));
+        throw new Error('Server returned an invalid response. Please try again later.');
+      }
+
+      const result = await response.json();
+
+      if (response.ok && result.ok) {
+        setMembershipResult({
+          type: 'success',
+          title: S.success || 'Success',
+          message: S.membershipCancelled || 'Your membership has been cancelled successfully.'
+        });
+        setShowMembershipResultModal(true);
+        // Refresh subscription status
+        if (user?.firebaseUser) {
+          const status = await getSubscriptionStatus(user.firebaseUser);
+          setSubscriptionStatus(status);
+        }
+      } else {
+        setMembershipResult({
+          type: 'error',
+          title: S.error || 'Error',
+          message: result.message || result.error || S.cancelMembershipFailed || 'Failed to cancel membership. Please try again or contact support.'
+        });
+        setShowMembershipResultModal(true);
+      }
+    } catch (error) {
+      console.error('Cancel membership error:', error);
+      let errorMessage = S.cancelMembershipFailed || 'Failed to cancel membership. Please try again or contact support.';
+      
+      // Provide more specific error messages
+      if (error.message && error.message.includes('JSON Parse error')) {
+        errorMessage = 'Server error: Invalid response from server. Please try again later or contact support.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setMembershipResult({
+        type: 'error',
+        title: S.error || 'Error',
+        message: errorMessage
+      });
+      setShowMembershipResultModal(true);
+    }
+  };
+
+  const handleSubscriptionExpiredSubscribe = () => {
+    setShowSubscriptionExpiredModal(false);
+    setShowCheckout(true);
+  };
+
+  const handleSubscriptionExpiredDismiss = async () => {
+    setShowSubscriptionExpiredModal(false);
+    // Log out user after dismissing modal
+    setTimeout(async () => {
+      await handleSignOut();
+    }, 500);
   };
   
   // 'reminders' | 'pharmacies' | 'labs' | 'prescription' | 'appointments' | 'settings'
@@ -2062,6 +2234,7 @@ export default function App() {
   
   // subscription & trial state
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [showSubscriptionExpiredModal, setShowSubscriptionExpiredModal] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   
   // fasting profile settings
@@ -2467,6 +2640,16 @@ export default function App() {
     emailUs: t('settings.emailUs'),
     emailAddress: t('settings.emailAddress'),
     signOut: t('settings.signOut'),
+    subscription: t('settings.subscription'),
+    currentPlan: t('settings.currentPlan'),
+    proPlan: t('settings.proPlan'),
+    trial: t('settings.trial'),
+    daysRemaining: t('settings.daysRemaining'),
+    cancelMembership: t('settings.cancelMembership'),
+    cancelMembershipConfirm: t('settings.cancelMembershipConfirm'),
+    confirmCancel: t('settings.confirmCancel'),
+    membershipCancelled: t('settings.membershipCancelled'),
+    cancelMembershipFailed: t('settings.cancelMembershipFailed'),
     
     // Wallpaper
     wallpaperTitle: t('wallpaper.title'),
@@ -3247,25 +3430,41 @@ export default function App() {
   const [meds, setMeds] = useState([
     {
       id: '1',
-      name: 'Aspirin',
-      strength: '81mg',
-      status: 'taking',
-      times: ['08:00'],
-      startDate: '2024-01-01',
-      endDate: '',
-      notes: 'Low dose for heart health',
-      dosesLeft: '30'
-    },
-    {
-      id: '2',
-      name: 'Metformin',
+      name: 'Metformina',
       strength: '500mg',
+      strengthValue: '500',
+      strengthUnit: 'Mg',
       status: 'taking',
       times: ['08:00', '20:00'],
       startDate: '2024-01-15',
       endDate: '',
-      notes: 'For diabetes management',
-      dosesLeft: '60'
+      notes: '',
+      dosesLeft: '0',
+      quantity: '0 tablet',
+      quantityValue: '0',
+      quantityUnit: 'Tablet',
+      remainingQuantity: '0',
+      lastRefill: null,
+      isSingleComponent: true
+    },
+    {
+      id: '2',
+      name: 'Aspirina',
+      strength: '100Mg',
+      strengthValue: '100',
+      strengthUnit: 'Mg',
+      status: 'taking',
+      times: ['17:30'],
+      startDate: '2024-01-01',
+      endDate: '',
+      notes: '',
+      dosesLeft: '30',
+      quantity: '30 tablet',
+      quantityValue: '30',
+      quantityUnit: 'Tablet',
+      remainingQuantity: '30',
+      lastRefill: null,
+      isSingleComponent: true
     }
   ]); // lifted medications state
   const [supplements, setSupplements] = useState([
@@ -3278,9 +3477,13 @@ export default function App() {
       times: ['08:00'],
       startDate: '2024-01-15',
       endDate: '',
-      notes: 'Take with breakfast',
-      dosesLeft: '90',
-      refillSoon: false
+      notes: '',
+      dosesLeft: '0',
+      quantity: '0',
+      quantityUnit: 'Tablet',
+      remainingQuantity: '0',
+      refillSoon: false,
+      lastRefill: null
     },
     {
       id: '2',
@@ -3291,9 +3494,13 @@ export default function App() {
       times: ['12:00'],
       startDate: '2024-01-10',
       endDate: '',
-      notes: 'Take with lunch',
-      dosesLeft: '60',
-      refillSoon: true
+      notes: '',
+      dosesLeft: '0',
+      quantity: '0',
+      quantityUnit: 'Tablet',
+      remainingQuantity: '0',
+      refillSoon: false,
+      lastRefill: null
     }
   ]);
   // prescriptions gallery
@@ -3355,9 +3562,27 @@ useEffect(() => {
         return;
       }
 
-      // Get current position
-      const { coords } = await Location.getCurrentPositionAsync({});
-      console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
+      // Get current position with error handling for Google Play Services issues
+      let coords;
+      try {
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+          timeout: 10000, // 10 second timeout
+          maximumAge: 300000 // 5 minutes
+        });
+        coords = position.coords;
+        console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
+      } catch (locationError) {
+        // Handle Google Play Services disconnection or other location errors
+        const errorMessage = locationError?.message || locationError?.toString() || '';
+        if (errorMessage.includes('Google Play services') || errorMessage.includes('service disconnection')) {
+          console.warn('⚠️ Google Play Services unavailable - skipping auto-load location data');
+          return;
+        }
+        // For other errors, log but don't crash
+        console.warn('⚠️ Location request failed - skipping auto-load:', errorMessage);
+        return;
+      }
 
       // Load pharmacies
       setPharmaciesLoading(true);
@@ -3825,7 +4050,15 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (R) { try { setReminders(JSON.parse(R)); } catch {} }
         if (P) { try { setRxPhotos(JSON.parse(P)); } catch {} }
   if (V) { try { setVoiceNotes(JSON.parse(V)); } catch {} }
-  if (MD) { try { setMeds(JSON.parse(MD)); } catch {} }
+        if (MD) { 
+          try { 
+            const parsedMeds = JSON.parse(MD);
+            // Only set meds if they exist, otherwise keep defaults
+            if (parsedMeds && parsedMeds.length > 0) {
+              setMeds(parsedMeds);
+            }
+          } catch {} 
+        }
         if (SD) { try { setSelectedAIDoctor(SD); } catch {} }
       } catch {
         // ignore corrupt storage on boot
@@ -3854,58 +4087,76 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
 
   // Authentication state listener and restoration
   useEffect(() => {
+    console.log('🔧 Setting up auth state listener...');
     let isRestoring = true; // Flag to prevent race conditions
     
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
       console.log('🔥 Firebase auth state changed:', firebaseUser ? firebaseUser.uid : 'null');
       
-      // Don't process auth state changes while we're still restoring
-      if (isRestoring) {
-        console.log('⏳ Skipping auth state change during restoration');
-        return;
-      }
-      
-      if (firebaseUser) {
-        // User is signed in
-        
-        // IMPORTANT: Check email verification before allowing access
-        if (!firebaseUser.emailVerified && !isRestoring) {
-          // New sign-up without verified email - force sign out
-          console.log('⚠️ User signed in without verified email, signing out...');
-          await authService.signOut();
-          showAlert({
-            title: 'Email Verification Required',
-            message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
-            buttonText: 'OK',
-          });
+      try {
+        // Don't process auth state changes while we're still restoring
+        if (isRestoring) {
+          console.log('⏳ Skipping auth state change during restoration');
           return;
         }
         
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          emailVerified: firebaseUser.emailVerified,
-          firebaseUser: firebaseUser, // Store Firebase user object for token refresh
-        });
-        setShowAuth(false);
-        setIsRestoringAuth(false);
-        
-        // Try to get user data
-        try {
-          const userDataResult = await authService.getUserData(firebaseUser.uid);
-          if (userDataResult.success) {
-            setUserData(userDataResult.data);
+        if (firebaseUser) {
+          // User is signed in
+          
+          // IMPORTANT: Check email verification before allowing access
+          if (!firebaseUser.emailVerified && !isRestoring) {
+            // New sign-up without verified email - force sign out
+            console.log('⚠️ User signed in without verified email, signing out...');
+            await authService.signOut();
+            showAlert({
+              title: 'Email Verification Required',
+              message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
+              buttonText: 'OK',
+            });
+            return;
           }
-        } catch (error) {
-          console.error('Failed to get user data:', error);
+          
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            emailVerified: firebaseUser.emailVerified,
+            firebaseUser: firebaseUser, // Store Firebase user object for token refresh
+          });
+          setShowAuth(false);
+          setRoute('dashboard'); // Navigate to dashboard after successful authentication
+          setIsRestoringAuth(false);
+          
+          // Try to get user data
+          try {
+            console.log('📥 Fetching user data for:', firebaseUser.uid);
+            const userDataResult = await authService.getUserData(firebaseUser.uid);
+            if (userDataResult.success) {
+              console.log('✅ User data loaded successfully');
+              setUserData(userDataResult.data);
+            } else {
+              console.warn('⚠️ User data fetch returned unsuccessful:', userDataResult);
+            }
+          } catch (error) {
+            console.error('❌ Failed to get user data:', error);
+            CrashLogger.logError(error, {
+              context: 'get_user_data',
+              userId: firebaseUser.uid,
+            }).catch(e => console.error('Failed to log error:', e));
+          }
+        } else {
+          // User is signed out
+          setUser(null);
+          setUserData(null);
+          setShowAuth(true);
+          setIsRestoringAuth(false);
         }
-      } else {
-        // User is signed out
-        setUser(null);
-        setUserData(null);
-        setShowAuth(true);
-        setIsRestoringAuth(false);
+      } catch (error) {
+        console.error('❌ Error in auth state change handler:', error);
+        CrashLogger.logError(error, {
+          context: 'auth_state_change',
+          hasUser: !!firebaseUser,
+        }).catch(e => console.error('Failed to log error:', e));
       }
     });
 
@@ -3919,6 +4170,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           console.log('✅ Auth state restored successfully - user will stay signed in');
           setUser(restoreResult.user);
           setShowAuth(false);
+          setRoute('dashboard'); // Navigate to dashboard after auth restoration
           
           // Try to get user data
           try {
@@ -3941,7 +4193,12 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           }, 1500);
         }
       } catch (error) {
-        console.error('Failed to restore auth state:', error);
+        console.error('❌ Failed to restore auth state:', error);
+        CrashLogger.logError(error, {
+          context: 'auth_restoration',
+          errorMessage: error?.message || String(error),
+          timestamp: new Date().toISOString(),
+        }).catch(e => console.error('Failed to log auth error:', e));
         setShowAuth(true);
         // Show loading screen for a bit longer on error
         setTimeout(() => {
@@ -4004,6 +4261,16 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           if (status.ok) {
             console.log('✅ Subscription status loaded:', status);
             setSubscriptionStatus(status);
+            
+            // Check if subscription has expired (0 days left)
+            const daysLeft = status.daysLeft || 0;
+            const isExpired = status.status === 'expired' || daysLeft === 0;
+            
+            if (isExpired && status.plan !== 'pro') {
+              console.log('⚠️ Subscription expired - showing modal');
+              setShowSubscriptionExpiredModal(true);
+              // Note: User will be logged out when they dismiss the modal
+            }
           } else {
             console.log('⚠️ Failed to load subscription status:', status);
           }
@@ -4036,6 +4303,55 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
                 });
                 return merged;
               });
+            }
+            
+            // Also directly fetch medications from database as backup
+            try {
+              console.log('💊 Directly fetching medications from database...');
+              const medsResponse = await fetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}`);
+              if (medsResponse.ok) {
+                const medsResult = await medsResponse.json();
+                if (medsResult.ok && medsResult.medications && Array.isArray(medsResult.medications)) {
+                  console.log('💊 Loaded', medsResult.medications.length, 'medications from database');
+                  
+                  // Convert database format to app format
+                  const dbMeds = medsResult.medications.map(dbMed => ({
+                    id: dbMed.id || `${Date.now()}-${Math.random()}`,
+                    name: dbMed.medication_name || '',
+                    strength: dbMed.strength_value && dbMed.strength_unit 
+                      ? `${dbMed.strength_value}${dbMed.strength_unit}` 
+                      : '',
+                    strengthValue: dbMed.strength_value || '',
+                    strengthUnit: dbMed.strength_unit || '',
+                    status: dbMed.status || 'taking',
+                    times: Array.isArray(dbMed.times) ? dbMed.times : (dbMed.times ? [dbMed.times] : []),
+                    startDate: dbMed.start_date || null,
+                    endDate: dbMed.end_date || null,
+                    notes: dbMed.notes || '',
+                    dosesLeft: dbMed.doses_left || '0',
+                    quantity: dbMed.quantity_value && dbMed.quantity_unit 
+                      ? `${dbMed.quantity_value} ${dbMed.quantity_unit}` 
+                      : '',
+                    quantityValue: dbMed.quantity_value || '0',
+                    quantityUnit: dbMed.quantity_unit || 'Tablet',
+                    remainingQuantity: dbMed.doses_left || '0',
+                    lastRefill: dbMed.last_refill || null,
+                    isSingleComponent: true, // Default for database meds
+                    dbId: dbMed.id, // Store database ID for future updates
+                  }));
+                  
+                  // Replace local meds with database meds (database is source of truth)
+                  // Always use database meds, even if empty (to clear defaults)
+                  console.log('💊 Replacing local medications with database medications');
+                  setMeds(dbMeds);
+                  // Also save to AsyncStorage for offline access
+                  await AsyncStorage.setItem(STORAGE.meds, JSON.stringify(dbMeds));
+                }
+              } else {
+                console.warn('⚠️ Failed to fetch medications from database:', medsResponse.status);
+              }
+            } catch (medsError) {
+              console.error('❌ Error fetching medications from database:', medsError);
             }
             
             // Merge reminders - cloudData.reminders is the payload array directly
@@ -4265,6 +4581,14 @@ useEffect(() => {
     
     <TrialWidget />
     
+    <AnimatedButton onPress={() => setShowHelpModal(true)} style={{ marginRight: 8 }}>
+      <Image 
+        source={require('./assets/dashboard Emojies/help.png')} 
+        style={{ width: 48, height: 48, tintColor: theme.accent }}
+        resizeMode="contain"
+      />
+    </AnimatedButton>
+    
     <AnimatedButton onPress={() => setRoute('settings')}>
       <Image 
         source={require('./assets/dashboard Emojies/settings cog.png')} 
@@ -4451,6 +4775,332 @@ const handleAskMedicalAI = async () => {
     setAiMessages(m => [...m, { role: 'assistant', text: S.networkError || 'Network error. Try again.' }]);
   }
 }
+
+  // --------- Membership Modals Component (Cancel Confirmation + Result) ----------
+  const MembershipModals = () => {
+    const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    
+    return (
+      <>
+        {/* Cancel Membership Confirmation Modal */}
+        <Modal
+          visible={showCancelMembershipModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowCancelMembershipModal(false)}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20
+          }}>
+            <View style={{
+              backgroundColor: getCardBackgroundColor() + 'F0',
+              borderRadius: 16,
+              padding: 24,
+              width: '90%',
+              maxWidth: 400,
+              borderWidth: 2,
+              borderColor: getCardBorderColor(),
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 10
+            }}>
+              <DynamicText type="card" style={{
+                fontFamily: 'Inter_700Bold',
+                fontSize: 20,
+                marginBottom: 16,
+                textAlign: 'center'
+              }}>
+                {S.cancelMembership || 'Cancel Membership'}
+              </DynamicText>
+              
+              <DynamicText type="card" style={{
+                fontFamily: 'Inter_400Regular',
+                fontSize: 15,
+                marginBottom: 24,
+                textAlign: 'center',
+                opacity: 0.8,
+                lineHeight: 22
+              }}>
+                {S.cancelMembershipConfirm || 'Are you sure you want to cancel your membership? This action cannot be undone.'}
+              </DynamicText>
+              
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() => setShowCancelMembershipModal(false)}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 14,
+                    borderRadius: 12,
+                    backgroundColor: getCardBackgroundColor() + '80',
+                    borderWidth: 2,
+                    borderColor: getCardBorderColor(),
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <DynamicText type="card" style={{
+                    fontFamily: 'Inter_600SemiBold',
+                    fontSize: 15
+                  }}>
+                    {S.cancel || 'Cancel'}
+                  </DynamicText>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  onPress={confirmCancelMembership}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 14,
+                    borderRadius: 12,
+                    backgroundColor: '#f59e0b',
+                    borderWidth: 2,
+                    borderColor: '#d97706',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    shadowColor: '#f59e0b',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    elevation: 5
+                  }}
+                >
+                  <DynamicText type="card" style={{
+                    fontFamily: 'Inter_700Bold',
+                    fontSize: 15,
+                    color: '#ffffff'
+                  }}>
+                    {S.confirmCancel || 'Yes, Cancel Membership'}
+                  </DynamicText>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        
+        {/* Membership Result Modal */}
+        <Modal
+          visible={showMembershipResultModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowMembershipResultModal(false)}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20
+          }}>
+            <View style={{
+              backgroundColor: getCardBackgroundColor() + 'F0',
+              borderRadius: 16,
+              padding: 24,
+              width: '90%',
+              maxWidth: 400,
+              borderWidth: 2,
+              borderColor: membershipResult.type === 'success' ? '#22c55e' : '#ef4444',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 10
+            }}>
+              <DynamicText type="card" style={{
+                fontFamily: 'Inter_700Bold',
+                fontSize: 20,
+                marginBottom: 16,
+                textAlign: 'center',
+                color: membershipResult.type === 'success' ? '#22c55e' : '#ef4444'
+              }}>
+                {membershipResult.title}
+              </DynamicText>
+              
+              <DynamicText type="card" style={{
+                fontFamily: 'Inter_400Regular',
+                fontSize: 15,
+                marginBottom: 24,
+                textAlign: 'center',
+                opacity: 0.8,
+                lineHeight: 22
+              }}>
+                {membershipResult.message}
+              </DynamicText>
+              
+              <TouchableOpacity
+                onPress={() => setShowMembershipResultModal(false)}
+                style={{
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  backgroundColor: membershipResult.type === 'success' ? '#22c55e' : '#ef4444',
+                  borderWidth: 2,
+                  borderColor: membershipResult.type === 'success' ? '#16a34a' : '#dc2626',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: membershipResult.type === 'success' ? '#22c55e' : '#ef4444',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 5
+                }}
+              >
+                <DynamicText type="card" style={{
+                  fontFamily: 'Inter_700Bold',
+                  fontSize: 15,
+                  color: '#ffffff'
+                }}>
+                  {S.ok || 'OK'}
+                </DynamicText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </>
+    );
+  };
+
+  // --------- Dashboard Help Modal ----------
+  const DashboardHelpModal = () => {
+    const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+    
+    // Create helpCards array inside render to ensure translations are available
+    const helpCards = useMemo(() => [
+      {
+        title: S.healthJournal || t('dashboard.healthJournal') || 'Health Journal',
+        icon: <Image source={require('./assets/dashboard Emojies/Reminders.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.healthJournal') || 'Shows your next medication reminder. Tap to see all your upcoming reminders and manage your medication schedule.',
+        iconSize: 32
+      },
+      {
+        title: S.labsLocations || t('tiles.labsLocations') || 'Lab Locations',
+        icon: <Image source={require('./assets/dashboard Emojies/Lab Locations.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.labsLocations') || 'Find nearby medical labs and testing centers. Shows distance from your location and provides directions to help you get there.',
+        iconSize: 32
+      },
+      {
+        title: S.pharmacyLocations || t('tiles.pharmacyLocations') || 'Pharmacy Locations',
+        icon: <Image source={require('./assets/dashboard Emojies/Pharmacy locations.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.pharmacyLocations') || 'Find pharmacies near you with real-time distance calculations. Shows how far each pharmacy is and provides directions to help you get there.',
+        iconSize: 32
+      },
+      {
+        title: S.reminders || t('tiles.reminders') || 'Reminders',
+        icon: <Image source={require('./assets/dashboard Emojies/Reminders.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.reminders') || 'Set and manage medication reminders. Get notified when it\'s time to take your medications, refill prescriptions, or attend appointments.',
+        iconSize: 32
+      },
+      {
+        title: S.medications || t('tiles.medications') || 'Medications',
+        icon: <Image source={require('./assets/dashboard Emojies/Medications.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.medications') || 'Track all your medications, dosages, and schedules. Get refill reminders, check drug interactions, and manage your prescription history.',
+        iconSize: 32
+      },
+      {
+        title: S.herbs || t('tiles.herbs') || 'Herbs',
+        icon: <Image source={require('./assets/dashboard Emojies/Herbs.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.herbs') || 'Explore herbal remedies and natural supplements. Learn about benefits, dosages, and potential interactions with your medications.',
+        iconSize: 32
+      },
+      {
+        title: S.supplements || t('tiles.supplements') || 'Supplements',
+        icon: <Image source={require('./assets/dashboard Emojies/supplements.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.supplements') || 'Manage your vitamins and supplements. Track daily intake, set reminders, and ensure you\'re getting the right nutrients.',
+        iconSize: 32
+      },
+      {
+        title: S.smartAlerts || t('tiles.smartAlerts') || 'Smart Alerts',
+        icon: <Image source={require('./assets/dashboard Emojies/Smart Alerts.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />,
+        description: t('help.cards.smartAlerts') || 'Intelligent notifications that adapt to your routine. Get location-based reminders, weather alerts, and personalized health tips.',
+        iconSize: 40
+      },
+      {
+        title: S.healthAnalytics || t('tiles.healthAnalytics') || 'Health Analytics',
+        icon: <Image source={require('./assets/dashboard Emojies/Health Analytics.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />,
+        description: t('help.cards.healthAnalytics') || 'Track your health metrics over time. Monitor medication adherence, side effects, and health trends with detailed charts and insights.',
+        iconSize: 40
+      },
+      {
+        title: S.appointmentLog || t('tiles.appointmentLog') || 'Appointment Tracker',
+        icon: <Image source={require('./assets/dashboard Emojies/Appointment Tracker.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
+        description: t('help.cards.appointmentLog') || 'Schedule and manage doctor appointments. Store doctor contacts, track visit history, and never miss an important healthcare appointment.',
+        iconSize: 32
+      },
+      {
+        title: S.aiHealth || t('tiles.aiHealth') || 'AI Health',
+        icon: <Image source={require('./assets/dashboard Emojies/AI Health.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />,
+        description: t('help.cards.aiHealth') || 'Get AI-powered health insights. Analyze symptoms, check drug interactions, and receive personalized health recommendations from our medical AI assistants.',
+        iconSize: 48
+      },
+      {
+        title: S.documents || t('tiles.documents') || 'Medical Documents',
+        icon: <Image source={require('./assets/dashboard Emojies/Documents.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />,
+        description: t('help.cards.documents') || 'Store and organize your medical documents. Keep insurance cards, lab results, prescriptions, and ID cards in one secure place for easy access during doctor visits.',
+        iconSize: 48
+      }
+    ], [S, t, lang, isReady]);
+
+    return (
+      <Modal
+        visible={showHelpModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowHelpModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.helpModalContainer, { backgroundColor: getCardBackgroundColor() + 'F5', borderColor: getCardBorderColor() }]}>
+            <View style={[styles.helpModalHeader, { borderBottomColor: getCardBorderColor() }]}>
+              <DynamicText type="primary" style={[styles.helpModalTitle, { fontFamily: 'Inter_800ExtraBold' }]}>
+                {t('help.title')}
+              </DynamicText>
+              <TouchableOpacity onPress={() => setShowHelpModal(false)} style={styles.helpModalClose}>
+                <DynamicText type="card" style={{ fontSize: 24, fontWeight: 'bold' }}>✕</DynamicText>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView 
+              style={styles.helpModalContent}
+              showsVerticalScrollIndicator={true}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              <DynamicText type="card" style={[styles.helpModalIntro, { fontFamily: 'Inter_400Regular', marginBottom: 20 }]}>
+                {t('help.intro') || 'Welcome to your health dashboard! Each card helps you manage different aspects of your health. Here\'s what each one does:'}
+              </DynamicText>
+              
+              {helpCards.map((card, index) => (
+                <View 
+                  key={index} 
+                  style={[styles.helpCardItem, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor(), marginBottom: 16 }]}
+                >
+                  <View style={styles.helpCardHeader}>
+                    <View style={[styles.helpCardIconContainer, { width: card.iconSize || 32, height: card.iconSize || 32 }]}>
+                      {card.icon}
+                    </View>
+                    <DynamicText type="card" style={[styles.helpCardTitle, { fontFamily: 'Inter_700Bold' }]}>
+                      {card.title}
+                    </DynamicText>
+                  </View>
+                  <DynamicText type="card" style={[styles.helpCardDescription, { fontFamily: 'Inter_400Regular' }]}>
+                    {card.description}
+                  </DynamicText>
+                </View>
+              ))}
+              
+              <View style={[styles.helpCardItem, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor(), marginTop: 8 }]}>
+                <DynamicText type="card" style={[styles.helpCardDescription, { fontFamily: 'Inter_400Regular', fontStyle: 'italic' }]}>
+                  {t('help.tip') || '💡 Tip: Tap any card to explore its features. The floating AI button in the bottom right gives you instant access to health advice from our medical AI assistants.'}
+                </DynamicText>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   // --------- Screens ----------
   const Dashboard = () => {
@@ -5659,6 +6309,60 @@ const handleAskMedicalAI = async () => {
           </View>
         </CollapsibleSection>
         
+        <CollapsibleSection title={S.subscription || 'Subscription'} sectionKey="subscription" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+            {subscriptionStatus && (
+              <View style={{ marginBottom: 12 }}>
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_600SemiBold', 
+                  fontSize: 14,
+                  marginBottom: 8,
+                  opacity: 0.8
+                }}>
+                  {S.currentPlan || 'Current Plan'}: {subscriptionStatus.plan === 'pro' ? (S.proPlan || 'Pro') : (S.trial || 'Trial')}
+                </DynamicText>
+                {subscriptionStatus.daysLeft !== undefined && subscriptionStatus.plan !== 'pro' && (
+                  <DynamicText type="card" style={{ 
+                    fontFamily: 'Inter_400Regular', 
+                    fontSize: 12,
+                    opacity: 0.7,
+                    marginBottom: 12
+                  }}>
+                    {S.daysRemaining || 'Days Remaining'}: {subscriptionStatus.daysLeft}
+                  </DynamicText>
+                )}
+              </View>
+            )}
+            <TouchableOpacity 
+              onPress={handleCancelMembership}
+              style={[styles.settingsButton, {
+                backgroundColor: '#f59e0b',
+                borderColor: '#d97706',
+                borderWidth: 2,
+                borderRadius: 12,
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#f59e0b',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 3
+              }]}
+            >
+              <DynamicText type="card" style={{ 
+                fontFamily: 'Inter_700Bold',
+                color: '#ffffff',
+                fontSize: 15,
+                textAlign: 'center'
+              }}>
+                {S.cancelMembership || 'Cancel Membership'}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </CollapsibleSection>
+        
         <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
           <TouchableOpacity 
             onPress={handleSignOut}
@@ -5701,6 +6405,7 @@ const handleAskMedicalAI = async () => {
       </View>
     );
   };
+
 
   
 
@@ -5771,6 +6476,11 @@ function trimTo(str, n) {
             onClose={handleAuthClose}
             onLanguageChange={handleLanguageChange}
             resetToSignIn={resetAuthToSignIn}
+            onResubscribe={showResubscribeButton ? () => {
+              // Open checkout modal for resubscription
+              // User is already authenticated at this point
+              setShowCheckout(true);
+            } : undefined}
           />
         ) : (
       /* Main App Content - Only show after authentication */
@@ -5796,6 +6506,12 @@ function trimTo(str, n) {
 
         {/* Floating AI button */}
         <AnimatedFloatingButton />
+        
+        {/* Dashboard Help Modal */}
+        <DashboardHelpModal />
+        
+        {/* Cancel Membership Confirmation Modal */}
+        <MembershipModals />
       </>
     )}
 
@@ -5982,11 +6698,28 @@ function trimTo(str, n) {
           const status = await getSubscriptionStatus(user?.firebaseUser);
           if (status.ok) {
             setSubscriptionStatus(status);
+            // If user was on auth screen (resubscribing), close it and go to dashboard
+            if (showAuth) {
+              setShowAuth(false);
+              setRoute('dashboard');
+              setShowResubscribeButton(false);
+            }
+            // Close checkout modal
+            setShowCheckout(false);
           }
         } catch (error) {
           console.error('Failed to refresh subscription status:', error);
         }
       }}
+    />
+
+    {/* Subscription Expired Modal */}
+    <SubscriptionExpiredModal
+      visible={showSubscriptionExpiredModal}
+      onSubscribe={handleSubscriptionExpiredSubscribe}
+      onDismiss={handleSubscriptionExpiredDismiss}
+      theme={theme}
+      lang={lang}
     />
     </WallpaperWrapper>
   </WallpaperProvider>
@@ -6108,6 +6841,73 @@ card: {
   },
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalBackdrop: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.6)', 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    padding: 20,
+  },
+  helpModalContainer: {
+    width: '100%',
+    maxWidth: 600,
+    height: '85%',
+    borderRadius: 20,
+    borderWidth: 2,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  helpModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderBottomWidth: 1,
+  },
+  helpModalTitle: {
+    fontSize: 24,
+  },
+  helpModalClose: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  helpModalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  helpModalIntro: {
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  helpCardItem: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+  },
+  helpCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  helpCardIconContainer: {
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpCardTitle: {
+    fontSize: 18,
+    flex: 1,
+  },
+  helpCardDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginLeft: 36,
+  },
   sheet: { 
   maxHeight: '80%', 
   borderTopLeftRadius: 18, 

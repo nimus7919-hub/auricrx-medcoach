@@ -11,7 +11,8 @@ ALTER TABLE user_profiles
   ADD COLUMN IF NOT EXISTS trial_eligible boolean DEFAULT true,
   ADD COLUMN IF NOT EXISTS trial_granted_by text,
   ADD COLUMN IF NOT EXISTS grace_expires_at timestamptz,
-  ADD COLUMN IF NOT EXISTS current_period_end timestamptz;
+  ADD COLUMN IF NOT EXISTS current_period_end timestamptz,
+  ADD COLUMN IF NOT EXISTS subscription_cancelled_at timestamptz;
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_profiles_email_hash 
   ON user_profiles(email_hash) 
