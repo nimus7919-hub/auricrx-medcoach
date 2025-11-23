@@ -275,7 +275,8 @@ export default function FastingProfileScreen({
                       borderColor: getCardBorderColor(),
                       color: getCardTextColor(),
                       flex: 1,
-                      marginRight: 8
+                      marginRight: 8,
+                      minHeight: 48
                     }]}
                     value={fastingProfile.customHealthCondition}
                     onChangeText={(text) => updateProfile('customHealthCondition', text)}
@@ -290,7 +291,7 @@ export default function FastingProfileScreen({
                     }]}
                   >
                     <DynamicText type="card" style={[styles.addButtonText, { color: '#ffffff' }]}>
-                      {t('addHealthCondition')}
+                      {t('others') || 'Others'}
                     </DynamicText>
                   </TouchableOpacity>
                 </View>
@@ -588,8 +589,8 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
     // backgroundColor, borderColor, color handled by getCardBackgroundColor, getCardBorderColor, getCardTextColor
   },
@@ -612,14 +613,15 @@ const styles = StyleSheet.create({
   },
   addButton: {
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
+    minWidth: 70,
     // backgroundColor handled by getAccentColor()
     // borderColor handled by getCardBorderColor
   },
   addButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     // color: '#ffffff', // Always white
   },

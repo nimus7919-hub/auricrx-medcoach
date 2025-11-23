@@ -1792,6 +1792,144 @@ app.delete('/api/medications', async (req, res) => {
   }
 });
 
+// --- User Supplements Endpoints ---
+
+// POST /api/supplements - Save a new user supplement
+app.post('/api/supplements', async (req, res) => {
+  try {
+    const { 
+      userId,
+      supplementName, 
+      brand,
+      dosageValue, 
+      dosageUnit,
+      quantityValue,
+      quantityUnit,
+      status, 
+      times, 
+      startDate, 
+      endDate, 
+      notes, 
+      dosesLeft,
+      remainingQuantity
+    } = req.body;
+
+    // Validate required fields
+    if (!userId || !supplementName || !status) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_required_fields',
+        message: 'userId, supplementName, and status are required'
+      });
+    }
+
+    // Prepare supplement data
+    const supplementData = {
+      supplementName: supplementName.trim(),
+      brand: brand?.trim() || '',
+      dosageValue: dosageValue?.trim() || '',
+      dosageUnit: dosageUnit?.trim() || '',
+      quantityValue: quantityValue?.trim() || '',
+      quantityUnit: quantityUnit?.trim() || '',
+      status: status.trim(),
+      times: Array.isArray(times) ? times : [],
+      startDate: startDate || null,
+      endDate: endDate || null,
+      notes: notes?.trim() || '',
+      dosesLeft: dosesLeft?.trim() || '',
+      remainingQuantity: remainingQuantity || '0',
+      isActive: true
+    };
+
+    // Save to Neon database
+    const savedSupplement = await saveUserSupplement(userId, supplementData);
+    
+    console.log('✅ Supplement saved successfully:', savedSupplement.id);
+    
+    res.json({ 
+      ok: true, 
+      supplement: savedSupplement,
+      message: 'Supplement saved successfully'
+    });
+  } catch (error) {
+    console.error('❌ Failed to save supplement:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'save_failed',
+      message: 'Failed to save supplement'
+    });
+  }
+});
+
+// GET /api/supplements - Get user supplements
+app.get('/api/supplements', async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_user_id',
+        message: 'userId is required'
+      });
+    }
+
+    // Get supplements from Neon database (only active ones)
+    const supplements = await getUserSupplements(userId);
+    
+    console.log(`📊 Retrieved ${supplements.length} active supplements for user ${userId}`);
+    
+    res.json({ 
+      ok: true, 
+      supplements,
+      count: supplements.length
+    });
+  } catch (error) {
+    console.error('❌ Failed to get supplements:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'retrieve_failed',
+      message: 'Failed to retrieve supplements'
+    });
+  }
+});
+
+// DELETE /api/supplements - Delete (soft delete) a user supplement
+app.delete('/api/supplements', async (req, res) => {
+  try {
+    const { userId, supplementId } = req.query;
+
+    if (!userId || !supplementId) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'missing_required_fields',
+        message: 'userId and supplementId are required'
+      });
+    }
+
+    // Soft delete: set is_active = false
+    await neonClient`
+      UPDATE user_supplements
+      SET is_active = false, updated_at = NOW()
+      WHERE user_id = ${userId} AND id = ${supplementId}
+    `;
+    
+    console.log(`🗑️ Soft deleted supplement ${supplementId} for user ${userId}`);
+    
+    res.json({ 
+      ok: true, 
+      message: 'Supplement deleted successfully'
+    });
+  } catch (error) {
+    console.error('❌ Failed to delete supplement:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'delete_failed',
+      message: 'Failed to delete supplement'
+    });
+  }
+});
+
 // --- Fasting Profile Endpoints ---
 
 // POST /api/fasting-profile - Save user fasting profile

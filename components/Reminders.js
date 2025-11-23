@@ -18,6 +18,7 @@ const Reminders = ({
   onNavigateToDashboard, 
   onNavigateToSettings,
   onAddMedicationFromReminder,
+  onAddSupplementFromReminder,
   onAddAppointmentFromReminder,
   meds,
   setMeds
@@ -67,6 +68,13 @@ const Reminders = ({
     quantity: '',
     quantityUnit: 'Tablets',
     isSingleComponent: true, // Default to single component
+    // Supplement-specific fields
+    supplementName: '',
+    brand: '',
+    dosageValue: '',
+    dosageUnit: 'mg',
+    quantityValue: '',
+    quantityUnit: 'capsules',
     // Appointment-specific fields
     address: ''
   });
@@ -214,6 +222,41 @@ const Reminders = ({
         // Call parent function to add to medications
         if (onAddMedicationFromReminder) {
           await onAddMedicationFromReminder(medicationData);
+        }
+
+      } else if (reminderData.type === 'supplement') {
+        // Route to supplements card
+        console.log('💊 Routing supplement reminder to supplements card:', reminderData);
+        
+        // Create supplement object for supplements card
+        const supplementData = {
+          id: reminderData.id,
+          name: reminderData.supplementName || reminderData.name,
+          brand: reminderData.brand || '',
+          dosage: reminderData.dosageValue && reminderData.dosageUnit ? 
+            `${reminderData.dosageValue} ${reminderData.dosageUnit}` : '500 mg',
+          dosageValue: reminderData.dosageValue || '500',
+          dosageUnit: reminderData.dosageUnit || 'mg',
+          quantity: reminderData.quantityValue && reminderData.quantityUnit ? 
+            `${reminderData.quantityValue} ${reminderData.quantityUnit}` : '30 capsules',
+          quantityValue: reminderData.quantityValue || '30',
+          quantityUnit: reminderData.quantityUnit || 'capsules',
+          times: [reminderData.time],
+          status: 'taking',
+          startDate: reminderData.startDate || new Date().toISOString().split('T')[0],
+          endDate: reminderData.endDate || '',
+          notes: reminderData.notes || '',
+          dosesLeft: '',
+          remainingQuantity: reminderData.quantityValue || '30',
+          refillSoon: false,
+          // Add reminder reference
+          reminderId: reminderData.id,
+          fromReminder: true
+        };
+
+        // Call parent function to add to supplements
+        if (onAddSupplementFromReminder) {
+          await onAddSupplementFromReminder(supplementData);
         }
 
       } else if (reminderData.type === 'appointment') {
@@ -532,7 +575,7 @@ const Reminders = ({
                     {S.reminderType || 'Type'}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {['medication', 'appointment', 'exercise', 'other'].map((type) => (
+                    {['medication', 'supplement', 'appointment', 'exercise', 'other'].map((type) => (
                       <TouchableOpacity
                         key={type}
                         onPress={() => handleTypeChange(type)}
@@ -950,6 +993,155 @@ const Reminders = ({
                   </View>
                 )}
 
+                {/* Supplement-specific fields */}
+                {addForm.type === 'supplement' && (
+                  <View style={{ marginBottom: 12 }}>
+                    <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
+                      {'Supplement Details'}
+                    </DynamicText>
+                    
+                    {/* Supplement Name */}
+                    <TextInput
+                      placeholder={"Supplement Name (e.g., Vitamin D3)"}
+                      placeholderTextColor={getCardTextColor() + '80'}
+                      value={addForm.supplementName}
+                      onChangeText={(text) => setAddForm(prev => ({ ...prev, supplementName: text }))}
+                      style={{
+                        backgroundColor: getCardBackgroundColor(),
+                        borderRadius: 12,
+                        padding: 16,
+                        marginBottom: 12,
+                        color: getCardTextColor(),
+                        fontFamily: 'Inter_400Regular',
+                        borderWidth: 1,
+                        borderColor: getCardBorderColor()
+                      }}
+                      onFocus={() => setInputFocused(true)}
+                      onBlur={() => setInputFocused(false)}
+                      autoCapitalize="words"
+                      autoCorrect={false}
+                      returnKeyType="next"
+                    />
+
+                    {/* Brand (Optional) */}
+                    <TextInput
+                      placeholder={"Brand (Optional)"}
+                      placeholderTextColor={getCardTextColor() + '80'}
+                      value={addForm.brand}
+                      onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
+                      style={{
+                        backgroundColor: getCardBackgroundColor(),
+                        borderRadius: 12,
+                        padding: 16,
+                        marginBottom: 12,
+                        color: getCardTextColor(),
+                        fontFamily: 'Inter_400Regular',
+                        borderWidth: 1,
+                        borderColor: getCardBorderColor()
+                      }}
+                      onFocus={() => setInputFocused(true)}
+                      onBlur={() => setInputFocused(false)}
+                      autoCapitalize="words"
+                      autoCorrect={false}
+                      returnKeyType="next"
+                    />
+
+                    {/* Dosage */}
+                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
+                      {'Dosage per serving'}
+                    </DynamicText>
+                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                      <TextInput
+                        placeholder="500"
+                        placeholderTextColor={getCardTextColor() + '80'}
+                        value={addForm.dosageValue}
+                        onChangeText={(text) => setAddForm(prev => ({ ...prev, dosageValue: text }))}
+                        style={{
+                          flex: 1,
+                          backgroundColor: getCardBackgroundColor(),
+                          borderRadius: 12,
+                          padding: 16,
+                          color: getCardTextColor(),
+                          fontFamily: 'Inter_400Regular',
+                          borderWidth: 1,
+                          borderColor: getCardBorderColor()
+                        }}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => setInputFocused(false)}
+                        keyboardType="numeric"
+                        returnKeyType="next"
+                      />
+                      <TextInput
+                        placeholder="mg"
+                        placeholderTextColor={getCardTextColor() + '80'}
+                        value={addForm.dosageUnit}
+                        onChangeText={(text) => setAddForm(prev => ({ ...prev, dosageUnit: text }))}
+                        style={{
+                          width: 80,
+                          backgroundColor: getCardBackgroundColor(),
+                          borderRadius: 12,
+                          padding: 16,
+                          color: getCardTextColor(),
+                          fontFamily: 'Inter_400Regular',
+                          borderWidth: 1,
+                          borderColor: getCardBorderColor()
+                        }}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => setInputFocused(false)}
+                        autoCapitalize="none"
+                        returnKeyType="next"
+                      />
+                    </View>
+
+                    {/* Quantity */}
+                    <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
+                      {'Quantity in bottle/package'}
+                    </DynamicText>
+                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                      <TextInput
+                        placeholder="30"
+                        placeholderTextColor={getCardTextColor() + '80'}
+                        value={addForm.quantityValue}
+                        onChangeText={(text) => setAddForm(prev => ({ ...prev, quantityValue: text }))}
+                        style={{
+                          flex: 1,
+                          backgroundColor: getCardBackgroundColor(),
+                          borderRadius: 12,
+                          padding: 16,
+                          color: getCardTextColor(),
+                          fontFamily: 'Inter_400Regular',
+                          borderWidth: 1,
+                          borderColor: getCardBorderColor()
+                        }}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => setInputFocused(false)}
+                        keyboardType="numeric"
+                        returnKeyType="done"
+                      />
+                      <TextInput
+                        placeholder="capsules"
+                        placeholderTextColor={getCardTextColor() + '80'}
+                        value={addForm.quantityUnit}
+                        onChangeText={(text) => setAddForm(prev => ({ ...prev, quantityUnit: text }))}
+                        style={{
+                          width: 110,
+                          backgroundColor: getCardBackgroundColor(),
+                          borderRadius: 12,
+                          padding: 16,
+                          color: getCardTextColor(),
+                          fontFamily: 'Inter_400Regular',
+                          borderWidth: 1,
+                          borderColor: getCardBorderColor()
+                        }}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => setInputFocused(false)}
+                        autoCapitalize="none"
+                        returnKeyType="done"
+                      />
+                    </View>
+                  </View>
+                )}
+
                 {/* Appointment-specific fields */}
                 {addForm.type === 'appointment' && (
                   <View style={{ marginBottom: 12 }}>
@@ -1082,6 +1274,14 @@ const Reminders = ({
                         quantity: addForm.quantity,
                         quantityUnit: addForm.quantityUnit,
                         isSingleComponent: addForm.isSingleComponent
+                      }),
+                      ...(addForm.type === 'supplement' && {
+                        supplementName: addForm.supplementName,
+                        brand: addForm.brand,
+                        dosageValue: addForm.dosageValue,
+                        dosageUnit: addForm.dosageUnit,
+                        quantityValue: addForm.quantityValue,
+                        quantityUnit: addForm.quantityUnit
                       }),
                       ...(addForm.type === 'appointment' && {
                         address: addForm.address

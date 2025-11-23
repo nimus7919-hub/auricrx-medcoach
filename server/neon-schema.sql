@@ -57,11 +57,22 @@ CREATE TABLE IF NOT EXISTS user_supplements (
   
   -- Supplement data
   supplement_name TEXT NOT NULL,
-  dosage TEXT,
-  frequency TEXT,
+  brand TEXT DEFAULT '',
+  dosage_value TEXT DEFAULT '',
+  dosage_unit TEXT DEFAULT '',
+  quantity_value TEXT DEFAULT '',
+  quantity_unit TEXT DEFAULT '',
+  status TEXT DEFAULT 'taking',
+  times TEXT[] DEFAULT ARRAY[]::TEXT[],
   start_date DATE,
   end_date DATE,
-  notes TEXT,
+  notes TEXT DEFAULT '',
+  doses_left TEXT DEFAULT '',
+  remaining_quantity TEXT DEFAULT '0',
+  
+  -- Legacy fields (keeping for backwards compatibility)
+  dosage TEXT,
+  frequency TEXT,
   
   -- Status
   is_active BOOLEAN DEFAULT TRUE
@@ -622,14 +633,20 @@ CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(token_hash);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_expires ON user_sessions(expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_phone_verification_phone ON phone_verification_codes(phone_number);
-CREATE INDEX IF NOT EXISTS idx_phone_verification_expires ON phone_verification_codes(expires_at);
+-- Create indexes for phone verification (only if table exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'phone_verification_codes') THEN
+    CREATE INDEX IF NOT EXISTS idx_phone_verification_phone ON phone_verification_codes(phone_number);
+    CREATE INDEX IF NOT EXISTS idx_phone_verification_expires ON phone_verification_codes(expires_at);
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_email_verification_email ON email_verification_codes(email);
 CREATE INDEX IF NOT EXISTS idx_email_verification_expires ON email_verification_codes(expires_at);
 
--- User fasting profiles table
-CREATE TABLE IF NOT EXISTS user_fasting_profiles (
+-- Health profiles table (NEW - clean implementation with multiple choice goals)
+CREATE TABLE IF NOT EXISTS health_profiles (
   id TEXT DEFAULT gen_random_uuid()::text PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -680,10 +697,10 @@ CREATE TABLE IF NOT EXISTS user_fasting_profiles (
   max_fasting_hours INTEGER DEFAULT 16,
   fasting_frequency TEXT DEFAULT 'daily',
   
-  -- Goals
+  -- Goals (MULTIPLE CHOICE - JSON array)
+  -- Options: 'weightLoss', 'metabolicHealth', 'generalHealth', 'muscleGain', 'mentalClarity', 'longevity', 'diseasePrevention'
+  health_goals JSONB DEFAULT '[]'::jsonb,
   primary_goal TEXT DEFAULT 'generalHealth',
-  weight_loss_goal BOOLEAN DEFAULT FALSE,
-  metabolic_health_goal BOOLEAN DEFAULT FALSE,
   
   -- Medical Supervision
   medical_supervision BOOLEAN DEFAULT FALSE,
@@ -694,19 +711,20 @@ CREATE TABLE IF NOT EXISTS user_fasting_profiles (
   is_active BOOLEAN DEFAULT TRUE
 );
 
--- Create indexes for fasting profiles
-CREATE INDEX IF NOT EXISTS idx_user_fasting_profiles_user_id ON user_fasting_profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_fasting_profiles_created_at ON user_fasting_profiles(created_at);
+-- Create indexes for health profiles
+CREATE INDEX IF NOT EXISTS idx_health_profiles_user_id ON health_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_health_profiles_created_at ON health_profiles(created_at);
+CREATE INDEX IF NOT EXISTS idx_health_profiles_active ON health_profiles(user_id, is_active) WHERE is_active = TRUE;
 
--- Enable RLS for fasting profiles
-ALTER TABLE user_fasting_profiles ENABLE ROW LEVEL SECURITY;
+-- Enable RLS for health profiles
+ALTER TABLE health_profiles ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policy for fasting profiles
-CREATE POLICY IF NOT EXISTS user_fasting_profiles_policy ON user_fasting_profiles
+-- Create RLS policy for health profiles
+CREATE POLICY IF NOT EXISTS health_profiles_policy ON health_profiles
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
 
 -- Create trigger for updated_at
-CREATE OR REPLACE FUNCTION update_user_fasting_profiles_updated_at()
+CREATE OR REPLACE FUNCTION update_health_profiles_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
@@ -714,13 +732,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER IF NOT EXISTS update_user_fasting_profiles_updated_at
-  BEFORE UPDATE ON user_fasting_profiles
+CREATE TRIGGER IF NOT EXISTS update_health_profiles_updated_at
+  BEFORE UPDATE ON health_profiles
   FOR EACH ROW
-  EXECUTE FUNCTION update_user_fasting_profiles_updated_at();
+  EXECUTE FUNCTION update_health_profiles_updated_at();
 
--- Helper function to get user fasting profile
-CREATE OR REPLACE FUNCTION get_user_fasting_profile(p_user_id TEXT)
+-- Helper function to get user health profile
+CREATE OR REPLACE FUNCTION get_user_health_profile(p_user_id TEXT)
 RETURNS TABLE (
   id TEXT,
   weight TEXT,
@@ -752,63 +770,63 @@ RETURNS TABLE (
   preferred_fasting_type TEXT,
   max_fasting_hours INTEGER,
   fasting_frequency TEXT,
+  health_goals JSONB,
   primary_goal TEXT,
-  weight_loss_goal BOOLEAN,
-  metabolic_health_goal BOOLEAN,
   medical_supervision BOOLEAN,
   self_monitoring BOOLEAN,
   wearable_devices BOOLEAN,
+  is_active BOOLEAN,
   created_at TIMESTAMP WITH TIME ZONE,
   updated_at TIMESTAMP WITH TIME ZONE
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT 
-    ufp.id,
-    ufp.weight,
-    ufp.height,
-    ufp.weight_unit,
-    ufp.height_unit,
-    ufp.diabetes,
-    ufp.hypoglycemia,
-    ufp.heart_conditions,
-    ufp.kidney_disease,
-    ufp.liver_disease,
-    ufp.eating_disorders,
-    ufp.pregnancy,
-    ufp.breastfeeding,
-    ufp.gastrointestinal_issues,
-    ufp.other_health_conditions,
-    ufp.body_fat_level,
-    ufp.muscle_mass,
-    ufp.micronutrient_levels,
-    ufp.hydration_level,
-    ufp.high_stress_environment,
-    ufp.intensive_mental_tasks,
-    ufp.anxiety,
-    ufp.depression,
-    ufp.activity_level,
-    ufp.physical_labor,
-    ufp.long_shifts,
-    ufp.sleep_quality,
-    ufp.preferred_fasting_type,
-    ufp.max_fasting_hours,
-    ufp.fasting_frequency,
-    ufp.primary_goal,
-    ufp.weight_loss_goal,
-    ufp.metabolic_health_goal,
-    ufp.medical_supervision,
-    ufp.self_monitoring,
-    ufp.wearable_devices,
-    ufp.created_at,
-    ufp.updated_at
-  FROM user_fasting_profiles ufp
-  WHERE ufp.user_id = p_user_id
-    AND ufp.is_active = TRUE
-  ORDER BY ufp.updated_at DESC
+    hp.id,
+    hp.weight,
+    hp.height,
+    hp.weight_unit,
+    hp.height_unit,
+    hp.diabetes,
+    hp.hypoglycemia,
+    hp.heart_conditions,
+    hp.kidney_disease,
+    hp.liver_disease,
+    hp.eating_disorders,
+    hp.pregnancy,
+    hp.breastfeeding,
+    hp.gastrointestinal_issues,
+    hp.other_health_conditions,
+    hp.body_fat_level,
+    hp.muscle_mass,
+    hp.micronutrient_levels,
+    hp.hydration_level,
+    hp.high_stress_environment,
+    hp.intensive_mental_tasks,
+    hp.anxiety,
+    hp.depression,
+    hp.activity_level,
+    hp.physical_labor,
+    hp.long_shifts,
+    hp.sleep_quality,
+    hp.preferred_fasting_type,
+    hp.max_fasting_hours,
+    hp.fasting_frequency,
+    hp.health_goals,
+    hp.primary_goal,
+    hp.medical_supervision,
+    hp.self_monitoring,
+    hp.wearable_devices,
+    hp.is_active,
+    hp.created_at,
+    hp.updated_at
+  FROM health_profiles hp
+  WHERE hp.user_id = p_user_id
+    AND hp.is_active = TRUE
+  ORDER BY hp.updated_at DESC
   LIMIT 1;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ========================================
 -- SECURITY NOTES

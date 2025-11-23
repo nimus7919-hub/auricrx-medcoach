@@ -152,25 +152,54 @@ async function getUserSymptoms(userId) {
 // User supplements functions
 async function saveUserSupplement(userId, supplement) {
   try {
-    // Set user context for RLS
-    await neonClient`SELECT set_user_context(${userId})`;
+    console.log('🔍 Attempting to save supplement for user:', userId);
+    console.log('🔍 Supplement data:', supplement);
     
-    const { data, error } = await neonClient`
+    // First, check if user_supplements table exists
+    try {
+      await neonClient`SELECT 1 FROM user_supplements LIMIT 1`;
+      console.log('✅ user_supplements table exists');
+    } catch (tableError) {
+      console.error('❌ user_supplements table does not exist:', tableError.message);
+      throw new Error('user_supplements table does not exist. Please run the schema setup.');
+    }
+    
+    // Set user context for RLS
+    try {
+      await neonClient`SELECT set_user_context(${userId}::text)`;
+      console.log('✅ User context set for RLS');
+    } catch (contextError) {
+      console.log('⚠️ Could not set user context, proceeding without RLS:', contextError.message);
+      // Continue without RLS if the function doesn't exist
+    }
+    
+    const result = await neonClient`
       INSERT INTO user_supplements (
-        user_id, supplement_name, dosage, frequency, 
-        start_date, end_date, notes, is_active
+        user_id, supplement_name, brand, dosage_value, dosage_unit, 
+        quantity_value, quantity_unit, status, times, start_date, end_date, 
+        notes, doses_left, remaining_quantity, is_active
       ) VALUES (
-        ${userId}, ${supplement.supplementName}, ${supplement.dosage}, 
-        ${supplement.frequency}, ${supplement.startDate}, 
-        ${supplement.endDate}, ${supplement.notes}, 
-        ${supplement.isActive || true}
+        ${userId}, ${supplement.supplementName}, ${supplement.brand}, 
+        ${supplement.dosageValue}, ${supplement.dosageUnit}, 
+        ${supplement.quantityValue}, ${supplement.quantityUnit},
+        ${supplement.status}, ${supplement.times}, ${supplement.startDate}, 
+        ${supplement.endDate}, ${supplement.notes}, ${supplement.dosesLeft},
+        ${supplement.remainingQuantity}, ${supplement.isActive || true}
       ) RETURNING *
     `;
     
-    console.log('✅ User supplement saved to Neon:', data[0]);
-    return data[0];
+    console.log('🔍 Database result:', result);
+    
+    if (!result || result.length === 0) {
+      throw new Error('No data returned from database insert');
+    }
+    
+    console.log('✅ User supplement saved to Neon:', result[0]);
+    return result[0];
   } catch (error) {
     console.error('❌ Failed to save user supplement:', error);
+    console.error('❌ Error details:', error.message);
+    console.error('❌ Error code:', error.code);
     throw error;
   }
 }
@@ -231,13 +260,14 @@ async function saveUserMedication(userId, medication) {
 
 async function getUserSupplements(userId) {
   try {
+    // Only return active supplements (is_active = true)
     const data = await neonClient`
       SELECT * FROM user_supplements 
-      WHERE user_id = ${userId} 
+      WHERE user_id = ${userId} AND is_active = true
       ORDER BY created_at DESC
     `;
     
-    console.log(`📊 Retrieved ${data.length} supplements for user ${userId}`);
+    console.log(`📊 Retrieved ${data.length} active supplements for user ${userId}`);
     return data;
   } catch (error) {
     console.error('❌ Failed to get user supplements:', error);
@@ -380,17 +410,27 @@ async function getUserProfile(userId) {
   }
 }
 
-// Save user fasting profile
+// Save user health profile (NEW TABLE)
 async function saveUserFastingProfile(userId, profileData) {
   try {
-    console.log('💾 Saving fasting profile for user:', userId);
+    console.log('💾 Saving health profile for user:', userId);
+    console.log('📋 Profile data received:', JSON.stringify(profileData, null, 2));
     
     // Set user context for RLS
-    await neonClient`SELECT set_user_context(${userId}::text)`;
+    try {
+      await neonClient`SELECT set_user_context(${userId}::text)`;
+    } catch (contextError) {
+      console.log('⚠️ Could not set user context, proceeding without RLS:', contextError.message);
+    }
+    
+    // Convert healthGoals to JSON array if it's an array, otherwise use empty array
+    const healthGoals = Array.isArray(profileData.healthGoals) 
+      ? profileData.healthGoals 
+      : (profileData.healthGoals ? [profileData.healthGoals] : []);
     
     // Check if profile already exists
     const existingProfile = await neonClient`
-      SELECT id FROM user_fasting_profiles 
+      SELECT id FROM health_profiles 
       WHERE user_id = ${userId} AND is_active = TRUE
       ORDER BY updated_at DESC 
       LIMIT 1
@@ -399,7 +439,7 @@ async function saveUserFastingProfile(userId, profileData) {
     if (existingProfile.length > 0) {
       // Update existing profile
       const result = await neonClient`
-        UPDATE user_fasting_profiles SET
+        UPDATE health_profiles SET
           weight = ${profileData.weight || null},
           height = ${profileData.height || null},
           weight_unit = ${profileData.weightUnit || 'kg'},
@@ -429,6 +469,7 @@ async function saveUserFastingProfile(userId, profileData) {
           preferred_fasting_type = ${profileData.preferredFastingType || 'timeRestricted'},
           max_fasting_hours = ${profileData.maxFastingHours || 16},
           fasting_frequency = ${profileData.fastingFrequency || 'daily'},
+          health_goals = ${JSON.stringify(healthGoals)}::jsonb,
           primary_goal = ${profileData.primaryGoal || 'generalHealth'},
           medical_supervision = ${profileData.medicalSupervision || false},
           self_monitoring = ${profileData.selfMonitoring || false},
@@ -438,12 +479,12 @@ async function saveUserFastingProfile(userId, profileData) {
         RETURNING id, created_at, updated_at
       `;
       
-      console.log('✅ Fasting profile updated successfully');
+      console.log('✅ Health profile updated successfully');
       return result[0];
     } else {
       // Create new profile
       const result = await neonClient`
-        INSERT INTO user_fasting_profiles (
+        INSERT INTO health_profiles (
           user_id, weight, height, weight_unit, height_unit,
           diabetes, hypoglycemia, heart_conditions, kidney_disease, liver_disease,
           eating_disorders, pregnancy, breastfeeding, gastrointestinal_issues,
@@ -451,7 +492,7 @@ async function saveUserFastingProfile(userId, profileData) {
           hydration_level, high_stress_environment, intensive_mental_tasks,
           anxiety, depression, activity_level, physical_labor, long_shifts,
           sleep_quality, preferred_fasting_type, max_fasting_hours, fasting_frequency,
-          primary_goal, weight_loss_goal, metabolic_health_goal,
+          health_goals, primary_goal,
           medical_supervision, self_monitoring, wearable_devices
         ) VALUES (
           ${userId},
@@ -484,6 +525,7 @@ async function saveUserFastingProfile(userId, profileData) {
           ${profileData.preferredFastingType || 'timeRestricted'},
           ${profileData.maxFastingHours || 16},
           ${profileData.fastingFrequency || 'daily'},
+          ${JSON.stringify(healthGoals)}::jsonb,
           ${profileData.primaryGoal || 'generalHealth'},
           ${profileData.medicalSupervision || false},
           ${profileData.selfMonitoring || false},
@@ -492,30 +534,34 @@ async function saveUserFastingProfile(userId, profileData) {
         RETURNING id, created_at, updated_at
       `;
       
-      console.log('✅ Fasting profile created successfully');
+      console.log('✅ Health profile created successfully');
       return result[0];
     }
   } catch (error) {
-    console.error('❌ Error saving fasting profile:', error);
+    console.error('❌ Error saving health profile:', error);
     throw error;
   }
 }
 
-// Get user fasting profile
+// Get user health profile (NEW TABLE)
 async function getUserFastingProfile(userId) {
   try {
-    console.log('📖 Loading fasting profile for user:', userId);
+    console.log('📖 Loading health profile for user:', userId);
     
     // Set user context for RLS
-    await neonClient`SELECT set_user_context(${userId}::text)`;
+    try {
+      await neonClient`SELECT set_user_context(${userId}::text)`;
+    } catch (contextError) {
+      console.log('⚠️ Could not set user context, proceeding without RLS:', contextError.message);
+    }
     
     const result = await neonClient`
-      SELECT * FROM get_user_fasting_profile(${userId})
+      SELECT * FROM get_user_health_profile(${userId})
     `;
     
     if (result.length > 0) {
       const profile = result[0];
-      console.log('✅ Fasting profile loaded successfully');
+      console.log('✅ Health profile loaded successfully');
       
       // Convert database fields to app format
       return {
@@ -549,17 +595,18 @@ async function getUserFastingProfile(userId) {
         preferredFastingType: profile.preferred_fasting_type || 'timeRestricted',
         maxFastingHours: profile.max_fasting_hours || 16,
         fastingFrequency: profile.fasting_frequency || 'daily',
+        healthGoals: profile.health_goals || [], // Multiple choice goals (array)
         primaryGoal: profile.primary_goal || 'generalHealth',
         medicalSupervision: profile.medical_supervision || false,
         selfMonitoring: profile.self_monitoring || false,
         wearableDevices: profile.wearable_devices || false
       };
     } else {
-      console.log('ℹ️ No fasting profile found for user');
+      console.log('ℹ️ No health profile found for user');
       return null;
     }
   } catch (error) {
-    console.error('❌ Error loading fasting profile:', error);
+    console.error('❌ Error loading health profile:', error);
     throw error;
   }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
@@ -8,7 +8,7 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 
 // Supplements component moved outside App to prevent remounting
-const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }) => {
+const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
@@ -88,6 +88,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
   const [lastSearchedSupplement, setLastSearchedSupplement] = useState('');
   const [showRefillModal, setShowRefillModal] = useState(false);
   const [selectedSupplement, setSelectedSupplement] = useState(null);
+  const [showRefillLoading, setShowRefillLoading] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editForm, setEditForm] = useState({ 
     name: '', 
@@ -247,31 +248,80 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
     }
   };
 
-  const addSupplement = () => {
-    if (!addForm.name.trim()) return;
-    const newSupp = {
-      id: Date.now().toString(),
-      name: addForm.name.trim(),
-      brand: addForm.brand ? addForm.brand.trim() : '',
-      dosage: `${addForm.dosageValue.trim()} ${addForm.dosageUnit}`.trim(),
-      dosageValue: addForm.dosageValue.trim(),
-      dosageUnit: addForm.dosageUnit,
-      quantity: addForm.quantityValue ? `${addForm.quantityValue.trim()} ${addForm.quantityUnit}`.trim() : '',
-      quantityValue: addForm.quantityValue ? addForm.quantityValue.trim() : '',
-      quantityUnit: addForm.quantityUnit,
-      times: addTimes.join(', '),
-      status: addForm.status,
-      startDate: addForm.startDate,
-      endDate: addForm.endDate,
-      notes: addForm.notes ? addForm.notes.trim() : '',
-      dosesLeft: addForm.dosesLeft ? addForm.dosesLeft.trim() : '',
-      remainingQuantity: addForm.quantityValue ? addForm.quantityValue : '0',
-      refillSoon: false
-    };
-    setSupplements(prev => [...prev, newSupp]);
-    setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'Mg', quantityValue: '', quantityUnit: 'Tablet', brand: '' });
-    setAddTimes([]);
-    setShowAdd(false);
+  const addSupplement = async () => {
+    try {
+      if (!addForm.name.trim()) return;
+      
+      const newSupp = {
+        id: Date.now().toString(),
+        name: addForm.name.trim(),
+        brand: addForm.brand ? addForm.brand.trim() : '',
+        dosage: `${addForm.dosageValue.trim()} ${addForm.dosageUnit}`.trim(),
+        dosageValue: addForm.dosageValue.trim(),
+        dosageUnit: addForm.dosageUnit,
+        quantity: addForm.quantityValue ? `${addForm.quantityValue.trim()} ${addForm.quantityUnit}`.trim() : '',
+        quantityValue: addForm.quantityValue ? addForm.quantityValue.trim() : '',
+        quantityUnit: addForm.quantityUnit,
+        times: addTimes,
+        status: addForm.status,
+        startDate: addForm.startDate,
+        endDate: addForm.endDate,
+        notes: addForm.notes ? addForm.notes.trim() : '',
+        dosesLeft: addForm.dosesLeft ? addForm.dosesLeft.trim() : '',
+        remainingQuantity: addForm.quantityValue ? addForm.quantityValue : '0',
+        refillSoon: false
+      };
+      
+      // Save to local state first for immediate UI update
+      setSupplements(prev => [...prev, newSupp]);
+      
+      // Save to database if user is authenticated
+      if (user && user.uid) {
+        try {
+          const response = await fetch('https://auricrx-medcoach.onrender.com/api/supplements', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.uid,
+              supplementName: newSupp.name,
+              brand: newSupp.brand,
+              dosageValue: newSupp.dosageValue,
+              dosageUnit: newSupp.dosageUnit,
+              quantityValue: newSupp.quantityValue,
+              quantityUnit: newSupp.quantityUnit,
+              status: newSupp.status,
+              times: newSupp.times,
+              startDate: newSupp.startDate,
+              endDate: newSupp.endDate,
+              notes: newSupp.notes,
+              dosesLeft: newSupp.dosesLeft,
+              remainingQuantity: newSupp.remainingQuantity
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.ok) {
+            console.log('✅ Supplement saved to database:', result.supplement);
+            // Update with database ID
+            setSupplements(prev => prev.map(s => 
+              s.id === newSupp.id ? { ...s, dbId: result.supplement.id } : s
+            ));
+          } else {
+            console.error('❌ Failed to save supplement to database:', result.message);
+          }
+        } catch (dbError) {
+          console.error('❌ Database save error:', dbError);
+          // Continue anyway - supplement is saved locally
+        }
+      }
+      
+      setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'Mg', quantityValue: '', quantityUnit: 'Tablet', brand: '' });
+      setAddTimes([]);
+      setShowAdd(false);
+    } catch (error) {
+      console.error('[SUPPLEMENTS] Error adding supplement:', error);
+    }
   };
 
   const updateSupplement = () => {
@@ -513,8 +563,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   <TouchableOpacity
                     onPress={(e) => {
                       e.stopPropagation();
-                      setSelectedSupplement(supp);
-                      setShowRefillModal(true);
+                      // Show loading overlay immediately
+                      setShowRefillLoading(true);
+                      // Small delay to ensure loading modal renders
+                      setTimeout(() => {
+                        setSelectedSupplement(supp);
+                        setShowRefillModal(true);
+                        setShowRefillLoading(false);
+                      }, 50);
                     }}
                     style={{
                       backgroundColor: '#2dd4bf',
@@ -537,8 +593,36 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                           { 
                             text: S.delete || 'Delete', 
                             style: 'destructive',
-                            onPress: () => {
+                            onPress: async () => {
+                              // Delete the supplement from local state first for immediate UI update
                               setSupplements(prev => prev.filter(s => s.id !== supp.id));
+                              
+                              // If this supplement was created from a reminder, also delete the reminder
+                              if (supp.fromReminder && supp.reminderId && setReminders) {
+                                console.log('🗑️ Also deleting corresponding reminder:', supp.reminderId);
+                                setReminders(prev => prev.filter(r => r.id !== supp.reminderId));
+                              }
+                              
+                              // Sync deletion to cloud if user is authenticated and supplement has database ID
+                              if (user && user.uid && (supp.dbId || supp.id)) {
+                                try {
+                                  const supplementId = supp.dbId || supp.id;
+                                  const response = await fetch(`https://auricrx-medcoach.onrender.com/api/supplements?userId=${user.uid}&supplementId=${supplementId}`, {
+                                    method: 'DELETE'
+                                  });
+                                  
+                                  const result = await response.json();
+                                  
+                                  if (result.ok) {
+                                    console.log('✅ Supplement deleted from database');
+                                  } else {
+                                    console.error('❌ Failed to delete supplement from database:', result.message);
+                                  }
+                                } catch (dbError) {
+                                  console.error('❌ Database delete error:', dbError);
+                                  // Continue anyway - supplement is deleted locally
+                                }
+                              }
                             }
                           }
                         ]
@@ -1569,6 +1653,66 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
             }
           }}
         />
+      )}
+
+      {/* Refill Loading Overlay - Outside ScrollView */}
+      {showRefillLoading && (
+        <View 
+          key="refill-loading-overlay"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}>
+          <View style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 12,
+            padding: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 240,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+          }}>
+            <Image
+              source={require('../assets/dashboard Emojies/standard pill emoji.png')}
+              style={{ width: 36, height: 36, marginBottom: 10 }}
+            />
+            <ActivityIndicator 
+              key={Date.now()}
+              size="large" 
+              color={theme.accent} 
+              animating={true}
+              hidesWhenStopped={false}
+              style={{ marginVertical: 10 }}
+            />
+            <Text style={{
+              fontSize: 14,
+              fontFamily: 'Inter_600SemiBold',
+              marginBottom: 4,
+              textAlign: 'center',
+              color: theme.text,
+            }}>
+              {S?.searchingPharmacies || 'Searching for pharmacies...'}
+            </Text>
+            <Text style={{
+              fontSize: 11,
+              textAlign: 'center',
+              color: theme.subtext,
+            }}>
+              {S?.pleaseWait || 'Please wait'}
+            </Text>
+          </View>
+        </View>
       )}
     </View>
   );

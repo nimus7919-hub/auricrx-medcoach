@@ -376,25 +376,25 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
 
   const handleEditMed = () => {
     try {
-      if (!editForm.name.trim()) return;
+      if (!editForm.name?.trim()) return;
       console.log('[MEDICATIONS DEBUG] Editing medication with quantity:', editForm.quantityValue, editForm.quantityUnit);
       setMeds(prev => prev.map(med => 
         med.id === editForm.id 
           ? { 
               ...med, 
-              name: editForm.name.trim(), 
-              strength: `${editForm.strengthValue.trim()} ${editForm.strengthUnit}`.trim(),
-              strengthValue: editForm.strengthValue.trim(),
-              strengthUnit: editForm.strengthUnit,
+              name: editForm.name?.trim() || '', 
+              strength: `${(editForm.strengthValue || '').trim()} ${editForm.strengthUnit || ''}`.trim(),
+              strengthValue: (editForm.strengthValue || '').trim(),
+              strengthUnit: editForm.strengthUnit || 'mg',
               status: editForm.status, 
               times: editTimes, 
               startDate: editForm.startDate, 
               endDate: editForm.endDate, 
-              notes: editForm.notes.trim(), 
-              dosesLeft: editForm.dosesLeft.trim(), 
-              quantity: `${editForm.quantityValue.trim()} ${editForm.quantityUnit}`.trim(),
-              quantityValue: editForm.quantityValue.trim(),
-              quantityUnit: editForm.quantityUnit
+              notes: (editForm.notes || '').trim(), 
+              dosesLeft: (editForm.dosesLeft || '').trim(), 
+              quantity: `${(editForm.quantityValue || '').trim()} ${editForm.quantityUnit || ''}`.trim(),
+              quantityValue: (editForm.quantityValue || '').trim(),
+              quantityUnit: editForm.quantityUnit || 'tablet'
             }
           : med
       ));
@@ -691,7 +691,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                       strengthValue: med.strengthValue || med.strength?.split(' ')[0] || '',
                       strengthUnit: toSentenceCase(med.strengthUnit || med.strength?.split(' ').slice(1).join(' ') || 'Mg'),
                       quantityValue: med.quantityValue || med.quantity?.split(' ')[0] || '',
-                      quantityUnit: toSentenceCase(med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || 'Tablet')
+                      quantityUnit: toSentenceCase(med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || 'Tablet'),
+                      notes: med.notes || '',
+                      dosesLeft: med.dosesLeft || ''
                     });
                     setEditTimes([...med.times]);
                     setShowEdit(true);

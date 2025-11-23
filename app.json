@@ -11,6 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
+    "scheme": "auricrx-medcoach",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -35,6 +36,13 @@
       "@react-native-firebase/auth"
     ],
     "extra": {
+      "googleAuth": {
+        "iosClientId": "1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1.apps.googleusercontent.com",
+        "androidClientId": "1043512593259-4v9d860v74rs76ms9oa0gc0nglk0so8o.apps.googleusercontent.com",
+        "webClientId": "",
+        "redirectScheme": "auricrx-medcoach",
+        "redirectPath": "auth"
+      },
       "eas": {
         "projectId": "db976ea9-7756-4bdb-ba4e-7563b0d3597b"
       }

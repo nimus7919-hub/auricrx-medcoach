@@ -4554,7 +4554,7 @@ useEffect(() => {
 
 
   // --------- Helpers ----------
-  const Card = ({ title, icon, onPress }) => {
+  const Card = ({ title, icon, onPress, subtitle, actionButton }) => {
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
     return (
       <TouchableOpacity 
@@ -4564,6 +4564,16 @@ useEffect(() => {
       >
         <View style={styles.cardIcon}>{icon}</View>
         <DynamicText type="card" style={[styles.cardText, { fontFamily: 'Inter_700Bold' }]}>{title}</DynamicText>
+        {subtitle && (
+          typeof subtitle === 'string' ? (
+            <DynamicText type="card" style={[styles.cardSubtitle, { fontFamily: 'Inter_400Regular', opacity: 0.7 }]}>
+              {subtitle}
+            </DynamicText>
+          ) : (
+            subtitle
+          )
+        )}
+        {actionButton}
       </TouchableOpacity>
     );
   };
@@ -5251,27 +5261,39 @@ const handleAskMedicalAI = async () => {
               icon={<Image source={require('./assets/dashboard Emojies/Documents.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('documents')}
               subtitle="Medical documents for doctor visits"
-              actionButton={
-                <TouchableOpacity 
-                  style={styles.quickScanButton}
-                  onPress={() => {
-                    // Quick scan functionality - could open camera directly
-                    Alert.alert(
-                      '📷 Quick Scan',
-                      'Choose what to scan:',
-                      [
-                        { text: 'Photo ID', onPress: () => setRoute('documents') },
-                        { text: 'Insurance Card', onPress: () => setRoute('documents') },
-                        { text: 'Lab Results', onPress: () => setRoute('documents') },
-                        { text: 'Cancel', style: 'cancel' }
-                      ]
-                    );
-                  }}
-                >
-                  <Text style={styles.quickScanButtonText}>📷</Text>
-                </TouchableOpacity>
-              }
             />
+            {/* Medication Promotions - Hidden for now */}
+            {/* <Card 
+              title="Medication Promotions" 
+              icon={
+                <View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                  <Text style={{ fontSize: 32 }}>🏷️</Text>
+                </View>
+              } 
+              onPress={() => {
+                Alert.alert(
+                  '🏷️ Medication Promotions',
+                  'This feature is currently in development. You will be able to see special offers and discounts on medications from nearby pharmacies.',
+                  [{ text: 'OK' }]
+                );
+              }}
+              subtitle={
+                <View style={{ marginTop: 8, paddingHorizontal: 8 }}>
+                  <DynamicText 
+                    type="card" 
+                    style={{ 
+                      fontSize: 16, 
+                      fontFamily: 'Inter_900Black', 
+                      textAlign: 'center',
+                      letterSpacing: 1,
+                      opacity: 0.8
+                    }}
+                  >
+                    IN DEVELOPMENT
+                  </DynamicText>
+                </View>
+              }
+            /> */}
         </View>
       </ScrollView>
       </>
@@ -6090,7 +6112,8 @@ const handleAskMedicalAI = async () => {
                 fontSize: 15,
                 textAlign: 'center',
                 marginBottom: 4,
-                width: '100%'
+                width: '100%',
+                alignSelf: 'center'
               }}>{S.healthProfileSettings}</DynamicText>
               <DynamicText type="card" style={{ 
                 fontFamily: 'Inter_400Regular', 
@@ -6612,14 +6635,14 @@ function trimTo(str, n) {
       /* Main App Content - Only show after authentication */
       <>
         {route === 'dashboard' ? <Dashboard /> :
-     route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
+     route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
      route === 'settings' ? <Settings /> :
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
-     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} /> :
+     route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
@@ -6917,6 +6940,7 @@ card: {
     color: '#0b1117',
   },
   cardText: { fontSize: 16, textAlign: 'center' },
+  cardSubtitle: { fontSize: 12, textAlign: 'center', marginTop: 4 },
 
   headerTitle: { fontSize: 18 },
   header: {
