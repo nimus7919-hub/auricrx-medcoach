@@ -2,7 +2,7 @@ import { creategetInitialAIMessage, createaddCatExpressions, creategetDoctorGree
 import PremiumTabBar from "./../components/PremiumTabBar";
 import PremiumButton from "./../components/PremiumButton";
 import { darkColors } from "./../theme/colors";
-import BrandIntro from "./../components/BrandIntro";
+import LoginIntro from "./../components/LoginIntro";
 import { authenticatedFetch } from "./../services/authenticatedFetch";
 import { requestSearchLocationPermission } from "./../lib/locationPermission";
 import ConsentHost from "./../components/ConsentHost";
@@ -2798,9 +2798,7 @@ const handleAskMedicalAI = async () => {
 // Utility: trim a string to n chars, add ellipsis if needed
 
   // final return (inside the App function)
-  return !introComplete ? (
-  <BrandIntro language={lang} onComplete={() => setIntroComplete(true)} />
-) : !fontsLoaded ? (
+  return !fontsLoaded ? (
   <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'#222' }}>
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
@@ -2827,6 +2825,7 @@ const handleAskMedicalAI = async () => {
         ) : isLoading ? (
           <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />
         ) : showAuth ? (
+          <LoginIntro enabled={!introComplete} language={lang} onComplete={() => setIntroComplete(true)}>
           <SignInScreen
             onAuthSuccess={handleAuthSuccess}
             onClose={handleAuthClose}
@@ -2838,6 +2837,7 @@ const handleAskMedicalAI = async () => {
               setShowCheckout(true);
             } : undefined}
           />
+          </LoginIntro>
         ) : !healthConsentReady ? (
           <View style={{ flex: 1, backgroundColor: '#161616' }} />
         ) : (
