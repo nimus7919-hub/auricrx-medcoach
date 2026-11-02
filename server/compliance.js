@@ -14,7 +14,7 @@ module.exports = function registerCompliance(app, sql, getStripe) {
       }
       req.complianceUser = decoded;
       return next();
-    } catch { return res.status(401).json({ error: 'INVALID_TOKEN' }); }
+    } catch (e) { console.warn('[identity] token verify failed:', e?.code, e?.message); return res.status(401).json({ error: 'INVALID_TOKEN' }); }
   }
   app.get('/account-deletion', (_req, res) => {
     res.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
