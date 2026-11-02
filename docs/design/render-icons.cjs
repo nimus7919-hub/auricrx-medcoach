@@ -55,7 +55,7 @@ const defs = `<defs>
   <linearGradient id="pillWhite" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFFDF4"/><stop offset="1" stop-color="#C8CBD0"/></linearGradient>
 </defs>`;
 
-for (const variant of ['a', 'ar']) {
+for (const variant of (process.argv.includes('--final') ? [] : ['a', 'ar'])) {
   const a = variant === 'a' ? letterA(1.12, 208, -42) : letterA(.86, 95, 70, .82, [512 - 513 * .82, 512 - 499 * .82]);
   const r = variant === 'ar' ? `<path transform="translate(0 47)" fill="url(#gold)" stroke="url(#edge)" stroke-width=".6" d="M535 233 H707 C828 233 859 294 859 362 C859 434 815 476 750 489 C787 511 806 560 831 614 L859 675 Q873 702 900 706 V717 H810 C789 694 776 663 755 614 L714 527 Q697 493 663 493 H648 V681 Q648 704 689 706 V717 H535 V706 Q570 704 570 681 V269 Q570 246 535 244 Z M648 251 V474 H683 C750 474 777 437 777 365 C777 293 755 251 696 251 Z"/>` : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title"><title id="title">AuricRX ${variant.toUpperCase()} gold capsule monogram</title>${defs}<rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/><circle cx="512" cy="512" r="458" fill="none" stroke="url(#gold)" stroke-width="2"/>${variant === 'ar' ? `<g transform="translate(512 512) scale(.82) translate(-513 -499)">${a}${r}</g>` : a}</svg>`;
@@ -82,7 +82,7 @@ for (const variant of ['a', 'ar']) {
 }
 
 // Verify the actual raster, including antialiasing, rather than geometry alone.
-require('node:child_process').execFileSync('python', ['-c', `
+if (!process.argv.includes('--final')) require('node:child_process').execFileSync('python', ['-c', `
 import json, math, sys
 from PIL import Image
 from pathlib import Path
@@ -108,3 +108,63 @@ for variant, pill in zip(('a', 'ar'), json.loads(sys.argv[2])):
                     assert b > r and b > g, ('AR enters ring margin', x, y)
     print(f'{variant}: row {row}, navy gap samples left/right={gaps}; raster checks passed')
 `, __dirname, JSON.stringify(previews)], { stdio: 'inherit' });
+
+
+// Final artwork is opt-in so regenerating it never overwrites earlier concepts.
+if (process.argv.includes('--final')) {
+  const { execFileSync } = require('node:child_process');
+  const finalDefs = defs
+    .replace(/<radialGradient id="bg">.*?<\/radialGradient>/s, '<radialGradient id="bg" r="71%"><stop stop-color="#0A0F1E"/><stop offset="1" stop-color="#0B1630"/></radialGradient>')
+    .replace('stop-opacity=".16"', 'stop-opacity=".035"')
+    .replace('</defs>', '<filter id="depth" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#00030B" flood-opacity=".42"/></filter></defs>');
+  const finalPills = [];
+  for (const foreground of [false, true]) {
+    // Original A bounds: x=37..506, y=190..807. Center its bounding box.
+    const scale = (foreground ? 640 : 716.8) / 617;
+    const mark = letterA(scale, 512 - 271.5 * scale, 512 - 498.5 * scale);
+    finalPills.push(previews[previews.length - 1]);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title"><title id="title">AuricRX final gold capsule A${foreground ? ' adaptive foreground' : ''}</title>${finalDefs}${foreground ? '' : '<rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/>'}<g${foreground ? '' : ' filter="url(#depth)"'}>${mark}</g></svg>`;
+    const name = foreground ? 'icon-final-foreground' : 'icon-final';
+    fs.writeFileSync(path.join(__dirname, `${name}.svg`), svg);
+    const output = path.join(__dirname, `${name}.png`);
+    if (Resvg) {
+      fs.writeFileSync(output, new Resvg(svg).render().asPng());
+    } else {
+      const temp = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'auric-final-'));
+      const html = path.join(temp, 'preview.html');
+      fs.writeFileSync(html, `<style>html,body{margin:0;width:1024px;height:1024px;overflow:hidden;background:transparent}</style>${svg}`);
+      execFileSync('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless', '--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--no-first-run', '--default-background-color=00000000', `--user-data-dir=${path.join(temp, 'profile')}`, '--window-size=1024,1024', `--screenshot=${output}`, require('node:url').pathToFileURL(html).href], { stdio: 'ignore', timeout: 60000 });
+    }
+  }
+  execFileSync('python', ['-c', `
+import json, math, sys
+from pathlib import Path
+from PIL import Image
+root = Path(sys.argv[1])
+for name, pill in zip(('icon-final', 'icon-final-foreground'), json.loads(sys.argv[2])):
+    im = Image.open(root / (name + '.png')).convert('RGBA')
+    assert im.size == (1024, 1024)
+    row = round(pill['cy'])
+    gaps = []
+    for start, end in ((pill['left'] + 2, pill['x'] - 2), (pill['end'] + 2, pill['right'] - 2)):
+        samples = [im.getpixel((x, row)) for x in range(math.ceil(start), math.floor(end) + 1)]
+        assert len(samples) >= 14
+        if name == 'icon-final':
+            assert all(b > r and b > g for r,g,b,a in samples), 'non-navy gap'
+        else:
+            assert all(a < 32 for r,g,b,a in samples), 'foreground gap obstructed'
+        gaps.append(len(samples))
+    for x in (round(pill['x']+3), round(pill['end']-3)):
+        r,g,b,a = im.getpixel((x,row))
+        assert r > b and a > 240, 'missing capsule'
+    if name == 'icon-final':
+        im.resize((192,192), Image.Resampling.LANCZOS).save(root / 'icon-final-192.png')
+    else:
+        # Include all visible shadow pixels when checking the central 66% square.
+        bounds = im.getchannel('A').getbbox()
+        assert bounds[0] >= 174 and bounds[1] >= 174 and bounds[2] <= 850 and bounds[3] <= 850, bounds
+        assert im.getpixel((0,0))[3] == 0
+        print('Adaptive visible bounds:', bounds)
+    print(f'{name}: pill row {row}; clear left/right gap samples {gaps}; passed')
+`, __dirname, JSON.stringify(finalPills)], { stdio: 'inherit' });
+}
