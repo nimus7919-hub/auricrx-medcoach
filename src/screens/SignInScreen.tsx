@@ -1,24 +1,12 @@
-import { gold as GOLD, darkColors } from '../theme/colors';
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Animated,
-  Platform,
-  SafeAreaView,
-  LayoutChangeEvent,
-  Dimensions,
-  Image,
-  Alert,
-  ScrollView,
-  FlatList,
-  Modal,
-  KeyboardAvoidingView,
-  ActivityIndicator,
-} from "react-native";
+import { BlurView } from 'expo-blur';
+import { Feather } from '@expo/vector-icons';
+import Svg, { Defs, RadialGradient, Stop, Rect, Line, Path } from 'react-native-svg';
+import AuricWordmark from '../components/AuricWordmark';
+import { vip } from '../theme/vip';
+import useTranslation from '../hooks/useTranslation';
+import { gold as GOLD } from '../theme/colors';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, SafeAreaView, Alert, ScrollView, Modal, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 
 // Expo:
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,7 +19,7 @@ import { loadPrivacyText, loadTermsText } from '../services/legalService';
 /** ====== GOLD PALETTE ====== */
 
 
-const { width: SCREEN_W } = Dimensions.get("window");
+
 
 export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLanguageChange, resetToSignIn, onResubscribe }: any) {
   const [email, setEmail] = useState("");
@@ -40,7 +28,9 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
   const [showSignUpForm, setShowSignUpForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('es');
+  const { currentLanguage, changeLanguage } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState(currentLanguage || 'es');
+  useEffect(() => { if (currentLanguage) setSelectedLanguage(currentLanguage.split('-')[0]); }, [currentLanguage]);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [legalModalVisible, setLegalModalVisible] = useState(false);
@@ -115,6 +105,8 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     setShowLanguageDropdown(false);
     if (onLanguageChange) {
       onLanguageChange(lang);
+    } else {
+      changeLanguage(lang);
     }
   };
 
@@ -286,13 +278,18 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     );
   }
 
+  const copy = { resetSent: selectedLanguage === 'es' ? 'Revisa tu correo electr?nico para restablecer tu contrase?a.' : 'Check your email for password reset instructions.', ...(loginCopy[selectedLanguage] || loginCopy.en) };
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView 
-        style={styles.container} 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 780">
+          <Defs><RadialGradient id="halo" cx="50%" cy="20%" rx="48%" ry="25%"><Stop offset="0" stopColor="#AF792D" stopOpacity="0.55"/><Stop offset="1" stopColor={vip.colors.navy} stopOpacity="0"/></RadialGradient></Defs>
+          <Rect width="400" height="780" fill={vip.colors.navy}/>
+          {Array.from({length: 24}, (_, i) => <Line key={i} x1={-400 + i * 35} y1="610" x2={100 + i * 35} y2="70" stroke={vip.colors.gold} strokeOpacity={i % 4 === 0 ? 0.16 : 0.06} strokeWidth="0.6"/>)}
+          <Rect width="400" height="780" fill="url(#halo)"/>
+        </Svg>
+      </View>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Modal
           visible={legalModalVisible}
           transparent
@@ -320,593 +317,66 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
             </View>
           </View>
         </Modal>
-
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-        {/* === Language Dropdown === */}
-        <View style={styles.languageContainer} pointerEvents="box-none">
-          <TouchableOpacity 
-            style={styles.languageSelector}
-            onPress={() => setShowLanguageDropdown(!showLanguageDropdown)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.languageSelectorText}>
-              {getLanguageLabel(selectedLanguage)}
-            </Text>
-            <Text style={styles.languageSelectorIcon}>
-              {showLanguageDropdown ? '▲' : '▼'}
-            </Text>
-          </TouchableOpacity>
-          
-          <Modal
-            visible={showLanguageDropdown}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowLanguageDropdown(false)}
-          >
-            <TouchableOpacity 
-              style={styles.modalOverlay}
-              activeOpacity={1}
-              onPress={() => setShowLanguageDropdown(false)}
-            >
-              <View style={styles.languageDropdown}>
-                <FlatList
-                  style={styles.languageList}
-                  contentContainerStyle={styles.languageListContent}
-                  data={[
-                    { key: 'en', label: 'English' },
-                    { key: 'es', label: 'Español' },
-                    { key: 'pt', label: 'Português' },
-                    { key: 'fr', label: 'Français' },
-                    { key: 'de', label: 'Deutsch' },
-                    { key: 'zh', label: '中文' }
-                  ]}
-                  renderItem={({ item }) => (
-                    <LanguageOption 
-                      language={item.key} 
-                      label={item.label} 
-                      isSelected={selectedLanguage === item.key} 
-                      onPress={() => handleLanguageChange(item.key)} 
-                    />
-                  )}
-                  keyExtractor={(item) => item.key}
-                  showsVerticalScrollIndicator={true}
-                  keyboardShouldPersistTaps="handled"
-                  scrollEnabled={true}
-                  bounces={false}
-                />
-              </View>
-            </TouchableOpacity>
-          </Modal>
-        </View>
-
-
-
-        {/* ===== Header (logo/title) ===== */}
-        <View style={styles.header}>
-          {/* Your actual logo */}
-          <Image 
-            source={require('../../assets/sign in logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <View style={{ height: 16 }} />
-        </View>
-
-        {/* ===== Form ===== */}
-        <View style={styles.form}>
-          <GoldOutline>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder={t.email}
-              placeholderTextColor="#CBA24F"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              style={styles.input}
-            />
-          </GoldOutline>
-
-          <View style={{ height: 14 }} />
-
-          <GoldOutline>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                value={pw}
-                onChangeText={setPw}
-                placeholder={t.password}
-                placeholderTextColor="#CBA24F"
-                secureTextEntry={!showPassword}
-                style={styles.passwordInput}
-              />
-              <TouchableOpacity
-                onPressIn={() => setShowPassword(true)}
-                onPressOut={() => setShowPassword(false)}
-                style={styles.eyeButton}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.eyeIcon}>👁</Text>
-              </TouchableOpacity>
+        <Modal visible={showLanguageDropdown} transparent animationType="fade" onRequestClose={() => setShowLanguageDropdown(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity style={StyleSheet.absoluteFill} accessibilityLabel={t.close} onPress={() => setShowLanguageDropdown(false)}/>
+            <View style={styles.languageDropdown} accessibilityViewIsModal>
+              {['es', 'en', 'pt', 'fr', 'de', 'zh'].map(lang => <TouchableOpacity key={lang} style={styles.languageOption} accessibilityRole="radio" accessibilityState={{selected: lang === selectedLanguage}} onPress={() => handleLanguageChange(lang)}>
+                <Text style={styles.languageOptionText}>{getLanguageLabel(lang)}</Text><Text style={styles.link}>{lang === selectedLanguage ? '?' : lang.toUpperCase()}</Text>
+              </TouchableOpacity>)}
             </View>
-          </GoldOutline>
-
-          <View style={{ height: 18 }} />
-
-          {/* Stay Signed In Toggle */}
-          <View style={styles.staySignedInContainer}>
-            <TouchableOpacity 
-              style={styles.staySignedInToggle}
-              onPress={() => setStaySignedIn(!staySignedIn)}
-              activeOpacity={0.7}
-            >
-              <View style={[
-                styles.checkbox, 
-                { backgroundColor: staySignedIn ? GOLD.a500 : 'transparent' }
-              ]}>
-                {staySignedIn && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
-              </View>
-              <Text style={styles.staySignedInText}>{t.staySignedIn}</Text>
-            </TouchableOpacity>
           </View>
-
-          <View style={{ height: 16 }} />
-
-          <GoldButton 
-            title={loading ? "Loading..." : t.signIn} 
-            onPress={onSignIn} 
-            disabled={loading || googleLoading}
-          />
-
-          <GoogleAuthButton language={selectedLanguage} loading={googleLoading}
-            disabled={loading || googleLoading} onPress={handleGoogleSignIn} />
-          <View style={{ height: 20 }} />
-
-          {/* Resubscribe Button - Shows when subscription is cancelled/expired */}
-          {onResubscribe && (
-            <>
-              <TouchableOpacity
-                onPress={onResubscribe}
-                style={styles.resubscribeButton}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.resubscribeText}>
-                  {t.resubscribe || 'Resubscribe'}
-                </Text>
-              </TouchableOpacity>
-              <View style={{ height: 16 }} />
-            </>
-          )}
-
-          <View style={styles.signUpContainer}>
-            <Text style={styles.signUp}>
-              {t.dontHaveAccount}{" "}
-              <Text 
-                style={styles.signUpLink}
-                onPress={() => { if (!loading && !googleLoading) setShowSignUpForm(true); }}
-              >
-                {t.signUp}
-              </Text>
-            </Text>
+        </Modal>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <View style={styles.topRow}><TouchableOpacity accessibilityRole="button" accessibilityLabel={copy.language} style={styles.languageSelector} onPress={() => setShowLanguageDropdown(true)}>
+            <Feather name="globe" color={vip.colors.gold} size={19}/><Text style={styles.languageSelectorText}>{selectedLanguage.toUpperCase()}</Text><Feather name="chevron-down" size={15} color={vip.colors.gold}/>
+          </TouchableOpacity></View>
+          <View style={styles.header}><View style={styles.wordmark}><AuricWordmark/></View><Text style={styles.subtitle}>RX MEDCOACH</Text><Text style={styles.tagline}>{copy.tagline}</Text></View>
+          <View style={styles.card}>
+            <BlurView intensity={22} tint="dark" style={StyleSheet.absoluteFill}/>
+            <LinearGradient colors={['rgba(255,255,255,0.04)', 'rgba(3,18,32,0.7)']} style={StyleSheet.absoluteFill}/>
+            <GoogleAuthButton variant="vip" language={selectedLanguage} loading={googleLoading} disabled={loading || googleLoading} onPress={handleGoogleSignIn}/>
+            <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>{copy.or}</Text><View style={styles.line}/></View>
+            <View style={styles.field}><Feather name="mail" color={vip.colors.gold} size={27}/><View style={styles.fieldBody}><Text style={styles.label}>{copy.email}</Text><TextInput accessibilityLabel={copy.email} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" style={styles.input}/></View></View>
+            <View style={styles.field}><Feather name="lock" color={vip.colors.gold} size={28}/><View style={styles.fieldBody}><Text style={styles.label}>{t.password}</Text><TextInput accessibilityLabel={t.password} value={pw} onChangeText={setPw} secureTextEntry={!showPassword} autoCapitalize="none" autoComplete="current-password" style={styles.input}/></View></View>
+            <View style={{flexDirection:'row',justifyContent:'space-between',marginBottom:8}}>
+              <TouchableOpacity accessibilityRole="checkbox" accessibilityState={{checked:staySignedIn}} onPress={() => setStaySignedIn(!staySignedIn)} style={{minHeight:28,justifyContent:'center'}}><Text style={{color:vip.colors.gold,fontSize:11}}>{staySignedIn ? '?' : '?'} {t.staySignedIn}</Text></TouchableOpacity>
+              <TouchableOpacity accessibilityLabel={t.password} accessibilityState={{selected:showPassword}} onPressIn={() => setShowPassword(true)} onPressOut={() => setShowPassword(false)} style={{minWidth:32,minHeight:28,alignItems:'center',justifyContent:'center'}}><Feather name={showPassword ? 'eye-off' : 'eye'} size={16} color={vip.colors.gold}/></TouchableOpacity>
+            </View>
+            <TouchableOpacity accessibilityRole="button" disabled={loading || googleLoading} onPress={onSignIn} activeOpacity={0.85} style={[styles.goldButton, (loading || googleLoading) && {opacity: 0.6}]}><LinearGradient colors={['#F5D28D', '#BD8739', '#E6B966', '#996721']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.goldContent}><Text style={styles.goldText}>{loading ? copy.loading : copy.signIn}</Text></LinearGradient></TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" style={styles.forgot} onPress={async () => { if (!email.trim()) { Alert.alert(copy.forgot, copy.resetHelp); return; } const result = await authService.resetPassword(email.trim()); Alert.alert(copy.forgot, result.success ? copy.resetSent : googleAuthText(selectedLanguage).error); }}><Text style={styles.link}>{copy.forgot}</Text></TouchableOpacity>
+            {onResubscribe && <TouchableOpacity onPress={onResubscribe} style={styles.forgot}><Text style={styles.link}>{t.resubscribe}</Text></TouchableOpacity>}
           </View>
-
-          <View style={{ height: 18 }} />
-          <Text style={styles.legalText}>
-            {t.legalPrefix}
-            <Text style={styles.legalLink} onPress={() => handleOpenLegal('terms')}>
-              {t.termsOfService}
-            </Text>
-            {t.legalConnector}
-            <Text style={styles.legalLink} onPress={() => handleOpenLegal('privacy')}>
-              {t.privacyPolicy}
-            </Text>
-            {t.legalSuffix}
-          </Text>
-        </View>
+          <Text style={styles.signUp}>{copy.newHere} <Text accessibilityRole="button" style={styles.link} onPress={() => { if (!loading && !googleLoading) setShowSignUpForm(true); }}>{copy.createAccount}</Text></Text>
+          <Text style={styles.legal}><Text accessibilityRole="link" onPress={() => handleOpenLegal('terms')}>{copy.terms}</Text> ? <Text accessibilityRole="link" onPress={() => handleOpenLegal('privacy')}>{copy.privacy}</Text></Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-/* ---------- Top slit that shines down like a cone onto the logo ---------- */
-/* ---------- Gold primitives ---------- */
-
-function GoldButton({ title, onPress, disabled = false }: { title: string; onPress: () => void; disabled?: boolean }) {
-  return (
-    <TouchableOpacity 
-      onPress={onPress} 
-      activeOpacity={0.9} 
-      style={[styles.goldBtnWrap, disabled && styles.goldBtnDisabled]}
-      disabled={disabled}
-    >
-      <LinearGradient
-        colors={[GOLD.a300, GOLD.y400, GOLD.a500]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.goldBtn}
-      >
-        {/* gloss overlay */}
-        <LinearGradient
-          colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.goldGloss}
-        />
-        <Text style={styles.goldBtnText}>{title}</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-}
-
-function GoldOutline({ children }: { children: React.ReactNode }) {
-  return <View style={styles.goldOutline}>{children}</View>;
-}
-
-function GoldRow({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) {
-  if (onPress) {
-    return (
-      <TouchableOpacity style={styles.goldRow} onPress={onPress} activeOpacity={0.8}>
-        {children}
-      </TouchableOpacity>
-    );
-  }
-  return <View style={styles.goldRow}>{children}</View>;
-}
-
-// Language option component for dropdown
-function LanguageOption({ language, label, isSelected, onPress }: { 
-  language: string; 
-  label: string; 
-  isSelected: boolean; 
-  onPress: () => void; 
-}) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[styles.languageOption, isSelected && styles.languageOptionSelected]}
-      activeOpacity={0.8}
-    >
-      <Text style={[styles.languageOptionText, isSelected && styles.languageOptionTextSelected]}>
-        {label}
-      </Text>
-      {isSelected && (
-        <Text style={styles.languageOptionCheck}>✓</Text>
-      )}
-    </TouchableOpacity>
-  );
-}
-
-/* ----------------- Styles ----------------- */
+const loginCopy: Record<string, any> = {
+  es: {language:'Elegir idioma', tagline:'Tu salud, en modo VIP.', or:'o', email:'Correo electr?nico', signIn:'Iniciar sesi?n', loading:'Conectando...', forgot:'?Olvidaste tu contrase?a?', resetHelp:'Introduce tu correo electr?nico para recuperar tu contrase?a.', newHere:'?Nuevo aqu??', createAccount:'Crear cuenta', terms:'T?rminos', privacy:'Privacidad'},
+  en: {language:'Choose language', tagline:'Your health, in VIP mode.', or:'or', email:'Email', signIn:'Sign in', loading:'Connecting...', forgot:'Forgot your password?', resetHelp:'Enter your email to recover your password.', newHere:'New here?', createAccount:'Create account', terms:'Terms', privacy:'Privacy'},
+  pt: {language:'Escolher idioma', tagline:'Sua sa?de, em modo VIP.', or:'ou', email:'Email', signIn:'Entrar', loading:'Conectando...', forgot:'Esqueceu sua senha?', resetHelp:'Insira seu email para recuperar sua senha.', newHere:'Novo aqui?', createAccount:'Criar conta', terms:'Termos', privacy:'Privacidade'},
+  fr: {language:'Choisir la langue', tagline:'Votre sant?, en mode VIP.', or:'ou', email:'E-mail', signIn:'Se connecter', loading:'Connexion...', forgot:'Mot de passe oubli? ?', resetHelp:'Saisissez votre e-mail pour r?cup?rer votre mot de passe.', newHere:'Nouveau ici ?', createAccount:'Cr?er un compte', terms:'Conditions', privacy:'Confidentialit?'},
+  de: {language:'Sprache w?hlen', tagline:'Ihre Gesundheit im VIP-Modus.', or:'oder', email:'E-Mail', signIn:'Anmelden', loading:'Verbinden...', forgot:'Passwort vergessen?', resetHelp:'Geben Sie Ihre E-Mail ein, um Ihr Passwort zur?ckzusetzen.', newHere:'Neu hier?', createAccount:'Konto erstellen', terms:'Bedingungen', privacy:'Datenschutz'},
+  zh: {language:'????', tagline:'?????VIP ???', or:'?', email:'????', signIn:'??', loading:'???...', forgot:'?????', resetHelp:'??????????', newHere:'????', createAccount:'????', terms:'??', privacy:'??'},
+};
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: darkColors.bg },
-  container: { flex: 1, backgroundColor: darkColors.bg, alignItems: "center" },
-
-  topLightsContainer: { position: "absolute", top: 0, left: 0, right: 0 },
-  slit: {
-    height: 2,
-    width: "86%",
-    alignSelf: "center",
-    marginTop: 8,
-    borderRadius: 999,
-    ...shadow(0, 0, 10, "rgba(255,220,140,.8)"),
-  },
-  sheenWrapper: { position: "absolute", top: 2, left: "50%", width: 120, marginLeft: -60 },
-  sheen: { height: 10, borderRadius: 999, opacity: 0.55 },
-
-  header: { marginTop: 100, alignItems: "center", justifyContent: "center", zIndex: 2 },
-  logo: { width: 200, height: 200 },
-
-  form: { width: "86%", marginTop: 28 },
-
-  input: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: darkColors.text,
-    borderRadius: 16,
-    backgroundColor: darkColors.card,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: darkColors.card,
-    borderRadius: 16,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: darkColors.text,
-  },
-  eyeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  eyeIcon: {
-    fontSize: 20,
-    opacity: 0.5,
-  },
-
-  goldBtnWrap: { borderRadius: 18, overflow: "hidden" },
-  goldBtnDisabled: { opacity: 0.6 },
-  goldBtn: {
-    borderRadius: 18,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    ...shadow(0, 10, 24, "rgba(255,176,32,.18)"),
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(251,191,36,.28)",
-  },
-  goldGloss: {
-    position: "absolute",
-    left: 1, right: 1, top: 1, height: "50%",
-    borderTopLeftRadius: 18, borderTopRightRadius: 18,
-    borderBottomLeftRadius: 18, borderBottomRightRadius: 18,
-    opacity: 0.12,
-  },
-  goldBtnText: { color: "#0B0B0B", fontSize: 16, fontWeight: "700" },
-
-  goldOutline: {
-    borderRadius: 16,
-    padding: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    borderWidth: 1,
-    borderColor: "rgba(251,191,36,0.38)",
-    ...shadow(0, 6, 18, "rgba(255,176,32,.12)"),
-  },
-
-  goldRow: {
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    borderWidth: 1,
-    borderColor: "rgba(251,191,36,0.38)",
-    ...shadow(0, 6, 18, "rgba(255,176,32,.12)"),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowText: { color: darkColors.text, fontSize: 15 },
-
-  signUpContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  signUp: { 
-    color: darkColors.text, 
-    textAlign: "center", 
-    fontSize: 15,
-  },
-  signUpLink: { 
-    color: GOLD.a300, 
-    fontWeight: "600",
-    fontSize: 15,
-    textDecorationLine: "underline",
-  },
-  signUpLinkActive: { 
-    color: GOLD.y400, 
-    fontWeight: "700"
-  },
-  resubscribeButton: {
-    backgroundColor: GOLD.a500,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: GOLD.y600,
-    shadowColor: GOLD.a500,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  resubscribeText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: '700',
-    fontFamily: 'Inter_700Bold',
-  },
-
-  legal: { color: "#AAAAAA", textAlign: "center", fontSize: 12, lineHeight: 18 },
-  
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
-
-  // Stay Signed In styles
-  staySignedInContainer: {
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  staySignedInToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: GOLD.a500,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  checkmark: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  staySignedInText: {
-    color: '#CBA24F',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  legalText: {
-    color: '#CBA24F',
-    textAlign: 'center',
-    fontSize: 12,
-    lineHeight: 16,
-    paddingHorizontal: 16,
-  },
-  legalLink: {
-    color: GOLD.a300,
-    textDecorationLine: 'underline',
-  },
-  legalModalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  legalModalContainer: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
-    padding: 16,
-    maxHeight: '85%',
-    borderWidth: 1,
-    borderColor: 'rgba(252, 211, 77, 0.3)'
-  },
-  legalModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  legalModalTitle: {
-    color: GOLD.a200,
-    fontSize: 18,
-    fontWeight: '600',
-    flex: 1,
-  },
-  legalModalClose: {
-    color: GOLD.a400,
-    fontSize: 14,
-  },
-  legalModalScroll: {
-    maxHeight: '80%',
-  },
-  legalModalText: {
-    color: '#F1DDA5',
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  legalModalLoadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 24,
-  },
-  legalModalLoadingText: {
-    color: '#E9C978',
-    marginTop: 12,
-    fontSize: 12,
-  },
-  
-  // Language dropdown styles
-  languageContainer: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    zIndex: 1000,
-  },
-  languageSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.8)",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: "rgba(251,191,36,0.3)",
-    ...shadow(0, 4, 12, "rgba(255,176,32,.15)"),
-    minWidth: 100,
-  },
-  languageSelectorText: {
-    color: GOLD.y400,
-    fontSize: 12,
-    fontWeight: "600",
-    flex: 1,
-  },
-  languageSelectorIcon: {
-    color: GOLD.a300,
-    fontSize: 10,
-    marginLeft: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
-    paddingTop: 50,
-    paddingRight: 12,
-  },
-  languageDropdown: {
-    width: 160,
-    height: 140,
-    borderRadius: 10,
-    backgroundColor: "rgba(10,10,10,0.96)",
-    borderWidth: 1,
-    borderColor: "rgba(251,191,36,0.38)",
-    overflow: "hidden",
-  },
-  languageList: {
-    flexGrow: 0,
-  },
-  languageListContent: {
-    paddingVertical: 2,
-  },
-  languageOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    height: 32, // Much more compact height
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(251,191,36,0.1)",
-  },
-  languageOptionSelected: {
-    backgroundColor: "rgba(251,191,36,0.1)",
-  },
-  languageOptionText: {
-    color: darkColors.text,
-    fontSize: 12,
-    fontWeight: "500",
-    flex: 1,
-  },
-  languageOptionTextSelected: {
-    color: GOLD.y400,
-    fontWeight: "600",
-  },
-  languageOptionCheck: {
-    color: GOLD.y400,
-    fontSize: 12,
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
+  safe:{flex:1,backgroundColor:vip.colors.navy}, container:{flex:1},
+  scrollContent:{flexGrow:1,alignItems:'center',paddingHorizontal:vip.spacing.lg,paddingBottom:20},
+  topRow:{width:'100%',alignItems:'flex-end',paddingTop:18},
+  languageSelector:{flexDirection:'row',alignItems:'center',gap:12,borderWidth:0.7,borderColor:vip.colors.gold,borderRadius:15,paddingHorizontal:13,minHeight:38,backgroundColor:'rgba(15,25,37,0.75)'},
+  languageSelectorText:{color:vip.colors.white,fontSize:17},
+  header:{width:'100%',maxWidth:300,alignItems:'center',marginTop:58,marginBottom:52},
+  wordmark:{width:'100%',height:86}, subtitle:{color:vip.colors.white,fontSize:20,letterSpacing:6,marginTop:4},
+  tagline:{color:vip.colors.gold,fontSize:18,fontStyle:'italic',marginTop:8},
+  card:{width:'100%',maxWidth:380,borderWidth:0.7,borderColor:vip.colors.gold,borderRadius:vip.radius.card,padding:vip.spacing.md,paddingTop:23,overflow:'hidden',backgroundColor:vip.colors.glass},
+  divider:{flexDirection:'row',alignItems:'center',gap:9,marginTop:10,marginBottom:8},line:{flex:1,height:0.7,backgroundColor:vip.colors.line},or:{color:vip.colors.white,fontSize:16},
+  field:{flexDirection:'row',alignItems:'center',gap:14,marginBottom:14},fieldBody:{flex:1,borderBottomWidth:0.7,borderColor:vip.colors.line},label:{color:vip.colors.white,fontSize:15},input:{color:vip.colors.white,fontSize:16,minHeight:34,paddingVertical:5},
+  goldButton:{borderRadius:vip.radius.button,padding:1,borderWidth:1,borderColor:vip.colors.gold,overflow:'hidden',marginTop:3},goldContent:{minHeight:46,borderRadius:16,alignItems:'center',justifyContent:'center',borderWidth:0.7,borderColor:'#FFE5A2'},goldText:{fontSize:20,color:'#10100E',fontWeight:'600'},
+  forgot:{alignItems:'center',paddingTop:14,paddingBottom:0,minHeight:30},link:{color:vip.colors.gold,fontSize:15},signUp:{color:vip.colors.white,fontSize:16,textAlign:'center',marginTop:19},legal:{color:vip.colors.muted,fontSize:12,textAlign:'center',marginTop:22},
+  modalOverlay:{flex:1,backgroundColor:'rgba(0,0,0,0.7)',justifyContent:'center',padding:28},languageDropdown:{backgroundColor:vip.colors.navy,borderColor:vip.colors.gold,borderWidth:1,borderRadius:20,padding:12},languageOption:{minHeight:48,flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:16},languageOptionText:{color:vip.colors.white,fontSize:17},
+  legalModalBackdrop:{flex:1,backgroundColor:'rgba(0,0,0,0.8)',justifyContent:'center',padding:20},legalModalContainer:{backgroundColor:vip.colors.navy,borderRadius:20,padding:20,maxHeight:'85%',borderWidth:1,borderColor:vip.colors.gold},legalModalHeader:{flexDirection:'row',alignItems:'center',marginBottom:16},legalModalTitle:{flex:1,color:vip.colors.gold,fontSize:18},legalModalClose:{color:vip.colors.gold},legalModalLoadingContainer:{padding:24,alignItems:'center'},legalModalLoadingText:{color:vip.colors.white,marginTop:12},legalModalScroll:{flexShrink:1},legalModalText:{color:vip.colors.white,fontSize:14,lineHeight:22},
 });
-
-/** Cross-platform shadow helper */
-function shadow(x: number, y: number, blur: number, color: string) {
-  if (Platform.OS === "ios") {
-    return {
-      shadowColor: color,
-      shadowOpacity: 1,
-      shadowRadius: blur / 2,
-      shadowOffset: { width: x, height: y },
-    };
-  }
-  // Android uses elevation; color handled via borders/gradients
-  return { elevation: Math.max(2, Math.min(12, Math.floor(blur / 2))) };
-}
