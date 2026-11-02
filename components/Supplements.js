@@ -1,3 +1,4 @@
+import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
@@ -482,7 +483,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
           >
             <Image source={require('../icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: getCardTextColor() }} />
           </TouchableOpacity>
-          <TouchableOpacity
+          <PremiumButton
             onPress={() => setShowAdd(true)}
             style={{
               flex: 1,
@@ -496,7 +497,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
             <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
               {S.addSupplement}
             </DynamicText>
-          </TouchableOpacity>
+          </PremiumButton>
         </View>
 
         {/* Supplements List */}
@@ -537,7 +538,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   )}
                 </View>
                 <View style={{ flexDirection: 'row', gap: 6 }}>
-                  <TouchableOpacity
+                  <PremiumButton
                     onPress={() => {
                       setEditForm({
                         ...supp,
@@ -560,7 +561,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                     <DynamicText type="card" style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                       {S.edit}
                     </DynamicText>
-                  </TouchableOpacity>
+                  </PremiumButton>
                   <TouchableOpacity
                     onPress={(e) => {
                       e.stopPropagation();
@@ -1083,7 +1084,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>{S.cancel}</DynamicText>
                 </TouchableOpacity>
                 
-                <TouchableOpacity 
+                <PremiumButton 
                   onPress={addSupplement}
                   style={{
                     flex: 1,
@@ -1094,7 +1095,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold' }}>{S.addSupplement}</DynamicText>
-                </TouchableOpacity>
+                </PremiumButton>
               </View>
             </ScrollView>
           </View>
@@ -1147,7 +1148,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                 <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>Close</DynamicText>
               </TouchableOpacity>
               
-              <TouchableOpacity 
+              <PremiumButton 
                 onPress={() => {
                   setShowAiAnalysis(false);
                   if (lastSearchedSupplement) {
@@ -1157,7 +1158,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
               >
                 <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>Search Again</DynamicText>
-              </TouchableOpacity>
+              </PremiumButton>
             </View>
           </View>
         </View>
@@ -1526,7 +1527,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>{S.cancel}</DynamicText>
                 </TouchableOpacity>
                 
-                <TouchableOpacity 
+                <PremiumButton 
                   onPress={updateSupplement}
                   style={{
                     flex: 1,
@@ -1537,7 +1538,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold' }}>{S.save || 'Save'}</DynamicText>
-                </TouchableOpacity>
+                </PremiumButton>
               </View>
             </ScrollView>
           </View>

@@ -1,3 +1,4 @@
+import { darkColors } from '../theme/colors';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,9 +26,10 @@ const WallpaperContext = createContext<WallpaperContextType | undefined>(undefin
 
 interface WallpaperProviderProps {
   children: ReactNode;
+  theme?: typeof darkColors;
 }
 
-export function WallpaperProvider({ children }: WallpaperProviderProps) {
+export function WallpaperProvider({ children, theme = darkColors }: WallpaperProviderProps) {
   const [currentWallpaper, setCurrentWallpaper] = useState<WallpaperOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,7 +49,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
       } else {
         console.log('🎨 WallpaperContext - No saved wallpaper found, setting default');
         // Set default wallpaper to Black Silver for new users
-        const defaultWallpaper = {
+        const defaultWallpaper: WallpaperOption = {
           id: 'black_silver',
           name: 'Black Silver',
           type: 'image',
@@ -59,7 +61,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     } catch (error) {
       console.error('Failed to load wallpaper:', error);
       // Set default wallpaper even on error
-      const defaultWallpaper = {
+      const defaultWallpaper: WallpaperOption = {
         id: 'black_silver',
         name: 'Black Silver',
         type: 'image',
@@ -88,7 +90,7 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     if (!currentWallpaper) {
       console.log('🎨 WallpaperContext - No wallpaper, using default background');
       return {
-        backgroundColor: '#1a1a1a', // Dark background to match Black Silver theme
+        backgroundColor: theme.bg, // Dark background to match Black Silver theme
       };
     }
 
@@ -139,108 +141,13 @@ export function WallpaperProvider({ children }: WallpaperProviderProps) {
     return luminance > 0.5;
   };
 
-  // Get optimal text color based on wallpaper
-  const getTextColor = (): string => {
-    if (!currentWallpaper) {
-      return '#2c2c2c'; // Default dark text
-    }
-
-    if (currentWallpaper.type === 'color') {
-      return isLightColor(currentWallpaper.value) ? '#2c2c2c' : '#ffffff';
-    } else {
-      // For image wallpapers, use a smart default based on common patterns
-      const imageName = currentWallpaper.value.toLowerCase();
-      if (imageName.includes('black') || imageName.includes('dark')) {
-        return '#ffffff'; // White text for dark images
-      } else if (imageName.includes('white') || imageName.includes('cream')) {
-        return '#2c2c2c'; // Dark text for light images
-      } else {
-        return '#ffffff'; // Default to white for complex images
-      }
-    }
-  };
-
-  const getSubTextColor = (): string => {
-    const textColor = getTextColor();
-    return textColor === '#ffffff' ? '#e0e0e0' : '#666666'; // Medium gray for placeholder text visibility
-  };
-
-  const getAccentColor = (): string => {
-    if (!currentWallpaper) {
-      return '#d4af37'; // Default gold
-    }
-
-    if (currentWallpaper.type === 'color') {
-      return isLightColor(currentWallpaper.value) ? '#d4af37' : '#ffd700';
-    } else {
-      // For image wallpapers, use gold variants
-      const imageName = currentWallpaper.value.toLowerCase();
-      if (imageName.includes('black') || imageName.includes('dark')) {
-        return '#ffd700'; // Brighter gold for dark backgrounds
-      } else {
-        return '#d4af37'; // Standard gold for light backgrounds
-      }
-    }
-  };
-
-  const getCardTextColor = (): string => {
-    // Get the actual card background color to determine text color
-    const cardBgColor = getCardBackgroundColor();
-    
-    // If card background is dark, use light text
-    // If card background is light, use dark text
-    if (cardBgColor === '#2a2a2a' || cardBgColor === '#1a1a1a' || cardBgColor === '#0d2424' || cardBgColor === '#121a33') {
-      return '#ffffff'; // Light text for dark cards
-    } else {
-      return '#000000'; // Pure black text for light cards for better visibility
-    }
-  };
-
-  const getCardBackgroundColor = (): string => {
-    if (!currentWallpaper) {
-      return '#ffffff'; // Default white
-    }
-
-    if (currentWallpaper.type === 'color') {
-      // For the default gold theme, use white cards
-      if (currentWallpaper.id === 'default_gold') {
-        return '#ffffff';
-      }
-      return isLightColor(currentWallpaper.value) ? '#ffffff' : '#2a2a2a';
-    } else {
-      // For image wallpapers, use smart defaults
-      const imageName = currentWallpaper.value.toLowerCase();
-      if (imageName.includes('black') || imageName.includes('dark')) {
-        return '#2a2a2a'; // Dark card for dark wallpapers
-      } else if (imageName.includes('white') || imageName.includes('cream')) {
-        return '#ffffff'; // White card for light wallpapers
-      } else {
-        return '#ffffff'; // Default to white for complex images
-      }
-    }
-  };
-
-  const getCardBorderColor = (): string => {
-    if (!currentWallpaper) {
-      return '#e8e3d8'; // Default light border
-    }
-
-    if (currentWallpaper.type === 'color') {
-      // For the default gold theme, use light border
-      if (currentWallpaper.id === 'default_gold') {
-        return '#e8e3d8';
-      }
-      return isLightColor(currentWallpaper.value) ? '#e8e3d8' : '#404040';
-    } else {
-      // For image wallpapers, use smart defaults
-      const imageName = currentWallpaper.value.toLowerCase();
-      if (imageName.includes('black') || imageName.includes('dark')) {
-        return '#404040'; // Dark border for dark wallpapers
-      } else {
-        return '#e8e3d8'; // Light border for light wallpapers
-      }
-    }
-  };
+  // Opaque card colors keep text readable over every custom wallpaper.
+  const getTextColor = () => theme.text;
+  const getSubTextColor = () => theme.sub;
+  const getAccentColor = () => theme.accent;
+  const getCardTextColor = () => theme.text;
+  const getCardBackgroundColor = () => theme.card;
+  const getCardBorderColor = () => theme.border;
 
   const value: WallpaperContextType = {
     currentWallpaper,

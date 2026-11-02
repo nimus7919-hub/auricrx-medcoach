@@ -1,3 +1,7 @@
+import PremiumTabBar from './src/components/PremiumTabBar';
+import PremiumButton from './src/components/PremiumButton';
+import { darkColors, premiumTheme } from './src/theme/colors';
+import BrandIntro from './src/components/BrandIntro';
 import { authenticatedFetch } from './src/services/authenticatedFetch';
 import { requestSearchLocationPermission } from './src/lib/locationPermission';
 import ConsentHost from './src/components/ConsentHost';
@@ -1848,63 +1852,7 @@ const STRINGS = {
 };
 
 // ---------- THEMES ----------
-const PALETTES = {
-  whiteGold: {
-    id: 'whiteGold',
-    bg: '#ffffff',
-    bgStart: '#ffffff',
-    bgEnd: '#fefefe',
-    card: '#ffffff',
-    text: '#1a1a1a',
-    sub: '#666666',
-    accent: '#D4AF37',
-    chip: '#f8f6f0',
-  },
-  gold: {
-    id: 'gold',
-    bg: '#faf8f5',
-    bgStart: '#faf8f5',
-    bgEnd: '#f5f2ed',
-    card: '#ffffff',
-    text: '#2c2c2c',
-    sub: '#6b6b6b',
-    accent: '#D4AF37',
-    chip: '#e8e3d8',
-  },
-  blue: {
-    id: 'blue',
-    bg: '#0e1324',
-    bgStart: '#0e1324',
-    bgEnd: '#0b1020',
-    card: '#121a33',
-    text: '#bcd2ff',
-    sub: '#91a6d8',
-    accent: '#3a7bfd',
-    chip: '#141b2e',
-  },
-  teal: {
-    id: 'teal',
-    bg: '#071b1b',
-    bgStart: '#071b1b',
-    bgEnd: '#052222',
-    card: '#0d2424',
-    text: '#aafaf0',
-    sub: '#6bd7cb',
-    accent: '#2dd4bf',
-    chip: '#0c2a29',
-  },
-  black: {
-    id: 'black',
-    bg: '#000000',
-    bgStart: '#000000',
-    bgEnd: '#1a1a1a',
-    card: '#1a1a1a',
-    text: '#FFA500',
-    sub: '#FFB84D',
-    accent: '#FFA500',
-    chip: '#2a2a2a',
-  },
-};
+const PALETTES = Object.fromEntries(['whiteGold', 'gold', 'blue', 'teal', 'black'].map(id => [id, { ...premiumTheme(!['whiteGold', 'gold'].includes(id)), id }]));
 
 const STORAGE = {
   lang: 'AURIC_LANG',
@@ -2260,7 +2208,7 @@ export default function App() {
 
   // language & theme
   const [lang, setLang] = useState('en');
-  const [themeKey, setThemeKey] = useState('whiteGold');
+  const [themeKey, setThemeKey] = useState('black');
   const [fontColor, setFontColor] = useState('default');
   const [night, setNight] = useState(false);
   const [moodShift, setMoodShift] = useState(true);
@@ -4451,73 +4399,8 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     }
   }, [user, showAuth]);
 
-  // mood shift color tweak (toy demo: if last AI message contains "stress", switch to teal)
-  const theme = useMemo(() => {
-    let base = PALETTES[themeKey] || PALETTES.whiteGold;
-    if (night) base = { ...base, bg: '#1a1a1a', bgStart: '#1a1a1a', bgEnd: '#2a2a2a', card: '#2d2d2d', text: '#f5f5f5', sub: '#b8b8b8' };
-    if (moodShift && aiMessages.slice(-1)[0]?.text?.toLowerCase?.().includes('stress')) {
-      base = PALETTES.teal;
-    }
-    
-    // Apply font color override
-    if (fontColor !== 'default') {
-      const fontColors = {
-        'white': { text: '#ffffff', sub: '#e0e0e0' },
-        'black': { text: '#000000', sub: '#333333' },
-        'blue': { text: '#3b82f6', sub: '#60a5fa' },
-        'green': { text: '#10b981', sub: '#34d399' },
-        'purple': { text: '#8b5cf6', sub: '#a78bfa' },
-        'red': { text: '#ef4444', sub: '#f87171' },
-        'orange': { text: '#f97316', sub: '#fb923c' },
-        'pink': { text: '#ec4899', sub: '#f472b6' },
-        'gold': { text: '#D4AF37', sub: '#E6C866' },
-        'silver': { text: '#9ca3af', sub: '#d1d5db' }
-      };
-      
-      if (fontColors[fontColor]) {
-        base = { ...base, ...fontColors[fontColor] };
-      }
-    }
-    
-    return base;
-  }, [themeKey, night, moodShift, aiMessages, fontColor]);
-
-
-// animation refs
-const splashOpacity = useRef(new Animated.Value(1)).current;
-const logoScale = useRef(new Animated.Value(1)).current;
-const textOpacity = useRef(new Animated.Value(1)).current;
-
-useEffect(() => {
-  if (!fontsLoaded) {
-    Animated.loop(
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(logoScale, { toValue: 1.05, duration: 800, useNativeDriver: true }),
-          Animated.timing(logoScale, { toValue: 1, duration: 800, useNativeDriver: true }),
-        ]),
-        Animated.sequence([
-          Animated.timing(textOpacity, { toValue: 0.4, duration: 800, useNativeDriver: true }),
-          Animated.timing(textOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
-        ]),
-      ])
-    ).start();
-  }
-}, [fontsLoaded]);
-
-// fade out when fonts loaded
-useEffect(() => {
-  if (fontsLoaded) {
-    Animated.timing(splashOpacity, {
-      toValue: 0,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
-  }
-}, [fontsLoaded]);
-
-
-
+  const theme = useMemo(() => ({ ...(PALETTES[themeKey] || PALETTES.black), ...(night ? darkColors : {}) }), [themeKey, night]);
+  const [introComplete, setIntroComplete] = useState(false);
 
   // --------- Helpers ----------
   const Card = ({ title, icon, onPress, subtitle, actionButton }) => {
@@ -5374,7 +5257,7 @@ const handleAskMedicalAI = async () => {
                 : (S.findNearbyPharmacies || 'Find nearby pharmacies')
               }
             </DynamicText>
-            <TouchableOpacity 
+            <PremiumButton 
               style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
               onPress={refreshPharmacies}
               disabled={labsLoading}
@@ -5382,7 +5265,7 @@ const handleAskMedicalAI = async () => {
               <DynamicText type="card" style={[styles.btnText, { fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
                 {labsLoading ? S.loading : S.refresh}
               </DynamicText>
-            </TouchableOpacity>
+            </PremiumButton>
           </View>
 
           {/* Error message */}
@@ -5448,7 +5331,7 @@ const handleAskMedicalAI = async () => {
 
                 {/* Action buttons */}
                 <View style={{ flexDirection: 'row', gap: 6 }}>
-                  <TouchableOpacity 
+                  <PremiumButton 
                     style={{ 
                       flex: 1, 
                       backgroundColor: theme.accent, 
@@ -5465,7 +5348,7 @@ const handleAskMedicalAI = async () => {
                     <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_700Bold', fontSize: 12 }}>
                       {S.directions}
                     </DynamicText>
-                  </TouchableOpacity>
+                  </PremiumButton>
           </View>
               </View>
             ))
@@ -5474,14 +5357,14 @@ const handleAskMedicalAI = async () => {
               <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
                 No pharmacies loaded yet
               </Text>
-              <TouchableOpacity 
+              <PremiumButton 
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
                 onPress={refreshPharmacies}
               >
                 <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
                   Find Nearby Pharmacies
                 </Text>
-              </TouchableOpacity>
+              </PremiumButton>
             </View>
           ) : null}
 
@@ -5671,7 +5554,7 @@ const handleAskMedicalAI = async () => {
                 : (S.findNearbyLabs || 'Find nearby labs')
               }
             </DynamicText>
-            <TouchableOpacity 
+            <PremiumButton 
               style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
               onPress={refreshLabs}
               disabled={labsLoading}
@@ -5679,7 +5562,7 @@ const handleAskMedicalAI = async () => {
               <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
                 {labsLoading ? S.loading : S.refresh}
               </Text>
-            </TouchableOpacity>
+            </PremiumButton>
           </View>
 
           {/* Error message */}
@@ -5750,7 +5633,7 @@ const handleAskMedicalAI = async () => {
 
                 {/* Action buttons */}
                 <View style={{ flexDirection: 'row', gap: 6 }}>
-                  <TouchableOpacity 
+                  <PremiumButton 
                     style={{ 
                       flex: 1, 
                       backgroundColor: theme.accent, 
@@ -5767,7 +5650,7 @@ const handleAskMedicalAI = async () => {
                     <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_700Bold', fontSize: 12 }}>
                       {S.directions}
                     </DynamicText>
-        </TouchableOpacity>
+        </PremiumButton>
                 </View>
               </View>
             ))
@@ -5776,14 +5659,14 @@ const handleAskMedicalAI = async () => {
               <DynamicText type="card" style={{ fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
                 No labs loaded yet
               </DynamicText>
-              <TouchableOpacity 
+              <PremiumButton 
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
                 onPress={refreshLabs}
               >
                 <DynamicText type="card" style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
                   Find Nearby Labs
                 </DynamicText>
-              </TouchableOpacity>
+              </PremiumButton>
             </View>
           ) : null}
 
@@ -5844,7 +5727,7 @@ const handleAskMedicalAI = async () => {
                 </ScrollView>
               )}
               
-              <TouchableOpacity 
+              <PremiumButton 
                 style={{ 
                   backgroundColor: theme.accent, 
                   borderRadius: 8, 
@@ -5860,7 +5743,7 @@ const handleAskMedicalAI = async () => {
                 }}>
                   {S.close}
                 </Text>
-              </TouchableOpacity>
+              </PremiumButton>
             </View>
           </View>
         </Modal>
@@ -5872,12 +5755,12 @@ const handleAskMedicalAI = async () => {
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
       <Header title={S.prescription} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={addRxPhoto}>
+          <PremiumButton style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={addRxPhoto}>
             <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{S.addPhoto}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={exportRxToPDF}>
+          </PremiumButton>
+          <PremiumButton style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={exportRxToPDF}>
             <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{S.toPDF}</Text>
-          </TouchableOpacity>
+          </PremiumButton>
         </View>
 
         <View style={styles.gallery}>
@@ -5892,9 +5775,9 @@ const handleAskMedicalAI = async () => {
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
       <Header title="Appointments" />
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <TouchableOpacity style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={toggleRecord}>
+          <PremiumButton style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={toggleRecord}>
             <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{isRecording ? S.stop : S.record}</Text>
-          </TouchableOpacity>
+          </PremiumButton>
         </View>
         <Text style={{ color: theme.sub, marginTop: 8, fontFamily: 'Inter_600SemiBold' }}>{isRecording ? S.recording : ' '}</Text>
 
@@ -6095,7 +5978,7 @@ const handleAskMedicalAI = async () => {
               <TouchableOpacity 
                 onPress={() => setSelectedAIDoctor('alfred')}
                 style={[styles.settingsButton, {
-                  backgroundColor: selectedAIDoctor === 'alfred' ? theme.accent + 'CC' : getCardBackgroundColor() + 'CC',
+                  backgroundColor: selectedAIDoctor === 'alfred' ? theme.muted : getCardBackgroundColor() + 'CC',
                   borderColor: selectedAIDoctor === 'alfred' ? theme.accent : getCardBorderColor(),
                   borderWidth: 2,
                   borderRadius: 12,
@@ -6116,7 +5999,7 @@ const handleAskMedicalAI = async () => {
               <TouchableOpacity 
                 onPress={() => setSelectedAIDoctor('mimi')}
                 style={[styles.settingsButton, {
-                  backgroundColor: selectedAIDoctor === 'mimi' ? theme.accent + 'CC' : getCardBackgroundColor() + 'CC',
+                  backgroundColor: selectedAIDoctor === 'mimi' ? theme.muted : getCardBackgroundColor() + 'CC',
                   borderColor: selectedAIDoctor === 'mimi' ? theme.accent : getCardBorderColor(),
                   borderWidth: 2,
                   borderRadius: 12,
@@ -6137,7 +6020,7 @@ const handleAskMedicalAI = async () => {
               <TouchableOpacity 
                 onPress={() => setSelectedAIDoctor('pawlmer')}
                 style={[styles.settingsButton, {
-                  backgroundColor: selectedAIDoctor === 'pawlmer' ? theme.accent + 'CC' : getCardBackgroundColor() + 'CC',
+                  backgroundColor: selectedAIDoctor === 'pawlmer' ? theme.muted : getCardBackgroundColor() + 'CC',
                   borderColor: selectedAIDoctor === 'pawlmer' ? theme.accent : getCardBorderColor(),
                   borderWidth: 2,
                   borderRadius: 12,
@@ -6213,7 +6096,7 @@ const handleAskMedicalAI = async () => {
                 key={option.key}
                 onPress={() => setTimeFormat(option.value)}
                 style={{
-                  backgroundColor: timeFormat === option.value ? theme.accent : getCardBackgroundColor(),
+                  backgroundColor: timeFormat === option.value ? theme.muted : getCardBackgroundColor(),
                   borderRadius: 8,
                   padding: 12,
                   marginBottom: 8,
@@ -6553,16 +6436,18 @@ function trimTo(str, n) {
 }
 
   // final return (inside the App function)
-  return !fontsLoaded ? (
+  return !introComplete ? (
+  <BrandIntro language={lang} onComplete={() => setIntroComplete(true)} />
+) : !fontsLoaded ? (
   <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'#222' }}>
     <Text style={{ color:'#fff' }}>Loading...</Text>
   </View>
 ) : (
-  <WallpaperProvider>
+  <WallpaperProvider theme={theme}>
     <WallpaperWrapper>
     <ConsentHost language={lang} user={showAuth ? null : user} privacyOpen={privacyOpen} onHealthConsentChange={setHealthConsentReady} onPrivacyClose={() => setPrivacyOpen(false)} />
     <StatusBar 
-      barStyle={themeKey === 'whiteGold' || themeKey === 'gold' ? 'dark-content' : 'light-content'} 
+      barStyle={theme.mode === 'light' ? 'dark-content' : 'light-content'} 
       backgroundColor="transparent"
       translucent={true}
     />
@@ -6597,6 +6482,7 @@ function trimTo(str, n) {
         ) : (
       /* Main App Content - Only show after authentication and health consent */
       <>
+        <View style={{ flex: 1 }}>
         {route === 'dashboard' ? <Dashboard /> :
      route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
      route === 'pharmacies' ? <Pharmacies /> :
@@ -6615,6 +6501,7 @@ function trimTo(str, n) {
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
      <Dashboard />}
+        </View>
 
         {/* Floating AI button */}
         <AnimatedFloatingButton />
@@ -6624,6 +6511,7 @@ function trimTo(str, n) {
         
         {/* Cancel Membership Confirmation Modal */}
         <MembershipModals />
+        <PremiumTabBar route={route} onNavigate={setRoute} dark={theme.mode === 'dark'} language={lang} />
       </>
     )}
 
@@ -6754,7 +6642,7 @@ function trimTo(str, n) {
               },
             ]}
           />
-          <TouchableOpacity 
+          <PremiumButton 
             style={[styles.aiBtn, { backgroundColor: theme.accent }]} 
             onPress={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fastingProfile, pharmacies, labs, userCountry)} 
             disabled={aiSending || streamLoading}
@@ -6762,7 +6650,7 @@ function trimTo(str, n) {
             <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
               {streamLoading ? '...' : 'Send'}
             </Text>
-        </TouchableOpacity>
+        </PremiumButton>
         {streamLoading ? (
           <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
             <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>Stop</Text>
@@ -6930,7 +6818,7 @@ card: {
   fab: {
     position: 'absolute',
     right: 16,
-    bottom: 60,
+    bottom: 100,
     width: 60,
     height: 60,
     borderRadius: 30,

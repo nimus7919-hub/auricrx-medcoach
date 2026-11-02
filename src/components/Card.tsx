@@ -1,3 +1,4 @@
+import { useDynamicTheme } from '../hooks/useDynamicTheme';
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,20 +7,22 @@ interface CardProps {
   children: React.ReactNode;
   style?: ViewStyle;
   variant?: 'default' | 'gradient';
-  colors?: string[];
+  colors?: [string, string, ...string[]];
 }
 
 export default function Card({ 
   children, 
   style, 
   variant = 'default',
-  colors = ['#151517', '#1A1A1D']
+  colors
 }: CardProps) {
+  const theme = useDynamicTheme();
+  const surface = { backgroundColor: theme.card, borderColor: theme.chip }; 
   if (variant === 'gradient') {
     return (
       <LinearGradient
-        colors={colors}
-        style={[styles.card, styles.gradientCard, style]}
+        colors={colors || [theme.card, theme.card]}
+        style={[styles.card, styles.gradientCard, surface, style]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
@@ -29,7 +32,7 @@ export default function Card({
   }
 
   return (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, surface, style]}>
       {children}
     </View>
   );
@@ -52,6 +55,6 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   gradientCard: {
-    borderWidth: 0,
+    borderWidth: 1,
   },
 });

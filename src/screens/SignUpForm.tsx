@@ -1,3 +1,4 @@
+import { gold as GOLD } from '../theme/colors';
 import React, { useState, useMemo } from "react";
 import {
   View,
@@ -21,16 +22,7 @@ import ConsentChoices from '../components/ConsentChoices';
 import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
 // Gold palette
-const GOLD = {
-  hi: "#FFF3D2",
-  a200: "#FDE68A",
-  a300: "#FCD34D",
-  y400: "#FACC15",
-  a400: "#FBBF24",
-  a500: "#F59E0B",
-  y600: "#CA8A04",
-  accent: "#FFB020",
-};
+
 
 interface SignUpFormProps {
   onSignUp: (userData: any) => void;

@@ -1,3 +1,4 @@
+import PremiumButton from './PremiumButton';
 // src/components/StripeCheckoutModal.js
 // Stripe checkout modal matching app theme
 
@@ -165,12 +166,12 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
               <DynamicText type="primary" style={styles.errorText}>
                 {error}
               </DynamicText>
-              <TouchableOpacity
+              <PremiumButton
                 onPress={openCheckoutInBrowser}
                 style={[styles.retryButton, { backgroundColor: theme?.accent || '#d4af37' }]}
               >
                 <DynamicText type="primary" style={styles.retryText}>Retry</DynamicText>
-              </TouchableOpacity>
+              </PremiumButton>
             </View>
           )}
         </View>
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   retryText: {
-    color: '#ffffff',
+    color: '#17130B',
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
   },

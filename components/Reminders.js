@@ -1,3 +1,4 @@
+import PremiumButton from '../src/components/PremiumButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Platform, Keyboard, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -384,7 +385,7 @@ const Reminders = ({
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Add Reminder Button */}
-          <TouchableOpacity
+          <PremiumButton
           onPress={() => setShowAdd(true)}
           style={{
             backgroundColor: theme.accent,
@@ -398,7 +399,7 @@ const Reminders = ({
           <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold', fontSize: 16 }}>
             {S.addReminder}
           </DynamicText>
-          </TouchableOpacity>
+          </PremiumButton>
         {reminders.map(r => (
           <View key={r.id} style={[styles.row, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_700Bold' }}>
@@ -779,7 +780,7 @@ const Reminders = ({
                         </View>
                         
                         {!addForm.isSingleComponent && (
-                          <TouchableOpacity
+                          <PremiumButton
                             onPress={addComponent}
                           style={{
                             backgroundColor: theme.accent,
@@ -793,7 +794,7 @@ const Reminders = ({
                           <DynamicText type="card" style={{ color: '#ffffff', fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>
                             +
                           </DynamicText>
-                        </TouchableOpacity>
+                        </PremiumButton>
                         )}
                       </View>
 
@@ -1246,7 +1247,7 @@ const Reminders = ({
                 />
 
                 {/* Save Button */}
-                <TouchableOpacity
+                <PremiumButton
                   style={{
                     backgroundColor: theme.accent,
                     paddingVertical: 16,
@@ -1311,7 +1312,7 @@ const Reminders = ({
                   <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold', fontSize: 16 }}>
                     {editingReminderId ? (S.updateReminder || "Update Reminder") : (S.addReminder || "Add Reminder")}
                   </DynamicText>
-                </TouchableOpacity>
+                </PremiumButton>
               </ScrollView>
             </View>
           </TouchableOpacity>

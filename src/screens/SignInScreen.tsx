@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import { gold as GOLD, darkColors } from '../theme/colors';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,23 +23,13 @@ import {
 // Expo:
 import { LinearGradient } from "expo-linear-gradient";
 
-import MaskedView from "@react-native-masked-view/masked-view";
-import Svg, { Rect, Defs, RadialGradient, Stop, Polygon } from "react-native-svg";
 import SignUpForm from "./SignUpForm";
 import GoogleAuthButton, { googleAuthText } from "../components/GoogleAuthButton";
 import authService from '../services/authService';
 import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
 /** ====== GOLD PALETTE ====== */
-const GOLD = {
-  hi: "#FFF3D2",
-  a200: "#FDE68A",
-  a300: "#FCD34D",
-  y400: "#FACC15",
-  a400: "#FBBF24",
-  a500: "#F59E0B",
-  y600: "#CA8A04",
-};
+
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -64,35 +55,6 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
       setShowSignUpForm(false);
     }
   }, [resetToSignIn]);
-
-  // where is the logo? (to aim the beam)
-  const [logoBox, setLogoBox] = useState<{ y: number; h: number }>({ y: 160, h: 56 });
-  const onLogoLayout = (e: LayoutChangeEvent) => {
-    const { y, height } = e.nativeEvent.layout;
-    setLogoBox({ y, h: height });
-  };
-
-  // Animations
-  const slitSheen = useRef(new Animated.Value(0)).current;  // sheen moves L→R
-  const beamPulse = useRef(new Animated.Value(0)).current;  // wash opacity pulse
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(slitSheen, { toValue: 1, duration: 3200, useNativeDriver: true })
-    ).start();
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(beamPulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
-        Animated.timing(beamPulse, { toValue: 0, duration: 1400, useNativeDriver: true }),
-      ])
-    ).start();
-  }, [slitSheen, beamPulse]);
-
-  const sheenTranslateX = slitSheen.interpolate({ inputRange: [0, 1], outputRange: [-120, 120] });
-  const beamOpacity = beamPulse.interpolate({ inputRange: [0, 1], outputRange: [0.08, 0.18] });
-
-  // where the beam fades out (aim near the bottom of the logo)
-  const BEAM_END_Y = Math.max(100, logoBox.y + logoBox.h * 0.6);
 
   const onSignIn = async () => {
     if (!email || !pw) {
@@ -421,16 +383,10 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           </Modal>
         </View>
 
-        {/* === Cone-shaped top slit that shines down onto the logo === */}
-        <TopSlitOverLogoCone
-          width={SCREEN_W}
-          endY={BEAM_END_Y}
-          sheenTranslateX={sheenTranslateX}
-          beamOpacity={beamOpacity}
-        />
+
 
         {/* ===== Header (logo/title) ===== */}
-        <View style={styles.header} onLayout={onLogoLayout}>
+        <View style={styles.header}>
           {/* Your actual logo */}
           <Image 
             source={require('../../assets/sign in logo.png')}
@@ -558,117 +514,6 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
 }
 
 /* ---------- Top slit that shines down like a cone onto the logo ---------- */
-function TopSlitOverLogoCone({
-  width,
-  endY,
-  sheenTranslateX,
-  beamOpacity,
-}: {
-  width: number;
-  endY: number; // where the cone should fade out (aim near the logo)
-  sheenTranslateX: Animated.AnimatedInterpolation<string | number>;
-  beamOpacity: Animated.AnimatedInterpolation<string | number>;
-}) {
-  // Height of the light container (from top down to end of the beam)
-  const h = Math.max(140, Math.floor(endY));
-
-  // Cone geometry: small at the slit, wider toward the logo
-  const apexY = 10;                  // just below the slit line
-  const apexHalfW = Math.max(8, width * 0.04);
-  const baseY = h;
-  const baseHalfW = width * 0.35;    // widen as it travels downward
-  
-  // Calculate the center of the logo area for proper beam centering
-  // Logo has marginTop: 100 and height: 200, so center is at 100 + 100 = 200 from top
-  const logoCenterY = Math.min(h * 0.75, 200); // Ensure it doesn't exceed the beam height
-  
-  // Adjust horizontal position slightly to the left
-  const logoCenterX = width / 2 - 25; // Move 25px to the left
-
-  // Polygon points for the cone (trapezoid) - shifted to match logoCenterX
-  const p1x = logoCenterX - apexHalfW, p1y = apexY;
-  const p2x = logoCenterX + apexHalfW, p2y = apexY;
-  const p3x = logoCenterX + baseHalfW, p3y = baseY;
-  const p4x = logoCenterX - baseHalfW, p4y = baseY;
-  const points = `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y} ${p4x},${p4y}`;
-
-  return (
-    <View pointerEvents="none" style={[styles.topLightsContainer, { height: h }]}>
-      {/* Thin slit */}
-      <LinearGradient
-        colors={["transparent", "rgba(255,245,220,0.9)", "transparent"]}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-        style={styles.slit}
-      />
-      {/* Moving sparkle across slit */}
-      <Animated.View style={[styles.sheenWrapper, { transform: [{ translateX: sheenTranslateX }] }]}>
-        <LinearGradient
-          colors={["transparent", GOLD.hi, "transparent"]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={styles.sheen}
-        />
-      </Animated.View>
-
-      {/* Cone-masked light wash */}
-      <MaskedView
-        style={[StyleSheet.absoluteFill, { top: 0 }]}
-        maskElement={
-          <Svg width={width} height={h} viewBox={`0 0 ${width} ${h}`} style={StyleSheet.absoluteFill}>
-            {/* Transparent background so only the polygon reveals content */}
-            <Rect x="0" y="0" width={width} height={h} fill="transparent" />
-            <Polygon points={points} fill="#fff" />
-          </Svg>
-        }
-      >
-        {/* Everything inside here is clipped to the cone */}
-        <Animated.View style={[StyleSheet.absoluteFill, { opacity: beamOpacity }]}>
-          {/* Vertical wash */}
-          <LinearGradient
-            colors={["rgba(255,208,128,0.10)", "rgba(255,208,128,0.04)", "transparent"]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-
-          {/* Radial spotlight that peaks near the logo area */}
-          <Svg width={width} height={h} viewBox={`0 0 ${width} ${h}`} style={StyleSheet.absoluteFill}>
-            <Defs>
-              <RadialGradient id="spot" cx={logoCenterX} cy={logoCenterY} r={h * 0.9} gradientUnits="userSpaceOnUse">
-                <Stop offset="0" stopColor="rgba(255,208,128,0.12)" />
-                <Stop offset="0.4" stopColor="rgba(255,208,128,0.05)" />
-                <Stop offset="1" stopColor="rgba(0,0,0,0)" />
-              </RadialGradient>
-            </Defs>
-            <Rect x="0" y="0" width={width} height={h} fill="url(#spot)" />
-          </Svg>
-
-          {/* Diagonal sweeping sparkle inside the cone */}
-          <Animated.View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: -width * 0.2,
-              width: width * 0.4,
-              height: h,
-              transform: [{ rotate: "-10deg" }, { translateX: sheenTranslateX as any }],
-              opacity: 0.08,
-            }}
-          >
-            <LinearGradient
-              colors={["transparent", "rgba(255,243,210,0.9)", "transparent"]}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={StyleSheet.absoluteFill}
-            />
-          </Animated.View>
-        </Animated.View>
-      </MaskedView>
-    </View>
-  );
-}
-
 /* ---------- Gold primitives ---------- */
 
 function GoldButton({ title, onPress, disabled = false }: { title: string; onPress: () => void; disabled?: boolean }) {
@@ -738,8 +583,8 @@ function LanguageOption({ language, label, isSelected, onPress }: {
 
 /* ----------------- Styles ----------------- */
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000" },
-  container: { flex: 1, backgroundColor: "#000", alignItems: "center" },
+  safe: { flex: 1, backgroundColor: darkColors.bg },
+  container: { flex: 1, backgroundColor: darkColors.bg, alignItems: "center" },
 
   topLightsContainer: { position: "absolute", top: 0, left: 0, right: 0 },
   slit: {
@@ -761,21 +606,21 @@ const styles = StyleSheet.create({
   input: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: "#E9C978",
+    color: darkColors.text,
     borderRadius: 16,
-    backgroundColor: "rgba(0,0,0,0.60)",
+    backgroundColor: darkColors.card,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: "rgba(0,0,0,0.60)",
+    backgroundColor: darkColors.card,
     borderRadius: 16,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: "#E9C978",
+    color: darkColors.text,
   },
   eyeButton: {
     paddingHorizontal: 12,
@@ -828,14 +673,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  rowText: { color: "#E9C978", fontSize: 15 },
+  rowText: { color: darkColors.text, fontSize: 15 },
 
   signUpContainer: {
     alignItems: "center",
     justifyContent: "center",
   },
   signUp: { 
-    color: "#E9C978", 
+    color: darkColors.text, 
     textAlign: "center", 
     fontSize: 15,
   },
@@ -1035,7 +880,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(251,191,36,0.1)",
   },
   languageOptionText: {
-    color: "#E9C978",
+    color: darkColors.text,
     fontSize: 12,
     fontWeight: "500",
     flex: 1,

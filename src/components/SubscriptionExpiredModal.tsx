@@ -1,3 +1,4 @@
+import { gold as GOLD } from '../theme/colors';
 import React from 'react';
 import {
   View,
@@ -13,16 +14,7 @@ import { useWallpaper } from '../contexts/WallpaperContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const GOLD = {
-  hi: "#FFF3D2",
-  a200: "#FDE68A",
-  a300: "#FCD34D",
-  y400: "#FACC15",
-  a400: "#FBBF24",
-  a500: "#F59E0B",
-  y600: "#CA8A04",
-  accent: "#FFB020",
-};
+
 
 interface SubscriptionExpiredModalProps {
   visible: boolean;
@@ -95,7 +87,7 @@ export default function SubscriptionExpiredModal({
             />
             
             {/* Inner container matching theme */}
-            <View style={[styles.innerContainer, { backgroundColor: getCardBackgroundColor() + 'F0' }]}>
+            <View style={[styles.innerContainer, { backgroundColor: getCardBackgroundColor() }]}>
               {/* Title */}
               <Text style={[styles.title, { color: getCardTextColor() }]}>{t.title}</Text>
               

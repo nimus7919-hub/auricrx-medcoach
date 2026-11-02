@@ -1,3 +1,4 @@
+import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
@@ -632,7 +633,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           >
             <Image source={require('../icon-library/filter-button-screen-med.png')} style={{ width: 22, height: 22, tintColor: getCardTextColor() }} />
           </TouchableOpacity>
-          <TouchableOpacity
+          <PremiumButton
             onPress={() => {
               if (buttonPressed) {
                 console.log('Button press ignored - already pressed');
@@ -654,7 +655,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
               {S.addMedication}
             </DynamicText>
-          </TouchableOpacity>
+          </PremiumButton>
         </View>
 
         {/* DEBUG: Show current medications */}
@@ -683,7 +684,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 {console.log('[MEDICATIONS DEBUG] Rendering medication:', med.name, 'quantity:', med.quantity, 'has quantity:', !!med.quantity)}
               </View>
               <View style={{ flexDirection: 'row', gap: 6 }}>
-                <TouchableOpacity
+                <PremiumButton
                   onPress={() => {
                     console.log('[MEDICATIONS DEBUG] Editing medication:', med.name, 'quantity:', med.quantity);
                     setEditForm({ 
@@ -709,7 +710,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   <DynamicText type="card" style={{ color: '#ffffff', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
                     {S.editMed}
                   </DynamicText>
-                </TouchableOpacity>
+                </PremiumButton>
                 <TouchableOpacity
                   onPress={() => findNearbyMedications(med)}
                   style={{
@@ -929,7 +930,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     </View>
                     {/* Only show Add Component button when multi is checked */}
                     {!addForm.isSingleComponent && (
-                      <TouchableOpacity
+                      <PremiumButton
                         onPress={addComponent}
                         style={{
                           backgroundColor: theme.accent,
@@ -943,7 +944,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                       <DynamicText type="card" style={{ color: '#ffffff', fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>
                         +
                       </DynamicText>
-                    </TouchableOpacity>
+                    </PremiumButton>
                     )}
                   </View>
 
@@ -1298,7 +1299,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   ))}
                 </View>
 
-                <TouchableOpacity
+                <PremiumButton
                   onPress={handleAddMed}
                   style={{
                     backgroundColor: theme.accent,
@@ -1311,7 +1312,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
                     {S.add}
                   </DynamicText>
-                </TouchableOpacity>
+                </PremiumButton>
               </ScrollView>
             </View>
           </TouchableOpacity>
@@ -1669,7 +1670,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     </DynamicText>
                   </TouchableOpacity>
                   
-                  <TouchableOpacity
+                  <PremiumButton
                     onPress={handleEditMed}
                     style={{
                       backgroundColor: theme.accent,
@@ -1684,7 +1685,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
                       {S.saveBtn}
                     </DynamicText>
-                  </TouchableOpacity>
+                  </PremiumButton>
                 </View>
               </ScrollView>
             </View>
