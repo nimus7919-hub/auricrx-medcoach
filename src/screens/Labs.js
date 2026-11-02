@@ -35,7 +35,7 @@ export default function createLabs(getScope) {
         const { coords } = await Location.getCurrentPositionAsync({});
         
         // Import the lab search function
-        const { findNearbyLabs, getTestTypesForLab } = await import('./services/labSearch');
+        const { findNearbyLabs, getTestTypesForLab } = await import('../../services/labSearch');
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
         
         // Add test types to each lab

@@ -1789,7 +1789,7 @@ useEffect(() => {
       // Load pharmacies
       setPharmaciesLoading(true);
       try {
-        const { findNearbyPharmacies } = await import('./services/pharmacySearch');
+        const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         setPharmacies(nearbyPharmacies);
         console.log('🏪 Auto-loaded pharmacies:', nearbyPharmacies.length);
@@ -1815,7 +1815,7 @@ useEffect(() => {
       // Load labs
       setLabsLoading(true);
       try {
-        const { findNearbyLabs } = await import('./services/labSearch');
+        const { findNearbyLabs } = await import('../../services/labSearch');
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
         setLabs(nearbyLabs);
         console.log('🧪 Auto-loaded labs:', nearbyLabs.length);
@@ -1876,7 +1876,7 @@ useEffect(() => {
         console.log('💰 Auto-detected currency:', determinedCurrency);
         
         // Load pharmacies for refill modal (same as regular pharmacies but stored separately)
-        const { findNearbyPharmacies } = await import('./services/pharmacySearch');
+        const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
         const refillPharmaciesData = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         setRefillPharmacies(refillPharmaciesData);
         console.log('💊 Auto-loaded refill pharmacies:', refillPharmaciesData.length);

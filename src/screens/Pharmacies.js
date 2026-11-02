@@ -33,7 +33,7 @@ export default function createPharmacies(getScope) {
         const { coords } = await Location.getCurrentPositionAsync({});
         
         // Import the pharmacy search function
-        const { findNearbyPharmacies } = await import('./services/pharmacySearch');
+        const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         
         setPharmacies(nearbyPharmacies);
