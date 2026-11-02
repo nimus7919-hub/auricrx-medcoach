@@ -25,6 +25,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
 import Svg, { Rect, Defs, RadialGradient, Stop, Polygon } from "react-native-svg";
 import SignUpForm from "./SignUpForm";
+import GoogleAuthButton, { googleAuthText } from "../components/GoogleAuthButton";
 import authService from '../services/authService';
 import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
@@ -47,6 +48,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
   const [showPassword, setShowPassword] = useState(false);
   const [showSignUpForm, setShowSignUpForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('es');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [staySignedIn, setStaySignedIn] = useState(false);
@@ -120,6 +122,23 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
       Alert.alert('Error', 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (loading || googleLoading) return;
+    setGoogleLoading(true);
+    try {
+      const result = await authService.signInWithGoogle();
+      if (!result.success) {
+        Alert.alert('Error', result.error || googleAuthText(selectedLanguage).error);
+        return;
+      }
+      await onAuthSuccess({ provider: 'google', user: result.user });
+    } catch (error) {
+      Alert.alert('Error', googleAuthText(selectedLanguage).error);
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -297,6 +316,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
   if (showSignUpForm) {
     return (
       <SignUpForm 
+        onGoogleSuccess={onAuthSuccess}
         onSignUp={handleSignUp} 
         onClose={() => setShowSignUpForm(false)}
         selectedLanguage={selectedLanguage}
@@ -483,9 +503,11 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           <GoldButton 
             title={loading ? "Loading..." : t.signIn} 
             onPress={onSignIn} 
-            disabled={loading}
+            disabled={loading || googleLoading}
           />
 
+          <GoogleAuthButton language={selectedLanguage} loading={googleLoading}
+            disabled={loading || googleLoading} onPress={handleGoogleSignIn} />
           <View style={{ height: 20 }} />
 
           {/* Resubscribe Button - Shows when subscription is cancelled/expired */}
@@ -509,7 +531,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
               {t.dontHaveAccount}{" "}
               <Text 
                 style={styles.signUpLink}
-                onPress={() => setShowSignUpForm(true)}
+                onPress={() => { if (!loading && !googleLoading) setShowSignUpForm(true); }}
               >
                 {t.signUp}
               </Text>

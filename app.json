@@ -11,7 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-    "scheme": "auricrx-medcoach",
+    "scheme": ["auricrx-medcoach", "com.auricrx.medcoach"],
     "assetBundlePatterns": [
       "**/*"
     ],

@@ -1956,7 +1956,24 @@ export default function App() {
     console.log('✅ Auth success:', authData);
     try {
       console.log('🔄 Processing auth data...');
-      const result = await authService.handleAuth(authData);
+      // Google has already authenticated with Firebase; reuse the common success flow.
+      const firebaseGoogleUser = authData.provider === 'google' ? authService.getCurrentUser() : null;
+      if (authData.provider === 'google' && (!firebaseGoogleUser || firebaseGoogleUser.uid !== authData.user?.uid)) {
+        throw new Error('Google authentication session is unavailable. Please try again.');
+      }
+      const result = authData.provider === 'google'
+        ? { success: true, user: authData.user }
+        : await authService.handleAuth(authData);
+      if (authData.provider === 'google') {
+        const profile = await authService.getUserData(result.user.uid);
+        if (!profile.success && profile.error === 'User data not found') {
+          const [firstName, ...lastName] = (result.user.displayName || '').split(' ');
+          await authService.storeUserData(result.user.uid, {
+            firstName, lastName: lastName.join(' '), email: result.user.email,
+            createdAt: new Date().toISOString(),
+          });
+        }
+      }
       
       if (result.success) {
         // Check if email verification is needed

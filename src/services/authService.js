@@ -14,11 +14,14 @@ import {
 import { auth } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 import * as FileSystem from 'expo-file-system';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { googleAuthConfig, getExpoClientId, getGoogleClientIdForPlatform } from '../config/googleOAuth';
+import { googleAuthConfig, getGoogleClientIdForPlatform } from '../config/googleOAuth';
 import { startTrial } from './trialService';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const GOOGLE_DISCOVERY = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -168,10 +171,12 @@ class AuthService {
   // Google Sign-In (Expo + native support)
   async signInWithGoogle() {
     try {
-      const useProxy = Constants.appOwnership === 'expo';
-      const platformClientId = getGoogleClientIdForPlatform(Platform.OS);
-      const expoClientId = getExpoClientId();
-      const clientId = useProxy ? (expoClientId ?? platformClientId) : (platformClientId ?? expoClientId);
+      if (Constants.appOwnership === 'expo') {
+        return { success: false, error: 'Google Sign-In requires a development build. Open this app in your installed dev build.' };
+      }
+      const clientId = Platform.OS === 'android'
+        ? googleAuthConfig.androidClientId
+        : getGoogleClientIdForPlatform(Platform.OS);
 
       if (!clientId) {
         console.warn('⚠️ Google Sign-In attempted without client ID configuration');
@@ -184,7 +189,7 @@ class AuthService {
       const redirectUri = AuthSession.makeRedirectUri({
         scheme: googleAuthConfig.redirectScheme,
         path: googleAuthConfig.redirectPath,
-        useProxy,
+        native: Platform.OS === 'android' ? 'com.auricrx.medcoach:/oauthredirect' : undefined,
       });
 
       const authRequest = new AuthSession.AuthRequest({
@@ -195,9 +200,9 @@ class AuthService {
         redirectUri,
       });
 
-      const result = await authRequest.promptAsync(GOOGLE_DISCOVERY, { useProxy });
+      const result = await authRequest.promptAsync(GOOGLE_DISCOVERY);
 
-      if (result.type === 'dismiss') {
+      if (result.type === 'dismiss' || result.type === 'cancel') {
         return {
           success: false,
           error: 'Google Sign-In was cancelled.',
@@ -207,7 +212,7 @@ class AuthService {
       if (result.type !== 'success' || !result.params?.code) {
         const errorDescription =
           result.params?.error_description ||
-          result.error ||
+          result.error?.message ||
           'Google Sign-In failed. Please try again.';
         console.warn('⚠️ Google Sign-In did not complete successfully:', result);
         return {

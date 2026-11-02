@@ -15,6 +15,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import authService from '../services/authService';
+import GoogleAuthButton, { googleAuthText } from '../components/GoogleAuthButton';
 import consentCheckboxText from '../legal/consentCheckboxText.json';
 import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
@@ -32,12 +34,13 @@ const GOLD = {
 
 interface SignUpFormProps {
   onSignUp: (userData: any) => void;
+  onGoogleSuccess: (data: any) => Promise<void>;
   onClose: () => void;
   onLanguageChange?: (lang: string) => void;
   selectedLanguage?: string;
 }
 
-export default function SignUpForm({ onSignUp, onClose, onLanguageChange, selectedLanguage = 'es' }: SignUpFormProps) {
+export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLanguageChange, selectedLanguage = 'es' }: SignUpFormProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -49,6 +52,7 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
     age: "",
   });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(selectedLanguage);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -657,6 +661,26 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
   };
 
   const t = getTranslations(currentLanguage);
+  const handleGoogleSignIn = async () => {
+    if (loading || googleLoading || !agreedToTerms) return;
+    if (!formData.age || Number(formData.age) < 18) {
+      Alert.alert('Error', t.ageRestrictionError);
+      return;
+    }
+    setGoogleLoading(true);
+    try {
+      const result = await authService.signInWithGoogle();
+      if (!result.success) {
+        Alert.alert('Error', result.error || googleAuthText(currentLanguage).error);
+        return;
+      }
+      await onGoogleSuccess({ provider: 'google', user: result.user });
+    } catch (error) {
+      Alert.alert('Error', googleAuthText(currentLanguage).error);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
   const consentTexts = consentCheckboxText as Record<string, string>;
   const consentText = consentTexts[currentLanguage] || consentTexts.en;
 
@@ -1032,12 +1056,14 @@ export default function SignUpForm({ onSignUp, onClose, onLanguageChange, select
             <GoldButton
               title={loading ? t.creatingAccount : t.createAccountButton}
               onPress={handleSignUp}
-              disabled={loading || !agreedToTerms}
+              disabled={loading || googleLoading || !agreedToTerms}
             />
 
             <View style={{ height: 16 }} />
 
-            <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
+            <GoogleAuthButton language={currentLanguage} loading={googleLoading}
+              disabled={loading || googleLoading || !agreedToTerms} onPress={handleGoogleSignIn} />
+            <TouchableOpacity disabled={loading || googleLoading} onPress={onClose} style={styles.cancelButton}>
               <Text style={styles.cancelText}>{t.cancel}</Text>
             </TouchableOpacity>
           </View>
