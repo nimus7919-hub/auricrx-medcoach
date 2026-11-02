@@ -38,8 +38,8 @@
     "extra": {
       "googleAuth": {
         "iosClientId": "1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1.apps.googleusercontent.com",
-        "androidClientId": "1043512593259-4v9d860v74rs76ms9oa0gc0nglk0so8o.apps.googleusercontent.com",
-        "webClientId": "",
+        "androidClientId": "1043512593259-4mrlc7bm03354lo0m96aub399e6fqpe8.apps.googleusercontent.com",
+        "webClientId": "1043512593259-mkpcv9c0boht5j478n3eaamo87fl4i8d.apps.googleusercontent.com",
         "redirectScheme": "auricrx-medcoach",
         "redirectPath": "auth"
       },
