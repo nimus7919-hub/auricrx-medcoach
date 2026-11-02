@@ -5,6 +5,12 @@ const admin = require('./firebase-admin');
 const NOTICE_VERSION = '2026-11-02';
 
 module.exports = function registerCompliance(app, sql, getStripe) {
+  // Ensure the consents table exists (idempotent; mirrors migrate-consents.sql).
+  (async () => { try {
+    await sql`CREATE TABLE IF NOT EXISTS consents (id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, user_id TEXT NOT NULL, recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), notice_version TEXT NOT NULL, method TEXT NOT NULL CHECK (method IN ('email', 'google')), terms BOOLEAN NOT NULL, privacy BOOLEAN NOT NULL, health BOOLEAN NOT NULL)`;
+    await sql`CREATE INDEX IF NOT EXISTS consents_user_latest ON consents(user_id, id DESC)`;
+    console.log('[compliance] consents table ready');
+  } catch (e) { console.error('[compliance] consents migration failed:', e?.message); } })();
   async function identity(req, res, next) {
     try {
       const token = /^Bearer (.+)$/i.exec(req.headers.authorization || '')?.[1];
@@ -33,7 +39,7 @@ module.exports = function registerCompliance(app, sql, getStripe) {
         WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
       const current = rows[0];
       res.json(current?.notice_version === NOTICE_VERSION ? current : { terms: false, privacy: false, health: false });
-    } catch { res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
+    } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
   });
   app.post('/api/consents', identity, async (req, res) => {
     const { terms, privacy, health, noticeVersion } = req.body;
@@ -46,7 +52,7 @@ module.exports = function registerCompliance(app, sql, getStripe) {
       await sql`INSERT INTO consents (user_id, notice_version, method, terms, privacy, health)
         VALUES (${req.complianceUser.uid}, ${noticeVersion}, ${method}, ${terms}, ${privacy}, ${health})`;
       res.json({ ok: true });
-    } catch { res.status(503).json({ error: 'CONSENT_NOT_SAVED' }); }
+    } catch (e) { console.error('[consents] save failed:', e?.message); res.status(503).json({ error: 'CONSENT_NOT_SAVED' }); }
   });
   app.delete('/api/account', identity, async (req, res) => {
     const uid = req.complianceUser.uid;
@@ -107,7 +113,7 @@ module.exports = function registerCompliance(app, sql, getStripe) {
         const rows = await sql`SELECT health, notice_version FROM consents WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
         if (!rows[0]?.health || rows[0].notice_version !== NOTICE_VERSION) return res.status(403).json({ error: 'HEALTH_CONSENT_REQUIRED' });
         return next();
-      } catch { res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
+      } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
     });
   });
 };
