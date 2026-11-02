@@ -802,8 +802,6 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
               <LinearGradient colors={['rgba(255,235,196,0.035)', 'rgba(3,18,32,0.65)']} style={StyleSheet.absoluteFill}/>
             </View>
             <Text style={styles.title}>{t.createAccount}</Text>
-            <GoogleAuthButton variant="vip" language={currentLanguage} loading={googleLoading} disabled={loading || googleLoading} onPress={handleGoogleSignIn}/>
-            <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>{googleAuthText(currentLanguage).or}</Text><View style={styles.line}/></View>
             {/* Age Restriction Notice */}
             <View style={styles.ageRestrictionNotice}>
               <Text style={styles.ageRestrictionText}>{t.ageRestriction}</Text>
