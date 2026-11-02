@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AuricRX · Portal de farmacias</title>
+<style>body{font:16px system-ui;max-width:850px;margin:40px auto;padding:20px;background:#faf8f3;color:#223}input,button,textarea{font:inherit;padding:10px;margin:6px 0;display:block;max-width:100%;box-sizing:border-box}textarea{width:100%;height:180px}section{border-top:1px solid #ccc;margin-top:24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>Portal de farmacias</h1>
+<label>Clave de acceso <input id="token" type="password" autocomplete="off"></label>
+<label>ID de socio (solo administrador) <input id="partner"></label><button id="load">Consultar mi catálogo y precios</button>
+<section><h2>Actualizar precios</h2><p>CSV: active_ingredient,strength,form,ean,store_id,price_mxn,observed_at. Se aceptan solo productos y sucursales autorizados. Los precios se muestran como “Precio verificado”.</p>
+<input id="file" type="file" accept=".csv,text/csv"><textarea id="csv" aria-label="Contenido CSV"></textarea><button id="upload">Importar CSV</button></section>
+<section><h2>Promoción OTC · Patrocinado</h2><p>Consulte a su medico. Solo medicamentos clasificados OTC; Rx y clasificación desconocida están bloqueados.</p>
+<label>Producto <input id="product"></label><label>Título <input id="title" maxlength="160"></label>
+<label>Inicio <input id="start" type="datetime-local"></label><label>Fin <input id="end" type="datetime-local"></label><button id="sponsor">Publicar Patrocinado</button>
+<label>ID de promoción para detener <input id="stopId" type="number" min="1"></label><button id="stop">Detener promoción</button></section>
+<p id="status" role="status"></p><pre id="data"></pre>
+<script>
+const el=id=>document.getElementById(id);
+async function api(path,method='GET',body,csv=false){
+  const r=await fetch('/api/partner/prices'+path,{method,headers:{Authorization:'Bearer '+el('token').value,'X-Partner-Id':el('partner').value,...(body?{'Content-Type':csv?'text/csv':'application/json'}:{})},body:body?(csv?body:JSON.stringify(body)):undefined});
+  const j=await r.json();if(!r.ok)throw Error(j.error||'Error');return j;
+}
+async function run(fn){try{el('status').textContent='Procesando…';const data=await fn();el('status').textContent='Completado';el('data').textContent=JSON.stringify(data,null,2);}catch(e){el('status').textContent=e.message;}}
+el('load').onclick=()=>run(()=>api('/feed'));
+el('file').onchange=async()=>{if(el('file').files[0])el('csv').value=await el('file').files[0].text();};
+el('upload').onclick=()=>run(()=>api('/feed','POST',el('csv').value,true));
+el('sponsor').onclick=()=>run(()=>api('/placements','POST',{product_id:el('product').value,title:el('title').value,starts_at:new Date(el('start').value).toISOString(),ends_at:new Date(el('end').value).toISOString()}));
+el('stop').onclick=()=>run(()=>api('/placements/'+encodeURIComponent(el('stopId').value)+'/stop','POST',{}));
+</script></html>

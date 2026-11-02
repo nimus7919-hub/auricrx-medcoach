@@ -4,12 +4,13 @@ import * as Location from "expo-location";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";
 import { openInMaps } from "../utils/maps";
+import { API_BASE } from "../src/config/api";
 import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../services/pharmacySearch";
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 import medicationDataCollector from "../services/medicationDataCollector";
 
-interface MedicationInfo { name: string; dosage: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
+interface MedicationInfo { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
 interface Props { 
   visible: boolean; 
   onClose: () => void; 
@@ -28,6 +29,15 @@ interface Props {
 export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry, onRefillComplete, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }: Props) {
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
+  const [placements, setPlacements] = useState<Array<{ id: string; title: string; chain: string }>>([]);
+  useEffect(() => {
+    if (!visible) return;
+    let active = true;
+    setPlacements([]);
+    fetch(API_BASE + '/api/prices/placements').then(r => r.ok ? r.json() : { placements: [] })
+      .then(j => { if (active) setPlacements(j.placements || []); }).catch(() => {});
+    return () => { active = false; };
+  }, [visible]);
   const [results, setResults] = useState<StorePrice[]>([]);
   const [sort, setSort] = useState<'distance'|'price'|'name'>('distance');
   const [descending, setDescending] = useState(false);
@@ -35,7 +45,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   const SORT_KEY = 'AURIC_SORT';
   
   // ENABLED: Enhanced medication search instance for Excel integration
-  const enhancedSearch = useRef(new EnhancedMedicationSearch()).current;
+
 
   useEffect(()=>{
     AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
@@ -156,76 +166,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         return;
       }
       
-      // ENABLED: Excel integration with React Native compatible reader
-      console.log('🔍 DEBUG: Attempting Excel integration with React Native compatible reader');
-      console.log('🔍 DEBUG: Input data:', {
-        nearCount: near.length,
-        medication: medication.name,
-        dosage: medication.dosage,
-        currency: determinedCurrency,
-        userCountry: userCountry
-      });
-      
-      try {
-        // Try Excel integration first
-        const { prices: excelPrices, meta: excelMeta } = await enhancedSearch.searchMedicationPrices(
-          near, 
-          medication, 
-          { 
-            currency: determinedCurrency.toUpperCase(),
-            userCountry: userCountry
-          }
-        );
-        
-        console.log('🔍 DEBUG: Excel integration returned:', {
-          pricesCount: excelPrices.length,
-          samplePrices: excelPrices.slice(0, 3).map(p => ({
-            name: p.name,
-            price: p.price,
-            priceNotAvailable: p.priceNotAvailable,
-            excelMatch: p.excelMatch
-          }))
-        });
-        
-        setResults(excelPrices);
-        if (excelMeta) setFxMeta(excelMeta);
-        setMockMode(false); // Excel data is real, not mock
-        
-      } catch (excelError) {
-        console.log('⚠️ DEBUG: Excel integration failed, using fallback:', excelError.message);
-        
-        // Fallback to original method
-        console.log('🔍 DEBUG: Calling getMedicationPrices with:', {
-          nearCount: near.length,
-          medication: medication.name,
-          currency: determinedCurrency
-        });
-        
-        // Create enhanced medication object with quantity unit for better search
-        const enhancedMedication = {
-          ...medication,
-          // Add quantity unit to the search query for better filtering
-          searchQuery: medication.quantityUnit ? 
-            `${medication.name} ${medication.quantityUnit}` : 
-            medication.name
-        };
-        
-        const { prices, meta } = await getMedicationPrices(near, enhancedMedication, { currency: determinedCurrency.toUpperCase() });
-        
-        console.log('🔍 DEBUG: getMedicationPrices returned:', {
-          pricesCount: prices.length,
-          samplePrices: prices.slice(0, 3).map(p => ({
-            name: p.name,
-            price: p.price,
-            priceNotAvailable: p.priceNotAvailable,
-            pharmacyNotAvailable: p.pharmacyNotAvailable
-          }))
-        });
-        
-        setResults(prices);
-        if (meta) setFxMeta(meta);
-        setMockMode(near.some(p => p.id.startsWith('mock-')));
-      }
+      const { prices, meta } = await getMedicationPrices(near, medication, { currency: 'MXN' });
+      setResults(prices);
+      setCurrency('MXN');
+      if (meta) setFxMeta(meta);
+      setMockMode(false);
     } catch (e) {
       console.warn('Refill load error', e);
     } finally {
@@ -476,9 +421,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     console.log('[PHARMACY DEBUG] excelMatch.unidades:', item.excelMatch?.unidades);
     return (
       <Pressable
-        onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
+        onPress={() => item.online
+          ? (item.purchase_url && !item.priceNotAvailable ? Linking.openURL(item.purchase_url) : undefined)
+          : openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
         accessibilityRole="button"
-        accessibilityLabel={`Open directions to ${item.name}`}
+        accessibilityLabel={item.online ? `Open ${item.name}` : `Open directions to ${item.name}`}
         hitSlop={8}
         style={{
           backgroundColor: colors.card,
@@ -538,18 +485,27 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
               </Pressable>
             </View>
           ) : (
-            <Text style={{ color: colors.text, fontSize:18, fontWeight:'700' }}>
+            <Text style={{ color: item.stale ? colors.sub : colors.text, fontSize:18, fontWeight:'700' }}>
               {typeof item.price==='number'? formatPrice(item.price): '—'}
             </Text>
           )}
+          {item.observed_at && (
+            <Text style={{ color: colors.sub, fontSize: 11, maxWidth: 210 }}>
+              {lang === 'es'
+                ? 'Precio de referencia consultado el ' + new Date(item.observed_at).toLocaleDateString('es-MX') + '. Puede variar en tienda.'
+                : 'Reference price checked on ' + new Date(item.observed_at).toLocaleDateString('en-US') + '. May vary in store.'}
+            </Text>
+          )}
+          {item.verified && !item.priceNotAvailable && <Text style={{ color: colors.sub, fontSize: 11 }}>Precio verificado</Text>}
+          {item.purchase_url && !item.priceNotAvailable && <Pressable onPress={() => Linking.openURL(item.purchase_url!)}><Text style={{ color: colors.sub }}>Mercado Libre ?</Text></Pressable>}
           {isLowest && !item.priceNotAvailable && (
             <View style={{ backgroundColor: colors.gold, paddingHorizontal:8, paddingVertical:2, borderRadius: radius.pill }}>
               <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest||'Lowest'}</Text>
             </View>
           )}
-          <Pressable onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })} style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 6, minHeight:32, justifyContent:'center' }}>
+          {!item.online && (<Pressable onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })} style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 6, minHeight:32, justifyContent:'center' }}>
             <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{strings.directions || 'Directions'}</Text>
-          </Pressable>
+          </Pressable>)}
         </View>
       </Pressable>
     );
@@ -624,7 +580,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
               <FlatList
         data={data}
                 keyExtractor={item => item.id}
-                getItemLayout={(_, index) => ({ length: 84, offset: 84 * index, index })}
+                ListHeaderComponent={placements.length ? <View style={{ padding: 12, gap: 8 }}>
+                  {placements.map(ad => <View key={ad.id} style={{ padding: 10, backgroundColor: colors.muted }}>
+                    <Text style={{ color: colors.sub }}>Patrocinado ? {ad.chain}</Text>
+                    <Text style={{ color: colors.text }}>{ad.title}</Text>
+                    <Text style={{ color: colors.sub }}>Consulte a su medico</Text>
+                  </View>)}
+                </View> : null}
                 renderItem={renderItem}
               />
             )}

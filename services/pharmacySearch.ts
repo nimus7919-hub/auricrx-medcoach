@@ -10,7 +10,12 @@ export type Pharmacy = {
 };
 
 export type StorePrice = Pharmacy & {
-  price: number | null; // USD for now, null when not available
+  observed_at?: string;
+  stale?: boolean;
+  verified?: boolean;
+  purchase_url?: string;
+  online?: boolean;
+  price: number | null; // Recorded MXN reference price, null when missing or stale
   priceNotAvailable?: boolean; // Flag for "Price not available"
   pharmacyNotAvailable?: boolean; // Flag for "Pharmacy not available"
   pickup?: boolean;
@@ -83,7 +88,7 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   }
 }
 
-export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string }, opts?: { currency?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number; fxTs?: number } }> {
+export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string }, opts?: { currency?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number; fxTs?: number } }> {
   console.log('🔍 DEBUG: getMedicationPrices called with:', {
     pharmaciesCount: pharmacies.length,
     medication: medication.name,
