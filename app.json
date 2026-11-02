@@ -41,7 +41,12 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1"
+        }
+      ],
       "@react-native-firebase/auth"
     ],
     "extra": {

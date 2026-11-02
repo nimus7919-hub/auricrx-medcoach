@@ -8,5 +8,11 @@ module.exports = () => {
     const value = process.env[`GOOGLE_${suffix}_CLIENT_ID_${profile.toUpperCase()}`];
     if (value) googleAuth[key] = value;
   }
-  return { ...config.expo, extra: { ...config.expo.extra, googleAuth } };
+  const plugins = config.expo.plugins.map((plugin) => {
+    if (Array.isArray(plugin) && plugin[0] === '@react-native-google-signin/google-signin') {
+      return [plugin[0], { ...plugin[1], iosUrlScheme: googleAuth.iosClientId.split('.').reverse().join('.') }];
+    }
+    return plugin;
+  });
+  return { ...config.expo, plugins, extra: { ...config.expo.extra, googleAuth } };
 };

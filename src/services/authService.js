@@ -24,7 +24,7 @@ import { Platform } from 'react-native';
 import { googleAuthConfig, getGoogleClientIdForPlatform } from '../config/googleOAuth';
 import { startTrial } from './trialService';
 
-WebBrowser.maybeCompleteAuthSession();
+if (Platform.OS === 'web') WebBrowser.maybeCompleteAuthSession();
 
 const GOOGLE_DISCOVERY = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -35,17 +35,22 @@ const GOOGLE_DISCOVERY = {
 class AuthService {
   constructor() {
     this.auth = auth;
-    // this.configureGoogleSignIn();
+    this.googleSignInConfigured = false;
   }
 
   // Configure Google Sign-In
   configureGoogleSignIn() {
-    // GoogleSignin.configure({
-    //   webClientId: '1043512593259-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com', // From Firebase Console
-    //   offlineAccess: true,
-    //   hostedDomain: '',
-    //   forceCodeForRefreshToken: true,
-    // });
+    // Load only on native so web and Expo Go do not initialize the native module.
+    const { GoogleSignin } = require('@react-native-google-signin/google-signin');
+    if (!this.googleSignInConfigured) {
+      GoogleSignin.configure({
+        webClientId: googleAuthConfig.webClientId,
+        iosClientId: googleAuthConfig.iosClientId,
+        offlineAccess: false,
+      });
+      this.googleSignInConfigured = true;
+    }
+    return GoogleSignin;
   }
 
   // Email/Password Authentication
@@ -179,12 +184,29 @@ class AuthService {
   // Google Sign-In (Expo + native support)
   async signInWithGoogle() {
     try {
-      if (Constants.appOwnership === 'expo') {
+      if (Platform.OS !== 'web' && Constants.appOwnership === 'expo') {
         return { success: false, error: 'Google Sign-In requires a development build. Open this app in your installed dev build.' };
       }
-      const clientId = Platform.OS === 'android'
-        ? googleAuthConfig.androidClientId
-        : getGoogleClientIdForPlatform(Platform.OS);
+      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+        if (!googleAuthConfig.webClientId) {
+          return { success: false, error: 'Google Sign-In is not configured. Please add your Google web client ID.' };
+        }
+        const GoogleSignin = this.configureGoogleSignIn();
+        if (Platform.OS === 'android') {
+          await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        }
+        const response = await GoogleSignin.signIn();
+        if (response.type === 'cancelled') {
+          return { success: false, error: 'Google Sign-In was cancelled.' };
+        }
+        const idToken = response.data?.idToken;
+        if (!idToken) {
+          return { success: false, error: 'Google Sign-In did not return a valid ID token. Please try again.' };
+        }
+        return await this.signInWithGoogleTokens(idToken);
+      }
+
+      const clientId = getGoogleClientIdForPlatform('web');
 
       if (!clientId) {
         console.warn('⚠️ Google Sign-In attempted without client ID configuration');
@@ -197,7 +219,6 @@ class AuthService {
       const redirectUri = AuthSession.makeRedirectUri({
         scheme: googleAuthConfig.redirectScheme,
         path: googleAuthConfig.redirectPath,
-        native: Platform.OS === 'android' ? 'com.auricrx.medcoach:/oauthredirect' : undefined,
       });
 
       const authRequest = new AuthSession.AuthRequest({
