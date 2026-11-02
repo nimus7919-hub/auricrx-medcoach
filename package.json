@@ -10,7 +10,7 @@
     "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <21"
   },
   "packageManager": "npm@10.9.3",
   "dependencies": {
