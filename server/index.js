@@ -2709,6 +2709,7 @@ app.get('/api/me/subscription', async (req, res) => {
     }
     
     console.log('✅ SERVER: SQL function succeeded');
+    console.log('📊 SERVER: subscription status', JSON.stringify({ plan: status.plan, status: status.status, daysLeft: status.daysLeft, trialStart: status.trial?.startedAt, trialEnd: status.trial?.endsAt, periodEnd: status.currentPeriodEnd }));
     res.json({
       ok: true,
       ...status

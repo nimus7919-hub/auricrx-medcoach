@@ -166,7 +166,7 @@ export default function App() {
             // Only block access if subscription is EXPIRED (0 days left)
             // Cancelled subscriptions should still allow access until period ends
             const daysLeft = status.daysLeft || 0;
-            const isExpired = status.status === 'expired' || daysLeft === 0;
+            const isExpired = status.status === 'expired';
             
             if (isExpired) {
               // Subscription expired - keep auth screen open so user can resubscribe
@@ -2427,7 +2427,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             
             // Check if subscription has expired (0 days left)
             const daysLeft = status.daysLeft || 0;
-            const isExpired = status.status === 'expired' || daysLeft === 0;
+            const isExpired = status.status === 'expired';
             
             if (isExpired && status.plan !== 'pro') {
               console.log('⚠️ Subscription expired - showing modal');
