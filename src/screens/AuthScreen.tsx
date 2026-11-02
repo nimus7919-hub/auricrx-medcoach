@@ -15,6 +15,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { vip } from '../theme/vip';
 import DynamicText from '../components/DynamicText';
 
 interface AuthScreenProps {
@@ -40,7 +41,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: getCardBackgroundColor(),
+      backgroundColor: vip.colors.navy,
     },
     scrollContent: {
       flexGrow: 1,
@@ -57,57 +58,57 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
     },
     closeButtonText: {
       fontSize: 18,
-      color: getCardTextColor(),
+      color: vip.colors.white,
     },
     title: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: getCardTextColor(),
+      color: vip.colors.white,
       textAlign: 'center',
       marginBottom: 10,
     },
     subtitle: {
       fontSize: 16,
-      color: getCardTextColor() + '80',
+      color: vip.colors.muted,
       textAlign: 'center',
       marginBottom: 30,
     },
     formContainer: {
-      backgroundColor: getCardBackgroundColor(),
-      borderRadius: 12,
+      backgroundColor: vip.colors.glass,
+      borderRadius: vip.radius.card,
       padding: 20,
       borderWidth: 1,
-      borderColor: getCardBorderColor(),
+      borderColor: vip.colors.line,
     },
     input: {
-      backgroundColor: getCardBackgroundColor(),
+      backgroundColor: vip.colors.glass,
       borderWidth: 1,
-      borderColor: getCardBorderColor(),
-      borderRadius: 8,
+      borderColor: vip.colors.line,
+      borderRadius: vip.radius.button,
       padding: 15,
       fontSize: 16,
-      color: getCardTextColor(),
+      color: vip.colors.white,
       marginBottom: 15,
     },
     button: {
-      backgroundColor: '#3b82f6',
+      backgroundColor: vip.colors.gold,
       padding: 15,
-      borderRadius: 8,
+      borderRadius: vip.radius.button,
       alignItems: 'center',
       marginBottom: 15,
     },
     buttonText: {
-      color: '#ffffff',
+      color: vip.colors.onGold,
       fontSize: 16,
       fontWeight: '600',
     },
     secondaryButton: {
       backgroundColor: 'transparent',
       borderWidth: 1,
-      borderColor: getCardBorderColor(),
+      borderColor: vip.colors.line,
     },
     secondaryButtonText: {
-      color: getCardTextColor(),
+      color: vip.colors.white,
     },
     modeSelector: {
       flexDirection: 'row',
@@ -121,15 +122,15 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       borderBottomColor: 'transparent',
     },
     modeButtonActive: {
-      borderBottomColor: '#3b82f6',
+      borderBottomColor: vip.colors.gold,
     },
     modeButtonText: {
       fontSize: 14,
       fontWeight: '500',
-      color: getCardTextColor() + '80',
+      color: vip.colors.muted,
     },
     modeButtonTextActive: {
-      color: '#3b82f6',
+      color: vip.colors.gold,
       fontWeight: '600',
     },
     loadingContainer: {
@@ -140,7 +141,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
     },
     loadingText: {
       marginLeft: 10,
-      color: getCardTextColor(),
+      color: vip.colors.white,
     },
   });
 
@@ -203,14 +204,14 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
           <TextInput
             style={dynamicStyles.input}
             placeholder="First Name"
-            placeholderTextColor={getCardTextColor() + '60'}
+            placeholderTextColor={vip.colors.white + '60'}
             value={firstName}
             onChangeText={setFirstName}
           />
           <TextInput
             style={dynamicStyles.input}
             placeholder="Last Name"
-            placeholderTextColor={getCardTextColor() + '60'}
+            placeholderTextColor={vip.colors.white + '60'}
             value={lastName}
             onChangeText={setLastName}
           />
@@ -219,7 +220,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       <TextInput
         style={dynamicStyles.input}
         placeholder="Email"
-        placeholderTextColor={getCardTextColor() + '60'}
+        placeholderTextColor={vip.colors.white + '60'}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -228,7 +229,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       <TextInput
         style={dynamicStyles.input}
         placeholder="Password"
-        placeholderTextColor={getCardTextColor() + '60'}
+        placeholderTextColor={vip.colors.white + '60'}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -237,7 +238,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
         <TextInput
           style={dynamicStyles.input}
           placeholder="Confirm Password"
-          placeholderTextColor={getCardTextColor() + '60'}
+          placeholderTextColor={vip.colors.white + '60'}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -260,7 +261,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       <TextInput
         style={dynamicStyles.input}
         placeholder="Phone Number (e.g., +1234567890)"
-        placeholderTextColor={getCardTextColor() + '60'}
+        placeholderTextColor={vip.colors.white + '60'}
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
@@ -330,7 +331,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
 
         {loading && (
           <View style={dynamicStyles.loadingContainer}>
-            <ActivityIndicator color="#3b82f6" />
+            <ActivityIndicator color={vip.colors.gold} />
             <Text style={dynamicStyles.loadingText}>
               {authMode === 'phone' ? 'Sending verification code...' : 'Authenticating...'}
             </Text>

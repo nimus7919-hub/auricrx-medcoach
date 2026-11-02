@@ -1,3 +1,4 @@
+import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Platform, Keyboard, Modal } from 'react-native';
@@ -439,7 +440,7 @@ const Reminders = ({
                   setShowAdd(true);
                 }}
                 style={{
-                  backgroundColor: '#3B82F6',
+                  backgroundColor: vip.colors.goldDark,
                   borderRadius: 6,
                   paddingHorizontal: 8,
                   paddingVertical: 4

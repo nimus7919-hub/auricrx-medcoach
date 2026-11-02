@@ -1,3 +1,4 @@
+import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -421,14 +422,14 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     },
     // Edit doctor button styles
     editDoctorButton: {
-      backgroundColor: '#3B82F6' + 'CC',
+      backgroundColor: vip.colors.goldDark,
       borderRadius: 12,
       width: 24,
       height: 24,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
-      borderColor: '#3B82F6',
+      borderColor: vip.colors.goldDark,
     },
     editDoctorButtonText: {
       fontSize: 10,

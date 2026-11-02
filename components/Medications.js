@@ -1,3 +1,4 @@
+import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
@@ -788,12 +789,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                     }
                   }}
                   style={{
-                    backgroundColor: '#2196F3',
+                    backgroundColor: vip.colors.goldDark,
                     borderRadius: 4,
                     paddingHorizontal: 8,
                     paddingVertical: 2,
                     borderWidth: 1,
-                    borderColor: '#2196F3',
+                    borderColor: vip.colors.goldDark,
                     height: 20
                   }}
                 >

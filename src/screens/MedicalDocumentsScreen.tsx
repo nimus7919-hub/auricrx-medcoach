@@ -1,3 +1,4 @@
+import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -3476,7 +3477,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           </View>
           
           <TouchableOpacity
-            style={[dynamicStyles.actionButton, { backgroundColor: '#3B82F6' + 'CC' }]}
+            style={[dynamicStyles.actionButton, { backgroundColor: vip.colors.goldDark }]}
             onPress={() => viewDocument(document)}
           >
             <DynamicText type="card" style={dynamicStyles.actionButtonText}>👁️</DynamicText>
@@ -3574,7 +3575,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           </DynamicText>
       </View>
       <TouchableOpacity
-        style={[dynamicStyles.actionButton, { backgroundColor: '#3B82F6' + 'CC' }]}
+        style={[dynamicStyles.actionButton, { backgroundColor: vip.colors.goldDark }]}
         onPress={() => viewDocument(document)}
       >
         <DynamicText type="card" style={dynamicStyles.actionButtonText}>👁️</DynamicText>
@@ -4199,7 +4200,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                             The image file may be corrupted or in an unsupported format.
                           </DynamicText>
                           <TouchableOpacity
-                            style={[dynamicStyles.modalButton, { marginTop: 10, backgroundColor: '#3B82F6' }]}
+                            style={[dynamicStyles.modalButton, { marginTop: 10, backgroundColor: vip.colors.goldDark }]}
                             onPress={async () => {
                               try {
                                 console.log('🔍 Retrying image conversion to data URI...');
@@ -4408,7 +4409,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     <View style={dynamicStyles.idImageContainer}>
                       {imageLoading ? (
                         <View style={dynamicStyles.loadingContainer}>
-                          <ActivityIndicator size="large" color="#3B82F6" />
+                          <ActivityIndicator size="large" color={vip.colors.gold} />
                           <DynamicText type="card" style={dynamicStyles.loadingText}>
                             Loading front image...
                           </DynamicText>
@@ -4442,7 +4443,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     <View style={dynamicStyles.idImageContainer}>
                       {imageLoading ? (
                         <View style={dynamicStyles.loadingContainer}>
-                          <ActivityIndicator size="large" color="#3B82F6" />
+                          <ActivityIndicator size="large" color={vip.colors.gold} />
                           <DynamicText type="card" style={dynamicStyles.loadingText}>
                             Loading back image...
                           </DynamicText>
@@ -5129,7 +5130,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   selectionButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: vip.colors.glass,
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
@@ -5137,12 +5138,12 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
   selectionButtonActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: vip.colors.goldDark,
   },
   selectionButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#374151',
+    color: vip.colors.white,
     textAlign: 'center',
   },
   selectionButtonTextActive: {
@@ -5156,7 +5157,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   selectionActionButton: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: vip.colors.glass,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -5164,7 +5165,7 @@ const styles = StyleSheet.create({
   selectionActionButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#374151',
+    color: vip.colors.white,
   },
   shareSelectedButton: {
     backgroundColor: '#10b981',
