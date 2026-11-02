@@ -1,3 +1,8 @@
+import { BlurView } from 'expo-blur';
+import { Feather } from '@expo/vector-icons';
+import Svg, { Defs, RadialGradient, Stop, Rect, Line } from 'react-native-svg';
+import AuricWordmark from '../components/AuricWordmark';
+import { vip } from '../theme/vip';
 import { gold as GOLD } from '../theme/colors';
 import React, { useState, useMemo } from "react";
 import {
@@ -46,6 +51,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(selectedLanguage);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('US');
@@ -728,6 +734,14 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
   return (
     <SafeAreaView style={styles.safe}>
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 780">
+          <Defs><RadialGradient id="signupHalo" cx="50%" cy="20%" rx="42%" ry="22%"><Stop offset="0" stopColor="#AF792D" stopOpacity="0.48"/><Stop offset="1" stopColor={vip.colors.navy} stopOpacity="0"/></RadialGradient></Defs>
+          <Rect width="400" height="780" fill={vip.colors.navy}/>
+          {Array.from({length: 24}, (_, i) => <Line key={i} x1={-400 + i * 35} y1="610" x2={100 + i * 35} y2="70" stroke={vip.colors.gold} strokeOpacity={i % 4 === 0 ? 0.16 : 0.06} strokeWidth="0.6"/>)}
+          <Rect width="400" height="780" fill="url(#signupHalo)"/>
+        </Svg>
+      </View>
       <KeyboardAvoidingView 
         style={styles.container} 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -761,19 +775,35 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
           </View>
         </Modal>
 
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t.createAccount}</Text>
-          <Text style={styles.subtitle}>{t.joinAuricRX}</Text>
-        </View>
-
-        <ScrollView 
-          style={styles.scrollView} 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+        <Modal visible={showLanguageDropdown} transparent animationType="fade" onRequestClose={() => setShowLanguageDropdown(false)}>
+          <View style={styles.languageOverlay}>
+            <TouchableOpacity style={StyleSheet.absoluteFill} accessibilityLabel={t.close} onPress={() => setShowLanguageDropdown(false)}/>
+            <View style={styles.languageDropdown} accessibilityViewIsModal>
+              {Object.entries(languageLabels).map(([lang, label]) => <TouchableOpacity key={lang} style={styles.languageOption} accessibilityRole="radio" accessibilityState={{selected: lang === currentLanguage}} onPress={() => { setCurrentLanguage(lang); setShowLanguageDropdown(false); onLanguageChange?.(lang); }}>
+                <Text style={styles.languageOptionText}>{label}</Text><Text style={styles.link}>{lang === currentLanguage ? '\u2713' : lang.toUpperCase()}</Text>
+              </TouchableOpacity>)}
+            </View>
+          </View>
+        </Modal>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <View style={styles.topRow}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel={languageLabels[currentLanguage] || 'Language'} style={styles.languageSelector} onPress={() => setShowLanguageDropdown(true)}>
+              <Feather name="globe" color={vip.colors.gold} size={19}/><Text style={styles.languageSelectorText}>{currentLanguage.toUpperCase()}</Text><Feather name="chevron-down" size={15} color={vip.colors.gold}/>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.header}>
+            <View style={styles.wordmark}><AuricWordmark/></View>
+            <Text style={styles.brandSubtitle}>RX MEDCOACH</Text>
+            <Text style={styles.subtitle}>{t.joinAuricRX}</Text>
+          </View>
           <View style={styles.form}>
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.cardSurface]}>
+              <BlurView intensity={22} tint="dark" style={StyleSheet.absoluteFill}/>
+              <LinearGradient colors={['rgba(255,235,196,0.035)', 'rgba(3,18,32,0.65)']} style={StyleSheet.absoluteFill}/>
+            </View>
+            <Text style={styles.title}>{t.createAccount}</Text>
+            <GoogleAuthButton variant="vip" language={currentLanguage} loading={googleLoading} disabled={loading || googleLoading} onPress={handleGoogleSignIn}/>
+            <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>{googleAuthText(currentLanguage).or}</Text><View style={styles.line}/></View>
             {/* Age Restriction Notice */}
             <View style={styles.ageRestrictionNotice}>
               <Text style={styles.ageRestrictionText}>{t.ageRestriction}</Text>
@@ -783,7 +813,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             {/* Age Field */}
             <Text style={styles.label}>{t.age}</Text>
-            <GoldOutline>
+            <GoldOutline icon="calendar">
               <TextInput
                 value={formData.age}
                 onChangeText={(value) => {
@@ -805,7 +835,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
             <View style={styles.row}>
               <View style={styles.halfWidth}>
                 <Text style={styles.label}>{t.firstName}</Text>
-                <GoldOutline>
+                <GoldOutline icon="user">
                   <TextInput
                     value={formData.firstName}
                     onChangeText={(value) => handleInputChange('firstName', value)}
@@ -817,7 +847,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
               </View>
               <View style={styles.halfWidth}>
                 <Text style={styles.label}>{t.lastName}</Text>
-                <GoldOutline>
+                <GoldOutline icon="user">
                   <TextInput
                     value={formData.lastName}
                     onChangeText={(value) => handleInputChange('lastName', value)}
@@ -833,7 +863,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             {/* Username */}
             <Text style={styles.label}>{t.username}</Text>
-            <GoldOutline>
+            <GoldOutline icon="at-sign">
               <TextInput
                 value={formData.username}
                 onChangeText={(value) => handleInputChange('username', value)}
@@ -848,7 +878,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             {/* Email */}
             <Text style={styles.label}>{t.email}</Text>
-            <GoldOutline>
+            <GoldOutline icon="mail">
               <TextInput
                 value={formData.email}
                 onChangeText={(value) => handleInputChange('email', value)}
@@ -864,7 +894,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             {/* Password */}
             <Text style={styles.label}>{t.password}</Text>
-            <GoldOutline>
+            <GoldOutline icon="lock">
               <View style={styles.passwordInputContainer}>
                 <TextInput
                   value={formData.password}
@@ -903,7 +933,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             {/* Confirm Password */}
             <Text style={styles.label}>{t.confirmPassword}</Text>
-            <GoldOutline>
+            <GoldOutline icon="lock">
               <View style={styles.passwordInputContainer}>
                 <TextInput
                   value={formData.confirmPassword}
@@ -1003,7 +1033,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
               )}
             </View>
             
-            <GoldOutline>
+            <GoldOutline icon="phone">
               <View style={styles.phoneInputContainer}>
                 <View style={styles.countryCodeContainer}>
                   <Text style={styles.countryCode}>{countries[selectedCountry].code}</Text>
@@ -1044,12 +1074,10 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             <View style={{ height: 16 }} />
 
-            <GoogleAuthButton language={currentLanguage} loading={googleLoading}
-              disabled={loading || googleLoading} onPress={handleGoogleSignIn} />
-            <TouchableOpacity disabled={loading || googleLoading} onPress={onClose} style={styles.cancelButton}>
-              <Text style={styles.cancelText}>{t.cancel}</Text>
-            </TouchableOpacity>
           </View>
+          <TouchableOpacity accessibilityRole="button" disabled={loading || googleLoading} onPress={onClose} style={styles.cancelButton}>
+            <Text style={styles.cancelText}>{(accountCopy[currentLanguage] || accountCopy.en)[0]} <Text style={styles.link}>{(accountCopy[currentLanguage] || accountCopy.en)[1]}</Text></Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -1057,8 +1085,8 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 }
 
 // Gold outline container
-function GoldOutline({ children }: { children: React.ReactNode }) {
-  return <View style={styles.goldOutline}>{children}</View>;
+function GoldOutline({ children, icon }: { children: React.ReactNode; icon: React.ComponentProps<typeof Feather>['name'] }) {
+  return <View style={styles.field}><Feather name={icon} size={23} color={vip.colors.gold}/><View style={styles.goldOutline}>{children}</View></View>;
 }
 
 // Password requirement item
@@ -1109,9 +1137,9 @@ function GoldButton({ title, onPress, disabled = false }: { title: string; onPre
       disabled={disabled}
     >
       <LinearGradient
-        colors={[GOLD.a300, GOLD.y400, GOLD.a500]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+        colors={['#F7D798', '#C18B3D', '#ECC77E', '#AD752B']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.goldBtn}
       >
         <LinearGradient
@@ -1126,35 +1154,43 @@ function GoldButton({ title, onPress, disabled = false }: { title: string; onPre
   );
 }
 
+const languageLabels: Record<string, string> = { es: 'Espa\u00f1ol', en: 'English', pt: 'Portugu\u00eas', fr: 'Fran\u00e7ais', de: 'Deutsch', zh: '\u4e2d\u6587' };
+const accountCopy: Record<string, [string, string]> = {
+  en: ['Already have an account?', 'Sign in'], es: ['\u00bfYa tienes una cuenta?', 'Iniciar sesi\u00f3n'],
+  pt: ['J\u00e1 tem uma conta?', 'Entrar'], fr: ['Vous avez d\u00e9j\u00e0 un compte ?', 'Se connecter'],
+  de: ['Bereits ein Konto?', 'Anmelden'], zh: ['\u5df2\u6709\u8d26\u6237\uff1f', '\u767b\u5f55'],
+};
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000" },
-  container: { flex: 1, backgroundColor: "#000" },
-  header: {
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-    alignItems: "center",
-  },
+  topRow: {width: '100%', alignItems: 'flex-end', paddingTop: 18},
+  languageSelector: {flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 0.7, borderColor: vip.colors.gold, borderRadius: 15, paddingHorizontal: 13, minHeight: 38, backgroundColor: 'rgba(15,25,37,0.75)'},
+  languageSelectorText: {color: vip.colors.white, fontSize: 17},
+  languageOverlay: {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 28},
+  languageDropdown: {backgroundColor: vip.colors.navy, borderColor: vip.colors.gold, borderWidth: 1, borderRadius: 20, padding: 12},
+  languageOption: {minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16},
+  languageOptionText: {color: vip.colors.white, fontSize: 17},
+  wordmark: {width: '100%', aspectRatio: 440/128},
+  brandSubtitle: {color: vip.colors.white, fontSize: 17, letterSpacing: 5, marginTop: 7},
+  cardSurface: {borderRadius: vip.radius.card, overflow: 'hidden'},
+  field: {flexDirection: 'row', alignItems: 'center', gap: 10},
+  link: {color: vip.colors.gold, fontSize: 15},
+  divider: {flexDirection: 'row', alignItems: 'center', gap: 9, marginVertical: 16},
+  line: {flex: 1, height: 0.7, backgroundColor: vip.colors.line},
+  or: {color: vip.colors.white, fontSize: 16},
+  safe: { flex: 1, backgroundColor: vip.colors.navy },
+  container: { flex: 1 },
+  header: { width: '100%', maxWidth: 280, alignItems: 'center', marginTop: 28, marginBottom: 28 },
   title: {
     color: GOLD.y400,
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 8,
   },
-  subtitle: {
-    color: "#E9C978",
-    fontSize: 16,
-  },
+  subtitle: { color: vip.colors.gold, fontSize: 17, fontStyle: 'italic', marginTop: 8 },
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  form: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
+  scrollContent: { flexGrow: 1, alignItems: 'center', paddingHorizontal: vip.spacing.lg, paddingBottom: 32 },
+  form: { width: '100%', maxWidth: 380, padding: 22, borderRadius: vip.radius.card, borderWidth: 0.7, borderColor: vip.colors.gold, backgroundColor: 'rgba(3,16,28,0.78)' },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1162,28 +1198,10 @@ const styles = StyleSheet.create({
   halfWidth: {
     width: "48%",
   },
-  label: {
-    color: GOLD.a300,
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  input: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: "#E9C978",
-    borderRadius: 16,
-    backgroundColor: "rgba(0,0,0,0.60)",
-  },
-  goldOutline: {
-    borderRadius: 16,
-    padding: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    borderWidth: 1,
-    borderColor: "rgba(251,191,36,0.38)",
-    ...shadow(0, 6, 18, "rgba(255,176,32,.12)"),
-  },
-  goldBtnWrap: { borderRadius: 18, overflow: "hidden" },
+  label: { color: vip.colors.white, fontSize: 15, marginBottom: 4 },
+  input: { flex: 1, minWidth: 0, paddingVertical: 8, paddingHorizontal: 0, color: vip.colors.white, fontSize: 16, minHeight: 44 },
+  goldOutline: { flex: 1, minWidth: 0, borderBottomWidth: 0.7, borderColor: vip.colors.line },
+  goldBtnWrap: { borderRadius: vip.radius.button, overflow: 'hidden', borderWidth: 1, borderColor: vip.colors.goldLight, padding: 1, backgroundColor: vip.colors.goldDark },
   goldBtnDisabled: { opacity: 0.6 },
   goldBtn: {
     borderRadius: 18,
@@ -1206,19 +1224,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 18,
     opacity: 0.12,
   },
-  goldBtnText: {
-    color: "#0B0B0B",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  cancelButton: {
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  cancelText: {
-    color: "#AAAAAA",
-    fontSize: 16,
-  },
+  goldBtnText: { color: vip.colors.onGold, fontSize: 20, fontWeight: '600' },
+  cancelButton: { alignItems: 'center', paddingVertical: 16, width: '100%', maxWidth: 380 },
+  cancelText: { color: vip.colors.white, fontSize: 16, textAlign: 'center' },
   ageRestrictionNotice: {
     backgroundColor: "rgba(251, 191, 36, 0.1)",
     borderRadius: 12,
@@ -1265,14 +1273,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: "#E9C978",
-    borderRadius: 16,
-    backgroundColor: "rgba(0,0,0,0.60)",
-  },
+  passwordInput: { flex: 1, minWidth: 0, paddingVertical: 8, color: vip.colors.white, fontSize: 16, minHeight: 44 },
   eyeButton: {
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -1418,15 +1419,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: 'center',
   },
-  phoneInput: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: "#E9C978",
-    backgroundColor: "rgba(0,0,0,0.60)",
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-  },
+  phoneInput: { flex: 1, minWidth: 0, paddingVertical: 8, color: vip.colors.white, fontSize: 16, minHeight: 44 },
   consentRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -1442,6 +1435,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
+    flexWrap: 'wrap',
+    rowGap: 8,
     marginTop: 8,
   },
   legalLink: {
@@ -1461,7 +1456,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   legalModalContainer: {
-    backgroundColor: '#1c1c1c',
+    backgroundColor: vip.colors.navy,
     borderRadius: 16,
     padding: 16,
     maxHeight: '85%',
