@@ -4,7 +4,7 @@
     "slug": "auricrx-medcoach",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon-auric.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -25,8 +25,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/adaptive-icon-auric.png",
+        "backgroundColor": "#0d1019"
       },
       "package": "com.auricrx.medcoach",
       "googleServicesFile": "./android/app/google-services.json",
