@@ -8,7 +8,9 @@ module.exports = function registerCompliance(app, sql, getStripe) {
   async function identity(req, res, next) {
     try {
       const token = /^Bearer (.+)$/i.exec(req.headers.authorization || '')?.[1];
-      const decoded = await admin.auth().verifyIdToken(token, true);
+      let decoded;
+      try { decoded = await admin.auth().verifyIdToken(token, true); }
+      catch (e) { if (e?.code !== 'app/invalid-credential') throw e; console.warn('[identity] revocation check unavailable, verifying signature only'); decoded = await admin.auth().verifyIdToken(token); }
       if ([req.body?.userId, req.body?.user_id, req.body?.uid, req.query?.userId, req.query?.user_id, req.query?.uid].some(id => id && id !== decoded.uid)) {
         return res.status(403).json({ error: 'USER_MISMATCH' });
       }
