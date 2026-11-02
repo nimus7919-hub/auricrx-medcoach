@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AuricRX MedCoach — Eliminar cuenta / Delete account</title></head>
+<body><main>
+<h1>AuricRX MedCoach: eliminar cuenta / Delete account</h1>
+<p>En la app, inicia sesión y abre Ajustes &gt; Perfil &gt; Eliminar cuenta. Confirma la solicitud. Se cancelan las suscripciones Stripe, se eliminan los registros de tu usuario en nuestros servidores Neon y después tu usuario Firebase. La app solo confirma el éxito si el servidor completa la operación. Si falla, vuelve a intentarlo.</p>
+<p lang="en">In the app, sign in and open Settings &gt; Profile &gt; Delete account. Confirm the request. Stripe subscriptions are canceled, your user records are deleted from our Neon servers, and your Firebase identity is then deleted. Success is shown only after the server completes the operation. Retry if it fails.</p>
+<h2>Solicitar eliminación aquí / Request deletion here</h2>
+<p>Para cuentas con correo y contraseña, verifica tu identidad abajo. Tu contraseña se envía directamente a Firebase por HTTPS, no al servidor AuricRX. / For email/password accounts, verify your identity below. Your password goes directly to Firebase over HTTPS, not to AuricRX.</p>
+<form id="deletion">
+<label>Correo / Email <input id="email" type="email" autocomplete="username" required></label>
+<label>Contraseña / Password <input id="password" type="password" autocomplete="current-password" required></label>
+<label><input id="confirm" type="checkbox" required>Confirmo que quiero eliminar mi cuenta y datos. / I confirm I want to delete my account and data.</label>
+<button id="submit" type="submit">Eliminar definitivamente / Permanently delete</button>
+</form>
+<button id="google" type="button">Verificar con Google y eliminar / Verify with Google and delete</button>
+<p id="status" role="status" aria-live="polite"></p>
+<script type="module" src="/account-deletion.js"></script>
+<p>TODO(OWNER-DECISION): Agregar correo de privacidad monitoreado y procedimiento verificado para solicitudes fuera de la app. / Add a monitored privacy email and verified procedure for requests outside the app.</p>
+<p>Las compras futuras en App Store o Google Play requieren integración de cancelación antes de habilitarlas. / Future App Store or Google Play purchases require cancellation integration before they are enabled.</p>
+</main></body></html>

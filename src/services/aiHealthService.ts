@@ -1,3 +1,4 @@
+import { symptomInformation } from './symptomInformation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SmartNotificationService } from './smartNotifications';
 import { HealthMetricsService } from './healthMetrics';
@@ -14,21 +15,7 @@ export interface DrugInteraction {
   references: string[];
 }
 
-export interface SymptomAnalysis {
-  id: string;
-  symptoms: string[];
-  severity: 'mild' | 'moderate' | 'severe' | 'emergency';
-  possibleConditions: {
-    condition: string;
-    probability: number;
-    description: string;
-    recommendations: string[];
-  }[];
-  urgency: 'low' | 'medium' | 'high' | 'emergency';
-  recommendations: string[];
-  followUpActions: string[];
-  createdAt: string;
-}
+export type SymptomAnalysis = ReturnType<typeof symptomInformation>;
 
 export interface MedicationRecommendation {
   id: string;
@@ -164,7 +151,7 @@ class AIHealthService {
         this.drugInteractions = JSON.parse(interactionsData);
       }
       if (symptomsData) {
-        this.symptomAnalyses = JSON.parse(symptomsData);
+        this.symptomAnalyses = JSON.parse(symptomsData).map((entry: any) => symptomInformation(entry.symptoms || [], 'en'));
       }
       if (recommendationsData) {
         this.medicationRecommendations = JSON.parse(recommendationsData);
@@ -233,148 +220,12 @@ class AIHealthService {
     );
   }
 
-  // Symptom Analysis
-  async analyzeSymptoms(symptoms: string[], additionalInfo?: string): Promise<SymptomAnalysis> {
-    const analysis: SymptomAnalysis = {
-      id: `symptom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      symptoms,
-      severity: this.assessSymptomSeverity(symptoms),
-      possibleConditions: this.generatePossibleConditions(symptoms),
-      urgency: this.assessUrgency(symptoms),
-      recommendations: this.generateSymptomRecommendations(symptoms),
-      followUpActions: this.generateFollowUpActions(symptoms),
-      createdAt: new Date().toISOString()
-    };
-
-    this.symptomAnalyses.push(analysis);
+  // General information only; never generate diagnoses or probability scores.
+  async analyzeSymptoms(symptoms: string[], additionalInfo?: string, language = 'en'): Promise<SymptomAnalysis> {
+    const information = symptomInformation(symptoms, language, additionalInfo);
+    this.symptomAnalyses.push(information);
     await this.saveData();
-
-    // Generate insight if high urgency
-    if (analysis.urgency === 'emergency' || analysis.urgency === 'high') {
-      await this.generateUrgencyInsight(analysis);
-    }
-
-    return analysis;
-  }
-
-  private assessSymptomSeverity(symptoms: string[]): 'mild' | 'moderate' | 'severe' | 'emergency' {
-    const emergencySymptoms = ['chest pain', 'difficulty breathing', 'severe headache', 'loss of consciousness', 'severe bleeding'];
-    const severeSymptoms = ['high fever', 'severe pain', 'nausea', 'vomiting', 'dizziness'];
-    
-    if (symptoms.some(s => emergencySymptoms.some(es => s.toLowerCase().includes(es)))) {
-      return 'emergency';
-    }
-    if (symptoms.some(s => severeSymptoms.some(ss => s.toLowerCase().includes(ss)))) {
-      return 'severe';
-    }
-    if (symptoms.length > 3) {
-      return 'moderate';
-    }
-    return 'mild';
-  }
-
-  private generatePossibleConditions(symptoms: string[]): SymptomAnalysis['possibleConditions'] {
-    // Simplified condition matching - in production, use comprehensive medical database
-    const conditionMap: { [key: string]: { condition: string; probability: number; description: string; recommendations: string[] } } = {
-      'fever': {
-        condition: 'Viral Infection',
-        probability: 0.7,
-        description: 'Common viral infection causing fever and general malaise',
-        recommendations: ['Rest and hydration', 'Over-the-counter fever reducers', 'Monitor temperature']
-      },
-      'headache': {
-        condition: 'Tension Headache',
-        probability: 0.6,
-        description: 'Stress-related headache affecting the head and neck',
-        recommendations: ['Rest in quiet environment', 'Apply cold compress', 'Consider pain relief medication']
-      },
-      'cough': {
-        condition: 'Upper Respiratory Infection',
-        probability: 0.8,
-        description: 'Infection of the upper respiratory tract',
-        recommendations: ['Stay hydrated', 'Use cough suppressants if needed', 'Rest and avoid irritants']
-      }
-    };
-
-    const conditions: SymptomAnalysis['possibleConditions'] = [];
-    
-    symptoms.forEach(symptom => {
-      const lowerSymptom = symptom.toLowerCase();
-      Object.keys(conditionMap).forEach(key => {
-        if (lowerSymptom.includes(key)) {
-          conditions.push(conditionMap[key]);
-        }
-      });
-    });
-
-    // If no specific conditions found, provide general guidance
-    if (conditions.length === 0) {
-      conditions.push({
-        condition: 'General Symptoms',
-        probability: 0.5,
-        description: 'Multiple symptoms that may indicate various conditions',
-        recommendations: ['Monitor symptoms closely', 'Consider consulting healthcare provider', 'Maintain good hydration and rest']
-      });
-    }
-
-    return conditions.sort((a, b) => b.probability - a.probability);
-  }
-
-  private assessUrgency(symptoms: string[]): 'low' | 'medium' | 'high' | 'emergency' {
-    const emergencyKeywords = ['chest pain', 'difficulty breathing', 'severe', 'emergency', 'unconscious'];
-    const highUrgencyKeywords = ['severe pain', 'high fever', 'bleeding', 'dizziness', 'confusion'];
-    
-    if (symptoms.some(s => emergencyKeywords.some(ek => s.toLowerCase().includes(ek)))) {
-      return 'emergency';
-    }
-    if (symptoms.some(s => highUrgencyKeywords.some(hk => s.toLowerCase().includes(hk)))) {
-      return 'high';
-    }
-    if (symptoms.length > 2) {
-      return 'medium';
-    }
-    return 'low';
-  }
-
-  private generateSymptomRecommendations(symptoms: string[]): string[] {
-    const recommendations: string[] = [];
-    
-    if (symptoms.some(s => s.toLowerCase().includes('fever'))) {
-      recommendations.push('Monitor temperature regularly');
-      recommendations.push('Stay hydrated with water and electrolyte drinks');
-    }
-    
-    if (symptoms.some(s => s.toLowerCase().includes('pain'))) {
-      recommendations.push('Apply cold or warm compress as appropriate');
-      recommendations.push('Consider over-the-counter pain relief');
-    }
-    
-    if (symptoms.some(s => s.toLowerCase().includes('cough'))) {
-      recommendations.push('Use humidifier to moisten air');
-      recommendations.push('Avoid irritants like smoke and dust');
-    }
-    
-    recommendations.push('Get adequate rest and sleep');
-    recommendations.push('Maintain good nutrition');
-    
-    return recommendations;
-  }
-
-  private generateFollowUpActions(symptoms: string[]): string[] {
-    const actions: string[] = [];
-    
-    if (symptoms.length > 2) {
-      actions.push('Schedule appointment with primary care physician');
-    }
-    
-    if (symptoms.some(s => s.toLowerCase().includes('severe'))) {
-      actions.push('Consider urgent care or emergency room visit');
-    }
-    
-    actions.push('Monitor symptoms for 24-48 hours');
-    actions.push('Keep symptom diary for healthcare provider');
-    
-    return actions;
+    return information;
   }
 
   // Medication Recommendations
@@ -572,7 +423,7 @@ class AIHealthService {
       type: 'symptom_pattern',
       title: 'High Priority Symptom Analysis',
       description: `Your symptoms require immediate attention: ${analysis.symptoms.join(', ')}`,
-      severity: analysis.urgency === 'emergency' ? 'critical' : 'warning',
+      severity: 'warning',
       actionable: true,
       actionItems: analysis.followUpActions,
       relatedData: { symptomAnalysis: analysis },

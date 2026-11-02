@@ -1,3 +1,4 @@
+import ConsentHost from './src/components/ConsentHost';
 import { API_BASE } from "./src/config/api";
 import { useMedicalStream } from "./src/hooks/useMedicalStream";
 
@@ -214,7 +215,7 @@ const STRINGS = {
     symptomAnalyses: 'Symptom Analyses',
     drugChecks: 'Drug Checks',
     voiceNotes: 'Voice Notes',
-    analyzeSymptoms: 'Analyze Symptoms',
+    analyzeSymptoms: 'General symptom info',
     checkInteractions: 'Check Interactions',
     voiceNote: 'Voice Note',
     recentAnalyses: 'Recent Analyses',
@@ -487,11 +488,11 @@ const STRINGS = {
     noLabsFound: 'No labs found',
     errorLoadingPharmacies: 'Failed to load nearby pharmacies. Please try again.',
     errorLoadingLabs: 'Failed to load nearby labs. Please try again.',
-    myDoctorAI: 'My Doctor AI',
-    selectAI: 'Select AI Doctor',
-    drAlfred: 'Dr. Alfred',
-    drMimi: 'Dr. Mimi',
-    drPawlmer: 'Dr. Pawlmer',
+    myDoctorAI: 'AI assistants',
+    selectAI: 'Select AI assistant',
+    drAlfred: 'Alfred',
+    drMimi: 'Mimi',
+    drPawlmer: 'Pawlmer',
     directions: 'Directions',
     info: 'Info',
     call: 'Call',
@@ -597,7 +598,7 @@ const STRINGS = {
     symptomAnalyses: 'Symptom Analyses',
     drugChecks: 'Drug Checks',
     voiceNotes: 'Voice Notes',
-    analyzeSymptoms: 'Analyze Symptoms',
+    analyzeSymptoms: 'General symptom info',
     checkInteractions: 'Check Interactions',
     voiceNote: 'Voice Note',
     locationBasedRemindersDesc: 'Get reminded when you\'re near pharmacies, doctor offices, or other important locations',
@@ -779,7 +780,7 @@ const STRINGS = {
     symptomAnalyses: 'Análisis de Síntomas',
     drugChecks: 'Verificaciones de Medicamentos',
     voiceNotes: 'Notas de Voz',
-    analyzeSymptoms: 'Analizar Síntomas',
+    analyzeSymptoms: 'Información general sobre síntomas',
     checkInteractions: 'Verificar Interacciones',
     voiceNote: 'Nota de Voz',
     recentAnalyses: 'Análisis Recientes',
@@ -1065,11 +1066,11 @@ const STRINGS = {
   noLabsFound: 'No se encontraron laboratorios',
   errorLoadingPharmacies: 'Error al cargar farmacias cercanas. Inténtalo de nuevo.',
   errorLoadingLabs: 'Error al cargar laboratorios cercanos. Inténtalo de nuevo.',
-  myDoctorAI: 'Mis Doctores IA',
-  selectAI: 'Seleccionar Doctor IA',
-  drAlfred: 'Dr. Alfred',
-  drMimi: 'Dr. Mimi',
-  drPawlmer: 'Dr. Pawlmer',
+  myDoctorAI: 'Asistentes IA',
+  selectAI: 'Seleccionar asistente IA',
+  drAlfred: 'Alfred',
+  drMimi: 'Mimi',
+  drPawlmer: 'Pawlmer',
   directions: 'Direcciones',
   info: 'Información',
   call: 'Llamar',
@@ -1175,7 +1176,7 @@ const STRINGS = {
   symptomAnalyses: 'Análisis de Síntomas',
   drugChecks: 'Verificaciones de Medicamentos',
   voiceNotes: 'Notas de Voz',
-  analyzeSymptoms: 'Analizar Síntomas',
+  analyzeSymptoms: 'Información general sobre síntomas',
   checkInteractions: 'Verificar Interacciones',
   voiceNote: 'Nota de Voz',
   locationBasedRemindersDesc: 'Recibe recordatorios cuando estés cerca de farmacias, consultorios médicos u otras ubicaciones importantes',
@@ -1945,6 +1946,8 @@ export default function App() {
   
   // Authentication state
   const [user, setUser] = useState(null);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [healthConsentReady, setHealthConsentReady] = useState(false);
   const [userData, setUserData] = useState(null);
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
   const [isRestoringAuth, setIsRestoringAuth] = useState(true); // Track auth restoration
@@ -3096,9 +3099,7 @@ export default function App() {
     noKnownInteractions: t('ai.noKnownInteractions'),
     foundInteractions: t('ai.foundInteractions'),
     severity: t('ai.severity'),
-    urgency: t('ai.urgency'),
-    possibleConditions: t('ai.possibleConditions'),
-    recommendations: t('ai.recommendations'),
+    urgency: t('ai.urgency'),    recommendations: t('ai.recommendations'),
     followUpActions: t('ai.followUpActions'),
     store: t('ai.store'),
     delete: t('ai.delete'),
@@ -3121,9 +3122,7 @@ export default function App() {
     sprainBruise: t('ai.sprainBruise'),
     skinIrritation: t('ai.skinIrritation'),
     viralSyndrome: t('ai.viralSyndrome'),
-    stomachUpset: t('ai.stomachUpset'),
-    probability: t('ai.probability'),
-    low: t('ai.low'),
+    stomachUpset: t('ai.stomachUpset'),    low: t('ai.low'),
     medium: t('ai.medium'),
     high: t('ai.high'),
     emergency: t('ai.emergency'),
@@ -3188,9 +3187,7 @@ export default function App() {
     monitorUnusualSymptoms: t('ai.monitorUnusualSymptoms'),
     drugInteractionDatabase: t('ai.drugInteractionDatabase'),
     severity: t('ai.severity'),
-    urgency: t('ai.urgency'),
-    possibleConditions: t('ai.possibleConditions'),
-    recommendations: t('ai.recommendations'),
+    urgency: t('ai.urgency'),    recommendations: t('ai.recommendations'),
     fastingCompatible: t('ai.fastingCompatible'),
     fastingWarning: t('ai.fastingWarning'),
     diabetesRequiresSupervision: t('ai.diabetesRequiresSupervision'),
@@ -3755,14 +3752,14 @@ const [aiInput, setAiInput] = useState('');
 // Function to get the initial AI message based on selected doctor
 const getInitialAIMessage = (selectedDoctor) => {
   const introductions = {
-    'alfred': S.drAlfredIntro || "Hello! I'm Dr. Alfred, your AI health consultant. I'm here to help you with medication information, health insights, and answer any medical questions you might have. How can I assist you today?",
-    'mimi': S.drMimiIntro || "Hi there! I'm Dr. Mimi, your friendly AI health assistant. I specialize in providing personalized health advice, medication guidance, and helping you understand your health better. What would you like to know?",
-    'pawlmer': S.drPawlmerIntro || "Meow! I'm Dr. Pawlmer, your purr-fessional AI health companion! As a feline doctor, I bring a unique perspective to healthcare. I'm here to help you with medication management, health tips, and make your healthcare journey more enjoyable. How can I help you today?"
+    'alfred': S.drAlfredIntro || "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
+    'mimi': S.drMimiIntro || "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
+    'pawlmer': S.drPawlmerIntro || "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor."
   };
   return introductions[selectedDoctor] || introductions['alfred'];
 };
 
-// Function to add cat-like expressions to Dr. Pawlmer's responses
+// Function to add cat-like expressions to Pawlmer's responses
 const addCatExpressions = (response, selectedDoctor, lang) => {
   if (selectedDoctor !== 'pawlmer') {
     return response;
@@ -4142,7 +4139,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       
       try {
         // Don't process auth state changes while we're still restoring
-        if (isRestoring) {
+        if (isRestoring || authService.authInProgress) {
           console.log('⏳ Skipping auth state change during restoration');
           return;
         }
@@ -4545,11 +4542,11 @@ useEffect(() => {
   const AnimatedFloatingButton = () => {
     const getDoctorDisplayName = (doctorKey) => {
       const names = {
-        'alfred': S.drAlfred || 'Dr. Alfred',
-        'mimi': S.drMimi || 'Dr. Mimi',
-        'pawlmer': S.drPawlmer || 'Dr. Pawlmer'
+        'alfred': S.drAlfred || 'Alfred',
+        'mimi': S.drMimi || 'Mimi',
+        'pawlmer': S.drPawlmer || 'Pawlmer'
       };
-      return names[doctorKey] || (S.drAlfred || 'Dr. Alfred');
+      return names[doctorKey] || (S.drAlfred || 'Alfred');
     };
 
     return (
@@ -4563,11 +4560,7 @@ useEffect(() => {
         }}
         activeOpacity={0.8}
       >
-        <Image 
-          source={getDoctorImage(getDoctorDisplayName(selectedAIDoctor))} 
-          style={{ width: 60, height: 60, borderRadius: 30 }} 
-          resizeMode="contain" 
-        />
+        <Text accessibilityLabel={lang === 'es' ? 'Asistente de IA' : 'AI assistant'} style={{ fontSize: 32 }}>{selectedAIDoctor === 'pawlmer' ? '\u{1F431}' : '\u{1F4AC}'}</Text>
       </TouchableOpacity>
     );
   };
@@ -4672,21 +4665,14 @@ const handleAskMedicalAI = async () => {
   // --------- AI Doctor System ----------
   const getDoctorGreeting = (doctor) => {
     const greetings = {
-      'Dr. Alfred': "Hello! I'm Dr. Alfred, your experienced medical AI assistant. I'm here to help you with comprehensive health guidance, medication management, and supplement recommendations. How can I assist you with your health journey today?",
-      'Dr. Mimi': "Hi there! I'm Dr. Mimi, your friendly and approachable health companion. I specialize in making healthcare feel comfortable and easy to understand. Whether it's about your medications, supplements, or general wellness, I'm here to help! What would you like to discuss?",
-      'Dr. Pawlmer': "Meow! I'm Dr. Pawlmer, your purr-fessional feline health expert! 🐱 I bring a unique perspective to healthcare with my cat-like curiosity and attention to detail. I'm here to help you with your medications, supplements, and health questions. What's on your mind today?"
+      'Alfred': "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
+      'Mimi': "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
+      'Pawlmer': "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor."
     };
-    return greetings[doctor] || greetings['Dr. Alfred'];
+    return greetings[doctor] || greetings['Alfred'];
   };
 
-  const getDoctorImage = (doctor) => {
-    const images = {
-      'Dr. Alfred': require('./assets/dashboard Emojies/Dr. Alfred AI Widget.png'),
-      'Dr. Mimi': require('./assets/dashboard Emojies/Dr. Mimi AI Widget.png'),
-      'Dr. Pawlmer': require('./assets/dashboard Emojies/Dr. Pawlmer AI Widget.png')
-    };
-    return images[doctor] || images['Dr. Alfred'];
-  };
+
 
 
   // --------- Location-based distance formatting ----------
@@ -5090,7 +5076,7 @@ const handleAskMedicalAI = async () => {
       {
         title: S.aiHealth || t('tiles.aiHealth') || 'AI Health',
         icon: <Image source={require('./assets/dashboard Emojies/AI Health.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />,
-        description: t('help.cards.aiHealth') || 'Get AI-powered health insights. Analyze symptoms, check drug interactions, and receive personalized health recommendations from our medical AI assistants.',
+        description: t('help.cards.aiHealth') || 'Explore general symptom, health and medication information with AI assistants. They are not doctors and do not provide medical advice.',
         iconSize: 48
       },
       {
@@ -5149,7 +5135,7 @@ const handleAskMedicalAI = async () => {
               
               <View style={[styles.helpCardItem, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor(), marginTop: 8 }]}>
                 <DynamicText type="card" style={[styles.helpCardDescription, { fontFamily: 'Inter_400Regular', fontStyle: 'italic' }]}>
-                  {t('help.tip') || '💡 Tip: Tap any card to explore its features. The floating AI button in the bottom right gives you instant access to health advice from our medical AI assistants.'}
+                  {t('help.tip') || '💡 Tip: Tap any card to explore its features. The floating AI button opens a general health-information assistant. It is not a doctor.'}
                 </DynamicText>
               </View>
             </ScrollView>
@@ -6099,7 +6085,7 @@ const handleAskMedicalAI = async () => {
                 fontSize: 14,
                 marginBottom: 8,
                 opacity: 0.8
-              }}>{S.selectAI || 'Select AI Doctor'}</DynamicText>
+              }}>{S.selectAI || 'Select AI assistant'}</DynamicText>
               
               <TouchableOpacity 
                 onPress={() => setSelectedAIDoctor('alfred')}
@@ -6119,7 +6105,7 @@ const handleAskMedicalAI = async () => {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>🧑‍⚕️ {S.drAlfred || 'Dr. Alfred'}</DynamicText>
+                }}>💬 {S.drAlfred || 'Alfred'}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -6140,7 +6126,7 @@ const handleAskMedicalAI = async () => {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>👩‍⚕️ {S.drMimi || 'Dr. Mimi'}</DynamicText>
+                }}>💬 {S.drMimi || 'Mimi'}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -6160,12 +6146,13 @@ const handleAskMedicalAI = async () => {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>🐱 {S.drPawlmer || 'Dr. Pawlmer'}</DynamicText>
+                }}>🐱 {S.drPawlmer || 'Pawlmer'}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
         </CollapsibleSection>
         
+        <TouchableOpacity onPress={() => setPrivacyOpen(true)} style={{ padding: 16 }}><Text style={{ color: theme.text }}>{lang === 'es' ? 'Privacidad' : 'Privacy'}</Text></TouchableOpacity>
         <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 
@@ -6564,6 +6551,7 @@ function trimTo(str, n) {
 ) : (
   <WallpaperProvider>
     <WallpaperWrapper>
+    <ConsentHost language={lang} user={showAuth ? null : user} privacyOpen={privacyOpen} onHealthConsentChange={setHealthConsentReady} onPrivacyClose={() => setPrivacyOpen(false)} />
     <StatusBar 
       barStyle={themeKey === 'whiteGold' || themeKey === 'gold' ? 'dark-content' : 'light-content'} 
       backgroundColor="transparent"
@@ -6595,8 +6583,10 @@ function trimTo(str, n) {
               setShowCheckout(true);
             } : undefined}
           />
+        ) : !healthConsentReady ? (
+          <View style={{ flex: 1, backgroundColor: '#161616' }} />
         ) : (
-      /* Main App Content - Only show after authentication */
+      /* Main App Content - Only show after authentication and health consent */
       <>
         {route === 'dashboard' ? <Dashboard /> :
      route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
@@ -6643,25 +6633,14 @@ function trimTo(str, n) {
             <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8 }}>
               {(() => {
                 const names = {
-                  'alfred': S.drAlfred || 'Dr. Alfred',
-                  'mimi': S.drMimi || 'Dr. Mimi',
-                  'pawlmer': S.drPawlmer || 'Dr. Pawlmer'
+                  'alfred': S.drAlfred || 'Alfred',
+                  'mimi': S.drMimi || 'Mimi',
+                  'pawlmer': S.drPawlmer || 'Pawlmer'
                 };
-                return names[selectedAIDoctor] || (S.drAlfred || 'Dr. Alfred');
+                return names[selectedAIDoctor] || (S.drAlfred || 'Alfred');
               })()}
             </Text>
-            <Image 
-              source={getDoctorImage((() => {
-                const names = {
-                  'alfred': 'Dr. Alfred',
-                  'mimi': 'Dr. Mimi',
-                  'pawlmer': 'Dr. Pawlmer'
-                };
-                return names[selectedAIDoctor] || 'Dr. Alfred';
-              })())} 
-              style={{ width: 24, height: 24 }} 
-              resizeMode="contain" 
-            />
+            <Text accessibilityLabel={lang === 'es' ? 'Asistente de IA' : 'AI assistant'} style={{ fontSize: 32 }}>{selectedAIDoctor === 'pawlmer' ? '\u{1F431}' : '\u{1F4AC}'}</Text>
         </View>
         <TouchableOpacity onPress={() => setAiOpen(false)}>
           <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>

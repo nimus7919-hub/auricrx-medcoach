@@ -1,3 +1,5 @@
+import { API_BASE } from '../config/api';
+import { consentRequest, requireAccountConsent } from './consentService';
 // src/services/authService.js
 // Authentication service with Firebase Auth integration
 
@@ -46,12 +48,16 @@ class AuthService {
   }
 
   // Email/Password Authentication
-  async signUpWithEmail(email, password, firstName, lastName) {
+  async signUpWithEmail(email, password, firstName, lastName, consents) {
+    if (!consents?.terms || !consents?.privacy) return { success: false, error: 'Terms and privacy acknowledgment are required.' };
     try {
       console.log('signUpWithEmail called with:', { email, password: '***', firstName, lastName });
+      this.authInProgress = true;
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
       console.log('User created successfully:', user.uid);
+      await consentRequest('POST', consents, 'email');
+      this.authInProgress = false;
 
       // Update user profile
       await updateProfile(user, {
@@ -81,6 +87,7 @@ class AuthService {
         message: 'Account created successfully! Please check your email (including spam folder) for a verification link.',
       };
     } catch (error) {
+      this.authInProgress = false;
       console.error('signUpWithEmail error:', error);
       console.error('Error code:', error.code);
       console.error('Error message:', error.message);
@@ -261,8 +268,11 @@ class AuthService {
       }
 
       const credential = GoogleAuthProvider.credential(idToken, accessToken);
+      this.authInProgress = true;
       const userCredential = await signInWithCredential(this.auth, credential);
       const user = userCredential.user;
+      await requireAccountConsent('google');
+      this.authInProgress = false;
 
       await this.storeAuthState({
         uid: user.uid,
@@ -281,6 +291,7 @@ class AuthService {
         },
       };
     } catch (error) {
+      this.authInProgress = false;
       console.error('Google Sign-In (Firebase credential) error:', error);
       let errorMessage = 'Google Sign-In failed. Please try again.';
       if (error?.code === 'auth/account-exists-with-different-credential') {
@@ -321,6 +332,16 @@ class AuthService {
     return this.auth.currentUser;
   }
 
+  async deleteAccount() {
+    const token = await this.auth.currentUser?.getIdToken();
+    if (!token) throw new Error('Please sign in again. / Inicia sesi\u00f3n de nuevo.');
+    const response = await fetch(API_BASE + '/api/account', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+    if (!response.ok) throw new Error('Deletion did not complete. Please retry. / No se complet\u00f3 la eliminaci\u00f3n. Intenta de nuevo.');
+    const result = await this.signOut();
+    if (!result.success) throw new Error(result.error);
+    return { success: true };
+  }
+
   // Listen to Auth State Changes
   onAuthStateChanged(callback) {
     return this.auth.onAuthStateChanged(callback);
@@ -354,7 +375,7 @@ class AuthService {
       if (isSignUp) {
         // Create account with Firebase
         console.log('Creating account...');
-        const result = await this.signUpWithEmail(email, password, userData.firstName || 'User', userData.lastName || 'Name');
+        const result = await this.signUpWithEmail(email, password, userData.firstName || 'User', userData.lastName || 'Name', userData.consents);
         console.log('Sign up result:', result);
         
         if (result.success) {

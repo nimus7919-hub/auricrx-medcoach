@@ -61,6 +61,8 @@ const askLimiter = rateLimit({
 });
 app.use(["/ask", "/ask-stream", "/api/ai"], askLimiter);
 
+require('./compliance')(app, require('./neon').neonClient, () => stripe);
+
 // --- Your routes here ---
 
 app.use((req, _res, next) => {

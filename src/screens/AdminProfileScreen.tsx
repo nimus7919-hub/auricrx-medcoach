@@ -260,13 +260,18 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
       title: t('confirmDeletion'),
       message: t('confirmDeletionMessage'),
       buttonText: t('yesDeleteForever'),
-      onPress: () => {
-        // TODO: Implement account deletion
+      onPress: async () => {
+        setLoading(true);
+        try {
+        await authService.deleteAccount();
         showAlert({
           title: t('accountDeleted'),
           message: t('accountDeletedMessage'),
           buttonText: t('ok'),
         });
+        } catch (error: any) {
+          showAlert({ title: t('error'), message: error.message, buttonText: t('ok') });
+        } finally { setLoading(false); }
       },
     });
   };

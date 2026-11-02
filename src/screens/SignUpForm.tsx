@@ -17,7 +17,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import authService from '../services/authService';
 import GoogleAuthButton, { googleAuthText } from '../components/GoogleAuthButton';
-import consentCheckboxText from '../legal/consentCheckboxText.json';
+import ConsentChoices from '../components/ConsentChoices';
 import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
 // Gold palette
@@ -58,7 +58,8 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('US');
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [consents, setConsents] = useState({ terms: false, privacy: false, health: false });
+  const agreedToTerms = consents.terms && consents.privacy;
   const [legalModalVisible, setLegalModalVisible] = useState(false);
   const [legalModalTitle, setLegalModalTitle] = useState('');
   const [legalModalContent, setLegalModalContent] = useState('');
@@ -426,6 +427,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       const formattedPhone = formatPhoneNumber(formData.phoneNumber, selectedCountry);
       
       const userData = {
+        consents,
         ...formData,
         age: parseInt(formData.age, 10),
         phoneNumber: formattedPhone,
@@ -662,7 +664,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
   const t = getTranslations(currentLanguage);
   const handleGoogleSignIn = async () => {
-    if (loading || googleLoading || !agreedToTerms) return;
+    if (loading || googleLoading) return;
     if (!formData.age || Number(formData.age) < 18) {
       Alert.alert('Error', t.ageRestrictionError);
       return;
@@ -681,8 +683,6 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       setGoogleLoading(false);
     }
   };
-  const consentTexts = consentCheckboxText as Record<string, string>;
-  const consentText = consentTexts[currentLanguage] || consentTexts.en;
 
   const handleOpenLegal = async (type: 'terms' | 'privacy') => {
     try {
@@ -1029,16 +1029,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
             <View style={{ height: 16 }} />
 
-            <TouchableOpacity
-              style={styles.consentRow}
-              onPress={() => setAgreedToTerms(!agreedToTerms)}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.checkbox, agreedToTerms ? styles.checkboxChecked : styles.checkboxUnchecked]}>
-                {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
-              </View>
-              <Text style={styles.consentText}>{consentText}</Text>
-            </TouchableOpacity>
+            <ConsentChoices language={currentLanguage} value={consents} onChange={setConsents} openLegal={handleOpenLegal} />
 
             <View style={styles.legalLinksRow}>
               <TouchableOpacity onPress={() => handleOpenLegal('terms')}>
@@ -1062,7 +1053,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
             <View style={{ height: 16 }} />
 
             <GoogleAuthButton language={currentLanguage} loading={googleLoading}
-              disabled={loading || googleLoading || !agreedToTerms} onPress={handleGoogleSignIn} />
+              disabled={loading || googleLoading} onPress={handleGoogleSignIn} />
             <TouchableOpacity disabled={loading || googleLoading} onPress={onClose} style={styles.cancelButton}>
               <Text style={styles.cancelText}>{t.cancel}</Text>
             </TouchableOpacity>

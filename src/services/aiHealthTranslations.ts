@@ -40,7 +40,6 @@ export const createAIHealthTranslations = (t: (key: string) => string) => {
     symptomAnalysisComplete: t('ai.symptomAnalysisComplete'),
     severity: t('ai.severity'),
     urgency: t('ai.urgency'),
-    possibleConditions: t('ai.possibleConditions'),
     recommendations: t('ai.recommendations'),
     potentialMildInteraction: t('ai.potentialMildInteraction'),
     mildSideEffectsPossible: t('ai.mildSideEffectsPossible'),

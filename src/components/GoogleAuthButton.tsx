@@ -25,6 +25,9 @@ export default function GoogleAuthButton({ language, loading, disabled, onPress 
         <Text style={styles.label}>{loading ? t.loading : t.label}</Text>
       </LinearGradient>
     </TouchableOpacity>
+    <Text style={{ color: '#E9C978', fontSize: 12, marginTop: 8 }}>
+      {language === 'es' ? 'Después de identificarte, revisa los consentimientos antes de crear tu perfil.' : 'After signing in, review consent choices before your profile is created.'}
+    </Text>
   </View>;
 }
 const styles = StyleSheet.create({

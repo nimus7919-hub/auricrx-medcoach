@@ -1,3 +1,4 @@
+import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -54,22 +55,7 @@ interface HealthInsight {
   createdAt: string;
 }
 
-interface SymptomAnalysis {
-  id: string;
-  symptoms: string[];
-  severity: 'mild' | 'moderate' | 'severe' | 'emergency';
-  possibleConditions: {
-    condition: string;
-    probability: number;
-    description: string;
-    recommendations: string[];
-  }[];
-  urgency: 'low' | 'medium' | 'high' | 'emergency';
-  recommendations: string[];
-  followUpActions: string[];
-  createdAt: string;
-  notes?: string;
-}
+type SymptomAnalysis = ReturnType<typeof symptomInformation> & { notes?: string };
 
 interface DrugInteraction {
   id: string;
@@ -81,30 +67,6 @@ interface DrugInteraction {
   management: string;
   references: string[];
 }
-
-// Simple symptom tracking function (no AI analysis/diagnosis)
-const analyzeSymptomsWithAI = (symptoms: string[], t: any, S: any): SymptomAnalysis => {
-  const id = `symptom_${Date.now()}`;
-  
-  // Just store symptoms without any diagnosis
-  return {
-    id,
-    symptoms,
-    severity: 'mild',
-    possibleConditions: [],  // No diagnosis
-    urgency: 'low',
-    recommendations: [
-      S?.trackOverTime || 'Track your symptoms over time',
-      S?.monitorChanges || 'Monitor any changes in severity or frequency',
-      S?.contactDoctorImmediately || 'Contact your doctor if symptoms worsen'
-    ],
-    followUpActions: [
-      S?.contactDoctorImmediately || 'Contact your doctor immediately if symptoms worsen',
-      S?.exportSymptomReport || 'Export your symptom report to share with your healthcare provider'
-    ],
-    createdAt: new Date().toISOString()
-  };
-};
 
 export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
@@ -678,12 +640,12 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       
       if (savedSymptoms) {
         const parsed = JSON.parse(savedSymptoms);
-        setSymptomAnalyses(parsed);
+        setSymptomAnalyses(parsed.map((entry: any) => ({ ...symptomInformation(entry.symptoms || [], i18n.language), id: entry.id, createdAt: entry.createdAt, notes: entry.notes })));
       }
       
       if (savedStoredSymptoms) {
         const parsed = JSON.parse(savedStoredSymptoms);
-        setStoredSymptomAnalyses(parsed);
+        setStoredSymptomAnalyses(parsed.map((entry: any) => ({ ...symptomInformation(entry.symptoms || [], i18n.language), id: entry.id, createdAt: entry.createdAt, notes: entry.notes })));
       }
     } catch (error) {
       console.error('Failed to load symptom analyses:', error);
@@ -824,7 +786,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       const symptoms = symptomText.split(',').map(s => s.trim()).filter(s => s.length > 0);
       
       // Enhanced AI-driven analysis based on symptom patterns
-      const analysis = analyzeSymptomsWithAI(symptoms, t, S);
+      const analysis = symptomInformation(symptoms, i18n.language);
       
       setSymptomAnalyses(prev => [analysis, ...prev]);
       setSymptomText('');
@@ -1679,7 +1641,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       // Create HTML content for ACTIVE symptoms only
       const symptomsHtml = symptomAnalyses.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
-          <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;">[${S?.[analysis.urgency] || analysis.urgency}]</span></p>
+          <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
           <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || 'Date'}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
           ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || 'Notes'}: ${analysis.notes}</p>` : ''}
         </div>
@@ -1852,7 +1814,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       // Create HTML content for ALL symptoms
       const symptomsHtml = sortedSymptoms.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
-          <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;">[${S?.[analysis.urgency] || analysis.urgency}]</span></p>
+          <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
           <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || 'Date'}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
           ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || 'Notes'}: ${analysis.notes}</p>` : ''}
         </div>
@@ -2293,10 +2255,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             </DynamicText>
             <View style={[
               dynamicStyles.insightSeverity,
-              { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
+              { backgroundColor: getSeverityColor('info') }
             ]}>
               <DynamicText type="card" style={dynamicStyles.severityText}>
-                {S?.[analysis.urgency] || analysis.urgency.toUpperCase()}
+                {t('analyzeSymptoms')}
               </DynamicText>
             </View>
           </View>
@@ -2651,13 +2613,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             {currentSymptomAnalysis && (
               <>
                 <View style={dynamicStyles.modalHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    {(currentSymptomAnalysis.urgency === 'emergency' || currentSymptomAnalysis.urgency === 'high') && (
-                      <Image 
-                        source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
-                        style={{ width: 24, height: 24, marginRight: 8 }}
-                      />
-                    )}
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <DynamicText type="primary" style={dynamicStyles.modalTitle}>
                       {S?.symptomAnalysisComplete || 'Symptom Analysis Complete'}
                     </DynamicText>
@@ -2666,42 +2622,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
                 <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                   <View style={dynamicStyles.analysisSection}>
-                    <DynamicText type="card" style={dynamicStyles.analysisLabel}>
-                      {S?.severity || 'Severity'}: <DynamicText type="card" style={[dynamicStyles.analysisValue, { color: getSeverityColor(currentSymptomAnalysis.severity) }]}>
-                        {currentSymptomAnalysis.severity}
-                      </DynamicText>
-                    </DynamicText>
-                    <DynamicText type="card" style={dynamicStyles.analysisLabel}>
-                      {S?.urgency || 'Urgency'}: <DynamicText type="card" style={[dynamicStyles.analysisValue, { color: getUrgencyColor(currentSymptomAnalysis.urgency) }]}>
-                        {currentSymptomAnalysis.urgency}
-                      </DynamicText>
-                    </DynamicText>
-                  </View>
-
-                  <View style={dynamicStyles.analysisSection}>
-                    <DynamicText type="card" style={dynamicStyles.sectionTitle}>
-                      {S?.possibleConditions || 'Possible Conditions'}:
-                    </DynamicText>
-                    {currentSymptomAnalysis.possibleConditions.map((condition, index) => (
-                      <View key={index} style={dynamicStyles.conditionCard}>
-                        <DynamicText type="card" style={dynamicStyles.conditionTitle}>
-                          • {condition.condition} ({Math.round(condition.probability * 100)}%)
-                        </DynamicText>
-                        <DynamicText type="card" style={dynamicStyles.conditionDescription}>
-                          {condition.description}
-                        </DynamicText>
-                        <View style={dynamicStyles.recommendationsContainer}>
-                          <DynamicText type="card" style={dynamicStyles.recommendationsTitle}>
-                            {S?.recommendations || 'Recommendations'}:
-                          </DynamicText>
-                          {condition.recommendations.map((rec, recIndex) => (
-                            <DynamicText key={recIndex} type="card" style={dynamicStyles.recommendationItem}>
-                              • {rec}
-                            </DynamicText>
-                          ))}
-                        </View>
-                      </View>
-                    ))}
+                    <Text style={{ color: theme?.text || '#fff' }}>{symptomInformation(currentSymptomAnalysis.symptoms, i18n.language).generalInformation}</Text>
+                    {symptomInformation(currentSymptomAnalysis.symptoms, i18n.language).followUpActions.map((action, index) => <Text key={index} style={{ color: theme?.text || '#fff', marginVertical: 8 }}>{action}</Text>)}
                   </View>
 
                   {/* Doctor Contact Warning */}
@@ -2804,10 +2726,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       </View>
                       <View style={[
                         dynamicStyles.insightSeverity,
-                        { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
+                        { backgroundColor: getSeverityColor('info') }
                       ]}>
                         <DynamicText type="card" style={dynamicStyles.severityText}>
-                          {S?.[analysis.urgency] || analysis.urgency.toUpperCase()}
+                          {t('analyzeSymptoms')}
                         </DynamicText>
                       </View>
                     </View>
@@ -2850,10 +2772,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                     </DynamicText>
                     <View style={[
                       dynamicStyles.insightSeverity,
-                      { backgroundColor: getSeverityColor(analysis.urgency === 'emergency' ? 'critical' : analysis.urgency === 'high' ? 'warning' : 'info') }
+                      { backgroundColor: getSeverityColor('info') }
                     ]}>
                       <DynamicText type="card" style={dynamicStyles.severityText}>
-                        {S?.[analysis.urgency] || analysis.urgency.toUpperCase()}
+                        {t('analyzeSymptoms')}
                       </DynamicText>
                     </View>
                   </View>
