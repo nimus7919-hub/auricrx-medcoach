@@ -1,3 +1,4 @@
+import { useMedicalStream } from "./src/hooks/useMedicalStream";
 
 // AuricRx MedCoach — Dashboard Build (single-file version) with Themes + Fonts
 // SDK 53 friendly. Minimal deps; stubs where cloud keys are needed.
@@ -1913,61 +1914,6 @@ const STORAGE = {
   selectedAIDoctor: 'AURIC_SELECTED_AI_DOCTOR',
 };
 
-// Lightweight streaming hook (defined inline to avoid extra files)
-function useMedicalStreamLocal(endpoint) {
-  const controllerRef = useRef(null);
-  const [text, setText] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  async function ask(messages) {
-    if (!endpoint) throw new Error('No stream endpoint provided');
-    try {
-      if (controllerRef.current) controllerRef.current.abort();
-    } catch {}
-
-    controllerRef.current = new AbortController();
-    setText('');
-    setLoading(true);
-
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          messages,
-          stream: false, // Disable streaming for now to fix the issue
-          temperature: 0.7,
-          max_tokens: 500
-        }),
-        signal: controllerRef.current.signal,
-      });
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `Stream endpoint returned ${res.status}`);
-      }
-
-        const full = await res.text();
-        setText(full);
-        return full;
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-      throw e;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function cancel() {
-    try { controllerRef.current?.abort(); } catch {}
-    setLoading(false);
-  }
-
-  return { text, loading, ask, cancel };
-}
-
 // ---------- ROOT APP ----------
 export default function App() {
   // TEMP FLAG - set to false when done testing env
@@ -3850,7 +3796,7 @@ useEffect(() => {
 const aiInputRef = useRef(null);
 
   // streaming hook (use a local inline implementation)
-  const { text: streamText, loading: streamLoading, ask: streamAsk, cancel: streamCancel } = useMedicalStreamLocal("https://auricrx-medcoach.onrender.com/ask-stream");
+  const { text: streamText, loading: streamLoading, ask: streamAsk, cancel: streamCancel } = useMedicalStream("https://auricrx-medcoach.onrender.com/ask-stream", { stream: false, temperature: 0.7, max_tokens: 500 });
 
   // sync streaming text into aiMessages so UI shows live tokens
   useEffect(() => {

@@ -1,42 +1,70 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function useMedicalStream(serverUrl = "http://localhost:3001/api/ai/stream") {
+const DEFAULT_OPTIONS = {};
+
+export function useMedicalStream(serverUrl = "http://localhost:3001/api/ai/stream", options = DEFAULT_OPTIONS) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef(null);
 
+  useEffect(() => () => {
+    const controller = abortRef.current;
+    abortRef.current = null;
+    controller?.abort();
+  }, []);
+
   async function ask(messages) {
-    setText("");
-    setLoading(true);
+    if (!serverUrl) throw new Error("No stream endpoint provided");
+    abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
+    const isCurrent = () => abortRef.current === controller && !controller.signal.aborted;
+    setText("");
+    setLoading(true);
+    let reader;
     try {
-      const resp = await fetch(serverUrl, {
+      const response = await fetch(serverUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({ ...options, messages }),
         signal: controller.signal,
       });
-
-      if (!resp.body) throw new Error("No response body");
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        setText(prev => prev + chunk);
+      if (!response.ok) throw new Error(`AI request failed: HTTP ${response.status}`);
+      if (!isCurrent()) return;
+      if (options.stream === false) {
+        const full = await response.text();
+        if (isCurrent()) setText(full);
+        return isCurrent() ? full : undefined;
       }
+      if (!response.body) throw new Error("No response body");
+      reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let full = "";
+      while (isCurrent()) {
+        const { value, done } = await reader.read();
+        if (!isCurrent()) return;
+        full += done ? decoder.decode() : decoder.decode(value, { stream: true });
+        setText(full);
+        if (done) return full;
+      }
+    } catch (error) {
+      if (isCurrent() && error.name !== "AbortError") throw error;
     } finally {
-      setLoading(false);
+      if (reader) {
+        try { await reader.cancel(); } catch {}
+        reader.releaseLock();
+      }
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        setLoading(false);
+      }
     }
   }
 
   function cancel() {
-    abortRef.current?.abort();
+    const controller = abortRef.current;
+    abortRef.current = null;
+    controller?.abort();
     setLoading(false);
   }
 

@@ -8,16 +8,23 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   updateProfile,
-  signInWithCustomToken,
+  signInWithCredential,
   GoogleAuthProvider,
 } from 'firebase/auth';
-// import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
 import * as FileSystem from 'expo-file-system';
-import { makeRedirectUri } from 'expo-auth-session';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+import { googleAuthConfig, getExpoClientId, getGoogleClientIdForPlatform } from '../config/googleOAuth';
 import { startTrial } from './trialService';
+
+const GOOGLE_DISCOVERY = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+};
 
 class AuthService {
   constructor() {
@@ -158,110 +165,128 @@ class AuthService {
     }
   }
 
-  // Google Sign-In (Web-based for Expo Go compatibility)
+  // Google Sign-In (Expo + native support)
   async signInWithGoogle() {
     try {
-      console.log('Starting web-based Google Sign-In...');
-      
-      // Google OAuth configuration
-      const redirectUri = makeRedirectUri({
-        scheme: 'auricrx-medcoach',
-        path: 'auth',
-      });
-      
-      const authUrl = `https://accounts.google.com/oauth/authorize?` +
-        `client_id=1043512593259-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=openid%20email%20profile&` +
-        `access_type=offline`;
-      
-      console.log('Opening Google OAuth URL:', authUrl);
-      
-      // Open the OAuth URL in a web browser
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
-      
-      if (result.type === 'success' && result.url) {
-        // Parse the authorization code from the URL
-        const url = new URL(result.url);
-        const code = url.searchParams.get('code');
-        
-        if (code) {
-          // Exchange the authorization code for tokens
-          const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-              client_id: '1043512593259-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
-              client_secret: 'YOUR_CLIENT_SECRET',
-              code: code,
-              grant_type: 'authorization_code',
-              redirect_uri: redirectUri,
-            }),
-          });
-          
-          const tokens = await tokenResponse.json();
-          
-          if (tokens.access_token) {
-            // Get user info from Google
-            const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokens.access_token}`);
-            const userInfo = await userInfoResponse.json();
-            
-            // Create a custom token for Firebase
-            const customTokenResponse = await fetch('https://auricrx-medcoach.onrender.com/api/auth/google', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                idToken: tokens.id_token,
-                accessToken: tokens.access_token,
-                userInfo: userInfo,
-              }),
-            });
-            
-            const customTokenData = await customTokenResponse.json();
-            
-            if (customTokenData.customToken) {
-              // Sign in to Firebase with the custom token
-              const userCredential = await signInWithCustomToken(this.auth, customTokenData.customToken);
-              const user = userCredential.user;
-              
-              console.log('Google Sign-In successful:', user.uid);
-              
-              // Store authentication state
-              await this.storeAuthState({
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName,
-                emailVerified: user.emailVerified,
-              });
-              
-              return {
-                success: true,
-                user: {
-                  uid: user.uid,
-                  email: user.email,
-                  displayName: user.displayName,
-                  emailVerified: user.emailVerified,
-                },
-              };
-            }
-          }
-        }
+      const useProxy = Constants.appOwnership === 'expo';
+      const platformClientId = getGoogleClientIdForPlatform(Platform.OS);
+      const expoClientId = getExpoClientId();
+      const clientId = useProxy ? (expoClientId ?? platformClientId) : (platformClientId ?? expoClientId);
+
+      if (!clientId) {
+        console.warn('⚠️ Google Sign-In attempted without client ID configuration');
+        return {
+          success: false,
+          error: 'Google Sign-In is not configured yet. Please add your Google OAuth client IDs.',
+        };
       }
-      
-      return {
-        success: false,
-        error: 'Google Sign-In was cancelled or failed',
-      };
+
+      const redirectUri = AuthSession.makeRedirectUri({
+        scheme: googleAuthConfig.redirectScheme,
+        path: googleAuthConfig.redirectPath,
+        useProxy,
+      });
+
+      const authRequest = new AuthSession.AuthRequest({
+        clientId,
+        responseType: AuthSession.ResponseType.Code,
+        scopes: ['openid', 'profile', 'email'],
+        usePKCE: true,
+        redirectUri,
+      });
+
+      const result = await authRequest.promptAsync(GOOGLE_DISCOVERY, { useProxy });
+
+      if (result.type === 'dismiss') {
+        return {
+          success: false,
+          error: 'Google Sign-In was cancelled.',
+        };
+      }
+
+      if (result.type !== 'success' || !result.params?.code) {
+        const errorDescription =
+          result.params?.error_description ||
+          result.error ||
+          'Google Sign-In failed. Please try again.';
+        console.warn('⚠️ Google Sign-In did not complete successfully:', result);
+        return {
+          success: false,
+          error: errorDescription,
+        };
+      }
+
+      const tokenResponse = await AuthSession.exchangeCodeAsync(
+        {
+          clientId,
+          code: result.params.code,
+          redirectUri,
+          extraParams: {
+            code_verifier: authRequest.codeVerifier ?? '',
+          },
+        },
+        GOOGLE_DISCOVERY,
+      );
+
+      const idToken = tokenResponse.idToken ?? tokenResponse.id_token;
+      const accessToken = tokenResponse.accessToken ?? tokenResponse.access_token;
+
+      if (!idToken) {
+        console.error('❌ Google Sign-In response did not include an ID token');
+        return {
+          success: false,
+          error: 'Google Sign-In did not return a valid ID token. Please try again.',
+        };
+      }
+
+      return await this.signInWithGoogleTokens(idToken, accessToken);
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       return {
         success: false,
         error: 'Google Sign-In failed. Please try again.',
+      };
+    }
+  }
+
+  async signInWithGoogleTokens(idToken, accessToken) {
+    try {
+      if (!idToken) {
+        throw new Error('Missing Google ID token');
+      }
+
+      const credential = GoogleAuthProvider.credential(idToken, accessToken);
+      const userCredential = await signInWithCredential(this.auth, credential);
+      const user = userCredential.user;
+
+      await this.storeAuthState({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        emailVerified: user.emailVerified,
+      });
+
+      return {
+        success: true,
+        user: {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+        },
+      };
+    } catch (error) {
+      console.error('Google Sign-In (Firebase credential) error:', error);
+      let errorMessage = 'Google Sign-In failed. Please try again.';
+      if (error?.code === 'auth/account-exists-with-different-credential') {
+        errorMessage =
+          'An account already exists with the same email address but a different sign-in method. Please sign in using your original provider.';
+      } else if (error?.code === 'auth/invalid-credential') {
+        errorMessage = 'The Google credential is invalid or has expired. Please try again.';
+      }
+      return {
+        success: false,
+        error: errorMessage,
       };
     }
   }

@@ -2,6 +2,7 @@
 // Enhanced medication search using Excel data
 
 const ExcelReader = require('./excelReaderRNCompatible');
+const { parsePrice } = require('../src/utils/parsePrice');
 
 class EnhancedMedicationSearch {
   constructor() {
@@ -53,8 +54,8 @@ class EnhancedMedicationSearch {
     const keys = ['original price', 'precio original', 'precioOriginal', 'price', 'Price', 'precio', 'Precio'];
     for (const k of keys) {
       if (row && row[k] != null && row[k] !== '') {
-        const n = Number(String(row[k]).toString().replace(/[^0-9.]/g, ''));
-        if (!Number.isNaN(n)) return n;
+        const price = parsePrice(row[k]);
+        if (price !== null) return price;
       }
     }
     return null;

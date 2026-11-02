@@ -9,6 +9,7 @@ import {
   Image,
   Alert,
   TextInput,
+  Modal,
 } from 'react-native';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
@@ -31,6 +32,7 @@ export default function FastingProfileScreen({
   saveFastingProfileToDB
 }: FastingProfileScreenProps) {
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, getAccentColor } = useWallpaper();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Use S object for translations, fallback to key if not available
   const t = (key: string) => S?.[key] || key;
@@ -65,11 +67,12 @@ export default function FastingProfileScreen({
       saveFastingProfileToDB(fastingProfile);
     }
     
-    Alert.alert(
-      S.profileSaved,
-      S.healthProfileSavedMessage,
-      [{ text: S.ok }]
-    );
+    // Show themed success modal
+    setShowSuccessModal(true);
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
     onClose();
   };
 
@@ -427,6 +430,36 @@ export default function FastingProfileScreen({
           </TouchableOpacity>
         </ScrollView>
       </View>
+
+      {/* Success Modal - Themed */}
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleSuccessModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, {
+            backgroundColor: getCardBackgroundColor(),
+            borderColor: getCardBorderColor(),
+          }]}>
+            <DynamicText type="primary" style={[styles.modalTitle, { color: getCardTextColor() }]}>
+              {S.profileSaved}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.modalMessage, { color: getSubTextColor() }]}>
+              {S.healthProfileSavedMessage}
+            </DynamicText>
+            <TouchableOpacity
+              onPress={handleSuccessModalClose}
+              style={[styles.modalButton, { backgroundColor: getAccentColor() }]}
+            >
+              <DynamicText type="card" style={[styles.modalButtonText, { color: '#ffffff' }]}>
+                {S.ok || 'OK'}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -652,5 +685,48 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     // color: '#ffffff', // Always white
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    borderRadius: 16,
+    padding: 24,
+    minWidth: 280,
+    maxWidth: '85%',
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  modalButton: {
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
 });

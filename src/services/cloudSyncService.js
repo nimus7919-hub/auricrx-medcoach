@@ -4,7 +4,31 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../config/firebase';
 
-const API_BASE_URL = 'https://auricrx-medcoach.onrender.com';
+import { API_BASE as API_BASE_URL } from '../config/api';
+
+// Keep the timeout active until the response body has been consumed.
+async function requestSync(path, options = {}) {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    if (!response.headers.get('content-type')?.includes('application/json')) {
+      throw new Error('Server returned non-JSON response');
+    }
+    const data = await response.json();
+    if (!data.ok) throw new Error(data.message || 'Sync failed');
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 /**
  * Get Firebase auth token
@@ -35,41 +59,11 @@ async function getAuthToken() {
  */
 async function pushToCloud(dataType, payload) {
   try {
-    const token = await getAuthToken();
-    if (!token) {
-      throw new Error('Not authenticated');
-    }
-    
-    const response = await fetch(`${API_BASE_URL}/api/sync/push`, {
+    const data = await requestSync('/api/sync/push', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
       body: JSON.stringify({ dataType, payload }),
     });
-    
-    // Check if response is OK
-    if (!response.ok) {
-      const text = await response.text();
-      console.error(`❌ Cloud sync push ${dataType} HTTP error:`, response.status, text.substring(0, 200));
-      throw new Error(`Server error: ${response.status}`);
-    }
-    
-    // Check if response is JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error(`❌ Cloud sync push ${dataType} non-JSON response:`, text.substring(0, 200));
-      throw new Error('Server returned non-JSON response');
-    }
-    
-    const data = await response.json();
-    
-    if (!data.ok) {
-      throw new Error(data.message || 'Sync failed');
-    }
-    
+
     return { success: true, data };
   } catch (error) {
     console.error(`❌ Failed to sync ${dataType}:`, error);
@@ -82,39 +76,8 @@ async function pushToCloud(dataType, payload) {
  */
 async function pullFromCloud(dataType) {
   try {
-    const token = await getAuthToken();
-    if (!token) {
-      throw new Error('Not authenticated');
-    }
-    
-    const response = await fetch(`${API_BASE_URL}/api/sync/pull/${dataType}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    
-    // Check if response is OK
-    if (!response.ok) {
-      const text = await response.text();
-      console.error(`❌ Cloud sync pull ${dataType} HTTP error:`, response.status, text.substring(0, 200));
-      throw new Error(`Server error: ${response.status}`);
-    }
-    
-    // Check if response is JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error(`❌ Cloud sync pull ${dataType} non-JSON response:`, text.substring(0, 200));
-      throw new Error('Server returned non-JSON response');
-    }
-    
-    const data = await response.json();
-    
-    if (!data.ok) {
-      throw new Error(data.message || 'Pull failed');
-    }
-    
+    const data = await requestSync(`/api/sync/pull/${dataType}`);
+
     return { success: true, hasData: data.hasData, payload: data.data?.payload };
   } catch (error) {
     console.error(`❌ Failed to pull ${dataType}:`, error);
@@ -127,50 +90,8 @@ async function pullFromCloud(dataType) {
  */
 async function pullAllFromCloud() {
   try {
-    console.log('🔍 DEBUG: Starting pullAllFromCloud...');
-    const token = await getAuthToken();
-    if (!token) {
-      console.error('❌ DEBUG: No auth token found');
-      throw new Error('Not authenticated');
-    }
-    
-    console.log('🔍 DEBUG: Fetching cloud data from:', `${API_BASE_URL}/api/sync/pull`);
-    
-    const response = await fetch(`${API_BASE_URL}/api/sync/pull`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    
-    console.log('🔍 DEBUG: Response status:', response.status);
-    console.log('🔍 DEBUG: Response headers:', response.headers.get('content-type'));
-    
-    // Check if response is OK
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('❌ Cloud sync pull HTTP error:', response.status);
-      console.error('❌ Response body:', text.substring(0, 500));
-      throw new Error(`Server error: ${response.status}`);
-    }
-    
-    // Check if response is JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error('❌ Cloud sync pull non-JSON response');
-      console.error('❌ Content-Type:', contentType);
-      console.error('❌ Response body:', text.substring(0, 500));
-      throw new Error('Server returned non-JSON response');
-    }
-    
-    const data = await response.json();
-    console.log('✅ DEBUG: Cloud data received:', Object.keys(data));
-    
-    if (!data.ok) {
-      throw new Error(data.message || 'Pull failed');
-    }
-    
+    const data = await requestSync('/api/sync/pull');
+
     return { success: true, data: data.data };
   } catch (error) {
     console.error('❌ Failed to pull all data:', error);
