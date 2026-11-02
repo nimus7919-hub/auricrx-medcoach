@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title"><title id="title">AuricRX A gold capsule monogram</title><defs>
+  <radialGradient id="bg"><stop stop-color="#20365A"/><stop offset=".58" stop-color="#102447"/><stop offset="1" stop-color="#0B1B3F"/></radialGradient>
+  <radialGradient id="glow" cx="48%" cy="30%" r="58%"><stop stop-color="#D7A74B" stop-opacity=".16"/><stop offset="1" stop-color="#D7A74B" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2=".85" y2="1" gradientUnits="objectBoundingBox">
+    <stop stop-color="#B37A25"/><stop offset=".18" stop-color="#FFE7A3"/><stop offset=".36" stop-color="#D9A443"/><stop offset=".49" stop-color="#FFF0BC"/><stop offset=".56" stop-color="#E8BC64"/><stop offset=".8" stop-color="#A66B20"/><stop offset="1" stop-color="#F3CF80"/>
+  </linearGradient>
+  <linearGradient id="edge"><stop stop-color="#FFF0BA"/><stop offset="1" stop-color="#AA742C"/></linearGradient>
+  <linearGradient id="pillGold" x2="0" y2="1"><stop stop-color="#FFF1B3"/><stop offset=".35" stop-color="#F7CF65"/><stop offset=".7" stop-color="#D6A032"/><stop offset="1" stop-color="#AB7421"/></linearGradient>
+  <linearGradient id="pillWhite" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFFDF4"/><stop offset="1" stop-color="#C8CBD0"/></linearGradient>
+</defs><rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/><circle cx="512" cy="512" r="458" fill="none" stroke="url(#gold)" stroke-width="2"/><g transform="translate(208 -42) scale(1.12)" fill="url(#gold)" stroke="url(#edge)" stroke-width="0.7">
+    <path d="M260 190 L475 780 Q480 794 506 797 L506 807 L344 807 L344 797 Q381 794 370 780 L235 350 L120 780 Q114 794 150 797 L150 807 L37 807 L37 797 Q62 794 65 780 Z"/>
+  </g>
+  <rect x="408.3424089897434" y="630.490050333847" width="145.91842076623186" height="21.419899332306112" rx="10.709949666153056" fill="url(#pillGold)"/>
+  <clipPath id="pillClip"><rect x="408.3424089897434" y="630.490050333847" width="145.91842076623186" height="21.419899332306112" rx="10.709949666153056"/></clipPath>
+  <g clip-path="url(#pillClip)">
+    <rect x="481.3016193728593" y="630.490050333847" width="72.95921038311593" height="21.419899332306112" fill="url(#pillWhite)"/>
+    <path d="M419.05235865589646 634.9882291936312 H543.5508800898222" stroke="#fff8d9" stroke-opacity=".7" stroke-width="1.4"/>
+  </g></svg>

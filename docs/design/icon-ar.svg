@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title"><title id="title">AuricRX AR gold capsule monogram</title><defs>
+  <radialGradient id="bg"><stop stop-color="#20365A"/><stop offset=".58" stop-color="#102447"/><stop offset="1" stop-color="#0B1B3F"/></radialGradient>
+  <radialGradient id="glow" cx="48%" cy="30%" r="58%"><stop stop-color="#D7A74B" stop-opacity=".16"/><stop offset="1" stop-color="#D7A74B" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2=".85" y2="1" gradientUnits="objectBoundingBox">
+    <stop stop-color="#B37A25"/><stop offset=".18" stop-color="#FFE7A3"/><stop offset=".36" stop-color="#D9A443"/><stop offset=".49" stop-color="#FFF0BC"/><stop offset=".56" stop-color="#E8BC64"/><stop offset=".8" stop-color="#A66B20"/><stop offset="1" stop-color="#F3CF80"/>
+  </linearGradient>
+  <linearGradient id="edge"><stop stop-color="#FFF0BA"/><stop offset="1" stop-color="#AA742C"/></linearGradient>
+  <linearGradient id="pillGold" x2="0" y2="1"><stop stop-color="#FFF1B3"/><stop offset=".35" stop-color="#F7CF65"/><stop offset=".7" stop-color="#D6A032"/><stop offset="1" stop-color="#AB7421"/></linearGradient>
+  <linearGradient id="pillWhite" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset=".4" stop-color="#FFFDF4"/><stop offset="1" stop-color="#C8CBD0"/></linearGradient>
+</defs><rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/><circle cx="512" cy="512" r="458" fill="none" stroke="url(#gold)" stroke-width="2"/><g transform="translate(95 70) scale(0.86)" fill="url(#gold)" stroke="url(#edge)" stroke-width="0.7">
+    <path d="M260 190 L475 780 Q480 794 506 797 L506 807 L344 807 L344 797 Q381 794 370 780 L235 350 L120 780 Q114 794 150 797 L150 807 L37 807 L37 797 Q62 794 65 780 Z"/>
+  </g>
+  <rect x="249.99506404569578" y="586.376288649204" width="109.72307308835659" height="16.447422701592192" rx="8.223711350796096" fill="url(#pillGold)"/>
+  <clipPath id="pillClip"><rect x="249.99506404569578" y="586.376288649204" width="109.72307308835659" height="16.447422701592192" rx="8.223711350796096"/></clipPath>
+  <g clip-path="url(#pillClip)">
+    <rect x="304.85660058987406" y="586.376288649204" width="54.86153654417829" height="16.447422701592192" fill="url(#pillWhite)"/>
+    <path d="M258.2187753964919 589.8302474165383 H351.49442578325625" stroke="#fff8d9" stroke-opacity=".7" stroke-width="1.4"/>
+  </g><path transform="translate(0 47)" fill="url(#gold)" stroke="url(#edge)" stroke-width=".6" d="M535 233 H707 C828 233 859 294 859 362 C859 434 815 476 750 489 C787 511 806 560 831 614 L859 675 Q873 702 900 706 V717 H810 C789 694 776 663 755 614 L714 527 Q697 493 663 493 H648 V681 Q648 704 689 706 V717 H535 V706 Q570 704 570 681 V269 Q570 246 535 244 Z M648 251 V474 H683 C750 474 777 437 777 365 C777 293 755 251 696 251 Z"/></svg>
