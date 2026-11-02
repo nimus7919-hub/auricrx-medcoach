@@ -1,8 +1,9 @@
+import { API_BASE } from "../config/api";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_OPTIONS = {};
 
-export function useMedicalStream(serverUrl = "http://localhost:3001/api/ai/stream", options = DEFAULT_OPTIONS) {
+export function useMedicalStream(serverUrl = `${API_BASE}/api/ai/stream`, options = DEFAULT_OPTIONS) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef(null);

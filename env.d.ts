@@ -1,5 +1,5 @@
-// env.d.ts
 declare module '@env' {
-  export const OPENAI_API_KEY: string;
+  export const API_BASE_URL: string;
   export const API_MODEL: string;
+  export const SENTRY_DSN: string;
 }

@@ -1,3 +1,4 @@
+import { API_BASE } from "../config/api";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -877,7 +878,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
       ).join('\n');
 
       // Call AI API - Use Render service (cloud)
-      const apiUrl = 'https://auricrx-medcoach.onrender.com/api/ai/drug-interactions';
+      const apiUrl = `${API_BASE}/api/ai/drug-interactions`;
       
       console.log('Calling AI API:', apiUrl);
       console.log('Items to check:', allItems);
@@ -1016,11 +1017,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       // Check for timeout
       if (error.message?.includes('timeout')) {
-        errorMessage = '⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   node aI-stream.js\n\n2. Check that port 3001 is available\n\n3. Verify your .env file has OPENAI_API_KEY';
+        errorMessage = '⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   npm start\n\n2. Check that port 4000 is available\n\n3. Verify server environment is configured';
       }
       // Check for network errors
       else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        errorMessage = '🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: node server/aI-stream.js\n2. Check if running on port 3001\n3. Make sure firewall allows the connection';
+        errorMessage = '🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: cd server; npm start\n2. Check if running on port 4000\n3. Make sure firewall allows the connection';
       }
       // Add error details for other errors
       else if (error.message) {

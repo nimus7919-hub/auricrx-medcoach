@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), quiet: true });
 const express = require('express');
 const cors = require("cors");
 const helmet = require("helmet");
@@ -59,7 +59,7 @@ const askLimiter = rateLimit({
   legacyHeaders: false,
   message: { ok: false, error: "Too many requests, please slow down." },
 });
-app.use("/ask", askLimiter);
+app.use(["/ask", "/ask-stream", "/api/ai"], askLimiter);
 
 // --- Your routes here ---
 
@@ -188,7 +188,6 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   console.log('🔑 API Key status:', apiKey ? 'Present' : 'Missing');
-  console.log('🔑 API Key value (first 10 chars):', apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING');
   if (!apiKey) {
     console.warn('❌ Nearby pharmacies: no API key present – returning mock data.');
     const mock = [
@@ -217,7 +216,6 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
     try {
       const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&type=pharmacy&language=${encodeURIComponent(lang)}&key=${apiKey}`;
       console.log('🔍 SKIPPING Legacy Places API (nearbysearch) - Using Places API (New) only');
-      console.log(`📍 Legacy Places API URL: ${url}`);
       console.log('🔥 SKIPPING LEGACY API - GOING STRAIGHT TO PLACES API (NEW)!');
       console.log(`Places API (legacy) fetch: lat=${lat.toFixed(4)} lon=${lon.toFixed(4)} lang=${lang} limit=${limit}`);
       // Skip legacy API entirely - go straight to Places API (New)
@@ -1109,7 +1107,7 @@ app.post('/ask', async (req, res) => {
 // --- Streaming endpoint (token-by-token) ---
 // POST /ask-stream { messages?: [{role, content}], message?: string }
 // Sends back raw tokens as they arrive (plain text stream) so client can append.
-app.post('/ask-stream', async (req, res) => {
+app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
   try {
     // Accept either a full messages array or a single message string
     let { messages, message } = req.body || {};
@@ -1133,11 +1131,26 @@ app.post('/ask-stream', async (req, res) => {
       }
     }
 
+    if (!messages.length || messages.length > 100 || messages.some(m =>
+      !m || typeof m.content !== 'string' ||
+      !['user', 'assistant', 'system'].includes(m.role))) {
+      return res.status(400).json({ ok: false, error: 'bad_request' });
+    }
+
     // Basic validation / trimming
     messages = messages.map(m => ({
       role: m.role === 'user' || m.role === 'assistant' || m.role === 'system' ? m.role : 'user',
       content: (m.content || '').slice(0, 8000),
     }));
+
+    if (req.body.stream === false) {
+      const completion = await client.chat.completions.create({
+        model: process.env.MODEL || 'gpt-4o-mini',
+        messages,
+        temperature: 0.2,
+      });
+      return res.type('text/plain').send(completion.choices[0]?.message?.content || '');
+    }
 
     res.writeHead(200, {
       'Content-Type': 'text/plain; charset=utf-8',
@@ -1167,7 +1180,8 @@ app.post('/ask-stream', async (req, res) => {
     }
     res.end();
   } catch (err) {
-    console.error('stream error', err);
+    console.error('AI stream request failed');
+    if (!res.headersSent) return res.status(502).json({ ok: false, error: 'AI request failed' });
     // Best-effort error emit; client can detect and show a message
     try { res.write('\n[STREAM_ERROR]\n'); } catch {}
     try { res.end(); } catch {}
@@ -2144,14 +2158,12 @@ app.get('/debug/neon', async (_req, res) => {
       testQuery: result,
       tableExists: tableCheck[0]?.table_exists,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
-      databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'Not set'
     });
   } catch (error) {
     res.status(500).json({
       ok: false,
       error: error.message,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
-      databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'Not set'
     });
   }
 });

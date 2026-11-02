@@ -1,3 +1,4 @@
+import { API_BASE } from "./src/config/api";
 import { useMedicalStream } from "./src/hooks/useMedicalStream";
 
 // AuricRx MedCoach — Dashboard Build (single-file version) with Themes + Fonts
@@ -113,8 +114,8 @@ import {
 } from '@expo-google-fonts/inter';
 
 // --- backend endpoint ---
-const BACKEND_URL = "https://auricrx-medcoach.onrender.com/ask";
-const API_BASE_URL = "https://auricrx-medcoach.onrender.com";
+const BACKEND_URL = `${API_BASE}/ask`;
+const API_BASE_URL = API_BASE;
 
 
 // ---------- i18n (inline, tiny) ----------
@@ -2084,7 +2085,7 @@ export default function App() {
       }
 
       // Call cancel subscription API
-      const response = await fetch('https://auricrx-medcoach.onrender.com/api/subscription/cancel', {
+      const response = await fetch(`${API_BASE}/api/subscription/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2160,7 +2161,7 @@ export default function App() {
       }
 
       // Call resubscribe API
-      const response = await fetch('https://auricrx-medcoach.onrender.com/api/subscription/resubscribe', {
+      const response = await fetch(`${API_BASE}/api/subscription/resubscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3796,7 +3797,7 @@ useEffect(() => {
 const aiInputRef = useRef(null);
 
   // streaming hook (use a local inline implementation)
-  const { text: streamText, loading: streamLoading, ask: streamAsk, cancel: streamCancel } = useMedicalStream("https://auricrx-medcoach.onrender.com/ask-stream", { stream: false, temperature: 0.7, max_tokens: 500 });
+  const { text: streamText, loading: streamLoading, ask: streamAsk, cancel: streamCancel } = useMedicalStream(`${API_BASE}/ask-stream`, { stream: false, temperature: 0.7, max_tokens: 500 });
 
   // sync streaming text into aiMessages so UI shows live tokens
   useEffect(() => {
@@ -3969,7 +3970,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   // Skip API test and go directly to tool calling
   console.log('Using tool calling approach...');
   console.log('Question:', q);
-  console.log('API Base URL:', 'https://auricrx-medcoach.onrender.com');
+  console.log('API Base URL:', `${API_BASE}`);
   
   // Add immediate response
   setAiMessages(m => [...m, { role: 'assistant', text: S.aiThinking || 'AI is thinking...' }]);
@@ -3981,7 +3982,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       userData: userData
     });
     
-    const response = await fetch('https://auricrx-medcoach.onrender.com/ask', {
+    const response = await fetch(`${API_BASE}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -4337,7 +4338,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             // Also directly fetch medications from database as backup
             try {
               console.log('💊 Directly fetching medications from database...');
-              const medsResponse = await fetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}`);
+              const medsResponse = await fetch(`${API_BASE}/api/medications?userId=${user.uid}`);
               if (medsResponse.ok) {
                 const medsResult = await medsResponse.json();
                 if (medsResult.ok && medsResult.medications && Array.isArray(medsResult.medications)) {
