@@ -1,8 +1,8 @@
+import { authenticatedFetch } from '../src/services/authenticatedFetch';
 // services/medicationDataCollector.js
 // Service for collecting and sending medication price contributions to the server
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import authService from '../src/services/authService';
+import { auth } from '../src/config/firebase';
 
 const API_BASE = 'https://auricrx-medcoach.onrender.com';
 
@@ -11,36 +11,11 @@ class MedicationDataCollector {
     this.apiBase = API_BASE;
   }
 
-  // Get authenticated user ID or create anonymous ID
+  // Use the signed-in Firebase identity for contributions.
   async getOrCreateUserId() {
-    try {
-      // First, try to get authenticated user
-      const currentUser = authService.getCurrentUser();
-      if (currentUser && currentUser.uid) {
-        console.log('🆔 Using authenticated user ID:', currentUser.uid);
-        return currentUser.uid;
-      }
-      
-      // Fallback: Try to get existing anonymous user ID from AsyncStorage
-      const existingUserId = await AsyncStorage.getItem('auricrx_user_id');
-      if (existingUserId) {
-        console.log('🆔 Using stored anonymous user ID:', existingUserId);
-        return existingUserId;
-      }
-      
-      // Generate a new anonymous user ID
-      const userId = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      // Store it for future use
-      await AsyncStorage.setItem('auricrx_user_id', userId);
-      
-      console.log('🆔 Generated new anonymous user ID:', userId);
-      return userId;
-    } catch (error) {
-      console.error('❌ Failed to get/create user ID:', error);
-      // Fallback to a simple timestamp-based ID
-      return 'anonymous_' + Date.now();
-    }
+    const user = auth.currentUser;
+    if (!user) throw new Error('Not authenticated');
+    return user.uid;
   }
 
   // Add a new medication contribution
@@ -57,7 +32,7 @@ class MedicationDataCollector {
       
       console.log('📊 Sending contribution to server:', contributionWithUserId);
       
-      const response = await fetch(`${this.apiBase}/medication-contributions`, {
+      const response = await authenticatedFetch(`${this.apiBase}/medication-contributions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +71,7 @@ class MedicationDataCollector {
 
       const url = `${this.apiBase}/medication-contributions${params.toString() ? '?' + params.toString() : ''}`;
       
-      const response = await fetch(url);
+      const response = await authenticatedFetch(url);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -115,7 +90,7 @@ class MedicationDataCollector {
   // Export contributions as CSV
   async exportContributions(format = 'csv') {
     try {
-      const response = await fetch(`${this.apiBase}/medication-contributions/export?format=${format}`);
+      const response = await authenticatedFetch(`${this.apiBase}/medication-contributions/export?format=${format}`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -137,7 +112,7 @@ class MedicationDataCollector {
   // Verify a contribution
   async verifyContribution(contributionId) {
     try {
-      const response = await fetch(`${this.apiBase}/medication-contributions/${contributionId}/verify`, {
+      const response = await authenticatedFetch(`${this.apiBase}/medication-contributions/${contributionId}/verify`, {
         method: 'PUT',
       });
 
@@ -158,7 +133,7 @@ class MedicationDataCollector {
   // Delete a contribution
   async deleteContribution(contributionId) {
     try {
-      const response = await fetch(`${this.apiBase}/medication-contributions/${contributionId}`, {
+      const response = await authenticatedFetch(`${this.apiBase}/medication-contributions/${contributionId}`, {
         method: 'DELETE',
       });
 

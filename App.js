@@ -1,3 +1,4 @@
+import { authenticatedFetch } from './src/services/authenticatedFetch';
 import { requestSearchLocationPermission } from './src/lib/locationPermission';
 import ConsentHost from './src/components/ConsentHost';
 import { API_BASE } from "./src/config/api";
@@ -2106,7 +2107,7 @@ export default function App() {
       }
 
       // Call cancel subscription API
-      const response = await fetch(`${API_BASE}/api/subscription/cancel`, {
+      const response = await authenticatedFetch(`${API_BASE}/api/subscription/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2182,7 +2183,7 @@ export default function App() {
       }
 
       // Call resubscribe API
-      const response = await fetch(`${API_BASE}/api/subscription/resubscribe`, {
+      const response = await authenticatedFetch(`${API_BASE}/api/subscription/resubscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2346,7 +2347,7 @@ export default function App() {
   const loadFastingProfileFromDB = async (userId) => {
     try {
       console.log('📖 Loading fasting profile from database for user:', userId);
-      const response = await fetch(`${API_BASE_URL}/api/fasting-profile?userId=${userId}`);
+      const response = await authenticatedFetch(`${API_BASE_URL}/api/fasting-profile?userId=${userId}`);
       const data = await response.json();
       
       if (data.ok && data.found && data.profile) {
@@ -2369,7 +2370,7 @@ export default function App() {
       }
 
       console.log('💾 Saving fasting profile to database for user:', user.uid);
-      const response = await fetch(`${API_BASE_URL}/api/fasting-profile`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/api/fasting-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -4000,7 +4001,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       userData: userData
     });
     
-    const response = await fetch(`${API_BASE}/ask`, {
+    const response = await authenticatedFetch(`${API_BASE}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -4356,7 +4357,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             // Also directly fetch medications from database as backup
             try {
               console.log('💊 Directly fetching medications from database...');
-              const medsResponse = await fetch(`${API_BASE}/api/medications?userId=${user.uid}`);
+              const medsResponse = await authenticatedFetch(`${API_BASE}/api/medications?userId=${user.uid}`);
               if (medsResponse.ok) {
                 const medsResult = await medsResponse.json();
                 if (medsResult.ok && medsResult.medications && Array.isArray(medsResult.medications)) {
@@ -4810,7 +4811,7 @@ const handleAskMedicalAI = async () => {
   setAiInput('');
 
   try {
-    const res = await fetch(BACKEND_URL, {
+    const res = await authenticatedFetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: q }),

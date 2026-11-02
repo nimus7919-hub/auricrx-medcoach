@@ -223,6 +223,8 @@ async function sanPabloSmart(q) {
 
 // GET (browser test): /api/mx/sanpablo/search?q=aspirina%20100%20mg%2028
 app.get('/api/mx/sanpablo/search', async (req, res) => {
+  // Resume only after written permission or an official feed.
+  return res.status(503).json({ error: 'price_lookup_paused', items: [] });
   const q = String(req.query.q || '');
   if (!q) return res.status(400).json({ error: 'q (query) is required' });
   try { res.json(await sanPabloSmart(q)); }

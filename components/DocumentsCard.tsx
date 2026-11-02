@@ -102,13 +102,9 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
   <Tabs value={active} onValueChange={(v: string) => setActive(v as DocKind)} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="lab">Lab results</TabsTrigger>
-            <TabsTrigger value="official_id">Official ID</TabsTrigger>
-            <TabsTrigger value="insurance_id">{insLabel}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="lab"><DocSection kind="lab" onSaved={handleSaved} allowMulti /></TabsContent>
-          <TabsContent value="official_id"><DocSection kind="official_id" onSaved={handleSaved} /></TabsContent>
-          <TabsContent value="insurance_id"><DocSection kind="insurance_id" onSaved={handleSaved} /></TabsContent>
         </Tabs>
 
         {(existing || recent.length > 0) && (

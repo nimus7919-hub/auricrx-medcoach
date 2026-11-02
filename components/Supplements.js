@@ -1,3 +1,4 @@
+import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -217,7 +218,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       setAiAnalysisQuery('Searching for nearby stores...');
       
       // Search for supplement stores using the same API pattern as pharmacies
-      const response = await fetch(`https://auricrx-medcoach.onrender.com/supplements/nearby?lat=${latitude}&lon=${longitude}&supplement=${encodeURIComponent(supplementName)}&limit=10`);
+      const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/supplements/nearby?lat=${latitude}&lon=${longitude}&supplement=${encodeURIComponent(supplementName)}&limit=10`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -278,7 +279,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       // Save to database if user is authenticated
       if (user && user.uid) {
         try {
-          const response = await fetch('https://auricrx-medcoach.onrender.com/api/supplements', {
+          const response = await authenticatedFetch('https://auricrx-medcoach.onrender.com/api/supplements', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -607,7 +608,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                               if (user && user.uid && (supp.dbId || supp.id)) {
                                 try {
                                   const supplementId = supp.dbId || supp.id;
-                                  const response = await fetch(`https://auricrx-medcoach.onrender.com/api/supplements?userId=${user.uid}&supplementId=${supplementId}`, {
+                                  const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/supplements?userId=${user.uid}&supplementId=${supplementId}`, {
                                     method: 'DELETE'
                                   });
                                   

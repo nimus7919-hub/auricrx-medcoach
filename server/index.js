@@ -61,6 +61,17 @@ const askLimiter = rateLimit({
 });
 app.use(["/ask", "/ask-stream", "/api/ai"], askLimiter);
 
+// Operational endpoints are unavailable in production and fail closed without a key.
+function requireDevelopmentAdmin(req, res, next) {
+  if (process.env.NODE_ENV === 'production') return res.status(404).end();
+  const adminKey = process.env.ADMIN_CLEANUP_KEY;
+  if (!adminKey || req.headers['x-admin-key'] !== adminKey) return res.status(401).end();
+  next();
+}
+app.use(['/debug', '/admin', '/api/admin', '/test-tools'], requireDevelopmentAdmin);
+
+const HEALTH_SAFETY_PROMPT = "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation.";
+
 require('./compliance')(app, require('./neon').neonClient, () => stripe);
 
 // --- Your routes here ---
@@ -880,7 +891,7 @@ app.post('/test-tools', async (req, res) => {
     const messages = [
       {
         role: 'system',
-        content: "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation."
+        content: HEALTH_SAFETY_PROMPT
       },
       { role: 'user', content: testMessage }
     ];
@@ -970,7 +981,7 @@ app.post('/ask', async (req, res) => {
     const messages = [
       {
         role: 'system',
-        content: "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation."
+        content: HEALTH_SAFETY_PROMPT
       },
       { role: 'user', content: message }
     ];
@@ -1069,7 +1080,7 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
         messages = [
           {
             role: 'system',
-            content: "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation."
+            content: HEALTH_SAFETY_PROMPT
           },
           { role: 'user', content: message.trim() },
         ];
@@ -1181,7 +1192,8 @@ async function saveContributions() {
 }
 
 // POST /medication-contributions - Save a new medication contribution
-app.post('/medication-contributions', async (req, res) => {
+app.post('/medication-contributions', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
     const { 
       medicationName, 
@@ -1192,8 +1204,7 @@ app.post('/medication-contributions', async (req, res) => {
       storeAddress, 
       pharmacyId, 
       userLocation, 
-      currency,
-      userId
+      currency
     } = req.body || {};
 
     // Validate required fields
@@ -1260,17 +1271,15 @@ app.post('/medication-contributions', async (req, res) => {
 });
 
 // GET /medication-contributions - Get all contributions with optional filtering
-app.get('/medication-contributions', async (req, res) => {
+app.get('/medication-contributions', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { 
-      search, 
+    const { search, 
       medication, 
       store, 
       verified, 
       limit = 100, 
-      offset = 0,
-      userId
-    } = req.query;
+      offset = 0 } = req.query;
 
     // Validate user_id is provided
     if (!userId) {
@@ -1332,7 +1341,7 @@ app.get('/medication-contributions', async (req, res) => {
 });
 
 // GET /medication-contributions/export - Export contributions as CSV
-app.get('/medication-contributions/export', async (req, res) => {
+app.get('/medication-contributions/export', requireDevelopmentAdmin, async (req, res) => {
   try {
     const { format = 'csv' } = req.query;
 
@@ -1398,7 +1407,7 @@ app.get('/medication-contributions/export', async (req, res) => {
 });
 
 // PUT /medication-contributions/:id/verify - Mark a contribution as verified
-app.put('/medication-contributions/:id/verify', async (req, res) => {
+app.put('/medication-contributions/:id/verify', requireDevelopmentAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const contribution = medicationContributions.find(c => c.id === id);
@@ -1432,12 +1441,12 @@ app.put('/medication-contributions/:id/verify', async (req, res) => {
 });
 
 // DELETE /medication-contributions/:id - Delete a contribution
-app.delete('/medication-contributions/:id', async (req, res) => {
+app.delete('/medication-contributions/:id', verifyUser, async (req, res) => {
   try {
     const { id } = req.params;
     const initialLength = medicationContributions.length;
     
-    medicationContributions = medicationContributions.filter(c => c.id !== id);
+    medicationContributions = medicationContributions.filter(c => c.id !== id || (c.userId || c.user_id) !== req.userId);
 
     if (medicationContributions.length === initialLength) {
       return res.status(404).json({ 
@@ -1466,7 +1475,7 @@ app.delete('/medication-contributions/:id', async (req, res) => {
 });
 
 // DELETE /medication-contributions - Clear all contributions (admin only)
-app.delete('/medication-contributions', async (req, res) => {
+app.delete('/medication-contributions', requireDevelopmentAdmin, async (req, res) => {
   try {
     const count = medicationContributions.length;
     medicationContributions = [];
@@ -1490,13 +1499,13 @@ app.delete('/medication-contributions', async (req, res) => {
 });
 
 // POST /supplement-contributions - Save a new supplement contribution
-app.post('/supplement-contributions', async (req, res) => {
+app.post('/supplement-contributions', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
     console.log('📊 POST /supplement-contributions endpoint hit');
     console.log('📊 Request body:', req.body);
     
-    const { 
-      supplementName, 
+    const { supplementName, 
       brand, 
       price, 
       quantity, 
@@ -1504,9 +1513,7 @@ app.post('/supplement-contributions', async (req, res) => {
       storeAddress, 
       pharmacyId, 
       currency, 
-      userLocation, 
-      userId 
-    } = req.body;
+      userLocation } = req.body;
 
     console.log('📊 Received supplement contribution:', {
       supplementName,
@@ -1569,17 +1576,16 @@ app.post('/supplement-contributions', async (req, res) => {
 });
 
 // GET /supplement-contributions - Get all supplement contributions with optional filtering
-app.get('/supplement-contributions', async (req, res) => {
+app.get('/supplement-contributions', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { 
-      search, 
+    const { search, 
       supplement, 
       store, 
       verified, 
-      userId,
+      
       limit = 50, 
-      offset = 0 
-    } = req.query;
+      offset = 0 } = req.query;
 
     // Get contributions from Neon database
     const filters = {};
@@ -1620,11 +1626,10 @@ app.get('/supplement-contributions', async (req, res) => {
 // --- User Medications Endpoints ---
 
 // POST /api/medications - Save a new user medication
-app.post('/api/medications', async (req, res) => {
+app.post('/api/medications', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { 
-      userId,
-      medicationName, 
+    const { medicationName, 
       strengthValue, 
       strengthUnit,
       status, 
@@ -1635,8 +1640,7 @@ app.post('/api/medications', async (req, res) => {
       dosesLeft, 
       quantityValue,
       quantityUnit,
-      lastRefill 
-    } = req.body;
+      lastRefill } = req.body;
 
     // Validate required fields
     if (!userId || !medicationName || !status) {
@@ -1685,9 +1689,10 @@ app.post('/api/medications', async (req, res) => {
 });
 
 // GET /api/medications - Get user medications
-app.get('/api/medications', async (req, res) => {
+app.get('/api/medications', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId } = req.query;
+    
 
     if (!userId) {
       return res.status(400).json({ 
@@ -1718,9 +1723,10 @@ app.get('/api/medications', async (req, res) => {
 });
 
 // DELETE /api/medications - Delete (soft delete) a user medication
-app.delete('/api/medications', async (req, res) => {
+app.delete('/api/medications', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId, medicationId } = req.query;
+    const { medicationId } = req.query;
 
     if (!userId || !medicationId) {
       return res.status(400).json({ 
@@ -1756,11 +1762,10 @@ app.delete('/api/medications', async (req, res) => {
 // --- User Supplements Endpoints ---
 
 // POST /api/supplements - Save a new user supplement
-app.post('/api/supplements', async (req, res) => {
+app.post('/api/supplements', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { 
-      userId,
-      supplementName, 
+    const { supplementName, 
       brand,
       dosageValue, 
       dosageUnit,
@@ -1772,8 +1777,7 @@ app.post('/api/supplements', async (req, res) => {
       endDate, 
       notes, 
       dosesLeft,
-      remainingQuantity
-    } = req.body;
+      remainingQuantity } = req.body;
 
     // Validate required fields
     if (!userId || !supplementName || !status) {
@@ -1823,9 +1827,10 @@ app.post('/api/supplements', async (req, res) => {
 });
 
 // GET /api/supplements - Get user supplements
-app.get('/api/supplements', async (req, res) => {
+app.get('/api/supplements', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId } = req.query;
+    
 
     if (!userId) {
       return res.status(400).json({ 
@@ -1856,9 +1861,10 @@ app.get('/api/supplements', async (req, res) => {
 });
 
 // DELETE /api/supplements - Delete (soft delete) a user supplement
-app.delete('/api/supplements', async (req, res) => {
+app.delete('/api/supplements', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId, supplementId } = req.query;
+    const { supplementId } = req.query;
 
     if (!userId || !supplementId) {
       return res.status(400).json({ 
@@ -1894,9 +1900,10 @@ app.delete('/api/supplements', async (req, res) => {
 // --- Fasting Profile Endpoints ---
 
 // POST /api/fasting-profile - Save user fasting profile
-app.post('/api/fasting-profile', async (req, res) => {
+app.post('/api/fasting-profile', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId, profileData } = req.body;
+    const { profileData } = req.body;
     
     if (!userId) {
       return res.status(400).json({ 
@@ -1937,9 +1944,10 @@ app.post('/api/fasting-profile', async (req, res) => {
 });
 
 // GET /api/fasting-profile - Get user fasting profile
-app.get('/api/fasting-profile', async (req, res) => {
+app.get('/api/fasting-profile', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId } = req.query;
+    
     
     if (!userId) {
       return res.status(400).json({ 
@@ -1971,11 +1979,12 @@ app.get('/api/fasting-profile', async (req, res) => {
 // --- User Profile Endpoints ---
 
 // POST /api/users - Create or update user profile
-app.post('/api/users', async (req, res) => {
+app.post('/api/users', verifyUser, async (req, res) => {
+  const user_id = req.userId;
   try {
     console.log('📝 POST /api/users called with body:', req.body);
     
-    const { user_id, first_name, last_name, email, phone, username, country, unique_id, created_at } = req.body;
+    const { first_name, last_name, email, phone, username, country, unique_id, created_at } = req.body;
     
     if (!user_id) {
       console.log('❌ Missing user_id');
@@ -2021,9 +2030,10 @@ app.post('/api/users', async (req, res) => {
 });
 
 // GET /api/users/:userId - Get user profile
-app.get('/api/users/:userId', async (req, res) => {
+app.get('/api/users/:userId', verifyUser, async (req, res) => {
+  const userId = req.userId;
   try {
-    const { userId } = req.params;
+    
     
     if (!userId) {
       return res.status(400).json({ 
@@ -2183,7 +2193,7 @@ app.get('/debug/storage', (_req, res) => {
 });
 
 // Health Report PDF Generation Endpoint
-app.post('/api/generate-health-report', async (req, res) => {
+app.post('/api/generate-health-report', verifyUser, async (req, res) => {
   try {
     const { medications, fastingProfile, fastingAnalysis, generatedDate } = req.body;
     
@@ -2317,9 +2327,14 @@ app.post('/api/generate-health-report', async (req, res) => {
 });
 
 // Drug Interaction Check Endpoint
-app.post('/api/ai/drug-interactions', async (req, res) => {
+app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
   try {
-    const { messages } = req.body;
+    // Only conversational text is accepted; clients cannot supply system instructions.
+    const parsed = z.object({ messages: z.array(z.object({
+      role: z.enum(['user', 'assistant']), content: z.string().min(1).max(10000)
+    }).strict()).min(1).max(20) }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ ok: false, error: 'INVALID_MESSAGES' });
+    const messages = [{ role: 'system', content: HEALTH_SAFETY_PROMPT }, ...parsed.data.messages];
     
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ 
@@ -3111,7 +3126,7 @@ app.post('/api/admin/cleanup-expired-accounts', async (req, res) => {
   try {
     // Only allow if admin key is provided (set in env)
     const adminKey = process.env.ADMIN_CLEANUP_KEY;
-    if (req.headers['x-admin-key'] !== adminKey && !adminKey) {
+    if (!adminKey || req.headers['x-admin-key'] !== adminKey) {
       return res.status(401).json({ ok: false, error: 'unauthorized' });
     }
 
@@ -3194,7 +3209,7 @@ app.post('/api/admin/cleanup-expired-accounts', async (req, res) => {
  * Use this to manually update a subscription if webhook/success page didn't fire
  * GET /api/stripe/verify-subscription?customer_id=cus_xxx
  */
-app.get('/api/stripe/verify-subscription', async (req, res) => {
+app.get('/api/stripe/verify-subscription', verifyUser, async (req, res) => {
   try {
     const customerId = req.query.customer_id;
     
@@ -3210,7 +3225,7 @@ app.get('/api/stripe/verify-subscription', async (req, res) => {
 
     // Find user by customer ID
     const profile = await neonClient`
-      SELECT user_id FROM user_profiles WHERE stripe_customer_id = ${customerId}
+      SELECT user_id FROM user_profiles WHERE stripe_customer_id = ${customerId} AND user_id = ${req.userId}
     `;
 
     if (profile.length === 0) {
@@ -3403,9 +3418,15 @@ app.get('/success', async (req, res) => {
  */
 async function verifyUser(req, res, next) {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = /^Bearer ([^\s]+)$/i.exec(req.headers.authorization || '')?.[1];
     const decoded = await verifyToken(token);
     const uid = decoded.uid;
+    if (typeof uid !== 'string' || !uid) throw new Error('Invalid token identity');
+    const suppliedIds = [req.body?.userId, req.body?.user_id, req.body?.uid,
+      req.query?.userId, req.query?.user_id, req.query?.uid, req.params?.userId];
+    if (suppliedIds.some(id => id !== undefined && id !== uid)) {
+      return res.status(403).json({ ok: false, error: 'USER_ID_MISMATCH' });
+    }
 
     // Ensure profile exists
     const profileResult = await neonClient`

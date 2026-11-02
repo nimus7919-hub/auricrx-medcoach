@@ -1,3 +1,4 @@
+import { authenticatedFetch } from '../services/authenticatedFetch';
 import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -858,7 +859,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                              i18n.language === 'pt' ? 'Portuguese' : 'English';
 
       // Race between fetch and timeout
-      const fetchPromise = fetch(apiUrl, {
+      const fetchPromise = authenticatedFetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -867,8 +868,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
           items: allItems,
           messages: [
             {
-              role: 'system',
-              content: `You are a clinical pharmacist AI assistant. 
+              role: 'user',
+              content: `Please provide general educational information about possible medication interactions. Do not suggest starting, stopping, or changing medicines or doses. 
 
 CRITICAL: You MUST respond ENTIRELY in ${currentLanguage}. Every single word, sentence, and phrase in your response must be written in ${currentLanguage}. This includes:
 - The medical disclaimer
@@ -889,7 +890,7 @@ For each interaction found, provide:
 2. Severity level: Minor, Moderate, Major, or Contraindicated (translate this to ${currentLanguage})
 3. Description of the interaction (in ${currentLanguage})
 4. Clinical effects (in ${currentLanguage})
-5. Management recommendations (in ${currentLanguage})
+5. Encourage consulting a doctor or pharmacist without suggesting treatment changes (in ${currentLanguage})
 
 If no significant interactions are found, state that clearly in ${currentLanguage} but still recommend consulting a pharmacist or doctor.
 

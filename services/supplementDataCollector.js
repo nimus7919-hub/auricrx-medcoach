@@ -1,16 +1,9 @@
+import { authenticatedFetch } from '../src/services/authenticatedFetch';
 // services/supplementDataCollector.js
 // Supplement data collection service for user contributions
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth } from '../src/config/firebase';
 
-let saveSupplementContribution;
-try {
-  const neonModule = require('../server/neon');
-  saveSupplementContribution = neonModule.saveSupplementContribution;
-} catch (error) {
-  console.warn('⚠️ Neon database not available, supplement data collection disabled');
-  saveSupplementContribution = null;
-}
 
 class SupplementDataCollector {
   constructor() {
@@ -19,29 +12,11 @@ class SupplementDataCollector {
     this.apiBase = 'https://auricrx-medcoach.onrender.com';
   }
 
-  // Generate or retrieve a unique user ID for this session
+  // Use the signed-in Firebase identity for contributions.
   async getOrCreateUserId() {
-    try {
-      // Try to get existing user ID from storage
-      const existingUserId = await AsyncStorage.getItem('auricrx_user_id');
-      if (existingUserId) {
-        console.log('🆔 Using stored anonymous user ID:', existingUserId);
-        return existingUserId;
-      }
-      
-      // Generate a new anonymous user ID
-      const userId = 'anonymous_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
-      // Store it for future use
-      await AsyncStorage.setItem('auricrx_user_id', userId);
-      
-      console.log('🆔 Generated new anonymous user ID:', userId);
-      return userId;
-    } catch (error) {
-      console.error('❌ Failed to get/create user ID:', error);
-      // Fallback to a simple timestamp-based ID
-      return 'anonymous_' + Date.now();
-    }
+    const user = auth.currentUser;
+    if (!user) throw new Error('Not authenticated');
+    return user.uid;
   }
 
   // Collect supplement price data from user interactions
@@ -69,7 +44,7 @@ class SupplementDataCollector {
       console.log('📊 API URL (temporarily using medication endpoint):', `${this.apiBase}/medication-contributions`);
 
       // Send to server API (temporarily using medication endpoint until supplement endpoint is deployed)
-      const response = await fetch(`${this.apiBase}/medication-contributions`, {
+      const response = await authenticatedFetch(`${this.apiBase}/medication-contributions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

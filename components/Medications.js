@@ -1,3 +1,4 @@
+import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -305,7 +306,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       // Save to database if user is authenticated
       if (user && user.uid) {
         try {
-          const response = await fetch('https://auricrx-medcoach.onrender.com/api/medications', {
+          const response = await authenticatedFetch('https://auricrx-medcoach.onrender.com/api/medications', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -423,7 +424,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     if (user && user.uid && (medToDelete?.dbId || medToDelete?.id)) {
       try {
         const medicationId = medToDelete.dbId || medToDelete.id;
-        const response = await fetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}&medicationId=${medicationId}`, {
+        const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}&medicationId=${medicationId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

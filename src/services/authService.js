@@ -1,3 +1,4 @@
+import { authenticatedFetch } from './authenticatedFetch';
 import { API_BASE } from '../config/api';
 import { consentRequest, requireAccountConsent } from './consentService';
 // src/services/authService.js
@@ -335,7 +336,7 @@ class AuthService {
   async deleteAccount() {
     const token = await this.auth.currentUser?.getIdToken();
     if (!token) throw new Error('Please sign in again. / Inicia sesi\u00f3n de nuevo.');
-    const response = await fetch(API_BASE + '/api/account', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+    const response = await authenticatedFetch(API_BASE + '/api/account', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
     if (!response.ok) throw new Error('Deletion did not complete. Please retry. / No se complet\u00f3 la eliminaci\u00f3n. Intenta de nuevo.');
     const result = await this.signOut();
     if (!result.success) throw new Error(result.error);
@@ -433,7 +434,7 @@ class AuthService {
       console.log('Storing user data for uid:', uid);
       console.log('User data:', userData);
       
-      const response = await fetch('https://auricrx-medcoach.onrender.com/api/users', {
+      const response = await authenticatedFetch('https://auricrx-medcoach.onrender.com/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -470,7 +471,7 @@ class AuthService {
   // Get user data from Neon database
   async getUserData(uid) {
     try {
-      const response = await fetch(`https://auricrx-medcoach.onrender.com/api/users/${uid}`);
+      const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/users/${uid}`);
       
       if (!response.ok) {
         if (response.status === 404) {

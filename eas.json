@@ -7,7 +7,7 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "android": { 
+      "android": {
         "buildType": "apk"
       },
       "node": "22.20.0",
@@ -15,24 +15,25 @@
         "NODE_ENV": "development"
       }
     },
-    "preview": { 
-      "distribution": "internal", 
+    "preview": {
+      "distribution": "internal",
       "node": "22.20.0",
       "env": {
         "NODE_ENV": "production"
       },
       "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh"
     },
-    "production": { 
-      "autoIncrement": true, 
+    "production": {
+      "autoIncrement": true,
       "node": "22.20.0",
       "android": {
-        "gradleCommand": ":app:assembleRelease"
+        "buildType": "app-bundle"
       },
       "env": {
         "NODE_ENV": "production"
       },
-      "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh"
+      "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
+      "developmentClient": false
     }
   },
   "submit": {
