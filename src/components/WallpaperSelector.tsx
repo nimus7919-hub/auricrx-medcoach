@@ -204,7 +204,7 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.closeButton}
+          style={[styles.closeButton, { elevation: 5 }]}
           onPress={onClose}
         >
           <Image 
@@ -216,7 +216,6 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.8,
               shadowRadius: 4,
-              elevation: 5,
             }}
             resizeMode="contain"
           />

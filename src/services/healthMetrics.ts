@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SmartNotificationService } from './smartNotifications';
+import SmartNotificationService from './smartNotifications';
 
 export interface HealthMetric {
   id: string;

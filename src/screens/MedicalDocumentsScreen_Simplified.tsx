@@ -40,7 +40,7 @@ interface DocumentItem {
 
 const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigation }) => {
   const { t } = useTranslation();
-  const { wallpaper } = useWallpaper();
+  const { getCardBackgroundColor, getCardTextColor } = useWallpaper();
   
   // State
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
@@ -91,7 +91,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
         const filePath = `${documentsDir}${file}`;
         const fileInfo = await FileSystem.getInfoAsync(filePath);
         
-        if (fileInfo.exists && fileInfo.isFile) {
+        if (fileInfo.exists && !fileInfo.isDirectory) {
           const mimeType = getMimeType(file);
           documentItems.push({
             id: file,
@@ -343,7 +343,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: wallpaper === 'dark' ? '#1a1a1a' : '#f8fafc',
+      backgroundColor: getCardBackgroundColor(),
     },
     scrollContent: {
       padding: 16,
@@ -367,7 +367,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
     title: {
       fontSize: 24,
       fontWeight: 'bold',
-      color: wallpaper === 'dark' ? '#ffffff' : '#1f2937',
+      color: getCardTextColor(),
     },
     uploadButton: {
       backgroundColor: '#3B82F6',
@@ -385,7 +385,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       marginLeft: 8,
     },
     documentCard: {
-      backgroundColor: wallpaper === 'dark' ? '#2d2d2d' : '#ffffff',
+      backgroundColor: getCardBackgroundColor(),
       borderRadius: 12,
       marginBottom: 16,
       shadowColor: '#000',
@@ -409,7 +409,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       width: 60,
       height: 60,
       borderRadius: 8,
-      backgroundColor: wallpaper === 'dark' ? '#404040' : '#f3f4f6',
+      backgroundColor: getCardBackgroundColor(),
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: 16,
@@ -423,12 +423,12 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
     documentName: {
       fontSize: 16,
       fontWeight: '600',
-      color: wallpaper === 'dark' ? '#ffffff' : '#1f2937',
+      color: getCardTextColor(),
       marginBottom: 4,
     },
     documentSize: {
       fontSize: 14,
-      color: wallpaper === 'dark' ? '#9ca3af' : '#6b7280',
+      color: getCardTextColor(),
     },
     documentActions: {
       flexDirection: 'row',
@@ -450,7 +450,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
     },
     modalContainer: {
       flex: 1,
-      backgroundColor: wallpaper === 'dark' ? '#1a1a1a' : '#ffffff',
+      backgroundColor: getCardBackgroundColor(),
     },
     modalHeader: {
       flexDirection: 'row',
@@ -458,19 +458,19 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       justifyContent: 'space-between',
       padding: 16,
       borderBottomWidth: 1,
-      borderBottomColor: wallpaper === 'dark' ? '#404040' : '#e5e7eb',
+      borderBottomColor: getCardBackgroundColor(),
     },
     closeButton: {
       padding: 8,
     },
     closeButtonText: {
       fontSize: 20,
-      color: wallpaper === 'dark' ? '#ffffff' : '#1f2937',
+      color: getCardTextColor(),
     },
     modalTitle: {
       fontSize: 18,
       fontWeight: '600',
-      color: wallpaper === 'dark' ? '#ffffff' : '#1f2937',
+      color: getCardTextColor(),
     },
     modalContent: {
       flex: 1,
@@ -614,6 +614,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
               <View style={dynamicStyles.modalContent}>
                 <PDFViewer
                   uri={selectedDocument.uri}
+                  name={selectedDocument.name}
                   onClose={() => setShowViewModal(false)}
                 />
               </View>

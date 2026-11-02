@@ -21,7 +21,7 @@ const resources = {
 };
 
 const LANGUAGE_DETECTOR = {
-  type: 'languageDetector',
+  type: 'languageDetector' as const,
   async: true,
   detect: async (callback: (lng: string) => void) => {
     try {

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import with fallback for development
-let Calendar: any = null;
+let Calendar: typeof import('expo-calendar') | null = null;
 let Notifications: any = null;
 
 try {
@@ -75,7 +75,7 @@ class AppointmentService {
   private appointments: Appointment[] = [];
   private doctorContacts: DoctorContact[] = [];
   private reminders: AppointmentReminder[] = [];
-  private smartNotifications: SmartNotificationService;
+  private smartNotifications: Pick<SmartNotificationService, "initialize" | "addLocationReminder" | "deleteLocationReminder" | "addWeatherAlert" | "deleteWeatherAlert" | "updateUsagePattern" | "getSmartRefillPrediction" | "getIntelligentReminderTime" | "getLocationReminders" | "getWeatherAlerts" | "getUsagePatterns" | "getCurrentLocation">;
   private calendarPermissionGranted = false;
 
   static getInstance(): AppointmentService {

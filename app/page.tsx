@@ -1,4 +1,4 @@
-import AuricRXSignIn from "@/components/AuricRXSignIn";
+import AuricRXSignIn from "../components/AuricRXSignIn";
 
 export default function Page() {
   return <AuricRXSignIn />;

@@ -112,6 +112,8 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
   
   // Generate dynamic styles based on theme
   const getDynamicStyles = () => StyleSheet.create({
+    modalHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: 12 },
+    metricType: { fontSize: 16, fontWeight: '600' as const, color: getCardTextColor() },
     sectionCard: {
       backgroundColor: getCardBackgroundColor() + 'CC',
       padding: 16,
@@ -1088,14 +1090,24 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         {t('trackMedicationSchedule')}
       </DynamicText>
       
-      {adherence.map(med => (
+      {Array.from(adherence.reduce((groups, dose) => {
+        const summary = groups.get(dose.medicationId) ?? {
+          medicationId: dose.medicationId, medicationName: dose.medicationName,
+          takenDoses: 0, missedDoses: 0, totalDoses: 0,
+        };
+        summary.totalDoses++;
+        if (dose.taken) summary.takenDoses++;
+        else summary.missedDoses++;
+        groups.set(dose.medicationId, summary);
+        return groups;
+      }, new Map<string, { medicationId: string; medicationName: string; takenDoses: number; missedDoses: number; totalDoses: number }>()).values()).map(med => (
         <View key={med.medicationId} style={dynamicStyles.adherenceCard}>
           <View style={dynamicStyles.adherenceHeader}>
             <DynamicText type="card" style={dynamicStyles.adherenceName}>{med.medicationName}</DynamicText>
-            <DynamicText type="card" style={dynamicStyles.adherenceRate}>{med.adherenceRate.toFixed(0)}%</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.adherenceRate}>{(100 * med.takenDoses / med.totalDoses).toFixed(0)}%</DynamicText>
           </View>
           <DynamicText type="card" style={dynamicStyles.adherenceDetails}>
-            {med.takenDoses} {t('taken')} • {med.missedDoses} {t('missed')} • {med.streak} {t('dayStreak')}
+            {med.takenDoses} {t('taken')} • {med.missedDoses} {t('missed')}
           </DynamicText>
         </View>
       ))}

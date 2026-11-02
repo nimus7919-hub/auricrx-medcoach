@@ -9,7 +9,9 @@ export type SupplementStore = {
 };
 
 export type StorePrice = SupplementStore & {
-  price: number; // USD for now
+  price: number | null;
+  priceNotAvailable?: boolean;
+  excelMatch?: { unidades?: string | number }; // USD for now
   pickup?: boolean;
   delivery?: boolean;
   requiresCoupon?: boolean;
@@ -77,7 +79,7 @@ export async function getSupplementPrices(stores: SupplementStore[], supplementN
     
     return { prices: json.prices || [], meta: json.meta };
   } catch (e) {
-    console.warn('🔍 DEBUG: API call failed, using fallback:', e.message);
+    console.warn('🔍 DEBUG: API call failed, using fallback:', (e instanceof Error ? e.message : String(e)));
     console.log('🔍 DEBUG: Fallback - returning "Price not available" for all stores');
     // Fallback: Show "Price not available" instead of mock prices
     return { prices: stores.map((store) => ({

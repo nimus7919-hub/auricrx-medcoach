@@ -169,7 +169,7 @@ export class OcrProcessor {
           // Resize to optimal size for OCR (not too small, not too large)
           { resize: { width: 1200 } },
           // Enhance contrast and brightness for better text recognition
-          { format: ImageManipulator.SaveFormat.JPEG },
+
         ],
         {
           compress: 0.95, // Very high quality for better OCR

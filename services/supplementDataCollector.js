@@ -122,4 +122,4 @@ class SupplementDataCollector {
   }
 }
 
-module.exports = new SupplementDataCollector();
+export default new SupplementDataCollector();

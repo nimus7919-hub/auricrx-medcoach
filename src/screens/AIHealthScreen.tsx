@@ -76,7 +76,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   const { t: i18nT, i18n } = useTranslation();
   
   // AI Health specific translations
-  const aiTranslations = createAIHealthTranslations(i18nT);
+  const aiTranslations: Record<string, string> = createAIHealthTranslations(i18nT);
   
   // Translation function using aiTranslations object
   const t = (key: string) => {

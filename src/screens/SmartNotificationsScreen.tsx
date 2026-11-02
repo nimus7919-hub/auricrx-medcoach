@@ -413,6 +413,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
   };
 
   const handleLocationInputSubmit = async () => {
+    if (!smartService) return;
     if (!locationInput.name.trim() || !locationInput.message.trim()) {
       Alert.alert('❌ ' + t('error'), t('fillBothFields'));
       return;

@@ -82,17 +82,8 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderWidth: 1,
       borderColor: getCardBorderColor(),
     },
-    appointmentHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 8,
-    },
-    appointmentTitle: {
-      fontSize: 8,
-      fontWeight: '600',
-      flex: 1,
-    },
+    
+    
     appointmentType: {
       fontSize: 13,
       backgroundColor: getCardBackgroundColor() + '80',
@@ -101,28 +92,13 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       borderRadius: 4,
       marginLeft: 8,
     },
-    appointmentDetails: {
-      fontSize: 13,
-      marginBottom: 4,
-    },
-    appointmentDateTime: {
-      fontSize: 13,
-      marginBottom: 4,
-    },
+    
+    
     appointmentLocation: {
       fontSize: 13,
     },
-    statusBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 4,
-      marginTop: 4,
-    },
-    statusText: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: '#ffffff',
-    },
+    
+    
     addButton: {
       backgroundColor: currentTheme.accent + 'CC',
       paddingHorizontal: 16,
@@ -759,7 +735,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     { code: '+998', country: '🇺🇿 Uzbekistan', flag: '🇺🇿' },
   ];
 
-  const dialingMethods = [
+  const dialingMethods: { value: DoctorContact['dialingMethod']; label: string; icon: string }[] = [
     { value: 'phone', label: t('phoneOnly'), icon: '' },
     { value: 'whatsapp', label: t('whatsappOnly'), icon: '' },
     { value: 'both', label: t('bothPhoneWhatsapp'), icon: '' },
@@ -1786,7 +1762,7 @@ setShowCountryPicker(true)
               </View>
             </ScrollView>
 
-            <View style={dynamicStyles.modalActions}>
+            <View style={dynamicStyles.modalButtons}>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => {

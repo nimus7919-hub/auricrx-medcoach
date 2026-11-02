@@ -28,7 +28,13 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/backup_*/**",
+    "backup/**",
+    "indautor Req/**",
+    "android/**",
+    "ios/**",
+    "**/*_backup.tsx"
   ],
   "extends": "expo/tsconfig.base"
 }

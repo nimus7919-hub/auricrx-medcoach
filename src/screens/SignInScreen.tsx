@@ -77,7 +77,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           context: 'sign_in',
           email: email ? email.substring(0, 3) + '***' : 'none',
           hasStaySignedIn: staySignedIn,
-        }).catch(e => console.error('Failed to log crash:', e));
+        }).catch((e: unknown) => console.error('Failed to log crash:', e));
       } catch (e) {
         console.error('Failed to import CrashLogger:', e);
       }
@@ -92,7 +92,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     setGoogleLoading(true);
     try {
       const result = await authService.signInWithGoogle();
-      if (!result.success) {
+      if (!result.success || !('user' in result)) {
         Alert.alert('Error', result.error || googleAuthText(selectedLanguage).error);
         return;
       }

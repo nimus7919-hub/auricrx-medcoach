@@ -31,7 +31,7 @@ import * as Print from 'expo-print';
 import { SecureSharing } from '../lib/SecureSharing';
 import DynamicText from '../components/DynamicText';
 import PDFViewer from '../components/PDFViewer';
-// Removed AppointmentService import - no longer using doctor contacts
+import type { DoctorContact } from '../services/appointmentService';
 import { useWallpaper } from '../contexts/WallpaperContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -45,6 +45,8 @@ interface MedicalDocumentsScreenProps {
 type DocumentCategory = 'photo_id' | 'birth_certificate' | 'insurance' | 'lab_results' | 'prescriptions' | 'medical_records' | 'other';
 
 interface DocumentItem {
+  mimeType?: string;
+  updatedAt?: string;
   id: string;
   name: string;
   uri: string;
@@ -79,7 +81,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     }
   }, []);
   
-  const DOCUMENT_CATEGORIES = {
+  const DOCUMENT_CATEGORIES: Record<DocumentCategory, { title: string; icon: string; description: string; supportsDualSides: boolean; frontLabel?: string; backLabel?: string }> = {
     photo_id: {
       title: t('photoID'),
       icon: '',
@@ -521,7 +523,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   const [deleteConfirmCallback, setDeleteConfirmCallback] = useState<(() => void) | null>(null);
   const [deleteConfirmTitle, setDeleteConfirmTitle] = useState('');
   const [deleteConfirmMessage, setDeleteConfirmMessage] = useState('');
-  const imageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const imageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -674,7 +676,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
       // Use document picker specifically for PDF files
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/pdf',
+        type: 'single',
         copyToCacheDirectory: true,
         multiple: false,
       });
@@ -703,7 +705,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             
             // Verify the copied file is still a valid PDF
             const fileInfo = await FileSystem.getInfoAsync(newUri);
-            if (!fileInfo.exists || fileInfo.size === 0) {
+            if (!fileInfo.exists || (fileInfo.exists ? fileInfo.size : 0) === 0) {
               throw new Error(t('pdfCorrupted'));
             }
                       
@@ -846,8 +848,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               
               // Convert blob to base64
               const reader = new FileReader();
-              logoBase64 = await new Promise((resolve, reject) => {
-                reader.onload = () => resolve(reader.result);
+              logoBase64 = await new Promise<string>((resolve, reject) => {
+                reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Expected image data URL'));
                 reader.onerror = reject;
                 reader.readAsDataURL(blob);
               });
@@ -982,7 +984,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               }
             } catch (shareError) {
               console.error('❌ ID PDF sharing failed:', shareError);
-              Alert.alert('❌ Error', `Failed to share PDF: ${shareError.message || 'Unknown error'}`);
+              Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
             }
             
           } catch (pdfError) {
@@ -1012,7 +1014,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               }
             } catch (fallbackError) {
               console.error('❌ Fallback sharing failed:', fallbackError);
-              Alert.alert('❌ Error', `Failed to share document: ${fallbackError.message || 'Unknown error'}`);
+              Alert.alert('❌ Error', `Failed to share document: ${(fallbackError instanceof Error ? fallbackError.message : String(fallbackError)) || 'Unknown error'}`);
             }
           }
         } else {
@@ -1040,7 +1042,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             }
           } catch (regularError) {
             console.error('❌ Regular sharing failed:', regularError);
-            Alert.alert('❌ Error', `Failed to share document: ${regularError.message || 'Unknown error'}`);
+            Alert.alert('❌ Error', `Failed to share document: ${(regularError instanceof Error ? regularError.message : String(regularError)) || 'Unknown error'}`);
           }
         }
       } else {
@@ -1067,7 +1069,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (nonIdError) {
           console.error('❌ Non-ID sharing failed:', nonIdError);
-          Alert.alert('❌ Error', `Failed to share document: ${nonIdError.message || 'Unknown error'}`);
+          Alert.alert('❌ Error', `Failed to share document: ${(nonIdError instanceof Error ? nonIdError.message : String(nonIdError)) || 'Unknown error'}`);
         }
       }
       
@@ -1390,7 +1392,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           [
             {
               text: t('useEmail'),
-              onPress: () => shareToSpecificDoctorEmail(document, doctor)
+              onPress: () => shareToSpecificDoctor(document, doctor)
             },
             {
               text: t('cancel'),
@@ -1618,7 +1620,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 // Try to use IntentLauncher to open WhatsApp directly with the file
                 try {
                   await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-                    type: 'application/pdf',
+                    type: 'single',
                     data: whatsappUri,
                     extra: {
                       'android.intent.extra.TEXT': `Hi Dr. ${doctor.name}, please find attached my ID document for your records.`,
@@ -1632,7 +1634,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   // Try without package restriction
                   try {
                     await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-                      type: 'application/pdf',
+                      type: 'single',
                       data: whatsappUri,
                       extra: {
                         'android.intent.extra.TEXT': `Hi Dr. ${doctor.name}, please find attached my ID document for your records.`,
@@ -1758,7 +1760,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               
               // Launch Gmail with the PDF attached
               await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-                type: 'application/pdf',
+                type: 'single',
                 data: `file://${gmailUri}`,
                 extra: {
                   'android.intent.extra.SUBJECT': `Medical Document - Dr. ${doctor.name}`,
@@ -1923,7 +1925,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             },
             {
               text: t('useWhatsApp'),
-              onPress: () => shareToDoctor(document)
+              onPress: () => shareToSpecificDoctorWhatsApp(document, doctor)
             },
             {
               text: t('cancel'),
@@ -2005,7 +2007,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   const isValidUri = (uri: string): boolean => {
     try {
       // Check if it's a valid URI format
-      return uri && (uri.startsWith('file://') || uri.startsWith('content://') || uri.startsWith('http://') || uri.startsWith('https://'));
+      return !!uri && (uri.startsWith('file://') || uri.startsWith('content://') || uri.startsWith('http://') || uri.startsWith('https://'));
     } catch {
       return false;
     }
@@ -2655,10 +2657,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 id: `view-${Date.now()}`,
                 name: `ID_Document_${new Date().toISOString().split('T')[0]}.pdf`,
                 uri: pdfUri,
-                type: 'application/pdf',
+                type: 'single',
                 mimeType: 'application/pdf',
                 size: 0,
-                category: 'id_documents',
+                category: 'photo_id',
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               };
@@ -2730,7 +2732,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         uri: document.uri,
         type: document.type
       });
-      Alert.alert('❌ ' + t('error'), `Failed to open document: ${error.message || 'Unknown error'}`);
+      Alert.alert('❌ ' + t('error'), `Failed to open document: ${(error instanceof Error ? error.message : String(error)) || 'Unknown error'}`);
     }
   };
 
@@ -3008,7 +3010,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (shareError) {
           console.error('❌ Combined ID PDF sharing failed:', shareError);
-          Alert.alert('❌ Error', `Failed to share PDF: ${shareError.message || 'Unknown error'}`);
+          Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
         }
       } else if (docs.length === 1) {
         console.log('🔄 Creating PDF with single ID document...');
@@ -3166,7 +3168,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (shareError) {
           console.error('❌ Single ID PDF sharing failed (duplicate section):', shareError);
-          Alert.alert('❌ Error', `Failed to share PDF: ${shareError.message || 'Unknown error'}`);
+          Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
         }
       } else if (docs.length === 1) {
         console.log('🔄 Creating PDF with single ID document...');
@@ -3325,7 +3327,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (shareError) {
           console.error('❌ Single ID PDF sharing failed:', shareError);
-          Alert.alert('❌ Error', `Failed to share PDF: ${shareError.message || 'Unknown error'}`);
+          Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
         }
       } else {
         console.log('⚠️ No valid documents found for PDF creation');
@@ -3966,12 +3968,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                             
                             Alert.alert(
                               'Debug Info', 
-                              `URI: ${selectedDocument.uri}\nExists: ${fileInfo.exists}\nSize: ${fileInfo.size}\n\nCheck console for detailed logs.`,
+                              `URI: ${selectedDocument.uri}\nExists: ${fileInfo.exists}\nSize: ${(fileInfo.exists ? fileInfo.size : 0)}\n\nCheck console for detailed logs.`,
                               [{ text: 'OK' }]
                             );
                           } catch (error) {
                             console.error('Debug failed:', error);
-                            Alert.alert('Debug Error', error.message);
+                            Alert.alert('Debug Error', (error instanceof Error ? error.message : String(error)));
                           }
                         }}
                       >
@@ -3994,13 +3996,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                               const fileInfo = await FileSystem.getInfoAsync(selectedDocument.uri);
                               console.log('File system info:', fileInfo);
                               console.log('File exists:', fileInfo.exists);
-                              console.log('File size:', fileInfo.size);
+                              console.log('File size:', (fileInfo.exists ? fileInfo.size : 0));
                               console.log('File URI:', fileInfo.uri);
                               console.log('===================================');
                               
                               Alert.alert(
                                 '🔍 File Debug Info',
-                                `Name: ${selectedDocument.name}\nURI: ${selectedDocument.uri}\nSize: ${fileInfo.size} bytes\nExists: ${fileInfo.exists}\n\nCheck console for full details.`,
+                                `Name: ${selectedDocument.name}\nURI: ${selectedDocument.uri}\nSize: ${(fileInfo.exists ? fileInfo.size : 0)} bytes\nExists: ${fileInfo.exists}\n\nCheck console for full details.`,
                                 [{ text: 'OK' }]
                               );
                             } catch (error) {
@@ -4129,7 +4131,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                                 try {
                                   await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
                                     data: selectedDocument.uri,
-                                    type: 'application/pdf',
+                                    type: 'single',
                                     flags: 1, // FLAG_ACTIVITY_NEW_TASK
                                   });
                                   
@@ -4523,8 +4525,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                           
                           // Convert blob to base64
                           const reader = new FileReader();
-                          const base64Promise = new Promise((resolve, reject) => {
-                            reader.onload = () => resolve(reader.result);
+                          const base64Promise = new Promise<string>((resolve, reject) => {
+                            reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Expected image data URL'));
                             reader.onerror = reject;
                           });
                           reader.readAsDataURL(blob);
@@ -4533,7 +4535,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                           logoBase64 = dataUrl;
                           console.log('✅ Logo loaded successfully via fetch, length:', dataUrl.length);
                         } catch (error) {
-                          console.log('❌ Logo loading failed:', error.message);
+                          console.log('❌ Logo loading failed:', (error instanceof Error ? error.message : String(error)));
                           console.log('🔄 Will use text fallback instead');
                           logoBase64 = null;
                         }
@@ -4716,7 +4718,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         // Check if the PDF file exists
                         const fileInfo = await FileSystem.getInfoAsync(uri);
                         console.log('🔍 PDF file exists:', fileInfo.exists);
-                        console.log('🔍 PDF file size:', fileInfo.size);
+                        console.log('🔍 PDF file size:', (fileInfo.exists ? fileInfo.size : 0));
                         console.log('🔍 PDF file URI:', fileInfo.uri);
                         
                         if (!fileInfo.exists) {
@@ -4836,7 +4838,7 @@ startxref
                         
                       } catch (error) {
                         console.error('❌ Error creating/sharing PDF:', error);
-                        Alert.alert('❌ Error', 'Failed to create or share PDF: ' + error.message);
+                        Alert.alert('❌ Error', 'Failed to create or share PDF: ' + (error instanceof Error ? error.message : String(error)));
                       }
                     }}
                   >
@@ -4860,8 +4862,8 @@ startxref
                         'Delete ID Documents',
                         'Are you sure you want to delete both front and back ID documents?',
                         () => {
-                          if (idPair && idPair.front) deleteDocument(idPair.front);
-                          if (idPair && idPair.back) deleteDocument(idPair.back);
+                          if (idPair && idPair.front) deleteDocument(idPair.front.id);
+                          if (idPair && idPair.back) deleteDocument(idPair.back.id);
                           setShowDualIDViewer(false);
                         }
                       );

@@ -75,7 +75,7 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
       <View style={styles.container}>
         {/* Header */}
         <View style={[styles.header, { borderColor: theme?.chip || '#e8e3d8' }]}>
-        <TouchableOpacity style={[styles.homeButton, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onNavigateToSettings || onClose}>
+        <TouchableOpacity style={[styles.homeButton, { elevation: 5, backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onNavigateToSettings || onClose}>
           <Image 
             source={require('../../assets/dashboard Emojies/close Window.png')} 
             style={{ 
@@ -85,7 +85,6 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.8,
               shadowRadius: 4,
-              elevation: 5,
             }}
             resizeMode="contain"
           />

@@ -112,7 +112,7 @@ export async function findNearbyLabs(lat: number, lon: number, lang: string = 'e
     return json.labs || [];
   } catch (e) {
     console.error('❌ Labs API call failed:', e);
-    throw new Error(`Failed to fetch labs: ${e.message}`);
+    throw new Error(`Failed to fetch labs: ${(e instanceof Error ? e.message : String(e))}`);
   }
 }
 

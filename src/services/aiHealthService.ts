@@ -1,10 +1,11 @@
 import { symptomInformation } from './symptomInformation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SmartNotificationService } from './smartNotifications';
-import { HealthMetricsService } from './healthMetrics';
-import { AppointmentService } from './appointmentService';
+import SmartNotificationService from './smartNotifications';
+import HealthMetricsService from './healthMetrics';
+import AppointmentService from './appointmentService';
 
 export interface DrugInteraction {
+  createdAt?: string;
   id: string;
   drug1: string;
   drug2: string;
@@ -479,7 +480,7 @@ class AIHealthService {
 
   private async processVoiceNote(voiceNote: VoiceNote): Promise<void> {
     // Process the voice note and generate insights
-    if (voiceNote.extractedEntities?.symptoms.length > 0) {
+    if (voiceNote.extractedEntities && voiceNote.extractedEntities.symptoms.length > 0) {
       const analysis = await this.analyzeSymptoms(voiceNote.extractedEntities.symptoms);
       // Could generate insights based on voice note analysis
     }

@@ -84,7 +84,7 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
     return json.pharmacies || [];
   } catch (e) {
     console.error('❌ Pharmacy API call failed:', e);
-    throw new Error(`Failed to fetch pharmacies: ${e.message}`);
+    throw new Error(`Failed to fetch pharmacies: ${(e instanceof Error ? e.message : String(e))}`);
   }
 }
 
@@ -129,11 +129,11 @@ export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { 
     
     return { prices: json.prices || [], meta: json.meta };
   } catch (e) {
-    console.warn('🔍 DEBUG: API call failed, using fallback:', e.message);
+    console.warn('🔍 DEBUG: API call failed, using fallback:', (e instanceof Error ? e.message : String(e)));
     console.log('🔍 DEBUG: Fallback - returning "Price not available" for all pharmacies');
     console.log('🔍 DEBUG: Error details:', {
-      error: e.message,
-      stack: e.stack,
+      error: (e instanceof Error ? e.message : String(e)),
+      stack: (e instanceof Error ? e.stack : undefined),
       apiUrl: `${API_BASE}/pharmacies/prices`,
       medication: medication.name,
       pharmaciesCount: pharmacies.length

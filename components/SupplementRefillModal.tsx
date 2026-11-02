@@ -517,7 +517,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
             <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
               <Text style={{ color: colors.sub, fontSize:11 }}>
-                {item.excelMatch?.unidades ? normalizeUnits(item.excelMatch.unidades) : (productInfo.display || supplement.dosage || supplement.name)}
+                {item.excelMatch?.unidades ? normalizeUnits(String(item.excelMatch.unidades)) : (productInfo.display || supplement.dosage || supplement.name)}
               </Text>
             </View>
           </View>

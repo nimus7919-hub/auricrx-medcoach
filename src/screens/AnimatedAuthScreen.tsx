@@ -15,10 +15,12 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import authService from '../services/authService';
+import SignUpForm from './SignUpForm';
 
 const { width, height } = Dimensions.get('window');
 
-const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
+type AuthUser = { uid: string; email: string | null; displayName: string | null; emailVerified: boolean };
+const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?: AuthUser) => void; onClose: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -81,16 +83,12 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
 
     setLoading(true);
     try {
-      if (isSignUp) {
-        await authService.signUp(email, password);
-        Alert.alert('Success', 'Account created successfully!');
-      } else {
-        await authService.signIn(email, password);
-        Alert.alert('Success', 'Signed in successfully!');
-      }
+      const result = await authService.signInWithEmail(email, password);
+      if (!result.success) throw new Error(result.error || 'Sign-in failed');
+      Alert.alert('Success', 'Signed in successfully!');
       onAuthSuccess();
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', (error instanceof Error ? error.message : String(error)));
     } finally {
       setLoading(false);
     }
@@ -104,7 +102,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
     setLoading(true);
     try {
       const result = await authService.signInWithGoogle();
-      if (result.success) {
+      if (result.success && 'user' in result) {
         Alert.alert('Success', 'Signed in with Google successfully!');
         onAuthSuccess(result.user);
       } else {
@@ -127,6 +125,20 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }) => {
     inputRange: [0, 1],
     outputRange: [0.5, 1],
   });
+
+  if (isSignUp) {
+    return <SignUpForm
+      selectedLanguage="en"
+      onClose={() => setIsSignUp(false)}
+      onGoogleSuccess={async ({ user }: { user: AuthUser }) => { onAuthSuccess(user); }}
+      onSignUp={async (data: { email: string; password: string; firstName: string; lastName: string; consents: { terms: boolean; privacy: boolean; health: boolean } }) => {
+        const result = await authService.signUpWithEmail(data.email, data.password, data.firstName, data.lastName, data.consents);
+        if (!result.success) throw new Error(result.error || 'Sign-up failed');
+        Alert.alert('Success', result.message || 'Please verify your email before signing in.');
+        setIsSignUp(false);
+      }}
+    />;
+  }
 
   return (
     <KeyboardAvoidingView 

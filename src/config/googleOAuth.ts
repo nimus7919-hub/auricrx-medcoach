@@ -11,7 +11,7 @@ type GoogleAuthExtra = {
   redirectPath?: string;
 };
 
-const rawExtra = (Constants.expoConfig?.extra ?? Constants.manifest?.extra ?? {}) as {
+const rawExtra = (Constants.expoConfig?.extra ?? {}) as {
   googleAuth?: GoogleAuthExtra;
   auth?: { google?: GoogleAuthExtra };
   [key: string]: unknown;

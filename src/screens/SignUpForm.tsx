@@ -62,7 +62,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
   };
 
   // Country data
-  const countries = {
+  const countries: Record<string, { code: string; name: string; flag: string }> = {
     US: { code: '+1', name: 'United States', flag: '🇺🇸' },
     CA: { code: '+1', name: 'Canada', flag: '🇨🇦' },
     MX: { code: '+52', name: 'Mexico', flag: '🇲🇽' },
@@ -324,7 +324,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     return `${country.code}${cleanPhone}`;
   };
 
-  const validatePassword = (password) => {
+  const validatePassword = (password: string) => {
     const errors = [];
     
     if (password.length < 8) {
@@ -432,7 +432,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       await onSignUp(userData);
     } catch (error) {
       console.error('Sign up error:', error);
-      Alert.alert('Error', `Sign up failed: ${error.message || 'Please try again.'}`);
+      Alert.alert('Error', `Sign up failed: ${(error instanceof Error ? error.message : String(error)) || 'Please try again.'}`);
     } finally {
       setLoading(false);
     }
@@ -454,7 +454,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         username: "Username",
         email: "Email",
         password: "Password",
-        confirmPassword: "Re-enter Password",
+        
         phoneNumber: "Phone Number",
         createAccountButton: "Create Account",
         creatingAccount: "Creating Account...",
@@ -488,7 +488,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         username: "Nombre de Usuario",
         email: "Correo",
         password: "Contraseña",
-        confirmPassword: "Confirmar Contraseña",
+        
         phoneNumber: "Número de Teléfono",
         createAccountButton: "Crear Cuenta",
         creatingAccount: "Creando Cuenta...",
@@ -522,7 +522,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         username: "Nome de Usuário",
         email: "Email",
         password: "Senha",
-        confirmPassword: "Confirmar Senha",
+        
         phoneNumber: "Número de Telefone",
         createAccountButton: "Criar Conta",
         creatingAccount: "Criando Conta...",
@@ -556,7 +556,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         username: "Nom d'utilisateur",
         email: "Email",
         password: "Mot de passe",
-        confirmPassword: "Confirmer le mot de passe",
+        
         phoneNumber: "Numéro de téléphone",
         createAccountButton: "Créer un compte",
         creatingAccount: "Création du compte...",
@@ -590,7 +590,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         username: "Benutzername",
         email: "E-Mail",
         password: "Passwort",
-        confirmPassword: "Passwort bestätigen",
+        
         phoneNumber: "Telefonnummer",
         createAccountButton: "Konto erstellen",
         creatingAccount: "Konto wird erstellt...",
@@ -624,7 +624,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         username: "用户名",
         email: "邮箱",
         password: "密码",
-        confirmPassword: "确认密码",
+        
         phoneNumber: "电话号码",
         createAccountButton: "创建账户",
         creatingAccount: "正在创建账户...",
@@ -651,7 +651,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         ageRestrictionError: "您必须年满 18 岁才能使用此应用"
       }
     };
-    return translations[lang] || translations.en;
+    return translations[lang as keyof typeof translations] || translations.en;
   };
 
   const t = getTranslations(currentLanguage);
@@ -664,7 +664,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     setGoogleLoading(true);
     try {
       const result = await authService.signInWithGoogle();
-      if (!result.success) {
+      if (!result.success || !('user' in result)) {
         Alert.alert('Error', result.error || googleAuthText(currentLanguage).error);
         return;
       }

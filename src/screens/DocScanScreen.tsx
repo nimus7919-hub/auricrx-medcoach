@@ -241,14 +241,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       gap: 8,
       justifyContent: 'center',
     },
-    pdfOptionButton: {
-      backgroundColor: currentTheme.chip,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
+    
     newScanModalContent: {
       backgroundColor: currentTheme.card,
       borderRadius: 16,
@@ -915,7 +908,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       // Fallback analysis
       return `📄 DOCUMENT ANALYSIS\n\n` +
-        `Error during analysis: ${error.message}\n\n` +
+        `Error during analysis: ${(error instanceof Error ? error.message : String(error))}\n\n` +
         `This appears to be a medical document. Please review the image manually for:\n` +
         `• Patient information\n` +
         `• Prescription details\n` +
@@ -941,10 +934,10 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         id: `ai_${Date.now()}`,
         name: `AI Analysis - ${new Date().toLocaleDateString()}`,
         pages: [],
-        ocrResults: [content],
+        ocrText: content,
+        pageCount: 0,
         createdAt: new Date().toISOString(),
-        language: 'en',
-        type: 'ai_analysis'
+
       };
       
       await ScanStorage.saveScan(scanManifest);
@@ -979,10 +972,10 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         id: `ai_${Date.now()}`,
         name: `AI Analysis - ${new Date().toLocaleDateString()}`,
         pages: [imageUri],
-        ocrResults: [content],
+        ocrText: content,
+        pageCount: 1,
         createdAt: new Date().toISOString(),
-        language: 'en',
-        type: 'ai_analysis'
+
       };
       
       await ScanStorage.saveScan(scanManifest);

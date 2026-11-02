@@ -14,13 +14,18 @@ import {
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 
+interface FastingProfile {
+  customHealthCondition: string;
+  otherHealthConditions: string[];
+  [key: string]: unknown;
+}
 interface FastingProfileScreenProps {
   onClose: () => void;
   theme?: any;
   S?: any;
-  fastingProfile: any;
-  setFastingProfile: (profile: any) => void;
-  saveFastingProfileToDB?: (profile: any) => void;
+  fastingProfile: FastingProfile;
+  setFastingProfile: React.Dispatch<React.SetStateAction<FastingProfile>>;
+  saveFastingProfileToDB?: (profile: FastingProfile) => void;
 }
 
 export default function FastingProfileScreen({ 
@@ -144,16 +149,16 @@ export default function FastingProfileScreen({
     <View style={styles.sliderRow}>
       <DynamicText type="card" style={[styles.sliderLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
       <View style={styles.sliderContainer}>
-        <DynamicText type="card" style={[styles.sliderValue, { color: getCardTextColor() }]}>{fastingProfile[key]} hours</DynamicText>
+        <DynamicText type="card" style={[styles.sliderValue, { color: getCardTextColor() }]}>{Number(fastingProfile[key])} hours</DynamicText>
         <View style={styles.sliderButtons}>
           <TouchableOpacity
-            onPress={() => updateProfile(key, Math.max(min, fastingProfile[key] - step))}
+            onPress={() => updateProfile(key, Math.max(min, Number(fastingProfile[key]) - step))}
             style={[styles.sliderButton, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}
           >
             <DynamicText type="card" style={[styles.sliderButtonText, { color: getCardTextColor() }]}>-</DynamicText>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => updateProfile(key, Math.min(max, fastingProfile[key] + step))}
+            onPress={() => updateProfile(key, Math.min(max, Number(fastingProfile[key]) + step))}
             style={[styles.sliderButton, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}
           >
             <DynamicText type="card" style={[styles.sliderButtonText, { color: getCardTextColor() }]}>+</DynamicText>
@@ -172,7 +177,7 @@ export default function FastingProfileScreen({
           borderColor: getCardBorderColor(),
           color: getCardTextColor()
         }]}
-        value={fastingProfile[key]}
+        value={String(fastingProfile[key] ?? '')}
         onChangeText={(text) => updateProfile(key, text)}
         placeholder={placeholder}
         placeholderTextColor={getSubTextColor()}

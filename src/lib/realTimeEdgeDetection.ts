@@ -15,7 +15,7 @@ export interface EdgeDetectionResult {
 }
 
 export class RealTimeEdgeDetector {
-  private static detectionInterval: NodeJS.Timeout | null = null;
+  private static detectionInterval: ReturnType<typeof setInterval> | null = null;
   private static lastDetectionTime = 0;
   private static readonly DETECTION_INTERVAL = 150; // Detect every 150ms for better performance
   private static readonly MIN_CONFIDENCE = 0.3;
