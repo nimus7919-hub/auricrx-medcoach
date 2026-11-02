@@ -1,6 +1,14 @@
 node_modules
 .git
 .expo
+# Never upload machine-specific Gradle/autolinking caches (absolute local paths).
+android/build
+android/.gradle
+android/.idea
+android/local.properties
+android/.cxx
+android/app/.cxx
+android/app/.gradle
 android/app/build
 ios/build
 *.log
