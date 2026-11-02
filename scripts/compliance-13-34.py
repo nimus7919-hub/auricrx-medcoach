@@ -19,13 +19,13 @@ edit('src/services/aiHealthService.ts',lambda s: re.sub(r"management: '[^']*'",'
 # Show terms before any web purchase; do not launch a checkout automatically.
 def checkout(s):
  s=s.replace("import AsyncStorage", "import { useTranslation } from 'react-i18next';\nimport AsyncStorage")
- s=s.replace('  const [loading,', "  const { i18n } = useTranslation();\n  const es = i18n.language.startsWith('es');\n  // TODO(OWNER-DECISION): Confirm MXN 50 vs 79. Native billing integration is pending.\n  const [loading,")
+ s=s.replace('  const [loading,', "  const { i18n } = useTranslation();\n  const es = i18n.language.startsWith('es');\n  // Approved Pro: MXN 79/month or MXN 699/year. Native billing integration is pending.\n  const [loading,")
  s=s.replace('    try {\n      console.log', "    if (Platform.OS !== 'web') return;\n    try {\n      console.log",1)
  s=s.replace('JSON.stringify({ country })','JSON.stringify({ country, platform: Platform.OS })')
  s=re.sub(r'  useEffect\(\(\) => \{.*?\}, \[visible, openCheckoutInBrowser\]\);','',s,flags=re.S)
  s=s.replace('              Upgrade to Pro',"              {es ? 'Mejorar a Pro' : 'Upgrade to Pro'}")
  s=s.replace('          {/* Content */}', '''          <DynamicText type="primary" style={{ padding: 20 }}>
-            {es ? 'Pro: MXN $50 al mes, IVA incluido. Se renueva automáticamente cada mes. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes.' : "Pro: MXN $50 per month, VAT included. Renews automatically each month. We'll remind you 5 days before each charge. Cancel anytime in Settings."}
+            {es ? 'Pro: MXN $79 al mes o MXN $699 al año, IVA incluido. Se renueva automáticamente por el período elegido. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes.' : "Pro: MXN $79 per month or MXN $699 per year, VAT included. Renews automatically for the selected period. We'll remind you 5 days before each charge. Cancel anytime in Settings."}
           </DynamicText>
           {Platform.OS !== 'web' ? <DynamicText type="secondary" style={{ padding: 20 }}>{es ? 'Las compras móviles están temporalmente deshabilitadas mientras integramos la facturación de la tienda.' : 'Mobile purchases are temporarily unavailable while store billing is integrated.'}</DynamicText> : <TouchableOpacity onPress={openCheckoutInBrowser} disabled={loading}><DynamicText type="primary" style={{ padding: 20 }}>{es ? 'Continuar al pago' : 'Continue to checkout'}</DynamicText></TouchableOpacity>}
           {/* Content */}''')

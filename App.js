@@ -494,7 +494,7 @@ const STRINGS = {
     selectAI: 'Select AI assistant',
     drAlfred: 'Alfred',
     drMimi: 'Mimi',
-    drPawlmer: 'Pawlmer',
+    pawlmer: 'Pawlmer',
     directions: 'Directions',
     info: 'Info',
     call: 'Call',
@@ -1072,7 +1072,7 @@ const STRINGS = {
   selectAI: 'Seleccionar asistente IA',
   drAlfred: 'Alfred',
   drMimi: 'Mimi',
-  drPawlmer: 'Pawlmer',
+  pawlmer: 'Pawlmer',
   directions: 'Direcciones',
   info: 'Información',
   call: 'Llamar',
@@ -1679,7 +1679,7 @@ const STRINGS = {
   selectAI: '选择AI医生',
   drAlfred: 'Alfred医生',
   drMimi: 'Mimi医生',
-  drPawlmer: 'Pawlmer医生',
+  pawlmer: 'Pawlmer',
   directions: '导航',
   info: '信息',
   call: '致电',
@@ -2637,8 +2637,8 @@ export default function App() {
     drAlfredIntro: t('ai.drAlfredIntro'),
     drMimi: t('ai.drMimi'),
     drMimiIntro: t('ai.drMimiIntro'),
-    drPawlmer: t('ai.drPawlmer'),
-    drPawlmerIntro: t('ai.drPawlmerIntro'),
+    pawlmer: t('ai.pawlmer'),
+    pawlmerIntro: t('ai.pawlmerIntro'),
     aiThinking: t('ai.aiThinking'),
     errorPreparingData: t('ai.errorPreparingData'),
     networkError: t('ai.networkError'),
@@ -3759,7 +3759,7 @@ const getInitialAIMessage = (selectedDoctor) => {
   const introductions = {
     'alfred': S.drAlfredIntro || "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
     'mimi': S.drMimiIntro || "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
-    'pawlmer': S.drPawlmerIntro || "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor."
+    'pawlmer': S.pawlmerIntro || "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor."
   };
   return introductions[selectedDoctor] || introductions['alfred'];
 };
@@ -4549,7 +4549,7 @@ useEffect(() => {
       const names = {
         'alfred': S.drAlfred || 'Alfred',
         'mimi': S.drMimi || 'Mimi',
-        'pawlmer': S.drPawlmer || 'Pawlmer'
+        'pawlmer': S.pawlmer || 'Pawlmer'
       };
       return names[doctorKey] || (S.drAlfred || 'Alfred');
     };
@@ -6151,7 +6151,7 @@ const handleAskMedicalAI = async () => {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>🐱 {S.drPawlmer || 'Pawlmer'}</DynamicText>
+                }}>🐱 {S.pawlmer || 'Pawlmer'}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -6407,6 +6407,10 @@ const handleAskMedicalAI = async () => {
               </View>
             )}
             
+            <DynamicText type="card" style={{ marginBottom: 12 }}>
+              Pro: {t('subscriptionPlans.month')} / {t('subscriptionPlans.year')}
+            </DynamicText>
+
             {/* Cancel or Restart Button */}
             {subscriptionStatus && subscriptionStatus.subscription_cancelled_at ? (
               <TouchableOpacity 
@@ -6640,7 +6644,7 @@ function trimTo(str, n) {
                 const names = {
                   'alfred': S.drAlfred || 'Alfred',
                   'mimi': S.drMimi || 'Mimi',
-                  'pawlmer': S.drPawlmer || 'Pawlmer'
+                  'pawlmer': S.pawlmer || 'Pawlmer'
                 };
                 return names[selectedAIDoctor] || (S.drAlfred || 'Alfred');
               })()}

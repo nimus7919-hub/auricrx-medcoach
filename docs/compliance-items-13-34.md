@@ -4,7 +4,7 @@ Scope: November 2, 2026 handoff, items 13–34 only. Items 1–12 were treated a
 
 ## Owner decisions (release blockers)
 
-- [ ] TODO(OWNER-DECISION): Confirm Pro MXN 50 (current code) versus MXN 79 (business plan). Existing prices were retained.
+- [x] Owner approved Pro: MXN 79/month or MXN 699/year, VAT included.
 - [ ] TODO(OWNER-DECISION): Decide Mexico-only production availability. Current country availability was not changed. Apply the approved choice manually in both store consoles.
 - [ ] TODO(OWNER-DECISION): Supply the real legal entity name, full street address, telephone and privacy email. Existing legal contact values remain placeholders, clearly marked in the documents.
 - [ ] Verify actual contracted processing regions for Render, Google/Firebase, Stripe and Expo; draft country disclosures need confirmation before publication.
@@ -13,7 +13,7 @@ Scope: November 2, 2026 handoff, items 13–34 only. Items 1–12 were treated a
 
 | Item | Implemented | Remaining / release condition |
 | --- | --- | --- |
-| 13 | Native Stripe checkout disabled; es-MX/EN paywall shows current MXN 50, VAT, renewal and cancellation terms; explicit web checkout action replaces automatic opening. Server requires web platform. | Partial: StoreKit/Play Billing requires a native billing module, store products, receipt validation, entitlement synchronization and restore purchases. No module installed under this run's constraint. Do not enable mobile purchases until complete. |
+| 13 | Native Stripe checkout disabled; es-MX/EN paywall shows MXN 79/month and MXN 699/year, VAT, renewal and cancellation terms; explicit web checkout action replaces automatic opening. Server requires web platform. | Partial: StoreKit/Play Billing requires a native billing module, store products, receipt validation, entitlement synchronization and restore purchases. No module installed under this run's constraint. Do not enable mobile purchases until complete. |
 | 14 | Renewal notice worker core supports email + push, verified amount/date, HTTPS cancellation URL, per-channel durable-ledger interface and idempotency keys. Daily window is 5–6 full days before renewal. New web checkout is blocked unless RENEWAL_NOTICES_READY is true. Stripe cancellation errors now fail instead of falsely reporting success. | Partial: configure real transports, durable ledger, daily scheduler, verified provider renewal dates/amounts, authenticated cancellation landing page/deep link and store cancellation flows. Never set readiness before acceptance. Existing subscriptions also need operational coverage. |
 | 15 | Cancellation copy says retained Pro access, no further charges and ability to subscribe again; date uses subscription period when available, with a paid-period fallback. | Verify actual date in a live provider-backed account. |
 | 16 | Static interaction management text no longer tells users to stop metformin or change statin doses; bilingual professional-consultation wording. | Review generated interaction output with real credentials before release. |
@@ -59,9 +59,9 @@ Scope: November 2, 2026 handoff, items 13–34 only. Items 1–12 were treated a
 
 AuricRX MedCoach helps adults organize medication reminders and read general health information from AI assistants. AI assistants are not doctors. Information may be inaccurate; consult a licensed professional before making health or medication decisions. For emergencies call 911.
 
-Pro: MXN $50 per month, VAT included. Renews automatically each month. We'll remind you 5 days before each charge. Cancel anytime in Settings.
+Pro: MXN $79 per month or MXN $699 per year, VAT included. Renews automatically for the selected period. We'll remind you 5 days before each charge. Cancel anytime in Settings.
 
-TODO(OWNER-DECISION): Confirm final Pro price before publishing. Do not advertise purchases until store billing and renewal delivery are operational. Do not add medical accuracy, diagnosis or health-outcome claims.
+Approved Pro pricing: MXN 79/month or MXN 699/year. Do not advertise purchases until store billing and renewal delivery are operational. Do not add medical accuracy, diagnosis or health-outcome claims.
 
 ## Verification
 

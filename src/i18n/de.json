@@ -55,8 +55,8 @@
     "drAlfredIntro": "Hallo! Ich bin Dr. Alfred, dein KI-Gesundheitsberater. Ich liefere Arzneiinformationen, Gesundheits-Insights und beantworte medizinische Fragen. Wobei kann ich dir heute helfen?\n\n⚠️ Wichtig: Die bereitgestellten Informationen dienen nur zu Bildungs- und Informationszwecken und stellen keine medizinische Beratung dar. Diese Informationen ersetzen oder überschreiben keine ärztlichen Anordnungen, Verschreibungen oder professionelle medizinische Beratung. Konsultiere immer deinen Gesundheitsdienstleister, bevor du Änderungen an deinen Medikamenten oder deinem Behandlungsplan vornimmst.",
     "drMimi": "Dr. Mimi",
     "drMimiIntro": "Hi! Ich bin Dr. Mimi, deine freundliche KI-Assistentin. Ich gebe personalisierte Gesundheitstipps, Medikationshinweise und helfe dir, Befunde besser zu verstehen. Was möchtest du wissen?\n\n⚠️ Wichtig: Die bereitgestellten Informationen dienen nur zu Bildungs- und Informationszwecken und stellen keine medizinische Beratung dar. Diese Informationen ersetzen oder überschreiben keine ärztlichen Anordnungen, Verschreibungen oder professionelle medizinische Beratung. Konsultiere immer deinen Gesundheitsdienstleister, bevor du Änderungen an deinen Medikamenten oder deinem Behandlungsplan vornimmst.",
-    "drPawlmer": "Dr. Pawlmer",
-    "drPawlmerIntro": "Miau! Ich bin Dr. Pawlmer, dein klarer, freundlicher – und schnurrender – KI-Berater. Ich unterstütze dich bei Medikationsmanagement und Gesundheitstipps. Womit starten wir?\n\n⚠️ Wichtig: Die bereitgestellten Informationen dienen nur zu Bildungs- und Informationszwecken und stellen keine medizinische Beratung dar. Diese Informationen ersetzen oder überschreiben keine ärztlichen Anordnungen, Verschreibungen oder professionelle medizinische Beratung. Konsultiere immer deinen Gesundheitsdienstleister, bevor du Änderungen an deinen Medikamenten oder deinem Behandlungsplan vornimmst.",
+    "pawlmer": "Pawlmer",
+    "pawlmerIntro": "Ich bin Pawlmer, ein KI-Katzenassistent. Ich mache Gesundheitsinformationen verständlicher, bin aber kein Arzt.",
     "aiThinking": "KI denkt nachâ€¦",
     "errorPreparingData": "Fehler beim Vorbereiten deiner Gesundheitsdaten. Bitte erneut versuchen.",
     "networkError": "Netzwerkfehler. Bitte erneut versuchen.",
@@ -181,7 +181,7 @@
     "symptomAnalysisComplete": "Symptomanalyse abgeschlossen",
     "noInteractionsFound": "Keine Wechselwirkungen gefunden",
     "noKnownInteractions": "Keine bekannten Arzneimittel-Wechselwirkungen",
-    "foundInteractions": "{count} Wechselwirkungen gefunden",
+    "foundInteractions": "Wechselwirkungen gefunden",
     "generalSymptoms": "Allgemeine Symptome",
     "multipleSymptomsDescription": "Mehrere Symptome â€“ verschiedene Ursachen mÃ¶glich",
     "monitorSymptomsClosely": "Symptome genau beobachten",
@@ -304,7 +304,6 @@
     "interactionResults": "Wechselwirkungsergebnisse",
     "generalSummary": "Allgemeine Zusammenfassung",
     "failedToCheckInteractions": "PrÃ¼fung fehlgeschlagen. Bitte stelle sicher, dass der KI-Server lÃ¤uft, und versuche es erneut.",
-    "foundInteractions": "Wechselwirkungen gefunden",
     "noInteractionsMessage": "Basierend auf den aktuellen Daten wurden keine signifikanten Wechselwirkungen erkannt. Bitte konsultiere dennoch deinen Behandelnden.",
     "clinicalEffects": "Klinische Auswirkungen",
     "management": "Management",
@@ -868,7 +867,7 @@
     "createPDF": "PDF erstellen"
   },
   "appointments": {
-    "title": "Termine",
+    "title": "Titel",
     "record": "Aufnehmen",
     "stop": "Stopp",
     "recording": "Aufnahme lÃ¤uftâ€¦",
@@ -888,7 +887,6 @@
     "scheduleAppointment": "Termin planen",
     "appointmentType": "Termintyp",
     "selectAppointmentType": "Termintyp wÃ¤hlen",
-    "title": "Titel",
     "titlePlaceholder": "Titel eingeben",
     "location": "Ort",
     "locationPlaceholder": "Ort eingeben",
@@ -1115,7 +1113,6 @@
     "cancel": "Abbrechen",
     "delete": "LÃ¶schen",
     "add": "HinzufÃ¼gen",
-    "success": "Erfolg",
     "alerts": {
       "locationDenied": "Standort abgelehnt",
       "enableLocation": "Bitte Standort aktivieren, um Apotheken zu suchen."
@@ -1168,5 +1165,10 @@
       "lastRefill": "Letzte NachfÃ¼llung",
       "refill": "NachfÃ¼llen"
     }
+  },
+  "subscriptionPlans": {
+    "month": "MXN $79 pro Monat",
+    "year": "MXN $699 pro Jahr",
+    "disclosure": "Inklusive Mehrwertsteuer. Automatische Verlängerung für den gewählten Zeitraum. Erinnerung 5 Tage vor jeder Abbuchung. Jederzeit in den Einstellungen kündbar."
   }
 }

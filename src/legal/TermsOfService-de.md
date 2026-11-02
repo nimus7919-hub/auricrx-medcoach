@@ -74,6 +74,8 @@ Wir dürfen anonymisierte oder pseudonymisierte Interaktionsdaten nutzen, um KI-
 
 ## 7) Abonnements, Testphase und Abrechnung (Stripe)
 
+Pro: MXN $79 pro Monat; MXN $699 pro Jahr. Inklusive Mehrwertsteuer. Automatische Verlängerung für den gewählten Zeitraum. Erinnerung 5 Tage vor jeder Abbuchung. Jederzeit in den Einstellungen kündbar.
+
 * **Ein Test pro Person (14 Tage).** Ein einmaliger 14-tägiger Test steht **pro Person einmal** zur Verfügung. Wir **überprüfen** die Berechtigung anhand gehashter E-Mail, Telefon (SMS) und Gerätekennungen und **verweigern** Wiederholungsversuche.
 
 * **Automatisch erneuerndes Abonnement.** Nach dem Test ist ein aktives kostenpflichtiges Abonnement des **Pro-Tarifs** über Stripe erforderlich. Abonnements **verlängern sich automatisch**, bis Sie kündigen. Steuern (falls zutreffend) werden beim Checkout hinzugefügt.

@@ -55,8 +55,8 @@
     "drAlfredIntro": "Soy Alfred, un asistente de información de salud con IA. No soy médico. Puedo explicarte temas generales de salud y medicamentos.",
     "drMimi": "Mimi",
     "drMimiIntro": "Soy Mimi, una asistente de bienestar con IA. Te comparto información general, no consejos médicos.",
-    "drPawlmer": "Pawlmer",
-    "drPawlmerIntro": "Soy Pawlmer, un gato asistente con IA. Hago la información de salud más amigable, pero no soy médico.",
+    "pawlmer": "Pawlmer",
+    "pawlmerIntro": "Soy Pawlmer, un gato asistente con IA. Hago la información de salud más amigable, pero no soy médico.",
     "aiThinking": "IA está pensando...",
     "errorPreparingData": "Error al preparar tus datos de salud. Inténtalo de nuevo.",
     "networkError": "Error de red. Inténtalo de nuevo.",
@@ -1165,5 +1165,10 @@
       "lastRefill": "Última recarga",
       "refill": "Recargar"
     }
+  },
+  "subscriptionPlans": {
+    "month": "MXN $79 al mes",
+    "year": "MXN $699 al año",
+    "disclosure": "IVA incluido. Se renueva automáticamente por el período elegido. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes."
   }
 }

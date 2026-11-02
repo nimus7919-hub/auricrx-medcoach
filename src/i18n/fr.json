@@ -86,8 +86,8 @@
     "drAlfredIntro": "Bonjour ! Je suis le Dr Alfred, votre consultant en santé IA. Je suis là pour vous aider avec des informations sur les médicaments, des informations sur la santé et répondre à toutes vos questions médicales. Comment puis-je vous aider aujourd'hui ?\n\n⚠️ Important : Les informations fournies sont uniquement à des fins éducatives et informatives et ne constituent pas des conseils médicaux. Ces informations ne remplacent ni ne remplacent les ordonnances, prescriptions ou conseils médicaux professionnels de votre médecin. Consultez toujours votre fournisseur de soins de santé avant d'apporter des modifications à vos médicaments ou à votre plan de traitement.",
     "drMimi": "Dr. Mimi",
     "drMimiIntro": "Salut ! Je suis le Dr Mimi, votre assistante de santé IA amicale. Je me spécialise dans la fourniture de conseils de santé personnalisés, d'orientation sur les médicaments et vous aider à mieux comprendre votre santé. Que souhaitez-vous savoir ?\n\n⚠️ Important : Les informations fournies sont uniquement à des fins éducatives et informatives et ne constituent pas des conseils médicaux. Ces informations ne remplacent ni ne remplacent les ordonnances, prescriptions ou conseils médicaux professionnels de votre médecin. Consultez toujours votre fournisseur de soins de santé avant d'apporter des modifications à vos médicaments ou à votre plan de traitement.",
-    "drPawlmer": "Dr. Pawlmer",
-    "drPawlmerIntro": "Miaou ! Je suis le Dr Pawlmer, votre compagnon de santé IA professionnel ! En tant que médecin félin, j'apporte une perspective unique aux soins de santé. Je suis là pour vous aider avec la gestion des médicaments, des conseils de santé et rendre votre parcours de santé plus agréable. Comment puis-je vous aider aujourd'hui ?\n\n⚠️ Important : Les informations fournies sont uniquement à des fins éducatives et informatives et ne constituent pas des conseils médicaux. Ces informations ne remplacent ni ne remplacent les ordonnances, prescriptions ou conseils médicaux professionnels de votre médecin. Consultez toujours votre fournisseur de soins de santé avant d'apporter des modifications à vos médicaments ou à votre plan de traitement.",
+    "pawlmer": "Pawlmer",
+    "pawlmerIntro": "Je suis Pawlmer, un chat assistant IA. Je rends les informations de santé plus accessibles, mais je ne suis pas médecin.",
     "aiThinking": "AI is thinking...",
     "errorPreparingData": "Error preparing your health data. Please try again.",
     "networkError": "Network error. Try again.",
@@ -1251,5 +1251,10 @@
     "profileSaved": "Profile Saved",
     "healthProfileSavedMessage": "Your health profile has been saved and will be used for personalized recommendations.",
     "saveProfile": "Save Profile"
+  },
+  "subscriptionPlans": {
+    "month": "MXN $79 par mois",
+    "year": "MXN $699 par an",
+    "disclosure": "TVA incluse. Renouvellement automatique pour la période choisie. Rappel 5 jours avant chaque paiement. Annulation à tout moment dans les paramètres."
   }
 }

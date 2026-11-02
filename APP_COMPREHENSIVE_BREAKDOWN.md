@@ -203,7 +203,7 @@ auricrx-medcoach/
 - Multiple AI doctor personas:
   - **Dr. Alfred**: Professional health consultant
   - **Dr. Mimi**: Friendly assistant
-  - **Dr. Pawlmer**: Feline-themed companion
+  - **Pawlmer**: Feline-themed companion
 - Tool calling with user data:
   - Access to medications list
   - Access to supplements

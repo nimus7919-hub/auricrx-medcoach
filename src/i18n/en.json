@@ -55,8 +55,8 @@
     "drAlfredIntro": "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
     "drMimi": "Mimi",
     "drMimiIntro": "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
-    "drPawlmer": "Pawlmer",
-    "drPawlmerIntro": "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor.",
+    "pawlmer": "Pawlmer",
+    "pawlmerIntro": "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor.",
     "aiThinking": "AI is thinking...",
     "errorPreparingData": "Error preparing your health data. Please try again.",
     "networkError": "Network error. Try again.",
@@ -1165,5 +1165,10 @@
       "lastRefill": "Last refill",
       "refill": "Refill"
     }
+  },
+  "subscriptionPlans": {
+    "month": "MXN $79 per month",
+    "year": "MXN $699 per year",
+    "disclosure": "VAT included. Renews automatically for the selected period. We’ll remind you 5 days before each charge. Cancel anytime in Settings."
   }
 }

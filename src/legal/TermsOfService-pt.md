@@ -74,6 +74,8 @@ Podemos utilizar dados de interação anonimizados ou desidentificados para apri
 
 ## 7) Assinaturas, Testes e Cobrança (Stripe)
 
+Pro: MXN $79 por mês; MXN $699 por ano. IVA incluído. Renovação automática pelo período escolhido. Aviso 5 dias antes de cada cobrança. Cancele a qualquer momento em Configurações.
+
 * **Uma Avaliação por Pessoa (14 dias).** Uma única avaliação de 14 dias está disponível **uma vez por pessoa**. **Verificaremos** a elegibilidade usando e-mail, telefone (SMS) e identificadores de dispositivo (armazenados como hashes irreversíveis) e **negaremos** avaliações repetidas.
 
 * **Assinatura com Renovação Automática.** Após o período de teste, o acesso contínuo exige uma assinatura paga ativa do **Plano Pro** faturada via Stripe. As assinaturas **renovam automaticamente** até serem canceladas. Impostos (quando aplicáveis) são adicionados no ato da cobrança.

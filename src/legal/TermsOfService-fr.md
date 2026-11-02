@@ -74,6 +74,8 @@ Nous pouvons utiliser des données d'interaction anonymisées ou désidentifiée
 
 ## 7) Abonnements, Essais et Facturation (Stripe)
 
+Pro: MXN $79 par mois; MXN $699 par an. TVA incluse. Renouvellement automatique pour la période choisie. Rappel 5 jours avant chaque paiement. Annulation à tout moment dans les paramètres.
+
 * **Un Essai par Personne (14 jours).** Un essai de 14 jours est disponible **une seule fois par personne**. Nous **vérifierons** l'admissibilité via e-mail, téléphone (SMS) et identifiants d'appareil (hachés non réversibles) et **refuserons** les essais répétés.
 
 * **Abonnement Renouvelable Automatiquement.** Après l'essai, l'accès continu nécessite un abonnement payant actif au **Plan Pro** facturé via Stripe. Les abonnements **se renouvellent automatiquement** jusqu'à annulation. Les taxes (le cas échéant) sont ajoutées lors du paiement.

@@ -86,8 +86,8 @@
     "drAlfredIntro": "Olá! Sou o Dr. Alfred, seu consultor de saúde IA. Estou aqui para ajudá-lo com informações sobre medicamentos, insights de saúde e responder qualquer pergunta médica que você possa ter. Como posso ajudá-lo hoje?\n\n⚠️ Importante: As informações fornecidas são apenas para fins educacionais e informativos e não constituem aconselhamento médico. Essas informações não substituem ou substituem as ordens, prescrições ou conselhos médicos profissionais do seu médico. Sempre consulte seu provedor de saúde antes de fazer alterações em seus medicamentos ou plano de tratamento.",
     "drMimi": "Dr. Mimi",
     "drMimiIntro": "Olá! Sou a Dra. Mimi, sua assistente de saúde IA amigável. Especializo-me em fornecer conselhos de saúde personalizados, orientação sobre medicamentos e ajudá-lo a entender melhor sua saúde. O que você gostaria de saber?\n\n⚠️ Importante: As informações fornecidas são apenas para fins educacionais e informativos e não constituem aconselhamento médico. Essas informações não substituem ou substituem as ordens, prescrições ou conselhos médicos profissionais do seu médico. Sempre consulte seu provedor de saúde antes de fazer alterações em seus medicamentos ou plano de tratamento.",
-    "drPawlmer": "Dr. Pawlmer",
-    "drPawlmerIntro": "Miau! Sou o Dr. Pawlmer, seu companheiro de saúde IA profissional! Como médico felino, trago uma perspectiva única para a área da saúde. Estou aqui para ajudá-lo com o gerenciamento de medicamentos, dicas de saúde e tornar sua jornada de saúde mais agradável. Como posso ajudá-lo hoje?\n\n⚠️ Importante: As informações fornecidas são apenas para fins educacionais e informativos e não constituem aconselhamento médico. Essas informações não substituem ou substituem as ordens, prescrições ou conselhos médicos profissionais do seu médico. Sempre consulte seu provedor de saúde antes de fazer alterações em seus medicamentos ou plano de tratamento.",
+    "pawlmer": "Pawlmer",
+    "pawlmerIntro": "Sou Pawlmer, um gato assistente de IA. Torno as informações de saúde mais acessíveis, mas não sou médico.",
     "aiThinking": "AI is thinking...",
     "errorPreparingData": "Error preparing your health data. Please try again.",
     "networkError": "Network error. Try again.",
@@ -1251,5 +1251,10 @@
     "profileSaved": "Profile Saved",
     "healthProfileSavedMessage": "Your health profile has been saved and will be used for personalized recommendations.",
     "saveProfile": "Save Profile"
+  },
+  "subscriptionPlans": {
+    "month": "MXN $79 por mês",
+    "year": "MXN $699 por ano",
+    "disclosure": "IVA incluído. Renovação automática pelo período escolhido. Aviso 5 dias antes de cada cobrança. Cancele a qualquer momento em Configurações."
   }
 }

@@ -443,7 +443,7 @@ const STRINGS = {
     myDoctorAI: 'My Doctor AI',
     drAlfred: 'Dr. Alfred',
     drMimi: 'Dr. Mimi',
-    drPawlmer: 'Dr. Pawlmer',
+    pawlmer: 'Pawlmer',
     directions: 'Directions',
     info: 'Info',
     call: 'Call',
@@ -1020,7 +1020,7 @@ const STRINGS = {
   myDoctorAI: 'Mis Doctores IA',
   drAlfred: 'Dr. Alfred',
   drMimi: 'Dr. Mimi',
-  drPawlmer: 'Dr. Pawlmer',
+  pawlmer: 'Pawlmer',
   directions: 'Direcciones',
   info: 'Información',
   call: 'Llamar',
@@ -1626,7 +1626,7 @@ const STRINGS = {
   myDoctorAI: '我的AI医生',
   drAlfred: 'Alfred医生',
   drMimi: 'Mimi医生',
-  drPawlmer: 'Pawlmer医生',
+  pawlmer: 'Pawlmer',
   directions: '导航',
   info: '信息',
   call: '致电',
@@ -3751,7 +3751,7 @@ const handleAskMedicalAI = async () => {
     const greetings = {
       'Dr. Alfred': "Hello! I'm Dr. Alfred, your experienced medical AI assistant. I'm here to help you with comprehensive health guidance, medication management, and supplement recommendations. How can I assist you with your health journey today?",
       'Dr. Mimi': "Hi there! I'm Dr. Mimi, your friendly and approachable health companion. I specialize in making healthcare feel comfortable and easy to understand. Whether it's about your medications, supplements, or general wellness, I'm here to help! What would you like to discuss?",
-      'Dr. Pawlmer': "Meow! I'm Dr. Pawlmer, your purr-fessional feline health expert! 🐱 I bring a unique perspective to healthcare with my cat-like curiosity and attention to detail. I'm here to help you with your medications, supplements, and health questions. What's on your mind today?"
+      'Pawlmer': "Meow! I'm Pawlmer, your purr-fessional feline health expert! 🐱 I bring a unique perspective to healthcare with my cat-like curiosity and attention to detail. I'm here to help you with your medications, supplements, and health questions. What's on your mind today?"
     };
     return greetings[doctor] || greetings['Dr. Alfred'];
   };
@@ -3760,7 +3760,7 @@ const handleAskMedicalAI = async () => {
     const images = {
       'Dr. Alfred': require('./assets/dashboard Emojies/Dr. Alfred AI Widget.png'),
       'Dr. Mimi': require('./assets/dashboard Emojies/Dr. Mimi AI Widget.png'),
-      'Dr. Pawlmer': require('./assets/dashboard Emojies/Dr. Pawlmer AI Widget.png')
+      'Pawlmer': require('./assets/dashboard Emojies/Pawlmer AI Widget.png')
     };
     return images[doctor] || images['Dr. Alfred'];
   };

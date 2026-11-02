@@ -55,8 +55,8 @@
     "drAlfredIntro": "你好！我是 AI 健康顾问 Alfred 医生。我可以为你提供药物信息、健康洞察，并回答你的医疗相关问题。今天我能如何帮助你？\n\n⚠️ 重要提示：所提供的信息仅用于教育和信息目的，不构成医疗建议。此信息不取代或替代任何医生的医嘱、处方或专业医疗建议。在对你的药物或治疗方案进行任何更改之前，请务必咨询你的医疗保健提供者。",
     "drMimi": "Mimi 医生",
     "drMimiIntro": "你好！我是你的友好 AI 健康助手 Mimi 医生。我专注于提供个性化健康建议、用药指导，并帮助你更好地理解健康状况。你想了解什么？\n\n⚠️ 重要提示：所提供的信息仅用于教育和信息目的，不构成医疗建议。此信息不取代或替代任何医生的医嘱、处方或专业医疗建议。在对你的药物或治疗方案进行任何更改之前，请务必咨询你的医疗保健提供者。",
-    "drPawlmer": "Pawlmer 医生",
-    "drPawlmerIntro": "喵～我是 AI 健康顾问 Pawlmer 医生：清晰、亲切、还会打呼噜。作为猫科医生，我带来独特的医疗视角。我可以协助你进行用药管理、健康建议，让你的健康之旅更轻松。今天需要我做什么？\n\n⚠️ 重要提示：所提供的信息仅用于教育和信息目的，不构成医疗建议。此信息不取代或替代任何医生的医嘱、处方或专业医疗建议。在对你的药物或治疗方案进行任何更改之前，请务必咨询你的医疗保健提供者。",
+    "pawlmer": "Pawlmer",
+    "pawlmerIntro": "我是 Pawlmer，一个 AI 猫咪助手。我让健康信息更易懂，但我不是医生。",
     "aiThinking": "AI 正在思考…",
     "errorPreparingData": "准备你的健康数据时出错。请重试。",
     "networkError": "网络错误。请重试。",
@@ -867,7 +867,7 @@
     "createPDF": "创建 PDF"
   },
   "appointments": {
-    "title": "就诊",
+    "title": "标题",
     "record": "录音",
     "stop": "停止",
     "recording": "录音中…",
@@ -887,7 +887,6 @@
     "scheduleAppointment": "安排预约",
     "appointmentType": "预约类型",
     "selectAppointmentType": "选择预约类型",
-    "title": "标题",
     "titlePlaceholder": "输入预约标题",
     "location": "地点",
     "locationPlaceholder": "输入预约地点",
@@ -1114,7 +1113,6 @@
     "cancel": "取消",
     "delete": "删除",
     "add": "添加",
-    "success": "成功",
     "alerts": {
       "locationDenied": "定位被拒绝",
       "enableLocation": "请启用定位以搜索附近药房。"
@@ -1167,5 +1165,10 @@
       "lastRefill": "上次补取",
       "refill": "补取"
     }
+  },
+  "subscriptionPlans": {
+    "month": "每月 MXN $79",
+    "year": "每年 MXN $699",
+    "disclosure": "含增值税。按所选周期自动续订。每次扣款前5天提醒。可随时在设置中取消。"
   }
 }

@@ -23,8 +23,8 @@ Conservas la propiedad de tu contenido. Solo lo procesamos para prestar y proteg
 Tus medicamentos y tu perfil de salud se guardan en nuestros servidores (Neon, EE.UU.) para que funcione la app. Los documentos que importas permanecen en tu dispositivo. Los modos de escaneo de identificaciones y tarjetas de seguro están deshabilitados.
 
 ## Suscripciones y cancelación
-La prueba de 14 días está disponible una vez por persona. El precio actual de Pro en México es MXN $50 al mes, IVA incluido. Se renueva automáticamente cada mes. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes. Conservarás Pro hasta el fin del período pagado; no se harán más cargos. Puedes volver a suscribirte cuando quieras.
-TODO(OWNER-DECISION): Confirmar precio Pro MXN 50 frente a MXN 79 del plan. Las compras móviles están deshabilitadas hasta integrar StoreKit/Google Play Billing y avisos de renovación. Stripe solo se utiliza para compras web.
+La prueba de 14 días está disponible una vez por persona. El precio actual de Pro en México es MXN $79 al mes o MXN $699 al año, IVA incluido. Se renueva automáticamente por el período elegido. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes. Conservarás Pro hasta el fin del período pagado; no se harán más cargos. Puedes volver a suscribirte cuando quieras.
+Precio Pro aprobado: MXN 79 al mes o MXN 699 al año. Las compras móviles están deshabilitadas hasta integrar StoreKit/Google Play Billing y avisos de renovación. Stripe solo se utiliza para compras web.
 Puedes cancelar en cualquier momento. Las compras hechas en App Store o Google Play se reembolsan según sus políticas. Atenderemos cualquier reclamación conforme a la Ley Federal de Protección al Consumidor.
 
 ## Retención
@@ -82,8 +82,8 @@ You retain ownership of your content. We process it only to provide and protect 
 Your medications and health profile are stored on our servers (Neon, USA) so the app works. Imported documents stay on your device. ID and insurance-card scanning modes are disabled.
 
 ## Subscriptions and cancellation
-One 14-day trial per person. The current Mexico Pro price is MXN $50 per month, VAT included. Renews automatically each month. We'll remind you 5 days before each charge. Cancel anytime in Settings. You keep Pro until the end of the paid period. No more charges. You can resubscribe anytime.
-TODO(OWNER-DECISION): Confirm Pro MXN 50 versus business-plan MXN 79. Mobile purchases are disabled until StoreKit/Google Play Billing and renewal notices are integrated. Stripe is for web purchases only.
+One 14-day trial per person. The current Mexico Pro price is MXN $79 per month or MXN $699 per year, VAT included. Renews automatically for the selected period. We'll remind you 5 days before each charge. Cancel anytime in Settings. You keep Pro until the end of the paid period. No more charges. You can resubscribe anytime.
+Approved Pro pricing: MXN 79/month or MXN 699/year. Mobile purchases are disabled until StoreKit/Google Play Billing and renewal notices are integrated. Stripe is for web purchases only.
 You can cancel anytime. App Store or Google Play purchases are refunded under their policies. We'll handle any complaint under the Federal Consumer Protection Law.
 
 ## Retention

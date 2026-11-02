@@ -15,6 +15,6 @@ TODO(OWNER-DECISION): Confirm whether production launch is Mexico-only. Current 
 
 Sources checked November 2, 2026: [Apple TestFlight](https://developer.apple.com/testflight/), [Google test tracks](https://support.google.com/googleplay/android-developer/answer/9845334).
 
-TODO(OWNER-DECISION): Pro price remains the existing code value (MXN 50); business plan says MXN 79. Item 13 is outside this run.
+Owner approved Pro pricing: MXN 79/month or MXN 699/year, VAT included. Configure both store products before enabling mobile purchases.
 
 TODO(OWNER-DECISION): Supply the real legal entity name, full address, phone and privacy/breach email. Existing operator values are unchanged. Do not publish placeholder contact details as verified facts.

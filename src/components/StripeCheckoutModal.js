@@ -40,9 +40,9 @@ async function getAuthToken() {
 
 export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess, country = 'US' }) {
   const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const es = i18n.language.startsWith('es');
-  // TODO(OWNER-DECISION): Confirm MXN 50 vs 79. Native billing integration is pending.
+  const [billingInterval, setBillingInterval] = useState('month');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -65,7 +65,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ country, platform: Platform.OS }),
+        body: JSON.stringify({ country, platform: Platform.OS, billingInterval }),
       });
 
       const data = await response.json();
@@ -101,7 +101,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
     } finally {
       setLoading(false);
     }
-  }, [country, onClose, onSuccess]);
+  }, [country, billingInterval, onClose, onSuccess]);
 
 
 
@@ -134,9 +134,21 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
             </TouchableOpacity>
           </View>
 
-          <DynamicText type="primary" style={{ padding: 20 }}>
-            {es ? 'Pro: MXN $50 al mes, IVA incluido. Se renueva automáticamente cada mes. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes.' : "Pro: MXN $50 per month, VAT included. Renews automatically each month. We'll remind you 5 days before each charge. Cancel anytime in Settings."}
-          </DynamicText>
+          <View accessibilityRole="radiogroup" style={{ padding: 20 }}>
+            {['month', 'year'].map(interval => (
+              <TouchableOpacity
+                key={interval}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: billingInterval === interval }}
+                onPress={() => setBillingInterval(interval)}
+                disabled={loading}
+                style={{ padding: 12, borderWidth: 2, borderRadius: 8, marginBottom: 8, borderColor: billingInterval === interval ? (theme?.accent || '#d4af37') : getCardBorderColor() }}
+              >
+                <DynamicText type="primary">{t(`subscriptionPlans.${interval}`)}</DynamicText>
+              </TouchableOpacity>
+            ))}
+            <DynamicText type="secondary">{t('subscriptionPlans.disclosure')}</DynamicText>
+          </View>
           {Platform.OS !== 'web' ? <DynamicText type="secondary" style={{ padding: 20 }}>{es ? 'Las compras móviles están temporalmente deshabilitadas mientras integramos la facturación de la tienda.' : 'Mobile purchases are temporarily unavailable while store billing is integrated.'}</DynamicText> : <TouchableOpacity onPress={openCheckoutInBrowser} disabled={loading}><DynamicText type="primary" style={{ padding: 20 }}>{es ? 'Continuar al pago' : 'Continue to checkout'}</DynamicText></TouchableOpacity>}
           {/* Content */}
           {loading && (

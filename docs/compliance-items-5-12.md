@@ -22,7 +22,7 @@ Deployment and partial completion:
 - Rehearse against disposable staging accounts, including expired subscriptions, Stripe failure, Firebase failure, withdrawal and both web authentication methods. No production database migration, account deletion, store-console edits or deployment was performed during this run.
 - The existing privacy documents remain linked. The full privacy-policy rewrite in item 20 is outside scope; confirm that notice content and version match before launch.
 
-Owner decisions: keep existing Pro price (MXN 50 versus plan MXN 79), production countries, and operator/contact values until confirmed. TODO(OWNER-DECISION): confirm legal entity name, address, phone and monitored privacy/breach email; assign incident owners. These placeholders are also tracked in the release checklist and incident plan.
+Pro pricing approved: MXN 79/month or MXN 699/year. Production countries and operator/contact values remain pending confirmation. TODO(OWNER-DECISION): confirm legal entity name, address, phone and monitored privacy/breach email; assign incident owners. These placeholders are also tracked in the release checklist and incident plan.
 
 Validation: server syntax and modified client syntax/JSON checked; focused consent/deletion/emergency tests added. Repository-wide TypeScript checking is blocked by errors across existing backup/Next.js and app files; it is not a clean build certificate. Live integrations were not exercised.
 

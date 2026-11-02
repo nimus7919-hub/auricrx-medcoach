@@ -2803,7 +2803,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 app.post('/api/stripe/create-checkout', async (req, res) => {
   // Native purchases require StoreKit/Play Billing; disabled until integration is ready.
   if (req.body?.platform !== 'web') return res.status(409).json({ ok: false, error: 'store_billing_required' });
-  // TODO(OWNER-DECISION): Confirm Pro MXN 50 versus business-plan MXN 79; retain current prices.
+  // Owner-approved Mexico Pro: MXN 79/month or MXN 699/year, VAT included.
   // Enable only after daily renewal delivery and cancellation links pass acceptance checks.
   if (process.env.RENEWAL_NOTICES_READY !== 'true') return res.status(503).json({ ok: false, error: 'renewal_notices_pending' });
   try {
@@ -2816,14 +2816,13 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
     // Get country from request body or default to US
     const country = req.body.country || 'US';
 
-    // Determine price based on country
-    let currency = 'usd';
-    let unitAmount = 300; // $3.00 USD for US
-    
-    if (country === 'MX') {
-      currency = 'mxn';
-      unitAmount = 5000; // 50.00 MXN for Mexico
+    // Approved Pro plans are billed in MXN in every checkout.
+    const billingInterval = req.body.billingInterval ?? 'month';
+    if (!['month', 'year'].includes(billingInterval)) {
+      return res.status(400).json({ ok: false, error: 'invalid_billing_interval' });
     }
+    const currency = 'mxn';
+    const unitAmount = billingInterval === 'year' ? 69900 : 7900;
     
     console.log(`💰 Creating checkout for ${country}: ${currency.toUpperCase()} ${unitAmount / 100}`);
 
@@ -2910,7 +2909,7 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
               },
               unit_amount: unitAmount,
               recurring: {
-                interval: 'month',
+                interval: billingInterval,
               },
             },
             quantity: 1,
@@ -2978,7 +2977,7 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
                 },
                 unit_amount: unitAmount,
                 recurring: {
-                  interval: 'month',
+                  interval: billingInterval,
                 },
               },
               quantity: 1,
