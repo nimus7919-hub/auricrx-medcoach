@@ -6,29 +6,35 @@ let Resvg;
 try { ({ Resvg } = require('@resvg/resvg-js')); } catch {}
 
 const edge = (y, x1, y1, x2, y2) => x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-function letterA(scale, tx, ty) {
-  const y = 610;
-  const left = v => edge(v, 270, 285, 120, 780);
-  const right = v => edge(v, 235, 350, 370, 780);
-  const outerLeft = v => edge(v, 260, 190, 65, 780);
-  const outerRight = v => edge(v, 260, 190, 475, 780);
-  const stroke = Math.min(left(y) - outerLeft(y), outerRight(y) - right(y)) * scale;
-  const h = stroke * 0.38;
-  // Use the narrowest counter width over the entire pill height, not just
-  // its centerline. The rectangular bounds (including the rounded ends)
-  // therefore clear both sloping inner leg edges by at least 5 output px.
-  const top = y - h / scale / 2;
-  const x = left(top) * scale + tx + 5;
-  const end = right(top) * scale + tx - 5;
+// These same vertices define the inner contour in the A path below.
+const counter = { apex: [235, 350], left: [120, 780], right: [370, 780] };
+const previews = [];
+function letterA(scale, tx, ty, outputScale = 1, outputOffset = [0, 0]) {
+  const y = 590;
+  const left = v => edge(v, ...counter.apex, ...counter.left);
+  const right = v => edge(v, ...counter.apex, ...counter.right);
+  const width = (right(y) - left(y)) * scale * 0.58;
+  const h = width / 2.6;
   const cy = y * scale + ty;
-  assert(h <= stroke * 0.4);
-  for (const v of [top, y, y + h / scale / 2]) {
-    assert(x - (left(v) * scale + tx) >= 5 - 1e-9);
-    assert(right(v) * scale + tx - end >= 5 - 1e-9);
-  }
-  console.log(JSON.stringify({ scale, pillWidth: end - x, pillHeight: h, minimumLegWidth: stroke, minimumClearance: 5 }));
+  const center = (left(y) + right(y)) / 2 * scale + tx;
+  const x = center - width / 2;
+  const end = center + width / 2;
+  const top = y - h / scale / 2;
+  const minimumClearance = Math.min(
+    x - (left(top) * scale + tx),
+    right(top) * scale + tx - end
+  ) * outputScale;
+  assert(minimumClearance >= 14);
+  previews.push({
+    cy: cy * outputScale + outputOffset[1],
+    left: (left(y) * scale + tx) * outputScale + outputOffset[0],
+    right: (right(y) * scale + tx) * outputScale + outputOffset[0],
+    x: x * outputScale + outputOffset[0],
+    end: end * outputScale + outputOffset[0],
+  });
+  console.log(JSON.stringify({ pillWidth: width * outputScale, pillHeight: h * outputScale, minimumClearance }));
   return `<g transform="translate(${tx} ${ty}) scale(${scale})" fill="url(#gold)" stroke="url(#edge)" stroke-width="0.7">
-    <path d="M260 190 L475 780 Q480 794 506 797 L506 807 L344 807 L344 797 Q381 794 370 780 L235 350 L120 780 Q114 794 150 797 L150 807 L37 807 L37 797 Q62 794 65 780 Z"/>
+    <path d="M260 190 L475 780 Q480 794 506 797 L506 807 L344 807 L344 797 Q381 794 ${counter.right.join(" ")} L${counter.apex.join(" ")} L${counter.left.join(" ")} Q114 794 150 797 L150 807 L37 807 L37 797 Q62 794 65 780 Z"/>
   </g>
   <rect x="${x}" y="${cy-h/2}" width="${end-x}" height="${h}" rx="${h/2}" fill="url(#pillGold)"/>
   <clipPath id="pillClip"><rect x="${x}" y="${cy-h/2}" width="${end-x}" height="${h}" rx="${h/2}"/></clipPath>
@@ -50,9 +56,9 @@ const defs = `<defs>
 </defs>`;
 
 for (const variant of ['a', 'ar']) {
-  const a = variant === 'a' ? letterA(1.12, 208, -42) : letterA(.86, 95, 70);
+  const a = variant === 'a' ? letterA(1.12, 208, -42) : letterA(.86, 95, 70, .82, [512 - 513 * .82, 512 - 499 * .82]);
   const r = variant === 'ar' ? `<path transform="translate(0 47)" fill="url(#gold)" stroke="url(#edge)" stroke-width=".6" d="M535 233 H707 C828 233 859 294 859 362 C859 434 815 476 750 489 C787 511 806 560 831 614 L859 675 Q873 702 900 706 V717 H810 C789 694 776 663 755 614 L714 527 Q697 493 663 493 H648 V681 Q648 704 689 706 V717 H535 V706 Q570 704 570 681 V269 Q570 246 535 244 Z M648 251 V474 H683 C750 474 777 437 777 365 C777 293 755 251 696 251 Z"/>` : '';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title"><title id="title">AuricRX ${variant.toUpperCase()} gold capsule monogram</title>${defs}<rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/><circle cx="512" cy="512" r="458" fill="none" stroke="url(#gold)" stroke-width="2"/>${a}${r}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title"><title id="title">AuricRX ${variant.toUpperCase()} gold capsule monogram</title>${defs}<rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/><circle cx="512" cy="512" r="458" fill="none" stroke="url(#gold)" stroke-width="2"/>${variant === 'ar' ? `<g transform="translate(512 512) scale(.82) translate(-513 -499)">${a}${r}</g>` : a}</svg>`;
   fs.writeFileSync(path.join(__dirname, `icon-${variant}.svg`), svg);
   if (!Resvg) {
     // Windows fallback: render the exact SVG in installed Chrome, then
@@ -74,3 +80,31 @@ for (const variant of ['a', 'ar']) {
     assert.equal(png.readUInt32BE(20), size);
   }
 }
+
+// Verify the actual raster, including antialiasing, rather than geometry alone.
+require('node:child_process').execFileSync('python', ['-c', `
+import json, math, sys
+from PIL import Image
+from pathlib import Path
+for variant, pill in zip(('a', 'ar'), json.loads(sys.argv[2])):
+    im = Image.open(Path(sys.argv[1]) / ('icon-' + variant + '.png')).convert('RGB')
+    row = round(pill['cy'])
+    gaps = []
+    for start, end in ((pill['left'] + 2, pill['x'] - 2), (pill['end'] + 2, pill['right'] - 2)):
+        samples = [im.getpixel((x, row)) for x in range(math.ceil(start), math.floor(end) + 1)]
+        assert len(samples) >= 14, (variant, 'gap too small', len(samples))
+        assert all(b > r and b > g for r, g, b in samples), (variant, 'non-navy gap')
+        gaps.append(len(samples))
+    for x in (round(pill['x'] + 3), round(pill['end'] - 3)):
+        r, g, b = im.getpixel((x, row))
+        assert r > b, (variant, 'missing capsule')
+    if variant == 'ar':
+        # Ring inner edge is r=457; require at least 27 px of navy margin.
+        for y in range(1024):
+            for x in range(1024):
+                radius = math.hypot(x - 512, y - 512)
+                if 430 <= radius <= 454:
+                    r, g, b = im.getpixel((x, y))
+                    assert b > r and b > g, ('AR enters ring margin', x, y)
+    print(f'{variant}: row {row}, navy gap samples left/right={gaps}; raster checks passed')
+`, __dirname, JSON.stringify(previews)], { stdio: 'inherit' });
