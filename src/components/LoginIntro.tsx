@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
-import AuricWordmark from './AuricWordmark';
+import AuricWordmark, { CROSSBAR, WORDMARK } from './AuricWordmark';
 import { vip } from '../theme/vip';
 
 /** Runs at the login boundary, with the actual login mounted below the reveal. */
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   intro: { flex: 1, backgroundColor: vip.colors.navy, alignItems: 'center', justifyContent: 'center', padding: 28 },
   mark: { width: '100%', maxWidth: 440, aspectRatio: 440 / 128 },
-  pill: { position: 'absolute', left: `${26.5 / 440 * 100}%`, top: `${81 / 128 * 100}%`, width: `${42.25 / 440 * 100}%`, height: `${12 / 128 * 100}%` },
+  pill: { position: 'absolute', left: `${CROSSBAR.x / WORDMARK.width * 100}%`, top: `${CROSSBAR.y / WORDMARK.height * 100}%`, width: `${CROSSBAR.width / WORDMARK.width * 100}%`, height: `${CROSSBAR.height / WORDMARK.height * 100}%`, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 2, shadowOffset: { width: 0, height: 2 } },
   subtitle: { color: vip.colors.white, fontSize: 18, letterSpacing: 5, marginTop: 12 },
   skip: { position: 'absolute', bottom: 48, color: vip.colors.gold, fontSize: 13 },
 });

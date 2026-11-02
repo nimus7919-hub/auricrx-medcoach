@@ -283,7 +283,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     <SafeAreaView style={styles.safe}>
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 400 780">
-          <Defs><RadialGradient id="halo" cx="50%" cy="20%" rx="48%" ry="25%"><Stop offset="0" stopColor="#AF792D" stopOpacity="0.55"/><Stop offset="1" stopColor={vip.colors.navy} stopOpacity="0"/></RadialGradient></Defs>
+          <Defs><RadialGradient id="halo" cx="50%" cy="20%" rx="42%" ry="22%"><Stop offset="0" stopColor="#AF792D" stopOpacity="0.48"/><Stop offset="1" stopColor={vip.colors.navy} stopOpacity="0"/></RadialGradient></Defs>
           <Rect width="400" height="780" fill={vip.colors.navy}/>
           {Array.from({length: 24}, (_, i) => <Line key={i} x1={-400 + i * 35} y1="610" x2={100 + i * 35} y2="70" stroke={vip.colors.gold} strokeOpacity={i % 4 === 0 ? 0.16 : 0.06} strokeWidth="0.6"/>)}
           <Rect width="400" height="780" fill="url(#halo)"/>
@@ -334,7 +334,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
           <View style={styles.header}><View style={styles.wordmark}><AuricWordmark/></View><Text style={styles.subtitle}>RX MEDCOACH</Text><Text style={styles.tagline}>{copy.tagline}</Text></View>
           <View style={styles.card}>
             <BlurView intensity={22} tint="dark" style={StyleSheet.absoluteFill}/>
-            <LinearGradient colors={['rgba(255,255,255,0.04)', 'rgba(3,18,32,0.7)']} style={StyleSheet.absoluteFill}/>
+            <LinearGradient colors={['rgba(255,235,196,0.035)', 'rgba(3,18,32,0.65)']} style={StyleSheet.absoluteFill}/>
             <GoogleAuthButton variant="vip" language={selectedLanguage} loading={googleLoading} disabled={loading || googleLoading} onPress={handleGoogleSignIn}/>
             <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>{copy.or}</Text><View style={styles.line}/></View>
             <View style={styles.field}><Feather name="mail" color={vip.colors.gold} size={27}/><View style={styles.fieldBody}><Text style={styles.label}>{copy.email}</Text><TextInput accessibilityLabel={copy.email} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" style={styles.input}/></View></View>
@@ -343,12 +343,12 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
               <TouchableOpacity accessibilityRole="checkbox" accessibilityState={{checked:staySignedIn}} onPress={() => setStaySignedIn(!staySignedIn)} style={{minHeight:28,justifyContent:'center'}}><Text style={{color:vip.colors.gold,fontSize:11}}>{staySignedIn ? '?' : '?'} {t.staySignedIn}</Text></TouchableOpacity>
               <TouchableOpacity accessibilityLabel={t.password} accessibilityState={{selected:showPassword}} onPressIn={() => setShowPassword(true)} onPressOut={() => setShowPassword(false)} style={{minWidth:32,minHeight:28,alignItems:'center',justifyContent:'center'}}><Feather name={showPassword ? 'eye-off' : 'eye'} size={16} color={vip.colors.gold}/></TouchableOpacity>
             </View>
-            <TouchableOpacity accessibilityRole="button" disabled={loading || googleLoading} onPress={onSignIn} activeOpacity={0.85} style={[styles.goldButton, (loading || googleLoading) && {opacity: 0.6}]}><LinearGradient colors={['#F5D28D', '#BD8739', '#E6B966', '#996721']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.goldContent}><Text style={styles.goldText}>{loading ? copy.loading : copy.signIn}</Text></LinearGradient></TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" disabled={loading || googleLoading} onPress={onSignIn} activeOpacity={0.85} style={[styles.goldButton, (loading || googleLoading) && {opacity: 0.6}]}><LinearGradient colors={['#F7D798', '#C18B3D', '#ECC77E', '#AD752B']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.goldContent}><LinearGradient pointerEvents="none" colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0)']} style={styles.buttonGloss}/><Text style={styles.goldText}>{loading ? copy.loading : copy.signIn}</Text></LinearGradient></TouchableOpacity>
             <TouchableOpacity accessibilityRole="button" style={styles.forgot} onPress={async () => { if (!email.trim()) { Alert.alert(copy.forgot, copy.resetHelp); return; } const result = await authService.resetPassword(email.trim()); Alert.alert(copy.forgot, result.success ? copy.resetSent : googleAuthText(selectedLanguage).error); }}><Text style={styles.link}>{copy.forgot}</Text></TouchableOpacity>
             {onResubscribe && <TouchableOpacity onPress={onResubscribe} style={styles.forgot}><Text style={styles.link}>{t.resubscribe}</Text></TouchableOpacity>}
           </View>
           <Text style={styles.signUp}>{copy.newHere} <Text accessibilityRole="button" style={styles.link} onPress={() => { if (!loading && !googleLoading) setShowSignUpForm(true); }}>{copy.createAccount}</Text></Text>
-          <Text style={styles.legal}><Text accessibilityRole="link" onPress={() => handleOpenLegal('terms')}>{copy.terms}</Text> ? <Text accessibilityRole="link" onPress={() => handleOpenLegal('privacy')}>{copy.privacy}</Text></Text>
+          <Text style={styles.legal}><Text accessibilityRole="link" onPress={() => handleOpenLegal('terms')}>{copy.terms}</Text> {'·'} <Text accessibilityRole="link" onPress={() => handleOpenLegal('privacy')}>{copy.privacy}</Text></Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -356,7 +356,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
 }
 
 const loginCopy: Record<string, any> = {
-  es: {language:'Elegir idioma', tagline:'Tu salud, en modo VIP.', or:'o', email:'Correo electr?nico', signIn:'Iniciar sesi?n', loading:'Conectando...', forgot:'?Olvidaste tu contrase?a?', resetHelp:'Introduce tu correo electr?nico para recuperar tu contrase?a.', newHere:'?Nuevo aqu??', createAccount:'Crear cuenta', terms:'T?rminos', privacy:'Privacidad'},
+  es: {language:'Elegir idioma', tagline:'Tu salud, en modo VIP.', or:'o', email:'Correo electrónico', signIn:'Iniciar sesión', loading:'Conectando...', forgot:'¿Olvidaste tu contraseña?', resetHelp:'Introduce tu correo electr?nico para recuperar tu contrase?a.', newHere:'¿Nuevo aquí?', createAccount:'Crear cuenta', terms:'Términos', privacy:'Privacidad'},
   en: {language:'Choose language', tagline:'Your health, in VIP mode.', or:'or', email:'Email', signIn:'Sign in', loading:'Connecting...', forgot:'Forgot your password?', resetHelp:'Enter your email to recover your password.', newHere:'New here?', createAccount:'Create account', terms:'Terms', privacy:'Privacy'},
   pt: {language:'Escolher idioma', tagline:'Sua sa?de, em modo VIP.', or:'ou', email:'Email', signIn:'Entrar', loading:'Conectando...', forgot:'Esqueceu sua senha?', resetHelp:'Insira seu email para recuperar sua senha.', newHere:'Novo aqui?', createAccount:'Criar conta', terms:'Termos', privacy:'Privacidade'},
   fr: {language:'Choisir la langue', tagline:'Votre sant?, en mode VIP.', or:'ou', email:'E-mail', signIn:'Se connecter', loading:'Connexion...', forgot:'Mot de passe oubli? ?', resetHelp:'Saisissez votre e-mail pour r?cup?rer votre mot de passe.', newHere:'Nouveau ici ?', createAccount:'Cr?er un compte', terms:'Conditions', privacy:'Confidentialit?'},
@@ -369,13 +369,13 @@ const styles = StyleSheet.create({
   topRow:{width:'100%',alignItems:'flex-end',paddingTop:18},
   languageSelector:{flexDirection:'row',alignItems:'center',gap:12,borderWidth:0.7,borderColor:vip.colors.gold,borderRadius:15,paddingHorizontal:13,minHeight:38,backgroundColor:'rgba(15,25,37,0.75)'},
   languageSelectorText:{color:vip.colors.white,fontSize:17},
-  header:{width:'100%',maxWidth:300,alignItems:'center',marginTop:58,marginBottom:52},
-  wordmark:{width:'100%',height:86}, subtitle:{color:vip.colors.white,fontSize:20,letterSpacing:6,marginTop:4},
+  header:{width:'100%',maxWidth:320,alignItems:'center',marginTop:62,marginBottom:40},
+  wordmark:{width:'100%',aspectRatio:440/128}, subtitle:{color:vip.colors.white,fontSize:20,letterSpacing:6,marginTop:7},
   tagline:{color:vip.colors.gold,fontSize:18,fontStyle:'italic',marginTop:8},
-  card:{width:'100%',maxWidth:380,borderWidth:0.7,borderColor:vip.colors.gold,borderRadius:vip.radius.card,padding:vip.spacing.md,paddingTop:23,overflow:'hidden',backgroundColor:vip.colors.glass},
+  card:{width:'100%',maxWidth:380,borderWidth:0.7,borderColor:vip.colors.gold,borderRadius:24,padding:22,paddingTop:24,paddingBottom:20,overflow:'hidden',backgroundColor:'rgba(3,16,28,0.78)'},
   divider:{flexDirection:'row',alignItems:'center',gap:9,marginTop:10,marginBottom:8},line:{flex:1,height:0.7,backgroundColor:vip.colors.line},or:{color:vip.colors.white,fontSize:16},
-  field:{flexDirection:'row',alignItems:'center',gap:14,marginBottom:14},fieldBody:{flex:1,borderBottomWidth:0.7,borderColor:vip.colors.line},label:{color:vip.colors.white,fontSize:15},input:{color:vip.colors.white,fontSize:16,minHeight:34,paddingVertical:5},
-  goldButton:{borderRadius:vip.radius.button,padding:1,borderWidth:1,borderColor:vip.colors.gold,overflow:'hidden',marginTop:3},goldContent:{minHeight:46,borderRadius:16,alignItems:'center',justifyContent:'center',borderWidth:0.7,borderColor:'#FFE5A2'},goldText:{fontSize:20,color:'#10100E',fontWeight:'600'},
+  field:{flexDirection:'row',alignItems:'center',gap:14,marginBottom:16},fieldBody:{flex:1,borderBottomWidth:0.7,borderColor:vip.colors.line},label:{color:vip.colors.white,fontSize:15},input:{color:vip.colors.white,fontSize:16,minHeight:34,paddingVertical:5},
+  goldButton:{borderRadius:vip.radius.button,padding:1,borderWidth:1,borderColor:'#F3D399',overflow:'hidden',marginTop:3,backgroundColor:'#A7732D',shadowColor:'#000',shadowOpacity:0.3,shadowRadius:5,shadowOffset:{width:0,height:4},elevation:3},buttonGloss:{position:'absolute',top:0,left:0,right:0,height:'48%',borderRadius:16},goldContent:{minHeight:48,borderRadius:16,alignItems:'center',justifyContent:'center',borderWidth:0.7,borderColor:'#FFE5A2'},goldText:{fontSize:20,color:'#10100E',fontWeight:'600'},
   forgot:{alignItems:'center',paddingTop:14,paddingBottom:0,minHeight:30},link:{color:vip.colors.gold,fontSize:15},signUp:{color:vip.colors.white,fontSize:16,textAlign:'center',marginTop:19},legal:{color:vip.colors.muted,fontSize:12,textAlign:'center',marginTop:22},
   modalOverlay:{flex:1,backgroundColor:'rgba(0,0,0,0.7)',justifyContent:'center',padding:28},languageDropdown:{backgroundColor:vip.colors.navy,borderColor:vip.colors.gold,borderWidth:1,borderRadius:20,padding:12},languageOption:{minHeight:48,flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:16},languageOptionText:{color:vip.colors.white,fontSize:17},
   legalModalBackdrop:{flex:1,backgroundColor:'rgba(0,0,0,0.8)',justifyContent:'center',padding:20},legalModalContainer:{backgroundColor:vip.colors.navy,borderRadius:20,padding:20,maxHeight:'85%',borderWidth:1,borderColor:vip.colors.gold},legalModalHeader:{flexDirection:'row',alignItems:'center',marginBottom:16},legalModalTitle:{flex:1,color:vip.colors.gold,fontSize:18},legalModalClose:{color:vip.colors.gold},legalModalLoadingContainer:{padding:24,alignItems:'center'},legalModalLoadingText:{color:vip.colors.white,marginTop:12},legalModalScroll:{flexShrink:1},legalModalText:{color:vip.colors.white,fontSize:14,lineHeight:22},
