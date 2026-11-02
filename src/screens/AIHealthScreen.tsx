@@ -999,197 +999,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
   // Enhanced Fasting Compatibility Check Function with Profile
   const checkFastingCompatibilityWithProfile = (medications: any[], profile: any) => {
-    let fastingSafe = true;
-    let warnings: string[] = [];
-    let suggestedFastingHours = 16; // Default recommendation
-    let riskLevel = 'low'; // 'low', 'medium', 'high', 'critical'
-
-    // Common medications that require food
-    const foodRequiredMedications = [
-      'metformin', 'aspirin', 'ibuprofen', 'naproxen', 'diclofenac',
-      'prednisone', 'prednisolone', 'iron', 'calcium', 'vitamin d',
-      'omeprazole', 'lansoprazole', 'esomeprazole', 'pantoprazole',
-      'sulfonylureas', 'glipizide', 'glyburide', 'glimepiride'
-    ];
-
-    // Check medications
-    medications.forEach(med => {
-      const medName = med.name?.toLowerCase() || '';
-      const medStrength = med.strength?.toLowerCase() || '';
-      const fullMedName = `${medName} ${medStrength}`.toLowerCase();
-      
-      const requiresFood = foodRequiredMedications.some(requiredMed => 
-        medName.includes(requiredMed) || fullMedName.includes(requiredMed)
-      );
-      
-      if (requiresFood) {
-        fastingSafe = false;
-        const foodText = S?.shouldBeTakenWithFood || 'should be taken with food.';
-        console.log('🔍 Debug - S object:', S);
-        console.log('🔍 Debug - shouldBeTakenWithFood:', S?.shouldBeTakenWithFood);
-        console.log('🔍 Debug - final foodText:', foodText);
-        warnings.push(`${med.name} ${foodText}`);
-        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
-      }
-    });
-
-    // Check health conditions
-    if (profile) {
-      // Calculate BMI (Body Mass Index) if weight and height are provided
-      let bmi = null;
-      if (profile.weight && profile.height) {
-        const weight = parseFloat(profile.weight);
-        const height = parseFloat(profile.height);
-        
-        if (weight > 0 && height > 0) {
-          // Convert to metric if needed
-          let weightKg = weight;
-          let heightM = height / 100; // Assume cm
-          
-          if (profile.weightUnit === 'lbs') {
-            weightKg = weight * 0.453592; // Convert lbs to kg
-          }
-          if (profile.heightUnit === 'ft') {
-            heightM = height * 0.3048; // Convert ft to m
-          }
-          
-          bmi = weightKg / (heightM * heightM);
-        }
-      }
-
-      // BMI (Body Mass Index) considerations
-      if (bmi !== null) {
-        if (bmi < 18.5) {
-          warnings.push(aiTranslations.lowBMIRisk);
-          suggestedFastingHours = Math.min(suggestedFastingHours, 12);
-          riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
-        } else if (bmi > 30) {
-          warnings.push(aiTranslations.higherBMIRisk);
-          suggestedFastingHours = Math.min(suggestedFastingHours, 14);
-          riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
-        }
-      }
-
-      // Check custom health conditions
-      if (profile.otherHealthConditions && profile.otherHealthConditions.length > 0) {
-        const highRiskConditions = ['cancer', 'autoimmune', 'thyroid', 'adrenal', 'pituitary', 'seizure', 'epilepsy'];
-        const mediumRiskConditions = ['migraine', 'chronic fatigue', 'fibromyalgia', 'arthritis', 'osteoporosis'];
-        
-        profile.otherHealthConditions.forEach((condition: string) => {
-          const lowerCondition = condition.toLowerCase();
-          
-          if (highRiskConditions.some(risk => lowerCondition.includes(risk))) {
-            fastingSafe = false;
-            warnings.push(`${condition} requires medical supervision for fasting.`);
-            suggestedFastingHours = Math.min(suggestedFastingHours, 14);
-            riskLevel = 'high';
-          } else if (mediumRiskConditions.some(risk => lowerCondition.includes(risk))) {
-            warnings.push(`${condition} may be affected by fasting.`);
-            suggestedFastingHours = Math.min(suggestedFastingHours, 14);
-            riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
-          } else {
-            warnings.push(`${condition} should be discussed with your healthcare provider before fasting.`);
-            riskLevel = riskLevel === 'low' ? 'medium' : riskLevel;
-          }
-        });
-      }
-
-      // Critical conditions that make fasting unsafe
-      if (profile.diabetes || profile.hypoglycemia) {
-        fastingSafe = false;
-        riskLevel = 'critical';
-        warnings.push(t('diabetesRequiresSupervision'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 8);
-      }
-
-      if (profile.pregnancy || profile.breastfeeding) {
-        fastingSafe = false;
-        riskLevel = 'critical';
-        warnings.push(t('pregnancyRequiresSupervision'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 8);
-      }
-
-      if (profile.eatingDisorders) {
-        fastingSafe = false;
-        riskLevel = 'high';
-        warnings.push(t('eatingDisordersRequireSupervision'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 8);
-      }
-
-      // High-risk conditions
-      if (profile.heartConditions || profile.kidneyDisease || profile.liverDisease) {
-        riskLevel = 'high';
-        warnings.push(t('heartKidneyLiverRequireSupervision'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
-      }
-
-      // Medium-risk conditions
-      if (profile.gastrointestinalIssues) {
-        riskLevel = 'medium';
-        warnings.push(t('gastrointestinalIssuesWorsened'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 14);
-      }
-
-      // Nutritional status considerations
-      if (profile.bodyFatLevel === 'low' || profile.muscleMass === 'low') {
-        riskLevel = 'medium';
-        warnings.push(t('lowBodyFatRisky'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
-      }
-
-      if (profile.hydrationLevel === 'poor') {
-        riskLevel = 'medium';
-        warnings.push(t('poorHydrationIncreasesRisks'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
-      }
-
-      // Mental health considerations
-      if (profile.anxiety || profile.depression) {
-        riskLevel = 'medium';
-        warnings.push(t('anxietyDepressionAffected'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 14);
-      }
-
-      // Activity level considerations
-      if (profile.activityLevel === 'athlete' || profile.physicalLabor) {
-        warnings.push(t('highActivityRequiresNutrition'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 12);
-      }
-
-      // Sleep quality considerations
-      if (profile.sleepQuality === 'poor') {
-        warnings.push(t('poorSleepAffected'));
-        suggestedFastingHours = Math.min(suggestedFastingHours, 14);
-      }
-
-      // Respect user preferences
-      if (profile.maxFastingHours && profile.maxFastingHours < suggestedFastingHours) {
-        suggestedFastingHours = profile.maxFastingHours;
-      }
-    }
-
-    // Generate personalized message
-    let message = '';
-    const riskEmoji = riskLevel === 'critical' ? '🚨' : 
-                     riskLevel === 'high' ? '⚠️' : 
-                     riskLevel === 'medium' ? '⚡' : '✅';
-
-    if (riskLevel === 'critical' || !fastingSafe) {
-      message = `${riskEmoji} ${t('fastingNotRecommended')} ${warnings.join(' ')} ${t('pleaseConsultHealthcareProvider')}`;
-    } else if (riskLevel === 'high') {
-      message = `${riskEmoji} ${t('fastingRequiresSupervision')} ${warnings.join(' ')} ${t('considerShorterFastingPeriod').replace('{hours}', suggestedFastingHours.toString()).replace('{remaining}', (24-suggestedFastingHours).toString())}`;
-    } else if (riskLevel === 'medium') {
-      message = `${riskEmoji} ${t('fastingMayBeSuitableWithCaution')} ${warnings.join(' ')} ${t('hourFastingWindowAppropriate').replace('{hours}', suggestedFastingHours.toString()).replace('{remaining}', (24-suggestedFastingHours).toString())}`;
-    } else {
-      message = `${riskEmoji} ${t('fastingAppearsCompatible')} ${t('hourFastingWindowSuitable').replace('{hours}', suggestedFastingHours.toString()).replace('{remaining}', (24-suggestedFastingHours).toString())}`;
-    }
-
+    const restricted = !!(profile?.diabetes || profile?.pregnancy || profile?.breastfeeding || profile?.eatingDisorders || profile?.eating_disorders);
     return {
-      compatible: fastingSafe && riskLevel !== 'critical',
-      warnings,
-      suggestedHours: suggestedFastingHours,
-      riskLevel,
-      message
+      compatible: false,
+      warnings: [],
+      suggestedHours: restricted ? 0 : 12,
+      message: restricted ? i18nT('ai.fastingProfileRestricted') : i18nT('ai.fastingAppearsCompatible'),
     };
   };
 
@@ -1369,7 +1184,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           <h3>${t('fastingAnalysis')}</h3>
           <div class="analysis-result ${fastingAnalysis.compatible ? 'compatible' : 'needs-review'}">
             <p><strong>${t('status')}:</strong> ${fastingAnalysis.compatible ? t('compatible') : t('needsReview')}</p>
-            <p><strong>${t('recommendedFastingWindow')}:</strong> ${fastingAnalysis.suggestedHours}:${24-fastingAnalysis.suggestedHours}</p>
+            <p><strong>${t('recommendedFastingWindow')}:</strong> ${fastingAnalysis.suggestedHours > 0 ? fastingAnalysis.suggestedHours + ':' + (24-fastingAnalysis.suggestedHours) : fastingAnalysis.message}</p>
             <p><strong>${t('analysis')}:</strong> ${fastingAnalysis.message}</p>
           </div>
           ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
@@ -2072,12 +1887,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
             {fastingAnalysis ? (
               <View style={dynamicStyles.fastingAnalysisResult}>
-                <View style={dynamicStyles.fastingTimeRecommendation}>
+                {fastingAnalysis.suggestedHours > 0 && <View style={dynamicStyles.fastingTimeRecommendation}>
                   <DynamicText type="card" style={dynamicStyles.fastingTimeLabel}>{t('recommendedFastingWindow')}</DynamicText>
                   <DynamicText type="card" style={dynamicStyles.fastingTimeValue}>
                     {fastingAnalysis.suggestedHours}:{24-fastingAnalysis.suggestedHours}
                   </DynamicText>
-                </View>
+                </View>}
 
                 <DynamicText type="card" style={dynamicStyles.fastingMessage}>
                   {fastingAnalysis.message}
@@ -2613,7 +2428,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             {currentSymptomAnalysis && (
               <>
                 <View style={dynamicStyles.modalHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+
                     <DynamicText type="primary" style={dynamicStyles.modalTitle}>
                       {S?.symptomAnalysisComplete || 'Symptom Analysis Complete'}
                     </DynamicText>

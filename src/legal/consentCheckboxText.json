@@ -7,6 +7,6 @@
   "en": {
     "terms": "I agree to the Terms of Service.",
     "privacy": "I have read the Privacy Notice.",
-    "health": "I expressly consent to AuricRX processing my health data (medications, conditions, symptoms and fasting profile) to give me reminders and general information. I can withdraw this consent in Settings > Privacy."
+    "health": "I consent to AuricRX collecting my health data (medications, conditions, symptoms, fasting profile) to provide reminders and general information. We share it only with service providers that run the app (OpenAI, Google/Firebase, Neon, Render, Stripe). We never sell it. You can withdraw consent and delete your data in Settings."
   }
 }

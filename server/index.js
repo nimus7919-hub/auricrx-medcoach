@@ -176,41 +176,13 @@ async function getPlaceDetails(placeId, apiKey) {
 }
 
 async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCache = true } = {}) {
-  console.log('🚀 STARTING fetchNearbyPharmacies:', { lat, lon, limit, lang, useCache });
   console.log('🔥 THIS IS THE PHARMACY SEARCH FUNCTION - IF YOU SEE THIS, THE SERVER IS WORKING!');
   const key = `${lat.toFixed(3)}:${lon.toFixed(3)}`;
   const now = Date.now();
-  if (useCache) {
-    const cached = pharmacyCache.get(key);
-    if (cached && now - cached.ts < PHARMACY_CACHE_TTL_MS) {
-      console.log('📦 Using cached pharmacy data');
-      return { list: cached.data.slice(0, limit), cached: true, mock: false };
-    }
-  }
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   console.log('🔑 API Key status:', apiKey ? 'Present' : 'Missing');
-  if (!apiKey) {
-    console.warn('❌ Nearby pharmacies: no API key present – returning mock data.');
-    const mock = [
-      { id: "mock-cvs", name: "CVS Pharmacy", lat: lat + 0.015, lon: lon + 0.015, address: "123 Main St", distanceMiles: 0.8 },
-      { id: "mock-wal", name: "Walgreens", lat: lat + 0.025, lon: lon - 0.010, address: "45 Oak Ave", distanceMiles: 1.1 },
-      { id: "mock-rite", name: "Rite Aid", lat: lat - 0.020, lon: lon + 0.030, address: "8 Pine Rd", distanceMiles: 1.3 },
-      { id: "mock-wmt", name: "Walmart Pharmacy", lat: lat - 0.030, lon: lon - 0.025, address: "220 Market", distanceMiles: 1.9 },
-      { id: "mock-cost", name: "Costco Pharmacy", lat: lat + 0.040, lon: lon + 0.035, address: "5 Lake Dr", distanceMiles: 2.4 },
-      { id: "mock-tar", name: "Target (CVS)", lat: lat + 0.050, lon: lon - 0.040, address: "77 River Rd", distanceMiles: 3.1 },
-    ];
-    
-    // Calculate actual distances using Haversine formula
-    const mockWithDistances = mock.map(pharmacy => {
-      const distanceMiles = haversineMi(lat, lon, pharmacy.lat, pharmacy.lon);
-      return {
-        ...pharmacy,
-        distanceMiles: distanceMiles
-      };
-    });
-    
-    return { list: mockWithDistances.slice(0, limit), cached: false, mock: true };
+  if (!apiKey) { throw new Error('places_unavailable');
   }
 
     const radius = 5000; // meters (~3.1 mi) adjust as needed
@@ -315,7 +287,6 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
         withRatings: placesWithDetails.filter(p => p.rating).length
       });
 
-        if (useCache) pharmacyCache.set(key, { data: placesWithDetails, ts: now });
         return { list: placesWithDetails, cached: false, mock: false, apiVersion: 'legacy', legacyStatus: json.status };
       } else {
         legacyError = json.status;
@@ -453,7 +424,7 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
       });
       
       console.log('Places API (New) results:', placesArr.length);
-      if (useCache) pharmacyCache.set(key, { data: placesArr, ts: now });
+
       return { list: placesArr.slice(0, limit), cached: false, mock: false, apiVersion: 'new' };
     } catch (e2) {
       console.error('Places API (New) fallback failed:', e2.message);
@@ -463,16 +434,9 @@ async function fetchNearbyPharmacies(lat, lon, limit = 10, lang = 'en', { useCac
 
 // Fetch nearby medical laboratories using Google Places API
 async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = true } = {}) {
-  console.log('🧪 STARTING fetchNearbyLabs:', { lat, lon, limit, lang, useCache });
   console.log('🔥 THIS IS THE LABS SEARCH FUNCTION - IF YOU SEE THIS, THE SERVER IS WORKING!');
   const key = `labs:${lat.toFixed(3)}:${lon.toFixed(3)}`;
   const now = Date.now();
-  if (useCache) {
-    const cached = pharmacyCache.get(key); // Reuse same cache for now
-    if (cached && now - cached.ts < PHARMACY_CACHE_TTL_MS) {
-      return { list: cached.data.slice(0, limit), cached: true, mock: false };
-    }
-  }
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
@@ -632,7 +596,7 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
     });
 
     console.log('Labs API results:', labsArr.length);
-    if (useCache) pharmacyCache.set(key, { data: labsArr, ts: now });
+
     return { list: labsArr.slice(0, limit), cached: false, mock: false, apiVersion: 'new' };
   } catch (e) {
     console.error('Labs API failed:', e.message);
@@ -640,12 +604,6 @@ async function fetchNearbyLabs(lat, lon, limit = 10, lang = 'en', { useCache = t
   }
 }
 
-// Deterministic pseudo-price generator (stable across requests for same id+med)
-function genPrice(pharmacyId, medName) {
-  const seed = [...(pharmacyId + medName)].reduce((a, c) => a + c.charCodeAt(0), 0);
-  const base = 15 + (seed % 30); // $15 - $44
-  return Number((base + (seed % 7) * 0.25).toFixed(2));
-}
 
 // GET /pharmacies/nearby?lat=..&lon=..&limit=10&lang=es
 app.get('/pharmacies/nearby', async (req, res) => {
@@ -869,6 +827,11 @@ app.get('/debug/places', async (req, res) => {
   }
 });
 
+app.get('/privacy-notice/:language', (req, res) => {
+  const language = req.params.language === 'es' ? 'es' : 'en';
+  res.type('text/plain; charset=utf-8').sendFile(require('path').join(__dirname, '../docs/privacy-notice-' + language + '.md'));
+});
+
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 // Define tools for the AI to call
@@ -917,13 +880,7 @@ app.post('/test-tools', async (req, res) => {
     const messages = [
       {
         role: 'system',
-        content: [
-          'You are a **personal health assistant**.',
-          'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
-          'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
-          'If a list is empty, say so and suggest what the user might add.',
-          'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
-        ].join(' ')
+        content: "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation."
       },
       { role: 'user', content: testMessage }
     ];
@@ -1013,13 +970,7 @@ app.post('/ask', async (req, res) => {
     const messages = [
       {
         role: 'system',
-        content: [
-          'You are a **personal health assistant**.',
-          'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
-          'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
-          'If a list is empty, say so and suggest what the user might add.',
-          'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
-        ].join(' ')
+        content: "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation."
       },
       { role: 'user', content: message }
     ];
@@ -1118,13 +1069,7 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
         messages = [
           {
             role: 'system',
-            content: [
-              'You are a **personal health assistant**.',
-              'The only personal info you can use is content **shared in this chat** (tool outputs or user messages).',
-              'Never say "I can\'t access your personal records." Instead say "From your dashboard data I see…"',
-              'If a list is empty, say so and suggest what the user might add.',
-              'Give helpful, non-diagnostic guidance and include brief safety notes when appropriate.'
-            ].join(' ')
+            content: "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation."
           },
           { role: 'user', content: message.trim() },
         ];
@@ -1975,6 +1920,7 @@ app.post('/api/fasting-profile', async (req, res) => {
     res.json({ 
       ok: true, 
       message: 'Fasting profile saved successfully',
+      fastingAdvice: require('./fasting-safety').fastingAdvice(profileData, req.body.language),
       profileId: result.id,
       createdAt: result.created_at,
       updatedAt: result.updated_at
@@ -2660,7 +2606,7 @@ app.post('/api/subscription/cancel', async (req, res) => {
         }
       } catch (stripeError) {
         console.error('⚠️ Error cancelling Stripe subscription:', stripeError);
-        // Continue with database update even if Stripe fails
+        return res.status(502).json({ ok: false, error: 'billing_provider_failed' });
       }
     }
 
@@ -2747,7 +2693,7 @@ app.post('/api/subscription/resubscribe', async (req, res) => {
         }
       } catch (stripeError) {
         console.error('⚠️ Error reactivating Stripe subscription:', stripeError);
-        // Continue with database update even if Stripe fails
+        return res.status(502).json({ ok: false, error: 'billing_provider_failed' });
       }
     }
 
@@ -2840,6 +2786,11 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  * Create Stripe checkout session
  */
 app.post('/api/stripe/create-checkout', async (req, res) => {
+  // Native purchases require StoreKit/Play Billing; disabled until integration is ready.
+  if (req.body?.platform !== 'web') return res.status(409).json({ ok: false, error: 'store_billing_required' });
+  // TODO(OWNER-DECISION): Confirm Pro MXN 50 versus business-plan MXN 79; retain current prices.
+  // Enable only after daily renewal delivery and cancellation links pass acceptance checks.
+  if (process.env.RENEWAL_NOTICES_READY !== 'true') return res.status(503).json({ ok: false, error: 'renewal_notices_pending' });
   try {
     // Verify auth token
     const token = req.headers.authorization?.split(' ')[1];

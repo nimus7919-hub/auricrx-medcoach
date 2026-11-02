@@ -44,13 +44,13 @@ export default function SubscriptionExpiredModal({
   const translations = {
     en: {
       title: 'Subscription Expired',
-      message: 'Your subscription has expired. You have 30 days to renew your subscription.\n\nYour data will be safely stored in the cloud during this grace period. After 30 days, your account data will be deleted.',
+      message: "30 days after your subscription ends we delete your account and all your data, except what the law requires us to keep, such as invoices.",
       subscribeButton: 'Subscribe Now',
       dismissButton: 'Later',
     },
     es: {
       title: 'Suscripción Expirada',
-      message: 'Tu suscripción ha expirado. Tienes 30 días para renovar tu suscripción.\n\nTus datos se almacenarán de forma segura en la nube durante este período de gracia. Después de 30 días, los datos de tu cuenta serán eliminados.',
+      message: "30 días después de que termine tu suscripción eliminamos tu cuenta y todos tus datos, salvo lo que la ley nos obligue a conservar (por ejemplo, facturas).",
       subscribeButton: 'Suscribirse Ahora',
       dismissButton: 'Más Tarde',
     },

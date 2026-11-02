@@ -1,3 +1,4 @@
+import { requestSearchLocationPermission } from './src/lib/locationPermission';
 import ConsentHost from './src/components/ConsentHost';
 import { API_BASE } from "./src/config/api";
 import { useMedicalStream } from "./src/hooks/useMedicalStream";
@@ -2691,7 +2692,7 @@ export default function App() {
     status: t('settings.status'),
     cancelMembership: t('settings.cancelMembership'),
     restartMembership: t('settings.restartMembership'),
-    cancelMembershipConfirm: t('settings.cancelMembershipConfirm'),
+    cancelMembershipConfirm: t('settings.cancelMembershipConfirm', { date: (subscriptionStatus?.currentPeriodEnd || subscriptionStatus?.current_period_end) ? new Date(subscriptionStatus.currentPeriodEnd || subscriptionStatus.current_period_end).toLocaleDateString() : (lang === 'es' ? 'fin del período pagado' : 'end of the paid period') }),
     restartMembershipConfirm: t('settings.restartMembershipConfirm'),
     confirmCancel: t('settings.confirmCancel'),
     confirmRestart: t('settings.confirmRestart'),
@@ -3099,7 +3100,8 @@ export default function App() {
     noKnownInteractions: t('ai.noKnownInteractions'),
     foundInteractions: t('ai.foundInteractions'),
     severity: t('ai.severity'),
-    urgency: t('ai.urgency'),    recommendations: t('ai.recommendations'),
+    urgency: t('ai.urgency'),
+    recommendations: t('ai.recommendations'),
     followUpActions: t('ai.followUpActions'),
     store: t('ai.store'),
     delete: t('ai.delete'),
@@ -3122,7 +3124,8 @@ export default function App() {
     sprainBruise: t('ai.sprainBruise'),
     skinIrritation: t('ai.skinIrritation'),
     viralSyndrome: t('ai.viralSyndrome'),
-    stomachUpset: t('ai.stomachUpset'),    low: t('ai.low'),
+    stomachUpset: t('ai.stomachUpset'),
+    low: t('ai.low'),
     medium: t('ai.medium'),
     high: t('ai.high'),
     emergency: t('ai.emergency'),
@@ -3187,7 +3190,8 @@ export default function App() {
     monitorUnusualSymptoms: t('ai.monitorUnusualSymptoms'),
     drugInteractionDatabase: t('ai.drugInteractionDatabase'),
     severity: t('ai.severity'),
-    urgency: t('ai.urgency'),    recommendations: t('ai.recommendations'),
+    urgency: t('ai.urgency'),
+    recommendations: t('ai.recommendations'),
     fastingCompatible: t('ai.fastingCompatible'),
     fastingWarning: t('ai.fastingWarning'),
     diabetesRequiresSupervision: t('ai.diabetesRequiresSupervision'),
@@ -3600,7 +3604,7 @@ useEffect(() => {
   const loadLocationData = async () => {
     try {
       // Request location permission
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await requestSearchLocationPermission();
       if (status !== 'granted') {
         console.log('📍 Location permission denied - skipping auto-load');
         return;
@@ -3737,7 +3741,7 @@ useEffect(() => {
 
   // Only load if user is authenticated and not on auth screen
   if (!showAuth && user) {
-    loadLocationData();
+    // Location is requested only by an explicit foreground search.
   }
 }, [showAuth, user, lang]); // Dependencies: reload when auth state or language changes
 
@@ -4717,7 +4721,7 @@ const handleAskMedicalAI = async () => {
   // --------- Pharmacies ----------
   async function openPharmaciesNearMe() {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await requestSearchLocationPermission();
       if (status !== 'granted') return Alert.alert('Location denied', 'Enable location to search nearby pharmacies.');
       const { coords } = await Location.getCurrentPositionAsync({});
       const q = encodeURIComponent('pharmacy');
@@ -4870,7 +4874,7 @@ const handleAskMedicalAI = async () => {
                 opacity: 0.8,
                 lineHeight: 22
               }}>
-                {S.cancelMembershipConfirm || 'Are you sure you want to cancel your membership? This action cannot be undone.'}
+                {S.cancelMembershipConfirm || 'Cancel membership. You keep Pro until the end of the paid period. No more charges. You can resubscribe anytime.'}
               </DynamicText>
               
               <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -5263,7 +5267,7 @@ const handleAskMedicalAI = async () => {
         setPharmaciesLoading(true);
         setPharmaciesError(null);
         
-        const { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await requestSearchLocationPermission();
         if (status !== 'granted') {
           setPharmaciesError('Location permission denied. Please enable location services.');
           return;
@@ -5505,7 +5509,7 @@ const handleAskMedicalAI = async () => {
         setLabsLoading(true);
         setLabsError(null);
         
-        const { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await requestSearchLocationPermission();
         if (status !== 'granted') {
           setLabsError('Location permission denied. Please enable location services.');
           return;
@@ -6152,7 +6156,7 @@ const handleAskMedicalAI = async () => {
           </View>
         </CollapsibleSection>
         
-        <TouchableOpacity onPress={() => setPrivacyOpen(true)} style={{ padding: 16 }}><Text style={{ color: theme.text }}>{lang === 'es' ? 'Privacidad' : 'Privacy'}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => setPrivacyOpen(true)} style={{ padding: 16 }}><Text style={{ color: theme.text }}>{lang === 'es' ? 'Aviso de Privacidad / Datos de Salud' : 'Privacy Notice / Consumer Health Data Privacy Policy'}</Text></TouchableOpacity>
         <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 

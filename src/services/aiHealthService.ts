@@ -89,7 +89,7 @@ class AIHealthService {
       severity: 'major',
       description: 'Increased risk of bleeding when taken together',
       clinicalEffects: ['Increased bleeding risk', 'Prolonged bleeding time', 'Bruising'],
-      management: 'Monitor INR closely, consider alternative pain relief',
+      management: "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
       references: ['Drug Interaction Database', 'Clinical Pharmacology']
     },
     {
@@ -99,7 +99,7 @@ class AIHealthService {
       severity: 'major',
       description: 'Risk of lactic acidosis with contrast media',
       clinicalEffects: ['Lactic acidosis', 'Kidney damage', 'Metabolic acidosis'],
-      management: 'Discontinue metformin 48 hours before and after contrast',
+      management: "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
       references: ['Radiology Guidelines', 'Diabetes Management']
     },
     {
@@ -109,7 +109,7 @@ class AIHealthService {
       severity: 'moderate',
       description: 'Grapefruit juice increases statin levels',
       clinicalEffects: ['Increased statin levels', 'Muscle pain', 'Liver toxicity'],
-      management: 'Avoid grapefruit juice or reduce statin dose',
+      management: "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
       references: ['Food-Drug Interactions', 'Cardiology Guidelines']
     }
   ];

@@ -57,6 +57,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
     <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#161616', padding: 24, paddingTop: 60 }}>
       <Text style={{ color: '#D4AF37', fontSize: 22 }}>{es ? 'Privacidad' : 'Privacy'}</Text>
       {document ? <><Text style={{ color: '#fff' }}>{document}</Text><Button title={es ? 'Volver' : 'Back'} onPress={() => setDocument('')} /></> : <>
+        <Button title={es ? "Aviso de Privacidad / Política de Datos de Salud" : "Privacy Notice / Consumer Health Data Privacy Policy"} onPress={async () => setDocument(await loadPrivacyText(language))} />
         <ConsentChoices language={language} value={choices} onChange={setChoices} openLegal={async type => {
           try { setDocument(await (type === 'terms' ? loadTermsText(language) : loadPrivacyText(language))); }
           catch { setError(es ? 'No se pudo abrir el documento.' : 'Could not open document.'); }

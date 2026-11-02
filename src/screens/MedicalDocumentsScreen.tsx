@@ -3734,7 +3734,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           </Animated.View>
 
           {/* Document Categories */}
-          {Object.keys(DOCUMENT_CATEGORIES).map(category => 
+          {Object.keys(DOCUMENT_CATEGORIES).filter(category => !['photo_id', 'birth_certificate', 'insurance'].includes(category)).map(category => 
             renderCategoryCard(category as DocumentCategory)
           )}
         </ScrollView>

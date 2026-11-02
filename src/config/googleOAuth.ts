@@ -1,3 +1,4 @@
+// OAuth client IDs come from app config for the selected build profile.
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
@@ -27,20 +28,20 @@ function readEnv(name: string): string | undefined {
 }
 
 export const googleAuthConfig = {
-  webClientId: readEnv('EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID') ?? googleExtra.webClientId,
-  iosClientId: readEnv('EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID') ?? googleExtra.iosClientId,
-  androidClientId: readEnv('EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID') ?? googleExtra.androidClientId,
-  expoClientId: readEnv('EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID') ?? googleExtra.expoClientId,
+  webClientId: googleExtra.webClientId,
+  iosClientId: googleExtra.iosClientId,
+  androidClientId: googleExtra.androidClientId,
+  expoClientId: googleExtra.expoClientId,
   redirectScheme: readEnv('EXPO_PUBLIC_GOOGLE_REDIRECT_SCHEME') ?? googleExtra.redirectScheme ?? 'auricrx-medcoach',
   redirectPath: readEnv('EXPO_PUBLIC_GOOGLE_REDIRECT_PATH') ?? googleExtra.redirectPath ?? 'auth',
 } as const;
 
 export function getGoogleClientIdForPlatform(platform: string = Platform.OS): string | undefined {
   if (platform === 'ios') {
-    return googleAuthConfig.iosClientId ?? googleAuthConfig.webClientId ?? googleAuthConfig.expoClientId;
+    return googleAuthConfig.iosClientId;
   }
   if (platform === 'android') {
-    return googleAuthConfig.androidClientId ?? googleAuthConfig.webClientId ?? googleAuthConfig.expoClientId;
+    return googleAuthConfig.androidClientId;
   }
   return (
     googleAuthConfig.webClientId ??

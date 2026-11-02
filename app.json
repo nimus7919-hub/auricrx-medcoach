@@ -11,7 +11,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-    "scheme": ["auricrx-medcoach", "com.auricrx.medcoach"],
+    "scheme": [
+      "auricrx-medcoach",
+      "com.auricrx.medcoach"
+    ],
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -26,7 +29,13 @@
         "backgroundColor": "#000000"
       },
       "package": "com.auricrx.medcoach",
-      "googleServicesFile": "./android/app/google-services.json"
+      "googleServicesFile": "./android/app/google-services.json",
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.DUMP",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

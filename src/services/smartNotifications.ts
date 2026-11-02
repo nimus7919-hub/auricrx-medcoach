@@ -80,13 +80,7 @@ class SmartNotificationService {
         console.warn('⚠️ Permission request failed, continuing without permissions:', error);
       }
       
-      // Start location tracking (don't fail if this doesn't work)
-      try {
-        await this.startLocationTracking();
-      } catch (error) {
-        console.warn('⚠️ Location tracking failed, continuing without location:', error);
-      }
-      
+      // Proximity tracking disabled; location is only requested for foreground search.
       // Start weather monitoring (don't fail if this doesn't work)
       try {
         await this.startWeatherMonitoring();
@@ -103,12 +97,6 @@ class SmartNotificationService {
 
   private async requestPermissions() {
     try {
-      // Request location permissions
-      const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
-      if (locationStatus !== 'granted') {
-        console.warn('Location permission not granted');
-      }
-
       // Request notification permissions
       if (Notifications) {
         const { status: notificationStatus } = await Notifications.requestPermissionsAsync();
@@ -163,86 +151,9 @@ class SmartNotificationService {
     }
   }
 
-  private async startLocationTracking() {
-    try {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-
-      // Get initial location
-      const location = await Location.getCurrentPositionAsync({});
-      this.currentLocation = {
-        lat: location.coords.latitude,
-        lon: location.coords.longitude
-      };
-
-      // Start watching location changes
-      this.isLocationTracking = true;
-      this.watchLocation();
-      
-      console.log('📍 Location tracking started');
-    } catch (error) {
-      console.error('Failed to start location tracking:', error);
-    }
-  }
-
-  private async watchLocation() {
-    if (!this.isLocationTracking) return;
-
-    try {
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced
-      });
-
-      this.currentLocation = {
-        lat: location.coords.latitude,
-        lon: location.coords.longitude
-      };
-
-      // Check location-based reminders
-      await this.checkLocationReminders();
-
-      // Continue watching
-      setTimeout(() => this.watchLocation(), 30000); // Check every 30 seconds
-    } catch (error) {
-      console.error('Location watch error:', error);
-      // Retry after delay
-      setTimeout(() => this.watchLocation(), 60000);
-    }
-  }
-
-  private async checkLocationReminders() {
-    if (!this.currentLocation) return;
-
-    for (const reminder of this.locationReminders) {
-      if (!reminder.enabled) continue;
-
-      const distance = this.calculateDistance(
-        this.currentLocation.lat,
-        this.currentLocation.lon,
-        reminder.latitude,
-        reminder.longitude
-      );
-
-      if (distance <= reminder.radius) {
-        // User is near the location, send reminder
-        await this.sendNotification({
-          title: `📍 Near ${reminder.name}`,
-          message: reminder.message,
-          data: { type: 'location_reminder', reminderId: reminder.id }
-        });
-
-        // Disable reminder temporarily to avoid spam
-        reminder.enabled = false;
-        await this.saveData();
-        
-        // Re-enable after 1 hour
-        setTimeout(() => {
-          reminder.enabled = true;
-          this.saveData();
-        }, 3600000);
-      }
-    }
-  }
+  private async startLocationTracking() {}
+  private async watchLocation() {}
+  private async checkLocationReminders() {}
 
   private async startWeatherMonitoring() {
     try {
@@ -373,15 +284,8 @@ class SmartNotificationService {
 
   // Public methods for managing notifications
 
-  async addLocationReminder(reminder: Omit<LocationReminder, 'id'>) {
-    const newReminder: LocationReminder = {
-      ...reminder,
-      id: `loc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    };
-
-    this.locationReminders.push(newReminder);
-    await this.saveData();
-    return newReminder;
+  async addLocationReminder(reminder: Omit<LocationReminder, 'id'>): Promise<LocationReminder> {
+    throw new Error('Proximity reminders are unavailable. / Los recordatorios por proximidad no están disponibles.');
   }
 
   async deleteLocationReminder(id: string) {

@@ -1,7 +1,8 @@
+import { requestSearchLocationPermission } from './locationPermission';
 import * as Location from "expo-location";
 
 export async function getUserLocation(): Promise<{lat:number; lng:number} | null> {
-  const { status } = await Location.requestForegroundPermissionsAsync();
+  const { status } = await requestSearchLocationPermission();
   if (status !== "granted") return null;
   const pos = await Location.getCurrentPositionAsync({});
   return { lat: pos.coords.latitude, lng: pos.coords.longitude };

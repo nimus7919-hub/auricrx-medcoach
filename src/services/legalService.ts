@@ -8,10 +8,10 @@ const PRIVACY_ANCHOR = '\n# AURICRX MEDCOACH — PRIVACY POLICY';
 const LEGAL_TEXTS: Record<string, string> = {
   en: legalTexts.termsEN,
   es: legalTexts.termsES,
-  pt: legalTexts.termsPT,
-  fr: legalTexts.termsFR,
-  de: legalTexts.termsDE,
-  zh: legalTexts.termsZH,
+  pt: legalTexts.termsEN,
+  fr: legalTexts.termsEN,
+  de: legalTexts.termsEN,
+  zh: legalTexts.termsEN,
 };
 
 function loadLegalFile(language: string): string {

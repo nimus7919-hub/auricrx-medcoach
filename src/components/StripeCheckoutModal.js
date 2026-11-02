@@ -15,6 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';
 import { auth } from '../config/firebase';
+import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'https://auricrx-medcoach.onrender.com';
@@ -39,10 +40,14 @@ async function getAuthToken() {
 
 export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess, country = 'US' }) {
   const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+  const { i18n } = useTranslation();
+  const es = i18n.language.startsWith('es');
+  // TODO(OWNER-DECISION): Confirm MXN 50 vs 79. Native billing integration is pending.
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const openCheckoutInBrowser = useCallback(async () => {
+    if (Platform.OS !== 'web') return;
     try {
       console.log('🔍 Opening checkout in browser for country:', country);
       setLoading(true);
@@ -60,7 +65,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ country }),
+        body: JSON.stringify({ country, platform: Platform.OS }),
       });
 
       const data = await response.json();
@@ -98,12 +103,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
     }
   }, [country, onClose, onSuccess]);
 
-  useEffect(() => {
-    if (visible) {
-      console.log('🔍 Modal opened, opening checkout...');
-      openCheckoutInBrowser();
-    }
-  }, [visible, openCheckoutInBrowser]);
+
 
 
   return (
@@ -124,7 +124,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: getCardBorderColor() }]}>
             <DynamicText type="primary" style={styles.title}>
-              Upgrade to Pro
+              {es ? 'Mejorar a Pro' : 'Upgrade to Pro'}
             </DynamicText>
             <TouchableOpacity
               onPress={onClose}
@@ -134,6 +134,10 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
             </TouchableOpacity>
           </View>
 
+          <DynamicText type="primary" style={{ padding: 20 }}>
+            {es ? 'Pro: MXN $50 al mes, IVA incluido. Se renueva automáticamente cada mes. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes.' : "Pro: MXN $50 per month, VAT included. Renews automatically each month. We'll remind you 5 days before each charge. Cancel anytime in Settings."}
+          </DynamicText>
+          {Platform.OS !== 'web' ? <DynamicText type="secondary" style={{ padding: 20 }}>{es ? 'Las compras móviles están temporalmente deshabilitadas mientras integramos la facturación de la tienda.' : 'Mobile purchases are temporarily unavailable while store billing is integrated.'}</DynamicText> : <TouchableOpacity onPress={openCheckoutInBrowser} disabled={loading}><DynamicText type="primary" style={{ padding: 20 }}>{es ? 'Continuar al pago' : 'Continue to checkout'}</DynamicText></TouchableOpacity>}
           {/* Content */}
           {loading && (
             <View style={styles.loadingContainer}>

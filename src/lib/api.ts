@@ -2,6 +2,8 @@ const API = "https://sanpablo-proxy.onrender.com";
 
 /** San Pablo price search */
 export async function searchPrices(q: string, pageSize = 10, page = 0) {
+  // Paused until written permission or an official feed is available.
+  return { query: q, page, pageSize, totalResults: 0, items: [] };
   const url = new URL("/api/sanpablo/search", API);
   url.searchParams.set("q", q);
   url.searchParams.set("pageSize", String(pageSize));
