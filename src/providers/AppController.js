@@ -2104,7 +2104,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     console.log('User data prepared for tool calling:', userData);
   } catch (error) {
     console.log('Error preparing user data:', error);
-    setAiMessages(m => [...m, { role: 'assistant', text: S.errorPreparingData || uiI18n.t("ai.errorPreparingData") }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: uiI18n.t("ai.unavailable") }]);
     setAiSending(false);
     return;
   }
@@ -2115,7 +2115,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   console.log('API Base URL:', `${API_BASE}`);
   
   // Add immediate response
-  setAiMessages(m => [...m, { role: 'assistant', text: S.aiThinking || uiI18n.t("ai.aiThinking") }]);
+  setAiMessages(m => [...m, { role: 'assistant', text: uiI18n.t("ai.thinking"), pending: true }]);
   
   try {
     console.log('Sending question with user data for tool calling...');
@@ -2133,26 +2133,18 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       })
     });
     
-    if (!response.ok) throw new Error(uiI18n.t("ui.apiReturnedValue", { value1: response.status }));
+    if (!response.ok) throw new Error('AI_UNAVAILABLE');
     
     const data = await response.json();
     console.log('Backend response:', data);
-    const reply = data.reply || uiI18n.t("ui.noResponseReceived");
+    if (data.error || data.ok === false || typeof data.reply !== 'string' || !data.reply.trim()) throw new Error('AI_UNAVAILABLE');
+    const reply = data.reply;
     console.log('Got response with tool calling:', reply);
     
-      setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
+      setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
     } catch (err) {
-    console.log('API Error:', err);
-    // Provide a helpful response even if AI is down
-    let fallbackResponse = uiI18n.t("ui.apiErrorValue", { value1: err.message });
-    if (q.toLowerCase().includes('aspirin')) {
-      fallbackResponse += uiI18n.t("ui.howeverICanTellYouThatAspirinIsACommonOverTheCounterMedicationUsedToReducePainFeverAndInfl");
-    } else if (q.toLowerCase().includes('aspirina')) {
-      fallbackResponse += 'Aspirina es un medicamento común de venta libre usado para reducir el dolor, la fiebre y la inflamación. También se usa en dosis bajas para ayudar a prevenir ataques cardíacos y accidentes cerebrovasculares. Consulte con un proveedor de atención médica para obtener asesoramiento médico.';
-    } else {
-      fallbackResponse += uiI18n.t("ui.pleaseTryAgainInAMomentOrConsultWithAHealthcareProviderForImmediateMedicalQuestions");
-    }
-    setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(fallbackResponse, selectedAIDoctor, lang) }]);
+    console.log('Alfred request unavailable');
+    setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: uiI18n.t("ai.unavailable") }]);
   } finally {
     setAiSending(false);
   }
@@ -2934,7 +2926,7 @@ const handleAskMedicalAI = async () => {
               ]}
             >
               <TypingEffect 
-                text={S.aiThinking || uiI18n.t("ai.aiThinking")}
+                text={uiI18n.t("ai.thinking")}
                 speed={100}
                 style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontStyle: 'italic' }}
                 showCursor={true}
@@ -2995,7 +2987,7 @@ const handleAskMedicalAI = async () => {
             disabled={aiSending || streamLoading}
           >
             <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
-              {streamLoading ? '...' : uiI18n.t("common.send")}
+              {streamLoading ? '...' : uiI18n.t("ai.send")}
             </Text>
         </PremiumButton>
         {streamLoading ? (
@@ -3006,8 +2998,7 @@ const handleAskMedicalAI = async () => {
         </View>
       </View>
 
-      <Text style={{ color: theme.sub, fontSize: 12, marginTop: 4, textAlign: 'center', fontFamily: 'Inter_400Regular' }}>
-        {S.tapToTalk}{uiI18n.t("ai.voiceNote")}</Text>
+
     </View>
   </View></KeyboardForm>
     </Modal>

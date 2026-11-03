@@ -891,7 +891,7 @@ app.post('/test-tools', async (req, res) => {
 });
 
 app.post('/ask', async (req, res) => {
-  console.log('POST /ask', req.body);
+  console.log('POST /ask');
   
   try {
     const schema = z.object({ 
@@ -987,17 +987,15 @@ app.post('/ask', async (req, res) => {
     
     // If we exit the loop without a response
     console.log('Tool calling loop exceeded max iterations');
-    res.json({ ok: true, reply: "I'm having trouble processing your request. Please try again." });
+    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'Alfred is unavailable right now. Please try again later.' });
     
   } catch (err) {
-    console.error('Error in /ask endpoint:', err);
-    console.error('Error stack:', err.stack);
-    console.error('Error details:', {
-      name: err.name,
-      message: err.message,
-      code: err.code
-    });
-    res.status(500).json({ ok: false, error: 'server_error', message: err.message });
+    // Keep provider messages, headers and credentials out of logs and responses.
+    const status = Number.isInteger(err?.status) && err.status >= 100 && err.status <= 599 ? err.status : null;
+    const providerCode = err?.code || err?.error?.code || err?.type;
+    const code = ['insufficient_quota', 'rate_limit_exceeded', 'rate_limit', 'server_error', 'invalid_api_key'].includes(providerCode) ? providerCode : 'provider_failure';
+    console.error('Alfred request failed', { status, code });
+    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'Alfred is unavailable right now. Please try again later.' });
   }
 });
 

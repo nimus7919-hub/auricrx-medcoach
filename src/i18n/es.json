@@ -40,6 +40,9 @@
     "aiHealth": "Salud IA"
   },
   "ai": {
+    "unavailable": "Alfred no esta disponible en este momento. Intenta mas tarde.",
+    "thinking": "IA está pensando...",
+    "send": "Enviar",
     "consultant": "Consultor IA",
     "askAI": "Preguntar a IA",
     "tapToTalk": "Toca para hablar",

@@ -40,6 +40,9 @@
     "aiHealth": "AI Health"
   },
   "ai": {
+    "unavailable": "Alfred is unavailable right now. Please try again later.",
+    "thinking": "AI is thinking...",
+    "send": "Send",
     "consultant": "AI Consultant",
     "askAI": "Ask AI",
     "tapToTalk": "Tap to speak",
