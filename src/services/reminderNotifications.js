@@ -2,6 +2,7 @@ import uiI18n from "../i18n";
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { parseReminderTime } from '../utils/reminderTime';
+import { normalizeReminderDates, parseReminderDate, nextReminderOccurrence } from '../utils/reminderDate';
 
 // A new ID avoids inheriting the old immutable, low-importance Android channel.
 export const REMINDER_CHANNEL = 'medication-reminders-v2';
@@ -48,20 +49,38 @@ function triggersFor(reminder) {
   const { hour, minute } = parseReminderTime(reminder.time);
   const base = { hour, minute, channelId: REMINDER_CHANNEL };
   const types = Notifications.SchedulableTriggerInputTypes;
-  const anchor = reminder.startDate ? new Date(reminder.startDate) : new Date();
-  if (Number.isNaN(anchor.getTime())) throw new Error(uiI18n.t("ui.invalidReminderStartDate"));
+  const now = new Date();
+  const dates = normalizeReminderDates(reminder, now, uiI18n.language);
+  const anchor = parseReminderDate(dates.startDate);
+  const end = dates.endDate ? parseReminderDate(dates.endDate) : null;
+  if (end) end.setHours(23, 59, 59, 999);
+  let recurring;
+  let selected = [];
   switch (reminder.frequency || 'daily') {
-    case 'daily': return [{ ...base, type: types.DAILY }];
-    case 'weekly': return [{ ...base, type: types.WEEKLY, weekday: anchor.getDay() + 1 }];
-    case 'monthly': return [{ ...base, type: types.MONTHLY, day: anchor.getDate() }];
+    case 'daily': recurring = [{ ...base, type: types.DAILY }]; break;
+    case 'weekly': recurring = [{ ...base, type: types.WEEKLY, weekday: anchor.getDay() + 1 }]; break;
+    case 'monthly': recurring = [{ ...base, type: types.MONTHLY, day: anchor.getDate() }]; break;
     case 'custom': {
       const days = [uiI18n.t("reminders.sunday"), uiI18n.t("reminders.monday"), uiI18n.t("reminders.tuesday"), uiI18n.t("reminders.wednesday"), uiI18n.t("reminders.thursday"), uiI18n.t("reminders.friday"), uiI18n.t("reminders.saturday")];
-      const selected = (reminder.customDays || []).map(day => days.indexOf(day) + 1);
+      selected = (reminder.customDays || []).map(day => days.indexOf(day) + 1);
       if (!selected.length || selected.some(day => day < 1)) throw new Error(uiI18n.t("ui.seleccionaLosDiasSelectReminderDays"));
-      return selected.map(weekday => ({ ...base, type: types.WEEKLY, weekday }));
+      recurring = selected.map(weekday => ({ ...base, type: types.WEEKLY, weekday })); break;
     }
     default: throw new Error(uiI18n.t("ui.unsupportedReminderFrequency"));
   }
+  const frequency = reminder.frequency || 'daily';
+  const next = nextReminderOccurrence(anchor, hour, minute, frequency, selected, now);
+  // Native repeating triggers cannot express a future start or an end date.
+  // Reconciliation replenishes this bounded queue when the app becomes active.
+  const today = parseReminderDate('', now);
+  if (!end && anchor <= today) return recurring;
+  const triggers = [];
+  let occurrence = next;
+  while (triggers.length < 32 && (!end || occurrence <= end)) {
+    triggers.push({ type: types.DATE, date: occurrence, channelId: REMINDER_CHANNEL });
+    occurrence = nextReminderOccurrence(anchor, hour, minute, frequency, selected, occurrence);
+  }
+  return triggers;
 }
 async function upsert(reminder, existing) {
   const triggers = triggersFor(reminder);

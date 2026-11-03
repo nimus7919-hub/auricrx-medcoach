@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { saveReminderNotification, testReminderNotification } from '../src/services/reminderNotifications';
 import { parseReminderTime } from '../src/utils/reminderTime';
+import { formatReminderDate, normalizeReminderDates } from '../src/utils/reminderDate';
 import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
@@ -121,7 +122,7 @@ const Reminders = ({
   const onDatePick = (_, date) => {
     setShowDatePicker(false);
     if (date) {
-      const formattedDate = date.toLocaleDateString();
+      const formattedDate = formatReminderDate(date);
       setAddForm(prev => ({ ...prev, [dateField]: formattedDate }));
     }
   };
@@ -236,7 +237,7 @@ const Reminders = ({
           isSingleComponent: reminderData.isSingleComponent !== undefined ? reminderData.isSingleComponent : true,
           times: [reminderData.time],
           status: 'taking',
-          startDate: reminderData.startDate || new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0],
+          startDate: reminderData.startDate || formatReminderDate(new Date()),
           endDate: reminderData.endDate || '',
           notes: reminderData.notes || '',
           // Add reminder reference
@@ -268,7 +269,7 @@ const Reminders = ({
           quantityUnit: reminderData.quantityUnit || 'capsules',
           times: [reminderData.time],
           status: 'taking',
-          startDate: reminderData.startDate || new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0],
+          startDate: reminderData.startDate || formatReminderDate(new Date()),
           endDate: reminderData.endDate || '',
           notes: reminderData.notes || '',
           dosesLeft: '',
@@ -1300,8 +1301,7 @@ const Reminders = ({
                       frequency: addForm.frequency,
                       customDays: addForm.customDays,
                       priority: addForm.priority,
-                      startDate: addForm.startDate,
-                      endDate: addForm.endDate,
+                      ...normalizeReminderDates(addForm, new Date(), i18n.language),
                       notes: addForm.notes,
                       // Include type-specific fields
                       ...(addForm.type === 'medication' && {
