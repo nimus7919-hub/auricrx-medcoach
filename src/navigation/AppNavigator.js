@@ -17,7 +17,6 @@ import WallpaperSettingsScreen from "./../screens/WallpaperSettingsScreen";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
   return () => {
-  useUILanguage();
   const { route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings } = getScope();
   return (route === 'dashboard' ? <Dashboard /> :
      route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
