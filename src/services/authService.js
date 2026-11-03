@@ -195,6 +195,8 @@ class AuthService {
         if (Platform.OS === 'android') {
           await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
         }
+        // Clear the cached Google account so the account picker shows every time
+        try { await GoogleSignin.signOut(); } catch (e) {}
         const response = await GoogleSignin.signIn();
         if (response.type === 'cancelled') {
           return { success: false, error: 'Google Sign-In was cancelled.' };
