@@ -2306,6 +2306,83 @@ app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
 const { hash, normalizeEmail, normalizePhone, verifyToken } = require('./auth-utils');
 const { neonClient } = require('./neon');
 
+// Reuse the Excel-derived catalog used by the app's pharmacy search.
+const normalizeMedName = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
+const medicationCatalog = new Map();
+for (const row of require('../assets/medicationData.json')) {
+  const name = String(row.Medicinas || row.medicinas || '').trim();
+  if (name && !medicationCatalog.has(normalizeMedName(name))) {
+    // This catalog has no structured active-ingredient field. Do not infer ingredients.
+    medicationCatalog.set(normalizeMedName(name), { name, components: [] });
+  }
+}
+let medsTableReady;
+function ensureMedsTable() {
+  if (!medsTableReady) {
+    medsTableReady = neonClient`CREATE TABLE IF NOT EXISTS user_added_meds (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      name TEXT NOT NULL, normalized_name TEXT NOT NULL UNIQUE,
+      components JSONB NOT NULL DEFAULT '[]'::jsonb,
+      user_id TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`.catch(error => { medsTableReady = null; throw error; });
+  }
+  return medsTableReady;
+}
+ensureMedsTable().catch(() => console.error('[meds] table initialization failed'));
+
+app.get('/api/meds/search', async (req, res) => {
+  const q = typeof req.query.q === 'string' ? normalizeMedName(req.query.q) : '';
+  if (q.length < 2) return res.json([]);
+  if (q.length > 200) return res.status(400).json({ error: 'INVALID_QUERY' });
+  const matches = new Map();
+  for (const [key, med] of medicationCatalog) {
+    if (key.includes(q)) matches.set(key, med);
+    if (matches.size === 15) break;
+  }
+  try {
+    await ensureMedsTable();
+    const rows = await neonClient`SELECT name, components FROM user_added_meds
+      WHERE strpos(normalized_name, ${q}) > 0 ORDER BY normalized_name LIMIT 15`;
+    for (const med of rows) matches.set(normalizeMedName(med.name), med);
+  } catch {
+    // The bundled catalog remains searchable during a database outage.
+    if (!matches.size) return res.status(503).json({ error: 'MEDS_UNAVAILABLE' });
+  }
+  return res.json([...matches.values()].sort((a, b) =>
+    Number(!normalizeMedName(a.name).startsWith(q)) - Number(!normalizeMedName(b.name).startsWith(q)) ||
+    a.name.localeCompare(b.name)).slice(0, 15));
+});
+
+app.post('/api/meds', async (req, res) => {
+  let decoded;
+  try {
+    const token = /^Bearer (.+)$/i.exec(req.headers.authorization || '')?.[1];
+    decoded = await verifyToken(token);
+    if (!decoded?.uid) throw new Error('Invalid identity');
+  } catch { return res.status(401).json({ error: 'INVALID_TOKEN' }); }
+  const { name, components } = req.body || {};
+  if (typeof name !== 'string' || !name.trim() || name.length > 200 ||
+      !Array.isArray(components) || components.length > 30 || components.some(c =>
+        !c || typeof c !== 'object' || Array.isArray(c) ||
+        Object.keys(c).some(k => !['name', 'strength', 'unit'].includes(k)) ||
+        Object.values(c).some(v => typeof v !== 'string' || v.length > 200))) {
+    return res.status(400).json({ error: 'INVALID_MEDICATION' });
+  }
+  const normalized = normalizeMedName(name);
+  const existing = medicationCatalog.get(normalized);
+  if (existing) return res.json(existing);
+  try {
+    await ensureMedsTable();
+    const rows = await neonClient`INSERT INTO user_added_meds (name, normalized_name, components, user_id)
+      VALUES (${name.trim()}, ${normalized}, ${JSON.stringify(components)}::jsonb, ${decoded.uid})
+      ON CONFLICT (normalized_name) DO NOTHING RETURNING name, components`;
+    if (rows.length) return res.status(201).json(rows[0]);
+    const found = await neonClient`SELECT name, components FROM user_added_meds WHERE normalized_name = ${normalized}`;
+    return res.json(found[0]);
+  } catch { return res.status(503).json({ error: 'MED_NOT_SAVED' }); }
+});
+
+
 // Trial eligibility endpoint
 app.post('/api/trial/eligibility', async (req, res) => {
   try {

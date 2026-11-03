@@ -1170,5 +1170,11 @@
     "month": "MXN $79 al mes",
     "year": "MXN $699 al año",
     "disclosure": "IVA incluido. Se renueva automáticamente por el período elegido. Te avisaremos 5 días antes de cada cobro. Cancela cuando quieras en Ajustes."
-  }
+  },
+  "medicationAutocomplete": {
+  "loading": "Buscando...",
+  "empty": "Sin coincidencias. Puedes ingresar un medicamento nuevo.",
+  "unavailable": "Búsqueda no disponible. Puedes ingresar el medicamento.",
+  "ingredient": "Principio activo"
+}
 }

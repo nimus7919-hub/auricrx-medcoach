@@ -1,3 +1,5 @@
+import MedicationAutocomplete from './MedicationAutocomplete';
+import { contributeMedication } from '../src/services/medicationCatalog';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Linking, Alert, TextInput, ScrollView } from "react-native";
 import * as Location from "expo-location";
@@ -27,6 +29,7 @@ interface Props {
 }
 
 export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry, onRefillComplete, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }: Props) {
+  const catalogSelection = useRef<{ name: string; components: any[] } | null>(null);
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
   const [placements, setPlacements] = useState<Array<{ id: string; title: string; chain: string }>>([]);
@@ -181,6 +184,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   // Price contribution functions
   const openContributionModal = (pharmacy: StorePrice) => {
     setSelectedPharmacy(pharmacy);
+    catalogSelection.current = null;
     setContributionData({
       medicationName: medication.name || '',
       strength: medication.dosage || '',
@@ -204,6 +208,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     }
 
     try {
+    contributeMedication(contributionData.medicationName, catalogSelection.current?.components || [], catalogSelection.current?.name);
       // Add contribution to data collector (sends to server)
       const contribution = await medicationDataCollector.addContribution({
         ...contributionData,
@@ -223,7 +228,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             onPress: () => {
               setShowContributionModal(false);
               setSelectedPharmacy(null);
-              setContributionData({
+              catalogSelection.current = null;
+    setContributionData({
                 medicationName: '',
                 strength: '',
                 price: '',
@@ -248,6 +254,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   const closeContributionModal = () => {
     setShowContributionModal(false);
     setSelectedPharmacy(null);
+    catalogSelection.current = null;
     setContributionData({
       medicationName: '',
       strength: '',
@@ -657,7 +664,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
                     {strings.medicationName || 'Medication Name'} *
                   </Text>
-                  <TextInput
+                  <MedicationAutocomplete
+                    onSelect={(med: any) => { catalogSelection.current = med; setContributionData(prev => ({ ...prev, medicationName: med.name, strength: med.components.map((c: any) => `${c.strength || ''}${c.unit || ''}`).join('/') })); }}
                     style={{
                       backgroundColor: colors.muted,
                       borderRadius: radius.md,
@@ -666,10 +674,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                       fontSize: 16
                     }}
                     value={contributionData.medicationName}
-                    onChangeText={(text) => setContributionData(prev => ({ ...prev, medicationName: text }))}
+                    onChangeText={(text: string) => { catalogSelection.current = null; setContributionData(prev => ({ ...prev, medicationName: text })); }}
                     placeholder={strings.medicationNamePlaceholder || 'Enter medication name'}
                     placeholderTextColor={colors.sub}
                   />
+                  {!!catalogSelection.current?.components.length && <Text style={{ color: colors.text, marginTop: 8 }}>
+                    {catalogSelection.current.components.map((c: any) => c.name).filter(Boolean).join(', ')}
+                  </Text>}
                 </View>
 
                 {/* Strength */}

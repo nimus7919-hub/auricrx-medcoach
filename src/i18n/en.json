@@ -1170,5 +1170,11 @@
     "month": "MXN $79 per month",
     "year": "MXN $699 per year",
     "disclosure": "VAT included. Renews automatically for the selected period. We’ll remind you 5 days before each charge. Cancel anytime in Settings."
-  }
+  },
+  "medicationAutocomplete": {
+  "loading": "Searching...",
+  "empty": "No matches. You can enter a new medication.",
+  "unavailable": "Search unavailable. You can still enter a medication.",
+  "ingredient": "Active ingredient"
+}
 }

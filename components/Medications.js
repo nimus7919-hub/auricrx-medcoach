@@ -1,3 +1,6 @@
+import MedicationAutocomplete from './MedicationAutocomplete';
+import { contributeMedication, medicationFields } from '../src/services/medicationCatalog';
+import { useTranslation } from 'react-i18next';
 import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
@@ -17,6 +20,7 @@ import { useTimeFormat } from '../src/hooks/useTimeFormat';
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
+  const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   const { timeFormat } = useTimeFormat();
   
@@ -272,11 +276,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const handleAddMed = async () => {
     try {
       if (!addForm.name.trim()) return;
+      contributeMedication(addForm.name, addForm.components, addForm.selectedMedicationName);
       console.log('[MEDICATIONS DEBUG] Adding medication with quantity:', addForm.quantity);
       
       const newMed = {
         id: `${Date.now()}`,
         name: addForm.name.trim(),
+        components: addForm.components,
         strength: addForm.components ? 
           addForm.components.map(comp => `${comp.strength}${comp.unit}`).join('/') : 
           '500mg',
@@ -380,12 +386,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const handleEditMed = () => {
     try {
       if (!editForm.name?.trim()) return;
+      contributeMedication(editForm.name, editForm.components, editForm.selectedMedicationName);
       console.log('[MEDICATIONS DEBUG] Editing medication with quantity:', editForm.quantityValue, editForm.quantityUnit);
       setMeds(prev => prev.map(med => 
         med.id === editForm.id 
           ? { 
               ...med, 
-              name: editForm.name?.trim() || '', 
+              name: editForm.name?.trim() || '',
+              components: editForm.components, 
               strength: `${(editForm.strengthValue || '').trim()} ${editForm.strengthUnit || ''}`.trim(),
               strengthValue: (editForm.strengthValue || '').trim(),
               strengthUnit: editForm.strengthUnit || 'mg',
@@ -860,12 +868,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   </TouchableOpacity>
                 </View>
 
-                <TextInput
+                <MedicationAutocomplete
+                  onSelect={med => setAddForm(prev => ({ ...prev, ...medicationFields(med), name: med.name }))}
                   ref={addMedNameRef}
                   placeholder={S.medicationName}
                   placeholderTextColor={getSubTextColor()}
                   value={addForm.name}
-                  onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
+                  onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text, selectedMedicationName: null }))}
                   style={{
                     backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
@@ -969,6 +978,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         </DynamicText>
                       </View>
 
+                      <TextInput
+                        placeholder={t('medicationAutocomplete.ingredient')}
+                        value={component.name || ''}
+                        onChangeText={text => updateComponent(index, 'name', text)}
+                        style={{ flex: 1, color: getCardTextColor(), borderColor: theme.accent, borderWidth: 1, borderRadius: 12, padding: 12 }}
+                      />
                       {/* Strength Input */}
                       <TextInput
                         placeholder=""
@@ -1359,11 +1374,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   </TouchableOpacity>
                 </View>
 
-                <TextInput
+                <MedicationAutocomplete
+                  onSelect={med => setEditForm(prev => ({ ...prev, ...medicationFields(med), name: med.name , strengthValue: med.components.map(c => c.strength || '').join('/'), strengthUnit: med.components[0]?.unit || 'Mg' }))}
                   placeholder={S.medicationName}
                   placeholderTextColor={getSubTextColor()}
                   value={editForm.name}
-                  onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text }))}
+                  onChangeText={(text) => setEditForm(prev => ({ ...prev, name: text, selectedMedicationName: null }))}
                   style={{
                     backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
@@ -1379,6 +1395,13 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   returnKeyType="next"
                 />
 
+                {!!editForm.components?.length && <View style={{ marginBottom: 12 }}>
+                  {editForm.components.map((component, index) => <TextInput key={index}
+                    placeholder={t('medicationAutocomplete.ingredient')}
+                    value={component.name || ''}
+                    onChangeText={text => setEditForm(prev => ({ ...prev, components: prev.components.map((c, i) => i === index ? { ...c, name: text } : c) }))}
+                    style={{ color: getCardTextColor(), padding: 12, borderColor: theme.accent, borderWidth: 1, borderRadius: 12 }} />)}
+                </View>}
                 {/* Strength Value and Unit */}
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                   <TextInput
@@ -1778,7 +1801,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
               {S?.selectUnit || 'Select Unit'}
             </DynamicText>
-            <ScrollView>
+            <ScrollView keyboardShouldPersistTaps="handled">
               {strengthUnits.map((unit) => (
                 <TouchableOpacity
                   key={unit}
@@ -1948,7 +1971,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
           shadowOpacity: 0.6,
           shadowRadius: 8,
         }}>
-          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
             {units.map((unit, index) => (
               <TouchableOpacity
                 key={index}
@@ -2017,7 +2040,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
           shadowOpacity: 0.6,
           shadowRadius: 8,
         }}>
-          <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
             {units.map((unit, index) => (
               <TouchableOpacity
                 key={index}

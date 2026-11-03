@@ -1,3 +1,6 @@
+import MedicationAutocomplete from './MedicationAutocomplete';
+import { contributeMedication, medicationFields } from '../src/services/medicationCatalog';
+import { useTranslation } from 'react-i18next';
 import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import React, { useEffect, useRef, useState } from 'react';
@@ -27,6 +30,7 @@ const Reminders = ({
 }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
+  const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const { timeFormat } = useTimeFormat();
   useEffect(() => {
@@ -198,6 +202,7 @@ const Reminders = ({
         const medicationData = {
           id: reminderData.id,
           name: reminderData.medicationName || reminderData.name,
+          components: reminderData.components,
           strength: reminderData.components ? 
             reminderData.components.map(comp => `${comp.strength}${comp.unit}`).join('/') : 
             '500mg',
@@ -384,7 +389,7 @@ const Reminders = ({
 
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16 }}>
         {/* Add Reminder Button */}
           <PremiumButton
           onPress={() => setShowAdd(true)}
@@ -527,12 +532,14 @@ const Reminders = ({
                 </View>
 
                 {/* Reminder Name */}
-                <TextInput
+                <MedicationAutocomplete
+                  onSelect={med => setAddForm(prev => ({ ...prev, ...medicationFields(med), name: med.name, medicationName: med.name }))}
+                  enabled={addForm.type === 'medication'}
                   ref={reminderNameRef}
                   placeholder={S.namePlaceholder || "Reminder Name"}
                   placeholderTextColor={getCardTextColor() + '80'}
                   value={addForm.name}
-                  onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text }))}
+                  onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text, selectedMedicationName: null }))}
                   style={{
                     backgroundColor: getCardBackgroundColor(),
                     borderRadius: 12,
@@ -721,11 +728,13 @@ const Reminders = ({
                     </DynamicText>
                     
                     {/* Medication Name */}
-                    <TextInput
+                    <MedicationAutocomplete
+                  onSelect={med => setAddForm(prev => ({ ...prev, ...medicationFields(med), name: med.name, medicationName: med.name }))}
+                  enabled={addForm.type === 'medication'}
                       placeholder={S.medicationNamePlaceholder || "Medication Name (e.g., Galvus Met)"}
                       placeholderTextColor={getCardTextColor() + '80'}
                       value={addForm.medicationName}
-                      onChangeText={(text) => setAddForm(prev => ({ ...prev, medicationName: text }))}
+                      onChangeText={(text) => setAddForm(prev => ({ ...prev, medicationName: text, selectedMedicationName: null }))}
                       style={{
                         backgroundColor: getCardBackgroundColor(),
                         borderRadius: 12,
@@ -819,7 +828,13 @@ const Reminders = ({
                             </DynamicText>
                           </View>
 
-                          {/* Strength Input */}
+                          <TextInput
+                        placeholder={t('medicationAutocomplete.ingredient')}
+                        value={component.name || ''}
+                        onChangeText={text => updateComponent(index, 'name', text)}
+                        style={{ flex: 1, color: getCardTextColor(), borderColor: theme.accent, borderWidth: 1, borderRadius: 12, padding: 12 }}
+                      />
+                      {/* Strength Input */}
                           <TextInput
                             placeholder=""
                             placeholderTextColor={getCardTextColor() + '80'}
@@ -1257,6 +1272,7 @@ const Reminders = ({
                   }}
                   onPress={async () => {
                     if (!addForm.name || !addForm.time) return;
+                    if (addForm.type === 'medication') contributeMedication(addForm.medicationName || addForm.name, addForm.components, addForm.selectedMedicationName);
                     
                     const reminderData = { 
                       id: editingReminderId || `${Date.now()}`,
