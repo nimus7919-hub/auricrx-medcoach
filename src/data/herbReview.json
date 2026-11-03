@@ -1,0 +1,1362 @@
+[
+  {
+    "id": "1",
+    "key": "damiana",
+    "names": {
+      "es": "Damiana",
+      "en": "Damiana",
+      "fr": "Damiana",
+      "de": "Damiana",
+      "pt": "Damiana",
+      "zh": "达米阿纳"
+    },
+    "origin": {
+      "es": "México, suroeste de EE. UU.",
+      "en": "Mexico, Southwestern USA",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥、美国西南部"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "damiana",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "2",
+    "key": "epazote",
+    "names": {
+      "es": "Epazote",
+      "en": "Epazote",
+      "fr": "Epazote",
+      "de": "Epazote",
+      "pt": "Epazote",
+      "zh": "墨西哥豉草"
+    },
+    "origin": {
+      "es": "México y Centroamérica",
+      "en": "Mexico and Central America",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥和中美洲"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "3",
+    "key": "dandelion",
+    "names": {
+      "es": "Diente de león",
+      "en": "Dandelion",
+      "fr": "Dandelion",
+      "de": "Dandelion",
+      "pt": "Dandelion",
+      "zh": "蒲公英"
+    },
+    "origin": {
+      "es": "Mundial (usado en México, Norteamérica, China)",
+      "en": "Worldwide (used in Mexico, North America, China)",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "全球（墨西哥、北美、中国使用）"
+    },
+    "safety": "food",
+    "evidence": "insufficient",
+    "summaryKey": "use_digestive",
+    "precautionKeys": [
+      "foodPregnancyUnknown",
+      "allergy"
+    ],
+    "interactionKeys": [
+      "antidiabetes",
+      "anticoagulants",
+      "antiplatelets",
+      "diuretics"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/dandelion",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "4",
+    "key": "chamomile",
+    "names": {
+      "es": "Manzanilla",
+      "en": "Chamomile",
+      "fr": "Chamomile",
+      "de": "Chamomile",
+      "pt": "Chamomile",
+      "zh": "洋甘菊"
+    },
+    "origin": {
+      "es": "Europa, Asia Occidental (ampliamente usada globalmente)",
+      "en": "Europe, Western Asia (widely used globally)",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "欧洲、西亚（全球广泛使用）"
+    },
+    "safety": "food",
+    "evidence": "insufficient",
+    "summaryKey": "use_digestive",
+    "precautionKeys": [
+      "pregnancyUnknown",
+      "chamomilePrecaution"
+    ],
+    "interactionKeys": [
+      "warfarin",
+      "sedatives",
+      "contraceptives",
+      "liverDrugs"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/chamomile",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "5",
+    "key": "garlic",
+    "names": {
+      "es": "Ajo",
+      "en": "Garlic",
+      "fr": "Garlic",
+      "de": "Garlic",
+      "pt": "Garlic",
+      "zh": "大蒜"
+    },
+    "origin": {
+      "es": "Asia Central (cultivada mundialmente)",
+      "en": "Central Asia (widely cultivated worldwide)",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中亚（全球广泛种植）"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "use_digestive",
+    "precautionKeys": [
+      "garlicPrecaution",
+      "bloodSugar"
+    ],
+    "interactionKeys": [
+      "anticoagulants",
+      "aspirin"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/garlic",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "6",
+    "key": "prunella_vulgaris",
+    "names": {
+      "es": "Autosanadora",
+      "en": "Selfheal",
+      "fr": "Selfheal",
+      "de": "Selfheal",
+      "pt": "Selfheal",
+      "zh": "夏枯草"
+    },
+    "origin": {
+      "es": "Norteamérica; ampliamente usado en la medicina china tradicional",
+      "en": "North America; widely used in Traditional Chinese Medicine",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "北美；在中医中广泛使用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  },
+  {
+    "id": "7",
+    "key": "tagetes_lucida",
+    "names": {
+      "es": "Yauhtli / Clavel de tierra",
+      "en": "Tagetes lucida",
+      "fr": "Tagetes lucida",
+      "de": "Tagetes lucida",
+      "pt": "Tagetes lucida",
+      "zh": "墨西哥金盏菊"
+    },
+    "origin": {
+      "es": "Centro de México",
+      "en": "Central Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥中部"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "8",
+    "key": "clinopodium_mexicanum",
+    "names": {
+      "es": "Toronjil de monte",
+      "en": "Clinopodium mexicanum",
+      "fr": "Clinopodium mexicanum",
+      "de": "Clinopodium mexicanum",
+      "pt": "Clinopodium mexicanum",
+      "zh": "墨西哥柠檬香草"
+    },
+    "origin": {
+      "es": "México",
+      "en": "Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "9",
+    "key": "litsea_glaucescens",
+    "names": {
+      "es": "Laurel Mexicano",
+      "en": "Mexican Bay Leaf",
+      "fr": "Mexican Bay Leaf",
+      "de": "Mexican Bay Leaf",
+      "pt": "Mexican Bay Leaf",
+      "zh": "墨西哥月桂叶"
+    },
+    "origin": {
+      "es": "México",
+      "en": "Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "10",
+    "key": "artemisia_annua",
+    "names": {
+      "es": "Artemisa dulce",
+      "en": "Sweet Wormwood",
+      "fr": "Sweet Wormwood",
+      "de": "Sweet Wormwood",
+      "pt": "Sweet Wormwood",
+      "zh": "青蒿"
+    },
+    "origin": {
+      "es": "China (medicina tradicional)",
+      "en": "China (Traditional Chinese Medicine)",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国（传统中医）"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "11",
+    "key": "aloe_vera",
+    "names": {
+      "es": "Aloe vera",
+      "en": "Aloe Vera",
+      "fr": "Aloe Vera",
+      "de": "Aloe Vera",
+      "pt": "Aloe Vera",
+      "zh": "芦荟"
+    },
+    "origin": {
+      "es": "África del Norte; naturalizada en México, EE. UU. y China",
+      "en": "North Africa; naturalized in Mexico, US, and China",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "北非；在墨西哥、美国和中国广泛分布"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "use_skin",
+    "precautionKeys": [
+      "aloePrecaution",
+      "bloodSugar"
+    ],
+    "interactionKeys": [
+      "digoxin"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/aloe-vera",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "12",
+    "key": "ginger",
+    "names": {
+      "es": "Jengibre",
+      "en": "Ginger",
+      "fr": "Ginger",
+      "de": "Ginger",
+      "pt": "Ginger",
+      "zh": "姜"
+    },
+    "origin": {
+      "es": "Sudeste Asiático; ampliamente usado globalmente",
+      "en": "Southeast Asia; widely used globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "东南亚；全球广泛使用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "use_digestive",
+    "precautionKeys": [
+      "gingerPrecaution"
+    ],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/ginger",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "13",
+    "key": "echinacea",
+    "names": {
+      "es": "Equinácea",
+      "en": "Echinacea",
+      "fr": "Echinacea",
+      "de": "Echinacea",
+      "pt": "Echinacea",
+      "zh": "紫锥花"
+    },
+    "origin": {
+      "es": "Norteamérica",
+      "en": "North America",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "北美"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "use_respiratory",
+    "precautionKeys": [
+      "echinaceaPrecaution",
+      "pregnancyUnknown"
+    ],
+    "interactionKeys": [
+      "immunosuppressants",
+      "caffeine",
+      "liverDrugs"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/echinacea",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "14",
+    "key": "ginkgo_biloba",
+    "names": {
+      "es": "Ginkgo",
+      "en": "Ginkgo",
+      "fr": "Ginkgo",
+      "de": "Ginkgo",
+      "pt": "Ginkgo",
+      "zh": "银杏"
+    },
+    "origin": {
+      "es": "China; introducido en EE. UU.",
+      "en": "China; introduced to US",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国；引入美国"
+    },
+    "safety": "caution",
+    "evidence": "insufficient",
+    "summaryKey": "use_respiratory",
+    "precautionKeys": [
+      "ginkgoPrecaution",
+      "pregnancyUnknown"
+    ],
+    "interactionKeys": [
+      "anticoagulants"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/ginkgo",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "15",
+    "key": "notoginseng",
+    "names": {
+      "es": "Notoginseng",
+      "en": "Notoginseng",
+      "fr": "Notoginseng",
+      "de": "Notoginseng",
+      "pt": "Notoginseng",
+      "zh": "三七"
+    },
+    "origin": {
+      "es": "China",
+      "en": "China",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "16",
+    "key": "turmeric",
+    "names": {
+      "es": "Cúrcuma",
+      "en": "Turmeric",
+      "fr": "Turmeric",
+      "de": "Turmeric",
+      "pt": "Turmeric",
+      "zh": "姜黄"
+    },
+    "origin": {
+      "es": "Sudeste Asiático; uso global",
+      "en": "Southeast Asia; used globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "东南亚；全球使用"
+    },
+    "safety": "caution",
+    "evidence": "insufficient",
+    "summaryKey": "use_digestive",
+    "precautionKeys": [
+      "turmericPrecaution",
+      "foodPregnancyUnknown"
+    ],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/turmeric",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "17",
+    "key": "rosemary",
+    "names": {
+      "es": "Romero",
+      "en": "Rosemary",
+      "fr": "Rosemary",
+      "de": "Rosemary",
+      "pt": "Rosemary",
+      "zh": "迷迭香"
+    },
+    "origin": {
+      "es": "Mediterráneo; ampliamente usado en México y EE. UU.",
+      "en": "Mediterranean; widely used in Mexico and US",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "地中海；在墨西哥和美国广泛使用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  },
+  {
+    "id": "18",
+    "key": "parsley",
+    "names": {
+      "es": "Perejil",
+      "en": "Parsley",
+      "fr": "Parsley",
+      "de": "Parsley",
+      "pt": "Parsley",
+      "zh": "欧芹"
+    },
+    "origin": {
+      "es": "Mediterráneo; uso global",
+      "en": "Mediterranean; used globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "地中海；全球使用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  },
+  {
+    "id": "19",
+    "key": "fennel",
+    "names": {
+      "es": "Hinojo",
+      "en": "Fennel",
+      "fr": "Fennel",
+      "de": "Fennel",
+      "pt": "Fennel",
+      "zh": "茴香"
+    },
+    "origin": {
+      "es": "Mediterráneo; adoptado globalmente",
+      "en": "Mediterranean; adopted globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "地中海；全球采用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  },
+  {
+    "id": "20",
+    "key": "aristolochia",
+    "names": {
+      "es": "Aristolochia odoratissima",
+      "en": "Aristolochia odoratissima",
+      "fr": "Aristolochia odoratissima",
+      "de": "Aristolochia odoratissima",
+      "pt": "Aristolochia odoratissima",
+      "zh": "马兜铃属"
+    },
+    "origin": {
+      "es": "México",
+      "en": "Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥"
+    },
+    "safety": "known",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [
+      "aristolochiaPrecaution"
+    ],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true,
+    "precautionSource": {
+      "name": "NCI",
+      "url": "https://www.cancer.gov/about-cancer/causes-prevention/risk/substances/aristolochic-acids",
+      "checked": "2026-11-03"
+    }
+  },
+  {
+    "id": "21",
+    "key": "mexican_oregano",
+    "names": {
+      "es": "Orégano Mexicano",
+      "en": "Mexican Oregano",
+      "fr": "Mexican Oregano",
+      "de": "Mexican Oregano",
+      "pt": "Mexican Oregano",
+      "zh": "墨西哥牛至"
+    },
+    "origin": {
+      "es": "México",
+      "en": "Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "22",
+    "key": "yerba_mansa",
+    "names": {
+      "es": "Yerba Mansa",
+      "en": "Yerba Mansa",
+      "fr": "Yerba Mansa",
+      "de": "Yerba Mansa",
+      "pt": "Yerba Mansa",
+      "zh": "美洲草锰"
+    },
+    "origin": {
+      "es": "Suroeste de EE. UU.; México",
+      "en": "Southwestern USA; Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "美国西南；墨西哥"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  },
+  {
+    "id": "23",
+    "key": "gray_sarsaparilla",
+    "names": {
+      "es": "Zarzaparrilla Gris",
+      "en": "Gray Sarsaparilla",
+      "fr": "Gray Sarsaparilla",
+      "de": "Gray Sarsaparilla",
+      "pt": "Gray Sarsaparilla",
+      "zh": "灰人参藤"
+    },
+    "origin": {
+      "es": "México, Centroamérica",
+      "en": "Mexico, Central America",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥、中美洲"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "24",
+    "key": "pericon",
+    "names": {
+      "es": "Pericón / Cempasúchil",
+      "en": "Mexican Marigold",
+      "fr": "Mexican Marigold",
+      "de": "Mexican Marigold",
+      "pt": "Mexican Marigold",
+      "zh": "墨西哥万寿菊"
+    },
+    "origin": {
+      "es": "México, Guatemala",
+      "en": "Mexico, Guatemala",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥、危地马拉"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "25",
+    "key": "heliopsis_longipes",
+    "names": {
+      "es": "Chilcuague",
+      "en": "Heliopsis longipes",
+      "fr": "Heliopsis longipes",
+      "de": "Heliopsis longipes",
+      "pt": "Heliopsis longipes",
+      "zh": "长管花"
+    },
+    "origin": {
+      "es": "México",
+      "en": "Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "26",
+    "key": "lippia_dulcis",
+    "names": {
+      "es": "Hierba Dulce",
+      "en": "Aztec Sweet Herb",
+      "fr": "Aztec Sweet Herb",
+      "de": "Aztec Sweet Herb",
+      "pt": "Aztec Sweet Herb",
+      "zh": "阿兹特克甜草"
+    },
+    "origin": {
+      "es": "Sur de México",
+      "en": "Southern Mexico",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "墨西哥南部"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "27",
+    "key": "agastache_rugosa",
+    "names": {
+      "es": "Menta Coreana",
+      "en": "Korean Mint",
+      "fr": "Korean Mint",
+      "de": "Korean Mint",
+      "pt": "Korean Mint",
+      "zh": "藿香"
+    },
+    "origin": {
+      "es": "China, Corea",
+      "en": "China, Korea",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国、韩国"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  },
+  {
+    "id": "28",
+    "key": "astragalus",
+    "names": {
+      "es": "Astrágalo",
+      "en": "Astragalus",
+      "fr": "Astragalus",
+      "de": "Astragalus",
+      "pt": "Astragalus",
+      "zh": "黄芪"
+    },
+    "origin": {
+      "es": "China",
+      "en": "China",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国"
+    },
+    "safety": "caution",
+    "evidence": "insufficient",
+    "summaryKey": "use_chinese",
+    "precautionKeys": [
+      "astragalusPrecaution",
+      "bloodSugar"
+    ],
+    "interactionKeys": [
+      "immunosuppressants"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/astragalus",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "29",
+    "key": "liquorice",
+    "names": {
+      "es": "Regaliz",
+      "en": "Licorice",
+      "fr": "Licorice",
+      "de": "Licorice",
+      "pt": "Licorice",
+      "zh": "甘草"
+    },
+    "origin": {
+      "es": "China",
+      "en": "China",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国"
+    },
+    "safety": "known",
+    "evidence": "insufficient",
+    "summaryKey": "use_respiratory",
+    "precautionKeys": [
+      "licoricePrecaution",
+      "pregnancyUnknown"
+    ],
+    "interactionKeys": [
+      "corticosteroids"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/licorice-root",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "30",
+    "key": "angelica_sinensis",
+    "names": {
+      "es": "Angélica China",
+      "en": "Dong Quai",
+      "fr": "Dong Quai",
+      "de": "Dong Quai",
+      "pt": "Dong Quai",
+      "zh": "当归"
+    },
+    "origin": {
+      "es": "China",
+      "en": "China",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "31",
+    "key": "ganoderma",
+    "names": {
+      "es": "Seta Lingzhi",
+      "en": "Lingzhi Mushroom",
+      "fr": "Lingzhi Mushroom",
+      "de": "Lingzhi Mushroom",
+      "pt": "Lingzhi Mushroom",
+      "zh": "灵芝"
+    },
+    "origin": {
+      "es": "China",
+      "en": "China",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "32",
+    "key": "cinnamon",
+    "names": {
+      "es": "Canela",
+      "en": "Cinnamon",
+      "fr": "Cinnamon",
+      "de": "Cinnamon",
+      "pt": "Cinnamon",
+      "zh": "肉桂"
+    },
+    "origin": {
+      "es": "China, Sudeste Asiático; uso global",
+      "en": "China, Southeast Asia; used globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "中国、东南亚；全球使用"
+    },
+    "safety": "food",
+    "evidence": "insufficient",
+    "summaryKey": null,
+    "precautionKeys": [
+      "cinnamonPrecaution",
+      "foodPregnancyUnknown"
+    ],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/cinnamon",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "33",
+    "key": "st_johns_wort",
+    "names": {
+      "es": "Hipérico",
+      "en": "St. John’s Wort",
+      "fr": "St. John’s Wort",
+      "de": "St. John’s Wort",
+      "pt": "St. John’s Wort",
+      "zh": "贯叶连翘"
+    },
+    "origin": {
+      "es": "Europa; usado en herbolaria de EE. UU.",
+      "en": "Europe; used in US herbalism",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "欧洲；也用于美国草药学"
+    },
+    "safety": "known",
+    "evidence": null,
+    "summaryKey": "use_mood",
+    "precautionKeys": [
+      "wortPrecaution"
+    ],
+    "interactionKeys": [
+      "wortDrugs"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/st-johns-wort",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "34",
+    "key": "eucalyptus",
+    "names": {
+      "es": "Eucalipto",
+      "en": "Eucalyptus",
+      "fr": "Eucalyptus",
+      "de": "Eucalyptus",
+      "pt": "Eucalyptus",
+      "zh": "桉树"
+    },
+    "origin": {
+      "es": "Australia; usado en EE. UU. y globalmente",
+      "en": "Australia; used in US and globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "澳大利亚；在美国和全球使用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "35",
+    "key": "peppermint",
+    "names": {
+      "es": "Menta Piperita",
+      "en": "Peppermint",
+      "fr": "Peppermint",
+      "de": "Peppermint",
+      "pt": "Peppermint",
+      "zh": "薄荷"
+    },
+    "origin": {
+      "es": "Europa; usado globalmente incluido EE. UU.",
+      "en": "Europe; used globally including US",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "欧洲；全球使用包括美国"
+    },
+    "safety": "caution",
+    "evidence": "insufficient",
+    "summaryKey": "use_digestive",
+    "precautionKeys": [
+      "peppermintPrecaution",
+      "foodPregnancyUnknown"
+    ],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/peppermint-oil",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": false
+  },
+  {
+    "id": "36",
+    "key": "milk_thistle",
+    "names": {
+      "es": "Cardo Mariano",
+      "en": "Milk Thistle",
+      "fr": "Milk Thistle",
+      "de": "Milk Thistle",
+      "pt": "Milk Thistle",
+      "zh": "乳蓟"
+    },
+    "origin": {
+      "es": "Mediterráneo; usado en EE. UU.",
+      "en": "Mediterranean; used in US",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "地中海；美国亦用"
+    },
+    "safety": "caution",
+    "evidence": "insufficient",
+    "summaryKey": "use_liver",
+    "precautionKeys": [
+      "pregnancyUnknown",
+      "bloodSugar",
+      "allergy"
+    ],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/milk-thistle",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "37",
+    "key": "lavender",
+    "names": {
+      "es": "Lavanda",
+      "en": "Lavender",
+      "fr": "Lavender",
+      "de": "Lavender",
+      "pt": "Lavender",
+      "zh": "薰衣草"
+    },
+    "origin": {
+      "es": "Mediterráneo; uso global",
+      "en": "Mediterranean; used globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "地中海；全球使用"
+    },
+    "safety": "food",
+    "evidence": "limited",
+    "summaryKey": "use_aroma",
+    "precautionKeys": [
+      "pregnancyUnknown",
+      "lavenderPrecaution"
+    ],
+    "interactionKeys": [
+      "sedatives"
+    ],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/lavender",
+      "checked": "2026-11-03"
+    },
+    "specificSource": true,
+    "imageVerified": true
+  },
+  {
+    "id": "38",
+    "key": "holy_basil",
+    "names": {
+      "es": "Albahaca Sagrada",
+      "en": "Holy Basil",
+      "fr": "Holy Basil",
+      "de": "Holy Basil",
+      "pt": "Holy Basil",
+      "zh": "圣罗勒"
+    },
+    "origin": {
+      "es": "India; uso global en herbolaria",
+      "en": "India; used globally in herbalism",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "印度；全球草本应用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "39",
+    "key": "hibiscus",
+    "names": {
+      "es": "Hibisco",
+      "en": "Hibiscus",
+      "fr": "Hibiscus",
+      "de": "Hibiscus",
+      "pt": "Hibiscus",
+      "zh": "木槿"
+    },
+    "origin": {
+      "es": "Regiones tropicales; uso global incluso México y EE. UU.",
+      "en": "Tropical regions; used globally including Mexico and US",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "热带地区；全球使用包括墨西哥和美国"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": false
+  },
+  {
+    "id": "40",
+    "key": "cilantro",
+    "names": {
+      "es": "Cilantro",
+      "en": "Cilantro",
+      "fr": "Cilantro",
+      "de": "Cilantro",
+      "pt": "Cilantro",
+      "zh": "香菜"
+    },
+    "origin": {
+      "es": "Mediterráneo; uso global",
+      "en": "Mediterranean; used globally",
+      "fr": "",
+      "de": "",
+      "pt": "",
+      "zh": "地中海；全球使用"
+    },
+    "safety": "caution",
+    "evidence": null,
+    "summaryKey": "notReviewed",
+    "precautionKeys": [],
+    "interactionKeys": [],
+    "source": {
+      "name": "NCCIH",
+      "url": "https://www.nccih.nih.gov/health/using-dietary-supplements-wisely",
+      "checked": "2026-11-03"
+    },
+    "specificSource": false,
+    "imageVerified": true
+  }
+]

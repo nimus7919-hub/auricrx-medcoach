@@ -5,7 +5,11 @@
     "resetDone": "Location consent reset. We will ask again on your next search.",
     "resetError": "Could not reset location consent. Please try again."
   },
-  "documentScanner": {"scan": "Scan", "manualPhoto": "Manual photo to PDF", "proBadge": "PRO"},
+  "documentScanner": {
+    "scan": "Scan",
+    "manualPhoto": "Manual photo to PDF",
+    "proBadge": "PRO"
+  },
   "navigation": {
     "pressBackAgainToExit": "Press back again to exit"
   },
@@ -676,9 +680,6 @@
     "noResults": "No herbs found",
     "details": {
       "origin": "Country of Origin",
-      "poisonous": "Poisonous",
-      "poisonousYes": "Yes",
-      "poisonousNo": "No",
       "summary": "Summary"
     },
     "searchHerbs": "Search herbs",
@@ -1326,7 +1327,6 @@
     "reminderNotificationsOff": "Notifications are off. You can turn them on in Settings.",
     "openNotificationSettings": "Open Settings",
     "homeGreeting": "Hello, {{name}}",
-
     "consentCanceled": "Consent canceled",
     "failedToCapturePhoto": "Failed to capture photo",
     "requestingCameraPermission": "Requesting camera permission...",
@@ -2374,280 +2374,280 @@
           "names": "Damiana",
           "details": {
             "origin": "Mexico, Southwestern USA",
-            "summary": "Traditionally used as an aphrodisiac, mood tonic, diuretic, for ulcers, respiratory infections; FDA lists it as generally recognized as safe (GRAS)."
+            "summary": "Traditionally used in folk medicine for digestive and mood-related concerns."
           }
         },
         "item1": {
           "names": "Epazote",
           "details": {
             "origin": "Mexico and Central America",
-            "summary": "Used to flavor beans and reduce gas and bloating; also used to combat intestinal parasites. (Culinary amounts recommended.)"
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item2": {
           "names": "Dandelion",
           "details": {
             "origin": "Worldwide (used in Mexico, North America, China)",
-            "summary": "Used for appetite loss, dyspepsia, flatulence, gallstones, bile stimulation, laxative, diuretic, circulatory tonic, skin and blood tonics."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item3": {
           "names": "Chamomile",
           "details": {
             "origin": "Europe, Western Asia (widely used globally)",
-            "summary": "Gentle herb known for calming properties, used for sleep and relaxation."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item4": {
           "names": "Garlic",
           "details": {
             "origin": "Central Asia (widely cultivated worldwide)",
-            "summary": "Used in cooking; proven benefits include antimicrobial effects, heart protection, reducing inflammation, cholesterol, and blood pressure."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item5": {
           "names": "Selfheal",
           "details": {
             "origin": "North America; widely used in Traditional Chinese Medicine",
-            "summary": "Used by indigenous North Americans for boils; in Chinese medicine for dizziness, cough, dermatitis; common in herbal teas."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item6": {
           "names": "Tagetes lucida",
           "details": {
             "origin": "Central Mexico",
-            "summary": "Used as tea for colds, gas, diarrhea; ritual incense by Aztecs; culinary substitute for tarragon."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item7": {
           "names": "Clinopodium mexicanum",
           "details": {
             "origin": "Mexico",
-            "summary": "Used to induce sleep and for analgesic effects; contains compounds with anxiolytic and antinociceptive activity."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item8": {
           "names": "Mexican Bay Leaf",
           "details": {
             "origin": "Mexico",
-            "summary": "Used in Mexican traditional medicine for “nervios” (anxiety/depression); experimental data suggest antidepressant activity."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item9": {
           "names": "Sweet Wormwood",
           "details": {
             "origin": "China (Traditional Chinese Medicine)",
-            "summary": "Source of artemisinin, a first-line treatment for malaria; artemisinin derivatives are used in many approved medicines."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item10": {
           "names": "Aloe Vera",
           "details": {
             "origin": "North Africa; naturalized in Mexico, US, and China",
-            "summary": "Topical use for burns and skin irritation; oral use for digestive support and wound healing."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item11": {
           "names": "Ginger",
           "details": {
             "origin": "Southeast Asia; widely used globally",
-            "summary": "Used for nausea, digestive upset, and inflammation."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item12": {
           "names": "Echinacea",
           "details": {
             "origin": "North America",
-            "summary": "Commonly used for prevention/treatment of colds and upper respiratory infections."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item13": {
           "names": "Ginkgo",
           "details": {
             "origin": "China; introduced to US",
-            "summary": "Used for cognitive support and blood flow in traditional and modern contexts."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item14": {
           "names": "Notoginseng",
           "details": {
             "origin": "China",
-            "summary": "Traditionally used for bleeding control and circulation; key component in Yunnan Baiyao."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item15": {
           "names": "Turmeric",
           "details": {
             "origin": "Southeast Asia; used globally",
-            "summary": "Contains curcumin; studied for anti-inflammatory and antioxidant benefits."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item16": {
           "names": "Rosemary",
           "details": {
             "origin": "Mediterranean; widely used in Mexico and US",
-            "summary": "Used for culinary flavor and antioxidant/anti-inflammatory support."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item17": {
           "names": "Parsley",
           "details": {
             "origin": "Mediterranean; used globally",
-            "summary": "High in antioxidants; supports general wellness in culinary and herbal use."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item18": {
           "names": "Fennel",
           "details": {
             "origin": "Mediterranean; adopted globally",
-            "summary": "Used for digestive health, bloating, and women’s health support."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item19": {
           "names": "Aristolochia odoratissima",
           "details": {
             "origin": "Mexico",
-            "summary": "Traditional use reported, but known to be nephrotoxic and carcinogenic; not recommended."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item20": {
           "names": "Mexican Oregano",
           "details": {
             "origin": "Mexico",
-            "summary": "Traditionally used for respiratory and digestive issues; antioxidant and antimicrobial properties."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item21": {
           "names": "Yerba Mansa",
           "details": {
             "origin": "Southwestern USA; Mexico",
-            "summary": "Antimicrobial, diuretic; used for mucous membrane inflammation, gout, kidney stones, and wound care."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item22": {
           "names": "Gray Sarsaparilla",
           "details": {
             "origin": "Mexico, Central America",
-            "summary": "Traditional uses include skin diseases, rheumatism, anemia; also considered a digestive tonic."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item23": {
           "names": "Mexican Marigold",
           "details": {
             "origin": "Mexico, Guatemala",
-            "summary": "Traditional uses for digestive and respiratory issues; antioxidant support."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item24": {
           "names": "Heliopsis longipes",
           "details": {
             "origin": "Mexico",
-            "summary": "Antibiotic, antifungal, analgesic; used for throat infections, fungal issues, oral pain, acid reflux."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item25": {
           "names": "Aztec Sweet Herb",
           "details": {
             "origin": "Southern Mexico",
-            "summary": "Used as a natural sweetener and medicinal herb; contains hernandulcin."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item26": {
           "names": "Korean Mint",
           "details": {
             "origin": "China, Korea",
-            "summary": "Common TCM herb for digestive and respiratory support."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item27": {
           "names": "Astragalus",
           "details": {
             "origin": "China",
-            "summary": "Widely used in TCM for immune support and qi enhancement."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item28": {
           "names": "Licorice",
           "details": {
             "origin": "China",
-            "summary": "Harmonizes formulas; soothes throat and digestive tract in TCM."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item29": {
           "names": "Dong Quai",
           "details": {
             "origin": "China",
-            "summary": "Used for women’s health; considered a blood tonic and used for menstrual disorders."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item30": {
           "names": "Lingzhi Mushroom",
           "details": {
             "origin": "China",
-            "summary": "Revered in TCM for longevity and immune modulation."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item31": {
           "names": "Cinnamon",
           "details": {
             "origin": "China, Southeast Asia; used globally",
-            "summary": "Used for blood sugar regulation and digestion; warming spice in culinary and traditional practices."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item32": {
           "names": "St. John’s Wort",
           "details": {
             "origin": "Europe; used in US herbalism",
-            "summary": "Used for mild to moderate depression; caution for drug interactions."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item33": {
           "names": "Eucalyptus",
           "details": {
             "origin": "Australia; used in US and globally",
-            "summary": "Used for respiratory congestion; decongestant with antimicrobial properties."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item34": {
           "names": "Peppermint",
           "details": {
             "origin": "Europe; used globally including US",
-            "summary": "Used for digestive relief, nausea, and tension headaches; menthol provides cooling."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item35": {
           "names": "Milk Thistle",
           "details": {
             "origin": "Mediterranean; used in US",
-            "summary": "Used for liver support; silymarin is a key antioxidant complex."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item36": {
           "names": "Lavender",
           "details": {
             "origin": "Mediterranean; used globally",
-            "summary": "Known for calming effects; used for sleep and anxiety relief; common in aromatherapy."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item37": {
           "names": "Holy Basil",
           "details": {
             "origin": "India; used globally in herbalism",
-            "summary": "Adaptogen used to reduce stress, support immunity, and regulate blood sugar."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item38": {
           "names": "Hibiscus",
           "details": {
             "origin": "Tropical regions; used globally including Mexico and US",
-            "summary": "Consumed as tea; studied for blood pressure-lowering and antioxidant properties."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         },
         "item39": {
           "names": "Cilantro",
           "details": {
             "origin": "Mediterranean; used globally",
-            "summary": "Used for digestive aid and as an antioxidant-rich culinary herb."
+            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
           }
         }
       }
@@ -3617,8 +3617,7 @@
       "ampoules": "ampoules",
       "sachets": "sachets"
     }
-  }
-,
+  },
   "documentPdf": {
     "brand": "AuricRX MedCoach",
     "identification": "Identification",
@@ -3626,5 +3625,67 @@
     "front": "Front",
     "back": "Back",
     "exportedOn": "Exported on {{date}}"
+  },
+  "herbReview": {
+    "safety": "Risk information",
+    "food": "No major known risks in food amounts",
+    "caution": "Caution",
+    "known": "Known risk: avoid without medical supervision",
+    "limited": "Evidence: limited",
+    "insufficient": "Evidence: insufficient",
+    "precautions": "Precautions",
+    "interactions": "Possible interactions",
+    "personal": "With medicines on your list",
+    "source": "Source: {{source}}, accessed {{date}}",
+    "checked": "Date checked: {{date}}",
+    "alert": "According to {{source}}, {{herb}} may interact with {{medication}} on your list. Talk to your doctor or pharmacist before combining them. Don't stop or change your medication on your own.",
+    "noMatches": "We found no interactions in our sources, but that doesn't guarantee it's safe. Ask your pharmacist.",
+    "footer": "General educational information. Not a diagnosis or treatment recommendation and not a substitute for advice from a health professional. Herbal products can cause side effects and interact with medicines. If you're pregnant, breastfeeding, have a condition or take medicines, check with your doctor or pharmacist before using them.",
+    "notReviewed": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species.",
+    "damiana": "Traditionally used in folk medicine for digestive and mood-related concerns.",
+    "uncertain": "Scientific evidence is limited and does not confirm effectiveness for this use.",
+    "pregnancyUnknown": "Pregnancy and breastfeeding: risk information is insufficient.",
+    "foodPregnancyUnknown": "Pregnancy and breastfeeding: insufficient information for amounts greater than food amounts.",
+    "generalPrecaution": "Many supplements have not been tested in pregnant people, breastfeeding people or children. Tell your healthcare team before surgery; supplements may pose risks.",
+    "bloodSugar": "Diabetes: blood-sugar effects have been described; consult before using supplements.",
+    "garlicPrecaution": "Supplements may increase bleeding; tell your healthcare team before surgery. During pregnancy and breastfeeding, amounts above food amounts may pose risks. Raw garlic on skin can cause burns.",
+    "chamomilePrecaution": "May cause allergies, especially with allergies to related plants. May affect estrogen-sensitive conditions.",
+    "aloePrecaution": "Oral aloe may pose risks during pregnancy and breastfeeding. Oral latex may cause cramps and diarrhea; liver injury has been reported with leaf extracts.",
+    "ginkgoPrecaution": "During pregnancy may increase early labor or bleeding risk. Fresh seeds and crude plant material may cause serious effects.",
+    "echinaceaPrecaution": "May cause serious allergic reactions. Rashes have occurred in children: consult their clinician before use. Consult before using supplements during pregnancy.",
+    "gingerPrecaution": "May cause heartburn, diarrhea and mouth or throat irritation. Consult before using supplements during pregnancy; breastfeeding information is insufficient.",
+    "turmericPrecaution": "Supplements may pose risks during pregnancy. Some high-absorption curcumin formulations have been associated with liver injury.",
+    "astragalusPrecaution": "May worsen autoimmune diseases. Pregnancy and breastfeeding data are insufficient; animal studies suggest fetal harm.",
+    "licoricePrecaution": "Glycyrrhizin may cause serious heart rhythm problems, especially with hypertension or heart or kidney disease. High intake during pregnancy is associated with early delivery.",
+    "cinnamonPrecaution": "Cassia cinnamon contains coumarin; prolonged use may pose problems in people with liver disease.",
+    "wortPrecaution": "During pregnancy may increase birth defect risk. Infants exposed through breast milk may experience colic, drowsiness and lethargy.",
+    "peppermintPrecaution": "Do not apply peppermint oil to infants’ or young children’s faces: menthol may affect breathing. Oral oil may cause heartburn.",
+    "lavenderPrecaution": "Before surgery disclose use because of possible interactions with sedatives.",
+    "allergy": "May cause allergic reactions.",
+    "aristolochiaPrecaution": "Aristolochic acids may cause kidney damage and are associated with urinary tract cancer. Avoid products containing them.",
+    "close": "Close",
+    "imagePending": "Image pending verification",
+    "ingredientMissing": "Some medicines have no recorded active ingredients and could not be checked. Add them in Medications.",
+    "use_digestive": "Traditionally used for digestive concerns.",
+    "use_respiratory": "Traditionally used for respiratory concerns.",
+    "use_skin": "Traditionally used for skin concerns.",
+    "use_liver": "Traditionally used for liver concerns.",
+    "use_mood": "Traditionally used for mood-related concerns.",
+    "use_aroma": "Traditionally used for aromatic and bathing practices.",
+    "use_chinese": "Traditionally used for traditional Chinese medicine practices.",
+    "class_anticoagulants": "Anticoagulants",
+    "class_aspirin": "Acetylsalicylic acid (aspirin)",
+    "class_sedatives": "Sedatives (theoretical possibility)",
+    "class_contraceptives": "Oral contraceptives",
+    "class_antiplatelets": "Antiplatelets (theoretical possibility)",
+    "class_antidiabetes": "Antidiabetes medicines (theoretical possibility)",
+    "class_diuretics": "Diuretics (theoretical possibility)",
+    "class_immunosuppressants": "Immunosuppressants",
+    "class_corticosteroids": "Corticosteroids",
+    "class_caffeine": "Caffeine (theoretical possibility)",
+    "class_liverDrugs": "Some liver-metabolized drugs; consult the source",
+    "class_wortDrugs": "Some antidepressants, contraceptives, cyclosporine, phenytoin, carbamazepine, digoxin, ivabradine, indinavir, nevirapine, irinotecan, imatinib, docetaxel, warfarin and simvastatin",
+    "class_digoxin": "Cardiac glycosides such as digoxin (oral aloe latex)",
+    "class_warfarin": "Warfarin"
   }
 }

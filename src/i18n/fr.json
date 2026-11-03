@@ -5,7 +5,11 @@
     "resetDone": "Consentement de localisation r?initialis?. Nous vous le redemanderons lors de votre prochaine recherche.",
     "resetError": "Impossible de r?initialiser le consentement de localisation. R?essayez."
   },
-  "documentScanner": {"scan": "Numériser", "manualPhoto": "Photo manuelle en PDF", "proBadge": "PRO"},
+  "documentScanner": {
+    "scan": "Numériser",
+    "manualPhoto": "Photo manuelle en PDF",
+    "proBadge": "PRO"
+  },
   "help": {
     "title": "Guide du Tableau de bord",
     "intro": "Bienvenue sur votre tableau de bord de santé ! Chaque carte vous aide à gérer différents aspects de votre santé. Voici ce que fait chacune :",
@@ -656,9 +660,6 @@
     "noResults": "Aucune herbe trouvée",
     "details": {
       "origin": "Pays d'origine",
-      "poisonous": "Vénéneuse",
-      "poisonousYes": "Oui",
-      "poisonousNo": "Non",
       "summary": "Résumé"
     }
   },
@@ -1375,17 +1376,78 @@
     }
   },
   "ui": {
-    "reminderNotificationsOff": "Les notifications sont d\u00e9sactiv\u00e9es. Vous pouvez les activer dans les r\u00e9glages.",
-    "openNotificationSettings": "Ouvrir les r\u00e9glages",
+    "reminderNotificationsOff": "Les notifications sont désactivées. Vous pouvez les activer dans les réglages.",
+    "openNotificationSettings": "Ouvrir les réglages",
     "homeGreeting": "Bonjour, {{name}}"
-}
-,
+  },
   "documentPdf": {
-  "brand": "AuricRX MedCoach",
-  "identification": "Identification",
-  "scannedDocument": "Document numérisé",
-  "front": "Recto",
-  "back": "Verso",
-  "exportedOn": "Exporté le {{date}}"
-}
+    "brand": "AuricRX MedCoach",
+    "identification": "Identification",
+    "scannedDocument": "Document numérisé",
+    "front": "Recto",
+    "back": "Verso",
+    "exportedOn": "Exporté le {{date}}"
+  },
+  "herbReview": {
+    "safety": "Informations sur les risques",
+    "food": "Aucun risque majeur connu aux quantités alimentaires",
+    "caution": "Prudence",
+    "known": "Risque connu : éviter sans surveillance médicale",
+    "limited": "Données probantes : limitées",
+    "insufficient": "Données probantes : insuffisantes",
+    "precautions": "Précautions",
+    "interactions": "Interactions possibles",
+    "personal": "Avec les médicaments de votre liste",
+    "source": "Source : {{source}}, consultée le {{date}}",
+    "checked": "Date de vérification : {{date}}",
+    "alert": "Selon {{source}}, {{herb}} pourrait interagir avec {{medication}} de votre liste. Parlez à votre médecin ou pharmacien avant de les associer. N'arrêtez pas et ne modifiez pas votre médicament de votre propre initiative.",
+    "noMatches": "Nous n'avons trouvé aucune interaction dans nos sources, mais cela ne garantit pas l'absence de risque. Consultez votre pharmacien.",
+    "footer": "Informations générales à visée éducative. Il ne s'agit ni d'un diagnostic ni d'une recommandation de traitement, et ces informations ne remplacent pas l'avis d'un professionnel de santé. Les produits à base de plantes peuvent provoquer des effets indésirables et interagir avec des médicaments. Si vous êtes enceinte, allaitez, avez une maladie ou prenez des médicaments, consultez votre médecin ou pharmacien avant de les utiliser.",
+    "notReviewed": "Nous ne disposons pas de fiche NCCIH spécifique vérifiée pour cette plante. Le lien NCCIH fournit des informations générales sur les compléments, sans évaluation de cette espèce.",
+    "damiana": "Traditionnellement utilisée en médecine populaire pour des questions digestives et d’humeur.",
+    "uncertain": "Les données scientifiques sont limitées et ne confirment pas son efficacité pour cet usage.",
+    "pregnancyUnknown": "Grossesse et allaitement : données insuffisantes sur les risques.",
+    "foodPregnancyUnknown": "Grossesse et allaitement : données insuffisantes au-delà des quantités alimentaires.",
+    "generalPrecaution": "De nombreux compléments ne sont pas étudiés pendant la grossesse, l’allaitement ou chez les enfants. Informez l’équipe soignante avant une chirurgie ; les compléments peuvent présenter des risques.",
+    "bloodSugar": "Diabète : des effets sur la glycémie ont été décrits ; consultez avant d’utiliser des compléments.",
+    "garlicPrecaution": "Les compléments peuvent augmenter les saignements ; prévenez avant une chirurgie. Pendant la grossesse et l’allaitement, les quantités supérieures aux aliments peuvent présenter des risques. L’ail cru peut brûler la peau.",
+    "chamomilePrecaution": "Peut provoquer des allergies, surtout en cas d’allergie aux plantes apparentées. Peut affecter les maladies sensibles aux œstrogènes.",
+    "aloePrecaution": "L’aloès oral peut présenter des risques pendant la grossesse et l’allaitement. Le latex oral peut causer crampes et diarrhée ; des lésions hépatiques ont été signalées avec des extraits de feuille.",
+    "ginkgoPrecaution": "Pendant la grossesse, peut augmenter les risques d’accouchement prématuré ou de saignement. Les graines fraîches et la plante brute peuvent provoquer des effets graves.",
+    "echinaceaPrecaution": "Peut provoquer des allergies graves. Des éruptions sont survenues chez des enfants : consultez leur médecin avant utilisation. Consultez avant d’utiliser des compléments pendant la grossesse.",
+    "gingerPrecaution": "Peut causer brûlures d’estomac, diarrhée et irritation de la bouche ou de la gorge. Consultez avant les compléments pendant la grossesse ; données insuffisantes pour l’allaitement.",
+    "turmericPrecaution": "Les compléments peuvent présenter des risques pendant la grossesse. Certaines formulations de curcumine à forte absorption ont été associées à des lésions hépatiques.",
+    "astragalusPrecaution": "Peut aggraver les maladies auto-immunes. Données insuffisantes pendant la grossesse et l’allaitement ; des études animales suggèrent un risque fœtal.",
+    "licoricePrecaution": "La glycyrrhizine peut causer de graves troubles du rythme cardiaque, surtout en cas d’hypertension ou de maladie cardiaque ou rénale. Une consommation élevée pendant la grossesse est associée à un accouchement anticipé.",
+    "cinnamonPrecaution": "La cannelle cassia contient de la coumarine ; un usage prolongé peut poser problème en cas de maladie hépatique.",
+    "wortPrecaution": "Pendant la grossesse, peut augmenter le risque de malformations. Les nourrissons exposés par le lait peuvent présenter coliques, somnolence et léthargie.",
+    "peppermintPrecaution": "N’appliquez pas d’huile de menthe poivrée sur le visage des bébés ou jeunes enfants : le menthol peut affecter la respiration. L’huile orale peut causer des brûlures d’estomac.",
+    "lavenderPrecaution": "Avant une chirurgie, signalez son usage en raison d’interactions possibles avec les sédatifs.",
+    "allergy": "Peut provoquer des réactions allergiques.",
+    "aristolochiaPrecaution": "Les acides aristolochiques peuvent endommager les reins et sont associés à des cancers des voies urinaires. Évitez les produits en contenant.",
+    "close": "Fermer",
+    "imagePending": "Image à vérifier",
+    "ingredientMissing": "Certains médicaments n’ont pas de principes actifs enregistrés et n’ont pas pu être comparés. Ajoutez-les dans Médicaments.",
+    "use_digestive": "Traditionnellement utilisée pour des questions digestives.",
+    "use_respiratory": "Traditionnellement utilisée pour des questions respiratoires.",
+    "use_skin": "Traditionnellement utilisée pour des questions cutanées.",
+    "use_liver": "Traditionnellement utilisée pour des questions hépatiques.",
+    "use_mood": "Traditionnellement utilisée pour des questions d’humeur.",
+    "use_aroma": "Traditionnellement utilisée pour des pratiques aromatiques et de bain.",
+    "use_chinese": "Traditionnellement utilisée pour des pratiques de médecine traditionnelle chinoise.",
+    "class_anticoagulants": "Anticoagulants",
+    "class_aspirin": "Acide acétylsalicylique (aspirine)",
+    "class_sedatives": "Sédatifs (possibilité théorique)",
+    "class_contraceptives": "Contraceptifs oraux",
+    "class_antiplatelets": "Antiagrégants (possibilité théorique)",
+    "class_antidiabetes": "Antidiabétiques (possibilité théorique)",
+    "class_diuretics": "Diurétiques (possibilité théorique)",
+    "class_immunosuppressants": "Immunosuppresseurs",
+    "class_corticosteroids": "Corticostéroïdes",
+    "class_caffeine": "Caféine (possibilité théorique)",
+    "class_liverDrugs": "Certains médicaments métabolisés par le foie ; consultez la source",
+    "class_wortDrugs": "Certains antidépresseurs, contraceptifs, ciclosporine, phénytoïne, carbamazépine, digoxine, ivabradine, indinavir, névirapine, irinotécan, imatinib, docétaxel, warfarine et simvastatine",
+    "class_digoxin": "Glycosides cardiaques comme la digoxine (latex d’aloès oral)",
+    "class_warfarin": "Warfarine"
+  }
 }

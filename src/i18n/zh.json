@@ -5,7 +5,11 @@
     "resetDone": "?????????????????????",
     "resetError": "???????????????"
   },
-  "documentScanner": {"scan": "扫描", "manualPhoto": "????? PDF", "proBadge": "PRO"},
+  "documentScanner": {
+    "scan": "扫描",
+    "manualPhoto": "????? PDF",
+    "proBadge": "PRO"
+  },
   "help": {
     "title": "仪表板指南",
     "intro": "欢迎使用您的健康仪表板！每张卡片帮助您管理健康的不同方面。以下是每张卡片的功能：",
@@ -651,9 +655,6 @@
     "noResults": "未找到草药",
     "details": {
       "origin": "原产国",
-      "poisonous": "是否有毒",
-      "poisonousYes": "是",
-      "poisonousNo": "否",
       "summary": "概要"
     }
   },
@@ -1246,280 +1247,280 @@
           "names": "达米阿纳",
           "details": {
             "origin": "墨西哥、美国西南部",
-            "summary": "传统上用作春药、情绪补剂、利尿剂，用于溃疡和呼吸道感染；FDA 列为一般公认为安全 (GRAS) 水平。"
+            "summary": "传统民间医学曾将其用于消化和情绪相关问题。"
           }
         },
         "item1": {
           "names": "墨西哥豉草",
           "details": {
             "origin": "墨西哥和中美洲",
-            "summary": "用于调味豆类并减少胀气；也用于对抗肠道寄生虫。（建议烹饪用量）"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item2": {
           "names": "蒲公英",
           "details": {
             "origin": "全球（墨西哥、北美、中国使用）",
-            "summary": "用于食欲不振、消化不良、腹胀、胆结石、刺激胆汁、泻药、利尿、循环补剂、皮肤和血液补剂。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item3": {
           "names": "洋甘菊",
           "details": {
             "origin": "欧洲、西亚（全球广泛使用）",
-            "summary": "温和草本，以其镇静特性闻名，用于助眠和放松。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item4": {
           "names": "大蒜",
           "details": {
             "origin": "中亚（全球广泛种植）",
-            "summary": "用于烹饪；证实的益处包括抗菌、保护心脏、减少炎症、胆固醇和血压。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item5": {
           "names": "夏枯草",
           "details": {
             "origin": "北美；在中医中广泛使用",
-            "summary": "北美原住民用于治疗疖子；在中医中用于眩晕、咳嗽、皮炎；常见于草本茶。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item6": {
           "names": "墨西哥金盏菊",
           "details": {
             "origin": "墨西哥中部",
-            "summary": "用作治疗感冒、胀气、腹泻的茶；阿兹特克人用于祭祀熏香；烹饪可替代龙蒿。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item7": {
           "names": "墨西哥柠檬香草",
           "details": {
             "origin": "墨西哥",
-            "summary": "用于诱导睡眠和止痛；含有具有抗焦虑和镇痛作用的化合物。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item8": {
           "names": "墨西哥月桂叶",
           "details": {
             "origin": "墨西哥",
-            "summary": "在墨西哥传统医学中用于“神经症”（焦虑/抑郁）；实验数据显示具抗抑郁活性。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item9": {
           "names": "青蒿",
           "details": {
             "origin": "中国（传统中医）",
-            "summary": "青蒿素的来源，是疟疾一线疗法；其衍生物用于多种获批药物。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item10": {
           "names": "芦荟",
           "details": {
             "origin": "北非；在墨西哥、美国和中国广泛分布",
-            "summary": "外用于烧伤与皮肤刺激；口服用于消化支持与伤口愈合。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item11": {
           "names": "姜",
           "details": {
             "origin": "东南亚；全球广泛使用",
-            "summary": "用于缓解恶心、消化不良与炎症。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item12": {
           "names": "紫锥花",
           "details": {
             "origin": "北美",
-            "summary": "常用于预防/治疗感冒与上呼吸道感染。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item13": {
           "names": "银杏",
           "details": {
             "origin": "中国；引入美国",
-            "summary": "用于认知支持与促进血流。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item14": {
           "names": "三七",
           "details": {
             "origin": "中国",
-            "summary": "传统用于止血与活血；云南白药关键成分。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item15": {
           "names": "姜黄",
           "details": {
             "origin": "东南亚；全球使用",
-            "summary": "含姜黄素；研究表明具抗炎与抗氧化益处。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item16": {
           "names": "迷迭香",
           "details": {
             "origin": "地中海；在墨西哥和美国广泛使用",
-            "summary": "用于烹饪调味与抗氧化/抗炎支持。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item17": {
           "names": "欧芹",
           "details": {
             "origin": "地中海；全球使用",
-            "summary": "富含抗氧化物；在烹饪与草药使用中支持健康。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item18": {
           "names": "茴香",
           "details": {
             "origin": "地中海；全球采用",
-            "summary": "用于消化健康、缓解腹胀与女性健康支持。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item19": {
           "names": "马兜铃属",
           "details": {
             "origin": "墨西哥",
-            "summary": "虽有传统使用，但已知具肾毒性与致癌性；不建议使用。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item20": {
           "names": "墨西哥牛至",
           "details": {
             "origin": "墨西哥",
-            "summary": "传统用于呼吸与消化问题；具抗氧化与抗菌特性。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item21": {
           "names": "美洲草锰",
           "details": {
             "origin": "美国西南；墨西哥",
-            "summary": "具抗菌与利尿作用；用于黏膜炎症、痛风、肾结石与创面护理。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item22": {
           "names": "灰人参藤",
           "details": {
             "origin": "墨西哥、中美洲",
-            "summary": "传统用于皮肤病、风湿、贫血；亦作消化补剂。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item23": {
           "names": "墨西哥万寿菊",
           "details": {
             "origin": "墨西哥、危地马拉",
-            "summary": "传统用于消化与呼吸问题；具抗氧化支持。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item24": {
           "names": "长管花",
           "details": {
             "origin": "墨西哥",
-            "summary": "具抗菌、抗真菌与镇痛作用；用于咽喉感染、真菌问题、口腔疼痛与胃酸反流。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item25": {
           "names": "阿兹特克甜草",
           "details": {
             "origin": "墨西哥南部",
-            "summary": "作为天然甜味剂与药草；含有her nandulcin（甜味成分）。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item26": {
           "names": "藿香",
           "details": {
             "origin": "中国、韩国",
-            "summary": "中医常用草药，用于消化与呼吸系统支持。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item27": {
           "names": "黄芪",
           "details": {
             "origin": "中国",
-            "summary": "在中医中广泛用于免疫支持与益气。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item28": {
           "names": "甘草",
           "details": {
             "origin": "中国",
-            "summary": "用于调和方剂；舒缓咽喉与消化道。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item29": {
           "names": "当归",
           "details": {
             "origin": "中国",
-            "summary": "用于女性健康；被视为补血药并用于月经失调。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item30": {
           "names": "灵芝",
           "details": {
             "origin": "中国",
-            "summary": "在中医中因助长寿与免疫调节而受推崇。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item31": {
           "names": "肉桂",
           "details": {
             "origin": "中国、东南亚；全球使用",
-            "summary": "用于调节血糖与助消化；在传统与烹饪中作为温热香料。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item32": {
           "names": "贯叶连翘",
           "details": {
             "origin": "欧洲；也用于美国草药学",
-            "summary": "用于轻中度抑郁；注意与药物相互作用。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item33": {
           "names": "桉树",
           "details": {
             "origin": "澳大利亚；在美国和全球使用",
-            "summary": "用于缓解呼吸道充血；具通气与抗菌特性。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item34": {
           "names": "薄荷",
           "details": {
             "origin": "欧洲；全球使用包括美国",
-            "summary": "用于缓解消化不适、恶心与紧张性头痛；薄荷醇带来清凉感。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item35": {
           "names": "乳蓟",
           "details": {
             "origin": "地中海；美国亦用",
-            "summary": "用于肝脏支持；水飞蓟素是关键抗氧化复合物。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item36": {
           "names": "薰衣草",
           "details": {
             "origin": "地中海；全球使用",
-            "summary": "以镇静著称；用于助眠与缓解焦虑；芳香疗法中常见。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item37": {
           "names": "圣罗勒",
           "details": {
             "origin": "印度；全球草本应用",
-            "summary": "适应原；用于减压、免疫支持与调节血糖。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item38": {
           "names": "木槿",
           "details": {
             "origin": "热带地区；全球使用包括墨西哥和美国",
-            "summary": "常作花茶；研究显示可降血压并具抗氧化特性。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         },
         "item39": {
           "names": "香菜",
           "details": {
             "origin": "地中海；全球使用",
-            "summary": "用于助消化；也是富含抗氧化物的烹饪香草。"
+            "summary": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。"
           }
         }
       }
@@ -2057,17 +2058,78 @@
     }
   },
   "ui": {
-    "reminderNotificationsOff": "\u901a\u77e5\u5df2\u5173\u95ed\u3002\u4f60\u53ef\u4ee5\u5728\u8bbe\u7f6e\u4e2d\u5f00\u542f\u901a\u77e5\u3002",
-    "openNotificationSettings": "\u6253\u5f00\u8bbe\u7f6e",
-    "homeGreeting": "\u4f60\u597d\uff0c{{name}}"
-}
-,
+    "reminderNotificationsOff": "通知已关闭。你可以在设置中开启通知。",
+    "openNotificationSettings": "打开设置",
+    "homeGreeting": "你好，{{name}}"
+  },
   "documentPdf": {
-  "brand": "AuricRX MedCoach",
-  "identification": "身份证明",
-  "scannedDocument": "扫描文档",
-  "front": "正面",
-  "back": "背面",
-  "exportedOn": "导出日期：{{date}}"
-}
+    "brand": "AuricRX MedCoach",
+    "identification": "身份证明",
+    "scannedDocument": "扫描文档",
+    "front": "正面",
+    "back": "背面",
+    "exportedOn": "导出日期：{{date}}"
+  },
+  "herbReview": {
+    "safety": "风险信息",
+    "food": "食物用量下无已知重大风险",
+    "caution": "注意",
+    "known": "已知风险：无医疗监督请勿使用",
+    "limited": "证据：有限",
+    "insufficient": "证据：不足",
+    "precautions": "注意事项",
+    "interactions": "可能的相互作用",
+    "personal": "与您列表中药物的相互作用",
+    "source": "来源：{{source}}，查阅日期 {{date}}",
+    "checked": "核查日期：{{date}}",
+    "alert": "根据{{source}}，{{herb}}可能与您列表中的{{medication}}发生相互作用。合用前请咨询医生或药师。请勿自行停药或更改药物。",
+    "noMatches": "我们未在资料中发现相互作用，但这并不保证安全。请咨询药师。",
+    "footer": "仅供一般教育参考。不是诊断或治疗建议，不能替代医疗专业人员的意见。草药产品可能引起不良反应并与药物相互作用。如果您怀孕、哺乳、患有疾病或正在服药，使用前请咨询医生或药师。",
+    "notReviewed": "我们尚无此植物经核查的NCCIH专用资料。NCCIH链接提供补充剂的一般信息，并非对此物种的评估。",
+    "damiana": "传统民间医学曾将其用于消化和情绪相关问题。",
+    "uncertain": "科学证据有限，尚未证实其对该用途有效。",
+    "pregnancyUnknown": "孕期和哺乳期：风险资料不足。",
+    "foodPregnancyUnknown": "孕期和哺乳期：超过食物用量的资料不足。",
+    "generalPrecaution": "许多补充剂尚未在孕妇、哺乳者或儿童中进行研究。手术前请告知医疗团队；补充剂可能带来风险。",
+    "bloodSugar": "糖尿病：已有影响血糖的报告；使用补充剂前请咨询专业人员。",
+    "garlicPrecaution": "补充剂可能增加出血；手术前请告知医疗团队。孕期和哺乳期超过食物用量可能带来风险。生蒜接触皮肤可能引起灼伤。",
+    "chamomilePrecaution": "可能引起过敏，尤其是对相关植物过敏者。可能影响雌激素敏感性疾病。",
+    "aloePrecaution": "口服芦荟在孕期和哺乳期可能有风险。口服乳胶可能引起腹部绞痛和腹泻；叶提取物已有肝损伤报告。",
+    "ginkgoPrecaution": "孕期可能增加早产或出血风险。新鲜种子和未加工植物可能引起严重不良反应。",
+    "echinaceaPrecaution": "可能引起严重过敏。儿童曾出现皮疹：使用前请咨询儿科医生。孕期使用补充剂前请咨询医生。",
+    "gingerPrecaution": "可能引起烧心、腹泻及口腔或咽喉刺激。孕期使用补充剂前请咨询；哺乳期资料不足。",
+    "turmericPrecaution": "补充剂在孕期可能有风险。某些高吸收率姜黄素制剂与肝损伤有关。",
+    "astragalusPrecaution": "可能加重自身免疫性疾病。孕期和哺乳期资料不足；动物研究提示可能伤害胎儿。",
+    "licoricePrecaution": "甘草酸可能引起严重心律问题，尤其是高血压、心脏病或肾病患者。孕期大量摄入与提前分娩有关。",
+    "cinnamonPrecaution": "肉桂含香豆素；肝病患者长期使用可能存在问题。",
+    "wortPrecaution": "孕期可能增加出生缺陷风险。通过母乳接触的婴儿可能出现绞痛、嗜睡及精神不振。",
+    "peppermintPrecaution": "请勿将薄荷油涂在婴幼儿脸部：薄荷醇可能影响呼吸。口服薄荷油可能引起烧心。",
+    "lavenderPrecaution": "手术前请告知其使用情况，因为可能与镇静药相互作用。",
+    "allergy": "可能引起过敏反应。",
+    "aristolochiaPrecaution": "马兜铃酸可能损伤肾脏，并与泌尿道癌症有关。请避免含有这些成分的产品。",
+    "close": "关闭",
+    "imagePending": "图片待核实",
+    "ingredientMissing": "部分药物未记录有效成分，无法比对。请在“药物”中补充。",
+    "use_digestive": "传统上曾用于消化相关问题。",
+    "use_respiratory": "传统上曾用于呼吸相关问题。",
+    "use_skin": "传统上曾用于皮肤相关问题。",
+    "use_liver": "传统上曾用于肝脏相关问题。",
+    "use_mood": "传统上曾用于情绪相关问题。",
+    "use_aroma": "传统上曾用于芳香与沐浴习俗。",
+    "use_chinese": "传统上曾用于中医传统习俗。",
+    "class_anticoagulants": "抗凝药",
+    "class_aspirin": "乙酰水杨酸（阿司匹林）",
+    "class_sedatives": "镇静药（理论可能性）",
+    "class_contraceptives": "口服避孕药",
+    "class_antiplatelets": "抗血小板药（理论可能性）",
+    "class_antidiabetes": "降糖药（理论可能性）",
+    "class_diuretics": "利尿药（理论可能性）",
+    "class_immunosuppressants": "免疫抑制剂",
+    "class_corticosteroids": "皮质类固醇",
+    "class_caffeine": "咖啡因（理论可能性）",
+    "class_liverDrugs": "某些经肝脏代谢的药物；请参阅来源",
+    "class_wortDrugs": "某些抗抑郁药、避孕药、环孢素、苯妥英、卡马西平、地高辛、伊伐布雷定、茚地那韦、奈韦拉平、伊立替康、伊马替尼、多西他赛、华法林及辛伐他汀",
+    "class_digoxin": "强心苷如地高辛（口服芦荟乳胶）",
+    "class_warfarin": "华法林"
+  }
 }

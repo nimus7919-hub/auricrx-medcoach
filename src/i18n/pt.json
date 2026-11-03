@@ -5,7 +5,11 @@
     "resetDone": "Consentimento de localiza??o redefinido. Perguntaremos novamente na pr?xima busca.",
     "resetError": "N?o foi poss?vel redefinir o consentimento de localiza??o. Tente novamente."
   },
-  "documentScanner": {"scan": "Digitalizar", "manualPhoto": "Foto manual para PDF", "proBadge": "PRO"},
+  "documentScanner": {
+    "scan": "Digitalizar",
+    "manualPhoto": "Foto manual para PDF",
+    "proBadge": "PRO"
+  },
   "help": {
     "title": "Guia do Painel",
     "intro": "Bem-vindo ao seu painel de saúde! Cada cartão ajuda você a gerenciar diferentes aspectos da sua saúde. Aqui está o que cada um faz:",
@@ -656,9 +660,6 @@
     "noResults": "Nenhuma erva encontrada",
     "details": {
       "origin": "País de Origem",
-      "poisonous": "Venenosa",
-      "poisonousYes": "Sim",
-      "poisonousNo": "Não",
       "summary": "Resumo"
     }
   },
@@ -1369,17 +1370,78 @@
     }
   },
   "ui": {
-    "reminderNotificationsOff": "As notifica\u00e7\u00f5es est\u00e3o desativadas. Voc\u00ea pode ativ\u00e1-las nas configura\u00e7\u00f5es.",
-    "openNotificationSettings": "Abrir configura\u00e7\u00f5es",
-    "homeGreeting": "Ol\u00e1, {{name}}"
-}
-,
+    "reminderNotificationsOff": "As notificações estão desativadas. Você pode ativá-las nas configurações.",
+    "openNotificationSettings": "Abrir configurações",
+    "homeGreeting": "Olá, {{name}}"
+  },
   "documentPdf": {
-  "brand": "AuricRX MedCoach",
-  "identification": "Identificação",
-  "scannedDocument": "Documento digitalizado",
-  "front": "Frente",
-  "back": "Verso",
-  "exportedOn": "Exportado em {{date}}"
-}
+    "brand": "AuricRX MedCoach",
+    "identification": "Identificação",
+    "scannedDocument": "Documento digitalizado",
+    "front": "Frente",
+    "back": "Verso",
+    "exportedOn": "Exportado em {{date}}"
+  },
+  "herbReview": {
+    "safety": "Informações de risco",
+    "food": "Sem riscos importantes conhecidos em quantidades alimentares",
+    "caution": "Precaução",
+    "known": "Risco conhecido: evite sem supervisão médica",
+    "limited": "Evidência: limitada",
+    "insufficient": "Evidência: insuficiente",
+    "precautions": "Precauções",
+    "interactions": "Possíveis interações",
+    "personal": "Com medicamentos da sua lista",
+    "source": "Fonte: {{source}}, consultada em {{date}}",
+    "checked": "Data de revisão: {{date}}",
+    "alert": "Segundo {{source}}, {{herb}} pode interagir com {{medication}} da sua lista. Converse com seu médico ou farmacêutico antes de combiná-los. Não suspenda nem altere seu medicamento por conta própria.",
+    "noMatches": "Não encontramos interações nas nossas fontes, mas isso não garante que seja seguro. Consulte seu farmacêutico.",
+    "footer": "Informações gerais para fins educativos. Não são um diagnóstico nem uma recomendação de tratamento e não substituem a orientação de um profissional de saúde. Produtos à base de ervas podem causar efeitos adversos e interagir com medicamentos. Se estiver grávida, amamentando, tiver uma doença ou tomar medicamentos, consulte seu médico ou farmacêutico antes de usá-los.",
+    "notReviewed": "Não dispomos de uma ficha específica do NCCIH revisada para esta planta. O link do NCCIH oferece informações gerais sobre suplementos, não uma avaliação desta espécie.",
+    "damiana": "Tradicionalmente usada na medicina popular para questões digestivas e de humor.",
+    "uncertain": "A evidência científica é limitada e não confirma eficácia para esse uso.",
+    "pregnancyUnknown": "Gravidez e amamentação: dados insuficientes sobre os riscos.",
+    "foodPregnancyUnknown": "Gravidez e amamentação: dados insuficientes para quantidades superiores às alimentares.",
+    "generalPrecaution": "Muitos suplementos não foram estudados em gestantes, lactantes ou crianças. Informe sua equipe de saúde antes de uma cirurgia; suplementos podem apresentar riscos.",
+    "bloodSugar": "Diabetes: foram descritos efeitos na glicemia; consulte antes de usar suplementos.",
+    "garlicPrecaution": "Suplementos podem aumentar sangramentos; informe antes de cirurgias. Na gravidez e amamentação, quantidades superiores às alimentares podem apresentar riscos. Alho cru na pele pode causar queimaduras.",
+    "chamomilePrecaution": "Pode causar alergias, sobretudo em pessoas alérgicas a plantas relacionadas. Pode afetar condições sensíveis ao estrogênio.",
+    "aloePrecaution": "Aloe oral pode apresentar riscos na gravidez e amamentação. O látex oral pode causar cólicas e diarreia; há relatos de lesão hepática com extratos da folha.",
+    "ginkgoPrecaution": "Na gravidez pode aumentar o risco de parto prematuro ou sangramento. Sementes frescas e a planta não processada podem causar efeitos graves.",
+    "echinaceaPrecaution": "Pode causar alergias graves. Houve erupções em crianças: consulte o pediatra antes do uso. Consulte antes de usar suplementos na gravidez.",
+    "gingerPrecaution": "Pode causar azia, diarreia e irritação da boca e garganta. Consulte antes de suplementos na gravidez; faltam dados na amamentação.",
+    "turmericPrecaution": "Suplementos podem apresentar riscos na gravidez. Algumas formulações de curcumina de alta absorção foram associadas a lesão hepática.",
+    "astragalusPrecaution": "Pode agravar doenças autoimunes. Faltam dados na gravidez e amamentação; estudos em animais sugerem dano fetal.",
+    "licoricePrecaution": "A glicirrizina pode causar arritmias graves, sobretudo com hipertensão ou doença cardíaca ou renal. Alto consumo na gravidez está associado a parto antecipado.",
+    "cinnamonPrecaution": "A canela cassia contém cumarina; uso prolongado pode causar problemas em pessoas com doença hepática.",
+    "wortPrecaution": "Na gravidez pode aumentar o risco de malformações. Lactentes expostos pelo leite podem apresentar cólicas, sonolência e letargia.",
+    "peppermintPrecaution": "Não aplique óleo de hortelã-pimenta no rosto de bebês ou crianças pequenas: o mentol pode afetar a respiração. O óleo oral pode causar azia.",
+    "lavenderPrecaution": "Informe seu uso antes de cirurgias devido a possíveis interações com sedativos.",
+    "allergy": "Pode causar reações alérgicas.",
+    "aristolochiaPrecaution": "Ácidos aristolóquicos podem causar dano renal e estão associados a câncer do trato urinário. Evite produtos que os contenham.",
+    "close": "Fechar",
+    "imagePending": "Imagem pendente de verificação",
+    "ingredientMissing": "Alguns medicamentos não têm princípios ativos registrados e não puderam ser comparados. Adicione-os em Medicamentos.",
+    "use_digestive": "Tradicionalmente usada para questões digestivas.",
+    "use_respiratory": "Tradicionalmente usada para questões respiratórias.",
+    "use_skin": "Tradicionalmente usada para questões da pele.",
+    "use_liver": "Tradicionalmente usada para questões do fígado.",
+    "use_mood": "Tradicionalmente usada para questões de humor.",
+    "use_aroma": "Tradicionalmente usada para práticas aromáticas e de banho.",
+    "use_chinese": "Tradicionalmente usada para práticas de medicina tradicional chinesa.",
+    "class_anticoagulants": "Anticoagulantes",
+    "class_aspirin": "Ácido acetilsalicílico (aspirina)",
+    "class_sedatives": "Sedativos (possibilidade teórica)",
+    "class_contraceptives": "Contraceptivos orais",
+    "class_antiplatelets": "Antiagregantes (possibilidade teórica)",
+    "class_antidiabetes": "Antidiabéticos (possibilidade teórica)",
+    "class_diuretics": "Diuréticos (possibilidade teórica)",
+    "class_immunosuppressants": "Imunossupressores",
+    "class_corticosteroids": "Corticosteroides",
+    "class_caffeine": "Cafeína (possibilidade teórica)",
+    "class_liverDrugs": "Alguns fármacos metabolizados pelo fígado; consulte a fonte",
+    "class_wortDrugs": "Alguns antidepressivos, contraceptivos, ciclosporina, fenitoína, carbamazepina, digoxina, ivabradina, indinavir, nevirapina, irinotecano, imatinibe, docetaxel, varfarina e sinvastatina",
+    "class_digoxin": "Glicosídeos cardíacos como digoxina (látex oral de aloe)",
+    "class_warfarin": "Varfarina"
+  }
 }
