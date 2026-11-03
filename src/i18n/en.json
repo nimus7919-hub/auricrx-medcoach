@@ -14,6 +14,8 @@
     "pressBackAgainToExit": "Press back again to exit"
   },
   "dashboard": {
+    "noUpcomingReminders": "No upcoming reminders",
+    "addReminderAction": "Add",
     "title": "Dashboard",
     "healthJournal": "Health Journal Widget",
     "nextReminder": "Next reminder",
@@ -1324,6 +1326,8 @@
     "ingredient": "Active ingredient"
   },
   "ui": {
+    "successWelcomeBack": "Welcome back, {{name}}",
+    "sessionStarted": "Signed in",
     "reminderNotificationsOff": "Notifications are off. You can turn them on in Settings.",
     "openNotificationSettings": "Open Settings",
     "homeGreeting": "Hello, {{name}}",

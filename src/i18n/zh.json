@@ -30,6 +30,8 @@
     "tip": "💡 提示：点击任何卡片以探索其功能。右下角的浮动AI按钮可让您即时访问我们医疗AI助手的健康建议。"
   },
   "dashboard": {
+    "noUpcomingReminders": "\u6682\u65e0\u5373\u5c06\u5230\u6765\u7684\u63d0\u9192",
+    "addReminderAction": "\u6dfb\u52a0",
     "title": "仪表板",
     "healthJournal": "健康日志",
     "nextReminder": "下一个提醒",
@@ -2058,6 +2060,8 @@
     }
   },
   "ui": {
+    "successWelcomeBack": "\u6b22\u8fce\u56de\u6765\uff0c{{name}}",
+    "sessionStarted": "\u767b\u5f55\u6210\u529f",
     "reminderNotificationsOff": "通知已关闭。你可以在设置中开启通知。",
     "openNotificationSettings": "打开设置",
     "homeGreeting": "你好，{{name}}"

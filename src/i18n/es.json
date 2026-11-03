@@ -33,6 +33,8 @@
     "tip": "💡 Consejo: Toca cualquier tarjeta para explorar sus funciones. El botón de IA abre un asistente de información general de salud. No es médico."
   },
   "dashboard": {
+    "noUpcomingReminders": "Sin recordatorios pr\u00f3ximos",
+    "addReminderAction": "Agregar",
     "title": "Panel",
     "healthJournal": "Registro de Salud",
     "nextReminder": "Próximo recordatorio",
@@ -1324,6 +1326,8 @@
     "ingredient": "Principio activo"
   },
   "ui": {
+    "successWelcomeBack": "Bienvenido de nuevo, {{name}}",
+    "sessionStarted": "Sesi\u00f3n iniciada",
     "reminderNotificationsOff": "Las notificaciones están desactivadas. Puedes activarlas en Ajustes.",
     "openNotificationSettings": "Abrir Ajustes",
     "homeGreeting": "Hola, {{name}}",

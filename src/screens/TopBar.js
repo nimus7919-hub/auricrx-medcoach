@@ -19,7 +19,7 @@ export default function createTopBar(getScope) {
     </AnimatedButton>
     <View style={{ flex: 1 }} />
     
-    <TrialWidget />
+
     <TouchableOpacity accessibilityRole="button" accessibilityLabel={uiI18n.t('settings.title')} onPress={() => setRoute('settings')} style={{ width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: '#D4AF37', backgroundColor: '#101D32', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginRight: 8 }}>
       {photo ? <Image source={{ uri: photo }} style={{ width: 34, height: 34, borderRadius: 17 }} /> : <Text style={{ color: '#D4AF37', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>{Array.from(name)[0]?.toUpperCase() || 'A'}</Text>}
     </TouchableOpacity>

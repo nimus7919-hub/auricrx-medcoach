@@ -1,4 +1,4 @@
-import Modal from '../components/BackModal';
+import { showSuccessToast } from '../components/SuccessToast';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -19,7 +19,7 @@ interface FastingProfileScreenProps {
   S?: any;
   fastingProfile: FastingProfile;
   setFastingProfile: React.Dispatch<React.SetStateAction<FastingProfile>>;
-  saveFastingProfileToDB?: (profile: FastingProfile) => void;
+  saveFastingProfileToDB?: (profile: FastingProfile) => Promise<boolean>;
 }
 
 export default function FastingProfileScreen({ 
@@ -32,7 +32,6 @@ export default function FastingProfileScreen({
 }: FastingProfileScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, getAccentColor } = useWallpaper();
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -61,18 +60,17 @@ export default function FastingProfileScreen({
     }));
   };
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
     // Save to database if function is provided
     if (saveFastingProfileToDB) {
-      saveFastingProfileToDB(fastingProfile);
+      const saved = await saveFastingProfileToDB(fastingProfile);
+      if (!saved) {
+        Alert.alert(uiI18n.t('adminProfile.error'), uiI18n.t('adminProfile.failedToUpdateProfile'));
+        return;
+      }
     }
     
-    // Show themed success modal
-    setShowSuccessModal(true);
-  };
-
-  const handleSuccessModalClose = () => {
-    setShowSuccessModal(false);
+    showSuccessToast(S.healthProfileSavedMessage || S.profileSaved);
     onClose();
   };
 
@@ -431,35 +429,7 @@ export default function FastingProfileScreen({
         </ScrollView>
       </View>
 
-      {/* Success Modal - Themed */}
-      <Modal
-        visible={showSuccessModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleSuccessModalClose}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, {
-            backgroundColor: getCardBackgroundColor(),
-            borderColor: getCardBorderColor(),
-          }]}>
-            <DynamicText type="primary" style={[styles.modalTitle, { color: getCardTextColor() }]}>
-              {S.profileSaved}
-            </DynamicText>
-            <DynamicText type="card" style={[styles.modalMessage, { color: getSubTextColor() }]}>
-              {S.healthProfileSavedMessage}
-            </DynamicText>
-            <TouchableOpacity
-              onPress={handleSuccessModalClose}
-              style={[styles.modalButton, { backgroundColor: getAccentColor() }]}
-            >
-              <DynamicText type="card" style={[styles.modalButtonText, { color: '#ffffff' }]}>
-                {S.ok || uiI18n.t("adminProfile.ok")}
-              </DynamicText>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+
     </View></KeyboardForm>
   );
 }

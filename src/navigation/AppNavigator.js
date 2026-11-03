@@ -17,9 +17,9 @@ import WallpaperSettingsScreen from "./../screens/WallpaperSettingsScreen";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
   return () => {
-  const { route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan } = getScope();
+  const { openReminderOnEntry, setOpenReminderOnEntry, route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan } = getScope();
   return (route === 'dashboard' ? <Dashboard /> :
-     route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
+     route === 'reminders' ? <Reminders openAddOnEntry={openReminderOnEntry} onAddEntryConsumed={() => setOpenReminderOnEntry(false)} theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
      route === 'pharmacies' ? <Pharmacies /> :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :

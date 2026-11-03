@@ -118,6 +118,8 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
   const [isRestoringAuth, setIsRestoringAuth] = useState(true); // Track auth restoration
   const [isLoading, setIsLoading] = useState(true); // Show loading screen initially
+  const [openReminderOnEntry, setOpenReminderOnEntry] = useState(false);
+  const openAddReminder = () => { setOpenReminderOnEntry(true); setRoute('reminders'); };
   const [route, setRoute] = useAndroidBackNavigation(!showAuth && !isRestoringAuth && !isLoading);
   const [resetAuthToSignIn, setResetAuthToSignIn] = useState(0); // Counter to trigger reset
 
@@ -202,6 +204,7 @@ export default function App() {
           setRoute('dashboard');
         }
         
+        let welcomeName = authData.firstName || result.user.displayName?.split(/\s+/)[0];
         // If it's a sign-up, store the user data
         if (authData.isSignUp) {
           setUserData(authData);
@@ -210,13 +213,15 @@ export default function App() {
           const userDataResult = await authService.getUserData(result.user.uid);
           if (userDataResult.success) {
             setUserData(userDataResult.data);
+            welcomeName = userDataResult.data.firstName || welcomeName;
           }
         }
         
         showAlert({
-          title: uiI18n.t("adminProfile.success"),
-          message: result.message || (authData.isSignUp ? uiI18n.t("ui.accountCreatedSuccessfully") : uiI18n.t("ui.signedInSuccessfully")),
-          buttonText: uiI18n.t("ui.continue"),
+          type: 'success',
+          title: '',
+          message: authData.isSignUp ? uiI18n.t('ui.accountCreatedSuccessfully') :
+            welcomeName?.trim() ? uiI18n.t('ui.successWelcomeBack', { name: welcomeName.trim().split(/\s+/)[0] }) : uiI18n.t('ui.sessionStarted'),
         });
       } else {
         showAlert({
@@ -574,6 +579,7 @@ export default function App() {
     } catch (error) {
       console.error('❌ Error saving fasting profile to database:', error);
     }
+    return false;
   };
 
   // Load fasting profile when user is authenticated
@@ -2338,6 +2344,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             if (userDataResult.success) {
               console.log('✅ User data loaded successfully');
               setUserData(userDataResult.data);
+            welcomeName = userDataResult.data.firstName || welcomeName;
             } else {
               console.warn('⚠️ User data fetch returned unsuccessful:', userDataResult);
             }
@@ -2381,6 +2388,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             const userDataResult = await authService.getUserData(restoreResult.user.uid);
             if (userDataResult.success) {
               setUserData(userDataResult.data);
+            welcomeName = userDataResult.data.firstName || welcomeName;
             }
           } catch (error) {
             console.error('Failed to get user data after restore:', error);
@@ -2786,7 +2794,7 @@ const handleAskMedicalAI = async () => {
   const DashboardHelpModal = createDashboardHelpModal(() => ({ showHelpModal, setShowHelpModal, lang, t, isReady, S }));
 
   // --------- Screens ----------
-  const Dashboard = createDashboard(() => ({ setRoute, S, Card, TopBar, nextReminder, user, userData }));
+  const Dashboard = createDashboard(() => ({ setRoute, openAddReminder, S, Card, TopBar, nextReminder, user, userData }));
 
   const Pharmacies = createPharmacies(() => ({ lang, pharmacies, setPharmacies, pharmaciesLoading, setPharmaciesLoading, pharmaciesError, setPharmaciesError, labsLoading, labsError, S, theme, userCountry, Header }));
 
@@ -2882,7 +2890,7 @@ const handleAskMedicalAI = async () => {
       /* Main App Content - Only show after authentication and health consent */
       <>
         <View style={{ flex: 1 }}>
-        {createAppNavigator(() => ({ route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan }))()}
+        {createAppNavigator(() => ({ openReminderOnEntry, setOpenReminderOnEntry, route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan }))()}
         </View>
 
         {/* Floating AI button */}

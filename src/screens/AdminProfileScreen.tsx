@@ -190,6 +190,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
       setTimeout(() => {
         setLoading(false);
         showAlert({
+          type: 'success',
           title: t("adminProfile.success"),
           message: t("adminProfile.profileUpdatedSuccessfully"),
           buttonText: t("adminProfile.ok"),
@@ -229,6 +230,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
       const result = await authService.resetPassword(profile.email);
       if (result.success) {
         showAlert({
+          type: 'success',
           title: t("adminProfile.success"),
           message: t("adminProfile.passwordResetEmailSent"),
           buttonText: t("adminProfile.ok"),

@@ -30,6 +30,8 @@
     "tip": "💡 Tipp: Tippen Sie auf eine beliebige Karte, um ihre Funktionen zu erkunden. Die schwebende KI-Schaltfläche unten rechts bietet Ihnen sofortigen Zugriff auf Gesundheitsberatung von unseren medizinischen KI-Assistenten."
   },
   "dashboard": {
+    "noUpcomingReminders": "Keine anstehenden Erinnerungen",
+    "addReminderAction": "Hinzuf\u00fcgen",
     "title": "Dashboard",
     "healthJournal": "Gesundheitstagebuch",
     "nextReminder": "NÃ¤chste Erinnerung",
@@ -1290,6 +1292,8 @@
     }
   },
   "ui": {
+    "successWelcomeBack": "Willkommen zur\u00fcck, {{name}}",
+    "sessionStarted": "Angemeldet",
     "reminderNotificationsOff": "Benachrichtigungen sind deaktiviert. Du kannst sie in den Einstellungen aktivieren.",
     "openNotificationSettings": "Einstellungen öffnen",
     "homeGreeting": "Hallo, {{name}}"

@@ -24,6 +24,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Reminders component moved outside App to prevent remounting
 const Reminders = ({ 
+  openAddOnEntry,
+  onAddEntryConsumed,
   theme, 
   reminders, 
   setReminders, 
@@ -68,7 +70,10 @@ const Reminders = ({
   }, []);
 
   // Form state
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd, setShowAdd] = useState(!!openAddOnEntry);
+  useEffect(() => {
+    if (openAddOnEntry) { setShowAdd(true); onAddEntryConsumed?.(); }
+  }, [openAddOnEntry, onAddEntryConsumed]);
   const [inputFocused, setInputFocused] = useState(false);
   const [editingReminderId, setEditingReminderId] = useState(null);
   const [addForm, setAddForm] = useState({

@@ -30,6 +30,8 @@
     "tip": "💡 Astuce : Appuyez sur n'importe quelle carte pour explorer ses fonctionnalités. Le bouton IA flottant en bas à droite vous donne un accès instantané aux conseils de santé de nos assistants médicaux IA."
   },
   "dashboard": {
+    "noUpcomingReminders": "Aucun rappel \u00e0 venir",
+    "addReminderAction": "Ajouter",
     "title": "Tableau de bord",
     "healthJournal": "Journal de Santé",
     "nextReminder": "Prochain rappel",
@@ -1376,6 +1378,8 @@
     }
   },
   "ui": {
+    "successWelcomeBack": "Bon retour, {{name}}",
+    "sessionStarted": "Connexion r\u00e9ussie",
     "reminderNotificationsOff": "Les notifications sont désactivées. Vous pouvez les activer dans les réglages.",
     "openNotificationSettings": "Ouvrir les réglages",
     "homeGreeting": "Bonjour, {{name}}"

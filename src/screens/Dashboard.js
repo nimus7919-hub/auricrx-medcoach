@@ -2,7 +2,7 @@ import ReminderPermissionBanner from '../components/ReminderPermissionBanner';
 import { Text } from 'react-native';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
-import { View, ScrollView, Image } from "react-native";
+import { View, ScrollView, Image, TouchableOpacity } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
 
@@ -12,7 +12,7 @@ import { styles } from "./appStyles";
 export default function createDashboard(getScope) {
   return () => {
   useUILanguage();
-    const { setRoute, S, Card, TopBar, nextReminder, user, userData } = getScope();
+    const { setRoute, openAddReminder, S, Card, TopBar, nextReminder, user, userData } = getScope();
 
     const name = (userData?.firstName || userData?.displayName || user?.displayName || user?.email?.split('@')[0] || '').trim();
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
@@ -34,12 +34,15 @@ export default function createDashboard(getScope) {
               <DynamicText type="card" style={[styles.widgetSub, { fontFamily: 'Inter_600SemiBold' }]}>
                 {S.nextReminder}
               </DynamicText>
-              <DynamicText type="card" style={[styles.widgetBig, { fontFamily: 'Inter_900Black' }]}>
-                {nextReminder?.name || '—'}
-              </DynamicText>
-              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>
-                {nextReminder?.time || '--:--'}
-              </DynamicText>
+              {nextReminder ? <>
+                <DynamicText type="card" style={[styles.widgetBig, { fontFamily: 'Inter_900Black' }]}>{nextReminder.name}</DynamicText>
+                <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>{nextReminder.time}</DynamicText>
+              </> : <>
+                <DynamicText type="card" style={{ fontSize: 15, marginTop: 10 }}>{uiI18n.t('dashboard.noUpcomingReminders')}</DynamicText>
+                <TouchableOpacity accessibilityRole="button" onPress={openAddReminder} style={{ alignSelf: 'flex-start', paddingVertical: 12, paddingRight: 16 }}>
+                  <Text style={{ color: '#D4AF37', fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>{uiI18n.t('dashboard.addReminderAction')}</Text>
+                </TouchableOpacity>
+              </>}
               <ReminderPermissionBanner />
             </View>
           </View>

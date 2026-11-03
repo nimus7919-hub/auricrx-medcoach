@@ -30,6 +30,8 @@
     "tip": "💡 Dica: Toque em qualquer cartão para explorar seus recursos. O botão de IA flutuante no canto inferior direito oferece acesso instantâneo a conselhos de saúde de nossos assistentes médicos de IA."
   },
   "dashboard": {
+    "noUpcomingReminders": "Nenhum lembrete pr\u00f3ximo",
+    "addReminderAction": "Adicionar",
     "title": "Painel",
     "healthJournal": "Diário de Saúde",
     "nextReminder": "Próximo lembrete",
@@ -1370,6 +1372,8 @@
     }
   },
   "ui": {
+    "successWelcomeBack": "Bem-vindo de volta, {{name}}",
+    "sessionStarted": "Sess\u00e3o iniciada",
     "reminderNotificationsOff": "As notificações estão desativadas. Você pode ativá-las nas configurações.",
     "openNotificationSettings": "Abrir configurações",
     "homeGreeting": "Olá, {{name}}"

@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Stop, Rect, Line, Path } from 'react-native-svg';
 import AuricWordmark from '../components/AuricWordmark';
 import { vip } from '../theme/vip';
+import { showSuccessToast } from '../components/SuccessToast';
 import useTranslation from '../hooks/useTranslation';
 import { gold as GOLD } from '../theme/colors';
 import React, { useEffect, useState } from 'react';
@@ -239,7 +240,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
               <TouchableOpacity accessibilityLabel={t.password} accessibilityState={{selected:showPassword}} onPressIn={() => setShowPassword(true)} onPressOut={() => setShowPassword(false)} style={{minWidth:32,minHeight:28,alignItems:'center',justifyContent:'center'}}><Feather name={showPassword ? 'eye-off' : 'eye'} size={16} color={vip.colors.gold}/></TouchableOpacity>
             </View>
             <TouchableOpacity accessibilityRole="button" disabled={loading || googleLoading} onPress={onSignIn} activeOpacity={0.85} style={[styles.goldButton, (loading || googleLoading) && {opacity: 0.6}]}><LinearGradient colors={['#F7D798', '#C18B3D', '#ECC77E', '#AD752B']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.goldContent}><LinearGradient pointerEvents="none" colors={['rgba(255,255,255,0.35)', 'rgba(255,255,255,0)']} style={styles.buttonGloss}/><Text style={styles.goldText}>{loading ? copy.loading : copy.signIn}</Text></LinearGradient></TouchableOpacity>
-            <TouchableOpacity accessibilityRole="button" style={styles.forgot} onPress={async () => { if (!email.trim()) { Alert.alert(copy.forgot, copy.resetHelp); return; } const result = await authService.resetPassword(email.trim()); Alert.alert(copy.forgot, result.success ? copy.resetSent : googleAuthText(selectedLanguage).error); }}><Text style={styles.link}>{copy.forgot}</Text></TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" style={styles.forgot} onPress={async () => { if (!email.trim()) { Alert.alert(copy.forgot, copy.resetHelp); return; } const result = await authService.resetPassword(email.trim()); if (result.success) { showSuccessToast(copy.resetSent); } else { Alert.alert(copy.forgot, googleAuthText(selectedLanguage).error); } }}><Text style={styles.link}>{copy.forgot}</Text></TouchableOpacity>
             {onResubscribe && <TouchableOpacity onPress={onResubscribe} style={styles.forgot}><Text style={styles.link}>{t.resubscribe}</Text></TouchableOpacity>}
           </View>
           <Text style={styles.signUp}>{copy.newHere} <Text accessibilityRole="button" style={styles.link} onPress={() => { if (!loading && !googleLoading) setShowSignUpForm(true); }}>{copy.createAccount}</Text></Text>
