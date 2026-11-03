@@ -26,7 +26,7 @@ export default function createPharmacies(getScope) {
         
         const { status } = await requestSearchLocationPermission();
         if (status !== 'granted') {
-          setPharmaciesError('Location permission denied. Please enable location services.');
+          setPharmaciesError(lang === 'es' ? 'Activa los servicios de ubicación para buscar farmacias.' : 'Enable location services to find pharmacies.');
           return;
         }
         
@@ -41,7 +41,7 @@ export default function createPharmacies(getScope) {
         console.log('🏪 Refreshed pharmacies:', nearbyPharmacies.length);
       } catch (e) {
         console.error('Error refreshing pharmacies:', e);
-        setPharmaciesError('Failed to refresh pharmacies. Please try again.');
+        setPharmaciesError(lang === 'es' ? 'No se pudieron cargar las farmacias. Intenta de nuevo.' : 'Unable to load pharmacies. Please try again.');
       } finally {
         setPharmaciesLoading(false);
       }
@@ -121,6 +121,10 @@ export default function createPharmacies(getScope) {
     return (
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Header title={S.pharmacyLocations} />
+        <View style={{ backgroundColor: '#10243A', borderColor: '#C9A962', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 12 }}>
+          <Text style={{ color: '#C9A962', fontSize: 12 }}>{lang === 'es' ? 'Farmacias cercanas - INEGI DENUE / tiendas monitoreadas por PROFECO' : 'Nearby pharmacies - INEGI DENUE / stores monitored by PROFECO'}</Text>
+          <Text style={{ color: '#fff', fontSize: 10 }}>Fuente: PROFECO, Quién es Quién en los Precios (CC-BY 4.0)</Text>
+        </View>
           
           {/* Header with refresh button */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -133,10 +137,10 @@ export default function createPharmacies(getScope) {
             <PremiumButton 
               style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8 }]} 
               onPress={refreshPharmacies}
-              disabled={labsLoading}
+              disabled={pharmaciesLoading}
             >
               <DynamicText type="card" style={[styles.btnText, { fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
-                {labsLoading ? S.loading : S.refresh}
+                {pharmaciesLoading ? S.loading : S.refresh}
               </DynamicText>
             </PremiumButton>
           </View>

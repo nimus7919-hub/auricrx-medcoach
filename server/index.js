@@ -68,6 +68,7 @@ function requireDevelopmentAdmin(req, res, next) {
   if (!adminKey || req.headers['x-admin-key'] !== adminKey) return res.status(401).end();
   next();
 }
+require('./profeco').install(app, require('./neon').neonClient);
 app.use(['/debug', '/admin', '/api/admin', '/test-tools'], requireDevelopmentAdmin);
 
 const HEALTH_SAFETY_PROMPT = "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation.";

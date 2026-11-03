@@ -53,7 +53,7 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   const brands = encodeURIComponent('HEB,Walmart,Target,Costco,CVS,Walgreens');
   const limit = opts?.limit ?? 15;
   const noCache = opts?.noCache ? '&noCache=1' : '';
-  const url = `${API_BASE}/pharmacies/nearby?lat=${lat}&lon=${lon}&limit=${limit}&lang=${encodeURIComponent(lang)}&brands=${brands}${noCache}`;
+  const url = `${API_BASE}/api/pharmacies/nearby?lat=${lat}&lng=${lon}&radius=3000`;
   
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -88,64 +88,16 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
   }
 }
 
-export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string }, opts?: { currency?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number; fxTs?: number } }> {
-  console.log('🔍 DEBUG: getMedicationPrices called with:', {
-    pharmaciesCount: pharmacies.length,
-    medication: medication.name,
-    currency: opts?.currency,
-    apiBase: API_BASE
-  });
-  
-  try {
-    console.log('🔍 DEBUG: Making API call to:', `${API_BASE}/pharmacies/prices`);
-    const res = await fetch(`${API_BASE}/pharmacies/prices`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ medication, pharmacies, currency: opts?.currency }),
-    });
-    
-    console.log('🔍 DEBUG: API response status:', res.status);
-    
-    if (!res.ok) {
-      console.log('❌ DEBUG: API call failed with status:', res.status);
-      throw new Error(`HTTP ${res.status}`);
-    }
-    
-    const json = await res.json();
-    console.log('🔍 DEBUG: API response data:', {
-      ok: json.ok,
-      pricesCount: json.prices?.length,
-      samplePrices: json.prices?.slice(0, 3).map((p: any) => ({
-        name: p.name,
-        price: p.price,
-        priceNotAvailable: p.priceNotAvailable
-      }))
-    });
-    
-    if (!json.ok) {
-      console.log('❌ DEBUG: API returned error:', json.error);
-      throw new Error(json.error || 'api_error');
-    }
-    
-    return { prices: json.prices || [], meta: json.meta };
-  } catch (e) {
-    console.warn('🔍 DEBUG: API call failed, using fallback:', (e instanceof Error ? e.message : String(e)));
-    console.log('🔍 DEBUG: Fallback - returning "Price not available" for all pharmacies');
-    console.log('🔍 DEBUG: Error details:', {
-      error: (e instanceof Error ? e.message : String(e)),
-      stack: (e instanceof Error ? e.stack : undefined),
-      apiUrl: `${API_BASE}/pharmacies/prices`,
-      medication: medication.name,
-      pharmaciesCount: pharmacies.length
-    });
-    // Fallback: Show "Price not available" instead of mock prices
-    return { prices: pharmacies.map((p) => ({
-      ...p,
-      price: null, // No price available
-      priceNotAvailable: true,
-      pickup: true,
-      delivery: Math.random() > 0.5,
-      requiresCoupon: Math.random() > 0.8,
-    })) };
-  }
+export type QQPQuote = {
+  as_of: string | null; fallback: boolean; source: string;
+  summary: { min: number | null; avg: number | null; max: number | null; count: number };
+};
+export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string }, opts?: { currency?: string; lat?: number; lng?: number; state?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number }; quote?: QQPQuote }> {
+  const params = new URLSearchParams({ med: medication.name });
+  if (opts?.lat != null && opts?.lng != null) { params.set('lat', String(opts.lat)); params.set('lng', String(opts.lng)); }
+  if (opts?.state) params.set('state', opts.state);
+  const response = await fetch(API_BASE + '/api/prices?' + params.toString());
+  if (!response.ok) throw new Error('Price data unavailable');
+  const data = await response.json();
+  return { prices: (data.nearest || []).map((p: any) => ({ ...p, priceNotAvailable: p.price == null })), meta: { currency: 'MXN', rate: 1 }, quote: data };
 }

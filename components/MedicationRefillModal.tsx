@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";
 import { openInMaps } from "../utils/maps";
 import { API_BASE } from "../src/config/api";
-import { findNearbyPharmacies, getMedicationPrices, StorePrice } from "../services/pharmacySearch";
+import { findNearbyPharmacies, getMedicationPrices, StorePrice, QQPQuote } from "../services/pharmacySearch";
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 import medicationDataCollector from "../services/medicationDataCollector";
@@ -42,6 +42,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     return () => { active = false; };
   }, [visible]);
   const [results, setResults] = useState<StorePrice[]>([]);
+  const [qqpQuote, setQqpQuote] = useState<QQPQuote | null>(null);
+  const [priceError, setPriceError] = useState(false);
   const [sort, setSort] = useState<'distance'|'price'|'name'>('distance');
   const [descending, setDescending] = useState(false);
   const [fxMeta, setFxMeta] = useState<{ currency: string; rate: number; fxTs?: number }|null>(null);
@@ -84,9 +86,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   async function load() {
     try {
       setLoading(true);
+      setResults([]); setQqpQuote(null); setPriceError(false);
       
       // Use pre-loaded data if available for faster loading
-      let coords = preloadedCoords || { latitude: 37.7749, longitude: -122.4194 }; // fallback (SF)
+      let hasCoords = !!preloadedCoords;
+      let coords = preloadedCoords || { latitude: 0, longitude: 0 };
       let determinedCurrency: string = preloadedCurrency || 'USD';
       let near = preloadedPharmacies || [];
       
@@ -97,6 +101,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           try {
             const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
             coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+            hasCoords = true;
             // cache it
             AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
           } catch {}
@@ -108,14 +113,15 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
               const parsed = JSON.parse(cached);
               if (parsed && typeof parsed.latitude==='number' && typeof parsed.longitude==='number') {
                 coords = { latitude: parsed.latitude, longitude: parsed.longitude };
+                hasCoords = true;
               }
             }
           } catch {}
         }
-        setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
+        setCoordsUsed(hasCoords ? { lat: coords.latitude, lon: coords.longitude } : null);
         
         // Determine currency from country (reverse geocode); fall back to language mapping then USD
-        if (!preloadedCurrency) {
+        if (!preloadedCurrency && hasCoords) {
           try {
             const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
             const cc = geo?.[0]?.isoCountryCode?.toUpperCase();
@@ -145,36 +151,26 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         setCurrency(determinedCurrency); // single definitive assignment
         
         // Load pharmacies if not pre-loaded
-        if (!preloadedPharmacies) {
-          near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang);
+        if (!preloadedPharmacies && hasCoords) {
+          try { near = await findNearbyPharmacies(coords.latitude, coords.longitude, lang); } catch { near = []; }
         }
       } else {
         // Use pre-loaded data
-        setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
+        setCoordsUsed(hasCoords ? { lat: coords.latitude, lon: coords.longitude } : null);
         setCurrency(determinedCurrency);
         console.log('🚀 Using pre-loaded refill data for faster loading');
       }
       
-      // Check if no pharmacies found - reload the modal
-      if (!near || near.length === 0) {
-        console.log('⚠️ No pharmacies found - reloading modal');
-        Alert.alert(
-          strings.noPharmaciesFound || 'No Pharmacies Found',
-          strings.noPharmaciesMessage || 'No pharmacies found in your area. Please try again.',
-          [
-            { text: strings.retry || 'Retry', onPress: () => load() },
-            { text: strings.cancel || 'Cancel', onPress: () => onClose() }
-          ]
-        );
-        return;
-      }
-      
-      const { prices, meta } = await getMedicationPrices(near, medication, { currency: 'MXN' });
+      let state: string | undefined;
+      try { if (hasCoords) state = (await Location.reverseGeocodeAsync(coords))[0]?.region || undefined; } catch {}
+      const { prices, meta, quote } = await getMedicationPrices(near, medication, { currency: 'MXN', lat: hasCoords ? coords.latitude : undefined, lng: hasCoords ? coords.longitude : undefined, state });
+      setQqpQuote(quote || null);
       setResults(prices);
       setCurrency('MXN');
       if (meta) setFxMeta(meta);
       setMockMode(false);
     } catch (e) {
+      setPriceError(true);
       console.warn('Refill load error', e);
     } finally {
       setLoading(false);
@@ -499,8 +495,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           {item.observed_at && (
             <Text style={{ color: colors.sub, fontSize: 11, maxWidth: 210 }}>
               {lang === 'es'
-                ? 'Precio de referencia consultado el ' + new Date(item.observed_at).toLocaleDateString('es-MX') + '. Puede variar en tienda.'
-                : 'Reference price checked on ' + new Date(item.observed_at).toLocaleDateString('en-US') + '. May vary in store.'}
+                ? 'Precio aproximado al ' + new Date(item.observed_at).toLocaleDateString('es-MX') + '. Puede variar en tienda.'
+                : 'Approximate price as of ' + new Date(item.observed_at).toLocaleDateString('en-US') + '. May vary in store.'}
             </Text>
           )}
           {item.verified && !item.priceNotAvailable && <Text style={{ color: colors.sub, fontSize: 11 }}>Precio verificado</Text>}
@@ -535,6 +531,19 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Text style={{ color: colors.sub, fontSize: 14 }}>
               {medication.name} • {medication.dosage}{medication.quantity && medication.quantity !== 'N/A' ? ` • ${medication.quantity}` : ""}{medication.lastRefill ? ` • ${(strings.lastRefill||'Last refill')}: ${medication.lastRefill}` : ""}
             </Text>
+            {qqpQuote && (
+              <View style={{ backgroundColor: '#10243A', borderColor: colors.gold, borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 }}>
+                <Text style={{ color: colors.gold, fontWeight: '600' }}>
+                  {lang === 'es' ? 'Precio aproximado' : 'Approximate price'}{qqpQuote.as_of ? ' - ' + String(qqpQuote.as_of).slice(0, 10) : ''}
+                </Text>
+                <Text style={{ color: '#fff', fontSize: 12 }}>
+                  {qqpQuote.summary.count ? 'MXN ' + Number(qqpQuote.summary.min).toFixed(2) + ' - ' + Number(qqpQuote.summary.max).toFixed(2) + (lang === 'es' ? ' - Promedio ' : ' - Average ') + Number(qqpQuote.summary.avg).toFixed(2) : (lang === 'es' ? 'Sin precios recientes para este medicamento.' : 'No recent prices for this medication.')}
+                </Text>
+                {qqpQuote.fallback && <Text style={{ color: '#fff', fontSize: 11 }}>{lang === 'es' ? 'Referencia nacional: sin datos para tu estado.' : 'National reference: no data for your state.'}</Text>}
+                <Text style={{ color: '#fff', fontSize: 10 }}>Fuente: PROFECO, Quién es Quién en los Precios (CC-BY 4.0)</Text>
+              </View>
+            )}
+            {priceError && <Text style={{ color: colors.gold }}>{lang === 'es' ? 'No se pudieron cargar los precios. Intenta de nuevo.' : 'Unable to load prices. Please try again.'}</Text>}
             {mockMode && (
               <View style={{ backgroundColor: '#fbbf24', paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.xl }}>
                 <Text style={{ color:'#000', fontSize:12, fontWeight:'600' }}>Mock data (add GOOGLE_PLACES_API_KEY for live pharmacies)</Text>
@@ -572,7 +581,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 <Text style={{ color: colors.text, fontSize: 12 }}>{strings.refresh||'Refresh'}</Text>
               </Pressable>
             </View>
-            {fxMeta && (
+            {fxMeta && currency !== 'MXN' && (
               <Text style={{ color: colors.sub, fontSize: 10, marginTop: spacing.xs }}>
                 {(strings.fxLabel||'FX')+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
               </Text>
