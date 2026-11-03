@@ -1,15 +1,9 @@
+import Modal from './BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { gold as GOLD } from '../theme/colors';
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useWallpaper } from '../contexts/WallpaperContext';

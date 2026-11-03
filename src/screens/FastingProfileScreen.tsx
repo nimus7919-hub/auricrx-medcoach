@@ -1,20 +1,10 @@
+import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  Image,
-  Alert,
-  TextInput,
-  Modal,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, Image, Alert, TextInput } from 'react-native';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 

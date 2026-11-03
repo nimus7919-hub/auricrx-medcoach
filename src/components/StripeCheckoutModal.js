@@ -1,3 +1,4 @@
+import Modal from './BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from './PremiumButton';
@@ -5,15 +6,7 @@ import PremiumButton from './PremiumButton';
 // Stripe checkout modal matching app theme
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';

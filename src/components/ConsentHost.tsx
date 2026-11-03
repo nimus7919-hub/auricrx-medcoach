@@ -1,8 +1,9 @@
+import Modal from './BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Text, ScrollView, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
+import { Text, ScrollView, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { vip } from '../theme/vip';
 import ConsentChoices from './ConsentChoices';
 import { consentRequest, registerConsentPrompt, readCachedConsent, hasCurrentConsent } from '../services/consentService';
@@ -87,7 +88,15 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
     } catch (e: any) { setError(e.message); }
     finally { setBusy(false); }
   };
-  return <Modal visible={visible} onRequestClose={() => {}} animationType="slide">
+  return <Modal visible={visible} onRequestClose={() => {
+    if (document) { setDocument(''); return; }
+    setVisible(false);
+    onPrivacyClose();
+    rejectPrompt?.(new Error(uiI18n.t('ui.consentCanceled')));
+    setRejectPrompt(null); setResolvePrompt(null);
+    // Cancel required consent without granting access to protected screens.
+    if (user && !privacyOpen) void authService.signOut();
+  }} animationType="slide">
     <KeyboardForm><ScrollView keyboardShouldPersistTaps="handled" style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.card}>
       <Text accessibilityRole="header" style={styles.title}>{uiI18n.t("localized.ConsentHost.text93")}</Text>

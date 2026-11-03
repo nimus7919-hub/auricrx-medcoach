@@ -1,22 +1,9 @@
+import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ActivityIndicator,
-  Dimensions,
-  StyleSheet,
-  Modal,
-  Platform,
-  Vibration,
-  Animated,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Dimensions, StyleSheet, Platform, Vibration, Animated } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';

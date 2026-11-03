@@ -1,4 +1,5 @@
 {
+  "navigation": { "pressBackAgainToExit": "Presiona atras de nuevo para salir" },
   "help": {
     "title": "Guía del Panel",
     "intro": "¡Bienvenido a tu panel de salud! Cada tarjeta te ayuda a gestionar diferentes aspectos de tu salud. Esto es lo que hace cada una:",

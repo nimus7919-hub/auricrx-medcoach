@@ -1,6 +1,7 @@
+import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
-import { View, TouchableOpacity, Modal } from "react-native";
+import { View, TouchableOpacity } from 'react-native';
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
 

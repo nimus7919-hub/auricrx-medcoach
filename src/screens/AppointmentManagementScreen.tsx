@@ -1,26 +1,11 @@
+import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Animated,
-  StatusBar,
-  Platform,
-  Vibration,
-  Dimensions,
-  Modal,
-  TextInput,
-  Image,
-  Linking,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Animated, StatusBar, Platform, Vibration, Dimensions, TextInput, Image, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';

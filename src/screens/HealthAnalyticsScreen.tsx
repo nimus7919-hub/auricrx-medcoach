@@ -1,24 +1,10 @@
+import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Animated,
-  StatusBar,
-  Platform,
-  Vibration,
-  Dimensions,
-  Modal,
-  TextInput,
-  Image,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Animated, StatusBar, Platform, Vibration, Dimensions, TextInput, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as Print from 'expo-print';

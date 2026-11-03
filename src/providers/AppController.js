@@ -1,3 +1,4 @@
+import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
@@ -12,7 +13,7 @@ import ConsentHost from "./../components/ConsentHost";
 import { API_BASE } from "./../config/api";
 import { useMedicalStream } from "./../hooks/useMedicalStream";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from 'react-native';
 import TypingEffect from "./../components/TypingEffect";
 import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
@@ -75,6 +76,7 @@ import createRowSwitch from "../screens/RowSwitch";
 import createSwitchRow from "../screens/SwitchRow";
 import createAppNavigator from "../navigation/AppNavigator";
 
+import useAndroidBackNavigation from '../navigation/useAndroidBackNavigation';
 import AppProviders from "./AppProviders";
 
 export default function App() {
@@ -86,7 +88,7 @@ export default function App() {
   console.log('📱 App component rendered');
 
   // Custom alert hook
-  const { alert, showAlert, handlePress } = useCustomAlert();
+  const { alert, showAlert, hideAlert, handlePress } = useCustomAlert();
 
   // Load fonts first (simple gate)
   const [fontsLoaded] = useFonts({
@@ -98,7 +100,6 @@ export default function App() {
   });
 
   // Put hooks/state INSIDE the component, before returns
-  const [route, setRoute] = useState('dashboard');
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showCancelMembershipModal, setShowCancelMembershipModal] = useState(false);
   const [showMembershipResultModal, setShowMembershipResultModal] = useState(false);
@@ -113,6 +114,7 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(true); // Start with auth screen
   const [isRestoringAuth, setIsRestoringAuth] = useState(true); // Track auth restoration
   const [isLoading, setIsLoading] = useState(true); // Show loading screen initially
+  const [route, setRoute] = useAndroidBackNavigation(!showAuth && !isRestoringAuth && !isLoading);
   const [resetAuthToSignIn, setResetAuthToSignIn] = useState(0); // Counter to trigger reset
 
   // Authentication handlers
@@ -3017,6 +3019,7 @@ const handleAskMedicalAI = async () => {
       message={alert?.message || ''}
       buttonText={alert?.buttonText || uiI18n.t("adminProfile.ok")}
       onPress={handlePress}
+        onDismiss={hideAlert}
     />
 
     {/* Stripe Checkout Modal */}

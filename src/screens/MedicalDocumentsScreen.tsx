@@ -1,28 +1,10 @@
+import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ActivityIndicator,
-  Dimensions,
-  StyleSheet,
-  TextInput,
-  Animated,
-  StatusBar,
-  Platform,
-  Vibration,
-  Share,
-  Clipboard,
-  Modal,
-  Linking,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Dimensions, StyleSheet, TextInput, Animated, StatusBar, Platform, Vibration, Share, Clipboard, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';

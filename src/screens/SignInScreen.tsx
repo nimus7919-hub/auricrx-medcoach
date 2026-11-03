@@ -1,3 +1,4 @@
+import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { BlurView } from 'expo-blur';
@@ -8,7 +9,7 @@ import { vip } from '../theme/vip';
 import useTranslation from '../hooks/useTranslation';
 import { gold as GOLD } from '../theme/colors';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, SafeAreaView, Alert, ScrollView, Modal, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, SafeAreaView, Alert, ScrollView, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 
 // Expo:
 import { LinearGradient } from "expo-linear-gradient";

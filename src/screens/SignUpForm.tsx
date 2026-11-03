@@ -1,3 +1,4 @@
+import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { BlurView } from 'expo-blur';
@@ -7,21 +8,7 @@ import AuricWordmark from '../components/AuricWordmark';
 import { vip } from '../theme/vip';
 import { gold as GOLD } from '../theme/colors';
 import React, { useState, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-  Alert,
-  Platform,
-  KeyboardAvoidingView,
-  FlatList,
-  Modal,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert, Platform, KeyboardAvoidingView, FlatList, ActivityIndicator } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";
 import authService from '../services/authService';
 import GoogleAuthButton, { googleAuthText } from '../components/GoogleAuthButton';

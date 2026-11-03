@@ -1,3 +1,4 @@
+import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
@@ -5,23 +6,7 @@ import { authenticatedFetch } from '../services/authenticatedFetch';
 import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Animated,
-  StatusBar,
-  Image,
-  Platform,
-  Vibration,
-  Dimensions,
-  Modal,
-  TextInput,
-  Share,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Animated, StatusBar, Image, Platform, Vibration, Dimensions, TextInput, Share } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -2750,6 +2735,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       {/* Saved Confirmation Modal */}
       <Modal
         visible={showSavedConfirmation}
+        onRequestClose={() => setShowSavedConfirmation(false)}
         transparent
         animationType="fade"
       >
@@ -2871,7 +2857,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       <Modal
         visible={showInteractionLoadingModal}
         animationType="fade"
-        onRequestClose={() => {}}
+        onRequestClose={() => setShowInteractionLoadingModal(false)}
       >
         <View style={[dynamicStyles.modalOverlay, { justifyContent: 'center' }]}>
           <View style={[dynamicStyles.modalContent, { 

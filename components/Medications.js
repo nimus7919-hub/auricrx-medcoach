@@ -1,3 +1,4 @@
+import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
@@ -9,7 +10,7 @@ import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';

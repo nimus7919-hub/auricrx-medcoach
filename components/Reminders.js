@@ -1,3 +1,4 @@
+import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
@@ -8,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Platform, Keyboard, Modal, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Platform, Keyboard, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { saveReminderNotification, testReminderNotification } from '../src/services/reminderNotifications';

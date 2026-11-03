@@ -1,4 +1,5 @@
 {
+  "navigation": { "pressBackAgainToExit": "Press back again to exit" },
   "dashboard": {
     "title": "Dashboard",
     "healthJournal": "Health Journal Widget",

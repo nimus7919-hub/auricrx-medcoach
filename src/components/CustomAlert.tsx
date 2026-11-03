@@ -1,12 +1,6 @@
+import Modal from './BackModal';
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 
@@ -18,6 +12,7 @@ interface CustomAlertProps {
   message: string;
   buttonText: string;
   onPress: () => void;
+  onDismiss?: () => void;
 }
 
 const GOLD = {
@@ -31,13 +26,13 @@ const GOLD = {
   accent: "#FFB020",
 };
 
-export default function CustomAlert({ visible, title, message, buttonText, onPress }: CustomAlertProps) {
+export default function CustomAlert({ visible, title, message, buttonText, onPress, onDismiss }: CustomAlertProps) {
   return (
     <Modal
       transparent
       visible={visible}
       animationType="fade"
-      onRequestClose={onPress}
+      onRequestClose={onDismiss || onPress}
     >
       <View style={styles.overlay}>
         <BlurView intensity={20} style={styles.blurContainer}>

@@ -1,8 +1,9 @@
+import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from './KeyboardForm';
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Alert, TextInput, ScrollView } from "react-native";
+import { View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Alert, TextInput, ScrollView } from 'react-native';
 import * as Location from "expo-location";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";

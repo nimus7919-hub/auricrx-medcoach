@@ -1,8 +1,9 @@
+import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import { ScrollView } from 'react-native';
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, TextInput, Modal, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, FlatList, TextInput, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { HERBS, Herb } from '../data/herbs';

@@ -1,9 +1,10 @@
+import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
 import { requestSearchLocationPermission } from "./../lib/locationPermission";
 import { useState } from "react";
-import { View, Text, ScrollView, Alert, Modal, Linking, Platform } from "react-native";
+import { View, Text, ScrollView, Alert, Linking, Platform } from 'react-native';
 import * as Location from "expo-location";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
@@ -311,7 +312,7 @@ export default function createLabs(getScope) {
       </ScrollView>
 
         {/* Test Types Modal */}
-        <Modal visible={showTestTypes} transparent animationType="slide">
+        <Modal visible={showTestTypes} transparent animationType="slide" onRequestClose={() => setShowTestTypes(false)}>
           <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 20 }}>
             <View style={{ 
               backgroundColor: theme.card, 

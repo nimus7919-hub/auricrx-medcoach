@@ -1,3 +1,4 @@
+import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from './KeyboardForm';
@@ -5,7 +6,7 @@ import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Keyboard, Alert, Linking, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
@@ -1108,7 +1109,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       </Modal>
 
       {/* Status Update Modal */}
-      <Modal visible={showStatusSheet} animationType="slide" transparent>
+      <Modal visible={showStatusSheet} animationType="slide" transparent onRequestClose={() => setShowStatusSheet(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={styles.modalTitle}>{S.updateStatus}</DynamicText>
@@ -1129,7 +1130,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       </Modal>
 
       {/* AI Analysis Modal */}
-      <Modal visible={showAiAnalysis} animationType="slide" transparent>
+      <Modal visible={showAiAnalysis} animationType="slide" transparent onRequestClose={() => setShowAiAnalysis(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), maxHeight: '80%' }]}>
             <View style={styles.modalHeader}>
