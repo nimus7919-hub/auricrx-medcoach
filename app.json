@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#0d1019"
     },
     "scheme": [
       "auricrx-medcoach",
@@ -59,7 +59,9 @@
       [
         "expo-notifications",
         {
-          "defaultChannel": "medication-reminders-v2"
+          "defaultChannel": "medication-reminders-v2",
+          "icon": "./assets/notification-icon-auric.png",
+          "color": "#D4AF37"
         }
       ]
     ],

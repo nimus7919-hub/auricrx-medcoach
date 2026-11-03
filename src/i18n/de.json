@@ -1,4 +1,5 @@
 {
+  "documentScanner": {"scan":"Scannen"},
   "help": {
     "title": "Dashboard-Anleitung",
     "intro": "Willkommen auf Ihrem Gesundheits-Dashboard! Jede Karte hilft Ihnen, verschiedene Aspekte Ihrer Gesundheit zu verwalten. Hier ist, was jede Karte macht:",

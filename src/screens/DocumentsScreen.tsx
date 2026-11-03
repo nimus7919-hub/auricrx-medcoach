@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { createDocumentPdf } from '../lib/documentPdf';
+import { scanDocumentPages } from '../lib/documentScanner';
 import * as Sharing from 'expo-sharing';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
@@ -74,6 +75,15 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
   };
 
   const addFromCamera = async () => {
+    const scan = await scanDocumentPages();
+    if (scan.status === 'cancel') return;
+    if (scan.status === 'success') {
+      setPages(prev => [...prev, ...scan.images.map((uri, index) => ({
+        id: `${Date.now()}_${index}_${Math.random().toString(36).slice(2)}`,
+        uri, timestamp: Date.now() + index,
+      }))]);
+      return;
+    }
     if (!(await requestCameraPermissions())) return;
     
     try {
@@ -223,7 +233,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
             style={[styles.actionButton, { backgroundColor: '#D4AF37' + 'CC' }]}
           >
             <DynamicText type="card" style={styles.actionButtonText}>
-              {Platform.OS === 'web' ? t('documents.addPhotos') : t('documents.addFromCamera')}
+              {Platform.OS === 'web' ? t('documents.addPhotos') : t('documentScanner.scan')}
             </DynamicText>
           </TouchableOpacity>
           

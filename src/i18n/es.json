@@ -1,4 +1,5 @@
 {
+  "documentScanner": {"scan":"Escanear"},
   "navigation": {
     "pressBackAgainToExit": "Presiona atras de nuevo para salir"
   },

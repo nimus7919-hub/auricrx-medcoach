@@ -15,6 +15,7 @@ import * as IntentLauncher from 'expo-intent-launcher';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import { createDocumentPdf } from '../lib/documentPdf';
+import { scanDocumentPages } from '../lib/documentScanner';
 import { SecureSharing } from '../lib/SecureSharing';
 import DynamicText from '../components/DynamicText';
 import PDFViewer from '../components/PDFViewer';
@@ -32,6 +33,7 @@ interface MedicalDocumentsScreenProps {
 type DocumentCategory = 'photo_id' | 'birth_certificate' | 'insurance' | 'lab_results' | 'prescriptions' | 'medical_records' | 'other';
 
 interface DocumentItem {
+  pdfUri?: string;
   mimeType?: string;
   updatedAt?: string;
   id: string;
@@ -732,6 +734,29 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const takePhoto = async (category: DocumentCategory, type: 'front' | 'back' | 'single' = 'single') => {
     try {
+      const scan = await scanDocumentPages(type === 'single' ? 100 : 1);
+      if (scan.status === 'cancel') return;
+      if (scan.status === 'success') {
+        // Retain ID originals for the existing front/back preview and pairing UI.
+        const sources = await Promise.all(scan.images.map(async (uri, index) => {
+          const saved = `${FileSystem.documentDirectory}scan_${Date.now()}_${index}_${Math.random().toString(36).slice(2)}.jpg`;
+          await FileSystem.copyAsync({ from: uri, to: saved });
+          return { uri: saved, type };
+        }));
+        const pdfUri = await createDocumentPdf(sources, type !== 'single');
+        const newDocument: DocumentItem = {
+          id: `doc_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('medicalDocuments.pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+          uri: type === 'single' ? pdfUri : sources[0].uri,
+          pdfUri,
+          mimeType: type === 'single' ? 'application/pdf' : 'image/jpeg',
+          type, category, createdAt: new Date().toISOString(),
+        };
+        await saveDocuments([...documents, newDocument]);
+        triggerHaptic('medium');
+        showCustomAlertMsg(t('common.success'), t('medicalDocuments.uploadSuccess'), 'success');
+        return;
+      }
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
@@ -753,10 +778,15 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
+        const savedImageUri = `${FileSystem.documentDirectory}photo_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+        await FileSystem.copyAsync({ from: asset.uri, to: savedImageUri });
+        const pdfUri = await createDocumentPdf([{ uri: savedImageUri, type }], type !== 'single');
         const newDocument: DocumentItem = {
           id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.document") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-          uri: asset.uri,
+          uri: savedImageUri,
+          pdfUri,
+          mimeType: 'image/jpeg',
           type,
           category,
           createdAt: new Date().toISOString(),
@@ -791,6 +821,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const shareDocument = async (document: DocumentItem) => {
     try {
+      if (document.pdfUri) {
+        const pair = document.type !== 'single' ? findIDPair(document) : null;
+        const uri = pair?.front && pair?.back
+          ? await createDocumentPdf([pair.front, pair.back], true) : document.pdfUri;
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: document.name });
+        return;
+      }
       triggerHaptic('light');
       
       console.log('Sharing document:', {
@@ -2307,6 +2344,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const viewDocument = async (document: DocumentItem) => {
     try {
+      if (document.pdfUri) {
+        const pair = document.type !== 'single' ? findIDPair(document) : null;
+        const uri = pair?.front && pair?.back
+          ? await createDocumentPdf([pair.front, pair.back], true) : document.pdfUri;
+        setSelectedDocument({ ...document, uri, mimeType: 'application/pdf' });
+        setShowPDFViewer(true);
+        return;
+      }
       triggerHaptic('light');
       
       console.log('📄 Opening document:', {
@@ -2949,7 +2994,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("medicalDocuments.takePhoto")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
+                      📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -2961,7 +3006,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("medicalDocuments.takePhoto")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
+                      📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -3026,7 +3071,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("medicalDocuments.takePhoto")}
+                      📷 {t("documentScanner.scan")}
                     </DynamicText>
                   </TouchableOpacity>
                   

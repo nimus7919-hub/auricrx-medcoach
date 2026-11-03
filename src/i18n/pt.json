@@ -1,4 +1,5 @@
 {
+  "documentScanner": {"scan":"Digitalizar"},
   "help": {
     "title": "Guia do Painel",
     "intro": "Bem-vindo ao seu painel de saúde! Cada cartão ajuda você a gerenciar diferentes aspectos da sua saúde. Aqui está o que cada um faz:",

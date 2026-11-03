@@ -1,4 +1,5 @@
 {
+  "documentScanner": {"scan":"Scan"},
   "navigation": {
     "pressBackAgainToExit": "Press back again to exit"
   },
