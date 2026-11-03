@@ -1,4 +1,20 @@
 {
+  "documentUI": {
+    "subtitle": "Elige cómo agregar tu documento.",
+    "front": "Lado frontal",
+    "back": "Lado trasero",
+    "scan": "Escanear documento",
+    "scanHint": "Detección automática de bordes",
+    "photo": "Tomar foto",
+    "photoHint": "Captura manual a PDF",
+    "gallery": "Desde galería",
+    "galleryHint": "Selecciona una imagen guardada",
+    "pdf": "Subir PDF",
+    "pdfHint": "Selecciona un archivo PDF",
+    "view": "Ver",
+    "share": "Compartir",
+    "delete": "Eliminar"
+  },
   "locationSearch": {
     "disclosure": "Usamos tu ubicaci?n solo para buscar farmacias o laboratorios cercanos. No la guardamos ni la usamos para seguimiento. Las b?squedas de farmacias usan datos de INEGI DENUE/PROFECO a trav?s de nuestro servidor; las b?squedas de laboratorios y las distancias opcionales en auto usan Google Places/Maps.",
     "reset": "Restablecer permiso de ubicaci?n",

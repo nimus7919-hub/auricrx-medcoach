@@ -1,3 +1,5 @@
+import { Ionicons } from '@expo/vector-icons';
+import { AddDocumentSheet, DocumentIconButton, DocumentPill } from '../components/DocumentControls';
 import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
@@ -176,20 +178,24 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
       marginBottom: 6,
       flexDirection: 'row',
       alignItems: 'center',
+      flexWrap: 'wrap',
+      rowGap: 8,
       borderColor: getCardBorderColor(),
       borderWidth: 1,
     },
     documentImage: {
-      width: 28,
-      height: 28,
+      width: 48,
+      height: 48,
       borderRadius: 4,
       marginRight: 8,
     },
     documentInfo: {
       flex: 1,
+      minWidth: 0,
     },
     documentName: {
-      fontSize: 10,
+      flexShrink: 1,
+      fontSize: 12,
       fontWeight: '500',
     },
     documentType: {
@@ -2670,38 +2676,26 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           {isSelectionMode && (
             <TouchableOpacity
               style={dynamicStyles.checkbox}
+              accessibilityRole="checkbox"
+              accessibilityLabel={document.name}
+              accessibilityState={{ checked: selectedDocuments.has(document.id) }}
               onPress={() => toggleDocumentSelection(document.id)}
             >
-              <Text style={dynamicStyles.checkboxText}>
-                {selectedDocuments.has(document.id) ? '☑️' : '☐'}
-              </Text>
+              <Ionicons name={selectedDocuments.has(document.id) ? 'checkbox-outline' : 'square-outline'} size={22} color={vip.colors.gold} />
             </TouchableOpacity>
           )}
           
-          {/* Dual image preview for ID documents */}
-          <View style={[dynamicStyles.documentImage, { flexDirection: 'row', padding: 2 }]}>
-      <Image 
-        source={{ uri: document.uri }} 
-              style={[dynamicStyles.documentImage, { flex: 1, marginRight: hasBackSide ? 1 : 0, borderRadius: 4 }]}
-        onError={(error) => {
-                console.error('Failed to load front ID thumbnail:', error);
-              }}
-            />
-            {hasBackSide && pair && pair.back && (
-              <Image 
-                source={{ uri: pair.back.uri }} 
-                style={[dynamicStyles.documentImage, { flex: 1, marginLeft: 1, borderRadius: 4 }]}
-                onError={(error) => {
-                  console.error('Failed to load back ID thumbnail:', error);
-                }}
-              />
+          <View style={[dynamicStyles.documentImage, { width: hasBackSide ? 80 : 48, flexDirection: 'row', gap: 3, backgroundColor: vip.colors.navy, padding: 3 }]}>
+            {[document, ...(hasBackSide && pair?.back ? [pair.back] : [])].map(item =>
+              item.mimeType === 'application/pdf' || /\.pdf(?:$|[?#])/i.test(item.uri) || /\.pdf$/i.test(item.name) ?
+                <View key={item.id} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="document-text-outline" size={24} color={vip.colors.gold} /></View> :
+                <Image key={item.id} source={{ uri: item.uri }} resizeMode="contain" style={{ flex: 1, height: '100%', borderRadius: 4 }} />
             )}
           </View>
-          
-      <View style={dynamicStyles.documentInfo}>
+          <View style={dynamicStyles.documentInfo}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-              <DynamicText type="card" style={dynamicStyles.documentName} numberOfLines={1}>
-                {displayName}
+              <DynamicText type="card" style={dynamicStyles.documentName} >
+                {DOCUMENT_CATEGORIES[document.category].title}{!hasBackSide && document.type !== 'single' ? ' - ' + t('documentUI.' + document.type) : ''}
               </DynamicText>
             </View>
         <DynamicText type="card" style={dynamicStyles.documentType}>
@@ -2712,15 +2706,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         </DynamicText>
           </View>
           
-          <TouchableOpacity
-            style={[dynamicStyles.actionButton, { backgroundColor: vip.colors.goldDark }]}
-            onPress={() => viewDocument(document)}
-          >
-            <DynamicText type="card" style={dynamicStyles.actionButtonText}>👁️</DynamicText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[dynamicStyles.actionButton, { backgroundColor: '#10B981' + 'CC' }]}
-            onPress={() => {
+          <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'flex-end' }}><DocumentIconButton icon="eye-outline" label={t("documentUI.view") + ": " + document.name} onPress={() => viewDocument(document)} />
+          <DocumentIconButton icon="share-outline" label={t("documentUI.share") + ": " + document.name} onPress={() => {
               console.log('🔘 Merge/Share button pressed:', {
                 documentName: document.name,
                 hasBackSide,
@@ -2737,15 +2724,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                 // Single ID document - also create PDF for consistency
                 shareCombinedIDDocuments([document]);
               }
-            }}
-          >
-            <DynamicText type="card" style={[dynamicStyles.actionButtonText, { fontSize: 10 }]}>
-              📤
-            </DynamicText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[dynamicStyles.actionButton, { backgroundColor: '#dc2626' + 'CC' }]}
-            onPress={() => {
+            }} />
+          <DocumentIconButton icon="trash-outline" label={t("documentUI.delete") + ": " + document.name} danger onPress={() => {
               if (hasBackSide) {
                 showDeleteConfirmDialog(
                   uiI18n.t("ui.deleteIdDocuments"),
@@ -2758,13 +2738,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               } else {
                 deleteDocument(document.id);
               }
-            }}
-          >
-            <Image 
-              source={require('../../assets/dashboard Emojies/trash.png')} 
-              style={{ width: 20, height: 20 }}
-            />
-        </TouchableOpacity>
+            }} /></View>
       </View>
       );
     }
@@ -2776,21 +2750,23 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         {isSelectionMode && (
           <TouchableOpacity
             style={dynamicStyles.checkbox}
-            onPress={() => toggleDocumentSelection(document.id)}
+              accessibilityRole="checkbox"
+              accessibilityLabel={document.name}
+              accessibilityState={{ checked: selectedDocuments.has(document.id) }}
+              onPress={() => toggleDocumentSelection(document.id)}
           >
-            <Text style={dynamicStyles.checkboxText}>
-              {selectedDocuments.has(document.id) ? '☑️' : '☐'}
-            </Text>
+            <Ionicons name={selectedDocuments.has(document.id) ? 'checkbox-outline' : 'square-outline'} size={22} color={vip.colors.gold} />
           </TouchableOpacity>
         )}
         
         {isPDF ? (
-          <View style={[dynamicStyles.documentImage, { backgroundColor: '#DC2626', justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={[dynamicStyles.documentImage, { backgroundColor: vip.colors.navy, justifyContent: 'center', alignItems: 'center' }]}>
             <DynamicText type="card" style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>PDF</DynamicText>
           </View>
         ) : (
           <Image 
-            source={{ uri: document.uri }} 
+            source={{ uri: document.uri }}
+            resizeMode="contain"
             style={dynamicStyles.documentImage}
             onError={(error) => {
               console.error('Failed to load document thumbnail:', error);
@@ -2799,7 +2775,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         )}
         <View style={dynamicStyles.documentInfo}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-            <DynamicText type="card" style={dynamicStyles.documentName} numberOfLines={1}>
+            <DynamicText type="card" style={dynamicStyles.documentName} >
               {document.name.replace(/\.(pdf|jpg|jpeg|png|gif)$/i, '').replace(/_/g, ' ')}
             </DynamicText>
           </View>
@@ -2807,30 +2783,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             {new Date(document.createdAt).toLocaleDateString()}
           </DynamicText>
           <DynamicText type="card" style={[dynamicStyles.documentType, { fontSize: 10, opacity: 0.7 }]}>
-            {document.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            {DOCUMENT_CATEGORIES[document.category].title}
           </DynamicText>
       </View>
-      <TouchableOpacity
-        style={[dynamicStyles.actionButton, { backgroundColor: vip.colors.goldDark }]}
-        onPress={() => viewDocument(document)}
-      >
-        <DynamicText type="card" style={dynamicStyles.actionButtonText}>👁️</DynamicText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={dynamicStyles.actionButton}
-        onPress={() => shareDocument(document)}
-      >
-        <DynamicText type="card" style={dynamicStyles.actionButtonText}>📤</DynamicText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[dynamicStyles.actionButton, { backgroundColor: '#dc2626' + 'CC' }]}
-        onPress={() => deleteDocument(document.id)}
-      >
-        <Image 
-          source={require('../../assets/dashboard Emojies/trash.png')} 
-          style={{ width: 20, height: 20 }}
-        />
-      </TouchableOpacity>
+      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'flex-end' }}><DocumentIconButton icon="eye-outline" label={t("documentUI.view") + ": " + document.name} onPress={() => viewDocument(document)} />
+      <DocumentIconButton icon="share-outline" label={t("documentUI.share") + ": " + document.name} onPress={() => shareDocument(document)} />
+      <DocumentIconButton icon="trash-outline" label={t("documentUI.delete") + ": " + document.name} danger onPress={() => deleteDocument(document.id)} /></View>
     </View>
   );
   };
@@ -2855,16 +2813,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             <DynamicText type="card" style={dynamicStyles.categoryIcon}>{categoryInfo.icon}</DynamicText>
             <DynamicText type="card" style={dynamicStyles.categoryTitle}>{categoryInfo.title}</DynamicText>
           </View>
-          <TouchableOpacity
-            style={dynamicStyles.scanButton}
-            onPress={() => {
+          <DocumentPill label={t("medicalDocuments.addDocument")} onPress={() => {
               setSelectedCategory(category);
               setShowUploadModal(true);
               triggerHaptic('light');
-            }}
-          >
-            <DynamicText type="card" style={dynamicStyles.scanButtonText}>{t("medicalDocuments.addDocument")}</DynamicText>
-          </TouchableOpacity>
+            }} />
         </View>
         
         <DynamicText type="card" style={dynamicStyles.categoryDescription}>
@@ -2913,43 +2866,19 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             
             {/* Selection Mode Controls in Header */}
             <View style={styles.headerSelectionControls}>
-              <TouchableOpacity
-                style={[styles.selectionButton, isSelectionMode && styles.selectionButtonActive]}
-                onPress={toggleSelectionMode}
-              >
-                <Text style={[styles.selectionButtonText, isSelectionMode && styles.selectionButtonTextActive]}>
-                  {isSelectionMode ? t("common.cancel") : t("medicalDocuments.multiSelectDoc")}
-                </Text>
-              </TouchableOpacity>
+              <DocumentPill icon={isSelectionMode ? 'close' : 'checkbox-outline'} label={isSelectionMode ? t('common.cancel') : t('medicalDocuments.multiSelectDoc')} onPress={toggleSelectionMode} />
             </View>
           </Animated.View>
 
           {/* Selection Actions (below header when in selection mode) */}
           {isSelectionMode && (
             <View style={styles.selectionActions}>
-              <TouchableOpacity
-                style={styles.selectionActionButton}
-                onPress={selectAllDocuments}
-              >
-                <Text style={styles.selectionActionButtonText}>{t("medicalDocuments.selectAll")}</Text>
-              </TouchableOpacity>
+              <DocumentIconButton icon="checkmark-done-outline" label={t("medicalDocuments.selectAll")} onPress={selectAllDocuments} />
               
-              <TouchableOpacity
-                style={styles.selectionActionButton}
-                onPress={clearSelection}
-              >
-                <Text style={styles.selectionActionButtonText}>{t("medicalDocuments.clear")}</Text>
-              </TouchableOpacity>
+              <DocumentIconButton icon="close-outline" label={t("medicalDocuments.clear")} onPress={clearSelection} />
               
               {selectedDocuments.size > 0 && (
-                <TouchableOpacity
-                  style={[styles.selectionActionButton, styles.shareSelectedButton]}
-                  onPress={shareSelectedDocuments}
-                >
-                  <Text style={styles.shareSelectedButtonText}>
-                    {t("medicalDocuments.share")} ({selectedDocuments.size})
-                  </Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}><DocumentIconButton icon="share-outline" label={t('documentUI.share') + ' (' + selectedDocuments.size + ')'} onPress={shareSelectedDocuments} /><Text style={{ color: vip.colors.gold, marginLeft: 6 }}>{selectedDocuments.size}</Text></View>
               )}
             </View>
           )}
@@ -2978,179 +2907,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           )}
         </ScrollView>
 
-        {/* Upload Modal */}
         {showUploadModal && selectedCategory && (
-          <View style={dynamicStyles.modalOverlay}>
-            <View style={dynamicStyles.modalContent}>
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                {t("medicalDocuments.addDocument")} {DOCUMENT_CATEGORIES[selectedCategory].title}
-              </DynamicText>
-              
-              {DOCUMENT_CATEGORIES[selectedCategory].supportsDualSides ? (
-                <>
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'front', true);
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
-                      <Text style={{ color: '#D4AF37', backgroundColor: '#332B16', fontSize: 10, fontWeight: '700' }}> {t('documentScanner.proBadge')} </Text>
-                    </DynamicText>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'front');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t('documentScanner.manualPhoto')} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
-                    </DynamicText>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'back', true);
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
-                      <Text style={{ color: '#D4AF37', backgroundColor: '#332B16', fontSize: 10, fontWeight: '700' }}> {t('documentScanner.proBadge')} </Text>
-                    </DynamicText>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'back');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t('documentScanner.manualPhoto')} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
-                    </DynamicText>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      uploadDocument(selectedCategory, 'front');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      🖼️ {t("medicalDocuments.uploadFromGallery")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
-                    </DynamicText>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      uploadDocument(selectedCategory, 'back');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      🖼️ {t("medicalDocuments.uploadFromGallery")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
-                    </DynamicText>
-                  </TouchableOpacity>
-                  
-                  {/* PDF upload only for non-photo ID categories */}
-                  {selectedCategory !== uiI18n.t("medicalDocuments.photoID") && (
-                    <>
-                      <TouchableOpacity
-                        style={[dynamicStyles.modalButton, { backgroundColor: '#8B5CF6' + 'CC' }]}
-                        onPress={() => {
-                          setShowUploadModal(false);
-                          uploadPDF(selectedCategory, 'front');
-                        }}
-                      >
-                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("medicalDocuments.uploadPDF")}{DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
-                        </DynamicText>
-                      </TouchableOpacity>
-                      
-                      <TouchableOpacity
-                        style={[dynamicStyles.modalButton, { backgroundColor: '#8B5CF6' + 'CC' }]}
-                        onPress={() => {
-                          setShowUploadModal(false);
-                          uploadPDF(selectedCategory, 'back');
-                        }}
-                      >
-                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("medicalDocuments.uploadPDF")}{DOCUMENT_CATEGORIES[selectedCategory].backLabel}
-                        </DynamicText>
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'single', true);
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("documentScanner.scan")}
-                      <Text style={{ color: '#D4AF37', backgroundColor: '#332B16', fontSize: 10, fontWeight: '700' }}> {t('documentScanner.proBadge')} </Text>
-                    </DynamicText>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'single');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t('documentScanner.manualPhoto')}
-                    </DynamicText>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={dynamicStyles.modalButton}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      uploadDocument(selectedCategory, 'single');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      🖼️ {t("medicalDocuments.uploadFromGallery")}
-                    </DynamicText>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity
-                    style={[dynamicStyles.modalButton, { backgroundColor: '#8B5CF6' + 'CC' }]}
-                    onPress={() => {
-                      setShowUploadModal(false);
-                      uploadPDF(selectedCategory, 'single');
-                    }}
-                  >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📄 {t("medicalDocuments.uploadPDF")}
-                    </DynamicText>
-                  </TouchableOpacity>
-                </>
-              )}
-              
-              <TouchableOpacity
-                style={dynamicStyles.modalCancelButton}
-                onPress={() => {
-                  setShowUploadModal(false);
-                  setSelectedCategory(null);
-                  triggerHaptic('light');
-                }}
-              >
-                <DynamicText type="card" style={dynamicStyles.modalCancelButtonText}>{t("common.cancel")}</DynamicText>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <AddDocumentSheet title={DOCUMENT_CATEGORIES[selectedCategory].title} dualSided={DOCUMENT_CATEGORIES[selectedCategory].supportsDualSides}
+            onClose={() => { setShowUploadModal(false); setSelectedCategory(null); triggerHaptic('light'); }}
+            onScan={(side) => { setShowUploadModal(false); takePhoto(selectedCategory, side, true); }}
+            onPhoto={(side) => { setShowUploadModal(false); takePhoto(selectedCategory, side); }}
+            onGallery={(side) => { setShowUploadModal(false); uploadDocument(selectedCategory, side); }}
+            onPDF={(side) => { setShowUploadModal(false); uploadPDF(selectedCategory, side); }} />
         )}
 
         {/* View Document Modal */}

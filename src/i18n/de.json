@@ -1,4 +1,20 @@
 {
+  "documentUI": {
+    "subtitle": "Wähle, wie du das Dokument hinzufügst.",
+    "front": "Vorderseite",
+    "back": "Rückseite",
+    "scan": "Dokument scannen",
+    "scanHint": "Automatische Randerkennung",
+    "photo": "Foto aufnehmen",
+    "photoHint": "Manuelle Aufnahme als PDF",
+    "gallery": "Aus der Galerie",
+    "galleryHint": "Gespeichertes Bild auswählen",
+    "pdf": "PDF hochladen",
+    "pdfHint": "PDF-Datei auswählen",
+    "view": "Ansehen",
+    "share": "Teilen",
+    "delete": "Löschen"
+  },
   "locationSearch": {
     "disclosure": "Wir verwenden Ihren Standort nur, um Apotheken oder Labore in der N?he zu suchen. Wir speichern ihn nicht und nutzen ihn nicht zur Nachverfolgung. Apothekensuchen verwenden INEGI DENUE/PROFECO-Daten ?ber unseren Server; Laborsuchen und optionale Fahrstrecken verwenden Google Places/Maps.",
     "reset": "Standortzustimmung zur?cksetzen",

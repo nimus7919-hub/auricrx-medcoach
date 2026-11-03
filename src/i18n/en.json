@@ -1,4 +1,20 @@
 {
+  "documentUI": {
+    "subtitle": "Choose how to add your document.",
+    "front": "Front side",
+    "back": "Back side",
+    "scan": "Scan document",
+    "scanHint": "Automatic edge detection",
+    "photo": "Take photo",
+    "photoHint": "Manual capture to PDF",
+    "gallery": "From gallery",
+    "galleryHint": "Choose a saved image",
+    "pdf": "Upload PDF",
+    "pdfHint": "Choose a PDF file",
+    "view": "View",
+    "share": "Share",
+    "delete": "Delete"
+  },
   "locationSearch": {
     "disclosure": "We use your location only to find nearby pharmacies or laboratories. We do not store it or use it for tracking. Pharmacy searches use INEGI DENUE/PROFECO data through our server; laboratory searches and optional driving distances use Google Places/Maps.",
     "reset": "Reset location consent",

@@ -1,4 +1,20 @@
 {
+  "documentUI": {
+    "subtitle": "Choisissez comment ajouter le document.",
+    "front": "Recto",
+    "back": "Verso",
+    "scan": "Scanner un document",
+    "scanHint": "Détection automatique des bords",
+    "photo": "Prendre une photo",
+    "photoHint": "Capture manuelle en PDF",
+    "gallery": "Depuis la galerie",
+    "galleryHint": "Choisir une image enregistrée",
+    "pdf": "Importer un PDF",
+    "pdfHint": "Choisir un fichier PDF",
+    "view": "Voir",
+    "share": "Partager",
+    "delete": "Supprimer"
+  },
   "locationSearch": {
     "disclosure": "Nous utilisons votre position uniquement pour rechercher des pharmacies ou laboratoires ? proximit?. Nous ne la conservons pas et ne l?utilisons pas pour vous suivre. Les recherches de pharmacies utilisent les donn?es INEGI DENUE/PROFECO via notre serveur ; les recherches de laboratoires et les distances routi?res facultatives utilisent Google Places/Maps.",
     "reset": "R?initialiser le consentement de localisation",
