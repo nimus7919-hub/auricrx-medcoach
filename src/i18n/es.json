@@ -3635,4 +3635,13 @@
       "sachets": "sobres"
     }
   }
+,
+  "documentPdf": {
+  "brand": "AuricRX MedCoach",
+  "identification": "Identificación",
+  "scannedDocument": "Documento escaneado",
+  "front": "Frente",
+  "back": "Reverso",
+  "exportedOn": "Exportado el {{date}}"
+}
 }

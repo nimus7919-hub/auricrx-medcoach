@@ -2054,4 +2054,13 @@
     "openNotificationSettings": "\u6253\u5f00\u8bbe\u7f6e",
     "homeGreeting": "\u4f60\u597d\uff0c{{name}}"
 }
+,
+  "documentPdf": {
+  "brand": "AuricRX MedCoach",
+  "identification": "身份证明",
+  "scannedDocument": "扫描文档",
+  "front": "正面",
+  "back": "背面",
+  "exportedOn": "导出日期：{{date}}"
+}
 }

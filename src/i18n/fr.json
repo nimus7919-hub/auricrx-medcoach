@@ -1372,4 +1372,13 @@
     "openNotificationSettings": "Ouvrir les r\u00e9glages",
     "homeGreeting": "Bonjour, {{name}}"
 }
+,
+  "documentPdf": {
+  "brand": "AuricRX MedCoach",
+  "identification": "Identification",
+  "scannedDocument": "Document numérisé",
+  "front": "Recto",
+  "back": "Verso",
+  "exportedOn": "Exporté le {{date}}"
+}
 }

@@ -1286,4 +1286,13 @@
     "openNotificationSettings": "Einstellungen \u00f6ffnen",
     "homeGreeting": "Hallo, {{name}}"
 }
+,
+  "documentPdf": {
+  "brand": "AuricRX MedCoach",
+  "identification": "Ausweis",
+  "scannedDocument": "Gescanntes Dokument",
+  "front": "Vorderseite",
+  "back": "Rückseite",
+  "exportedOn": "Exportiert am {{date}}"
+}
 }

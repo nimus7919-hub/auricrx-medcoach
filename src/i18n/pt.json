@@ -1366,4 +1366,13 @@
     "openNotificationSettings": "Abrir configura\u00e7\u00f5es",
     "homeGreeting": "Ol\u00e1, {{name}}"
 }
+,
+  "documentPdf": {
+  "brand": "AuricRX MedCoach",
+  "identification": "Identificação",
+  "scannedDocument": "Documento digitalizado",
+  "front": "Frente",
+  "back": "Verso",
+  "exportedOn": "Exportado em {{date}}"
+}
 }

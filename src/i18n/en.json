@@ -3611,4 +3611,13 @@
       "sachets": "sachets"
     }
   }
+,
+  "documentPdf": {
+    "brand": "AuricRX MedCoach",
+    "identification": "Identification",
+    "scannedDocument": "Scanned document",
+    "front": "Front",
+    "back": "Back",
+    "exportedOn": "Exported on {{date}}"
+  }
 }
