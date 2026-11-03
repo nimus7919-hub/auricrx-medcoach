@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">AuricRX MedCoach</string>
+  <string name="app_name">AuricRX MedCoach</string>
+  <string name="hc_privacy_notice" formatted="false">Datos de actividad y salud de Health Connect\n\nCon tu permiso, AuricRX MedCoach leerá de Health Connect tu frecuencia cardíaca, frecuencia cardíaca en reposo, pasos y sesiones de ejercicio (que pueden venir de Samsung Health, Fitbit, Garmin, Mi Fitness u otras apps). Los usamos solo para mostrarte tu historial y gráficas dentro de la app. No hacemos diagnósticos. No vendemos estos datos, no los usamos para publicidad y no los compartimos con terceros. Se quedan en tu teléfono y no se envían a nuestros servidores. Puedes retirar este permiso cuando quieras en Ajustes &gt; Privacidad o en Health Connect, y borrar los datos importados.\n\nDatos importados de tus apps y dispositivos para fines de bienestar. Pueden no ser exactos. No son un diagnóstico ni sustituyen la valoración de un médico. Si te sientes mal o tienes síntomas, busca atención médica; en una emergencia llama al 911.</string>
 </resources>

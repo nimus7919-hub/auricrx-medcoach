@@ -226,3 +226,6 @@ tasks.register("ensureKotlinImports") {
 tasks.named("preBuild").configure { 
     dependsOn("ensureKotlinImports") 
 }
+
+// AuricRX local Health Connect library (compileSdk 35 / Expo 53).
+dependencies { implementation("androidx.health.connect:connect-client:1.1.0-alpha11") }

@@ -49,6 +49,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "./plugins/withHealthConnect",
       [
         "@react-native-google-signin/google-signin",
         {

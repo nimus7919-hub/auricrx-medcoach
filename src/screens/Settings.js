@@ -8,6 +8,9 @@ import { formatTime } from "./../utils/time";
 import DynamicText from "./../components/DynamicText";
 
 import { styles } from "./appStyles";
+import { Platform } from 'react-native';
+import { HealthConnectPrivacyControls } from './ActivityHealthScreen';
+import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createSettings(getScope) {
@@ -345,6 +348,7 @@ export default function createSettings(getScope) {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.privacy} sectionKey="privacy" onToggle={toggleSection}>
+          {Platform.OS === 'android' && HEALTH_CONNECT_ENABLED && <HealthConnectPrivacyControls userId={getScope().user?.uid} onConnect={() => setRoute('health-connect-consent')} />}
           <TouchableOpacity style={{ padding: 16 }} onPress={async () => {
             try {
               await resetSearchLocationConsent();
