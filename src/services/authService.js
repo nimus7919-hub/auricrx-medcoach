@@ -1,6 +1,6 @@
 import { authenticatedFetch } from './authenticatedFetch';
 import { API_BASE } from '../config/api';
-import { consentRequest, requireAccountConsent } from './consentService';
+import { consentRequest, requireAccountConsent, clearConsentCache } from './consentService';
 // src/services/authService.js
 // Authentication service with Firebase Auth integration
 
@@ -334,6 +334,7 @@ class AuthService {
   // Sign Out
   async signOut() {
     try {
+      await clearConsentCache(this.auth.currentUser?.uid);
       // Clear stored authentication state
       await this.clearAuthState();
       

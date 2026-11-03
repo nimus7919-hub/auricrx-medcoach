@@ -1,9 +1,9 @@
 import KeyboardForm from '../../components/KeyboardForm';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Text, ScrollView, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { vip } from '../theme/vip';
 import ConsentChoices from './ConsentChoices';
-import { consentRequest, registerConsentPrompt } from '../services/consentService';
+import { consentRequest, registerConsentPrompt, readCachedConsent, hasCurrentConsent } from '../services/consentService';
 import { loadTermsText, loadPrivacyText } from '../services/legalService';
 import authService from '../services/authService';
 import * as Notifications from 'expo-notifications';
@@ -25,6 +25,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
   const [document, setDocument] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const checkRevision = useRef(0);
   const es = language === 'es';
   useEffect(() => {
     registerConsentPrompt(provider => new Promise<void>((resolve, reject) => {
@@ -36,20 +37,39 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
   useEffect(() => {
     if (!user) { setVisible(false); onHealthConsentChange(false); return; }
     let active = true;
-    setVisible(true);
+    const revision = ++checkRevision.current;
+    setVisible(false);
+    setError('');
     setChoices({ terms: false, privacy: false, health: false });
     onHealthConsentChange(false);
-    consentRequest().then(current => {
-      if (active && (!current.health || !current.terms || !current.privacy)) {
+    const isCurrent = () => active && checkRevision.current === revision;
+    const check = async () => {
+      if (await readCachedConsent(user.uid)) {
+        if (!isCurrent()) return;
+        onHealthConsentChange(true);
+      }
+      const current = await consentRequest();
+      if (!isCurrent()) return;
+      const accepted = hasCurrentConsent(current);
+      onHealthConsentChange(accepted);
+      if (!accepted) {
         setChoices({ terms: false, privacy: false, health: false }); setVisible(true);
-      } else if (active) { setVisible(false); onHealthConsentChange(true); }
-    }).catch(e => { if (active) { setError(e.message); setVisible(true); } });
-    return () => { active = false; };
+      }
+    };
+    // An unavailable server is not evidence of missing consent; retain cached access
+    // or the loading view and retry without displaying the consent form.
+    let retry: ReturnType<typeof setTimeout>;
+    const run = () => { check().catch(() => {
+      if (isCurrent()) retry = setTimeout(run, 5000);
+    }); };
+    run();
+    return () => { active = false; clearTimeout(retry); };
   }, [user?.uid]);
   useEffect(() => {
     if (privacyOpen) { setVisible(true); setChoices({ terms: false, privacy: false, health: false }); }
   }, [privacyOpen]);
   const save = async (withdraw = false) => {
+    checkRevision.current += 1;
     setBusy(true); setError('');
     try {
       await consentRequest('POST', withdraw ? { terms: true, privacy: true, health: false } : choices, method);

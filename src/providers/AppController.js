@@ -2840,7 +2840,9 @@ const handleAskMedicalAI = async () => {
           />
           </LoginIntro>
         ) : !healthConsentReady ? (
-          <View style={{ flex: 1, backgroundColor: '#161616' }} />
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+            <ActivityIndicator size="large" color="#D4AF37" />
+          </View>
         ) : (
       /* Main App Content - Only show after authentication and health consent */
       <>
