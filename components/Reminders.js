@@ -19,6 +19,7 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Reminders component moved outside App to prevent remounting
 const Reminders = ({ 
@@ -43,6 +44,7 @@ const Reminders = ({
   const [saving, setSaving] = useState(false);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const { timeFormat } = useTimeFormat();
+  const insets = useSafeAreaInsets();
   useEffect(() => {
     mounted.current += 1;
     console.log(`[REMINDERS] MOUNT #${mounted.current}`);
@@ -477,7 +479,7 @@ const Reminders = ({
         >
           {/* Backdrop */}
           <KeyboardForm><TouchableOpacity 
-            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }} 
             activeOpacity={1}
             onPress={() => {
               if (!inputFocused && showAdd) {
@@ -490,24 +492,21 @@ const Reminders = ({
             {/* Modal Content */}
             <View
               style={{
-                backgroundColor: getCardBackgroundColor() + 'CC', 
+                backgroundColor: vip.colors.navy, 
                 borderColor: getCardBorderColor(), 
                 marginHorizontal: 16, 
                 width: '90%', 
-                maxHeight: '85%', 
+                maxHeight: '100%',
+                flexShrink: 1,
+                minHeight: 0, 
                 padding: 16,
                 borderRadius: 18,
                 borderWidth: 1
               }}
               onStartShouldSetResponder={() => true}
             >
-              <ScrollView 
-                contentContainerStyle={[{ padding: 12, width: '100%', paddingBottom: 20 }, { paddingBottom: 24 }]} 
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-              >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: vip.colors.navy, padding: 12, paddingBottom: 20, flexShrink: 0 }}>
+                  <DynamicText type="card" style={{ flex: 1, marginRight: 12, color: vip.colors.gold, fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
                     {editingReminderId ? (S.editReminder || uiI18n.t("reminders.editReminder")) : (S.addReminder || uiI18n.t("reminders.addReminder"))}
                   </DynamicText>
                   <TouchableOpacity onPress={() => {
@@ -519,6 +518,13 @@ const Reminders = ({
                   </TouchableOpacity>
                 </View>
 
+              <ScrollView
+                style={{ flexShrink: 1, minHeight: 0 }}
+                contentContainerStyle={{ padding: 12, paddingBottom: 32 }}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                showsVerticalScrollIndicator
+              >
                 {/* Reminder Name */}
                 <MedicationAutocomplete
                   onSelect={med => setAddForm(prev => ({ ...prev, ...medicationFields(med), name: med.name, medicationName: med.name }))}
@@ -1250,15 +1256,28 @@ const Reminders = ({
                   returnKeyType="default"
                 />
 
-                <PremiumButton onPress={async () => {
+                <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={async () => {
                   try {
                     const notificationId = await testReminderNotification();
                     if (!notificationId) return;
                     Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1253"), uiI18n.t("localized.Reminders.Reminders.text1253"));
                   } catch (error) { Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), error.message); }
-                }} style={{ padding: 16, alignItems: 'center' }}>
-                  <DynamicText type="card">{uiI18n.t("localized.Reminders.Reminders.text1256")}</DynamicText>
-                </PremiumButton>
+                }} style={{
+                  alignSelf: 'center',
+                  maxWidth: '100%',
+                  minHeight: 44,
+                  paddingHorizontal: 20,
+                  paddingVertical: 10,
+                  marginBottom: 12,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: vip.colors.gold,
+                  backgroundColor: 'transparent',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <DynamicText type="card" style={{ color: vip.colors.gold, fontSize: 14, fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>{uiI18n.t("localized.Reminders.Reminders.text1256")}</DynamicText>
+                </TouchableOpacity>
                 {/* Save Button */}
                 <PremiumButton
                   style={{
