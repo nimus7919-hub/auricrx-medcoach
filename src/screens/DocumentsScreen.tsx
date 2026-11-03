@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, FlatList, Alert, Platform, StyleSh
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-import * as Print from 'expo-print';
+import { createDocumentPdf } from '../lib/documentPdf';
 import * as Sharing from 'expo-sharing';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
@@ -103,8 +103,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
+        allowsEditing: false,
         quality: 0.8,
         allowsMultipleSelection: true,
       });
@@ -149,35 +148,11 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
 
     setExporting(true);
     try {
-      // Create HTML content for PDF
-      const imageHtml = pages.map(page => 
-        `<img src="${page.uri}" style="width: 100%; max-width: 800px; margin: 20px 0; display: block;" />`
-      ).join('');
+      const uri = await createDocumentPdf(pages);
 
-      const html = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>${t('documents.title')}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .page { page-break-after: always; }
-              .page:last-child { page-break-after: auto; }
-            </style>
-          </head>
-          <body>
-            <h1>${t('documents.title')}</h1>
-            <p>Generated on ${new Date().toLocaleDateString()}</p>
-            ${imageHtml}
-          </body>
-        </html>
-      `;
-
-      const { uri } = await Print.printToFileAsync({ html });
-      
       // Save to docs directory
       const docsDir = FileSystem.documentDirectory + 'docs/';
+      await FileSystem.makeDirectoryAsync(docsDir, { intermediates: true });
       const fileName = `documents_${Date.now()}.pdf`;
       const finalUri = docsDir + fileName;
       

@@ -29,6 +29,7 @@ import * as FileSystem from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
+import { createDocumentPdf } from '../lib/documentPdf';
 import { SecureSharing } from '../lib/SecureSharing';
 import DynamicText from '../components/DynamicText';
 import PDFViewer from '../components/PDFViewer';
@@ -602,6 +603,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       setDocuments(newDocuments);
     } catch (error) {
       console.error('Failed to save documents:', error);
+      throw error;
     }
   };
 
@@ -632,7 +634,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images, // Only allow images, not PDFs
-        allowsMultipleSelection: false,
+        allowsMultipleSelection: type === 'single',
         quality: 0.8,
         aspect: [4, 3],
       });
@@ -656,7 +658,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           type,
           category,
           createdAt: new Date().toISOString(),
-          size: asset.fileSize,
+          
         };
 
         const updatedDocuments = [...documents, newDocument];
@@ -692,7 +694,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   if (isPDF) {
           // For PDFs, copy to a more accessible location with proper .pdf extension
           const originalName = asset.name || 'document.pdf';
-          const fileName = `${Date.now()}_${originalName}`;
+          const fileName = `${Date.now()}_${originalName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
                     const newUri = `${FileSystem.documentDirectory}${fileName}`;
                     
                     try {
@@ -718,6 +720,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         category,
                         createdAt: new Date().toISOString(),
                         size: asset.size,
+                        mimeType: 'application/pdf',
                       };
 
                       const updatedDocuments = [...documents, newDocument];
@@ -735,7 +738,9 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       }
     } catch (error) {
       console.error('Failed to upload PDF:', error);
-      showCustomAlertMsg(t('error'), t('failedToUploadPDF'), 'error');
+      Alert.alert(t('error'), /native module|cannot find|not available/i.test(String(error))
+        ? 'PDF import is unavailable in this installed app. Install a new native build with expo-document-picker. You can use the camera or gallery to create a PDF.'
+        : 'Could not open or read the PDF. Try again using the Files app and choose a PDF saved on this device. You can also use the camera or gallery to create a PDF.');
     }
   };
 
@@ -769,7 +774,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           type,
           category,
           createdAt: new Date().toISOString(),
-          size: asset.fileSize,
+          
         };
 
         const updatedDocuments = [...documents, newDocument];
@@ -2070,68 +2075,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   
 
 
-  const findIDPair = (document: DocumentItem): { front: DocumentItem | null, back: DocumentItem | null } | null => {
-    try {
-      console.log('🔍 Looking for ID pair for:', document.name);
-      
-      // First try the name-based approach
-      const docName = document.name.toLowerCase();
-      const isFront = docName.includes('front') || docName.includes('frente') || docName.includes('anverso');
-      const isBack = docName.includes('back') || docName.includes('reverso') || docName.includes('atras');
-      
-      if (isFront || isBack) {
-        console.log('🔍 Using name-based pairing');
-        const pair = documents.find(doc => {
-          if (doc.id === document.id) return false;
-          
-          const otherDocName = doc.name.toLowerCase();
-          const docIsFront = otherDocName.includes('front') || otherDocName.includes('frente') || otherDocName.includes('anverso');
-          const docIsBack = otherDocName.includes('back') || otherDocName.includes('reverso') || otherDocName.includes('atras');
-          
-          if (isFront && docIsBack) return true;
-          if (isBack && docIsFront) return true;
-          return false;
-        });
-        
-        if (pair) {
-          const result = {
-            front: isFront ? document : pair,
-            back: isBack ? document : pair
-          };
-          console.log('✅ Found name-based ID pair:', { front: result.front?.name, back: result.back?.name });
-          return result;
-        }
-      }
-      
-      // Fallback: Group ID documents by category and creation time (within 5 minutes)
-      console.log('🔍 Trying time-based pairing for ID documents');
-      const idDocuments = documents.filter(doc => 
-        doc.id !== document.id && 
-        isIDDocument(doc) &&
-        Math.abs(new Date(doc.createdAt).getTime() - new Date(document.createdAt).getTime()) < 5 * 60 * 1000 // 5 minutes
-      );
-      
-      console.log('🔍 Found ID documents within time window:', idDocuments.map(d => d.name));
-      
-      if (idDocuments.length > 0) {
-        // If we have exactly 2 ID documents created close together, pair them
-        if (idDocuments.length === 1) {
-          const otherDoc = idDocuments[0];
-          const result = {
-            front: document.createdAt < otherDoc.createdAt ? document : otherDoc,
-            back: document.createdAt < otherDoc.createdAt ? otherDoc : document
-          };
-          console.log('✅ Found time-based ID pair:', { front: result.front?.name, back: result.back?.name });
-          return result;
-        }
-      }
-      
-      console.log('⚠️ No ID pair found');
-      return null;
-    } catch (error) {
-      console.error('❌ Error finding ID pair:', error);
-      return null;
-    }
+  const findIDPair = (document: DocumentItem): { front: DocumentItem; back: DocumentItem } | null => {
+    if (document.type !== 'front' && document.type !== 'back') return null;
+    const opposite = document.type === 'front' ? 'back' : 'front';
+    const other = [...documents].reverse().find(doc => doc.category === document.category && doc.type === opposite);
+    return other ? { front: document.type === 'front' ? document : other, back: document.type === 'back' ? document : other } : null;
   };
 
   const convertImageToDataUri = async (uri: string): Promise<string | null> => {
@@ -2372,237 +2320,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   };
 
   // Create formatted PDF for viewing ID documents (same styling as exported PDFs)
-  const createFormattedIDPDF = async (docs: DocumentItem[]): Promise<string | null> => {
-    try {
-      console.log('🔄 Creating formatted ID PDF for viewing with', docs.length, 'documents');
-      
-      if (docs.length === 0) {
-        console.error('❌ No documents provided for PDF creation');
-        return null;
-      }
-      
-      // Convert images to base64
-      const imageBase64s = await Promise.all(
-        docs.map(async (doc) => {
-          console.log('📄 Converting image to base64:', doc.name);
-          const base64 = await convertImageToDataUri(doc.uri);
-          if (!base64) {
-            console.error('❌ Failed to convert image to base64:', doc.name);
-          }
-          return base64;
-        })
-      );
-      
-      const validImages = imageBase64s.filter(base64 => base64 !== null);
-      if (validImages.length === 0) {
-        console.error('❌ No valid images to create PDF');
-        return null;
-      }
-      
-      // Try to load the AuricRX logo
-      let logoBase64 = null;
-      try {
-        const logoSource = require('../../assets/AuricRX Document Logo.png');
-        const logoAssetInfo = Image.resolveAssetSource(logoSource);
-        console.log('📄 Loading logo for viewing PDF:', logoAssetInfo.uri);
-        
-        const logoDownload = await FileSystem.downloadAsync(
-          logoAssetInfo.uri,
-          FileSystem.cacheDirectory + 'auricrx-view-logo-temp.png'
-        );
-        
-        const logoBase64Data = await FileSystem.readAsStringAsync(logoDownload.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        
-        logoBase64 = `data:image/png;base64,${logoBase64Data}`;
-        console.log('✅ Logo loaded successfully for viewing PDF');
-      } catch (logoError) {
-        console.log('⚠️ Failed to load logo for viewing PDF, continuing without it:', logoError);
-      }
-
-      // Create HTML with the same styling as exported PDFs
-      let html = '';
-      
-      if (validImages.length === 1) {
-        // Single ID document
-        html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: white;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 30px;
-              }
-              .logo {
-                max-width: 200px;
-                max-height: 80px;
-                margin-bottom: 10px;
-              }
-              .title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 20px;
-              }
-              .id-container {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 20px;
-              }
-              .id-side {
-                text-align: center;
-              }
-              .id-side h3 {
-                margin: 0 0 10px 0;
-                font-size: 14px;
-                color: #666;
-              }
-              .id-image {
-                max-width: 400px;
-                height: auto;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                color: #666;
-                border-top: 1px solid #ddd;
-                padding-top: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-              <div class="title">AuricRX Medical ID Document</div>
-            </div>
-            
-            <div class="id-container">
-              <div class="id-side">
-                <h3>ID Document</h3>
-                <img src="${validImages[0]}" class="id-image" alt="ID Document">
-              </div>
-            </div>
-            
-            <div class="footer">
-              Generated by AuricRX MedCoach - ${new Date().toLocaleDateString()}
-            </div>
-          </body>
-          </html>
-        `;
-      } else {
-        // Dual ID document
-        html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: white;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 30px;
-              }
-              .logo {
-                max-width: 200px;
-                max-height: 80px;
-                margin-bottom: 10px;
-              }
-              .title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 20px;
-              }
-              .id-container {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 20px;
-                gap: 20px;
-              }
-              .id-side {
-                flex: 1;
-                text-align: center;
-              }
-              .id-side h3 {
-                margin: 0 0 10px 0;
-                font-size: 14px;
-                color: #666;
-              }
-              .id-image {
-                max-width: 100%;
-                height: auto;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                color: #666;
-                border-top: 1px solid #ddd;
-                padding-top: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-              <div class="title">AuricRX Medical ID Document</div>
-            </div>
-            
-            <div class="id-container">
-              <div class="id-side">
-                <h3>Front Side</h3>
-                <img src="${validImages[0]}" class="id-image" alt="Front ID">
-              </div>
-              <div class="id-side">
-                <h3>Back Side</h3>
-                <img src="${validImages[1]}" class="id-image" alt="Back ID">
-              </div>
-            </div>
-            
-            <div class="footer">
-              Generated by AuricRX MedCoach - ${new Date().toLocaleDateString()}
-            </div>
-          </body>
-          </html>
-        `;
-      }
-
-      // Generate PDF using expo-print
-      console.log('📄 Generating formatted PDF with expo-print...');
-      const { uri } = await Print.printToFileAsync({
-        html: html,
-        base64: false,
-      });
-      
-      console.log('✅ Formatted ID PDF created successfully at:', uri);
-      return uri;
-      
-    } catch (error) {
-      console.error('❌ Failed to create formatted ID PDF for viewing:', error);
-      return null;
-    }
-  };
+  const createFormattedIDPDF = async (docs: DocumentItem[]): Promise<string | null> =>
+    createDocumentPdf(docs, true);
 
   const viewDocument = async (document: DocumentItem) => {
     try {
@@ -2822,523 +2541,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
   const shareCombinedIDDocuments = async (docs: DocumentItem[]) => {
     try {
-      console.log('🚀 shareCombinedIDDocuments called with:', docs.map(d => ({ name: d.name, uri: d.uri })));
-      
-      // Find the ID pair - use more flexible detection
-      const frontDoc = docs.find(doc => {
-        const name = doc.name.toLowerCase();
-        return name.includes('front') || name.includes('frontal') || name.includes('frente') || 
-               name.includes('anverso') || name.includes('id');
-      });
-      const backDoc = docs.find(doc => {
-        const name = doc.name.toLowerCase();
-        return name.includes('back') || name.includes('trasero') || name.includes('reverso') || 
-               name.includes('atras') || name.includes('lado trasero');
-      });
-      
-      console.log('🔍 Found documents:', { 
-        frontDoc: frontDoc?.name, 
-        backDoc: backDoc?.name,
-        totalDocs: docs.length 
-      });
-      
-      if (frontDoc && backDoc) {
-        console.log('🔄 Creating combined PDF with both ID images...');
-        
-        // Convert images to base64 for embedding in PDF
-        console.log('📄 Converting front image:', frontDoc.uri);
-        const frontBase64 = await convertImageToDataUri(frontDoc.uri);
-        console.log('📄 Converting back image:', backDoc.uri);
-        const backBase64 = await convertImageToDataUri(backDoc.uri);
-        
-        console.log('📄 Front image converted:', !!frontBase64);
-        console.log('📄 Back image converted:', !!backBase64);
-        
-        if (!frontBase64 || !backBase64) {
-          console.error('❌ Failed to convert images to base64');
-          Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
-          return;
-        }
-
-        // Try to load the AuricRX logo
-        let logoBase64 = null;
-        try {
-          const logoSource = require('../../assets/AuricRX Document Logo.png');
-          const logoAssetInfo = Image.resolveAssetSource(logoSource);
-          console.log('📄 Loading logo for combined ID PDF:', logoAssetInfo.uri);
-          
-          // Download asset to cache and convert to base64
-          const logoDownload = await FileSystem.downloadAsync(
-            logoAssetInfo.uri,
-            FileSystem.cacheDirectory + 'auricrx-doc-logo-temp.png'
-          );
-          
-          const logoBase64Data = await FileSystem.readAsStringAsync(logoDownload.uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          
-          // Create data URI
-          logoBase64 = `data:image/png;base64,${logoBase64Data}`;
-          console.log('✅ Logo loaded successfully for combined ID PDF');
-        } catch (logoError) {
-          console.log('⚠️ Failed to load logo, proceeding without it:', logoError);
-        }
-
-        // Create HTML for PDF with both images side by side
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: white;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 30px;
-              }
-              .logo {
-                max-width: 200px;
-                max-height: 80px;
-                margin-bottom: 10px;
-              }
-              .title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 20px;
-              }
-              .id-container {
-                display: flex;
-                justify-content: space-between;
-                gap: 20px;
-                margin-bottom: 20px;
-              }
-              .id-side {
-                flex: 1;
-                text-align: center;
-              }
-              .id-side h3 {
-                margin: 0 0 10px 0;
-                font-size: 14px;
-                color: #666;
-              }
-              .id-image {
-                width: 100%;
-                max-width: 300px;
-                height: auto;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                color: #666;
-                border-top: 1px solid #ddd;
-                padding-top: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-              <div class="title">AuricRX Medical ID Document</div>
-            </div>
-            
-            <div class="id-container">
-              <div class="id-side">
-                <h3>Front Side</h3>
-                <img src="${frontBase64}" class="id-image" alt="ID Front">
-              </div>
-              <div class="id-side">
-                <h3>Back Side</h3>
-                <img src="${backBase64}" class="id-image" alt="ID Back">
-              </div>
-            </div>
-            
-            <div class="footer">
-              Generated by AuricRX MedCoach - ${new Date().toLocaleDateString()}
-            </div>
-          </body>
-          </html>
-        `;
-
-        // Generate PDF using expo-print
-        console.log('📄 About to generate PDF with expo-print...');
-        console.log('📄 HTML length:', html.length);
-        console.log('📄 Print.printToFileAsync available:', !!Print?.printToFileAsync);
-        
-        const { uri } = await Print.printToFileAsync({
-          html: html,
-          base64: false,
-        });
-        
-        console.log('📄 PDF generated successfully at:', uri);
-        
-        // Copy PDF to a more accessible location for sharing
-        const shareableUri = `${FileSystem.documentDirectory}Combined_ID_Document_${Date.now()}.pdf`;
-        await FileSystem.copyAsync({
-          from: uri,
-          to: shareableUri,
-        });
-        
-        // Share the PDF
-        console.log('📤 Attempting to share combined ID PDF:', shareableUri);
-        try {
-          const isAvailable = await Sharing.isAvailableAsync();
-          console.log('📤 Sharing availability check:', isAvailable);
-          
-          if (isAvailable) {
-            await Sharing.shareAsync(shareableUri, {
-              mimeType: 'application/pdf',
-              dialogTitle: `Share Combined ID Document`,
-            });
-            console.log('✅ Combined ID PDF shared successfully');
-          } else {
-            console.log('⚠️ Sharing not available, trying direct share anyway...');
-            // Try sharing anyway - sometimes the availability check fails in dev builds
-            await Sharing.shareAsync(shareableUri, {
-              mimeType: 'application/pdf',
-              dialogTitle: `Share Combined ID Document`,
-            });
-            console.log('✅ Combined ID PDF shared successfully (fallback)');
-          }
-        } catch (shareError) {
-          console.error('❌ Combined ID PDF sharing failed:', shareError);
-          Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
-        }
-      } else if (docs.length === 1) {
-        console.log('🔄 Creating PDF with single ID document...');
-        
-        const singleDoc = docs[0];
-        console.log('📄 Converting single image:', singleDoc.uri);
-        const imageBase64 = await convertImageToDataUri(singleDoc.uri);
-        
-        if (!imageBase64) {
-          console.error('❌ Failed to convert single image to base64');
-          Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
-          return;
-        }
-
-        // Try to load the AuricRX logo
-        let logoBase64 = null;
-        try {
-          const logoSource = require('../../assets/AuricRX Document Logo.png');
-          const logoAssetInfo = Image.resolveAssetSource(logoSource);
-          console.log('📄 Loading logo for single ID PDF:', logoAssetInfo.uri);
-          
-          // Download asset to cache and convert to base64
-          const logoDownload = await FileSystem.downloadAsync(
-            logoAssetInfo.uri,
-            FileSystem.cacheDirectory + 'auricrx-single-logo-temp.png'
-          );
-          
-          const logoBase64Data = await FileSystem.readAsStringAsync(logoDownload.uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          
-          // Create data URI
-          logoBase64 = `data:image/png;base64,${logoBase64Data}`;
-          console.log('✅ Logo loaded successfully for single ID PDF');
-        } catch (logoError) {
-          console.log('⚠️ Failed to load logo, proceeding without it:', logoError);
-        }
-
-        // Create HTML for PDF with single image
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: white;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 30px;
-              }
-              .logo {
-                max-width: 200px;
-                max-height: 80px;
-                margin-bottom: 10px;
-              }
-              .title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 20px;
-              }
-              .id-container {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 20px;
-              }
-              .id-side {
-                text-align: center;
-              }
-              .id-side h3 {
-                margin: 0 0 10px 0;
-                font-size: 14px;
-                color: #666;
-              }
-              .id-image {
-                max-width: 400px;
-                height: auto;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                color: #666;
-                border-top: 1px solid #ddd;
-                padding-top: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-              <div class="title">AuricRX Medical ID Document</div>
-            </div>
-            
-            <div class="id-container">
-              <div class="id-side">
-                <h3>ID Document</h3>
-                <img src="${imageBase64}" class="id-image" alt="ID Document">
-              </div>
-            </div>
-            
-            <div class="footer">
-              Generated by AuricRX MedCoach - ${new Date().toLocaleDateString()}
-            </div>
-          </body>
-          </html>
-        `;
-
-        // Generate PDF using expo-print
-        console.log('📄 About to generate single ID PDF with expo-print...');
-        console.log('📄 HTML length:', html.length);
-        console.log('📄 Print.printToFileAsync available:', !!Print?.printToFileAsync);
-        
-        const { uri } = await Print.printToFileAsync({
-          html: html,
-          base64: false,
-        });
-        
-        console.log('📄 Single ID PDF generated successfully at:', uri);
-        
-        // Copy PDF to a more accessible location for sharing
-        const shareableUri = `${FileSystem.documentDirectory}Single_ID_Document_${Date.now()}.pdf`;
-        await FileSystem.copyAsync({
-          from: uri,
-          to: shareableUri,
-        });
-        
-        // Share the PDF
-        console.log('📤 Attempting to share single ID PDF (duplicate section):', shareableUri);
-        try {
-          const isAvailable = await Sharing.isAvailableAsync();
-          console.log('📤 Sharing availability check (duplicate section):', isAvailable);
-          
-          if (isAvailable) {
-            await Sharing.shareAsync(shareableUri, {
-              mimeType: 'application/pdf',
-              dialogTitle: `Share ID Document`,
-            });
-            console.log('✅ Single ID PDF shared successfully (duplicate section)');
-          } else {
-            console.log('⚠️ Sharing not available, trying direct share anyway (duplicate section)...');
-            await Sharing.shareAsync(shareableUri, {
-              mimeType: 'application/pdf',
-              dialogTitle: `Share ID Document`,
-            });
-            console.log('✅ Single ID PDF shared successfully (duplicate section fallback)');
-          }
-        } catch (shareError) {
-          console.error('❌ Single ID PDF sharing failed (duplicate section):', shareError);
-          Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
-        }
-      } else if (docs.length === 1) {
-        console.log('🔄 Creating PDF with single ID document...');
-        
-        const singleDoc = docs[0];
-        console.log('📄 Converting single image:', singleDoc.uri);
-        const imageBase64 = await convertImageToDataUri(singleDoc.uri);
-        
-        if (!imageBase64) {
-          console.error('❌ Failed to convert single image to base64');
-          Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
-          return;
-        }
-
-        // Try to load the AuricRX logo
-        let logoBase64 = null;
-        try {
-          const logoSource = require('../../assets/AuricRX Document Logo.png');
-          const logoAssetInfo = Image.resolveAssetSource(logoSource);
-          console.log('📄 Loading logo for single ID PDF:', logoAssetInfo.uri);
-          
-          // Download asset to cache and convert to base64
-          const logoDownload = await FileSystem.downloadAsync(
-            logoAssetInfo.uri,
-            FileSystem.cacheDirectory + 'auricrx-single-logo-temp.png'
-          );
-          
-          const logoBase64Data = await FileSystem.readAsStringAsync(logoDownload.uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          
-          // Create data URI
-          logoBase64 = `data:image/png;base64,${logoBase64Data}`;
-          console.log('✅ Logo loaded successfully for single ID PDF');
-        } catch (logoError) {
-          console.log('⚠️ Failed to load logo, proceeding without it:', logoError);
-        }
-
-        // Create HTML for PDF with single image
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: white;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 30px;
-              }
-              .logo {
-                max-width: 200px;
-                max-height: 80px;
-                margin-bottom: 10px;
-              }
-              .title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 20px;
-              }
-              .id-container {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 20px;
-              }
-              .id-side {
-                text-align: center;
-              }
-              .id-side h3 {
-                margin: 0 0 10px 0;
-                font-size: 14px;
-                color: #666;
-              }
-              .id-image {
-                max-width: 400px;
-                height: auto;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                color: #666;
-                border-top: 1px solid #ddd;
-                padding-top: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-              <div class="title">AuricRX Medical ID Document</div>
-            </div>
-            
-            <div class="id-container">
-              <div class="id-side">
-                <h3>ID Document</h3>
-                <img src="${imageBase64}" class="id-image" alt="ID Document">
-              </div>
-            </div>
-            
-            <div class="footer">
-              Generated by AuricRX MedCoach - ${new Date().toLocaleDateString()}
-            </div>
-          </body>
-          </html>
-        `;
-
-        // Generate PDF using expo-print
-        console.log('📄 About to generate single ID PDF with expo-print...');
-        console.log('📄 HTML length:', html.length);
-        console.log('📄 Print.printToFileAsync available:', !!Print?.printToFileAsync);
-        
-        const { uri } = await Print.printToFileAsync({
-          html: html,
-          base64: false,
-        });
-        
-        console.log('📄 Single ID PDF generated successfully at:', uri);
-        
-        // Copy PDF to a more accessible location for sharing
-        const shareableUri = `${FileSystem.documentDirectory}Single_ID_Document_${Date.now()}.pdf`;
-        await FileSystem.copyAsync({
-          from: uri,
-          to: shareableUri,
-        });
-        
-        // Share the PDF
-        console.log('📤 Attempting to share single ID PDF:', shareableUri);
-        try {
-          const isAvailable = await Sharing.isAvailableAsync();
-          console.log('📤 Sharing availability check:', isAvailable);
-          
-          if (isAvailable) {
-            await Sharing.shareAsync(shareableUri, {
-              mimeType: 'application/pdf',
-              dialogTitle: `Share ID Document`,
-            });
-            console.log('✅ Single ID PDF shared successfully');
-          } else {
-            console.log('⚠️ Sharing not available, trying direct share anyway...');
-            // Try sharing anyway - sometimes the availability check fails in dev builds
-            await Sharing.shareAsync(shareableUri, {
-              mimeType: 'application/pdf',
-              dialogTitle: `Share ID Document`,
-            });
-            console.log('✅ Single ID PDF shared successfully (fallback)');
-          }
-        } catch (shareError) {
-          console.error('❌ Single ID PDF sharing failed:', shareError);
-          Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
-        }
-      } else {
-        console.log('⚠️ No valid documents found for PDF creation');
-        Alert.alert('❌ ' + t('error'), 'No valid documents to create PDF');
-      }
-        
+      const uri = await createDocumentPdf([...docs].sort((a, b) => (a.type === 'front' ? -1 : b.type === 'front' ? 1 : 0)), true);
+      if (!(await Sharing.isAvailableAsync())) throw new Error('Sharing is unavailable');
+      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
     } catch (error) {
-      console.error('❌ Failed to create combined ID PDF:', error);
-      // Fallback to individual sharing
-      await shareMultipleFiles(docs);
+      Alert.alert(t('error'), 'Could not export ID. Use one image or a single-page PDF for each side and try again.');
     }
   };
 
@@ -3737,7 +2944,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           </Animated.View>
 
           {/* Document Categories */}
-          {Object.keys(DOCUMENT_CATEGORIES).filter(category => !['photo_id', 'birth_certificate', 'insurance'].includes(category)).map(category => 
+          {Object.keys(DOCUMENT_CATEGORIES).filter(category => !['birth_certificate', 'insurance'].includes(category)).map(category => 
             renderCategoryCard(category as DocumentCategory)
           )}
         </ScrollView>
