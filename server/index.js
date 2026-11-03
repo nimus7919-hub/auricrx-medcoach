@@ -2312,8 +2312,10 @@ const medicationCatalog = new Map();
 for (const row of require('../assets/medicationData.json')) {
   const name = String(row.Medicinas || row.medicinas || '').trim();
   if (name && !medicationCatalog.has(normalizeMedName(name))) {
-    // This catalog has no structured active-ingredient field. Do not infer ingredients.
-    medicationCatalog.set(normalizeMedName(name), { name, components: [] });
+    medicationCatalog.set(normalizeMedName(name), {
+      name, components: Array.isArray(row.components) ? row.components : [],
+      ...(row.source ? { source: row.source } : {}),
+    });
   }
 }
 let medsTableReady;
@@ -2337,7 +2339,6 @@ app.get('/api/meds/search', async (req, res) => {
   const matches = new Map();
   for (const [key, med] of medicationCatalog) {
     if (key.includes(q)) matches.set(key, med);
-    if (matches.size === 15) break;
   }
   try {
     await ensureMedsTable();
@@ -2350,6 +2351,7 @@ app.get('/api/meds/search', async (req, res) => {
   }
   return res.json([...matches.values()].sort((a, b) =>
     Number(!normalizeMedName(a.name).startsWith(q)) - Number(!normalizeMedName(b.name).startsWith(q)) ||
+    Number(b.source === 'generic') - Number(a.source === 'generic') ||
     a.name.localeCompare(b.name)).slice(0, 15));
 });
 

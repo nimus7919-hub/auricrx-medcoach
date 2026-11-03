@@ -128,3 +128,5 @@ package.backup.*
 # -----------------------------
 .DS_Store
 Thumbs.db
+
+q6-export/
