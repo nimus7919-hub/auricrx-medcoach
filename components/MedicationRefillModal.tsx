@@ -1,3 +1,4 @@
+import KeyboardForm from './KeyboardForm';
 import MedicationAutocomplete from './MedicationAutocomplete';
 import { contributeMedication } from '../src/services/medicationCatalog';
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -640,7 +641,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
 
       {/* Price Contribution Modal */}
       <Modal visible={showContributionModal} animationType="slide" transparent onRequestClose={closeContributionModal}>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: spacing.lg }}>
+        <KeyboardForm><View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: spacing.lg }}>
           <View style={{
             backgroundColor: colors.bg,
             borderRadius: radius.xl,
@@ -658,7 +659,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             </View>
 
             {/* Form */}
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={{ maxHeight: 400 }}
               showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="handled"
@@ -807,7 +808,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
               </Pressable>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
     </Modal>
   );

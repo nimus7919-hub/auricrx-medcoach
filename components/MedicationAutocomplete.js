@@ -1,3 +1,4 @@
+import GrowingTextInput from './GrowingTextInput';
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -29,12 +30,12 @@ const MedicationAutocomplete = forwardRef(function MedicationAutocomplete(
     return () => { active = false; clearTimeout(timer); controller.abort(); };
   }, [value, focused, enabled]);
   return <View>
-    <TextInput {...props} ref={ref} value={value} style={[styles.input, style]}
+    <GrowingTextInput {...props} ref={ref} value={value} style={[styles.input, style]}
       onChangeText={text => { selected.current = null; setItems([]); onChangeText(text); }}
       onFocus={event => { clearTimeout(blurTimer.current); setFocused(true); onFocus?.(event); }}
       onBlur={event => { blurTimer.current = setTimeout(() => setFocused(false), 180); onBlur?.(event); }} />
     {enabled && focused && (items.length > 0 || status) && <View style={styles.dropdown}>
-      <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always" style={{ maxHeight: 220 }}>
+      <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 16 }} style={{ maxHeight: 220 }}>
         {items.map(item => <TouchableOpacity key={item.name} accessibilityRole="button"
           style={styles.row} onPress={() => { selected.current = item.name; setItems([]); setStatus(''); setFocused(false); onChangeText(item.name); onSelect?.(item); }}>
           <Text style={styles.name}>{item.name}</Text>

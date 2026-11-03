@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -647,12 +648,12 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
   );
 
   return (
-    <View style={styles.container}>
+    <KeyboardForm><View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView keyboardShouldPersistTaps="handled" 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -729,8 +730,8 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         animationType="slide"
         onRequestClose={() => setShowLocationInputModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0' }]}>
+        <KeyboardForm><View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0' }]}><ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
             <DynamicText type="primary" style={styles.modalTitle}>
               📍 {t('addLocationReminderTitle')}
             </DynamicText>
@@ -776,8 +777,8 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
                 <DynamicText type="card" style={[styles.modalButtonText, { color: '#fff' }]}>{t('add')}</DynamicText>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
+          </ScrollView></View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Custom Weather Alert Modal */}
@@ -848,7 +849,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
           </View>
         </View>
       </Modal>
-    </View>
+    </View></KeyboardForm>
   );
 }
 

@@ -1,3 +1,5 @@
+import { ScrollView } from 'react-native';
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, TextInput, Modal, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -120,7 +122,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
   };
 
   return (
-    <View style={[styles.container, { paddingTop: 1, backgroundColor: 'transparent' }]}>
+    <KeyboardForm><View style={[styles.container, { paddingTop: 1, backgroundColor: 'transparent' }]}>
       <View style={[styles.header, { 
         flexDirection: 'row', 
         alignItems: 'center', 
@@ -140,7 +142,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
       </View>
 
       <View style={[styles.content, { backgroundColor: 'transparent' }]}>
-        <View style={[styles.searchInput, { 
+        <ScrollView keyboardShouldPersistTaps="handled" style={{ flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ paddingBottom: 4 }}><View style={[styles.searchInput, { 
           backgroundColor: getCardBackgroundColor() + 'CC', 
           borderColor: getCardBorderColor(),
           borderWidth: 3, // Make border more obvious
@@ -182,14 +184,14 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
             onFocus={() => console.log('🌿 HerbsScreen - TextInput onFocus')}
             onBlur={() => console.log('🌿 HerbsScreen - TextInput onBlur')}
           />
-        </View>
+        </View></ScrollView>
 
         {filteredHerbs.length === 0 ? (
           <View style={styles.emptyState}>
             <DynamicText type="secondary" style={styles.emptyStateText}>{t('noHerbsFound')}</DynamicText>
           </View>
         ) : (
-          <FlatList
+          <FlatList keyboardShouldPersistTaps="handled"
             data={filteredHerbs}
             renderItem={renderHerbItem}
             keyExtractor={item => item.id}
@@ -202,7 +204,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
       </View>
 
       {renderHerbDetails()}
-    </View>
+    </View></KeyboardForm>
   );
 }
 

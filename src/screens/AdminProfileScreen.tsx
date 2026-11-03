@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 // src/screens/AdminProfileScreen.tsx
 // Admin profile management screen
 
@@ -277,8 +278,8 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
   };
 
   return (
-    <View style={dynamicStyles.container}>
-      <ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
+    <KeyboardForm><View style={dynamicStyles.container}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[dynamicStyles.scrollContent, { paddingBottom: 24 }]}>
         <View style={dynamicStyles.header}>
           <TouchableOpacity style={dynamicStyles.closeButton} onPress={onNavigateToSettings || onClose}>
             <View style={dynamicStyles.circleContainer}>
@@ -371,6 +372,6 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
         buttonText={alert?.buttonText || 'OK'}
         onPress={handlePress}
       />
-    </View>
+    </View></KeyboardForm>
   );
 }

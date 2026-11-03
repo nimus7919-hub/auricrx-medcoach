@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -1179,12 +1180,12 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
   // Simplified Health Analytics - no external service needed
 
   return (
-    <View style={styles.container}>
+    <KeyboardForm><View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView keyboardShouldPersistTaps="handled" 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -1251,11 +1252,11 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         animationType="fade"
         onRequestClose={() => setShowAddMetricModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>📈 {t('addHealthMetric')}</DynamicText>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
@@ -1409,7 +1410,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Add Side Effect Modal */}
@@ -1419,7 +1420,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         animationType="fade"
         onRequestClose={() => setShowAddSideEffectModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image 
@@ -1429,7 +1430,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
               <DynamicText type="primary" style={dynamicStyles.modalTitle}>{t('recordSideEffect')}</DynamicText>
             </View>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
@@ -1517,7 +1518,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Severity Selection Modal */}
@@ -1718,7 +1719,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
               {t('totalMetrics') || 'Total metrics tracked'}: {metrics.length}
             </DynamicText>
 
-            <ScrollView style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={true}>
+            <ScrollView keyboardShouldPersistTaps="handled" style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={[{ paddingBottom: 10 }, { paddingBottom: 24 }]} showsVerticalScrollIndicator={true}>
               {metrics.map((metric) => {
                 const metricType = metricTypes.find(mt => mt.value === metric.type);
                 return (
@@ -1930,10 +1931,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 {t('selectMetricType') || 'Select Metric Type'}
               </DynamicText>
               
-              <ScrollView 
+              <ScrollView keyboardShouldPersistTaps="handled" 
                 style={{ maxHeight: '80%' }}
                 showsVerticalScrollIndicator={true}
-                contentContainerStyle={{ paddingBottom: 10 }}
+                contentContainerStyle={[{ paddingBottom: 10 }, { paddingBottom: 24 }]}
               >
                 {metricTypes.map((type, index) => {
                   const currentMetric = multipleMetrics.find(m => m.id === currentMetricId);
@@ -2049,7 +2050,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </View></KeyboardForm>
   );
 }
 

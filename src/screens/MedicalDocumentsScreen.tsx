@@ -3653,8 +3653,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView keyboardShouldPersistTaps="handled" 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -3920,9 +3920,9 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   </TouchableOpacity>
                 </View>
                 
-                <ScrollView 
+                <ScrollView keyboardShouldPersistTaps="handled" 
                   style={dynamicStyles.documentViewer}
-                  contentContainerStyle={dynamicStyles.documentViewerContent}
+                  contentContainerStyle={[dynamicStyles.documentViewerContent, { paddingBottom: 24 }]}
                 >
                   {isPDFFile(selectedDocument) ? (
                     <View style={dynamicStyles.pdfViewer}>
@@ -4396,10 +4396,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       </View>
               
               <View style={[dynamicStyles.dualIDContainer, { flex: 1 }]}>
-                <ScrollView 
+                <ScrollView keyboardShouldPersistTaps="handled" 
                   style={[dynamicStyles.dualIDScrollView, { flex: 1 }]} 
                   showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingBottom: 80 }}
+                  contentContainerStyle={[{ paddingBottom: 80 }, { paddingBottom: 24 }]}
                 >
                   {/* Front Side */}
                   <View style={dynamicStyles.idSideContainer}>

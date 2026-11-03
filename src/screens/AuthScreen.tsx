@@ -281,7 +281,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       style={dynamicStyles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={dynamicStyles.scrollContent}>
         <View style={dynamicStyles.header}>
           <TouchableOpacity style={dynamicStyles.closeButton} onPress={onClose}>
             <Text style={dynamicStyles.closeButtonText}>✕</Text>

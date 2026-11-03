@@ -1,3 +1,5 @@
+import { ScrollView } from 'react-native';
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -73,8 +75,8 @@ export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClos
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
+    <KeyboardForm><SafeAreaView style={styles.safe}>
+      <ScrollView style={{ flex: 1, backgroundColor: "#000" }} contentContainerStyle={[styles.container, { flex: undefined, flexGrow: 1 }]} keyboardShouldPersistTaps="handled">
         {/* ======== Animated Top Slit Light ======== */}
         <View style={styles.topLightsContainer}>
           {/* thin slit line */}
@@ -185,8 +187,8 @@ export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClos
             By signing in, you agree to our Terms of Service and Privacy Policy
           </Text>
         </View>
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </SafeAreaView></KeyboardForm>
   );
 }
 

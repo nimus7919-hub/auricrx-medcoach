@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useEffect, useState } from 'react';
 import { Modal, Text, ScrollView, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { vip } from '../theme/vip';
@@ -63,7 +64,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
     finally { setBusy(false); }
   };
   return <Modal visible={visible} onRequestClose={() => {}} animationType="slide">
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <KeyboardForm><ScrollView keyboardShouldPersistTaps="handled" style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.card}>
       <Text accessibilityRole="header" style={styles.title}>{es ? 'Privacidad' : 'Privacy'}</Text>
       {document ? <><Text style={styles.document}>{document}</Text><ConsentButton title={es ? 'Volver' : 'Back'} onPress={() => setDocument('')} /></> : <>
@@ -92,7 +93,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
         <Text style={styles.error}>{error}</Text>
       </>}
     </View>
-    </ScrollView>
+    </ScrollView></KeyboardForm>
   </Modal>;
 }
 

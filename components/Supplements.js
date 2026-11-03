@@ -1,3 +1,4 @@
+import KeyboardForm from './KeyboardForm';
 import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import { authenticatedFetch } from '../src/services/authenticatedFetch';
@@ -415,7 +416,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
   });
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background }}>
+    <KeyboardForm><View style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header */}
       <View style={{ 
         flexDirection: 'row', 
@@ -463,7 +464,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         style={{ flex: 1 }} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={[{ paddingBottom: 20 }, { paddingBottom: 24 }]}
       >
       <View style={{ padding: 16 }}>
         {/* Header with Filter and Add buttons */}
@@ -734,7 +735,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         }}
       >
         {/* Backdrop: closes on outside press */}
-        <TouchableOpacity 
+        <KeyboardForm><TouchableOpacity 
           style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
           activeOpacity={1}
           onPress={() => {
@@ -750,8 +751,8 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
             onStartShouldSetResponder={() => true}
           >
             <ScrollView 
-              contentContainerStyle={{ padding: 16, width: '100%' }} 
-              keyboardShouldPersistTaps="always"
+              contentContainerStyle={[{ padding: 16, width: '100%' }, { paddingBottom: 24 }]} 
+              keyboardShouldPersistTaps="handled"
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
@@ -1100,7 +1101,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
               </View>
             </ScrollView>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity></KeyboardForm>
       </Modal>
 
       {/* Status Update Modal */}
@@ -1135,7 +1136,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
               </TouchableOpacity>
             </View>
             
-            <ScrollView style={{ maxHeight: 400 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ maxHeight: 400 }}>
               <DynamicText type="card" style={{ color: getCardTextColor(), fontFamily: 'Inter_400Regular', lineHeight: 20 }}>
                 {aiAnalysisQuery}
               </DynamicText>
@@ -1177,7 +1178,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         }}
       >
         {/* Backdrop: closes on outside press */}
-        <TouchableOpacity 
+        <KeyboardForm><TouchableOpacity 
           style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
           activeOpacity={1}
           onPress={() => {
@@ -1193,8 +1194,8 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
             onStartShouldSetResponder={() => true}
           >
             <ScrollView 
-              contentContainerStyle={{ padding: 16, width: '100%' }} 
-              keyboardShouldPersistTaps="always"
+              contentContainerStyle={[{ padding: 16, width: '100%' }, { paddingBottom: 24 }]} 
+              keyboardShouldPersistTaps="handled"
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
@@ -1543,7 +1544,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
               </View>
             </ScrollView>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity></KeyboardForm>
       </Modal>
 
       {/* Supplement Refill Modal */}
@@ -1717,7 +1718,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
           </View>
         </View>
       )}
-    </View>
+    </View></KeyboardForm>
   );
 };
 
@@ -1756,7 +1757,7 @@ const DosageUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, t
           shadowOpacity: 0.6,
           shadowRadius: 8,
         }}>
-          <ScrollView style={{ maxHeight: 120 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ maxHeight: 120 }} showsVerticalScrollIndicator={false}>
             {units.map((unit, index) => (
               <TouchableOpacity
                 key={index}

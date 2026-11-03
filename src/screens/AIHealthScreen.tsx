@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import { authenticatedFetch } from '../services/authenticatedFetch';
 import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
@@ -2143,12 +2144,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
   // Simplified AI Health - no external service needed
 
   return (
-    <View style={styles.container}>
+    <KeyboardForm><View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView keyboardShouldPersistTaps="handled" 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -2247,8 +2248,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         animationType="fade"
         onRequestClose={() => setShowSymptomModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContent}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
+          <View style={dynamicStyles.modalContent}><ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image 
                 source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
@@ -2283,8 +2284,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyze || 'Analyze'}</DynamicText>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
+          </ScrollView></View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Drug Interaction Check Modal */}
@@ -2320,7 +2321,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               </DynamicText>
             </View>
 
-            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
               {/* Medications Section */}
               {medications && medications.length > 0 && (
                 <View style={dynamicStyles.inputGroup}>
@@ -2437,7 +2438,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   </View>
                 </View>
 
-                <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                   <View style={dynamicStyles.analysisSection}>
                     <Text style={{ color: theme?.text || '#fff' }}>{symptomInformation(currentSymptomAnalysis.symptoms, i18n.language).generalInformation}</Text>
                     {symptomInformation(currentSymptomAnalysis.symptoms, i18n.language).followUpActions.map((action, index) => <Text key={index} style={{ color: theme?.text || '#fff', marginVertical: 8 }}>{action}</Text>)}
@@ -2524,7 +2525,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               {S?.totalSymptoms || 'Total symptoms tracked'}: {symptomAnalyses.length + storedSymptomAnalyses.length}
             </DynamicText>
 
-            <ScrollView style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={true}>
+            <ScrollView keyboardShouldPersistTaps="handled" style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={[{ paddingBottom: 10 }, { paddingBottom: 24 }]} showsVerticalScrollIndicator={true}>
               {/* Show Stored/Saved Symptoms First */}
               {storedSymptomAnalyses.map((analysis) => (
                 <View key={analysis.id} style={dynamicStyles.insightCard}>
@@ -2922,7 +2923,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               </DynamicText>
             </View>
 
-            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={true}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ flex: 1 }} showsVerticalScrollIndicator={true}>
               {/* Disclaimer */}
               {interactionResult?.disclaimer && (
                 <View style={[dynamicStyles.doctorWarningCard, { marginBottom: 16 }]}>
@@ -3019,7 +3020,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         </View>
       </Modal>
 
-    </View>
+    </View></KeyboardForm>
   );
 }
 

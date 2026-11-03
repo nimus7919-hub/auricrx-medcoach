@@ -1,3 +1,5 @@
+import GrowingTextInput from './GrowingTextInput';
+import KeyboardForm from './KeyboardForm';
 import MedicationAutocomplete from './MedicationAutocomplete';
 import { contributeMedication, medicationFields } from '../src/services/medicationCatalog';
 import { useTranslation } from 'react-i18next';
@@ -576,8 +578,20 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     return med.status === filter;
   });
 
+  useEffect(() => {
+    if (addForm.isSingleComponent !== false && addForm.components?.filter(c => String(c.name || c.strength || '').trim()).length >= 2) {
+      setAddForm(prev => ({ ...prev, isSingleComponent: false }));
+    }
+  }, [addForm.components, addForm.isSingleComponent]);
+
+  useEffect(() => {
+    if (editForm.isSingleComponent !== false && editForm.components?.filter(c => String(c.name || c.strength || '').trim()).length >= 2) {
+      setEditForm(prev => ({ ...prev, isSingleComponent: false }));
+    }
+  }, [editForm.components, editForm.isSingleComponent]);
+
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background }}>
+    <KeyboardForm><View style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header with AuricRX home button */}
       <View style={{ 
         flexDirection: 'row', 
@@ -621,7 +635,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       </View>
 
       <ScrollView 
-        contentContainerStyle={{ padding: 16, paddingBottom: 20 }} 
+        contentContainerStyle={[{ padding: 16, paddingBottom: 20 }, { paddingBottom: 24 }]} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
@@ -831,7 +845,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           }}
         >
           {/* Backdrop: closes on outside press */}
-          <TouchableOpacity 
+          <KeyboardForm><TouchableOpacity 
             style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
             activeOpacity={1} // Ensure it's tappable
             onPress={() => {
@@ -852,8 +866,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               onStartShouldSetResponder={() => true} // Prevent touches from bubbling up to the backdrop
             >
               <ScrollView 
-                contentContainerStyle={{ padding: 16, width: '100%' }} 
-                keyboardShouldPersistTaps="always"
+                contentContainerStyle={[{ padding: 16, width: '100%' }, { paddingBottom: 24 }]} 
+                keyboardShouldPersistTaps="handled"
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
@@ -978,7 +992,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         </DynamicText>
                       </View>
 
-                      <TextInput
+                      <GrowingTextInput
                         placeholder={t('medicationAutocomplete.ingredient')}
                         value={component.name || ''}
                         onChangeText={text => updateComponent(index, 'name', text)}
@@ -1331,7 +1345,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 </PremiumButton>
               </ScrollView>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity></KeyboardForm>
         </Modal>
 
         {/* Edit Medication Modal */}
@@ -1346,7 +1360,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             setShowEdit(false);
           }}
         >
-          <TouchableOpacity 
+          <KeyboardForm><TouchableOpacity 
             style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
             activeOpacity={1}
             onPress={() => {
@@ -1359,8 +1373,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               onStartShouldSetResponder={() => true}
             >
               <ScrollView 
-                contentContainerStyle={{ padding: 16, width: '100%' }} 
-                keyboardShouldPersistTaps="always"
+                contentContainerStyle={[{ padding: 16, width: '100%' }, { paddingBottom: 24 }]} 
+                keyboardShouldPersistTaps="handled"
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
@@ -1396,7 +1410,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 />
 
                 {!!editForm.components?.length && <View style={{ marginBottom: 12 }}>
-                  {editForm.components.map((component, index) => <TextInput key={index}
+                  {editForm.components.map((component, index) => <GrowingTextInput key={index}
                     placeholder={t('medicationAutocomplete.ingredient')}
                     value={component.name || ''}
                     onChangeText={text => setEditForm(prev => ({ ...prev, components: prev.components.map((c, i) => i === index ? { ...c, name: text } : c) }))}
@@ -1713,7 +1727,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 </View>
               </ScrollView>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity></KeyboardForm>
         </Modal>
 
         {/* Time Picker */}
@@ -1801,7 +1815,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
               {S?.selectUnit || 'Select Unit'}
             </DynamicText>
-            <ScrollView keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {strengthUnits.map((unit) => (
                 <TouchableOpacity
                   key={unit}
@@ -1932,7 +1946,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           </View>
         </View>
       )}
-    </View>
+    </View></KeyboardForm>
   );
 };
 
@@ -1971,7 +1985,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
           shadowOpacity: 0.6,
           shadowRadius: 8,
         }}>
-          <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
             {units.map((unit, index) => (
               <TouchableOpacity
                 key={index}
@@ -2040,7 +2054,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
           shadowOpacity: 0.6,
           shadowRadius: 8,
         }}>
-          <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
             {units.map((unit, index) => (
               <TouchableOpacity
                 key={index}

@@ -310,7 +310,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
                   <Text style={styles.legalModalLoadingText}>{t.loadingDocument}</Text>
                 </View>
               ) : (
-                <ScrollView style={styles.legalModalScroll} showsVerticalScrollIndicator>
+                <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={styles.legalModalScroll} showsVerticalScrollIndicator>
                   <Text style={styles.legalModalText}>{legalModalContent}</Text>
                 </ScrollView>
               )}

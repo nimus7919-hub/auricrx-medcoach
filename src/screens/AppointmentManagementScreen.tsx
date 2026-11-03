@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -1308,12 +1309,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
   );
 
   return (
-    <View style={styles.container}>
+    <KeyboardForm><View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView keyboardShouldPersistTaps="handled" 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -1371,11 +1372,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
         animationType="fade"
         onRequestClose={() => setShowAddAppointmentModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>📅 {t('scheduleAppointment')}</DynamicText>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
@@ -1498,7 +1499,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Add Doctor Modal */}
@@ -1508,11 +1509,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
         animationType="fade"
         onRequestClose={() => setShowAddDoctorModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>👨‍⚕️ {t('addDoctorContact')}</DynamicText>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
@@ -1638,7 +1639,7 @@ setShowCountryPicker(true)
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Edit Doctor Modal */}
@@ -1648,11 +1649,11 @@ setShowCountryPicker(true)
         animationType="fade"
         onRequestClose={() => setShowEditDoctorModal(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>✏️ {t('editDoctorContact')}</DynamicText>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
@@ -1781,7 +1782,7 @@ setShowCountryPicker(true)
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Past Appointments Modal */}
@@ -1794,8 +1795,8 @@ setShowCountryPicker(true)
           setPastAppointmentsSearch('');
         }}
       >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={[dynamicStyles.modalContent, { maxHeight: '80%' }]}>
+        <KeyboardForm><View style={dynamicStyles.modalOverlay}>
+          <View style={[dynamicStyles.modalContent, { maxHeight: '80%' }]}><ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
             <DynamicText type="primary" style={dynamicStyles.modalTitle}>📋 {t('pastAppointments')}</DynamicText>
             
             {/* Search Input */}
@@ -1809,7 +1810,7 @@ setShowCountryPicker(true)
               />
             </View>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={true}
             >
@@ -1877,8 +1878,8 @@ setShowCountryPicker(true)
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('close')}</DynamicText>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
+          </ScrollView></View>
+        </View></KeyboardForm>
       </Modal>
 
       {/* Country Code Picker Modal */}
@@ -1895,7 +1896,7 @@ setShowCountryPicker(true)
               {t('chooseCountryCode')}
             </DynamicText>
             
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" 
               style={dynamicStyles.modalScrollView}
               showsVerticalScrollIndicator={true}
             >
@@ -1942,7 +1943,7 @@ setShowCountryPicker(true)
           </View>
         </View>
       </Modal>
-    </View>
+    </View></KeyboardForm>
   );
 }
 

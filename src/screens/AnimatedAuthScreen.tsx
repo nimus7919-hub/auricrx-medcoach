@@ -145,7 +145,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContainer}>
         {/* Background */}
         <View style={styles.background} />
         

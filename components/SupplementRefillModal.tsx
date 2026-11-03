@@ -1,3 +1,4 @@
+import KeyboardForm from './KeyboardForm';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, View, Text, Pressable, Animated, Easing, FlatList, ActivityIndicator, Image, Alert, TextInput, ScrollView } from "react-native";
 import * as Location from "expo-location";
@@ -639,7 +640,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
 
       {/* Price Contribution Modal */}
       <Modal visible={showContributionModal} animationType="slide" transparent onRequestClose={closeContributionModal}>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: spacing.lg }}>
+        <KeyboardForm><View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: spacing.lg }}>
           <View style={{
             backgroundColor: colors.bg,
             borderRadius: radius.xl,
@@ -657,7 +658,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             </View>
 
             {/* Form */}
-            <ScrollView 
+            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={{ maxHeight: 400 }}
               showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="handled"
@@ -822,7 +823,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
               </Pressable>
             </View>
           </View>
-        </View>
+        </View></KeyboardForm>
       </Modal>
     </Modal>
   );

@@ -1,3 +1,5 @@
+import GrowingTextInput from './GrowingTextInput';
+import KeyboardForm from './KeyboardForm';
 import MedicationAutocomplete from './MedicationAutocomplete';
 import { contributeMedication, medicationFields } from '../src/services/medicationCatalog';
 import { useTranslation } from 'react-i18next';
@@ -182,6 +184,12 @@ const Reminders = ({
     }
   };
 
+  useEffect(() => {
+    if (addForm.isSingleComponent !== false && addForm.components?.filter(c => String(c.name || c.strength || '').trim()).length >= 2) {
+      setAddForm(prev => ({ ...prev, isSingleComponent: false }));
+    }
+  }, [addForm.components, addForm.isSingleComponent]);
+
   const updateComponent = (index, field, value) => {
     setAddForm(prev => ({
       ...prev,
@@ -346,7 +354,7 @@ const Reminders = ({
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardForm><View style={{ flex: 1 }}>
       {/* Header with AuricRX home button */}
       <View style={{ 
         flexDirection: 'row', 
@@ -389,7 +397,7 @@ const Reminders = ({
 
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: 24 }]}>
         {/* Add Reminder Button */}
           <PremiumButton
           onPress={() => setShowAdd(true)}
@@ -488,7 +496,7 @@ const Reminders = ({
           }}
         >
           {/* Backdrop */}
-          <TouchableOpacity 
+          <KeyboardForm><TouchableOpacity 
             style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }} 
             activeOpacity={1}
             onPress={() => {
@@ -514,8 +522,8 @@ const Reminders = ({
               onStartShouldSetResponder={() => true}
             >
               <ScrollView 
-                contentContainerStyle={{ padding: 12, width: '100%', paddingBottom: 20 }} 
-                keyboardShouldPersistTaps="always"
+                contentContainerStyle={[{ padding: 12, width: '100%', paddingBottom: 20 }, { paddingBottom: 24 }]} 
+                keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -828,7 +836,7 @@ const Reminders = ({
                             </DynamicText>
                           </View>
 
-                          <TextInput
+                          <GrowingTextInput
                         placeholder={t('medicationAutocomplete.ingredient')}
                         value={component.name || ''}
                         onChangeText={text => updateComponent(index, 'name', text)}
@@ -1332,7 +1340,7 @@ const Reminders = ({
                 </PremiumButton>
               </ScrollView>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity></KeyboardForm>
         </Modal>
 
         {/* Date Picker */}
@@ -1470,7 +1478,7 @@ const Reminders = ({
           </TouchableOpacity>
         </Modal>
       </ScrollView>
-    </View>
+    </View></KeyboardForm>
   );
 };
 

@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import { creategetInitialAIMessage, createaddCatExpressions, creategetDoctorGreeting } from "../utils/appHelpers";
 import PremiumTabBar from "./../components/PremiumTabBar";
 import PremiumButton from "./../components/PremiumButton";
@@ -2867,7 +2868,7 @@ const handleAskMedicalAI = async () => {
       onRequestClose={() => setAiOpen(false)}
       presentationStyle="overFullScreen"
 >
-  <View style={styles.sheetBackdrop}>
+  <KeyboardForm><View style={styles.sheetBackdrop}>
     <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
         <View style={styles.sheetHeader}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -2888,12 +2889,12 @@ const handleAskMedicalAI = async () => {
         </TouchableOpacity>
       </View>
 
-      <View style={{ flex: 1, minHeight: 200, paddingBottom: 100 }}>
+      <View style={{ flex: 1, paddingBottom: 16 }}>
         <ScrollView
           ref={aiScrollRef}
           keyboardShouldPersistTaps="handled"
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingVertical: 8, paddingBottom: 100 }}
+          contentContainerStyle={[{ paddingVertical: 8, paddingBottom: 100 }, { paddingBottom: 24 }]}
           showsVerticalScrollIndicator={false}
         >
           {aiMessages.map((m, idx) => (
@@ -2947,10 +2948,7 @@ const handleAskMedicalAI = async () => {
           borderTopWidth: 1,
           paddingBottom: Platform.OS === 'ios' ? 20 : 10,
           minHeight: 80, // Ensure minimum height
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+
           zIndex: 1000,
         }
       ]}>
@@ -3007,7 +3005,7 @@ const handleAskMedicalAI = async () => {
         {S.tapToTalk}: (voice input wired in next build)
       </Text>
     </View>
-  </View>
+  </View></KeyboardForm>
     </Modal>
 
     {/* Custom Alert */}

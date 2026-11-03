@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -1632,12 +1633,12 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
 
   return (
-    <View style={styles.container}>
+    <KeyboardForm><View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView keyboardShouldPersistTaps="handled" 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
           showsVerticalScrollIndicator={false}
           {...panResponder.panHandlers}
         >
@@ -1827,7 +1828,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
             </View>
             
             {showSavedScans && (
-              <ScrollView style={dynamicStyles.savedScansList} horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={dynamicStyles.savedScansList} horizontal showsHorizontalScrollIndicator={false}>
                 {savedScans.map((scan) => (
                   <View key={scan.id} style={[dynamicStyles.savedScanItem, { borderColor: currentTheme.chip }]}>
                     <View style={styles.savedScanHeader}>
@@ -2167,7 +2168,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       {/* Premium OCR Text Editor Modal */}
       {isEditing && selectedPage !== null && (
         <View style={dynamicStyles.modalOverlay}>
-          <View style={dynamicStyles.modalContent}>
+          <View style={dynamicStyles.modalContent}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
             <Text style={dynamicStyles.modalTitle}>✏️ Edit OCR Text - Page {selectedPage + 1}</Text>
             <TextInput
               style={dynamicStyles.modalTextInput}
@@ -2199,7 +2200,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 <Text style={dynamicStyles.modalButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView></View>
         </View>
       )}
 
@@ -2254,7 +2255,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         </View>
       )}
       </View>
-    </View>
+    </View></KeyboardForm>
   );
 }
 

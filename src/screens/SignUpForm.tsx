@@ -767,7 +767,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
                   <Text style={styles.legalModalLoadingText}>{t.loadingDocument}</Text>
                 </View>
               ) : (
-                <ScrollView style={styles.legalModalScroll} showsVerticalScrollIndicator>
+                <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={styles.legalModalScroll} showsVerticalScrollIndicator>
                   <Text style={styles.legalModalText}>{legalModalContent}</Text>
                 </ScrollView>
               )}
@@ -990,7 +990,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
                 <View style={styles.countryDropdown}>
                   <ScrollView
                     style={styles.countryList}
-                    contentContainerStyle={styles.countryListContent}
+                    contentContainerStyle={[styles.countryListContent, { paddingBottom: 24 }]}
                     showsVerticalScrollIndicator={true}
                     keyboardShouldPersistTaps="handled"
                     nestedScrollEnabled={true}

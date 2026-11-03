@@ -37,9 +37,17 @@ for (const [alias, name] of Object.entries(translations)) {
   aliases.set(alias, name);
   aliases.set(normalize(name), name);
 }
+// English gliptin INNs have a regular Spanish -ina ending.
+for (const stem of ['vildaglipt', 'sitaglipt', 'linaglipt', 'saxaglipt', 'aloglipt', 'teneliglipt', 'gemiglipt', 'evoglipt', 'omariglipt']) {
+  const spanish = stem[0].toUpperCase() + stem.slice(1) + 'ina';
+  aliases.set(stem + 'in', spanish);
+  aliases.set(stem + 'ina', spanish);
+}
 const ingredientPattern = new RegExp(`\\b(?:${[...aliases.keys()].sort((a,b) => b.length-a.length).join('|')})\\b`, 'g');
 function parseComponents(name) {
   const text = normalize(name).replace(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*(mg|mcg|g)\b/g, '$1 $3 / $2 $3');
+  // Match ingredient names independently of separators. Text after the final
+  // strength (brands and pack descriptions such as 'galvus met caja') is ignored.
   const ingredients = [...text.matchAll(ingredientPattern)];
   // Keep concentrations together; slash is also an ingredient separator elsewhere.
   const strengths = [...text.matchAll(/\b\d+(?:[.,]\d+)?\s*(?:mcg|µg|mg|g|ui|iu|%)(?:\s*\/\s*(?:\d+(?:[.,]\d+)?\s*)?(?:ml|g))?\b/g)];
@@ -56,6 +64,7 @@ function build() {
   const file = path.join(__dirname, '../assets/medicationData.json');
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
   const before = fs.statSync(file).size;
+  const withComponentsBefore = data.filter(r => r.components?.length).length;
   for (const row of data) {
     if (row.source !== 'generic') row.components = parseComponents(String(row.Medicinas || row.medicinas || ''));
   }
@@ -71,7 +80,7 @@ function build() {
   add('Sales de rehidratación oral', ['Glucosa anhidra 13.5 g/L', 'Cloruro de sodio 2.6 g/L', 'Cloruro de potasio 1.5 g/L', 'Citrato trisódico dihidratado 2.9 g/L']);
   add('Complejo B: Tiamina 100 mg + Piridoxina 5 mg + Cianocobalamina 50 mcg', ['Tiamina 100 mg', 'Piridoxina 5 mg', 'Cianocobalamina 50 mcg']);
   fs.writeFileSync(file, JSON.stringify(data));
-  console.log(JSON.stringify({ total: data.length, withComponents: data.filter(r => r.components?.length).length, added, bytesBefore: before, bytesAfter: fs.statSync(file).size }));
+  console.log(JSON.stringify({ total: data.length, withComponentsBefore, withComponentsAfter: data.filter(r => r.components?.length).length, added, bytesBefore: before, bytesAfter: fs.statSync(file).size }));
 }
 if (require.main === module) build();
 module.exports = { parseComponents };

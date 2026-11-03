@@ -1,3 +1,4 @@
+import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState } from 'react';
 import {
   View,
@@ -217,7 +218,7 @@ export default function FastingProfileScreen({
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: getCardBackgroundColor() }]}>
+    <KeyboardForm><View style={[styles.container, { backgroundColor: getCardBackgroundColor() }]}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
       <View style={[styles.container, { backgroundColor: getCardBackgroundColor() }]}>
@@ -235,9 +236,9 @@ export default function FastingProfileScreen({
           </DynamicText>
         </View>
 
-        <ScrollView 
+        <ScrollView keyboardShouldPersistTaps="handled" 
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]}
           showsVerticalScrollIndicator={true}
         >
           {/* Basic Information */}
@@ -465,7 +466,7 @@ export default function FastingProfileScreen({
           </View>
         </View>
       </Modal>
-    </View>
+    </View></KeyboardForm>
   );
 }
 
