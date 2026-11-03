@@ -87,7 +87,14 @@ function install(app, sql) {
   async function pruneQQP() {
     const stat = async () => (await sql`SELECT (SELECT count(*) FROM qqp_prices)::bigint AS rows, pg_total_relation_size('qqp_prices') AS tbl, pg_database_size(current_database()) AS db`)[0];
     const before = await stat();
-    await sql`DELETE FROM qqp_prices WHERE fecha < (SELECT max(fecha) FROM qqp_prices) - INTERVAL '90 days'`;
+    // Publication can lag for months: anchor only to stored observations.
+    // NULL on an empty table is a no-op; the explicit newest-date guard keeps
+    // the newest observation period even if the retention predicate changes.
+    await sql`WITH latest AS (SELECT max(fecha) AS newest FROM qqp_prices)
+      DELETE FROM qqp_prices AS p USING latest
+      WHERE latest.newest IS NOT NULL
+        AND p.fecha < latest.newest - INTERVAL '90 days'
+        AND p.fecha < latest.newest`;
     try { await sql`VACUUM ANALYZE qqp_prices`; } catch (err) { console.log('PROFECO vacuum skipped: '+err.message); }
     const after = await stat();
     console.log('PROFECO retention (90d from newest): '+JSON.stringify({before,after}));
