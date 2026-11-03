@@ -2,14 +2,14 @@ import uiI18n from "../i18n";
 // src/api/api.medical-ai.js
 import { API_BASE } from "../config/api";
 
-export async function askMedicalAI(message) {
+export async function askMedicalAI(message, character = 'alfred') {
   // Optional debug to verify the URL used by the app
   console.log("API_BASE:", API_BASE);
 
   const res = await fetch(`${API_BASE}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, character, language: uiI18n.resolvedLanguage || uiI18n.language }),
   });
 
   if (!res.ok) {

@@ -1,5 +1,7 @@
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
+import { getAICharacter } from '../utils/aiCharacters';
+import { detectUrgency, appendSafety } from '../../utils/aiCharacterSafety';
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { creategetInitialAIMessage, createaddCatExpressions, creategetDoctorGreeting } from "../utils/appHelpers";
@@ -13,7 +15,7 @@ import ConsentHost from "./../components/ConsentHost";
 import { API_BASE } from "./../config/api";
 import { useMedicalStream } from "./../hooks/useMedicalStream";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from 'react-native';
 import TypingEffect from "./../components/TypingEffect";
 import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
@@ -794,10 +796,10 @@ export default function App() {
     // AI Doctor Selection
     myDoctorAI: t('ai.myDoctorAI'),
     selectAI: t('ai.selectAI'),
-    drAlfred: t('ai.drAlfred'),
-    drAlfredIntro: t('ai.drAlfredIntro'),
-    drMimi: t('ai.drMimi'),
-    drMimiIntro: t('ai.drMimiIntro'),
+    alfred: t('ai.alfred'),
+    alfredIntro: t('ai.alfredIntro'),
+    mimi: t('ai.mimi'),
+    mimiIntro: t('ai.mimiIntro'),
     pawlmer: t('ai.pawlmer'),
     pawlmerIntro: t('ai.pawlmerIntro'),
     aiThinking: t('ai.aiThinking'),
@@ -1922,7 +1924,7 @@ const getInitialAIMessage = creategetInitialAIMessage(() => ({ S }));
 const addCatExpressions = createaddCatExpressions(() => ({  }));
 
 const [aiMessages, setAiMessages] = useState([
-  { role: 'system', text: getInitialAIMessage(selectedAIDoctor) },
+  { role: 'assistant', text: getInitialAIMessage(selectedAIDoctor) },
 ]);
 const [aiSending, setAiSending] = useState(false);
 
@@ -1935,7 +1937,7 @@ useEffect(() => {
 // Update AI messages when selected doctor or language changes
 useEffect(() => {
   const newIntro = getInitialAIMessage(selectedAIDoctor);
-  setAiMessages([{ role: 'system', text: newIntro }]);
+  setAiMessages([{ role: 'assistant', text: newIntro }]);
 }, [selectedAIDoctor, lang, S]);
 
 const aiInputRef = useRef(null);
@@ -1972,6 +1974,12 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   setAiMessages(m => [...m, { role: 'user', text: q }]);
   setAiInput('');
   setAiSending(true);
+
+  if (detectUrgency(q).emergency) {
+    setAiMessages(m => [...m, { role: 'assistant', text: appendSafety('', q, lang) }]);
+    setAiSending(false);
+    return;
+  }
 
   console.log('Building user data for tool calling...');
   console.log('reminders:', reminders?.length || 0);
@@ -2129,6 +2137,8 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: q,
+        character: selectedAIDoctor,
+        language: lang,
         userData: userData
       })
     });
@@ -2141,7 +2151,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     const reply = data.reply;
     console.log('Got response with tool calling:', reply);
     
-      setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
+      setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: appendSafety(reply, q, lang) }]);
     } catch (err) {
     console.log('Alfred request unavailable');
     setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: uiI18n.t("ai.unavailable") }]);
@@ -2729,11 +2739,11 @@ const handleAskMedicalAI = async () => {
     const res = await authenticatedFetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: q }),
+      body: JSON.stringify({ message: q, character: selectedAIDoctor, language: lang }),
     });
     const data = await res.json();
     const reply = data?.reply || uiI18n.t("common.noResponse");
-    setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: appendSafety(reply, q, lang) }]);
   } catch (e) {
     setAiMessages(m => [...m, { role: 'assistant', text: S.networkError || uiI18n.t("ai.networkError") }]);
   }
@@ -2868,24 +2878,31 @@ const handleAskMedicalAI = async () => {
   <KeyboardForm><View style={styles.sheetBackdrop}>
     <View style={[styles.sheet, { backgroundColor: theme.card, borderColor: theme.chip, flex: 1 }]}>
         <View style={styles.sheetHeader}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Image source={getAICharacter(selectedAIDoctor).avatar} style={{ width: 48, height: 48, borderRadius: 24, marginRight: 10, borderWidth: 1, borderColor: getAICharacter(selectedAIDoctor).border }} />
+            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8, flex: 1 }}>
               {(() => {
                 const names = {
-                  'alfred': S.drAlfred || uiI18n.t("ai.drAlfred"),
-                  'mimi': S.drMimi || uiI18n.t("ai.drMimi"),
+                  'alfred': S.alfred || uiI18n.t("ai.alfred"),
+                  'mimi': S.mimi || uiI18n.t("ai.mimi"),
                   'pawlmer': S.pawlmer || uiI18n.t("ai.pawlmer")
                 };
-                return names[selectedAIDoctor] || (S.drAlfred || uiI18n.t("ai.drAlfred"));
+                return names[selectedAIDoctor] || (S.alfred || uiI18n.t("ai.alfred"));
               })()}
             </Text>
-            <Text accessibilityLabel={uiI18n.t("localized.AppController.text2888")} style={{ fontSize: 32 }}>{selectedAIDoctor === uiI18n.t("ai.pawlmer") ? '\u{1F431}' : '\u{1F4AC}'}</Text>
         </View>
         <TouchableOpacity onPress={() => setAiOpen(false)}>
           <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>
         </TouchableOpacity>
       </View>
 
+      <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 8 }}>{uiI18n.t('ai.disclaimer')}</Text>
+      {detectUrgency(aiMessages.filter(m => m.role === 'user').map(m => m.text).join(' ')).emergency && (
+        <View accessibilityRole="alert" style={{ backgroundColor: '#541E25', borderColor: '#EDB268', borderWidth: 1, borderRadius: 12, padding: 10, marginBottom: 8 }}>
+          <Text style={{ color: '#FFF2DC', fontWeight: '700' }} onPress={() => Linking.openURL('tel:911')}>{uiI18n.t('ai.emergencyBanner')}</Text>
+          {detectUrgency(aiMessages.filter(m => m.role === 'user').map(m => m.text).join(' ')).selfHarm && <Text style={{ color: '#FFF2DC', marginTop: 6 }} onPress={() => Linking.openURL('tel:8009112000')}>{uiI18n.t('ai.selfHarmBanner')}</Text>}
+        </View>
+      )}
       <View style={{ flex: 1, paddingBottom: 16 }}>
         <ScrollView
           ref={aiScrollRef}
@@ -2900,18 +2917,19 @@ const handleAskMedicalAI = async () => {
               style={[
                 styles.msg,
                 m.role === 'user' ? styles.msgUser : styles.msgBot,
-                { borderColor: theme.chip, backgroundColor: m.role === 'user' ? theme.chip : theme.card },
+                { borderRadius: 22, borderColor: m.role === 'user' ? theme.chip : getAICharacter(selectedAIDoctor).border, backgroundColor: m.role === 'user' ? theme.chip : getAICharacter(selectedAIDoctor).bubble },
               ]}
             >
+              {m.role !== 'user' && <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}><Image source={getAICharacter(selectedAIDoctor).avatar} style={{ width: 34, height: 34, borderRadius: 17 }} />{selectedAIDoctor === 'pawlmer' && <Text accessible={false} style={{ marginLeft: 6, color: '#D89A61', opacity: 0.55 }}>🐾</Text>}</View>}
               {m.role === 'assistant' && idx === aiMessages.length - 1 && aiSending ? (
                 <TypingEffect 
                   text={m.text} 
                   speed={20}
-                  style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}
+                  style={{ color: '#FFF3DC', fontFamily: 'Inter_400Regular' }}
                   showCursor={true}
                 />
               ) : (
-              <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
+              <Text style={{ color: m.role === 'user' ? theme.text : '#FFF3DC', fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
               )}
             </View>
           ))}

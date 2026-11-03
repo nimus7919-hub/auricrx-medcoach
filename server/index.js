@@ -890,12 +890,16 @@ app.post('/test-tools', async (req, res) => {
   }
 });
 
+const { characterPrompt, appendSafety: appendCharacterSafety, detectUrgency: detectCharacterUrgency } = require('./characterPrompts');
+
 app.post('/ask', async (req, res) => {
   console.log('POST /ask');
   
   try {
     const schema = z.object({ 
       message: z.string().min(1).max(10000),
+      character: z.enum(['alfred', 'mimi', 'pawlmer']).optional().default('alfred'),
+      language: z.enum(['en', 'es', 'de', 'fr', 'pt', 'zh']).optional(),
       userData: z.object({
         meds: z.array(z.any()).optional().default([]),
         supplements: z.array(z.any()).optional().default([]),
@@ -910,11 +914,16 @@ app.post('/ask', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'bad_request', details: parsed.error });
     }
 
-    const { message, userData } = parsed.data;
+    const { message, userData, character } = parsed.data;
+    const language = parsed.data.language || req.body?.userData?.language || (/\b(hola|dolor|medicamento|no puedo|sobredosis|quiero morir)\b/i.test(message) ? 'es' : 'en');
+    const urgency = detectCharacterUrgency(message);
+    if (urgency.emergency) {
+      return res.json({ ok: true, reply: appendCharacterSafety('', message, language) });
+    }
     const messages = [
       {
         role: 'system',
-        content: HEALTH_SAFETY_PROMPT
+        content: characterPrompt(character, language)
       },
       { role: 'user', content: message }
     ];
@@ -981,7 +990,7 @@ app.post('/ask', async (req, res) => {
       // Final answer
       const text = msg.content?.trim() || '';
       console.log('Final AI response:', text);
-      res.json({ ok: true, reply: text });
+      res.json({ ok: true, reply: appendCharacterSafety(text, message, language) });
       return;
     }
     

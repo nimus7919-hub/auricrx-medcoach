@@ -1,5 +1,7 @@
 {
-  "navigation": { "pressBackAgainToExit": "Press back again to exit" },
+  "navigation": {
+    "pressBackAgainToExit": "Press back again to exit"
+  },
   "dashboard": {
     "title": "Dashboard",
     "healthJournal": "Health Journal Widget",
@@ -55,12 +57,12 @@
     "aiHealthFeatures": "AI Health Features",
     "myDoctorAI": "AI assistants",
     "selectAI": "Select AI assistant",
-    "drAlfred": "Alfred",
-    "drAlfredIntro": "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
-    "drMimi": "Mimi",
-    "drMimiIntro": "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
-    "pawlmer": "Pawlmer",
-    "pawlmerIntro": "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor.",
+    "alfred": "Alfred, AI health-information assistant",
+    "alfredIntro": "I'm Alfred, your warm AI health-information assistant. AI assistant. I'm not a doctor or health professional. General information only.",
+    "mimi": "Mimi, AI wellness guide",
+    "mimiIntro": "I'm Mimi, your upbeat AI wellness guide! AI assistant. I'm not a doctor or health professional. General information only.",
+    "pawlmer": "Pawlmer, your reminder buddy",
+    "pawlmerIntro": "I'm Pawlmer, your AI reminder buddy! One paw at a time. AI assistant. I'm not a doctor or health professional. General information only.",
     "aiThinking": "AI is thinking...",
     "errorPreparingData": "Error preparing your health data. Please try again.",
     "networkError": "Network error. Try again.",
@@ -313,7 +315,11 @@
     "fastingProfileRestricted": "Because of your profile, talk to your doctor before any fasting.",
     "referencePriceNotice": "Reference price checked on {{date}}. May vary in store.",
     "aiHealthAssistant": "AI Health Assistant",
-    "intelligentHealthcareFeatures": "Intelligent healthcare features"
+    "intelligentHealthcareFeatures": "Intelligent healthcare features",
+    "disclaimer": "AI assistant. I'm not a doctor or health professional. General information only.",
+    "emergencyBanner": "Possible emergency: call 911 now.",
+    "selfHarmBanner": "If you may harm yourself, call 911 or Línea de la Vida: 800 911 2000.",
+    "medicationWarning": "Do not change or stop any medication without talking to your doctor or pharmacist."
   },
   "healthProfile": {
     "title": "Health Profile",
@@ -3038,9 +3044,9 @@
         "errorLoadingLabs": "Failed to load nearby labs. Please try again.",
         "myDoctorAI": "AI assistants",
         "selectAI": "Select AI assistant",
-        "drAlfred": "Alfred",
-        "drMimi": "Mimi",
-        "pawlmer": "Pawlmer",
+        "alfred": "Alfred, AI health-information assistant",
+        "mimi": "Mimi, AI wellness guide",
+        "pawlmer": "Pawlmer, your reminder buddy",
         "directions": "Directions",
         "info": "Info",
         "call": "Call",
@@ -3576,30 +3582,29 @@
     "GE": "🇬🇪 Georgia",
     "KG": "🇰🇬 Kyrgyzstan",
     "UZ": "🇺🇿 Uzbekistan"
-  }
-,
-  "refillSheet": {
-  "noSupplementPrices": "No prices for this supplement",
-  "sortBy": "Sort by",
-  "sort": {
-    "distance": "Distance",
-    "price": "Price",
-    "name": "Name"
   },
-  "pricesFor": "Prices for: {{name}}",
-  "detailsUnavailable": "Product details not available",
-  "within": "Within {{radius}} km",
-  "expand": "Expand search",
-  "noPrices": "No PROFECO prices for this medication",
-  "noNearby": "No priced stores within this radius",
-  "state": "State",
-  "national": "National",
-  "units": {
-    "tablets": "tablets",
-    "capsules": "capsules",
-    "dragees": "dragees",
-    "ampoules": "ampoules",
-    "sachets": "sachets"
+  "refillSheet": {
+    "noSupplementPrices": "No prices for this supplement",
+    "sortBy": "Sort by",
+    "sort": {
+      "distance": "Distance",
+      "price": "Price",
+      "name": "Name"
+    },
+    "pricesFor": "Prices for: {{name}}",
+    "detailsUnavailable": "Product details not available",
+    "within": "Within {{radius}} km",
+    "expand": "Expand search",
+    "noPrices": "No PROFECO prices for this medication",
+    "noNearby": "No priced stores within this radius",
+    "state": "State",
+    "national": "National",
+    "units": {
+      "tablets": "tablets",
+      "capsules": "capsules",
+      "dragees": "dragees",
+      "ampoules": "ampoules",
+      "sachets": "sachets"
+    }
   }
-}
 }

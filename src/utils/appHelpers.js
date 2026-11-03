@@ -5,8 +5,8 @@ export function creategetInitialAIMessage(getScope) {
     const { S } = getScope();
 
   const introductions = {
-    'alfred': S.drAlfredIntro || uiI18n.t("ai.drAlfredIntro"),
-    'mimi': S.drMimiIntro || uiI18n.t("ai.drMimiIntro"),
+    'alfred': S.alfredIntro || uiI18n.t("ai.alfredIntro"),
+    'mimi': S.mimiIntro || uiI18n.t("ai.mimiIntro"),
     'pawlmer': S.pawlmerIntro || uiI18n.t("ai.pawlmerIntro")
   };
   return introductions[selectedDoctor] || introductions['alfred'];
@@ -49,10 +49,10 @@ export function creategetDoctorGreeting(getScope) {
     const {  } = getScope();
 
     const greetings = {
-      'Alfred': uiI18n.t("ai.drAlfredIntro"),
-      'Mimi': uiI18n.t("ai.drMimiIntro"),
+      'Alfred': uiI18n.t("ai.alfredIntro"),
+      'Mimi': uiI18n.t("ai.mimiIntro"),
       'Pawlmer': uiI18n.t("ai.pawlmerIntro")
     };
-    return greetings[doctor] || greetings[uiI18n.t("ai.drAlfred")];
+    return greetings[doctor] || greetings[uiI18n.t("ai.alfred")];
   };
 }

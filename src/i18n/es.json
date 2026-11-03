@@ -1,5 +1,7 @@
 {
-  "navigation": { "pressBackAgainToExit": "Presiona atras de nuevo para salir" },
+  "navigation": {
+    "pressBackAgainToExit": "Presiona atras de nuevo para salir"
+  },
   "help": {
     "title": "Guía del Panel",
     "intro": "¡Bienvenido a tu panel de salud! Cada tarjeta te ayuda a gestionar diferentes aspectos de tu salud. Esto es lo que hace cada una:",
@@ -55,12 +57,12 @@
     "aiHealthFeatures": "Características de Salud IA",
     "myDoctorAI": "Asistentes IA",
     "selectAI": "Seleccionar asistente IA",
-    "drAlfred": "Alfred",
-    "drAlfredIntro": "Soy Alfred, un asistente de información de salud con IA. No soy médico. Puedo explicarte temas generales de salud y medicamentos.",
-    "drMimi": "Mimi",
-    "drMimiIntro": "Soy Mimi, una asistente de bienestar con IA. Te comparto información general, no consejos médicos.",
-    "pawlmer": "Pawlmer",
-    "pawlmerIntro": "Soy Pawlmer, un gato asistente con IA. Hago la información de salud más amigable, pero no soy médico.",
+    "alfred": "Alfred, asistente de información de salud con IA",
+    "alfredIntro": "Soy Alfred, tu cálido asistente de información de salud con IA. Asistente de IA. No soy médico ni profesional de la salud. Solo información general.",
+    "mimi": "Mimi, guía de bienestar con IA",
+    "mimiIntro": "¡Soy Mimi, tu entusiasta guía de bienestar con IA! Asistente de IA. No soy médico ni profesional de la salud. Solo información general.",
+    "pawlmer": "Pawlmer, tu compañero de recordatorios",
+    "pawlmerIntro": "¡Soy Pawlmer, tu compañero de recordatorios con IA! Vamos patita a patita. Asistente de IA. No soy médico ni profesional de la salud. Solo información general.",
     "aiThinking": "IA está pensando...",
     "errorPreparingData": "Error al preparar tus datos de salud. Inténtalo de nuevo.",
     "networkError": "Error de red. Inténtalo de nuevo.",
@@ -313,7 +315,11 @@
     "fastingProfileRestricted": "Por tu perfil, habla con tu médico antes de cualquier ayuno.",
     "referencePriceNotice": "Precio de referencia consultado el {{date}}. Puede variar en tienda.",
     "aiHealthAssistant": "Asistente de salud con IA",
-    "intelligentHealthcareFeatures": "Funciones inteligentes de salud"
+    "intelligentHealthcareFeatures": "Funciones inteligentes de salud",
+    "disclaimer": "Asistente de IA. No soy médico ni profesional de la salud. Solo información general.",
+    "emergencyBanner": "Posible emergencia: llama al 911 ahora.",
+    "selfHarmBanner": "Si puedes hacerte daño, llama al 911 o a Línea de la Vida: 800 911 2000.",
+    "medicationWarning": "No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico."
   },
   "healthProfile": {
     "title": "Perfil de Salud",
@@ -3051,9 +3057,9 @@
         "errorLoadingLabs": "Error al cargar laboratorios cercanos. Inténtalo de nuevo.",
         "myDoctorAI": "Asistentes IA",
         "selectAI": "Seleccionar asistente IA",
-        "drAlfred": "Alfred",
-        "drMimi": "Mimi",
-        "pawlmer": "Pawlmer",
+        "alfred": "Alfred, asistente de información de salud con IA",
+        "mimi": "Mimi, guía de bienestar con IA",
+        "pawlmer": "Pawlmer, tu compañero de recordatorios",
         "info": "Información",
         "call": "Llamar",
         "foundPharmacies": "Se encontraron {count} farmacias cercanas",
@@ -3600,30 +3606,29 @@
     "GE": "🇬🇪 Georgia",
     "KG": "🇰🇬 Kirguistán",
     "UZ": "🇺🇿 Uzbekistán"
-  }
-,
-  "refillSheet": {
-  "noSupplementPrices": "Sin precios para este suplemento",
-  "sortBy": "Ordenar por",
-  "sort": {
-    "distance": "Distancia",
-    "price": "Precio",
-    "name": "Nombre"
   },
-  "pricesFor": "Precios para: {{name}}",
-  "detailsUnavailable": "Detalles del producto no disponibles",
-  "within": "Dentro de {{radius}} km",
-  "expand": "Ampliar b?squeda",
-  "noPrices": "Sin precios PROFECO para este medicamento",
-  "noNearby": "Sin tiendas con precio dentro de este radio",
-  "state": "Estatal",
-  "national": "Nacional",
-  "units": {
-    "tablets": "tabletas",
-    "capsules": "c?psulas",
-    "dragees": "grageas",
-    "ampoules": "ampolletas",
-    "sachets": "sobres"
+  "refillSheet": {
+    "noSupplementPrices": "Sin precios para este suplemento",
+    "sortBy": "Ordenar por",
+    "sort": {
+      "distance": "Distancia",
+      "price": "Precio",
+      "name": "Nombre"
+    },
+    "pricesFor": "Precios para: {{name}}",
+    "detailsUnavailable": "Detalles del producto no disponibles",
+    "within": "Dentro de {{radius}} km",
+    "expand": "Ampliar b?squeda",
+    "noPrices": "Sin precios PROFECO para este medicamento",
+    "noNearby": "Sin tiendas con precio dentro de este radio",
+    "state": "Estatal",
+    "national": "Nacional",
+    "units": {
+      "tablets": "tabletas",
+      "capsules": "c?psulas",
+      "dragees": "grageas",
+      "ampoules": "ampolletas",
+      "sachets": "sobres"
+    }
   }
-}
 }

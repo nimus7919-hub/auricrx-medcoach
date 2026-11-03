@@ -139,7 +139,7 @@ export default function createSettings(getScope) {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>💬 {S.drAlfred || uiI18n.t("ai.drAlfred")}</DynamicText>
+                }}>💬 {S.alfred || uiI18n.t("ai.alfred")}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -160,7 +160,7 @@ export default function createSettings(getScope) {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>💬 {S.drMimi || uiI18n.t("ai.drMimi")}</DynamicText>
+                }}>💬 {S.mimi || uiI18n.t("ai.mimi")}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
