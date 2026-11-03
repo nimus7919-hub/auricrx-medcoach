@@ -1,16 +1,7 @@
 // services/enhancedSupplementSearch.js
-// Enhanced supplement search using Excel data and database contributions
+// Enhanced supplement search using Excel data
 
 const ExcelReader = require('./excelReaderRNCompatible');
-
-let getSupplementContributions;
-try {
-  const neonModule = require('../server/neon');
-  getSupplementContributions = neonModule.getSupplementContributions;
-} catch (error) {
-  console.warn('⚠️ Neon database not available, enhanced supplement search will use fallback');
-  getSupplementContributions = null;
-}
 
 class EnhancedSupplementSearch {
   constructor() {
@@ -40,7 +31,7 @@ class EnhancedSupplementSearch {
     }
   }
 
-  // Search for supplement prices using Excel data and database contributions
+  // Search for supplement prices using Excel data
   async searchSupplementPrices(stores, supplement, options = {}) {
     try {
       console.log('🔍 Enhanced supplement search for:', supplement.name);
@@ -330,7 +321,7 @@ class EnhancedSupplementSearch {
           return { prices, meta };
         }
       } catch (excelError) {
-        console.warn('⚠️ Excel search failed, trying database contributions:', excelError);
+        console.warn('⚠️ Excel search failed, using local fallback:', excelError);
         console.error('🔍 Excel search error details:', {
           supplementName: supplement.name,
           supplementBrand: supplement.brand,
@@ -339,78 +330,20 @@ class EnhancedSupplementSearch {
         });
       }
       
-      // Fallback to database contributions if Excel didn't work
-      if (getSupplementContributions) {
-        console.log('📊 Attempting database contribution search...');
-        
-        const supplementContributions = await getSupplementContributions({
-          supplementName: supplement.name,
-          limit: 100
-        });
-        
-        console.log(`📊 Found ${supplementContributions.length} supplement contributions for "${supplement.name}"`);
-        
-        // Process database contributions (same logic as before)
-        const storeContributions = {};
-        supplementContributions.forEach(contribution => {
-          const storeKey = contribution.store_name.toLowerCase().trim();
-          if (!storeContributions[storeKey]) {
-            storeContributions[storeKey] = [];
-          }
-          storeContributions[storeKey].push(contribution);
-        });
-        
-        stores.forEach(store => {
-          const storeKey = store.name.toLowerCase().trim();
-          const contributions = storeContributions[storeKey] || [];
-          
-          if (contributions.length > 0 && prices.find(p => p.id === store.id) === undefined) {
-            const latestContribution = contributions.sort((a, b) => 
-              new Date(b.created_at) - new Date(a.created_at)
-            )[0];
-            
-            prices.push({
-              ...store,
-              price: parseFloat(latestContribution.price),
-              pickup: true,
-              delivery: Math.random() > 0.3,
-              requiresCoupon: Math.random() > 0.9,
-              source: 'database_contribution',
-              contributionId: latestContribution.id,
-              lastUpdated: latestContribution.created_at
-            });
-            
-            console.log(`✅ Added database price for ${store.name}: $${latestContribution.price}`);
-          }
-        });
-        
-        if (prices.length > 0) {
-          console.log(`🎯 Database search returned ${prices.length} prices`);
-          meta = {
-            source: 'database_contributions',
-            contributionCount: supplementContributions.length,
-            storeCount: prices.length,
-            currency: options.currency || 'USD'
-          };
-          return { prices, meta };
-        }
-      }
-      
-      // If both Excel and database failed, show detailed debugging and fall back gracefully
+      // If Excel data is unavailable, show detailed debugging and fall back gracefully
       console.log('⚠️ No enhanced data available - this is normal for supplements not in Excel data');
       console.log('📊 Debug summary:', {
         supplementName: supplement.name,
         supplementBrand: supplement.brand,
         excelDataLoaded: excelMedications ? excelMedications.length : 0,
         excelMatchesFound: excelMatches ? excelMatches.length : 0,
-        databaseAvailable: !!getSupplementContributions,
         finalPriceCount: prices.length,
         hasExcelData: !!excelMedications,
         hasMatches: !!excelMatches
       });
       
       // Don't throw error - just return empty results to fall back to original method
-      return { prices: [], meta: { source: 'no_enhanced_data', reason: 'supplement not found in Excel or database' } };
+      return { prices: [], meta: { source: 'no_enhanced_data', reason: 'supplement not found in Excel' } };
       
     } catch (error) {
       console.error('❌ Enhanced supplement search failed:', error);
