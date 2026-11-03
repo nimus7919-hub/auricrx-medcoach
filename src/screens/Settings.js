@@ -1,6 +1,7 @@
+import { resetSearchLocationConsent } from "../lib/locationPermission";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import { useTimeFormat } from "./../hooks/useTimeFormat";
 import { formatTime } from "./../utils/time";
@@ -344,6 +345,16 @@ export default function createSettings(getScope) {
         </CollapsibleSection>
         
         <CollapsibleSection title={S.privacy} sectionKey="privacy" onToggle={toggleSection}>
+          <TouchableOpacity style={{ padding: 16 }} onPress={async () => {
+            try {
+              await resetSearchLocationConsent();
+              Alert.alert(uiI18n.t("locationSearch.reset"), uiI18n.t("locationSearch.resetDone"));
+            } catch {
+              Alert.alert(uiI18n.t("locationSearch.reset"), uiI18n.t("locationSearch.resetError"));
+            }
+          }}>
+            <DynamicText type="card">{uiI18n.t("locationSearch.reset")}</DynamicText>
+          </TouchableOpacity>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <RowSwitch
               label={S.dataCollection}

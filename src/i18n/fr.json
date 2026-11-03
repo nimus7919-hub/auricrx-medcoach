@@ -1,4 +1,10 @@
 {
+  "locationSearch": {
+    "disclosure": "Nous utilisons votre position uniquement pour rechercher des pharmacies ou laboratoires ? proximit?. Nous ne la conservons pas et ne l?utilisons pas pour vous suivre. Les recherches de pharmacies utilisent les donn?es INEGI DENUE/PROFECO via notre serveur ; les recherches de laboratoires et les distances routi?res facultatives utilisent Google Places/Maps.",
+    "reset": "R?initialiser le consentement de localisation",
+    "resetDone": "Consentement de localisation r?initialis?. Nous vous le redemanderons lors de votre prochaine recherche.",
+    "resetError": "Impossible de r?initialiser le consentement de localisation. R?essayez."
+  },
   "documentScanner": {"scan": "Numériser", "manualPhoto": "Photo manuelle en PDF", "proBadge": "PRO"},
   "help": {
     "title": "Guide du Tableau de bord",

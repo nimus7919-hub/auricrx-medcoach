@@ -1,4 +1,10 @@
 {
+  "locationSearch": {
+    "disclosure": "Usamos sua localiza??o apenas para buscar farm?cias ou laborat?rios pr?ximos. N?o a armazenamos nem a usamos para rastreamento. As buscas de farm?cias usam dados do INEGI DENUE/PROFECO pelo nosso servidor; as buscas de laborat?rios e as dist?ncias opcionais de carro usam Google Places/Maps.",
+    "reset": "Redefinir consentimento de localiza??o",
+    "resetDone": "Consentimento de localiza??o redefinido. Perguntaremos novamente na pr?xima busca.",
+    "resetError": "N?o foi poss?vel redefinir o consentimento de localiza??o. Tente novamente."
+  },
   "documentScanner": {"scan": "Digitalizar", "manualPhoto": "Foto manual para PDF", "proBadge": "PRO"},
   "help": {
     "title": "Guia do Painel",

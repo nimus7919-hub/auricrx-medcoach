@@ -1,4 +1,10 @@
 {
+  "locationSearch": {
+    "disclosure": "Usamos tu ubicaci?n solo para buscar farmacias o laboratorios cercanos. No la guardamos ni la usamos para seguimiento. Las b?squedas de farmacias usan datos de INEGI DENUE/PROFECO a trav?s de nuestro servidor; las b?squedas de laboratorios y las distancias opcionales en auto usan Google Places/Maps.",
+    "reset": "Restablecer permiso de ubicaci?n",
+    "resetDone": "Consentimiento de ubicaci?n restablecido. Te preguntaremos de nuevo en tu pr?xima b?squeda.",
+    "resetError": "No se pudo restablecer el consentimiento de ubicaci?n. Int?ntalo de nuevo."
+  },
   "documentScanner": {"scan": "Escanear", "manualPhoto": "Foto manual a PDF", "proBadge": "PRO"},
   "navigation": {
     "pressBackAgainToExit": "Presiona atras de nuevo para salir"

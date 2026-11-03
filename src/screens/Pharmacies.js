@@ -33,6 +33,7 @@ export default function createPharmacies(getScope) {
           return;
         }
         
+        setPharmaciesLoading(true);
         const { coords } = await Location.getCurrentPositionAsync({});
         
         // Import the pharmacy search function

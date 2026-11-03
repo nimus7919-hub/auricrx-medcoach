@@ -36,6 +36,7 @@ export default function createLabs(getScope) {
           return;
         }
         
+        setLabsLoading(true);
         const { coords } = await Location.getCurrentPositionAsync({});
         
         // Import the lab search function

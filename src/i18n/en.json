@@ -1,4 +1,10 @@
 {
+  "locationSearch": {
+    "disclosure": "We use your location only to find nearby pharmacies or laboratories. We do not store it or use it for tracking. Pharmacy searches use INEGI DENUE/PROFECO data through our server; laboratory searches and optional driving distances use Google Places/Maps.",
+    "reset": "Reset location consent",
+    "resetDone": "Location consent reset. We will ask again on your next search.",
+    "resetError": "Could not reset location consent. Please try again."
+  },
   "documentScanner": {"scan": "Scan", "manualPhoto": "Manual photo to PDF", "proBadge": "PRO"},
   "navigation": {
     "pressBackAgainToExit": "Press back again to exit"
