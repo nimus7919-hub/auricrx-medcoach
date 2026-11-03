@@ -1,5 +1,5 @@
 import ReminderPermissionBanner from '../components/ReminderPermissionBanner';
-import { Text, Platform } from 'react-native';
+import { Text } from 'react-native';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -50,7 +50,6 @@ export default function createDashboard(getScope) {
 
           {/* Card grid */}
         <View style={styles.grid}>
-            {Platform.OS === 'android' && HEALTH_CONNECT_ENABLED && <Card title="Actividad y salud" icon={<Text style={{ color: '#E8BF80', fontSize: 32 }}>♡</Text>} subtitle="Health Connect" onPress={() => setRoute('activity-health')} />}
             <Card title={S.labsLocations} icon={<Image source={require('../../assets/dashboard Emojies/Lab Locations.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('labs')} />
           <Card title={S.pharmacyLocations} icon={<Image source={require('../../assets/dashboard Emojies/Pharmacy locations.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('pharmacies')} />
             <Card title={S.reminders} icon={<Image source={require('../../assets/dashboard Emojies/Reminders.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('reminders')} />

@@ -13,7 +13,7 @@ import Supplements from "./../../components/Supplements";
 import Reminders from "./../../components/Reminders";
 import AdminProfileScreen from "./../screens/AdminProfileScreen";
 import WallpaperSettingsScreen from "./../screens/WallpaperSettingsScreen";
-import ActivityHealthScreen, { HealthConnectConsentScreen, HealthConnectPrivacyScreen } from '../screens/ActivityHealthScreen';
+import { HealthConnectConsentScreen, HealthConnectPrivacyScreen } from '../screens/ActivityHealthScreen';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
@@ -25,15 +25,14 @@ export default function createAppNavigator(getScope) {
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
      route === 'settings' ? <Settings /> :
-     route === 'activity-health' ? <ActivityHealthScreen key={user?.uid} userId={user?.uid} onClose={() => setRoute('dashboard')} onConnect={() => setRoute('health-connect-consent')} onPrivacy={() => setRoute('health-connect-privacy')} /> :
-     route === 'health-connect-consent' ? <HealthConnectConsentScreen key={user?.uid} userId={user?.uid} onClose={() => setRoute('activity-health')} onConnected={() => setRoute('activity-health')} /> :
-     route === 'health-connect-privacy' ? <HealthConnectPrivacyScreen key={user?.uid} userId={user?.uid} onClose={() => setRoute('settings')} onConnect={() => setRoute('health-connect-consent')} /> :
+     route === 'health-connect-consent' ? <HealthConnectConsentScreen key={user?.uid} userId={user?.uid} onClose={() => setRoute('health-analytics')} onConnected={() => setRoute('health-analytics')} /> :
+     route === 'health-connect-privacy' ? <HealthConnectPrivacyScreen key={user?.uid} userId={user?.uid} onClose={() => setRoute('health-analytics')} onConnect={() => setRoute('health-connect-consent')} /> :
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} medications={meds} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'documents' ? <MedicalDocumentsScreen requestAutoDocumentScan={requestAutoDocumentScan} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'health-analytics' ? <HealthAnalyticsScreen key={user?.uid} userId={user?.uid} onConnectHealth={() => setRoute('health-connect-consent')} onHealthPrivacy={() => setRoute('health-connect-privacy')} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'ai-health' ? (isReady ? <AIHealthScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} supplements={supplements} /> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>{uiI18n.t("ui.loadingTranslations")}</Text></View>) :
         route === 'health-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :

@@ -1,4 +1,4 @@
-// Isolated Android feature bundle. Does not use Expo CLI, app config or dotenv.
+// Isolated Android health analytics + wearable bundle. Does not use Expo CLI, app config or dotenv.
 const path = require('node:path');
 const fs = require('node:fs');
 const Metro = require('metro');
@@ -17,14 +17,15 @@ const root = path.resolve(__dirname, '..');
     /[\\/]\.env[^\\/]*(?:[\\/]|$)/i, /[\\/]\.git(?:[\\/]|$)/i,
     /[\\/]auricrx-medcoach[\\/](?:dist[^\\/]*|backup|temp-export|q6-export|\.expo|\.health-connect-check)(?:[\\/]|$)/i,
   ];
+  config.transformer.assetRegistryPath = require.resolve('react-native/Libraries/Image/AssetRegistry');
   config.transformer.babelTransformerPath = path.join(__dirname, 'health-connect-sanity-transformer.cjs');
   config.reporter = { update(event) { if (event.type === 'bundling_error') console.error(event.error.message); } };
   const output = path.join(root, '.health-connect-check');
   fs.mkdirSync(output, { recursive: true });
   config.fileMapCacheDirectory = output;
   await Metro.runBuild(config, {
-    entry: 'src/screens/ActivityHealthScreen.js', platform: 'android', dev: false,
-    minify: false, out: path.join(output, 'activity-health.android.bundle'),
+    entry: 'src/screens/HealthAnalyticsScreen.tsx', platform: 'android', dev: false,
+    minify: false, out: path.join(output, 'health-analytics.android.bundle'),
   });
-  console.log('Android Health Connect feature bundle passed (isolated config, no environment files).');
+  console.log('Android health analytics + Health Connect bundle passed (isolated config, no environment files).');
 })().catch(error => { console.error(error.message); process.exitCode = 1; });

@@ -144,7 +144,8 @@ function HeartChart({ samples }) {
 }
 const rate = value => value == null ? 'sin registros' : `${Math.round(value)} lpm`;
 
-export default function ActivityHealthScreen({ userId, onClose, onConnect, onPrivacy }) {
+// Display-only boundary: keep snapshots here, never lift into analytics, reports or AI state.
+export function ActivityHealthSection({ userId, onConnect, onPrivacy }) {
   const { status, setStatus, data, setData, refresh, revision } = useConnection(userId);
   const [reading, setReading] = useState(false);
   useEffect(() => {
@@ -159,7 +160,9 @@ export default function ActivityHealthScreen({ userId, onClose, onConnect, onPri
     }).finally(() => { if (active) setReading(false); });
     return () => { active = false; };
   }, [status, userId, revision, setData, setStatus]);
-  return <Page title="Actividad y salud" onClose={onClose}>
+  return <View style={styles.section}>
+    <Text accessibilityRole="header" style={styles.title}>Actividad y salud</Text>
+    <Text style={styles.body}>Solo visualizaci?n ? datos en tu tel?fono. Estos datos no se usan en an?lisis con IA, puntuaciones ni recomendaciones.</Text>
     <ConnectionActions status={status} onConnect={onConnect} refresh={refresh} />
     {reading && <Text style={styles.body}>Leyendo datos del teléfono…</Text>}
     {data && status === 'connected' && <>
@@ -176,13 +179,21 @@ export default function ActivityHealthScreen({ userId, onClose, onConnect, onPri
       <Text style={styles.body}>Actualizado: {new Date(data.updatedAt).toLocaleString('es-MX')}</Text>
       <HealthButton title="Actualizar datos" onPress={refresh} />
     </>}
+    {!data && <Text style={styles.body}>Fuente: Health Connect</Text>}
     <HealthButton title="Privacidad y conexión" onPress={onPrivacy} />
     <Text style={styles.body}>Si tienes dudas sobre tus resultados, consulta a tu médico.</Text>
     <Text style={styles.disclaimer}>{privacy.disclaimer}</Text>
+  </View>;
+}
+
+export default function ActivityHealthScreen({ userId, onClose, onConnect, onPrivacy }) {
+  return <Page title="Actividad y salud" onClose={onClose}>
+    <ActivityHealthSection userId={userId} onConnect={onConnect} onPrivacy={onPrivacy} />
   </Page>;
 }
 
 const styles = StyleSheet.create({
+  section: { backgroundColor: C.navy, borderColor: C.gold, borderWidth: 1, borderRadius: 18, padding: 16, marginBottom: 24 },
   screen: { flex: 1, backgroundColor: C.navy }, content: { padding: 20, paddingBottom: 48 },
   title: { color: C.gold, fontSize: 26, fontWeight: '700', marginVertical: 18 },
   heading: { color: C.gold, fontSize: 18, fontWeight: '600', marginVertical: 10 },

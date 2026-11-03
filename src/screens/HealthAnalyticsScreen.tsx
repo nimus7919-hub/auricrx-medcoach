@@ -11,6 +11,8 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DynamicText from '../components/DynamicText';
+import { ActivityHealthSection } from './ActivityHealthScreen';
+import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import { useWallpaper } from '../contexts/WallpaperContext';
 // Simplified Health Analytics - no external service dependencies
 
@@ -18,6 +20,9 @@ const { width: screenWidth } = Dimensions.get('window');
 
 interface HealthAnalyticsScreenProps {
   onClose: () => void;
+  userId?: string;
+  onConnectHealth: () => void;
+  onHealthPrivacy: () => void;
   theme?: any;
   S?: any; // Translation helper
 }
@@ -76,7 +81,7 @@ interface HealthReport {
   createdAt: string;
 }
 
-export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnalyticsScreenProps) {
+export default function HealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealth, onHealthPrivacy }: HealthAnalyticsScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
@@ -1215,6 +1220,11 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
               {t("healthAnalytics.trackHealthMetrics")}
             </DynamicText>
           </Animated.View>
+
+          {/* Isolated display-only state; never feed wearable snapshots into metrics or reports. */}
+          {Platform.OS === 'android' && HEALTH_CONNECT_ENABLED && (
+            <ActivityHealthSection key={userId} userId={userId} onConnect={onConnectHealth} onPrivacy={onHealthPrivacy} />
+          )}
 
           {/* Stats Overview */}
           {renderStatsOverview()}

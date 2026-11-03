@@ -182,6 +182,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.ActivityHealthSection = ActivityHealthSection;
   exports.HealthButton = HealthButton;
   exports.HealthConnectConsentScreen = HealthConnectConsentScreen;
   exports.HealthConnectPrivacyControls = HealthConnectPrivacyControls;
@@ -616,12 +617,13 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var rate = function rate(value) {
     return value == null ? 'sin registros' : `${Math.round(value)} lpm`;
   };
-  function ActivityHealthScreen(_ref12) {
+
+  // Display-only boundary: keep snapshots here, never lift into analytics, reports or AI state.
+  function ActivityHealthSection(_ref12) {
     var _data$days$steps,
       _data$days,
       _this2 = this;
     var userId = _ref12.userId,
-      onClose = _ref12.onClose,
       onConnect = _ref12.onConnect,
       onPrivacy = _ref12.onPrivacy;
     var _useConnection2 = useConnection(userId),
@@ -657,10 +659,16 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         active = false;
       };
     }, [status, userId, revision, setData, setStatus]);
-    return /*#__PURE__*/(0, _jsxRuntime.jsxs)(Page, {
-      title: "Actividad y salud",
-      onClose: onClose,
-      children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(ConnectionActions, {
+    return /*#__PURE__*/(0, _jsxRuntime.jsxs)(_reactNative.View, {
+      style: styles.section,
+      children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(_reactNative.Text, {
+        accessibilityRole: "header",
+        style: styles.title,
+        children: "Actividad y salud"
+      }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactNative.Text, {
+        style: styles.body,
+        children: "Solo visualizaci?n ? datos en tu tel?fono. Estos datos no se usan en an?lisis con IA, puntuaciones ni recomendaciones."
+      }), /*#__PURE__*/(0, _jsxRuntime.jsx)(ConnectionActions, {
         status: status,
         onConnect: onConnect,
         refresh: refresh
@@ -723,6 +731,9 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           title: "Actualizar datos",
           onPress: refresh
         })]
+      }), !data && /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactNative.Text, {
+        style: styles.body,
+        children: "Fuente: Health Connect"
       }), /*#__PURE__*/(0, _jsxRuntime.jsx)(HealthButton, {
         title: "Privacidad y conexi\xF3n",
         onPress: onPrivacy
@@ -735,7 +746,30 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       })]
     });
   }
+  function ActivityHealthScreen(_ref13) {
+    var userId = _ref13.userId,
+      onClose = _ref13.onClose,
+      onConnect = _ref13.onConnect,
+      onPrivacy = _ref13.onPrivacy;
+    return /*#__PURE__*/(0, _jsxRuntime.jsx)(Page, {
+      title: "Actividad y salud",
+      onClose: onClose,
+      children: /*#__PURE__*/(0, _jsxRuntime.jsx)(ActivityHealthSection, {
+        userId: userId,
+        onConnect: onConnect,
+        onPrivacy: onPrivacy
+      })
+    });
+  }
   var styles = _reactNative.StyleSheet.create({
+    section: {
+      backgroundColor: C.navy,
+      borderColor: C.gold,
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 16,
+      marginBottom: 24
+    },
     screen: {
       flex: 1,
       backgroundColor: C.navy
@@ -61969,7 +62003,12 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     _disconnectHealth = (0, _asyncToGenerator2.default)(function* (userId) {
       epoch += 1;
       if (userId) disconnectedUsers.add(userId);
-      if (userId) yield storeConsent(userId, null, epoch);
+      var storageError;
+      try {
+        if (userId) yield storeConsent(userId, null, epoch);
+      } catch (error) {
+        storageError = error;
+      }
       var revoked = false;
       try {
         if (native()) {
@@ -61977,6 +62016,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           revoked = true;
         }
       } catch (_unused2) {/* Still clear local consent; UI directs user to system settings. */}
+      if (storageError) throw storageError;
       return revoked;
     });
     return _disconnectHealth.apply(this, arguments);

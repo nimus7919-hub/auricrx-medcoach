@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const privacy = require('../modules/health-connect/privacy.json');
 const files = [
   'src/services/healthConnectService.js', 'src/screens/ActivityHealthScreen.js',
-  'src/navigation/AppNavigator.js', 'src/screens/Dashboard.js', 'src/screens/Settings.js',
+  'src/screens/HealthAnalyticsScreen.tsx', 'src/navigation/AppNavigator.js', 'src/screens/Dashboard.js', 'src/screens/Settings.js',
   'src/providers/AppController.js', 'plugins/withHealthConnect.js',
 ];
 for (const file of files) {
