@@ -3597,4 +3597,29 @@
     "KG": "🇰🇬 Kirguistán",
     "UZ": "🇺🇿 Uzbekistán"
   }
+,
+  "refillSheet": {
+  "noSupplementPrices": "Sin precios para este suplemento",
+  "sortBy": "Ordenar por",
+  "sort": {
+    "distance": "Distancia",
+    "price": "Precio",
+    "name": "Nombre"
+  },
+  "pricesFor": "Precios para: {{name}}",
+  "detailsUnavailable": "Detalles del producto no disponibles",
+  "within": "Dentro de {{radius}} km",
+  "expand": "Ampliar b?squeda",
+  "noPrices": "Sin precios PROFECO para este medicamento",
+  "noNearby": "Sin tiendas con precio dentro de este radio",
+  "state": "Estatal",
+  "national": "Nacional",
+  "units": {
+    "tablets": "tabletas",
+    "capsules": "c?psulas",
+    "dragees": "grageas",
+    "ampoules": "ampolletas",
+    "sachets": "sobres"
+  }
+}
 }

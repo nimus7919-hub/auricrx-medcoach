@@ -21,6 +21,17 @@ function signature(value) {
   const ingredients = normalize(text.replace(/\d+(?:[.,]\d+)?\s*(mcg|mg|g|ui|ml)/g, ' ')).split(' ').filter(w => !/^(caja|con|de|tabletas?|capsulas?|comprimidos?|solucion|suspension|inyectable|oral|y|\d+)$/.test(w)).sort();
   return { strengths: strengths.join('|'), ingredients: [...new Set(ingredients)].join('|') };
 }
+// Keep unknown presentation details null rather than guessing a package size.
+function parsePresentation(value) {
+  const text = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const strengthPattern = /\d+(?:[.,]\d+)?\s*(?:mcg|mg|g|ui|iu|%)(?:\s*\/\s*(?:\d+(?:[.,]\d+)?\s*)?(?:mcg|mg|ml|g|ui|iu))?/gi;
+  const strengths = text.match(strengthPattern) || [];
+  const packText = text.replace(strengthPattern, ' ');
+  const pack = packText.match(/(\d+(?:[.,]\d+)?)\s*(tabletas?|tabs?\b|comprimidos?|capsulas?|caps?\b|grageas?|ampolletas?|ampollas?|sobres?|ml|mililitros?|g|gramos?)\b/i);
+  const raw = pack?.[2] || '';
+  const unit = /^(tab|comprim)/.test(raw) ? 'tablets' : /^cap/.test(raw) ? 'capsules' : /^grage/.test(raw) ? 'dragees' : /^amp/.test(raw) ? 'ampoules' : /^sobre/.test(raw) ? 'sachets' : /^(ml|mililitro)/.test(raw) ? 'ml' : /^(g|gramo)/.test(raw) ? 'g' : null;
+  return { count: pack ? Number(pack[1].replace(',', '.')) : null, unit, strength: strengths.length ? strengths.join(' / ').replace(/\s+/g, ' ').trim() : null };
+}
 async function jsonFetch(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(60000), headers: { Accept: 'application/json' } });
   if (!response.ok) throw new Error(`upstream_http_${response.status}`);
@@ -210,6 +221,8 @@ function install(app, sql) {
     const med = String(req.query.med || '').trim();
     if (!med || med.length>300) throw new Error('med_required');
     const origin = coordinates(req.query), state = normalize(req.query.state);
+    const requestedRadius = req.query.radius_km == null ? null : Number(req.query.radius_km);
+    if (requestedRadius != null && (!Number.isFinite(requestedRadius) || requestedRadius <= 0 || requestedRadius > 250)) throw new Error('invalid_radius');
     let ids = [...new Set(catalog.filter(m=>m.id===med || m.name===normalize(med)).map(m=>m.id))];
     if (!ids.length) { const q = normalize(med); ids = [...new Set(catalog.filter(m=>m.name.startsWith(q)).slice(0,200).map(m=>m.id))]; }
     const rows = await sql`WITH matched AS (SELECT p.* FROM qqp_prices p WHERE EXISTS(SELECT 1 FROM med_qqp_map m WHERE m.producto=p.producto AND m.presentacion=p.presentacion AND m.med_id=ANY(${ids}::text[]))) SELECT p.*,s.chain,s.branch,s.address,s.state,s.lat,s.lng FROM matched p JOIN qqp_stores s ON s.id=p.store_id WHERE p.fecha>=(SELECT max(fecha) FROM matched)-INTERVAL '90 days' ORDER BY p.fecha DESC,p.id DESC`;
@@ -217,9 +230,11 @@ function install(app, sql) {
     const local = state ? rows.filter(r=>normalize(r.state)===state) : [], fallback = !local.length;
     const chains = new Map(), stores = new Map();
     for (const r of rows) { if(!chains.has(r.chain)) chains.set(r.chain,[]); chains.get(r.chain).push(r); if(!stores.has(r.store_id)) stores.set(r.store_id,r); }
-    const nearest = origin ? [...stores.values()].filter(s=>s.lat!=null && s.lng!=null).map(s=>({id:s.store_id,name:s.branch,chain:s.chain,branch:s.branch,address:s.address,state:s.state,lat:s.lat,lng:s.lng,lon:s.lng,price:Number(s.precio),last_price:Number(s.precio),as_of:s.fecha,observed_at:s.fecha,distance_m:distance(origin,s),distanceMiles:distance(origin,s)/1609.344})).sort((a,b)=>a.distance_m-b.distance_m).slice(0,10) : [];
+    const candidates = origin ? [...stores.values()].filter(s=>s.lat!=null && s.lng!=null).map(s=>({id:s.store_id,name:s.branch,chain:s.chain,branch:s.branch,address:s.address,state:s.state,lat:s.lat,lng:s.lng,lon:s.lng,presentacion:s.presentacion,parsed:parsePresentation(s.presentacion),price:Number(s.precio),last_price:Number(s.precio),as_of:s.fecha,observed_at:s.fecha,distance_m:distance(origin,s),distanceMiles:distance(origin,s)/1609.344})).sort((a,b)=>a.distance_m-b.distance_m) : [];
+    const radiusKm = requestedRadius ?? (candidates.filter(s=>s.distance_m<=15000).length < 3 ? 50 : 15);
+    const nearest = candidates.filter(s=>s.distance_m<=radiusKm*1000);
     await driving(origin,nearest);
-    res.json({ok:true,med,state:summary(local),national:summary(rows),summary:summary(fallback?rows:local),per_chain:[...chains].map(([chain,list])=>({chain,...summary(list),as_of:list[0].fecha})),nearest,source:'PROFECO QQP',attribution,as_of:rows[0]?.fecha || null,fallback,window_days:90,window_anchor:'latest_observation',currency:'MXN'});
+    res.json({ok:true,med,radius_km:radiusKm,presentations:[...new Set(rows.map(r=>r.presentacion))].map(presentacion=>({presentacion,parsed:parsePresentation(presentacion)})),state:summary(local),national:summary(rows),summary:summary(fallback?rows:local),per_chain:[...chains].map(([chain,list])=>({chain,...summary(list),as_of:list[0].fecha})),nearest,source:'PROFECO QQP',attribution,as_of:rows[0]?.fecha || null,fallback,window_days:90,window_anchor:'latest_observation',currency:'MXN'});
   }));
   const safeRun = () => run().catch(()=>console.error('Pharmacy refresh failed'));
   const first = setTimeout(safeRun,120000); first.unref?.();
@@ -229,4 +244,4 @@ function install(app, sql) {
   if (!(process.env.INEGI_DENUE_TOKEN || process.env.INEGI_TOKEN)) console.log('DENUE skipped: INEGI_DENUE_TOKEN not set');
   return {ready,run};
 }
-module.exports = {install,normalize,signature,distance,coordinates};
+module.exports = {install,normalize,signature,distance,coordinates,parsePresentation};

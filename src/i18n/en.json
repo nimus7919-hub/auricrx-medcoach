@@ -1646,7 +1646,7 @@
     "noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite_781fca": "No phone number found for {{value1}}. Please try calling them directly or visit their website.",
     "callPharmacy": "Call Pharmacy",
     "callValueValue_59a584": "Call {{value1}}?\n{{value2}}",
-    "fuenteProfecoQuienEsQuienEnLosPreciosCcBy40": "Source: PROFECO, Quién es Quién en los Precios (CC-BY 4.0)",
+    "fuenteProfecoQuienEsQuienEnLosPreciosCcBy40": "Source: PROFECO, Qui?n es Qui?n en los Precios (CC-BY 4.0)",
     "noPharmaciesLoadedYet": "No pharmacies loaded yet",
     "areYouSureYouWantToSignOut": "Are you sure you want to sign out?",
     "accountDetails": "Account Details",
@@ -1833,11 +1833,11 @@
     "selectMultipleFiles": "Select multiple files.",
     "singleFileOnly": "Single file only.",
     "openDirectionsToValue": "Open directions to {{value1}}",
-    "farmaciaNoDisponible": "Farmacia no disponible",
+    "farmaciaNoDisponible": "Pharmacy not available",
     "pharmacyNotAvailable": "Pharmacy not available",
-    "precioNoDisponible": "Precio no disponible",
-    "precioAproximadoAl": "Precio aproximado al",
-    "puedeVariarEnTienda": ". Puede variar en tienda.",
+    "precioNoDisponible": "Price not available",
+    "precioAproximadoAl": "Approximate price as of ",
+    "puedeVariarEnTienda": ". May vary in store.",
     "approximatePriceAsOf": "Approximate price as of",
     "mayVaryInStore": ". May vary in store.",
     "sortByValue": "Sort by {{value1}}",
@@ -3573,4 +3573,29 @@
     "KG": "🇰🇬 Kyrgyzstan",
     "UZ": "🇺🇿 Uzbekistan"
   }
+,
+  "refillSheet": {
+  "noSupplementPrices": "No prices for this supplement",
+  "sortBy": "Sort by",
+  "sort": {
+    "distance": "Distance",
+    "price": "Price",
+    "name": "Name"
+  },
+  "pricesFor": "Prices for: {{name}}",
+  "detailsUnavailable": "Product details not available",
+  "within": "Within {{radius}} km",
+  "expand": "Expand search",
+  "noPrices": "No PROFECO prices for this medication",
+  "noNearby": "No priced stores within this radius",
+  "state": "State",
+  "national": "National",
+  "units": {
+    "tablets": "tablets",
+    "capsules": "capsules",
+    "dragees": "dragees",
+    "ampoules": "ampoules",
+    "sachets": "sachets"
+  }
+}
 }

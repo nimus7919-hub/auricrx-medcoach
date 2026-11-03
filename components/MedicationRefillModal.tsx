@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius, spacing } from "../theme/tokens";
 import { openInMaps } from "../utils/maps";
 import { API_BASE } from "../src/config/api";
-import { findNearbyPharmacies, getMedicationPrices, StorePrice, QQPQuote } from "../services/pharmacySearch";
+import { findNearbyPharmacies, getMedicationPrices, StorePrice, QQPQuote, formatPresentation } from "../services/pharmacySearch";
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 import medicationDataCollector from "../services/medicationDataCollector";
@@ -47,6 +47,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   }, [visible]);
   const [results, setResults] = useState<StorePrice[]>([]);
   const [qqpQuote, setQqpQuote] = useState<QQPQuote | null>(null);
+  const [radiusKm, setRadiusKm] = useState(15);
+  const requestId = useRef(0);
   const [priceError, setPriceError] = useState(false);
   const [sort, setSort] = useState<'distance'|'price'|'name'>('distance');
   const [descending, setDescending] = useState(false);
@@ -56,9 +58,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   // ENABLED: Enhanced medication search instance for Excel integration
 
 
-  useEffect(()=>{
-    AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
-  },[]);
+
   const [showAll, setShowAll] = useState(false);
   const [currency, setCurrency] = useState<string>(uiI18n.t("common.usd"));
   const [mockMode, setMockMode] = useState(false);
@@ -87,7 +87,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
-  async function load() {
+  async function load(requestedRadius?: number) {
+    const id = ++requestId.current;
     try {
       setLoading(true);
       setResults([]); setQqpQuote(null); setPriceError(false);
@@ -167,17 +168,20 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       
       let state: string | undefined;
       try { if (hasCoords) state = (await Location.reverseGeocodeAsync(coords))[0]?.region || undefined; } catch {}
-      const { prices, meta, quote } = await getMedicationPrices(near, medication, { currency: uiI18n.t("common.mxn"), lat: hasCoords ? coords.latitude : undefined, lng: hasCoords ? coords.longitude : undefined, state });
+      const { prices, meta, quote } = await getMedicationPrices(near, medication, { currency: uiI18n.t("common.mxn"), lat: hasCoords ? coords.latitude : undefined, lng: hasCoords ? coords.longitude : undefined, state, radiusKm: requestedRadius });
+      if (id !== requestId.current) return;
+      setRadiusKm(quote?.radius_km || requestedRadius || 50);
       setQqpQuote(quote || null);
       setResults(prices);
       setCurrency(uiI18n.t("common.mxn"));
       if (meta) setFxMeta(meta);
       setMockMode(false);
     } catch (e) {
+      if (id !== requestId.current) return;
       setPriceError(true);
       console.warn('Refill load error', e);
     } finally {
-      setLoading(false);
+      if (id === requestId.current) setLoading(false);
     }
   }
 
@@ -200,9 +204,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     // Validate form
     if (!contributionData.medicationName.trim() || !contributionData.price.trim() || !contributionData.storeName.trim()) {
       Alert.alert(
-        strings.contributionError || uiI18n.t("ai.contributionError"),
-        strings.contributionErrorText || uiI18n.t("localized.appConstants.STRINGS.contributionErrorText"),
-        [{ text: strings.ok || uiI18n.t("adminProfile.ok") }]
+        uiI18n.t("ai.contributionError"),
+        uiI18n.t("localized.appConstants.STRINGS.contributionErrorText"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
       return;
     }
@@ -220,11 +224,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       console.log('📊 Price contribution saved to server:', contribution);
 
       Alert.alert(
-        strings.contributionSuccess || uiI18n.t("ai.contributionSuccess"),
-        strings.contributionSuccessText || uiI18n.t("ai.contributionSuccessText"),
+        uiI18n.t("ai.contributionSuccess"),
+        uiI18n.t("ai.contributionSuccessText"),
         [
           {
-            text: strings.ok || uiI18n.t("adminProfile.ok"),
+            text: uiI18n.t("adminProfile.ok"),
             onPress: () => {
               setShowContributionModal(false);
               setSelectedPharmacy(null);
@@ -244,9 +248,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     } catch (error) {
       console.error('❌ Failed to save contribution:', error);
       Alert.alert(
-        strings.contributionError || uiI18n.t("adminProfile.error"),
-        strings.contributionErrorText || uiI18n.t("ui.failedToSaveYourContributionPleaseTryAgain"),
-        [{ text: strings.ok || uiI18n.t("adminProfile.ok") }]
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToSaveYourContributionPleaseTryAgain"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
     }
   };
@@ -266,7 +270,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   };
 
   const data = useMemo(() => {
-    let list = results.slice();
+    let list = results.filter(r => r.distanceMiles != null && r.distanceMiles * 1.609344 <= radiusKm);
     console.log('🔍 MedicationRefillModal - Before sorting:', list.slice(0, 3).map(r => ({
       name: r.name,
       distanceMiles: r.distanceMiles,
@@ -298,7 +302,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       price: r.price
     })));
     return showAll ? list : list.slice(0,5);
-  }, [results, showAll, sort, descending, uiI18n.resolvedLanguage]);
+  }, [results, radiusKm, showAll, sort, descending, uiI18n.resolvedLanguage]);
 
   // Precompute current lowest price once per results array (excluding "price not available" items)
   const lowestPrice = useMemo(() => {
@@ -450,15 +454,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <Text style={{ color: colors.text, fontSize:16, fontWeight:'600' }}>{item.name}</Text>
             <Text style={{ color: colors.sub, fontSize:12 }}>{formatDistance(item.distanceMiles)} • {item.address}</Text>
             <View style={{ flexDirection:'row', alignItems:'center', marginTop:2 }}>
-              {item.excelMatch?.medicinas ? (
-                <Text style={{ color: colors.sub, fontSize:11 }}>
-                  {extractStrengthAndQuantity(item.excelMatch.medicinas, item.excelMatch.unidades)}
-                </Text>
-              ) : (
-                <Text style={{ color: colors.sub, fontSize:11, fontStyle: 'italic' }}>
-                  {strings.productInfoNotAvailable || uiI18n.t("medications.productInfoNotAvailable")}
-                </Text>
-              )}
+              <Text style={{ color: colors.sub, fontSize: 11 }}>{formatPresentation(item, key => uiI18n.t(key))}</Text>
             </View>
           </View>
         </View>
@@ -480,7 +476,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 style={{ backgroundColor: '#10b981', borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 4, minHeight:28, justifyContent:'center' }}
               >
                 <Text style={{ color:'#ffffff', fontWeight:'600', fontSize:11 }}>
-                  {strings.helpUsGetPrice || uiI18n.t("ai.helpUsGetPrice")}
+                  {uiI18n.t("ai.helpUsGetPrice")}
                 </Text>
               </Pressable>
             </View>
@@ -500,11 +496,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           {item.purchase_url && !item.priceNotAvailable && <Pressable onPress={() => Linking.openURL(item.purchase_url!)}><Text style={{ color: colors.sub }}>{uiI18n.t("ui.mercadoLibre")}</Text></Pressable>}
           {isLowest && !item.priceNotAvailable && (
             <View style={{ backgroundColor: colors.gold, paddingHorizontal:8, paddingVertical:2, borderRadius: radius.pill }}>
-              <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest||uiI18n.t("medications.lowest")}</Text>
+              <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{uiI18n.t("medications.lowest")}</Text>
             </View>
           )}
           {!item.online && (<Pressable onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })} style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 6, minHeight:32, justifyContent:'center' }}>
-            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{strings.directions || uiI18n.t("common.directions")}</Text>
+            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{uiI18n.t("common.directions")}</Text>
           </Pressable>)}
         </View>
       </Pressable>
@@ -524,19 +520,18 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         }}>
           {/* Header */}
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{(strings.refill||uiI18n.t("medications.refill"))} {`(${(strings.sortBy||uiI18n.t("common.sort"))}: ${strings[sort]||sort}${descending?' ↓':' ↑'})`}</Text>
+            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{uiI18n.t("medications.refill")} ({uiI18n.t("refillSheet.sortBy")}: {uiI18n.t("refillSheet.sort." + sort)}{descending ? " ?" : " ?"})</Text>
             <Text style={{ color: colors.sub, fontSize: 14 }}>
-              {medication.name} • {medication.dosage}{medication.quantity && medication.quantity !== 'N/A' ? uiI18n.t("healthAnalytics.value", { value1: medication.quantity }) : ""}{medication.lastRefill ? ` • ${(strings.lastRefill||uiI18n.t("medications.lastRefill"))}: ${medication.lastRefill}` : ""}
+              {medication.name} • {medication.dosage}{medication.quantity && medication.quantity !== 'N/A' ? uiI18n.t("healthAnalytics.value", { value1: medication.quantity }) : ""}{medication.lastRefill ? ` • ${(uiI18n.t("medications.lastRefill"))}: ${medication.lastRefill}` : ""}
             </Text>
+            <Text style={{ color: colors.gold, fontSize: 20, fontWeight: '700' }}>{uiI18n.t('refillSheet.pricesFor', { name: medication.name })}</Text>
+            {qqpQuote?.presentations?.map((p, i) => <Text key={i} style={{ color: colors.sub }}>{formatPresentation(p, key => uiI18n.t(key))}</Text>)}
             {qqpQuote && (
               <View style={{ backgroundColor: '#10243A', borderColor: colors.gold, borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 }}>
                 <Text style={{ color: colors.gold, fontWeight: '600' }}>
                   {uiI18n.t("localized.MedicationRefillModal.text541")}{qqpQuote.as_of ? ' - ' + String(qqpQuote.as_of).slice(0, 10) : ''}
                 </Text>
-                <Text style={{ color: '#fff', fontSize: 12 }}>
-                  {qqpQuote.summary.count ? uiI18n.t("common.mxn") + Number(qqpQuote.summary.min).toFixed(2) + ' - ' + Number(qqpQuote.summary.max).toFixed(2) + (uiI18n.t("localized.MedicationRefillModal.text544")) + Number(qqpQuote.summary.avg).toFixed(2) : (uiI18n.t("localized.MedicationRefillModal.text544"))}
-                </Text>
-                {qqpQuote.fallback && <Text style={{ color: '#fff', fontSize: 11 }}>{uiI18n.t("localized.MedicationRefillModal.text546")}</Text>}
+                {(['state', 'national'] as const).map(scope => <Text key={scope} style={{ color: '#fff', fontSize: 12 }}>{uiI18n.t('refillSheet.' + scope)}: {qqpQuote[scope]?.count ? `${formatPrice(qqpQuote[scope].min!)} ? ${formatPrice(qqpQuote[scope].max!)}` : uiI18n.t('refillSheet.noPrices')}</Text>)}
                 <Text style={{ color: '#fff', fontSize: 10 }}>{uiI18n.t("ui.fuenteProfecoQuienEsQuienEnLosPreciosCcBy40")}</Text>
               </View>
             )}
@@ -559,11 +554,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {`📍 ${coordsUsed.lat.toFixed(4)}, ${coordsUsed.lon.toFixed(4)} • ${currency}`}
               </Text>
             )}
+            <Text style={{ color: colors.text }}>{uiI18n.t('refillSheet.within', { radius: radiusKm })}</Text>
+            {radiusKm < 250 && <Pressable accessibilityRole="button" disabled={loading} onPress={() => load(radiusKm < 100 ? 100 : 250)}><Text style={{ color: colors.gold }}>{uiI18n.t('refillSheet.expand')}</Text></Pressable>}
             {/* Sorting row */}
             <View style={{ flexDirection:'row', alignItems:'center', flexWrap:'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
-              <Text style={{ color: colors.sub, fontSize: 12 }}>{strings.sortBy || uiI18n.t("common.sort")}</Text>
+              <Text style={{ color: colors.sub, fontSize: 12 }}>{uiI18n.t("refillSheet.sortBy")}</Text>
               {['distance','price','name'].map(key => {
-                const label = key === 'distance' ? (strings.distance||uiI18n.t("medications.sort.distance")) : key === 'price' ? (strings.price||uiI18n.t("medications.sort.price")) : (strings.name||uiI18n.t("medications.sort.name"));
+                const label = uiI18n.t("refillSheet.sort." + key);
                 const active = sort === key;
                 return (
                   <Pressable accessibilityRole="button" accessibilityLabel={uiI18n.t("ui.sortByValue", { value1: label })} key={key} onPress={()=> { setSort(key as any); AsyncStorage.setItem(SORT_KEY, key).catch(()=>{}); }} style={{ backgroundColor: active? colors.gold: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
@@ -575,12 +572,12 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 <Text style={{ color: colors.text, fontSize: 12 }}>{descending? '↓':'↑'}</Text>
               </Pressable>
               <Pressable accessibilityRole="button" accessibilityLabel={uiI18n.t("ui.refreshPharmacies")} onPress={()=>{ load(); }} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
-                <Text style={{ color: colors.text, fontSize: 12 }}>{strings.refresh||uiI18n.t("appointments.refresh")}</Text>
+                <Text style={{ color: colors.text, fontSize: 12 }}>{uiI18n.t("appointments.refresh")}</Text>
               </Pressable>
             </View>
             {fxMeta && currency !== uiI18n.t("common.mxn") && (
               <Text style={{ color: colors.sub, fontSize: 10, marginTop: spacing.xs }}>
-                {(strings.fxLabel||uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
+                {(uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
               </Text>
             )}
           </View>
@@ -600,12 +597,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     <Text style={{ color: colors.sub }}>{uiI18n.t("ui.consulteASuMedico")}</Text>
                   </View>)}
                 </View> : null}
+                ListEmptyComponent={<Text style={{ color: colors.sub }}>{uiI18n.t(qqpQuote?.national?.count ? 'refillSheet.noNearby' : 'refillSheet.noPrices')}</Text>}
                 renderItem={renderItem}
               />
             )}
             {!showAll && results.length > 5 && !loading && (
               <Pressable onPress={() => setShowAll(true)} style={{ alignSelf: 'center', marginTop: spacing.sm }}>
-                <Text style={{ color: colors.gold, fontSize: 14, fontWeight: '600' }}>{strings.showAll || uiI18n.t("common.showAll")}</Text>
+                <Text style={{ color: colors.gold, fontSize: 14, fontWeight: '600' }}>{uiI18n.t("common.showAll")}</Text>
               </Pressable>
             )}
           </View>
@@ -613,7 +611,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           {/* Footer actions */}
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
             <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-              <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.close || uiI18n.t("ai.close")}</Text>
+              <Text style={{ color: colors.text, fontWeight: '700' }}>{uiI18n.t("ai.close")}</Text>
             </Pressable>
             {onRefillComplete && (
               <Pressable 
@@ -623,12 +621,12 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 }}
                 style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}
               >
-                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.refillComplete || uiI18n.t("common.refillComplete")}</Text>
+                <Text style={{ color: '#000', fontWeight: '700' }}>{uiI18n.t("common.refillComplete")}</Text>
               </Pressable>
             )}
             {!onRefillComplete && (
               <Pressable style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.reserve || uiI18n.t("medications.reserve")}</Text>
+                <Text style={{ color: '#000', fontWeight: '700' }}>{uiI18n.t("medications.reserve")}</Text>
               </Pressable>
             )}
           </View>
@@ -647,7 +645,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             {/* Header */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
               <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>
-                {strings.helpUsGetPrice || uiI18n.t("ai.helpUsGetPrice")}
+                {uiI18n.t("ai.helpUsGetPrice")}
               </Text>
               <Pressable onPress={closeContributionModal} style={{ padding: spacing.xs }}>
                 <Text style={{ color: colors.sub, fontSize: 24 }}>×</Text>
@@ -662,13 +660,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             >
               <View style={{ gap: spacing.md }}>
                 <Text style={{ color: colors.sub, fontSize: 14, marginBottom: spacing.sm }}>
-                  {strings.contributionDescription || uiI18n.t("ui.helpUsImproveOurMedicationPriceDatabaseBySharingWhatYouFound")}
+                  {uiI18n.t("ui.helpUsImproveOurMedicationPriceDatabaseBySharingWhatYouFound")}
                 </Text>
 
                 {/* Medication Name */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.medicationName || uiI18n.t("medications.medicationName")} *
+                    {uiI18n.t("medications.medicationName")} *
                   </Text>
                   <MedicationAutocomplete
                     onSelect={(med: any) => { catalogSelection.current = med; setContributionData(prev => ({ ...prev, medicationName: med.name, strength: med.components.map((c: any) => `${c.strength || ''}${c.unit || ''}`).join('/') })); }}
@@ -681,7 +679,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.medicationName}
                     onChangeText={(text: string) => { catalogSelection.current = null; setContributionData(prev => ({ ...prev, medicationName: text })); }}
-                    placeholder={strings.medicationNamePlaceholder || uiI18n.t("localized.appConstants.STRINGS.medicationNamePlaceholder")}
+                    placeholder={uiI18n.t("localized.appConstants.STRINGS.medicationNamePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                   {!!catalogSelection.current?.components.length && <Text style={{ color: colors.text, marginTop: 8 }}>
@@ -692,7 +690,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Strength */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.strength || uiI18n.t("ui.strengthDosage")}
+                    {uiI18n.t("ui.strengthDosage")}
                   </Text>
                   <TextInput
                     style={{
@@ -704,7 +702,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.strength}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, strength: text }))}
-                    placeholder={strings.strengthPlaceholder || uiI18n.t("medications.strengthPlaceholder")}
+                    placeholder={uiI18n.t("medications.strengthPlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -712,7 +710,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Price */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.price || uiI18n.t("medications.sort.price")} *
+                    {uiI18n.t("medications.sort.price")} *
                   </Text>
                   <TextInput
                     style={{
@@ -724,7 +722,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.price}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, price: text }))}
-                    placeholder={strings.pricePlaceholder || uiI18n.t("ai.pricePlaceholder")}
+                    placeholder={uiI18n.t("ai.pricePlaceholder")}
                     placeholderTextColor={colors.sub}
                     keyboardType="numeric"
                   />
@@ -733,7 +731,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Quantity */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.quantity || uiI18n.t("ui.quantityPackageSize")}
+                    {uiI18n.t("ui.quantityPackageSize")}
                   </Text>
                   <TextInput
                     style={{
@@ -745,7 +743,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.quantity}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, quantity: text }))}
-                    placeholder={strings.quantityPlaceholder || uiI18n.t("ai.quantityPlaceholder")}
+                    placeholder={uiI18n.t("ai.quantityPlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -753,7 +751,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Store Name */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.storeName || uiI18n.t("ui.storeName")} *
+                    {uiI18n.t("ui.storeName")} *
                   </Text>
                   <TextInput
                     style={{
@@ -765,7 +763,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.storeName}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, storeName: text }))}
-                    placeholder={strings.storeNamePlaceholder || uiI18n.t("ai.storeNamePlaceholder")}
+                    placeholder={uiI18n.t("ai.storeNamePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -773,7 +771,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Store Address */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.storeAddress || uiI18n.t("ui.storeAddress")}
+                    {uiI18n.t("ui.storeAddress")}
                   </Text>
                   <TextInput
                     style={{
@@ -785,7 +783,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.storeAddress}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, storeAddress: text }))}
-                    placeholder={strings.storeAddressPlaceholder || uiI18n.t("ai.storeAddressPlaceholder")}
+                    placeholder={uiI18n.t("ai.storeAddressPlaceholder")}
                     placeholderTextColor={colors.sub}
                     multiline
                     numberOfLines={2}
@@ -797,10 +795,10 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             {/* Footer Actions */}
             <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
               <Pressable onPress={closeContributionModal} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.cancel || uiI18n.t("healthAnalytics.cancel")}</Text>
+                <Text style={{ color: colors.text, fontWeight: '700' }}>{uiI18n.t("healthAnalytics.cancel")}</Text>
               </Pressable>
               <Pressable onPress={submitContribution} style={{ flex: 1, backgroundColor: '#10b981', borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{strings.submitContribution || uiI18n.t("ai.submitContribution")}</Text>
+                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{uiI18n.t("ai.submitContribution")}</Text>
               </Pressable>
             </View>
           </View>

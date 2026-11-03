@@ -10,6 +10,8 @@ export type Pharmacy = {
 };
 
 export type StorePrice = Pharmacy & {
+  presentacion?: string;
+  parsed?: { count: number | null; unit: string | null; strength: string | null };
   observed_at?: string;
   stale?: boolean;
   verified?: boolean;
@@ -89,15 +91,25 @@ export async function findNearbyPharmacies(lat: number, lon: number, lang: strin
 }
 
 export type QQPQuote = {
+  radius_km: number;
+  presentations?: Pick<StorePrice, "presentacion" | "parsed">[];
+  state: QQPQuote["summary"]; national: QQPQuote["summary"];
   as_of: string | null; fallback: boolean; source: string;
   summary: { min: number | null; avg: number | null; max: number | null; count: number };
 };
-export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string }, opts?: { currency?: string; lat?: number; lng?: number; state?: string }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number }; quote?: QQPQuote }> {
+export async function getMedicationPrices(pharmacies: Pharmacy[], medication: { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string }, opts?: { currency?: string; lat?: number; lng?: number; state?: string; radiusKm?: number }): Promise<{ prices: StorePrice[]; meta?: { currency: string; rate: number }; quote?: QQPQuote }> {
   const params = new URLSearchParams({ med: medication.name });
   if (opts?.lat != null && opts?.lng != null) { params.set('lat', String(opts.lat)); params.set('lng', String(opts.lng)); }
+  if (opts?.radiusKm != null) params.set('radius_km', String(opts.radiusKm));
   if (opts?.state) params.set('state', opts.state);
   const response = await fetch(API_BASE + '/api/prices?' + params.toString());
   if (!response.ok) throw new Error('Price data unavailable');
   const data = await response.json();
   return { prices: (data.nearest || []).map((p: any) => ({ ...p, priceNotAvailable: p.price == null })), meta: { currency: 'MXN', rate: 1 }, quote: data };
+}
+
+export function formatPresentation(item: Pick<StorePrice, 'presentacion' | 'parsed'>, t: (key: string) => string): string {
+  const p = item.parsed;
+  const pack = p?.count != null && p.unit ? `${p.count} ${['ml', 'g'].includes(p.unit) ? p.unit : t('refillSheet.units.' + p.unit)}` : '';
+  return [pack, p?.strength].filter(Boolean).join(' ? ') || item.presentacion || t('refillSheet.detailsUnavailable');
 }

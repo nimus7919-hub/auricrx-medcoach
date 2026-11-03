@@ -34,14 +34,12 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<StorePrice[]>([]);
-  const [sort, setSort] = useState<'distance'|'price'|'name'>('price');
+  const [sort, setSort] = useState<'distance'|'price'|'name'>('distance');
   const [descending, setDescending] = useState(false);
   const [fxMeta, setFxMeta] = useState<{ currency: string; rate: number; fxTs?: number }|null>(null);
   const SORT_KEY = 'AURIC_SUPPLEMENT_SORT';
 
-  useEffect(()=>{
-    AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
-  },[]);
+
   const [showAll, setShowAll] = useState(false);
   const [currency, setCurrency] = useState<string>(uiI18n.t("common.usd"));
   const [coordsUsed, setCoordsUsed] = useState<{lat:number; lon:number}|null>(null);
@@ -215,9 +213,9 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
     // Validate form
     if (!contributionData.supplementName?.trim() || !contributionData.price?.trim() || !contributionData.storeName?.trim()) {
       Alert.alert(
-        strings.contributionError || uiI18n.t("ai.contributionError"),
-        strings.contributionErrorText || uiI18n.t("ai.contributionErrorText"),
-        [{ text: strings.ok || uiI18n.t("adminProfile.ok") }]
+        uiI18n.t("ai.contributionError"),
+        uiI18n.t("ai.contributionErrorText"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
       return;
     }
@@ -234,11 +232,11 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
       console.log('📊 Supplement price contribution saved to server:', contribution);
 
       Alert.alert(
-        strings.contributionSuccess || uiI18n.t("ai.contributionSuccess"),
-        strings.contributionSuccessText || uiI18n.t("ai.contributionSuccessText"),
+        uiI18n.t("ai.contributionSuccess"),
+        uiI18n.t("ai.contributionSuccessText"),
         [
           {
-            text: strings.ok || uiI18n.t("adminProfile.ok"),
+            text: uiI18n.t("adminProfile.ok"),
             onPress: () => {
               closeContributionModal();
             }
@@ -248,9 +246,9 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
     } catch (error) {
       console.error('❌ Failed to save supplement contribution:', error);
       Alert.alert(
-        strings.contributionError || uiI18n.t("adminProfile.error"),
-        strings.contributionErrorText || uiI18n.t("ui.failedToSaveYourContributionPleaseTryAgain"),
-        [{ text: strings.ok || uiI18n.t("adminProfile.ok") }]
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToSaveYourContributionPleaseTryAgain"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
     }
   };
@@ -450,14 +448,14 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
           {item.priceNotAvailable ? (
             <View style={{ alignItems: 'flex-end', gap: 4 }}>
               <Text style={{ color: colors.sub, fontSize:14, fontWeight:'500', fontStyle: 'italic' }}>
-                {strings.priceNotAvailable || uiI18n.t("supplements.priceNotAvailable")}
+                {uiI18n.t("supplements.priceNotAvailable")}
               </Text>
               <Pressable 
                 onPress={() => openContributionModal(item)} 
                 style={{ backgroundColor: '#10b981', borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 4, minHeight:28, justifyContent:'center' }}
               >
                 <Text style={{ color:'#ffffff', fontWeight:'600', fontSize:11 }}>
-                  {strings.helpUsGetPrice || uiI18n.t("ai.helpUsGetPrice")}
+                  {uiI18n.t("ai.helpUsGetPrice")}
                 </Text>
               </Pressable>
             </View>
@@ -466,7 +464,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
               <Text style={{ color: colors.text, fontSize:18, fontWeight:'700' }}>{typeof item.price==='number'? formatPrice(item.price): '—'}</Text>
               {isLowest && (
                 <View style={{ backgroundColor: colors.gold, paddingHorizontal:8, paddingVertical:2, borderRadius: radius.pill }}>
-                  <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest}</Text>
+                  <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{uiI18n.t("medications.lowest")}</Text>
                 </View>
               )}
             </>
@@ -475,7 +473,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             openInMaps({ lat: item.lat, lon: item.lon, address: item.address });
             collectSupplementPriceData(item);
           }} style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 6, minHeight:32, justifyContent:'center' }}>
-            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{strings.directions}</Text>
+            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{uiI18n.t("common.directions")}</Text>
           </Pressable>
         </View>
       </Pressable>
@@ -495,9 +493,9 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
         }}>
           {/* Header */}
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{strings.refill} {`(${strings.sortBy}: ${strings[sort] || sort}${descending?' ↓':' ↑'})`}</Text>
+            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{uiI18n.t("medications.refill")} ({uiI18n.t("refillSheet.sortBy")}: {uiI18n.t("refillSheet.sort." + sort)}{descending ? " ?" : " ?"})</Text>
             <Text style={{ color: colors.sub, fontSize: 14 }}>
-              {supplement.name} • {supplement.dosage || supplement.brand}{supplement.quantity && supplement.quantity !== 'N/A' ? uiI18n.t("healthAnalytics.value", { value1: supplement.quantity }) : ""}{supplement.lastRefill ? ` • ${strings.lastRefill}: ${supplement.lastRefill}` : ""}
+              {supplement.name} • {supplement.dosage || supplement.brand}{supplement.quantity && supplement.quantity !== 'N/A' ? uiI18n.t("healthAnalytics.value", { value1: supplement.quantity }) : ""}{supplement.lastRefill ? ` • ${uiI18n.t("medications.lastRefill")}: ${supplement.lastRefill}` : ""}
             </Text>
             {coordsUsed && (
               <Text style={{ color: colors.sub, fontSize: 10 }}>
@@ -506,9 +504,9 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             )}
             {/* Sorting row */}
             <View style={{ flexDirection:'row', alignItems:'center', flexWrap:'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
-              <Text style={{ color: colors.sub, fontSize: 12 }}>{(strings.sortBy || uiI18n.t("common.sortBy"))}:</Text>
+              <Text style={{ color: colors.sub, fontSize: 12 }}>{(uiI18n.t("refillSheet.sortBy"))}:</Text>
               {['distance','price','name'].map(key => {
-                const label = key === 'distance' ? (strings.distance || uiI18n.t("medications.sort.distance")) : key === 'price' ? (strings.price || uiI18n.t("medications.sort.price")) : (strings.name || uiI18n.t("medications.sort.name"));
+                const label = uiI18n.t("refillSheet.sort." + key);
                 const active = sort === key;
                 return (
                   <Pressable accessibilityRole="button" accessibilityLabel={uiI18n.t("ui.sortByValue_3ebf1c", { value1: label })} key={key} onPress={()=> { setSort(key as any); AsyncStorage.setItem(SORT_KEY, key).catch(()=>{}); }} style={{ backgroundColor: active? colors.gold: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
@@ -520,12 +518,12 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 <Text style={{ color: colors.text, fontSize: 12 }}>{descending? '↓':'↑'}</Text>
               </Pressable>
               <Pressable accessibilityRole="button" accessibilityLabel={uiI18n.t("ui.refreshStores")} onPress={()=>{ load(); }} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
-                <Text style={{ color: colors.text, fontSize: 12 }}>{strings.refresh || uiI18n.t("appointments.refresh")}</Text>
+                <Text style={{ color: colors.text, fontSize: 12 }}>{uiI18n.t("appointments.refresh")}</Text>
               </Pressable>
             </View>
               {fxMeta && (
               <Text style={{ color: colors.sub, fontSize: 10, marginTop: spacing.xs }}>
-                {(strings.fxLabel||uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
+                {(uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
               </Text>
             )}
           </View>
@@ -539,12 +537,13 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
         data={data}
                 keyExtractor={item => item.id}
                 getItemLayout={(_, index) => ({ length: 84, offset: 84 * index, index })}
+                ListEmptyComponent={<Text style={{ color: colors.sub }}>{uiI18n.t("refillSheet.noSupplementPrices")}</Text>}
                 renderItem={renderItem}
               />
             )}
             {!showAll && results.length > 5 && !loading && (
               <Pressable onPress={() => setShowAll(true)} style={{ alignSelf: 'center', marginTop: spacing.sm }}>
-                <Text style={{ color: "#FFD700", fontSize: 14, fontWeight: '600' }}>{strings.showAll}</Text>
+                <Text style={{ color: "#FFD700", fontSize: 14, fontWeight: '600' }}>{uiI18n.t("common.showAll")}</Text>
               </Pressable>
             )}
           </View>
@@ -552,10 +551,10 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
           {/* Footer actions */}
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
             <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-              <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.close}</Text>
+              <Text style={{ color: colors.text, fontWeight: '700' }}>{uiI18n.t("ai.close")}</Text>
             </Pressable>
             <Pressable style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-              <Text style={{ color: '#000', fontWeight: '700' }}>{strings.reserve}</Text>
+              <Text style={{ color: '#000', fontWeight: '700' }}>{uiI18n.t("medications.reserve")}</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -573,7 +572,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             {/* Header */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
               <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>
-                {strings.helpUsGetPrice || uiI18n.t("ai.helpUsGetPrice")}
+                {uiI18n.t("ai.helpUsGetPrice")}
               </Text>
               <Pressable onPress={closeContributionModal} style={{ padding: spacing.xs }}>
                 <Text style={{ color: colors.sub, fontSize: 24 }}>×</Text>
@@ -588,13 +587,13 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             >
               <View style={{ gap: spacing.md }}>
                 <Text style={{ color: colors.sub, fontSize: 14, marginBottom: spacing.sm }}>
-                  {strings.contributionDescription || uiI18n.t("ai.contributionDescription")}
+                  {uiI18n.t("ai.contributionDescription")}
                 </Text>
 
                 {/* Supplement Name */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.supplementName || uiI18n.t("ai.supplementName")} *
+                    {uiI18n.t("ai.supplementName")} *
                   </Text>
                   <TextInput
                     style={{
@@ -606,7 +605,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.supplementName}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, supplementName: text }))}
-                    placeholder={strings.supplementNamePlaceholder || uiI18n.t("ai.supplementNamePlaceholder")}
+                    placeholder={uiI18n.t("ai.supplementNamePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -614,7 +613,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 {/* Brand */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.brand || uiI18n.t("supplements.supplementBrand")}
+                    {uiI18n.t("supplements.supplementBrand")}
                   </Text>
                   <TextInput
                     style={{
@@ -626,7 +625,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.brand}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, brand: text }))}
-                    placeholder={strings.brandPlaceholder || uiI18n.t("ai.brandPlaceholder")}
+                    placeholder={uiI18n.t("ai.brandPlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -634,7 +633,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 {/* Dosage */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.dosage || uiI18n.t("ai.dosage")}
+                    {uiI18n.t("ai.dosage")}
                   </Text>
                   <TextInput
                     style={{
@@ -646,7 +645,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.dosage}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, dosage: text }))}
-                    placeholder={strings.dosagePlaceholder || uiI18n.t("ai.dosagePlaceholder")}
+                    placeholder={uiI18n.t("ai.dosagePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -654,7 +653,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 {/* Price */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.price || uiI18n.t("medications.sort.price")} *
+                    {uiI18n.t("medications.sort.price")} *
                   </Text>
                   <TextInput
                     style={{
@@ -666,7 +665,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.price}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, price: text }))}
-                    placeholder={strings.pricePlaceholder || uiI18n.t("ai.pricePlaceholder")}
+                    placeholder={uiI18n.t("ai.pricePlaceholder")}
                     placeholderTextColor={colors.sub}
                     keyboardType="numeric"
                   />
@@ -675,7 +674,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 {/* Quantity */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.quantity || uiI18n.t("ui.quantityPackageSize")}
+                    {uiI18n.t("ui.quantityPackageSize")}
                   </Text>
                   <TextInput
                     style={{
@@ -687,7 +686,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.quantity}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, quantity: text }))}
-                    placeholder={strings.quantityPlaceholder || uiI18n.t("ai.quantityPlaceholder")}
+                    placeholder={uiI18n.t("ai.quantityPlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -695,7 +694,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 {/* Store Name */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.storeName || uiI18n.t("ui.storeName")} *
+                    {uiI18n.t("ui.storeName")} *
                   </Text>
                   <TextInput
                     style={{
@@ -707,7 +706,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.storeName}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, storeName: text }))}
-                    placeholder={strings.storeNamePlaceholder || uiI18n.t("ai.storeNamePlaceholder")}
+                    placeholder={uiI18n.t("ai.storeNamePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -715,7 +714,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                 {/* Store Address */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.storeAddress || uiI18n.t("ui.storeAddress")}
+                    {uiI18n.t("ui.storeAddress")}
                   </Text>
                   <TextInput
                     style={{
@@ -727,7 +726,7 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
                     }}
                     value={contributionData.storeAddress}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, storeAddress: text }))}
-                    placeholder={strings.storeAddressPlaceholder || uiI18n.t("ai.storeAddressPlaceholder")}
+                    placeholder={uiI18n.t("ai.storeAddressPlaceholder")}
                     placeholderTextColor={colors.sub}
                     multiline
                     numberOfLines={2}
@@ -739,10 +738,10 @@ export default function SupplementRefillModal({ visible, onClose, supplement, st
             {/* Footer Actions */}
             <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
               <Pressable onPress={closeContributionModal} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.cancel || uiI18n.t("healthAnalytics.cancel")}</Text>
+                <Text style={{ color: colors.text, fontWeight: '700' }}>{uiI18n.t("healthAnalytics.cancel")}</Text>
               </Pressable>
               <Pressable onPress={submitContribution} style={{ flex: 1, backgroundColor: '#10b981', borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{strings.submitContribution || uiI18n.t("ai.submitContribution")}</Text>
+                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{uiI18n.t("ai.submitContribution")}</Text>
               </Pressable>
             </View>
           </View>
