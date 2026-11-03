@@ -26,13 +26,6 @@ export default function createTopBar(getScope) {
       />
     </AnimatedButton>
     
-    <AnimatedButton onPress={() => setRoute('settings')}>
-      <Image 
-        source={require('../../assets/dashboard Emojies/settings cog.png')} 
-        style={{ width: 48, height: 48, tintColor: theme.accent }}
-        resizeMode="contain"
-      />
-    </AnimatedButton>
   </View>
 );
   };
