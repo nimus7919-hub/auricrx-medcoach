@@ -1,5 +1,5 @@
 {
-  "documentScanner": {"scan":"Scannen"},
+  "documentScanner": {"scan": "Scannen", "manualPhoto": "Manuelles Foto als PDF", "proBadge": "PRO"},
   "help": {
     "title": "Dashboard-Anleitung",
     "intro": "Willkommen auf Ihrem Gesundheits-Dashboard! Jede Karte hilft Ihnen, verschiedene Aspekte Ihrer Gesundheit zu verwalten. Hier ist, was jede Karte macht:",

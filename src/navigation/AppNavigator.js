@@ -17,7 +17,7 @@ import WallpaperSettingsScreen from "./../screens/WallpaperSettingsScreen";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
   return () => {
-  const { route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings } = getScope();
+  const { route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan } = getScope();
   return (route === 'dashboard' ? <Dashboard /> :
      route === 'reminders' ? <Reminders theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
      route === 'pharmacies' ? <Pharmacies /> :
@@ -27,7 +27,7 @@ export default function createAppNavigator(getScope) {
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
-     route === 'documents' ? <MedicalDocumentsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+     route === 'documents' ? <MedicalDocumentsScreen requestAutoDocumentScan={requestAutoDocumentScan} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'smart-notifications' ? <SmartNotificationsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :

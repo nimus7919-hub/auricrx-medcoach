@@ -408,6 +408,25 @@ export default function App() {
     }
   };
 
+  const requestAutoDocumentScan = async () => {
+    try {
+      const status = await getSubscriptionStatus(user?.firebaseUser || null);
+      if (status.ok) {
+        setSubscriptionStatus(status);
+        const end = status.plan === 'pro'
+          ? (status.currentPeriodEnd || status.current_period_end)
+          : status.trial?.endsAt;
+        const hasTime = end ? new Date(end).getTime() > Date.now() : status.daysLeft > 0;
+        if (status.status !== 'expired' && hasTime &&
+            (status.plan === 'pro' || status.plan === 'trial')) return true;
+      }
+    } catch (error) {
+      console.warn('Could not verify document scanner access');
+    }
+    setShowCheckout(true);
+    return false;
+  };
+
   const handleSubscriptionExpiredSubscribe = () => {
     setShowSubscriptionExpiredModal(false);
     setShowCheckout(true);
@@ -2863,7 +2882,7 @@ const handleAskMedicalAI = async () => {
       /* Main App Content - Only show after authentication and health consent */
       <>
         <View style={{ flex: 1 }}>
-        {createAppNavigator(() => ({ route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings }))()}
+        {createAppNavigator(() => ({ route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan }))()}
         </View>
 
         {/* Floating AI button */}

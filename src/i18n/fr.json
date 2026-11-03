@@ -1,5 +1,5 @@
 {
-  "documentScanner": {"scan":"Numériser"},
+  "documentScanner": {"scan": "Numériser", "manualPhoto": "Photo manuelle en PDF", "proBadge": "PRO"},
   "help": {
     "title": "Guide du Tableau de bord",
     "intro": "Bienvenue sur votre tableau de bord de santé ! Chaque carte vous aide à gérer différents aspects de votre santé. Voici ce que fait chacune :",

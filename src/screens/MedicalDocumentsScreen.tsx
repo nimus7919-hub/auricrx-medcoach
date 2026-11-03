@@ -26,6 +26,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface MedicalDocumentsScreenProps {
   onClose: () => void;
+  requestAutoDocumentScan: () => Promise<boolean>;
   theme?: any;
   S?: any;
 }
@@ -47,7 +48,7 @@ interface DocumentItem {
 
 // This will be defined inside the component to access translations
 
-export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDocumentsScreenProps) {
+export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoDocumentScan }: MedicalDocumentsScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
@@ -732,9 +733,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
     }
   };
 
-  const takePhoto = async (category: DocumentCategory, type: 'front' | 'back' | 'single' = 'single') => {
+  const takePhoto = async (category: DocumentCategory, type: 'front' | 'back' | 'single' = 'single', autoScan = false) => {
     try {
-      const scan = await scanDocumentPages(type === 'single' ? 100 : 1);
+      if (autoScan && !(await requestAutoDocumentScan())) return;
+      const scan = autoScan ? await scanDocumentPages(type === 'single' ? 100 : 1) : { status: 'unavailable' as const, images: [] };
       if (scan.status === 'cancel') return;
       if (scan.status === 'success') {
         // Retain ID originals for the existing front/back preview and pairing UI.
@@ -2990,14 +2992,38 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     style={dynamicStyles.modalButton}
                     onPress={() => {
                       setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'front');
+                      takePhoto(selectedCategory, 'front', true);
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
                       📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
+                      <Text style={{ color: '#D4AF37', backgroundColor: '#332B16', fontSize: 10, fontWeight: '700' }}> {t('documentScanner.proBadge')} </Text>
+                    </DynamicText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={dynamicStyles.modalButton}
+                    onPress={() => {
+                      setShowUploadModal(false);
+                      takePhoto(selectedCategory, 'front');
+                    }}
+                  >
+                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
+                      📷 {t('documentScanner.manualPhoto')} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
+                  <TouchableOpacity
+                    style={dynamicStyles.modalButton}
+                    onPress={() => {
+                      setShowUploadModal(false);
+                      takePhoto(selectedCategory, 'back', true);
+                    }}
+                  >
+                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
+                      📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
+                      <Text style={{ color: '#D4AF37', backgroundColor: '#332B16', fontSize: 10, fontWeight: '700' }}> {t('documentScanner.proBadge')} </Text>
+                    </DynamicText>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={dynamicStyles.modalButton}
                     onPress={() => {
@@ -3006,7 +3032,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t("documentScanner.scan")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
+                      📷 {t('documentScanner.manualPhoto')} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -3067,11 +3093,23 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     style={dynamicStyles.modalButton}
                     onPress={() => {
                       setShowUploadModal(false);
-                      takePhoto(selectedCategory, 'single');
+                      takePhoto(selectedCategory, 'single', true);
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
                       📷 {t("documentScanner.scan")}
+                      <Text style={{ color: '#D4AF37', backgroundColor: '#332B16', fontSize: 10, fontWeight: '700' }}> {t('documentScanner.proBadge')} </Text>
+                    </DynamicText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={dynamicStyles.modalButton}
+                    onPress={() => {
+                      setShowUploadModal(false);
+                      takePhoto(selectedCategory, 'single');
+                    }}
+                  >
+                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>
+                      📷 {t('documentScanner.manualPhoto')}
                     </DynamicText>
                   </TouchableOpacity>
                   

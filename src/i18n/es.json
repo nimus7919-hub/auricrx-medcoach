@@ -1,5 +1,5 @@
 {
-  "documentScanner": {"scan":"Escanear"},
+  "documentScanner": {"scan": "Escanear", "manualPhoto": "Foto manual a PDF", "proBadge": "PRO"},
   "navigation": {
     "pressBackAgainToExit": "Presiona atras de nuevo para salir"
   },
