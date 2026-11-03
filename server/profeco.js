@@ -73,14 +73,26 @@ function install(app, sql) {
     }
     console.log(`PROFECO matching: ${matched}/${products.length} products; ${products.length-matched} for review`);
   }
+  async function pruneQQP() {
+    const stat = async () => (await sql`SELECT (SELECT count(*) FROM qqp_prices)::bigint AS rows, pg_total_relation_size('qqp_prices') AS tbl, pg_database_size(current_database()) AS db`)[0];
+    const before = await stat();
+    await sql`DELETE FROM qqp_prices WHERE fecha < (SELECT max(fecha) FROM qqp_prices) - INTERVAL '90 days'`;
+    try { await sql`VACUUM ANALYZE qqp_prices`; } catch (err) { console.log('PROFECO vacuum skipped: '+err.message); }
+    const after = await stat();
+    console.log('PROFECO retention (90d from newest): '+JSON.stringify({before,after}));
+  }
   async function ingestQQP() {
     let total = 0;
+    const [mx] = await sql`SELECT max(fecha) AS m FROM qqp_prices`;
+    const cutoff = mx && mx.m ? new Date(new Date(mx.m).getTime()-90*86400000) : null;
     for (const year of [new Date().getUTCFullYear()-1, new Date().getUTCFullYear()]) {
       let pkg;
       try { pkg = await jsonFetch('https://www.datos.gob.mx/api/3/action/package_show?id=programa_quien_es_quien_precios_'+year); } catch(e) { if (year < new Date().getUTCFullYear() && e.message === 'upstream_http_404') continue; throw e; }
       if (!pkg.success) { if (year < new Date().getUTCFullYear()) continue; throw new Error('ckan_package_failed'); }
       for (const resource of pkg.result.resources || []) {
         if ((await sql`SELECT resource_id FROM qqp_sources WHERE resource_id=${resource.id} AND row_count > 0`).length) continue;
+        const per = /b(\d{2})_(\d{4})_q(\d)/i.exec(String(resource.name||'')+' '+String(resource.url||''));
+        if (cutoff && per && new Date(Date.UTC(+per[2], +per[1]-1, per[3]==='1'?16:32)) < cutoff) { console.log(`PROFECO skip old resource ${resource.id}`); continue; }
         let offset = 0, count = 0, csvRows = null;
         while (true) {
           const url = new URL('https://www.datos.gob.mx/api/3/action/datastore_search');
@@ -109,7 +121,7 @@ function install(app, sql) {
             return { ...r, lat: Number.isFinite(lat) && r.latitud !== '' ? lat : null, lng: Number.isFinite(lng) && r.longitud !== '' ? lng : null, price, date, sid:hash(JSON.stringify([r.nombre_comercial || '',Number.isFinite(lat) && r.latitud !== '' ? lat : null,Number.isFinite(lng) && r.longitud !== '' ? lng : null])) };
           }).filter(r => Number.isFinite(r.price) && r.price>0 && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && r._id != null);
           // One roundtrip per page, with SQL conflict handling for restart-safe ingest.
-          await sql`WITH input AS (SELECT * FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS r(sid text,nombre_comercial text,cadena_comercial text,direccion text,estado text,municipio text,lat float8,lng float8,producto text,presentacion text,marca text,price numeric,date date,_id text)), stores AS (INSERT INTO qqp_stores(id,chain,branch,address,state,municipio,lat,lng) SELECT DISTINCT ON (sid) sid,cadena_comercial,coalesce(nombre_comercial,''),direccion,estado,municipio,lat,lng FROM input ON CONFLICT DO NOTHING RETURNING id) INSERT INTO qqp_prices(producto,presentacion,marca,precio,fecha,store_id,resource_id,_id) SELECT coalesce(producto,''),coalesce(presentacion,''),marca,price,date,sid,${resource.id},_id FROM input WHERE date >= CURRENT_DATE-INTERVAL '12 months' ON CONFLICT(resource_id,_id) DO NOTHING`;
+          await sql`WITH input AS (SELECT * FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS r(sid text,nombre_comercial text,cadena_comercial text,direccion text,estado text,municipio text,lat float8,lng float8,producto text,presentacion text,marca text,price numeric,date date,_id text)), stores AS (INSERT INTO qqp_stores(id,chain,branch,address,state,municipio,lat,lng) SELECT DISTINCT ON (sid) sid,cadena_comercial,coalesce(nombre_comercial,''),direccion,estado,municipio,lat,lng FROM input ON CONFLICT DO NOTHING RETURNING id) INSERT INTO qqp_prices(producto,presentacion,marca,precio,fecha,store_id,resource_id,_id) SELECT coalesce(producto,''),coalesce(presentacion,''),marca,price,date,sid,${resource.id},_id FROM input WHERE date >= COALESCE((SELECT max(fecha) FROM qqp_prices),'1900-01-01'::date)-INTERVAL '90 days' ON CONFLICT(resource_id,_id) DO NOTHING`;
           count += rows.length; offset += records.length;
           if (!records.length || offset >= Number(page.result.total)) break;
         }
@@ -117,7 +129,7 @@ function install(app, sql) {
         total += count; console.log(`PROFECO resource ${resource.id}: ${count} valid rows`);
       }
     }
-    await sql`DELETE FROM qqp_prices WHERE fecha<CURRENT_DATE-INTERVAL '12 months'`;
+    await pruneQQP();
     await matchCatalog();
     console.log(`PROFECO ingest: ${total} valid rows processed`);
     return total;
