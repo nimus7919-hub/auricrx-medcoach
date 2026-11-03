@@ -133,8 +133,8 @@ function install(app, sql) {
     }
   }
   async function ingestDENUE() {
-    const token = process.env.INEGI_TOKEN;
-    if (!token) { console.log('DENUE skipped: INEGI_TOKEN not set'); return; }
+    const token = (process.env.INEGI_DENUE_TOKEN || process.env.INEGI_TOKEN);
+    if (!token) { console.log('DENUE skipped: INEGI_DENUE_TOKEN not set'); return; }
     const [job] = await sql`SELECT completed_at FROM pharmacy_jobs WHERE name='denue'`;
     if (job && Date.now()-new Date(job.completed_at).getTime()<30*86400000) return;
     let count = 0;
@@ -213,7 +213,7 @@ function install(app, sql) {
   const weekly = setInterval(safeRun,7*86400000); weekly.unref?.();
   // DENUE freshness is checked daily; a completed refresh is reused for 30 days.
   const monthly = setInterval(()=>ready.then(()=>ingestDENUE()).then(()=>linkStores()).catch(()=>console.error('DENUE refresh failed')),86400000); monthly.unref?.();
-  if (!process.env.INEGI_TOKEN) console.log('DENUE skipped: INEGI_TOKEN not set');
+  if (!(process.env.INEGI_DENUE_TOKEN || process.env.INEGI_TOKEN)) console.log('DENUE skipped: INEGI_DENUE_TOKEN not set');
   return {ready,run};
 }
 module.exports = {install,normalize,signature,distance,coordinates};
