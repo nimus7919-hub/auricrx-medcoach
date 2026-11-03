@@ -80,7 +80,7 @@ function install(app, sql) {
       try { pkg = await jsonFetch('https://www.datos.gob.mx/api/3/action/package_show?id=programa_quien_es_quien_precios_'+year); } catch(e) { if (year < new Date().getUTCFullYear() && e.message === 'upstream_http_404') continue; throw e; }
       if (!pkg.success) { if (year < new Date().getUTCFullYear()) continue; throw new Error('ckan_package_failed'); }
       for (const resource of pkg.result.resources || []) {
-        if ((await sql`SELECT resource_id FROM qqp_sources WHERE resource_id=${resource.id}`).length) continue;
+        if ((await sql`SELECT resource_id FROM qqp_sources WHERE resource_id=${resource.id} AND row_count > 0`).length) continue;
         let offset = 0, count = 0, csvRows = null;
         while (true) {
           const url = new URL('https://www.datos.gob.mx/api/3/action/datastore_search');
@@ -105,7 +105,7 @@ function install(app, sql) {
           const records = page.result.records;
           const rows = records.map(r => {
             const lat = Number(r.latitud), lng = Number(r.longitud), price = Number(String(r.precio).replace(/[$,]/g,''));
-            const date = String(r.fecha_registro || '').slice(0,10);
+            const date = String(r.fecha_registro || '').slice(0,10).replace(/\//g,'-');
             return { ...r, lat: Number.isFinite(lat) && r.latitud !== '' ? lat : null, lng: Number.isFinite(lng) && r.longitud !== '' ? lng : null, price, date, sid:hash(JSON.stringify([r.nombre_comercial || '',Number.isFinite(lat) && r.latitud !== '' ? lat : null,Number.isFinite(lng) && r.longitud !== '' ? lng : null])) };
           }).filter(r => Number.isFinite(r.price) && r.price>0 && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && r._id != null);
           // One roundtrip per page, with SQL conflict handling for restart-safe ingest.
@@ -113,7 +113,7 @@ function install(app, sql) {
           count += rows.length; offset += records.length;
           if (!records.length || offset >= Number(page.result.total)) break;
         }
-        await sql`INSERT INTO qqp_sources(resource_id,row_count) VALUES(${resource.id},${count}) ON CONFLICT DO NOTHING`;
+        await sql`INSERT INTO qqp_sources(resource_id,row_count) VALUES(${resource.id},${count}) ON CONFLICT (resource_id) DO UPDATE SET row_count=excluded.row_count`;
         total += count; console.log(`PROFECO resource ${resource.id}: ${count} valid rows`);
       }
     }
