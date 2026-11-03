@@ -10,12 +10,13 @@ import ConsentHost from "./../components/ConsentHost";
 import { API_BASE } from "./../config/api";
 import { useMedicalStream } from "./../hooks/useMedicalStream";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput, Linking, Platform, Keyboard, StatusBar, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from "react-native";
 import TypingEffect from "./../components/TypingEffect";
 import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
 
 import * as Notifications from "expo-notifications";
+import { initializeReminderNotifications, reconcileReminderNotifications } from "../services/reminderNotifications";
 
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
@@ -1631,6 +1632,7 @@ export default function App() {
 
   // meds/reminders (light placeholder list)
   const [reminders, setReminders] = useState([]);
+  const [remindersLoaded, setRemindersLoaded] = useState(false);
   const [meds, setMeds] = useState([
     {
       id: '1',
@@ -2160,23 +2162,14 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: false,
     }),
   });
 
-  (async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Notifications disabled', 'Enable notifications for reminder alerts.');
-    }
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.DEFAULT,
-      });
-    }
-  })();
+  initializeReminderNotifications().catch(error => console.error('[Reminders] channel setup failed', error));
 }, []);
 
     useEffect(() => {
@@ -2227,9 +2220,18 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (SD) { try { setSelectedAIDoctor(SD); } catch {} }
       } catch {
         // ignore corrupt storage on boot
-      }
+      } finally { setRemindersLoaded(true); }
     })();
   }, []);
+
+  // Reconcile restored/cloud-synced reminders, edits, deletions and consent re-acceptance.
+  useEffect(() => {
+    if (USING_EXPO_GO || !remindersLoaded || !user || !healthConsentReady) return;
+    const sync = () => reconcileReminderNotifications(reminders).catch(error => console.error('[Reminders] reconcile failed', error));
+    sync();
+    const subscription = AppState.addEventListener('change', state => { if (state === 'active') sync(); });
+    return () => subscription.remove();
+  }, [reminders, remindersLoaded, user?.uid, healthConsentReady]);
 
   // Sync lang state with i18n when it becomes ready
   useEffect(() => {
@@ -2244,7 +2246,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   useEffect(() => { AsyncStorage.setItem(STORAGE.theme, themeKey); }, [themeKey]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.night, night ? '1' : '0'); }, [night]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.mood, moodShift ? '1' : '0'); }, [moodShift]);
-  useEffect(() => { AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(reminders)); }, [reminders]);
+  useEffect(() => { if (remindersLoaded) AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(reminders)); }, [reminders, remindersLoaded]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.rxPhotos, JSON.stringify(rxPhotos)); }, [rxPhotos]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.voiceNotes, JSON.stringify(voiceNotes)); }, [voiceNotes]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);

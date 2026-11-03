@@ -6,10 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Platform, Keyboard, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Platform, Keyboard, Modal, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as Notifications from 'expo-notifications';
+import { saveReminderNotification, testReminderNotification } from '../src/services/reminderNotifications';
+import { parseReminderTime } from '../src/utils/reminderTime';
 import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
@@ -32,7 +33,9 @@ const Reminders = ({
 }) => {
   // Mount/unmount detection
   const mounted = useRef(0);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const es = i18n.language?.startsWith('es');
+  const [saving, setSaving] = useState(false);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const { timeFormat } = useTimeFormat();
   useEffect(() => {
@@ -304,31 +307,6 @@ const Reminders = ({
       console.log('✅ Reminder successfully routed to appropriate card');
     } catch (error) {
       console.error('❌ Failed to route reminder to card:', error);
-    }
-  };
-
-  // Schedule reminder notification function
-  const scheduleReminderNotification = async (name, time24h) => {
-    // time24h like "13:45"
-    const [hh, mm] = (time24h || '').split(':').map(n => parseInt(n, 10));
-    if (Number.isNaN(hh) || Number.isNaN(mm)) return;
-
-    const now = new Date();
-    const fire = new Date(now);
-    fire.setHours(hh, mm, 0, 0);
-    if (fire <= now) fire.setDate(fire.getDate() + 1); // schedule for tomorrow if time already passed
-
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Medication Reminder',
-          body: name || 'Time to take your medication',
-          sound: 'default',
-        },
-        trigger: fire, // exact datetime
-      });
-    } catch (e) {
-      console.log('schedule error', e);
     }
   };
 
@@ -1270,6 +1248,14 @@ const Reminders = ({
                   returnKeyType="default"
                 />
 
+                <PremiumButton onPress={async () => {
+                  try {
+                    await testReminderNotification();
+                    Alert.alert(es ? 'Prueba programada' : 'Test scheduled', es ? 'Llegara en 10 segundos.' : 'Arrives in 10 seconds.');
+                  } catch (error) { Alert.alert(es ? 'Error de recordatorio' : 'Reminder error', error.message); }
+                }} style={{ padding: 16, alignItems: 'center' }}>
+                  <DynamicText type="card">{es ? 'Probar recordatorio' : 'Test reminder'}</DynamicText>
+                </PremiumButton>
                 {/* Save Button */}
                 <PremiumButton
                   style={{
@@ -1279,13 +1265,15 @@ const Reminders = ({
                     alignItems: 'center'
                   }}
                   onPress={async () => {
-                    if (!addForm.name || !addForm.time) return;
+                    if (saving || !addForm.name || !addForm.time) return;
+                    setSaving(true);
+                    try {
                     if (addForm.type === 'medication') contributeMedication(addForm.medicationName || addForm.name, addForm.components, addForm.selectedMedicationName);
                     
                     const reminderData = { 
                       id: editingReminderId || `${Date.now()}`,
                       name: addForm.name,
-                      time: addForm.time,
+                      time: parseReminderTime(addForm.time).normalized,
                       type: addForm.type,
                       frequency: addForm.frequency,
                       customDays: addForm.customDays,
@@ -1314,6 +1302,8 @@ const Reminders = ({
                       })
                     };
 
+                    reminderData.notificationIds = await saveReminderNotification(reminderData);
+
                     if (editingReminderId) {
                       // Update existing reminder
                       setReminders(r => r.map(item => item.id === editingReminderId ? reminderData : item));
@@ -1326,12 +1316,16 @@ const Reminders = ({
                     await routeReminderToCard(reminderData);
                     
                     // Schedule notification
-                    await scheduleReminderNotification(addForm.name, addForm.time);
+                    // Scheduled successfully before committing the reminder.
                     
                     // Reset form and close modal
                     setShowAdd(false);
                     setInputFocused(false);
                     setEditingReminderId(null);
+                    } catch (error) {
+                      console.error('[Reminders] save failed', error);
+                      Alert.alert(es ? 'No se pudo programar' : 'Could not schedule reminder', error.message);
+                    } finally { setSaving(false); }
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold', fontSize: 16 }}>

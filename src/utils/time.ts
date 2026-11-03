@@ -1,3 +1,4 @@
+import { parseReminderTime } from './reminderTime';
 /**
  * Centralized time formatting utility
  * Handles global time format preferences across the entire app
@@ -56,7 +57,8 @@ export function formatTime(
     // Handle various string formats
     if (input.includes(':')) {
       // Handle "HH:MM" or "HH:MM:SS" format
-      const [hours, minutes, seconds] = input.split(':').map(Number);
+      const { hour: hours, minute: minutes } = parseReminderTime(input);
+      const seconds = 0;
       date = new Date();
       date.setHours(hours || 0, minutes || 0, seconds || 0, 0);
     } else {

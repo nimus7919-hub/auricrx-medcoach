@@ -36,6 +36,12 @@
         "android.permission.DUMP",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "permissions": [
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.USE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
       ]
     },
     "web": {
@@ -48,7 +54,13 @@
           "iosUrlScheme": "com.googleusercontent.apps.1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1"
         }
       ],
-      "@react-native-firebase/auth"
+      "@react-native-firebase/auth",
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "medication-reminders-v2"
+        }
+      ]
     ],
     "extra": {
       "googleAuth": {
