@@ -21,7 +21,7 @@ class CrashLogger {
         platform: Platform?.OS || 'unknown',
       };
 
-      console.error('💥 CRASH LOG:', errorInfo);
+      // Persist details without emitting a duplicate console error.
 
       // Get existing logs
       const existingLogs = await this.getLogs();

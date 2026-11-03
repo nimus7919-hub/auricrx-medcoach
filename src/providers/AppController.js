@@ -204,7 +204,8 @@ export default function App() {
           setRoute('dashboard');
         }
         
-        let welcomeName = authData.firstName || result.user.displayName?.split(/\s+/)[0];
+        const firstName = (value) => typeof value === 'string' ? value.trim().split(/\s+/)[0] : '';
+        let welcomeName = firstName(authData.firstName) || firstName(result.user.displayName);
         // If it's a sign-up, store the user data
         if (authData.isSignUp) {
           setUserData(authData);
@@ -213,7 +214,7 @@ export default function App() {
           const userDataResult = await authService.getUserData(result.user.uid);
           if (userDataResult.success) {
             setUserData(userDataResult.data);
-            welcomeName = userDataResult.data.firstName || welcomeName;
+            welcomeName = firstName(userDataResult.data?.firstName) || firstName(userDataResult.data?.displayName) || welcomeName;
           }
         }
         
@@ -221,7 +222,7 @@ export default function App() {
           type: 'success',
           title: '',
           message: authData.isSignUp ? uiI18n.t('ui.accountCreatedSuccessfully') :
-            welcomeName?.trim() ? uiI18n.t('ui.successWelcomeBack', { name: welcomeName.trim().split(/\s+/)[0] }) : uiI18n.t('ui.sessionStarted'),
+            welcomeName ? uiI18n.t('ui.successWelcomeBack', { name: welcomeName }) : uiI18n.t('ui.sessionStarted'),
         });
       } else {
         showAlert({
@@ -2344,7 +2345,6 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             if (userDataResult.success) {
               console.log('✅ User data loaded successfully');
               setUserData(userDataResult.data);
-            welcomeName = userDataResult.data.firstName || welcomeName;
             } else {
               console.warn('⚠️ User data fetch returned unsuccessful:', userDataResult);
             }
@@ -2388,7 +2388,6 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             const userDataResult = await authService.getUserData(restoreResult.user.uid);
             if (userDataResult.success) {
               setUserData(userDataResult.data);
-            welcomeName = userDataResult.data.firstName || welcomeName;
             }
           } catch (error) {
             console.error('Failed to get user data after restore:', error);
