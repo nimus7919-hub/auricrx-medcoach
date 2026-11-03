@@ -2681,6 +2681,22 @@ app.get('/api/me/subscription', async (req, res) => {
     const uid = decoded.uid;
     console.log('🔍 SERVER: User ID:', uid);
 
+    // Start the trial for trial-plan users who never got trial dates (14 days, same as trial start endpoint)
+    try {
+      const started = await neonClient`
+        UPDATE user_profiles
+        SET trial_start = NOW(),
+            trial_end = NOW() + INTERVAL '14 days',
+            trial_used_at = COALESCE(trial_used_at, NOW()),
+            trial_eligible = false
+        WHERE user_id = ${uid} AND plan = 'trial' AND trial_end IS NULL
+        RETURNING user_id
+      `;
+      if (started.length) console.log('?? SERVER: started missing trial for user', uid);
+    } catch (e) {
+      console.error('?? SERVER: could not auto-start trial:', e.message);
+    }
+
     // Use SQL function - NO FALLBACK. Must succeed or fail hard.
     console.log('🔍 SERVER: Attempting SQL function query');
     const result = await neonClient`
