@@ -1256,5 +1256,111 @@
     "month": "MXN $79 par mois",
     "year": "MXN $699 par an",
     "disclosure": "TVA incluse. Renouvellement automatique pour la période choisie. Rappel 5 jours avant chaque paiement. Annulation à tout moment dans les paramètres."
+  },
+  "authSignIn": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "continueWithApple": "iOS Bientôt Disponible",
+    "continueWithGoogle": "G   Continuer avec Google",
+    "staySignedIn": "Rester connecté",
+    "legalPrefix": "En vous connectant, vous acceptez nos ",
+    "legalConnector": " et notre ",
+    "legalSuffix": ".",
+    "termsOfService": "Conditions d'utilisation",
+    "privacyPolicy": "Politique de confidentialité",
+    "close": "Fermer",
+    "loadingDocument": "Chargement du document légal...",
+    "resubscribe": "Réabonner"
+  },
+  "authSignUp": {
+    "createAccount": "Créer un compte",
+    "joinAuricRX": "Rejoignez AuricRX aujourd'hui",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "username": "Nom d'utilisateur",
+    "email": "Email",
+    "password": "Mot de passe",
+    "phoneNumber": "Numéro de téléphone",
+    "createAccountButton": "Créer un compte",
+    "creatingAccount": "Création du compte...",
+    "cancel": "Annuler",
+    "passwordRequirements": "Le mot de passe doit contenir :",
+    "enterFirstName": "Entrez votre prénom",
+    "enterLastName": "Entrez votre nom de famille",
+    "chooseUsername": "Choisissez un nom d'utilisateur",
+    "enterEmail": "Entrez votre email",
+    "createPassword": "Créez un mot de passe",
+    "confirmPassword": "Confirmez votre mot de passe",
+    "enterPhone": "Entrez votre numéro de téléphone",
+    "viewTerms": "Voir les Conditions d'utilisation",
+    "viewPrivacy": "Voir la Politique de confidentialité",
+    "consentRequired": "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour continuer.",
+    "termsOfService": "Conditions d'utilisation",
+    "privacyPolicy": "Politique de confidentialité",
+    "close": "Fermer",
+    "loadingDocument": "Chargement du document légal...",
+    "ageRestriction": "Pour utiliser cette application, vous devez avoir 18 ans ou plus",
+    "age": "Âge",
+    "enterAge": "Entrez votre âge",
+    "ageRequired": "L'âge est requis",
+    "ageRestrictionError": "Vous devez avoir au moins 18 ans pour utiliser cette application"
+  },
+  "subscriptionExpired": {
+    "title": "Abonnement Expiré",
+    "message": "Votre abonnement a expiré. Vous avez 30 jours pour renouveler votre abonnement.\n\nVos données seront stockées en toute sécurité dans le cloud pendant cette période de grâce. Après 30 jours, les données de votre compte seront supprimées.",
+    "subscribeButton": "S'abonner Maintenant",
+    "dismissButton": "Plus Tard"
+  },
+  "localized": {
+    "SignInScreen": {
+      "loginCopy": {
+        "language": "Choisir la langue",
+        "tagline": "Votre sant?, en mode VIP.",
+        "or": "ou",
+        "email": "E-mail",
+        "signIn": "Se connecter",
+        "loading": "Connexion...",
+        "forgot": "Mot de passe oubli? ?",
+        "resetHelp": "Saisissez votre e-mail pour r?cup?rer votre mot de passe.",
+        "newHere": "Nouveau ici ?",
+        "createAccount": "Cr?er un compte",
+        "terms": "Conditions",
+        "privacy": "Confidentialit?"
+      }
+    },
+    "SignUpForm": {
+      "languageLabels": "Français",
+      "accountCopy": [
+        "Vous avez déjà un compte ?",
+        "Se connecter"
+      ]
+    },
+    "translationService": {
+      "TRANSLATION_MAP": {
+        "notifications": "Notifications",
+        "security": "Sécurité",
+        "privacy": "Confidentialité",
+        "wallpaper": "Fond d'écran",
+        "pushNotifications": "Notifications Push",
+        "emailNotifications": "Notifications par Email",
+        "smsNotifications": "Notifications SMS",
+        "changePassword": "Changer le mot de passe",
+        "dataCollection": "Collecte de données",
+        "analytics": "Analyses",
+        "changeWallpaper": "Changer le fond d'écran",
+        "chooseWallpaperDescription": "Choisissez votre fond d'écran préféré pour personnaliser votre application",
+        "never": "Jamais",
+        "refillComplete": "Réapprovisionnement Terminé"
+      }
+    },
+    "MedicationRefillModal": {
+      "localeMap": "fr-FR"
+    },
+    "SupplementRefillModal": {
+      "localeMap": "fr-FR"
+    }
   }
 }

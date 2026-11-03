@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -41,6 +43,7 @@ interface DocScanScreenProps {
 }
 
 export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanScreenProps) {
+  useUILanguage();
   const { t } = useTranslation();
   
   // Default theme if not provided
@@ -733,9 +736,9 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          '📱 Permission Required',
-          'Please grant camera roll access to scan documents.',
-          [{ text: 'OK' }]
+          uiI18n.t("ui.permissionRequired_54aab6"),
+          uiI18n.t("ui.pleaseGrantCameraRollAccessToScanDocuments"),
+          [{ text: uiI18n.t("adminProfile.ok") }]
         );
         return false;
       }
@@ -763,7 +766,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       if (!result.canceled && result.assets) {
         if (enableEdgeDetection) {
           setIsProcessingEdges(true);
-          showSuccessFeedback('🔍 Processing document edges...');
+          showSuccessFeedback(uiI18n.t("ui.processingDocumentEdges"));
           
           try {
             const processedPages: string[] = [];
@@ -781,13 +784,13 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
             }
             
             setPages(prev => [...prev, ...processedPages]);
-            showSuccessFeedback('✅ Gallery images processed with edge detection');
+            showSuccessFeedback(uiI18n.t("ui.galleryImagesProcessedWithEdgeDetection"));
           } catch (error) {
             console.error('Gallery edge detection error:', error);
             // Fallback to original images
             const originalPages = result.assets.map(asset => asset.uri);
             setPages(prev => [...prev, ...originalPages]);
-            showSuccessFeedback('📸 Images added from gallery (processing failed)');
+            showSuccessFeedback(uiI18n.t("ui.imagesAddedFromGalleryProcessingFailed"));
           } finally {
             setIsProcessingEdges(false);
           }
@@ -795,14 +798,14 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
           // No edge detection, use original images
           const newPages = result.assets.map(asset => asset.uri);
           setPages(prev => [...prev, ...newPages]);
-          showSuccessFeedback('📸 Images added from gallery');
+          showSuccessFeedback(uiI18n.t("ui.imagesAddedFromGallery"));
         }
         
         triggerHaptic('medium');
       }
     } catch (error) {
       console.error('Failed to add from gallery:', error);
-      Alert.alert('❌ Error', 'Failed to add images from gallery');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToAddImagesFromGallery"));
     }
   };
 
@@ -822,7 +825,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
       if (!result.canceled && result.assets) {
         setIsProcessing(true);
-        showSuccessFeedback('🤖 AI is analyzing your images...');
+        showSuccessFeedback(uiI18n.t("ui.aiIsAnalyzingYourImages"));
         
         try {
           const aiAnalysisResults: string[] = [];
@@ -838,13 +841,13 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
             // Create a document with AI analysis
             const aiDocument = aiAnalysisResults.join('\n\n---\n\n');
             await saveAIAnalysisAsDocument(aiDocument);
-            showSuccessFeedback('✅ AI analysis saved as document!');
+            showSuccessFeedback(uiI18n.t("ui.aiAnalysisSavedAsDocument"));
           } else {
-            showSuccessFeedback('⚠️ AI analysis failed, please try again');
+            showSuccessFeedback(uiI18n.t("ui.aiAnalysisFailedPleaseTryAgain"));
           }
         } catch (error) {
           console.error('AI analysis error:', error);
-          showSuccessFeedback('❌ AI analysis failed');
+          showSuccessFeedback(uiI18n.t("ui.aiAnalysisFailed"));
         } finally {
           setIsProcessing(false);
         }
@@ -853,7 +856,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       }
     } catch (error) {
       console.error('Failed to analyze with AI:', error);
-      Alert.alert('❌ Error', 'Failed to analyze images with AI');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToAnalyzeImagesWithAi"));
     }
   };
 
@@ -878,27 +881,10 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       if (extractedText) {
         // Analyze the extracted text
-        analysis = `📄 DOCUMENT ANALYSIS\n\n` +
-          `Extracted Text:\n"${extractedText}"\n\n` +
-          `Analysis:\n` +
-          `This appears to be a medical document containing text. The extracted content shows: "${extractedText.substring(0, 200)}${extractedText.length > 200 ? '...' : ''}"\n\n` +
-          `Key Information Found:\n` +
-          `- Document contains readable text\n` +
-          `- Text length: ${extractedText.length} characters\n` +
-          `- First 50 characters: "${extractedText.substring(0, 50)}"\n\n` +
-          `Recommendation: Review the extracted text above for any medical information, prescriptions, or important details.`;
+        analysis = uiI18n.t("ui.documentAnalysis") + '\n' + uiI18n.t("ui.extractedTextValue", { value1: extractedText }) + '\n' + uiI18n.t("ai.analysis") + '\n' + uiI18n.t("ui.thisAppearsToBeAMedicalDocumentContainingTextTheExtractedContentShowsValuevalue", { value1: extractedText.substring(0, 200), value2: extractedText.length > 200 ? '...' : '' }) + '\n' + uiI18n.t("ui.keyInformationFound") + '\n' + uiI18n.t("ui.documentContainsReadableText") + '\n' + uiI18n.t("ui.textLengthValueCharacters", { value1: extractedText.length }) + '\n' + uiI18n.t("ui.first50CharactersValue", { value1: extractedText.substring(0, 50) }) + '\n' + uiI18n.t("ui.recommendationReviewTheExtractedTextAboveForAnyMedicalInformationPrescriptionsOrImportantD");
       } else {
         // Generic analysis for images without text
-        analysis = `📸 IMAGE ANALYSIS\n\n` +
-          `This image appears to be a medical document or health-related content.\n\n` +
-          `Common elements to look for in medical documents:\n` +
-          `• Patient information and demographics\n` +
-          `• Prescription details (medication name, dosage, instructions)\n` +
-          `• Doctor's notes and recommendations\n` +
-          `• Lab results or test values\n` +
-          `• Appointment information\n` +
-          `• Insurance or billing information\n\n` +
-          `Note: No text was automatically extracted from this image. You may need to review it manually or try taking a clearer photo.`;
+        analysis = uiI18n.t("ui.imageAnalysis") + '\n' + uiI18n.t("ui.thisImageAppearsToBeAMedicalDocumentOrHealthRelatedContent") + '\n' + uiI18n.t("ui.commonElementsToLookForInMedicalDocuments") + '\n' + uiI18n.t("ui.patientInformationAndDemographics") + '\n' + uiI18n.t("ui.prescriptionDetailsMedicationNameDosageInstructions") + '\n' + uiI18n.t("ui.doctorSNotesAndRecommendations") + '\n' + uiI18n.t("ui.labResultsOrTestValues") + '\n' + uiI18n.t("ui.appointmentInformation") + '\n' + uiI18n.t("ui.insuranceOrBillingInformation") + '\n' + uiI18n.t("ui.noteNoTextWasAutomaticallyExtractedFromThisImageYouMayNeedToReviewItManuallyOrTryTakingACl");
       }
       
       console.log('✅ AI analysis completed');
@@ -908,21 +894,14 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       console.error('AI analysis failed:', error);
       
       // Fallback analysis
-      return `📄 DOCUMENT ANALYSIS\n\n` +
-        `Error during analysis: ${(error instanceof Error ? error.message : String(error))}\n\n` +
-        `This appears to be a medical document. Please review the image manually for:\n` +
-        `• Patient information\n` +
-        `• Prescription details\n` +
-        `• Medical instructions\n` +
-        `• Important dates or numbers\n\n` +
-        `Consider taking a clearer photo if the text is not easily readable.`;
+      return uiI18n.t("ui.documentAnalysis") + '\n' + uiI18n.t("ui.errorDuringAnalysisValue", { value1: error instanceof Error ? error.message : String(error) }) + '\n' + uiI18n.t("ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor") + '\n' + uiI18n.t("ui.patientInformation") + '\n' + uiI18n.t("ui.prescriptionDetails") + '\n' + uiI18n.t("ui.medicalInstructions") + '\n' + uiI18n.t("ui.importantDatesOrNumbers") + '\n' + uiI18n.t("ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable");
     }
   };
 
   const saveAIAnalysisAsDocument = async (content: string) => {
     try {
       const timestamp = new Date().toISOString();
-      const fileName = `AI_Analysis_${timestamp.split('T')[0]}.txt`;
+      const fileName = `AI_Analysis_${timestamp.split(uiI18n.t("reminders.tuesdayShort"))[0]}.txt`;
       
       // Save to document directory
       const documentPath = `${FileSystem.documentDirectory}${fileName}`;
@@ -933,7 +912,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       // Also save to scan storage for consistency
       const scanManifest: ScanManifest = {
         id: `ai_${Date.now()}`,
-        name: `AI Analysis - ${new Date().toLocaleDateString()}`,
+        name: uiI18n.t("ui.aiAnalysisValue", { value1: new Date().toLocaleDateString() }),
         pages: [],
         ocrText: content,
         pageCount: 0,
@@ -944,7 +923,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       await ScanStorage.saveScan(scanManifest);
       setCurrentScan(scanManifest);
       
-      showSuccessFeedback('📄 AI analysis saved successfully!');
+      showSuccessFeedback(uiI18n.t("ui.aiAnalysisSavedSuccessfully"));
     } catch (error) {
       console.error('Failed to save AI analysis:', error);
       throw error;
@@ -960,7 +939,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       // Create a simple text-only PDF first to test
       const timestamp = new Date().toISOString();
-      const fileName = `AI_Analysis_${timestamp.split('T')[0]}.txt`;
+      const fileName = `AI_Analysis_${timestamp.split(uiI18n.t("reminders.tuesdayShort"))[0]}.txt`;
       
       // Save as text file first
       const documentPath = `${FileSystem.documentDirectory}${fileName}`;
@@ -971,7 +950,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       // Also save to scan storage
       const scanManifest: ScanManifest = {
         id: `ai_${Date.now()}`,
-        name: `AI Analysis - ${new Date().toLocaleDateString()}`,
+        name: uiI18n.t("ui.aiAnalysisValue_bb716b", { value1: new Date().toLocaleDateString() }),
         pages: [imageUri],
         ocrText: content,
         pageCount: 1,
@@ -982,7 +961,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       await ScanStorage.saveScan(scanManifest);
       setCurrentScan(scanManifest);
       
-      showSuccessFeedback('📄 AI analysis saved as text file!');
+      showSuccessFeedback(uiI18n.t("ui.aiAnalysisSavedAsTextFile"));
       console.log('✅ Text file saved successfully:', documentPath);
       
       // Try to create a simple PDF with just the text (no image processing)
@@ -991,9 +970,9 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         
         const pdfResult = await PdfGenerator.createPdf({
           pages: [], // No images to avoid preprocessing issues
-          title: `AI Analysis - ${new Date().toLocaleDateString()}`,
-          author: 'AuricRx MedCoach',
-          subject: 'AI Document Analysis',
+          title: uiI18n.t("ui.aiAnalysisValue_bb716b", { value1: new Date().toLocaleDateString() }),
+          author: uiI18n.t("ai.auricrxMedCoach"),
+          subject: uiI18n.t("ui.aiDocumentAnalysis"),
           keywords: ['ai', 'analysis', 'medical', 'document'],
           includeOcrText: true,
           ocrText: [content],
@@ -1004,7 +983,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         
         if (pdfResult.success && pdfResult.filePath) {
           console.log('✅ PDF also created successfully:', pdfResult.filePath);
-          showSuccessFeedback('📄 AI analysis saved as both text and PDF!');
+          showSuccessFeedback(uiI18n.t("ui.aiAnalysisSavedAsBothTextAndPdf"));
         }
       } catch (pdfError) {
         console.log('⚠️ PDF creation failed, but text file saved:', pdfError);
@@ -1027,23 +1006,23 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
     
     // Show AI Analysis option after capture
     Alert.alert(
-      '📸 Photo Captured',
-      'What would you like to do with this photo?',
+      uiI18n.t("ui.photoCaptured"),
+      uiI18n.t("ui.whatWouldYouLikeToDoWithThisPhoto"),
       [
         {
-          text: 'Regular Scan',
+          text: uiI18n.t("ui.regularScan"),
           onPress: async () => {
             await processCapturedImage(uri);
           }
         },
         {
-          text: '🤖 AI Analysis',
+          text: uiI18n.t("ui.aiAnalysis"),
           onPress: async () => {
             await analyzeCapturedImageWithAI(uri);
           }
         },
         {
-          text: 'Cancel',
+          text: uiI18n.t("healthAnalytics.cancel"),
           style: 'cancel'
         }
       ]
@@ -1054,7 +1033,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
     try {
         if (enableEdgeDetection) {
           setIsProcessingEdges(true);
-          showSuccessFeedback('🔍 Processing document edges...');
+          showSuccessFeedback(uiI18n.t("ui.processingDocumentEdges"));
           console.log('🔍 Starting edge detection for camera image...');
           
           try {
@@ -1064,20 +1043,20 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
             if (processedResult.success && processedResult.processedUri) {
               setPages(prev => [...prev, processedResult.processedUri!]);
               setEdgeDetectionConfidence(processedResult.confidence || 0.85);
-              showSuccessFeedback(`✅ Smart edge detection (${Math.round((processedResult.confidence || 0.85) * 100)}% confidence)`);
+              showSuccessFeedback(uiI18n.t("ui.smartEdgeDetectionValueConfidence", { value1: Math.round((processedResult.confidence || 0.85) * 100) }));
               console.log('📄 Document bounds detected:', processedResult.bounds);
             } else {
               // Fallback to original image if edge detection fails
             setPages(prev => [...prev, uri]);
               setEdgeDetectionConfidence(null);
-              showSuccessFeedback('📷 Image captured (edge detection failed)');
+              showSuccessFeedback(uiI18n.t("ui.imageCapturedEdgeDetectionFailed"));
               console.log('⚠️ Edge detection failed:', processedResult.error);
             }
           } catch (error) {
             console.error('❌ Edge detection error:', error);
             // Fallback to original image
           setPages(prev => [...prev, uri]);
-            showSuccessFeedback('📷 Image captured (processing failed)');
+            showSuccessFeedback(uiI18n.t("ui.imageCapturedProcessingFailed"));
           } finally {
             setIsProcessingEdges(false);
           }
@@ -1085,33 +1064,33 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
           // No edge detection, use original image
           console.log('📷 Using original image without edge detection');
         setPages(prev => [...prev, uri]);
-          showSuccessFeedback('📷 Image captured successfully');
+          showSuccessFeedback(uiI18n.t("ui.imageCapturedSuccessfully"));
         }
         
         triggerHaptic('medium');
     } catch (error) {
       console.error('Failed to process captured image:', error);
-      Alert.alert('❌ Error', 'Failed to process captured image');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToProcessCapturedImage"));
     }
   };
 
   const analyzeCapturedImageWithAI = async (uri: string) => {
     try {
       setIsProcessing(true);
-      showSuccessFeedback('🤖 AI is analyzing your photo...');
+      showSuccessFeedback(uiI18n.t("ui.aiIsAnalyzingYourPhoto"));
       
       const analysis = await analyzeImageWithAI(uri);
       
       if (analysis) {
         // Save AI analysis as PDF
         await saveAIAnalysisAsPDF(analysis, uri);
-        showSuccessFeedback('✅ AI analysis saved as PDF!');
+        showSuccessFeedback(uiI18n.t("ui.aiAnalysisSavedAsPdf"));
       } else {
-        showSuccessFeedback('⚠️ AI analysis failed, please try again');
+        showSuccessFeedback(uiI18n.t("ui.aiAnalysisFailedPleaseTryAgain"));
       }
     } catch (error) {
       console.error('AI analysis error:', error);
-      showSuccessFeedback('❌ AI analysis failed');
+      showSuccessFeedback(uiI18n.t("ui.aiAnalysisFailed"));
     } finally {
       setIsProcessing(false);
     }
@@ -1152,7 +1131,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
   const processOcr = async () => {
     if (pages.length === 0) {
-      Alert.alert('📄 No Pages', 'Please add some pages before running OCR');
+      Alert.alert(uiI18n.t("ui.noPages"), uiI18n.t("ui.pleaseAddSomePagesBeforeRunningOcr"));
       return;
     }
 
@@ -1186,28 +1165,19 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       triggerHaptic('heavy');
       
       Alert.alert(
-        '🎉 OCR Complete!', 
-        `Successfully processed ${pages.length} page${pages.length > 1 ? 's' : ''}\n\n` +
-        `📝 Total characters extracted: ${totalText.toLocaleString()}\n` +
-        `🎯 Average confidence: ${(avgConfidence * 100).toFixed(1)}%\n\n` +
-        `Your document text is ready for export!`,
+        uiI18n.t("ui.ocrComplete"), 
+        uiI18n.t("ui.successfullyProcessedValuePagevalue", { value1: pages.length, value2: pages.length > 1 ? 's' : '' }) + '\n' + uiI18n.t("ui.totalCharactersExtractedValue", { value1: totalText.toLocaleString() }) + '\n' + uiI18n.t("ui.averageConfidenceValue", { value1: (avgConfidence * 100).toFixed(1) }) + '\n' + uiI18n.t("ui.yourDocumentTextIsReadyForExport"),
         [
-          { text: 'View Results', onPress: () => setShowOcrResults(true) },
-          { text: 'OK', style: 'default' }
+          { text: uiI18n.t("ui.viewResults"), onPress: () => setShowOcrResults(true) },
+          { text: uiI18n.t("adminProfile.ok"), style: 'default' }
         ]
       );
     } catch (error) {
       console.error('OCR processing failed:', error);
       triggerHaptic('heavy');
       Alert.alert(
-        '❌ OCR Failed', 
-        'Failed to process text recognition.\n\n' +
-        '💡 Tips for better results:\n' +
-        '• Ensure images are well-lit and clear\n' +
-        '• Text should be readable and not blurry\n' +
-        '• Avoid shadows or reflections\n' +
-        '• Try adjusting camera angle or lighting\n' +
-        '• Use high-quality scan settings'
+        uiI18n.t("ui.ocrFailed"), 
+        uiI18n.t("ui.failedToProcessTextRecognition") + '\n' + uiI18n.t("ui.tipsForBetterResults") + '\n' + uiI18n.t("ui.ensureImagesAreWellLitAndClear") + '\n' + uiI18n.t("ui.textShouldBeReadableAndNotBlurry") + '\n' + uiI18n.t("ui.avoidShadowsOrReflections") + '\n' + uiI18n.t("ui.tryAdjustingCameraAngleOrLighting") + '\n' + uiI18n.t("ui.useHighQualityScanSettings")
       );
     } finally {
       setIsProcessing(false);
@@ -1222,7 +1192,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
   const saveScan = async () => {
     if (pages.length === 0) {
-      Alert.alert('📄 No Pages', 'Please add some pages before saving');
+      Alert.alert(uiI18n.t("ui.noPages"), uiI18n.t("ui.pleaseAddSomePagesBeforeSaving"));
       return;
     }
 
@@ -1252,24 +1222,21 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       triggerHaptic('heavy');
       Alert.alert(
-        '💾 Scan Saved!', 
-        `Document "${scan.name}" saved successfully!\n\n` +
-        `📄 Pages: ${pages.length}\n` +
-        `📝 OCR Text: ${ocrResults.length > 0 ? 'Available' : 'Not processed'}\n\n` +
-        `Your scan is now stored and accessible from the Documents tile.`
+        uiI18n.t("ui.scanSaved"), 
+        uiI18n.t("ui.documentValueSavedSuccessfully", { value1: scan.name }) + '\n' + uiI18n.t("ui.pagesValue", { value1: pages.length }) + '\n' + uiI18n.t("ui.ocrTextValue_e53603", { value1: ocrResults.length > 0 ? uiI18n.t("ui.available_7c62a1") : uiI18n.t("ui.notProcessed") }) + '\n' + uiI18n.t("ui.yourScanIsNowStoredAndAccessibleFromTheDocumentsTile")
       );
       
       setScanName('');
       loadExistingScans(); // Reload saved scans to show the new one
     } catch (error) {
       console.error('Failed to save scan:', error);
-      Alert.alert('❌ Save Failed', 'Failed to save the document scan');
+      Alert.alert(uiI18n.t("ui.saveFailed_0d047f"), uiI18n.t("ui.failedToSaveTheDocumentScan"));
     }
   };
 
   const exportPdf = async () => {
     if (pages.length === 0) {
-      Alert.alert('📄 No Pages', 'Please add some pages before exporting');
+      Alert.alert(uiI18n.t("ui.noPages"), uiI18n.t("ui.pleaseAddSomePagesBeforeExporting"));
       return;
     }
 
@@ -1279,9 +1246,9 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
     try {
       const result = await PdfGenerator.createPdf({
         pages,
-        title: scanName || 'Document Scan',
-        author: 'AuricRx MedCoach',
-        subject: 'Scanned Document',
+        title: scanName || uiI18n.t("ui.documentScan"),
+        author: uiI18n.t("ai.auricrxMedCoach"),
+        subject: uiI18n.t("ui.scannedDocument"),
         keywords: ['scan', 'document', 'medical'],
         includeOcrText: true,
         ocrText: ocrResults || [],
@@ -1296,39 +1263,25 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         
         if (shared) {
           Alert.alert(
-            '📄 PDF Exported!', 
-            'PDF exported and shared successfully!\n\n' +
-            `📊 File size: ${((result.fileSize || 0) / 1024).toFixed(1)} KB\n` +
-            `📄 Pages: ${result.pageCount}\n` +
-            `📝 OCR Text: ${ocrResults.length > 0 ? 'Included' : 'Not available'}\n` +
-            `📐 Layout: ${pdfLayout} | Margins: ${pdfMargins}mm | Font: ${pdfFontSize}px`
+            uiI18n.t("ui.pdfExported_470538"), 
+            uiI18n.t("documents.pdfExported") + '\n' + uiI18n.t("ui.fileSizeValueKb", { value1: ((result.fileSize || 0) / 1024).toFixed(1) }) + '\n' + uiI18n.t("ui.pagesValue_341114", { value1: result.pageCount }) + '\n' + uiI18n.t("ui.ocrTextValue_e53603", { value1: ocrResults.length > 0 ? uiI18n.t("ui.included") : uiI18n.t("ui.notAvailable") }) + '\n' + `📐 Layout: ${pdfLayout} | Margins: ${pdfMargins}mm | Font: ${pdfFontSize}px`
           );
         } else {
           Alert.alert(
-            '📄 PDF Exported!', 
-            `PDF saved successfully!\n\n` +
-            `📁 Location: ${result.filePath}\n` +
-            `📊 File size: ${((result.fileSize || 0) / 1024).toFixed(1)} KB\n` +
-            `📄 Pages: ${result.pageCount}\n` +
-            `📝 OCR Text: ${ocrResults.length > 0 ? 'Included' : 'Not available'}\n` +
-            `📐 Layout: ${pdfLayout} | Margins: ${pdfMargins}mm | Font: ${pdfFontSize}px`
+            uiI18n.t("ui.pdfExported_470538"), 
+            uiI18n.t("ui.pdfSavedSuccessfully") + '\n' + `📁 Location: ${result.filePath}\n` + '\n' + uiI18n.t("ui.fileSizeValueKb_0550a5", { value1: ((result.fileSize || 0) / 1024).toFixed(1) }) + '\n' + uiI18n.t("ui.pagesValue_341114", { value1: result.pageCount }) + '\n' + uiI18n.t("ui.ocrTextValue_e53603", { value1: ocrResults.length > 0 ? uiI18n.t("ui.included") : uiI18n.t("ui.notAvailable") }) + '\n' + `📐 Layout: ${pdfLayout} | Margins: ${pdfMargins}mm | Font: ${pdfFontSize}px`
           );
         }
       } else {
         console.error('PDF export failed:', result.error);
         Alert.alert(
-          '❌ Export Failed', 
-          result.error || 'Failed to export PDF\n\n' +
-          '💡 Troubleshooting tips:\n' +
-          '• Make sure you have at least one page scanned\n' +
-          '• Check that images are valid and accessible\n' +
-          '• Try scanning again with better lighting\n' +
-          '• Ensure sufficient storage space'
+          uiI18n.t("ai.exportFailed"), 
+          result.error || uiI18n.t("documents.failedToExport") + '\n' + uiI18n.t("ui.troubleshootingTips") + '\n' + uiI18n.t("ui.makeSureYouHaveAtLeastOnePageScanned") + '\n' + uiI18n.t("ui.checkThatImagesAreValidAndAccessible") + '\n' + uiI18n.t("ui.tryScanningAgainWithBetterLighting") + '\n' + uiI18n.t("ui.ensureSufficientStorageSpace")
         );
       }
     } catch (error) {
       console.error('PDF export failed:', error);
-      Alert.alert('❌ Export Failed', 'Failed to export PDF');
+      Alert.alert(uiI18n.t("ai.exportFailed"), uiI18n.t("documents.failedToExport"));
     } finally {
       setIsProcessing(false);
     }
@@ -1336,7 +1289,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
   const exportOcrText = async () => {
     if (ocrResults.length === 0) {
-      Alert.alert('📝 No OCR Results', 'Please run OCR first before exporting text');
+      Alert.alert(uiI18n.t("ui.noOcrResults"), uiI18n.t("ui.pleaseRunOcrFirstBeforeExportingText"));
       return;
     }
 
@@ -1357,7 +1310,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       try {
         await Share.share({
           message: textContent,
-          title: 'OCR Text Export',
+          title: uiI18n.t("ui.ocrTextExport"),
         });
       } catch (shareError) {
         console.log('Share not available, text copied to clipboard');
@@ -1365,15 +1318,12 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       triggerHaptic('light');
       Alert.alert(
-        '📝 OCR Text Ready!', 
-        `OCR text extracted from ${ocrResults.length} page${ocrResults.length > 1 ? 's' : ''}.\n\n` +
-        `📊 Total characters: ${textContent.length.toLocaleString()}\n` +
-        `📄 File name: ${filename}\n\n` +
-        `✅ Text copied to clipboard and shared!`
+        uiI18n.t("ui.ocrTextReady"), 
+        uiI18n.t("ui.ocrTextExtractedFromValuePagevalue", { value1: ocrResults.length, value2: ocrResults.length > 1 ? 's' : '' }) + '\n' + uiI18n.t("ui.totalCharactersValue", { value1: textContent.length.toLocaleString() }) + '\n' + uiI18n.t("ui.fileNameValue", { value1: filename }) + '\n' + uiI18n.t("ui.textCopiedToClipboardAndShared")
       );
     } catch (error) {
       console.error('OCR text export failed:', error);
-      Alert.alert('❌ Export Failed', 'Failed to export OCR text');
+      Alert.alert(uiI18n.t("ai.exportFailed"), uiI18n.t("ui.failedToExportOcrText"));
     }
   };
 
@@ -1390,7 +1340,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       setIsEditing(false);
       setSelectedPage(null);
       triggerHaptic('medium');
-      showSuccessFeedback('✅ OCR text updated successfully');
+      showSuccessFeedback(uiI18n.t("ui.ocrTextUpdatedSuccessfully"));
     }
   };
 
@@ -1398,7 +1348,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
     try {
       await Clipboard.setString(text);
       triggerHaptic('light');
-      showSuccessFeedback('📋 Text copied to clipboard');
+      showSuccessFeedback(uiI18n.t("ui.textCopiedToClipboard"));
     } catch (error) {
       console.error('Failed to copy text:', error);
     }
@@ -1412,18 +1362,18 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
     setShowOcrResults(true);
     triggerHaptic('light');
     Alert.alert(
-      '📄 Scan Loaded!', 
-      `Document "${scan.name}" loaded successfully.`,
-      [{ text: 'OK' }]
+      uiI18n.t("ui.scanLoaded"), 
+      uiI18n.t("ui.documentValueLoadedSuccessfully", { value1: scan.name }),
+      [{ text: uiI18n.t("adminProfile.ok") }]
     );
   };
 
   const deleteSavedScan = async (id: string) => {
     triggerHaptic('heavy');
     Alert.alert(
-      '🗑️ Scan Deleted',
-      'Scan deleted successfully.',
-      [{ text: 'OK' }]
+      uiI18n.t("ui.scanDeleted"),
+      uiI18n.t("ui.scanDeletedSuccessfully"),
+      [{ text: uiI18n.t("adminProfile.ok") }]
     );
     await ScanStorage.deleteScan(id);
     loadExistingScans();
@@ -1479,9 +1429,9 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       {/* Premium OCR indicator */}
       {ocrResults[index] && (
         <View style={styles.ocrIndicator}>
-          <Text style={styles.ocrIndicatorText}>OCR ✓</Text>
+          <Text style={styles.ocrIndicatorText}>{uiI18n.t("ui.ocr")}</Text>
           <Text style={styles.ocrConfidenceText}>
-            {ocrResults[index].length > 100 ? 'High' : ocrResults[index].length > 50 ? 'Medium' : 'Low'}
+            {ocrResults[index].length > 100 ? uiI18n.t("ai.high") : ocrResults[index].length > 50 ? uiI18n.t("ai.medium") : uiI18n.t("ai.low")}
           </Text>
         </View>
       )}
@@ -1499,7 +1449,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       ]}
     >
       <View style={styles.ocrHeader}>
-        <Text style={dynamicStyles.sectionTitle}>📝 OCR Results</Text>
+        <Text style={dynamicStyles.sectionTitle}>{uiI18n.t("ui.ocrResults")}</Text>
         <TouchableOpacity 
           style={styles.toggleButton}
           onPress={() => {
@@ -1508,7 +1458,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
           }}
         >
           <Text style={styles.toggleButtonText}>
-            {showOcrResults ? 'Hide' : 'Show'}
+            {showOcrResults ? uiI18n.t("ui.hide") : uiI18n.t("ui.show")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -1518,11 +1468,10 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
           {ocrResults.map((text, index) => (
           <View key={index} style={dynamicStyles.ocrResultItem}>
               <View style={styles.ocrResultHeader}>
-                <Text style={dynamicStyles.ocrResultTitle}>Page {index + 1}</Text>
+                <Text style={dynamicStyles.ocrResultTitle}>{uiI18n.t("ui.page")}{index + 1}</Text>
                 <View style={dynamicStyles.ocrResultBadge}>
                   <Text style={dynamicStyles.ocrResultBadgeText}>
-                    {text.length} chars
-                  </Text>
+                    {text.length}{uiI18n.t("ui.chars")}</Text>
                 </View>
               </View>
               
@@ -1537,19 +1486,19 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                   style={dynamicStyles.ocrActionButton}
                   onPress={() => copyOcrText(text)}
                 >
-                  <Text style={dynamicStyles.ocrActionButtonText}>📋 Copy</Text>
+                  <Text style={dynamicStyles.ocrActionButtonText}>{uiI18n.t("ui.copy")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={dynamicStyles.ocrActionButton}
                   onPress={() => editOcrText(index)}
                 >
-                  <Text style={dynamicStyles.ocrActionButtonText}>✏️ Edit</Text>
+                  <Text style={dynamicStyles.ocrActionButtonText}>{uiI18n.t("medications.edit")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={dynamicStyles.ocrActionButton}
-                  onPress={() => Share.share({ message: text, title: `Page ${index + 1} OCR Text` })}
+                  onPress={() => Share.share({ message: text, title: uiI18n.t("ui.pageValueOcrText", { value1: index + 1 }) })}
                 >
-                  <Text style={dynamicStyles.ocrActionButtonText}>📤 Share</Text>
+                  <Text style={dynamicStyles.ocrActionButtonText}>{uiI18n.t("medicalDocuments.share")}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1561,7 +1510,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
   const renderQualitySelector = () => (
     <View style={[styles.qualitySelector, { backgroundColor: currentTheme.card, borderColor: currentTheme.chip }]}>
-      <Text style={[styles.qualityLabel, { color: currentTheme.text }]}>Scan Quality:</Text>
+      <Text style={[styles.qualityLabel, { color: currentTheme.text }]}>{uiI18n.t("ui.scanQuality")}</Text>
       <View style={styles.qualityButtons}>
         {(['low', 'medium', 'high'] as const).map(quality => (
           <TouchableOpacity
@@ -1590,10 +1539,8 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       {/* Edge Detection Toggle */}
       <View style={styles.edgeDetectionToggle}>
         <View style={styles.edgeDetectionInfo}>
-          <Text style={[styles.edgeDetectionLabel, { color: currentTheme.text }]}>🔍 Smart Edge Detection:</Text>
-          <Text style={[styles.edgeDetectionDescription, { color: currentTheme.sub }]}>
-            AI-powered document boundary detection
-          </Text>
+          <Text style={[styles.edgeDetectionLabel, { color: currentTheme.text }]}>{uiI18n.t("ui.smartEdgeDetection")}</Text>
+          <Text style={[styles.edgeDetectionDescription, { color: currentTheme.sub }]}>{uiI18n.t("ui.aiPoweredDocumentBoundaryDetection")}</Text>
         </View>
         <TouchableOpacity
           style={[
@@ -1611,7 +1558,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
             { color: currentTheme.text },
             enableEdgeDetection && { color: currentTheme.text }
           ]}>
-            {enableEdgeDetection ? 'ON' : 'OFF'}
+            {enableEdgeDetection ? uiI18n.t("ui.on") : uiI18n.t("ui.off")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -1678,7 +1625,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               setShowNewScanModal(true);
             }}
           >
-            <Text style={styles.actionButtonText}>Start Scan</Text>
+            <Text style={styles.actionButtonText}>{uiI18n.t("ui.startScan")}</Text>
           </TouchableOpacity>
           
           {pages.length > 0 && (
@@ -1687,12 +1634,12 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               onPress={() => {
                 triggerHaptic('medium');
                 Alert.alert(
-                  '🗑️ Clear Current Scan',
-                  'This will clear current pages and start fresh. Continue?',
+                  uiI18n.t("ui.clearCurrentScan"),
+                  uiI18n.t("ui.thisWillClearCurrentPagesAndStartFreshContinue"),
                   [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
                     { 
-                      text: 'Clear All', 
+                      text: uiI18n.t("ui.clearAll"), 
                       onPress: () => {
                         setPages([]);
                         setOcrResults([]);
@@ -1700,7 +1647,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                         setCurrentScan(null);
                         setShowOcrResults(false);
                         triggerHaptic('heavy');
-                        showSuccessFeedback('🗑️ Scan cleared');
+                        showSuccessFeedback(uiI18n.t("ui.scanCleared"));
                       }
                     }
                   ]
@@ -1708,14 +1655,14 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               }}
             >
               <Text style={styles.actionButtonIcon}>🗑️</Text>
-              <Text style={styles.actionButtonText}>Clear Scan</Text>
+              <Text style={styles.actionButtonText}>{uiI18n.t("ui.clearScan")}</Text>
             </TouchableOpacity>
           )}
         </Animated.View>
 
         {/* Quality Selector */}
         <View style={[dynamicStyles.qualitySelector, { borderColor: currentTheme.chip }]}>
-          <Text style={[dynamicStyles.qualityLabel, { color: currentTheme.text }]}>Scan Quality:</Text>
+          <Text style={[dynamicStyles.qualityLabel, { color: currentTheme.text }]}>{uiI18n.t("ui.scanQuality")}</Text>
           <View style={styles.qualityButtons}>
             {(['low', 'medium', 'high'] as const).map(quality => (
               <TouchableOpacity
@@ -1744,10 +1691,8 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
           {/* Edge Detection Toggle */}
           <View style={styles.edgeDetectionToggle}>
             <View style={styles.edgeDetectionInfo}>
-              <Text style={[dynamicStyles.edgeDetectionLabel, { color: currentTheme.text }]}>🔍 Smart Edge Detection:</Text>
-              <Text style={[dynamicStyles.edgeDetectionDescription, { color: currentTheme.sub }]}>
-                AI-powered document boundary detection
-              </Text>
+              <Text style={[dynamicStyles.edgeDetectionLabel, { color: currentTheme.text }]}>{uiI18n.t("ui.smartEdgeDetection")}</Text>
+              <Text style={[dynamicStyles.edgeDetectionDescription, { color: currentTheme.sub }]}>{uiI18n.t("ui.aiPoweredDocumentBoundaryDetection")}</Text>
             </View>
             <TouchableOpacity
               style={[
@@ -1765,7 +1710,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 { color: currentTheme.text },
                 enableEdgeDetection && { color: currentTheme.text }
               ]}>
-                {enableEdgeDetection ? 'ON' : 'OFF'}
+                {enableEdgeDetection ? uiI18n.t("ui.on") : uiI18n.t("ui.off")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -1775,16 +1720,15 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         {isProcessingEdges && (
           <View style={dynamicStyles.processingIndicator}>
             <ActivityIndicator size="small" color={currentTheme.accent} />
-            <Text style={[dynamicStyles.processingText, { color: currentTheme.text }]}>🔍 AI-powered edge detection...</Text>
-            <Text style={[dynamicStyles.edgeDetectionDescription, { color: currentTheme.sub }]}>Analyzing document boundaries</Text>
+            <Text style={[dynamicStyles.processingText, { color: currentTheme.text }]}>{uiI18n.t("ui.aiPoweredEdgeDetection")}</Text>
+            <Text style={[dynamicStyles.edgeDetectionDescription, { color: currentTheme.sub }]}>{uiI18n.t("ui.analyzingDocumentBoundaries")}</Text>
           </View>
         )}
 
         {/* Edge Detection Confidence Indicator */}
         {edgeDetectionConfidence !== null && (
           <View style={dynamicStyles.confidenceIndicator}>
-            <Text style={[dynamicStyles.edgeDetectionLabel, { color: currentTheme.text }]}>
-              🎯 Detection Confidence: {Math.round(edgeDetectionConfidence * 100)}%
+            <Text style={[dynamicStyles.edgeDetectionLabel, { color: currentTheme.text }]}>{uiI18n.t("ui.detectionConfidence")}{Math.round(edgeDetectionConfidence * 100)}%
             </Text>
             <View style={dynamicStyles.confidenceBar}>
               <View 
@@ -1813,7 +1757,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
             ]}
           >
             <View style={styles.savedScansHeader}>
-              <Text style={[dynamicStyles.sectionTitle, { color: currentTheme.text }]}>💾 Saved Scans ({savedScans.length})</Text>
+              <Text style={[dynamicStyles.sectionTitle, { color: currentTheme.text }]}>{uiI18n.t("ui.savedScans")}{savedScans.length})</Text>
               <TouchableOpacity 
                 style={[styles.toggleButton, { backgroundColor: currentTheme.chip }]}
                 onPress={() => {
@@ -1822,7 +1766,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 }}
               >
                 <Text style={[styles.toggleButtonText, { color: currentTheme.text }]}>
-                  {showSavedScans ? 'Hide' : 'Show'}
+                  {showSavedScans ? uiI18n.t("ui.hide") : uiI18n.t("ui.show")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1835,7 +1779,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                       <Text style={[dynamicStyles.savedScanTitle, { color: currentTheme.accent }]}>{scan.name}</Text>
                       <View style={[dynamicStyles.ocrResultBadge, { backgroundColor: currentTheme.chip }]}>
                         <Text style={[dynamicStyles.savedScanBadgeText, { color: currentTheme.text }]}>
-                          {scan.pageCount} page{scan.pageCount > 1 ? 's' : ''}
+                          {scan.pageCount}{uiI18n.t("ui.page_e7cfb4")}{scan.pageCount > 1 ? uiI18n.t("reminders.saturdayShort") : ''}
                         </Text>
                       </View>
                     </View>
@@ -1849,19 +1793,19 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                         style={[dynamicStyles.savedScanActionButton, { backgroundColor: currentTheme.accent }]}
                         onPress={() => loadSavedScan(scan)}
                       >
-                        <Text style={[dynamicStyles.savedScanActionButtonText, { color: currentTheme.text }]}>📄 Load</Text>
+                        <Text style={[dynamicStyles.savedScanActionButtonText, { color: currentTheme.text }]}>{uiI18n.t("ui.load")}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity 
                         style={[dynamicStyles.savedScanActionButton, { backgroundColor: '#dc2626' }]}
                         onPress={() => {
                           triggerHaptic('heavy');
                           Alert.alert(
-                            '🗑️ Delete Scan',
-                            `Are you sure you want to delete "${scan.name}"? This cannot be undone.`,
+                            uiI18n.t("ui.deleteScan"),
+                            uiI18n.t("ui.areYouSureYouWantToDeleteValueThisCannotBeUndone", { value1: scan.name }),
                             [
-                              { text: 'Cancel', style: 'cancel' },
+                              { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
                               { 
-                                text: 'Delete', 
+                                text: uiI18n.t("ai.delete"), 
                                 style: 'destructive',
                                 onPress: () => deleteSavedScan(scan.id)
                               }
@@ -1869,7 +1813,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                           );
                         }}
                       >
-                        <Text style={[dynamicStyles.savedScanActionButtonText, { color: '#ffffff' }]}>🗑️ Delete</Text>
+                        <Text style={[dynamicStyles.savedScanActionButtonText, { color: '#ffffff' }]}>{uiI18n.t("ai.delete")}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -1890,12 +1834,12 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               }
             ]}
           >
-            <Text style={dynamicStyles.nameInputLabel}>📝 Document Name:</Text>
+            <Text style={dynamicStyles.nameInputLabel}>{uiI18n.t("medicalDocuments.documentName")}</Text>
             <TextInput
               style={dynamicStyles.nameInput}
               value={scanName}
               onChangeText={setScanName}
-              placeholder="Enter document name"
+              placeholder={uiI18n.t("medicalDocuments.enterDocumentName")}
               placeholderTextColor={currentTheme.sub}
               autoFocus
             />
@@ -1903,7 +1847,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               style={dynamicStyles.nameInputButton}
               onPress={() => setShowNameInput(false)}
             >
-              <Text style={dynamicStyles.nameInputButtonText}>Done</Text>
+              <Text style={dynamicStyles.nameInputButtonText}>{uiI18n.t("ui.done")}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -1919,8 +1863,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               }
             ]}
           >
-            <Text style={dynamicStyles.sectionTitle}>
-              📄 Pages ({pages.length})
+            <Text style={dynamicStyles.sectionTitle}>{uiI18n.t("ui.pages_0d7310")}{pages.length})
             </Text>
             <View style={styles.pagesGrid}>
               {pages.map((uri, index) => renderPageItem(uri, index))}
@@ -1941,7 +1884,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
           >
             {/* Language Selector */}
             <View style={dynamicStyles.languageSelector}>
-              <Text style={dynamicStyles.languageLabel}>🌐 OCR Language:</Text>
+              <Text style={dynamicStyles.languageLabel}>{uiI18n.t("ui.ocrLanguage")}</Text>
               <View style={styles.languageButtons}>
                 {['en', 'es', 'zh'].map(lang => (
                   <TouchableOpacity
@@ -1959,7 +1902,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                       dynamicStyles.languageButtonText,
                       selectedLanguage === lang && styles.languageButtonTextActive
                     ]}>
-                      {lang === 'en' ? 'English' : lang === 'es' ? 'Español' : '中文'}
+                      {lang === 'en' ? uiI18n.t("settings.languages.en") : lang === 'es' ? uiI18n.t("settings.languages.es") : '中文'}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -1994,12 +1937,10 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               {isProcessing ? (
                 <View style={styles.processingContainer}>
                   <ActivityIndicator color={currentTheme.accent} size="small" />
-                  <Text style={dynamicStyles.processingText}>Processing...</Text>
+                  <Text style={dynamicStyles.processingText}>{uiI18n.t("adminProfile.processing")}</Text>
                 </View>
               ) : (
-                <Text style={dynamicStyles.controlButtonText}>
-                  🔍 Run OCR ({pages.length} pages)
-                </Text>
+                <Text style={dynamicStyles.controlButtonText}>{uiI18n.t("ui.runOcr")}{pages.length}{uiI18n.t("ui.pages_2c7ebc")}</Text>
               )}
             </TouchableOpacity>
 
@@ -2007,14 +1948,14 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               style={[dynamicStyles.controlButton, dynamicStyles.primaryButton]}
               onPress={saveScan}
             >
-              <Text style={dynamicStyles.primaryButtonText}>💾 Save Scan</Text>
+              <Text style={dynamicStyles.primaryButtonText}>{uiI18n.t("ui.saveScan")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[dynamicStyles.controlButton, dynamicStyles.secondaryButton]}
               onPress={exportPdf}
             >
-              <Text style={dynamicStyles.secondaryButtonText}>📄 Export PDF</Text>
+              <Text style={dynamicStyles.secondaryButtonText}>{uiI18n.t("documents.exportPDF")}</Text>
             </TouchableOpacity>
 
             {/* PDF Export Options */}
@@ -2025,18 +1966,17 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 triggerHaptic('light');
               }}
             >
-              <Text style={dynamicStyles.infoButtonText}>
-                ⚙️ PDF Options {showPdfOptions ? '▼' : '▶'}
+              <Text style={dynamicStyles.infoButtonText}>{uiI18n.t("ui.pdfOptions")}{showPdfOptions ? '▼' : '▶'}
               </Text>
             </TouchableOpacity>
 
             {showPdfOptions && (
               <View style={dynamicStyles.pdfOptionsContainer}>
-                <Text style={dynamicStyles.pdfOptionsTitle}>📐 PDF Export Settings</Text>
+                <Text style={dynamicStyles.pdfOptionsTitle}>{uiI18n.t("ui.pdfExportSettings")}</Text>
                 
                 {/* Layout Selection */}
                 <View style={dynamicStyles.pdfOptionRow}>
-                  <Text style={dynamicStyles.pdfOptionLabel}>Layout:</Text>
+                  <Text style={dynamicStyles.pdfOptionLabel}>{uiI18n.t("ui.layout")}</Text>
                   <View style={dynamicStyles.pdfOptionButtons}>
                     {(['portrait', 'landscape'] as const).map(layout => (
                       <TouchableOpacity
@@ -2054,7 +1994,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                           dynamicStyles.pdfOptionButtonText,
                           pdfLayout === layout && styles.pdfOptionButtonTextActive
                         ]}>
-                          {layout === 'portrait' ? '📱 Portrait' : '🖼️ Landscape'}
+                          {layout === uiI18n.t("ui.portrait") ? uiI18n.t("ui.portrait_10826b") : uiI18n.t("ui.landscape")}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -2063,7 +2003,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
                 {/* Margins Selection */}
                 <View style={dynamicStyles.pdfOptionRow}>
-                  <Text style={dynamicStyles.pdfOptionLabel}>Margins:</Text>
+                  <Text style={dynamicStyles.pdfOptionLabel}>{uiI18n.t("ui.margins")}</Text>
                   <View style={dynamicStyles.pdfOptionButtons}>
                     {[10, 15, 20, 25, 30].map(margin => (
                       <TouchableOpacity
@@ -2090,7 +2030,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
 
                 {/* Font Size Selection */}
                 <View style={dynamicStyles.pdfOptionRow}>
-                  <Text style={dynamicStyles.pdfOptionLabel}>Font Size:</Text>
+                  <Text style={dynamicStyles.pdfOptionLabel}>{uiI18n.t("ui.fontSize")}</Text>
                   <View style={dynamicStyles.pdfOptionButtons}>
                     {[10, 11, 12, 14, 16].map(size => (
                       <TouchableOpacity
@@ -2115,9 +2055,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                   </View>
                 </View>
 
-                <Text style={dynamicStyles.pdfOptionsInfo}>
-                  💡 These settings will apply to your next PDF export
-                </Text>
+                <Text style={dynamicStyles.pdfOptionsInfo}>{uiI18n.t("ui.theseSettingsWillApplyToYourNextPdfExport")}</Text>
               </View>
             )}
 
@@ -2126,7 +2064,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 style={[dynamicStyles.controlButton, dynamicStyles.infoButton]}
                 onPress={exportOcrText}
               >
-                <Text style={dynamicStyles.infoButtonText}>📝 Export OCR Text</Text>
+                <Text style={dynamicStyles.infoButtonText}>{uiI18n.t("ui.exportOcrText")}</Text>
               </TouchableOpacity>
             )}
 
@@ -2135,12 +2073,12 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
               onPress={() => {
                 triggerHaptic('heavy');
                 Alert.alert(
-                  '🗑️ Clear All Pages',
-                  'Are you sure you want to remove all pages? This cannot be undone.',
+                  uiI18n.t("ui.clearAllPages"),
+                  uiI18n.t("ui.areYouSureYouWantToRemoveAllPagesThisCannotBeUndone"),
                   [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
                     { 
-                      text: 'Clear All', 
+                      text: uiI18n.t("ui.clearAll"), 
                       style: 'destructive',
                       onPress: () => {
                         setPages([]);
@@ -2155,7 +2093,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 );
               }}
             >
-              <Text style={dynamicStyles.dangerButtonText}>🗑️ Clear All</Text>
+              <Text style={dynamicStyles.dangerButtonText}>{uiI18n.t("ui.clearAll_43626b")}</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -2169,7 +2107,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       {isEditing && selectedPage !== null && (
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
-            <Text style={dynamicStyles.modalTitle}>✏️ Edit OCR Text - Page {selectedPage + 1}</Text>
+            <Text style={dynamicStyles.modalTitle}>{uiI18n.t("ui.editOcrTextPage")}{selectedPage + 1}</Text>
             <TextInput
               style={dynamicStyles.modalTextInput}
               value={editingText[selectedPage]}
@@ -2179,7 +2117,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 setEditingText(newEditingText);
               }}
               multiline
-              placeholder="Edit the extracted text..."
+              placeholder={uiI18n.t("ui.editTheExtractedText")}
               placeholderTextColor={currentTheme.sub}
             />
             <View style={styles.modalActions}>
@@ -2191,13 +2129,13 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                   triggerHaptic('light');
                 }}
               >
-                <Text style={dynamicStyles.modalButtonText}>Cancel</Text>
+                <Text style={dynamicStyles.modalButtonText}>{uiI18n.t("healthAnalytics.cancel")}</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSave]}
                 onPress={saveOcrEdit}
               >
-                <Text style={dynamicStyles.modalButtonText}>Save</Text>
+                <Text style={dynamicStyles.modalButtonText}>{uiI18n.t("medications.save")}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView></View>
@@ -2208,10 +2146,8 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       {showNewScanModal && (
         <View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.newScanModalContent}>
-            <Text style={dynamicStyles.newScanModalTitle}>🆕 Start New Scan</Text>
-            <Text style={dynamicStyles.newScanModalSubtitle}>
-              Choose how you'd like to add pages to your new scan
-            </Text>
+            <Text style={dynamicStyles.newScanModalTitle}>{uiI18n.t("ui.startNewScan")}</Text>
+            <Text style={dynamicStyles.newScanModalSubtitle}>{uiI18n.t("ui.chooseHowYouDLikeToAddPagesToYourNewScan")}</Text>
             
             <View style={dynamicStyles.newScanModalButtons}>
               <TouchableOpacity 
@@ -2223,8 +2159,8 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 }}
               >
                 <Text style={styles.newScanModalButtonIcon}>📷</Text>
-                <Text style={dynamicStyles.newScanModalButtonText}>Camera</Text>
-                <Text style={dynamicStyles.newScanModalButtonSubtext}>Take a photo</Text>
+                <Text style={dynamicStyles.newScanModalButtonText}>{uiI18n.t("ui.camera")}</Text>
+                <Text style={dynamicStyles.newScanModalButtonSubtext}>{uiI18n.t("ui.takeAPhoto")}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -2236,8 +2172,8 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 }}
               >
                 <Text style={styles.newScanModalButtonIcon}>🖼️</Text>
-                <Text style={dynamicStyles.newScanModalButtonText}>Gallery</Text>
-                <Text style={dynamicStyles.newScanModalButtonSubtext}>Select from photos</Text>
+                <Text style={dynamicStyles.newScanModalButtonText}>{uiI18n.t("ui.gallery")}</Text>
+                <Text style={dynamicStyles.newScanModalButtonSubtext}>{uiI18n.t("ui.selectFromPhotos")}</Text>
               </TouchableOpacity>
 
             </View>
@@ -2249,7 +2185,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                 triggerHaptic('light');
               }}
             >
-              <Text style={dynamicStyles.newScanModalCancelText}>Cancel</Text>
+              <Text style={dynamicStyles.newScanModalCancelText}>{uiI18n.t("healthAnalytics.cancel")}</Text>
             </TouchableOpacity>
           </View>
         </View>

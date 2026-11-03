@@ -1,12 +1,13 @@
+import uiI18n from "../i18n";
 // Keep helper closures tied to the render that created them.
 export function creategetInitialAIMessage(getScope) {
   return (selectedDoctor) => {
     const { S } = getScope();
 
   const introductions = {
-    'alfred': S.drAlfredIntro || "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
-    'mimi': S.drMimiIntro || "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
-    'pawlmer': S.pawlmerIntro || "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor."
+    'alfred': S.drAlfredIntro || uiI18n.t("ai.drAlfredIntro"),
+    'mimi': S.drMimiIntro || uiI18n.t("ai.drMimiIntro"),
+    'pawlmer': S.pawlmerIntro || uiI18n.t("ai.pawlmerIntro")
   };
   return introductions[selectedDoctor] || introductions['alfred'];
 };
@@ -21,11 +22,7 @@ export function createaddCatExpressions(getScope) {
   }
 
   // Cat expressions based on language
-  const catExpressions = {
-    'en': ['Purr...', 'Meow!', '🐱', 'Purr-fect!', 'Feline-ly speaking...', 'Cat-egorically speaking...'],
-    'es': ['Ronroneo...', '¡Miau!', '🐱', '¡Purr-fecto!', 'Felino-hablando...', 'Categoría-mente hablando...'],
-    'zh': ['呼噜...', '喵！', '🐱', '完美！', '猫科医生说...', '从猫的角度...']
-  };
+  const catExpressions = { get en() { return uiI18n.t("localized.appHelpers.catExpressions", { lng: 'en', returnObjects: true }); }, get es() { return uiI18n.t("localized.appHelpers.catExpressions", { lng: 'es', returnObjects: true }); }, get zh() { return uiI18n.t("localized.appHelpers.catExpressions", { lng: 'zh', returnObjects: true }); } };
 
   const expressions = catExpressions[lang] || catExpressions['en'];
   
@@ -52,10 +49,10 @@ export function creategetDoctorGreeting(getScope) {
     const {  } = getScope();
 
     const greetings = {
-      'Alfred': "I'm Alfred, an AI health-information assistant. I'm not a doctor. I can explain general health and medication topics.",
-      'Mimi': "I'm Mimi, an AI wellness assistant. I share general information, not medical advice.",
-      'Pawlmer': "I'm Pawlmer, an AI cat assistant. I make health information friendlier, but I'm not a doctor."
+      'Alfred': uiI18n.t("ai.drAlfredIntro"),
+      'Mimi': uiI18n.t("ai.drMimiIntro"),
+      'Pawlmer': uiI18n.t("ai.pawlmerIntro")
     };
-    return greetings[doctor] || greetings['Alfred'];
+    return greetings[doctor] || greetings[uiI18n.t("ai.drAlfred")];
   };
 }

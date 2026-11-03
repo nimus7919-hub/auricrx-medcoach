@@ -1,3 +1,4 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
 import { ScrollView } from 'react-native';
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useMemo } from 'react';
@@ -30,12 +31,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
   console.log('🌿 HerbsScreen - getCardTextColor:', getCardTextColor());
   
   // Create translation function from S object
-  const t = (key: string) => {
-    if (S && typeof S === 'object' && S[key]) {
-      return S[key];
-    }
-    return key; // fallback to key if translation not found
-  };
+  const { t } = useScreenTranslation();
 
   // Default theme if not provided
   const defaultTheme = {
@@ -92,24 +88,24 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
             
             <View style={styles.detailsContainer}>
               <View style={styles.detailRow}>
-                <DynamicText type="secondary" style={styles.detailLabel}>{t('origin')}:</DynamicText>
+                <DynamicText type="secondary" style={styles.detailLabel}>{t("herbs.details.origin")}:</DynamicText>
                 <DynamicText type="card" style={styles.detailValue}>
                   {selectedHerb.details.origin[currentLang]}
                 </DynamicText>
               </View>
               
               <View style={styles.detailRow}>
-                <DynamicText type="secondary" style={styles.detailLabel}>{t('poisonous')}:</DynamicText>
+                <DynamicText type="secondary" style={styles.detailLabel}>{t("herbs.details.poisonous")}:</DynamicText>
                 <DynamicText type="card" style={[
                   styles.detailValue,
                   { color: selectedHerb.details.poisonous ? '#EF4444' : '#10B981' }
                 ]}>
-                  {selectedHerb.details.poisonous ? t('yes') : t('no')}
+                  {selectedHerb.details.poisonous ? t("ai.yes") : t("ai.no")}
                 </DynamicText>
               </View>
               
               <View style={styles.detailRow}>
-                <DynamicText type="secondary" style={styles.detailLabel}>{t('summary')}:</DynamicText>
+                <DynamicText type="secondary" style={styles.detailLabel}>{t("ai.summary")}:</DynamicText>
                 <DynamicText type="card" style={styles.detailSummary}>
                   {selectedHerb.details.summary[currentLang]}
                 </DynamicText>
@@ -137,7 +133,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
             resizeMode="contain"
           />
         </TouchableOpacity>
-        <DynamicText type="primary" style={[styles.title, { position: 'absolute', left: '50%', transform: [{ translateX: -50 }] }]}>{t('herbs')}</DynamicText>
+        <DynamicText type="primary" style={[styles.title, { position: 'absolute', left: '50%', transform: [{ translateX: -50 }] }]}>{t("herbs.title")}</DynamicText>
         <View style={styles.placeholder} />
       </View>
 
@@ -166,7 +162,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
               textDecorationLine: 'none',
               minHeight: 48 // Ensure minimum height
             }}
-            placeholder={t('searchHerbs')}
+            placeholder={t("herbs.searchHerbs")}
             placeholderTextColor={getCardTextColor() + '80'} // Use theme-based placeholder color
             value={searchQuery}
             onChangeText={(text) => {
@@ -188,7 +184,7 @@ export default function HerbsScreen({ onClose, theme, S, currentLang = 'en' }: H
 
         {filteredHerbs.length === 0 ? (
           <View style={styles.emptyState}>
-            <DynamicText type="secondary" style={styles.emptyStateText}>{t('noHerbsFound')}</DynamicText>
+            <DynamicText type="secondary" style={styles.emptyStateText}>{t("herbs.noHerbsFound")}</DynamicText>
           </View>
         ) : (
           <FlatList keyboardShouldPersistTaps="handled"

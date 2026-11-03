@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 // src/api/api.medical-ai.js
 import { API_BASE } from "../config/api";
 
@@ -17,6 +18,6 @@ export async function askMedicalAI(message) {
   }
 
   const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "API error");
+  if (!data.ok) throw new Error(data.error || uiI18n.t("ui.apiError"));
   return data.reply;
 }

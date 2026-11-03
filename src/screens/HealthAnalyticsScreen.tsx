@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -88,15 +91,11 @@ interface HealthReport {
 }
 
 export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnalyticsScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
   // Create translation function from S object
-  const t = (key: string) => {
-    if (S && typeof S === 'object' && S[key]) {
-      return S[key];
-    }
-    return key; // fallback to key if translation not found
-  };
+  const { t } = useScreenTranslation();
   
   // Default theme if not provided
   const defaultTheme = {
@@ -551,17 +550,17 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
   };
 
   const metricTypes: { value: MetricType; label: string; unit: string; icon: string; alternateUnits?: string[] }[] = [
-    { value: 'blood_pressure', label: t('bloodPressure'), unit: 'mmHg', icon: '🩸' },
-    { value: 'weight', label: t('weight'), unit: 'kg', icon: '⚖️', alternateUnits: ['kg', 'lbs'] },
-    { value: 'blood_sugar', label: t('bloodSugar'), unit: 'mg/dL', icon: '🍯' },
-    { value: 'heart_rate', label: t('heartRate'), unit: 'bpm', icon: '❤️' },
-    { value: 'temperature', label: t('temperature'), unit: '°C', icon: '🌡️', alternateUnits: ['°C', '°F'] },
-    { value: 'oxygen_saturation', label: t('oxygenSaturation'), unit: '%', icon: '🫁' },
-    { value: 'pain_level', label: t('painLevel'), unit: '/10', icon: '😣' },
-    { value: 'mood', label: t('mood'), unit: '/5', icon: '😊' },
-    { value: 'energy_level', label: t('energyLevel'), unit: '/5', icon: '⚡' },
-    { value: 'sleep_hours', label: t('sleepHours'), unit: 'hours', icon: '😴' },
-    { value: 'steps', label: t('steps'), unit: 'steps', icon: '👟' },
+    { value: 'blood_pressure', label: t("healthAnalytics.bloodPressure"), unit: 'mmHg', icon: '🩸' },
+    { value: 'weight', label: t("healthAnalytics.weight"), unit: 'kg', icon: '⚖️', alternateUnits: ['kg', 'lbs'] },
+    { value: 'blood_sugar', label: t("healthAnalytics.bloodSugar"), unit: 'mg/dL', icon: '🍯' },
+    { value: 'heart_rate', label: t("healthAnalytics.heartRate"), unit: 'bpm', icon: '❤️' },
+    { value: 'temperature', label: t("healthAnalytics.temperature"), unit: '°C', icon: '🌡️', alternateUnits: ['°C', '°F'] },
+    { value: 'oxygen_saturation', label: t("healthAnalytics.oxygenSaturation"), unit: '%', icon: '🫁' },
+    { value: 'pain_level', label: t("healthAnalytics.painLevel"), unit: '/10', icon: '😣' },
+    { value: 'mood', label: t("healthAnalytics.mood"), unit: '/5', icon: '😊' },
+    { value: 'energy_level', label: t("healthAnalytics.energyLevel"), unit: '/5', icon: '⚡' },
+    { value: 'sleep_hours', label: t("healthAnalytics.sleepHours"), unit: 'hours', icon: '😴' },
+    { value: 'steps', label: t("healthAnalytics.steps"), unit: 'steps', icon: '👟' },
   ];
 
   // Load health data from AsyncStorage on mount
@@ -596,14 +595,14 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
 
   const addMetric = async () => {
     if (!metricValue) {
-      showCustomAlertMsg(t('error'), t('pleaseEnterValue'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.pleaseEnterValue"), 'error');
       return;
     }
 
     try {
       const value = parseFloat(metricValue);
       if (isNaN(value)) {
-        showCustomAlertMsg(t('error'), t('pleaseEnterValidNumber'), 'error');
+        showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.pleaseEnterValidNumber"), 'error');
         return;
       }
 
@@ -624,10 +623,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       setMetricNotes('');
       setShowAddMetricModal(false);
       triggerHaptic('medium');
-      showCustomAlertMsg(t('success'), t('healthMetricAdded'), 'success');
+      showCustomAlertMsg(t("healthAnalytics.success"), t("healthAnalytics.healthMetricAdded"), 'success');
     } catch (error) {
       console.error('Failed to add metric:', error);
-      showCustomAlertMsg(t('error'), t('failedToAddHealthMetric'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.failedToAddHealthMetric"), 'error');
     }
   };
 
@@ -641,7 +640,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
     });
     
     if (validMetrics.length === 0) {
-      showCustomAlertMsg(t('error'), t('pleaseEnterValue'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.pleaseEnterValue"), 'error');
       return;
     }
 
@@ -654,14 +653,14 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           const systolic = parseFloat(metric.systolic || '0');
           const diastolic = parseFloat(metric.diastolic || '0');
           if (isNaN(systolic) || isNaN(diastolic)) {
-            throw new Error('Invalid blood pressure values');
+            throw new Error(uiI18n.t("ui.invalidBloodPressureValues"));
           }
           // Store as "systolic/diastolic" format, but use systolic as the numeric value for sorting
           value = systolic;
         } else {
           value = parseFloat(metric.value);
           if (isNaN(value)) {
-            throw new Error('Invalid value');
+            throw new Error(uiI18n.t("ui.invalidValue"));
           }
         }
         
@@ -685,10 +684,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       setMultipleMetrics([{ id: '1', type: 'blood_pressure', value: '', systolic: '', diastolic: '', notes: '' }]);
       setShowAddMetricModal(false);
       triggerHaptic('medium');
-      showCustomAlertMsg(t('success'), `${validMetrics.length} ${t('healthMetricsAdded')}`, 'success');
+      showCustomAlertMsg(t("healthAnalytics.success"), `${validMetrics.length} ${t("healthAnalytics.healthMetricsAdded")}`, 'success');
     } catch (error) {
       console.error('Failed to add metrics:', error);
-      showCustomAlertMsg(t('error'), t('failedToAddHealthMetric'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.failedToAddHealthMetric"), 'error');
     }
   };
 
@@ -713,7 +712,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
 
   const addSideEffect = async () => {
     if (!sideEffectSymptom) {
-      showCustomAlertMsg(t('error'), t('pleaseEnterSymptom'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.pleaseEnterSymptom"), 'error');
       return;
     }
 
@@ -722,7 +721,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       const newSideEffect: SideEffect = {
         id: `side_effect_${Date.now()}`,
         medicationId: 'general',
-        medicationName: 'General',
+        medicationName: uiI18n.t("ui.general"),
         effect: sideEffectSymptom,
         severity: sideEffectSeverity === 1 ? 'mild' : sideEffectSeverity === 2 ? 'moderate' : 'severe',
         duration: 0,
@@ -736,10 +735,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       setSideEffectSeverity(1);
       setShowAddSideEffectModal(false);
       triggerHaptic('medium');
-      showCustomAlertMsg(t('success'), t('sideEffectRecorded'), 'success');
+      showCustomAlertMsg(t("healthAnalytics.success"), t("healthAnalytics.sideEffectRecorded"), 'success');
     } catch (error) {
       console.error('Failed to add side effect:', error);
-      showCustomAlertMsg(t('error'), t('failedToRecordSideEffect'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.failedToRecordSideEffect"), 'error');
     }
   };
 
@@ -747,7 +746,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
     // Validate all side effects
     const validSideEffects = multipleSideEffects.filter(effect => effect.symptom.trim());
     if (validSideEffects.length === 0) {
-      showCustomAlertMsg(t('error'), t('pleaseEnterSymptom'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.pleaseEnterSymptom"), 'error');
       return;
     }
 
@@ -755,7 +754,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       const newSideEffects: SideEffect[] = validSideEffects.map(effect => ({
         id: `side_effect_${Date.now()}_${Math.random()}`,
         medicationId: 'general',
-        medicationName: 'General',
+        medicationName: uiI18n.t("ui.general"),
         effect: effect.symptom,
         severity: effect.severity === 1 ? 'mild' : effect.severity === 2 ? 'moderate' : 'severe',
         duration: 0,
@@ -767,10 +766,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       setMultipleSideEffects([{ id: '1', symptom: '', severity: 1, notes: '' }]);
       setShowAddSideEffectModal(false);
       triggerHaptic('medium');
-      showCustomAlertMsg(t('success'), `${validSideEffects.length} ${t('sideEffectsRecorded')}`, 'success');
+      showCustomAlertMsg(t("healthAnalytics.success"), `${validSideEffects.length} ${t("healthAnalytics.sideEffectsRecorded")}`, 'success');
     } catch (error) {
       console.error('Failed to add side effects:', error);
-      showCustomAlertMsg(t('error'), t('failedToRecordSideEffect'), 'error');
+      showCustomAlertMsg(t("healthAnalytics.error"), t("healthAnalytics.failedToRecordSideEffect"), 'error');
     }
   };
 
@@ -796,8 +795,8 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
   const exportMetricsToPDF = async () => {
     if (metrics.length === 0) {
       showCustomAlertMsg(
-        t('noMetricsToExport') || 'No Metrics to Export',
-        t('noMetricsMessage') || 'There are no health metrics to export.',
+        t("healthAnalytics.noMetricsToExport") || uiI18n.t("healthAnalytics.noMetricsToExport"),
+        t("healthAnalytics.noMetricsMessage") || uiI18n.t("ui.thereAreNoHealthMetricsToExport"),
         'error'
       );
       return;
@@ -816,9 +815,9 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         return `
           <div class="metric-item">
             <h3>${index + 1}. ${metricType?.icon || ''} ${metricType?.label || metric.type}</h3>
-            <p><strong>${t('value')}:</strong> ${displayValue}</p>
-            <p><strong>${t('date')}:</strong> ${new Date(metric.timestamp).toLocaleDateString()} ${new Date(metric.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-            ${metric.notes ? `<p><strong>${t('notes')}:</strong> ${metric.notes}</p>` : ''}
+            <p><strong>${t("healthAnalytics.value")}:</strong> ${displayValue}</p>
+            <p><strong>${t("ai.date")}:</strong> ${new Date(metric.timestamp).toLocaleDateString()} ${new Date(metric.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            ${metric.notes ? `<p><strong>${t("ai.notes")}:</strong> ${metric.notes}</p>` : ''}
           </div>
         `;
       }).join('');
@@ -828,7 +827,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         <html>
           <head>
             <meta charset="utf-8">
-            <title>${t('healthMetrics') || 'Health Metrics'}</title>
+            <title>${t("healthAnalytics.healthMetrics") || uiI18n.t("healthAnalytics.healthMetrics")}</title>
             <style>
               body { 
                 font-family: Arial, sans-serif; 
@@ -876,16 +875,16 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           </head>
           <body>
             <div class="header">
-              <h1 class="title">${t('healthMetrics') || 'Health Metrics'}</h1>
-              <p class="subtitle">${t('generatedOn') || 'Generated on'} ${currentDate}</p>
-              <p class="subtitle">${t('totalMetrics') || 'Total Metrics'}: ${metrics.length}</p>
+              <h1 class="title">${t("healthAnalytics.healthMetrics") || uiI18n.t("healthAnalytics.healthMetrics")}</h1>
+              <p class="subtitle">${t("ai.generatedOn") || uiI18n.t("ai.generatedOn")} ${currentDate}</p>
+              <p class="subtitle">${t("healthAnalytics.totalMetrics") || uiI18n.t("ui.totalMetrics")}: ${metrics.length}</p>
             </div>
 
             ${metricsHtml}
 
             <div class="footer">
-              <p>AuricRx - ${t('healthMetrics') || 'Health Metrics'}</p>
-              <p>${t('consultHealthcareProvider') || 'Please consult your healthcare provider for medical advice.'}</p>
+              <p>AuricRx - ${t("healthAnalytics.healthMetrics") || uiI18n.t("healthAnalytics.healthMetrics")}</p>
+              <p>${t("ai.consultHealthcareProvider") || uiI18n.t("ui.pleaseConsultYourHealthcareProviderForMedicalAdvice")}</p>
             </div>
           </body>
         </html>
@@ -899,10 +898,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         await Promise.race([
           Sharing.shareAsync(uri, {
             mimeType: 'application/pdf',
-            dialogTitle: t('healthMetrics') || 'Health Metrics',
+            dialogTitle: t("healthAnalytics.healthMetrics") || uiI18n.t("healthAnalytics.healthMetrics"),
           }),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Share timeout')), 10000)
+            setTimeout(() => reject(new Error(uiI18n.t("ui.shareTimeout"))), 10000)
           )
         ]);
         console.log('✅ PDF share completed');
@@ -913,15 +912,15 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       
       triggerHaptic('medium');
       showCustomAlertMsg(
-        t('exportSuccessful') || 'Export Successful',
-        t('healthReportGenerated') || 'Your health report has been generated as a PDF and is ready for sharing.',
+        t("ai.exportSuccessful") || uiI18n.t("ai.exportSuccessful"),
+        t("healthAnalytics.healthReportGenerated") || uiI18n.t("ai.healthReportGenerated"),
         'success'
       );
     } catch (error) {
       console.error('Error exporting metrics:', error);
       showCustomAlertMsg(
-        t('exportFailed') || 'Export Failed',
-        t('failedToExportMetrics') || 'Failed to export health metrics. Please try again.',
+        t("ai.exportFailed") || uiI18n.t("ai.exportFailed"),
+        t("healthAnalytics.failedToExportMetrics") || uiI18n.t("ui.failedToExportHealthMetricsPleaseTryAgain"),
         'error'
       );
     }
@@ -952,20 +951,20 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
     // Handle string severity (SideEffect.medicationName)
     if (typeof severity === 'string') {
       switch (severity) {
-        case 'mild': return t('mild');
-        case 'moderate': return t('moderate');
-        case 'severe': return t('severe');
-        default: return t('unknown');
+        case 'mild': return t("healthAnalytics.mild");
+        case 'moderate': return t("healthAnalytics.moderate");
+        case 'severe': return t("healthAnalytics.severe");
+        default: return t("healthAnalytics.unknown");
       }
     }
     // Handle number severity (from multiple side effects form)
     switch (severity) {
-      case 1: return t('mild');
-      case 2: return t('moderate');
-      case 3: return t('moderateSevere');
-      case 4: return t('severe');
-      case 5: return t('verySevere');
-      default: return t('unknown');
+      case 1: return t("healthAnalytics.mild");
+      case 2: return t("healthAnalytics.moderate");
+      case 3: return t("healthAnalytics.moderateSevere");
+      case 4: return t("healthAnalytics.severe");
+      case 5: return t("healthAnalytics.verySevere");
+      default: return t("healthAnalytics.unknown");
     }
   };
 
@@ -984,25 +983,25 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
           style={{ width: 20, height: 20, marginRight: 8 }}
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('healthOverview')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("healthAnalytics.healthOverview")}</DynamicText>
       </View>
       
       <View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{metrics.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('metricsRecorded')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t("healthAnalytics.metricsRecorded")}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{overallAdherence.toFixed(0)}%</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('adherenceRate')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t("healthAnalytics.adherenceRate")}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{sideEffects.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('sideEffects')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t("healthAnalytics.sideEffects")}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{adherence.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('medications')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t("healthAnalytics.medications")}</DynamicText>
         </View>
       </View>
     </Animated.View>
@@ -1018,9 +1017,9 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📈 {t('recentHealthMetrics')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📈 {t("healthAnalytics.recentHealthMetrics")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('trackVitalSigns')}
+        {t("healthAnalytics.trackVitalSigns")}
       </DynamicText>
       
       {metrics.slice(0, 5).map(metric => {
@@ -1032,7 +1031,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 {metricType?.icon} {metricType?.label}
               </DynamicText>
               <DynamicText type="card" style={dynamicStyles.metricValue}>
-                {metric.type === 'blood_pressure' && metric.systolic && metric.diastolic
+                {metric.type === uiI18n.t("healthAnalytics.bloodPressure") && metric.systolic && metric.diastolic
                   ? `${metric.systolic}/${metric.diastolic} ${metric.unit}`
                   : `${metric.value} ${metric.unit}`}
               </DynamicText>
@@ -1046,7 +1045,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       
       {metrics.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noHealthMetrics')}
+          {t("healthAnalytics.noHealthMetrics")}
         </DynamicText>
       )}
       
@@ -1054,7 +1053,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         style={dynamicStyles.addButton}
         onPress={() => setShowAddMetricModal(true)}
       >
-        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t('addHealthMetric')}</DynamicText>
+        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t("healthAnalytics.addHealthMetric")}</DynamicText>
       </TouchableOpacity>
       
       {metrics.length > 0 && (
@@ -1063,7 +1062,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           onPress={() => setShowMetricsHistoryModal(true)}
         >
           <DynamicText type="card" style={[dynamicStyles.addButtonText, { color: '#ffffff' }]}>
-            {t('viewAllMetrics') || 'View All Metrics'}
+            {t("healthAnalytics.viewAllMetrics") || uiI18n.t("healthAnalytics.viewAllMetrics")}
           </DynamicText>
         </TouchableOpacity>
       )}
@@ -1085,10 +1084,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
           style={{ width: 20, height: 20, marginRight: 8 }}
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('medicationAdherence')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("healthAnalytics.medicationAdherence")}</DynamicText>
       </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('trackMedicationSchedule')}
+        {t("healthAnalytics.trackMedicationSchedule")}
       </DynamicText>
       
       {Array.from(adherence.reduce((groups, dose) => {
@@ -1108,14 +1107,14 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
             <DynamicText type="card" style={dynamicStyles.adherenceRate}>{(100 * med.takenDoses / med.totalDoses).toFixed(0)}%</DynamicText>
           </View>
           <DynamicText type="card" style={dynamicStyles.adherenceDetails}>
-            {med.takenDoses} {t('taken')} • {med.missedDoses} {t('missed')}
+            {med.takenDoses} {t("healthAnalytics.taken")} • {med.missedDoses} {t("healthAnalytics.missed")}
           </DynamicText>
         </View>
       ))}
       
       {adherence.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noAdherenceData')}
+          {t("healthAnalytics.noAdherenceData")}
         </DynamicText>
       )}
     </Animated.View>
@@ -1136,10 +1135,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
           style={{ width: 20, height: 20, marginRight: 8 }}
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('sideEffectsMonitoring')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("healthAnalytics.sideEffectsMonitoring")}</DynamicText>
       </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('trackSideEffects')}
+        {t("healthAnalytics.trackSideEffects")}
       </DynamicText>
       
       {sideEffects.slice(0, 5).map(sideEffect => (
@@ -1156,15 +1155,15 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
             </View>
           </View>
           <DynamicText type="card" style={dynamicStyles.sideEffectDetails}>
-            {sideEffect.medicationName} • {t('started')} {new Date(sideEffect.reportedAt).toLocaleDateString()}
-            {sideEffect.notes && ` • ${sideEffect.notes}`}
+            {sideEffect.medicationName} • {t("healthAnalytics.started")} {new Date(sideEffect.reportedAt).toLocaleDateString()}
+            {sideEffect.notes && uiI18n.t("healthAnalytics.value", { value1: sideEffect.notes })}
           </DynamicText>
         </View>
       ))}
       
       {sideEffects.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noSideEffectsRecorded')}
+          {t("healthAnalytics.noSideEffectsRecorded")}
         </DynamicText>
       )}
       
@@ -1172,7 +1171,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
         style={dynamicStyles.addButton}
         onPress={() => setShowAddSideEffectModal(true)}
       >
-        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t('recordSideEffect')}</DynamicText>
+        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t("healthAnalytics.recordSideEffect")}</DynamicText>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -1223,11 +1222,11 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 style={{ width: 24, height: 24, marginRight: 8 }}
               />
               <DynamicText type="primary" style={styles.title}>
-                {t('healthAnalytics')}
+                {t("healthAnalytics.healthAnalytics")}
               </DynamicText>
             </View>
             <DynamicText type="secondary" style={styles.subtitle}>
-              {t('trackHealthMetrics')}
+              {t("healthAnalytics.trackHealthMetrics")}
             </DynamicText>
           </Animated.View>
 
@@ -1254,7 +1253,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
       >
         <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📈 {t('addHealthMetric')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📈 {t("healthAnalytics.addHealthMetric")}</DynamicText>
             
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
@@ -1265,7 +1264,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 <View key={metric.id} style={dynamicStyles.metricEntry}>
                   <View style={dynamicStyles.metricEntryHeader}>
                     <DynamicText type="card" style={dynamicStyles.metricEntryTitle}>
-                      {t('addHealthMetric').replace('Add ', '')} {index + 1}
+                      {t("healthAnalytics.addHealthMetric").replace(uiI18n.t("medications.add"), '')} {index + 1}
                     </DynamicText>
                     {multipleMetrics.length > 1 && (
                       <TouchableOpacity
@@ -1278,7 +1277,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   </View>
 
                   <View style={dynamicStyles.inputGroup}>
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('metricType')}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.metricType")}</DynamicText>
                     <TouchableOpacity
                       style={dynamicStyles.pickerButton}
                       onPress={() => {
@@ -1293,13 +1292,13 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                     </TouchableOpacity>
                   </View>
 
-                  {metric.type === 'blood_pressure' ? (
+                  {metric.type === uiI18n.t("healthAnalytics.bloodPressure") ? (
                     <>
                       <View style={dynamicStyles.inputGroup}>
-                        <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('systolic') || 'Systolic'}</DynamicText>
+                        <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.systolic") || uiI18n.t("healthAnalytics.systolic")}</DynamicText>
                         <TextInput
                           style={dynamicStyles.textInput}
-                          placeholder={t('enterSystolic') || 'e.g., 120'}
+                          placeholder={t("healthAnalytics.enterSystolic") || uiI18n.t("healthAnalytics.enterSystolic")}
                           placeholderTextColor="#ffffff80"
                           value={metric.systolic || ''}
                           onChangeText={(value) => updateMetricEntry(metric.id, 'systolic', value)}
@@ -1307,10 +1306,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                         />
                       </View>
                       <View style={dynamicStyles.inputGroup}>
-                        <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('diastolic') || 'Diastolic'}</DynamicText>
+                        <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.diastolic") || uiI18n.t("healthAnalytics.diastolic")}</DynamicText>
                         <TextInput
                           style={dynamicStyles.textInput}
-                          placeholder={t('enterDiastolic') || 'e.g., 80'}
+                          placeholder={t("healthAnalytics.enterDiastolic") || uiI18n.t("healthAnalytics.enterDiastolic")}
                           placeholderTextColor="#ffffff80"
                           value={metric.diastolic || ''}
                           onChangeText={(value) => updateMetricEntry(metric.id, 'diastolic', value)}
@@ -1321,11 +1320,11 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   ) : (
                     <>
                       <View style={dynamicStyles.inputGroup}>
-                        <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('value')}</DynamicText>
+                        <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.value")}</DynamicText>
                         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                           <TextInput
                             style={[dynamicStyles.textInput, { flex: 1 }]}
-                            placeholder={t('enterValue')}
+                            placeholder={t("healthAnalytics.enterValue")}
                             placeholderTextColor="#ffffff80"
                             value={metric.value}
                             onChangeText={(value) => updateMetricEntry(metric.id, 'value', value)}
@@ -1371,10 +1370,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   )}
 
                   <View style={dynamicStyles.inputGroup}>
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.notesOptional")}</DynamicText>
                     <TextInput
                       style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                      placeholder={t('addAnyNotes')}
+                      placeholder={t("healthAnalytics.addAnyNotes")}
                       placeholderTextColor="#ffffff80"
                       value={metric.notes}
                       onChangeText={(value) => updateMetricEntry(metric.id, 'notes', value)}
@@ -1388,7 +1387,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 style={dynamicStyles.addAnotherButton}
                 onPress={addNewMetricEntry}
               >
-                <DynamicText type="card" style={dynamicStyles.addAnotherButtonText}>+ {t('add')}</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.addAnotherButtonText}>+ {t("common.add")}</DynamicText>
               </TouchableOpacity>
             </ScrollView>
 
@@ -1400,13 +1399,13 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   setMultipleMetrics([{ id: '1', type: 'blood_pressure', value: '', systolic: '', diastolic: '', notes: '' }]);
                 }}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("healthAnalytics.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={addMultipleMetrics}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('ok')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t("healthAnalytics.ok")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1427,7 +1426,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
                 style={{ width: 24, height: 24, marginRight: 8 }}
               />
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{t('recordSideEffect')}</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{t("healthAnalytics.recordSideEffect")}</DynamicText>
             </View>
             
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
@@ -1439,7 +1438,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 <View key={effect.id} style={dynamicStyles.metricEntry}>
                   <View style={dynamicStyles.metricEntryHeader}>
                     <DynamicText type="card" style={dynamicStyles.metricEntryTitle}>
-                      {t('recordSideEffect').replace('Record ', '')} {index + 1}
+                      {t("healthAnalytics.recordSideEffect").replace(uiI18n.t("appointments.record"), '')} {index + 1}
                     </DynamicText>
                     {multipleSideEffects.length > 1 && (
                       <TouchableOpacity
@@ -1452,10 +1451,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   </View>
 
                   <View style={dynamicStyles.inputGroup}>
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('symptom')}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.symptom")}</DynamicText>
                     <TextInput
                       style={dynamicStyles.textInput}
-                      placeholder={t('symptomPlaceholder')}
+                      placeholder={t("healthAnalytics.symptomPlaceholder")}
                       placeholderTextColor="#ffffff80"
                       value={effect.symptom}
                       onChangeText={(value) => updateSideEffectEntry(effect.id, 'symptom', value)}
@@ -1463,7 +1462,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   </View>
 
                   <View style={dynamicStyles.inputGroup}>
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('severity')}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.severity")}</DynamicText>
                     <TouchableOpacity
                       style={dynamicStyles.pickerButton}
                       onPress={() => {
@@ -1479,10 +1478,10 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   </View>
 
                   <View style={dynamicStyles.inputGroup}>
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.notesOptional")}</DynamicText>
                     <TextInput
                       style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                      placeholder={t('addAnyNotes')}
+                      placeholder={t("healthAnalytics.addAnyNotes")}
                       placeholderTextColor="#ffffff80"
                       value={effect.notes}
                       onChangeText={(value) => updateSideEffectEntry(effect.id, 'notes', value)}
@@ -1496,7 +1495,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 style={dynamicStyles.addAnotherButtonTop}
                 onPress={addNewSideEffectEntry}
               >
-                <DynamicText type="card" style={dynamicStyles.addAnotherButtonTextTop}>+ {t('add')}</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.addAnotherButtonTextTop}>+ {t("common.add")}</DynamicText>
               </TouchableOpacity>
             </ScrollView>
 
@@ -1508,13 +1507,13 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   setMultipleSideEffects([{ id: '1', symptom: '', severity: 1, notes: '' }]);
                 }}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("healthAnalytics.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={addMultipleSideEffects}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('ok')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t("healthAnalytics.ok")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1539,7 +1538,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
           }]}>
             <View style={styles.customAlertContent}>
               <DynamicText type="primary" style={styles.customAlertTitle}>
-                {t('severity')}
+                {t("healthAnalytics.severity")}
               </DynamicText>
               <View style={styles.severityOptions}>
                 <TouchableOpacity
@@ -1554,7 +1553,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   }}
                 >
                   <DynamicText type="card" style={styles.severityOptionText}>
-                    1 - {t('mild')}
+                    1 - {t("healthAnalytics.mild")}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1569,7 +1568,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   }}
                 >
                   <DynamicText type="card" style={styles.severityOptionText}>
-                    2 - {t('moderate')}
+                    2 - {t("healthAnalytics.moderate")}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1584,7 +1583,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   }}
                 >
                   <DynamicText type="card" style={styles.severityOptionText}>
-                    3 - {t('moderateSevere')}
+                    3 - {t("healthAnalytics.moderateSevere")}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1599,7 +1598,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   }}
                 >
                   <DynamicText type="card" style={styles.severityOptionText}>
-                    4 - {t('severe')}
+                    4 - {t("healthAnalytics.severe")}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1614,7 +1613,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   }}
                 >
                   <DynamicText type="card" style={styles.severityOptionText}>
-                    5 - {t('verySevere')}
+                    5 - {t("healthAnalytics.verySevere")}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
@@ -1625,7 +1624,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 onPress={() => setShowSeverityModal(false)}
               >
                 <DynamicText type="card" style={styles.customAlertButtonText}>
-                  {t('cancel')}
+                  {t("healthAnalytics.cancel")}
                 </DynamicText>
               </TouchableOpacity>
             </View>
@@ -1647,26 +1646,26 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
                 style={{ width: 24, height: 24, marginRight: 8 }}
               />
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{t('healthReportGenerated')}</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{t("healthAnalytics.healthReportGenerated")}</DynamicText>
             </View>
             
             {healthReportData && (
               <View style={dynamicStyles.reportContent}>
                 <View style={dynamicStyles.reportSection}>
-                  <DynamicText type="card" style={dynamicStyles.reportSectionTitle}>{t('summary')}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.reportSectionTitle}>{t("healthAnalytics.summary")}</DynamicText>
                   <DynamicText type="card" style={dynamicStyles.reportText}>
-                    • {healthReportData.summary.totalMetrics} {t('metricsRecorded').toLowerCase()}
+                    • {healthReportData.summary.totalMetrics} {t("healthAnalytics.metricsRecorded").toLowerCase()}
                   </DynamicText>
                   <DynamicText type="card" style={dynamicStyles.reportText}>
-                    • {healthReportData.summary.adherenceRate.toFixed(1)}% {t('adherenceRate').toLowerCase()}
+                    • {healthReportData.summary.adherenceRate.toFixed(1)}% {t("healthAnalytics.adherenceRate").toLowerCase()}
                   </DynamicText>
                   <DynamicText type="card" style={dynamicStyles.reportText}>
-                    • {healthReportData.summary.sideEffects} {t('sideEffects').toLowerCase()}
+                    • {healthReportData.summary.sideEffects} {t("healthAnalytics.sideEffects").toLowerCase()}
                   </DynamicText>
                 </View>
 
                 <View style={dynamicStyles.reportSection}>
-                  <DynamicText type="card" style={dynamicStyles.reportSectionTitle}>{t('keyInsights')}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.reportSectionTitle}>{t("healthAnalytics.keyInsights")}</DynamicText>
                   {healthReportData.summary.keyInsights.slice(0, 3).map((insight: string, index: number) => (
                     <DynamicText key={index} type="card" style={dynamicStyles.reportText}>
                       • {insight}
@@ -1681,7 +1680,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={() => setShowHealthReportModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('ok')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t("healthAnalytics.ok")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1704,7 +1703,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   style={{ width: 24, height: 24, marginRight: 8 }}
                 />
                 <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                  {t('metricsHistory') || 'Metrics History'}
+                  {t("healthAnalytics.metricsHistory") || uiI18n.t("healthAnalytics.metricsHistory")}
                 </DynamicText>
               </View>
               <TouchableOpacity
@@ -1716,7 +1715,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
             </View>
 
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { marginBottom: 12 }]}>
-              {t('totalMetrics') || 'Total metrics tracked'}: {metrics.length}
+              {t("healthAnalytics.totalMetrics") || uiI18n.t("healthAnalytics.totalMetrics")}: {metrics.length}
             </DynamicText>
 
             <ScrollView keyboardShouldPersistTaps="handled" style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={[{ paddingBottom: 10 }, { paddingBottom: 24 }]} showsVerticalScrollIndicator={true}>
@@ -1730,7 +1729,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                           {metricType?.icon} {metricType?.label}
                         </DynamicText>
                         <DynamicText type="card" style={dynamicStyles.metricValue}>
-                          {metric.type === 'blood_pressure' && metric.systolic && metric.diastolic
+                          {metric.type === uiI18n.t("healthAnalytics.bloodPressure") && metric.systolic && metric.diastolic
                             ? `${metric.systolic}/${metric.diastolic} ${metric.unit}`
                             : `${metric.value} ${metric.unit}`}
                         </DynamicText>
@@ -1750,7 +1749,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
 
               {metrics.length === 0 && (
                 <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic', marginTop: 20 }]}>
-                  {t('noHealthMetrics') || 'No metrics tracked yet'}
+                  {t("healthAnalytics.noHealthMetrics") || uiI18n.t("ui.noMetricsTrackedYet")}
                 </DynamicText>
               )}
             </ScrollView>
@@ -1787,7 +1786,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                     letterSpacing: 0.3,
                     width: '100%'
                   }}>
-                    {t('exportPDF') || 'Export PDF'}
+                    {t("documents.exportPDF") || uiI18n.t("documents.exportPDF")}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1798,7 +1797,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   onPress={() => setShowMetricsHistoryModal(false)}
                 >
                   <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                    {t('close') || 'Close'}
+                    {t("common.close") || uiI18n.t("ai.close")}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
@@ -1842,7 +1841,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 marginBottom: 16,
                 textAlign: 'center'
               }}>
-                {t('selectUnit') || 'Select Unit'}
+                {t("healthAnalytics.selectUnit") || uiI18n.t("healthAnalytics.selectUnit")}
               </DynamicText>
               
               {(() => {
@@ -1928,7 +1927,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 marginBottom: 20,
                 textAlign: 'center'
               }}>
-                {t('selectMetricType') || 'Select Metric Type'}
+                {t("healthAnalytics.selectMetricType") || uiI18n.t("healthAnalytics.selectMetricType")}
               </DynamicText>
               
               <ScrollView keyboardShouldPersistTaps="handled" 
@@ -1998,7 +1997,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                   fontSize: 15, 
                   fontFamily: 'Inter_600SemiBold'
                 }}>
-                  {t('cancel') || 'Cancel'}
+                  {t("healthAnalytics.cancel") || uiI18n.t("healthAnalytics.cancel")}
                 </DynamicText>
               </TouchableOpacity>
             </TouchableOpacity>
@@ -2027,7 +2026,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 backgroundColor: customAlertMessage.type === 'success' ? '#22c55e' : '#ef4444' 
               }]}>
                 <DynamicText type="card" style={styles.customAlertIconText}>
-                  {customAlertMessage.type === 'success' ? '✓' : '✕'}
+                  {customAlertMessage.type === uiI18n.t("adminProfile.success") ? '✓' : '✕'}
                 </DynamicText>
               </View>
               <DynamicText type="primary" style={styles.customAlertTitle}>
@@ -2042,9 +2041,7 @@ export default function HealthAnalyticsScreen({ onClose, theme, S }: HealthAnaly
                 }]}
                 onPress={() => setShowCustomAlert(false)}
               >
-                <DynamicText type="card" style={styles.customAlertButtonText}>
-                  OK
-                </DynamicText>
+                <DynamicText type="card" style={styles.customAlertButtonText}>{uiI18n.t("adminProfile.ok")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>

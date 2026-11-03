@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SmartNotificationService from './smartNotifications';
 
@@ -291,7 +292,7 @@ class HealthMetricsService {
         min: 0,
         max: 0,
         dataPoints: [],
-        insights: ['No data available for analysis']
+        insights: [uiI18n.t("ui.noDataAvailableForAnalysis")]
       };
     }
 
@@ -348,46 +349,46 @@ class HealthMetricsService {
     switch (metricType) {
       case 'blood_pressure':
         if (average > 140) {
-          insights.push('⚠️ Blood pressure is elevated. Consider consulting your doctor.');
+          insights.push(uiI18n.t("ui.bloodPressureIsElevatedConsiderConsultingYourDoctor"));
         } else if (average < 90) {
-          insights.push('📉 Blood pressure is low. Monitor for symptoms.');
+          insights.push(uiI18n.t("ui.bloodPressureIsLowMonitorForSymptoms"));
         } else {
-          insights.push('✅ Blood pressure is within normal range.');
+          insights.push(uiI18n.t("ui.bloodPressureIsWithinNormalRange"));
         }
         break;
 
       case 'weight':
         if (trend === 'improving' && change > 5) {
-          insights.push('📈 Weight is trending upward. Monitor dietary habits.');
+          insights.push(uiI18n.t("ui.weightIsTrendingUpwardMonitorDietaryHabits"));
         } else if (trend === 'declining' && change < -5) {
-          insights.push('📉 Weight is trending downward. Ensure adequate nutrition.');
+          insights.push(uiI18n.t("ui.weightIsTrendingDownwardEnsureAdequateNutrition"));
         } else {
-          insights.push('⚖️ Weight is stable. Maintain current habits.');
+          insights.push(uiI18n.t("ui.weightIsStableMaintainCurrentHabits"));
         }
         break;
 
       case 'blood_sugar':
         if (average > 180) {
-          insights.push('🍯 Blood sugar is high. Check medication timing and diet.');
+          insights.push(uiI18n.t("ui.bloodSugarIsHighCheckMedicationTimingAndDiet"));
         } else if (average < 70) {
-          insights.push('🍯 Blood sugar is low. Have a snack and monitor.');
+          insights.push(uiI18n.t("ui.bloodSugarIsLowHaveASnackAndMonitor"));
         } else {
-          insights.push('✅ Blood sugar is well controlled.');
+          insights.push(uiI18n.t("ui.bloodSugarIsWellControlled"));
         }
         break;
 
       case 'mood':
         if (average < 3) {
-          insights.push('😔 Mood scores are low. Consider discussing with your doctor.');
+          insights.push(uiI18n.t("ui.moodScoresAreLowConsiderDiscussingWithYourDoctor"));
         } else if (average > 4) {
-          insights.push('😊 Mood scores are positive. Keep up the good work!');
+          insights.push(uiI18n.t("ui.moodScoresArePositiveKeepUpTheGoodWork"));
         } else {
-          insights.push('😐 Mood is stable. Continue monitoring.');
+          insights.push(uiI18n.t("ui.moodIsStableContinueMonitoring"));
         }
         break;
 
       default:
-        insights.push(`📊 ${metricType} trend: ${trend} (${change.toFixed(1)}% change)`);
+        insights.push(uiI18n.t("ui.valueTrendValueValueChange", { value1: metricType, value2: trend, value3: change.toFixed(1) }));
     }
 
     return insights;
@@ -420,7 +421,7 @@ class HealthMetricsService {
           current: latest.value,
           average: trend.average,
           trend: trend.trend,
-          recommendation: trend.insights[0] || 'Continue monitoring'
+          recommendation: trend.insights[0] || uiI18n.t("ui.continueMonitoring")
         };
       }
     }
@@ -430,7 +431,7 @@ class HealthMetricsService {
 
     const report: HealthReport = {
       id: reportId,
-      title: `Health Report - ${period}`,
+      title: uiI18n.t("ui.healthReportValue", { value1: period }),
       period,
       generatedAt,
       summary: {
@@ -452,28 +453,28 @@ class HealthMetricsService {
     const recommendations: string[] = [];
 
     if (adherence < 80) {
-      recommendations.push('💊 Medication adherence is below 80%. Consider setting more reminders.');
+      recommendations.push(uiI18n.t("ui.medicationAdherenceIsBelow80ConsiderSettingMoreReminders"));
     }
 
     if (sideEffects.length > 0) {
       const severeSideEffects = sideEffects.filter(se => se.severity >= 4);
       if (severeSideEffects.length > 0) {
-        recommendations.push('⚠️ You have severe side effects. Please consult your doctor immediately.');
+        recommendations.push(uiI18n.t("ui.youHaveSevereSideEffectsPleaseConsultYourDoctorImmediately"));
       } else {
-        recommendations.push('📝 Monitor side effects and discuss with your doctor at next visit.');
+        recommendations.push(uiI18n.t("ui.monitorSideEffectsAndDiscussWithYourDoctorAtNextVisit"));
       }
     }
 
     if (metrics.blood_pressure && metrics.blood_pressure.trend === 'declining') {
-      recommendations.push('📈 Blood pressure is improving. Continue current treatment plan.');
+      recommendations.push(uiI18n.t("ui.bloodPressureIsImprovingContinueCurrentTreatmentPlan"));
     }
 
     if (metrics.weight && metrics.weight.trend === 'volatile') {
-      recommendations.push('⚖️ Weight is fluctuating. Consider dietary consistency.');
+      recommendations.push(uiI18n.t("ui.weightIsFluctuatingConsiderDietaryConsistency"));
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('✅ Overall health metrics look good. Keep up the great work!');
+      recommendations.push(uiI18n.t("ui.overallHealthMetricsLookGoodKeepUpTheGreatWork"));
     }
 
     return recommendations;

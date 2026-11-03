@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { BlurView } from 'expo-blur';
 import { Feather } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Stop, Rect, Line } from 'react-native-svg';
@@ -38,6 +40,7 @@ interface SignUpFormProps {
 }
 
 export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLanguageChange, selectedLanguage = 'es' }: SignUpFormProps) {
+  useUILanguage();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -69,23 +72,23 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
   // Country data
   const countries: Record<string, { code: string; name: string; flag: string }> = {
-    US: { code: '+1', name: 'United States', flag: '🇺🇸' },
-    CA: { code: '+1', name: 'Canada', flag: '🇨🇦' },
-    MX: { code: '+52', name: 'Mexico', flag: '🇲🇽' },
-    BR: { code: '+55', name: 'Brazil', flag: '🇧🇷' },
-    AR: { code: '+54', name: 'Argentina', flag: '🇦🇷' },
-    CO: { code: '+57', name: 'Colombia', flag: '🇨🇴' },
-    PE: { code: '+51', name: 'Peru', flag: '🇵🇪' },
-    CL: { code: '+56', name: 'Chile', flag: '🇨🇱' },
-    VE: { code: '+58', name: 'Venezuela', flag: '🇻🇪' },
-    EC: { code: '+593', name: 'Ecuador', flag: '🇪🇨' },
-    BO: { code: '+591', name: 'Bolivia', flag: '🇧🇴' },
-    UY: { code: '+598', name: 'Uruguay', flag: '🇺🇾' },
-    PY: { code: '+595', name: 'Paraguay', flag: '🇵🇾' },
-    PA: { code: '+507', name: 'Panama', flag: '🇵🇦' },
-    FR: { code: '+33', name: 'France', flag: '🇫🇷' },
-    DE: { code: '+49', name: 'Germany', flag: '🇩🇪' },
-    CN: { code: '+86', name: 'China', flag: '🇨🇳' }
+    US: { code: '+1', name: uiI18n.t("ui.unitedStates"), flag: '🇺🇸' },
+    CA: { code: '+1', name: uiI18n.t("ui.canada"), flag: '🇨🇦' },
+    MX: { code: '+52', name: uiI18n.t("ui.mexico"), flag: '🇲🇽' },
+    BR: { code: '+55', name: uiI18n.t("ui.brazil"), flag: '🇧🇷' },
+    AR: { code: '+54', name: uiI18n.t("ui.argentina"), flag: '🇦🇷' },
+    CO: { code: '+57', name: uiI18n.t("ui.colombia"), flag: '🇨🇴' },
+    PE: { code: '+51', name: uiI18n.t("ui.peru"), flag: '🇵🇪' },
+    CL: { code: '+56', name: uiI18n.t("ui.chile"), flag: '🇨🇱' },
+    VE: { code: '+58', name: uiI18n.t("ui.venezuela"), flag: '🇻🇪' },
+    EC: { code: '+593', name: uiI18n.t("ui.ecuador"), flag: '🇪🇨' },
+    BO: { code: '+591', name: uiI18n.t("ui.bolivia"), flag: '🇧🇴' },
+    UY: { code: '+598', name: uiI18n.t("ui.uruguay"), flag: '🇺🇾' },
+    PY: { code: '+595', name: uiI18n.t("ui.paraguay"), flag: '🇵🇾' },
+    PA: { code: '+507', name: uiI18n.t("ui.panama"), flag: '🇵🇦' },
+    FR: { code: '+33', name: uiI18n.t("ui.france"), flag: '🇫🇷' },
+    DE: { code: '+49', name: uiI18n.t("ui.germany"), flag: '🇩🇪' },
+    CN: { code: '+86', name: uiI18n.t("ui.china"), flag: '🇨🇳' }
   };
 
   const getCountryLabel = (countryCode: string) => {
@@ -159,30 +162,30 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
   // Validate email format and check for common typos
   const validateEmail = (email: string): { valid: boolean; error?: string } => {
     if (!email.trim()) {
-      return { valid: false, error: 'Email is required' };
+      return { valid: false, error: uiI18n.t("ui.emailIsRequired") };
     }
 
     // Basic email regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
     if (!emailRegex.test(email)) {
-      return { valid: false, error: 'Please enter a valid email address' };
+      return { valid: false, error: uiI18n.t("ui.pleaseEnterAValidEmailAddress") };
     }
 
     // Check for double dots or invalid characters
     if (email.includes('..') || email.startsWith('.') || email.endsWith('.')) {
-      return { valid: false, error: 'Please enter a valid email address' };
+      return { valid: false, error: uiI18n.t("ui.pleaseEnterAValidEmailAddress") };
     }
 
     // Parse domain and TLD
     const domain = email.split('@')[1]?.toLowerCase();
     if (!domain) {
-      return { valid: false, error: 'Please enter a valid email address' };
+      return { valid: false, error: uiI18n.t("ui.pleaseEnterAValidEmailAddress") };
     }
 
     const domainParts = domain.split('.');
     if (domainParts.length < 2) {
-      return { valid: false, error: 'Please enter a valid email address' };
+      return { valid: false, error: uiI18n.t("ui.pleaseEnterAValidEmailAddress") };
     }
 
     const tld = domainParts[domainParts.length - 1];
@@ -226,7 +229,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       const correctDomain = commonDomains[domain];
       return { 
         valid: false, 
-        error: `Did you mean ${email.split('@')[0]}@${correctDomain}?` 
+        error: uiI18n.t("ui.didYouMeanValueValue", { value1: email.split('@')[0], value2: correctDomain }) 
       };
     }
 
@@ -235,7 +238,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     if (tld.length < 2) {
       return { 
         valid: false, 
-        error: `Invalid domain extension. Did you mean ${baseDomain}.com?` 
+        error: uiI18n.t("ui.invalidDomainExtensionDidYouMeanValueCom", { value1: baseDomain }) 
       };
     }
 
@@ -245,7 +248,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       if (correctTLD !== tld) {
         return { 
           valid: false, 
-          error: `Invalid domain extension. Did you mean ${baseDomain}.${correctTLD}?` 
+          error: uiI18n.t("ui.invalidDomainExtensionDidYouMeanValueValue", { value1: baseDomain, value2: correctTLD }) 
         };
       }
     }
@@ -275,13 +278,13 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       if (closeMatch) {
         return { 
           valid: false, 
-          error: `Invalid domain extension. Did you mean ${baseDomain}.${closeMatch}?` 
+          error: uiI18n.t("ui.invalidDomainExtensionDidYouMeanValueValue_391084", { value1: baseDomain, value2: closeMatch }) 
         };
       }
 
       return { 
         valid: false, 
-        error: `Invalid domain extension (.${tld}). Please use a valid domain extension like .com, .net, .org, etc.` 
+        error: uiI18n.t("ui.invalidDomainExtensionValuePleaseUseAValidDomainExtensionLikeComNetOrgEtc", { value1: tld }) 
       };
     }
 
@@ -291,7 +294,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
   // Validate phone number length based on country
   const validatePhoneNumber = (phone: string, countryCode: string): { valid: boolean; error?: string } => {
     if (!phone.trim()) {
-      return { valid: false, error: 'Phone number is required' };
+      return { valid: false, error: uiI18n.t("ui.phoneNumberIsRequired") };
     }
 
     // Remove any non-digit characters for length check
@@ -303,7 +306,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     if (!expectedLength) {
       // If country not in list, allow 8-15 digits (international standard)
       if (digitsOnly.length < 8 || digitsOnly.length > 15) {
-        return { valid: false, error: 'Please enter a valid phone number (8-15 digits)' };
+        return { valid: false, error: uiI18n.t("ui.pleaseEnterAValidPhoneNumber815Digits") };
       }
       return { valid: true };
     }
@@ -312,7 +315,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     if (digitsOnly.length !== expectedLength) {
       return { 
         valid: false, 
-        error: `Phone number must be ${expectedLength} digits for ${countries[countryCode]?.name || countryCode}` 
+        error: uiI18n.t("ui.phoneNumberMustBeValueDigitsForValue", { value1: expectedLength, value2: countries[countryCode]?.name || countryCode }) 
       };
     }
 
@@ -334,19 +337,19 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     const errors = [];
     
     if (password.length < 8) {
-      errors.push("At least 8 characters");
+      errors.push(uiI18n.t("ui.atLeast8Characters"));
     }
     
     if (!/[A-Z]/.test(password)) {
-      errors.push("At least 1 uppercase letter");
+      errors.push(uiI18n.t("ui.atLeast1UppercaseLetter"));
     }
     
     if (!/[a-z]/.test(password)) {
-      errors.push("At least 1 lowercase letter");
+      errors.push(uiI18n.t("ui.atLeast1LowercaseLetter"));
     }
     
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      errors.push("At least 1 special character");
+      errors.push(uiI18n.t("ui.atLeast1SpecialCharacter"));
     }
     
     return errors;
@@ -361,56 +364,56 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
     
     // Age validation
     if (!age.trim()) {
-      Alert.alert('Error', t.ageRequired);
+      Alert.alert(uiI18n.t("adminProfile.error"), t.ageRequired);
       return false;
     }
     const ageNum = parseInt(age, 10);
     if (isNaN(ageNum) || ageNum < 18) {
-      Alert.alert('Error', t.ageRestrictionError);
+      Alert.alert(uiI18n.t("adminProfile.error"), t.ageRestrictionError);
       return false;
     }
     
     if (!firstName.trim()) {
-      Alert.alert('Error', 'First name is required');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.firstNameIsRequired"));
       return false;
     }
     if (!lastName.trim()) {
-      Alert.alert('Error', 'Last name is required');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.lastNameIsRequired"));
       return false;
     }
     if (!username.trim()) {
-      Alert.alert('Error', 'Username is required');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.usernameIsRequired"));
       return false;
     }
     // Email validation with typo checking
     const emailValidation = validateEmail(email);
     if (!emailValidation.valid) {
-      Alert.alert('Invalid Email', emailValidation.error || 'Please enter a valid email address');
+      Alert.alert(uiI18n.t("ui.invalidEmail"), emailValidation.error || uiI18n.t("ui.pleaseEnterAValidEmailAddress"));
       return false;
     }
     if (!password.trim()) {
-      Alert.alert('Error', 'Password is required');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.passwordIsRequired"));
       return false;
     }
     // Check password requirements
     const passwordValidationErrors = validatePassword(password);
     if (passwordValidationErrors.length > 0) {
-      Alert.alert('Password Requirements', passwordValidationErrors.join('\n'));
+      Alert.alert(uiI18n.t("ui.passwordRequirements"), passwordValidationErrors.join('\n'));
       return false;
     }
     
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.passwordsDoNotMatch"));
       return false;
     }
     // Phone number validation based on country
     const phoneValidation = validatePhoneNumber(phoneNumber, selectedCountry);
     if (!phoneValidation.valid) {
-      Alert.alert('Invalid Phone Number', phoneValidation.error || 'Please enter a valid phone number');
+      Alert.alert(uiI18n.t("ui.invalidPhoneNumber"), phoneValidation.error || uiI18n.t("ui.pleaseEnterAValidPhoneNumber"));
       return false;
     }
     if (!agreedToTerms) {
-      Alert.alert('Error', t.consentRequired);
+      Alert.alert(uiI18n.t("adminProfile.error"), t.consentRequired);
       return false;
     }
     return true;
@@ -438,7 +441,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       await onSignUp(userData);
     } catch (error) {
       console.error('Sign up error:', error);
-      Alert.alert('Error', `Sign up failed: ${(error instanceof Error ? error.message : String(error)) || 'Please try again.'}`);
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.signUpFailedValue", { value1: (error instanceof Error ? error.message : String(error)) || 'Please try again.' }));
     } finally {
       setLoading(false);
     }
@@ -451,232 +454,27 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
   // Translation system for sign-up form
   const getTranslations = (lang: string) => {
-    const translations = {
-      en: {
-        createAccount: "Create Account",
-        joinAuricRX: "Join AuricRX today",
-        firstName: "First Name",
-        lastName: "Last Name",
-        username: "Username",
-        email: "Email",
-        password: "Password",
-        
-        phoneNumber: "Phone Number",
-        createAccountButton: "Create Account",
-        creatingAccount: "Creating Account...",
-        cancel: "Cancel",
-        passwordRequirements: "Password must contain:",
-        enterFirstName: "Enter first name",
-        enterLastName: "Enter last name",
-        chooseUsername: "Choose a username",
-        enterEmail: "Enter your email",
-        createPassword: "Create a password",
-        confirmPassword: "Confirm your password",
-        enterPhone: "Enter your phone number",
-        viewTerms: "View Terms of Service",
-        viewPrivacy: "View Privacy Policy",
-        consentRequired: "You must agree to the Terms of Service and Privacy Policy to continue.",
-        termsOfService: "Terms of Service",
-        privacyPolicy: "Privacy Policy",
-        close: "Close",
-        loadingDocument: "Loading legal document...",
-        ageRestriction: "To use this app, you must be 18 years or older",
-        age: "Age",
-        enterAge: "Enter your age",
-        ageRequired: "Age is required",
-        ageRestrictionError: "You must be at least 18 years old to use this app"
-      },
-      es: {
-        createAccount: "Crear Cuenta",
-        joinAuricRX: "Únete a AuricRX hoy",
-        firstName: "Nombre",
-        lastName: "Apellido",
-        username: "Nombre de Usuario",
-        email: "Correo",
-        password: "Contraseña",
-        
-        phoneNumber: "Número de Teléfono",
-        createAccountButton: "Crear Cuenta",
-        creatingAccount: "Creando Cuenta...",
-        cancel: "Cancelar",
-        passwordRequirements: "La contraseña debe contener:",
-        enterFirstName: "Ingresa tu nombre",
-        enterLastName: "Ingresa tu apellido",
-        chooseUsername: "Elige un nombre de usuario",
-        enterEmail: "Ingresa tu correo",
-        createPassword: "Crea una contraseña",
-        confirmPassword: "Confirma tu contraseña",
-        enterPhone: "Ingresa tu número de teléfono",
-        viewTerms: "Ver Términos de Servicio",
-        viewPrivacy: "Ver Política de Privacidad",
-        consentRequired: "Debes aceptar los Términos de Servicio y la Política de Privacidad para continuar.",
-        termsOfService: "Términos de Servicio",
-        privacyPolicy: "Política de Privacidad",
-        close: "Cerrar",
-        loadingDocument: "Cargando documento legal...",
-        ageRestriction: "Para usar esta aplicación, debes tener 18 años o más",
-        age: "Edad",
-        enterAge: "Ingresa tu edad",
-        ageRequired: "La edad es requerida",
-        ageRestrictionError: "Debes tener al menos 18 años para usar esta aplicación"
-      },
-      pt: {
-        createAccount: "Criar Conta",
-        joinAuricRX: "Junte-se ao AuricRX hoje",
-        firstName: "Nome",
-        lastName: "Sobrenome",
-        username: "Nome de Usuário",
-        email: "Email",
-        password: "Senha",
-        
-        phoneNumber: "Número de Telefone",
-        createAccountButton: "Criar Conta",
-        creatingAccount: "Criando Conta...",
-        cancel: "Cancelar",
-        passwordRequirements: "A senha deve conter:",
-        enterFirstName: "Digite seu nome",
-        enterLastName: "Digite seu sobrenome",
-        chooseUsername: "Escolha um nome de usuário",
-        enterEmail: "Digite seu email",
-        createPassword: "Crie uma senha",
-        confirmPassword: "Confirme sua senha",
-        enterPhone: "Digite seu número de telefone",
-        viewTerms: "Ver Termos de Serviço",
-        viewPrivacy: "Ver Política de Privacidade",
-        consentRequired: "Você deve aceitar os Termos de Serviço e a Política de Privacidade para continuar.",
-        termsOfService: "Termos de Serviço",
-        privacyPolicy: "Política de Privacidade",
-        close: "Fechar",
-        loadingDocument: "Carregando documento legal...",
-        ageRestriction: "Para usar este aplicativo, você deve ter 18 anos ou mais",
-        age: "Idade",
-        enterAge: "Digite sua idade",
-        ageRequired: "A idade é obrigatória",
-        ageRestrictionError: "Você deve ter pelo menos 18 anos para usar este aplicativo"
-      },
-      fr: {
-        createAccount: "Créer un compte",
-        joinAuricRX: "Rejoignez AuricRX aujourd'hui",
-        firstName: "Prénom",
-        lastName: "Nom de famille",
-        username: "Nom d'utilisateur",
-        email: "Email",
-        password: "Mot de passe",
-        
-        phoneNumber: "Numéro de téléphone",
-        createAccountButton: "Créer un compte",
-        creatingAccount: "Création du compte...",
-        cancel: "Annuler",
-        passwordRequirements: "Le mot de passe doit contenir :",
-        enterFirstName: "Entrez votre prénom",
-        enterLastName: "Entrez votre nom de famille",
-        chooseUsername: "Choisissez un nom d'utilisateur",
-        enterEmail: "Entrez votre email",
-        createPassword: "Créez un mot de passe",
-        confirmPassword: "Confirmez votre mot de passe",
-        enterPhone: "Entrez votre numéro de téléphone",
-        viewTerms: "Voir les Conditions d'utilisation",
-        viewPrivacy: "Voir la Politique de confidentialité",
-        consentRequired: "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour continuer.",
-        termsOfService: "Conditions d'utilisation",
-        privacyPolicy: "Politique de confidentialité",
-        close: "Fermer",
-        loadingDocument: "Chargement du document légal...",
-        ageRestriction: "Pour utiliser cette application, vous devez avoir 18 ans ou plus",
-        age: "Âge",
-        enterAge: "Entrez votre âge",
-        ageRequired: "L'âge est requis",
-        ageRestrictionError: "Vous devez avoir au moins 18 ans pour utiliser cette application"
-      },
-      de: {
-        createAccount: "Konto erstellen",
-        joinAuricRX: "Treten Sie heute AuricRX bei",
-        firstName: "Vorname",
-        lastName: "Nachname",
-        username: "Benutzername",
-        email: "E-Mail",
-        password: "Passwort",
-        
-        phoneNumber: "Telefonnummer",
-        createAccountButton: "Konto erstellen",
-        creatingAccount: "Konto wird erstellt...",
-        cancel: "Abbrechen",
-        passwordRequirements: "Das Passwort muss enthalten:",
-        enterFirstName: "Geben Sie Ihren Vornamen ein",
-        enterLastName: "Geben Sie Ihren Nachnamen ein",
-        chooseUsername: "Wählen Sie einen Benutzernamen",
-        enterEmail: "Geben Sie Ihre E-Mail ein",
-        createPassword: "Erstellen Sie ein Passwort",
-        confirmPassword: "Bestätigen Sie Ihr Passwort",
-        enterPhone: "Geben Sie Ihre Telefonnummer ein",
-        viewTerms: "Nutzungsbedingungen anzeigen",
-        viewPrivacy: "Datenschutzerklärung anzeigen",
-        consentRequired: "Sie müssen den Nutzungsbedingungen und der Datenschutzerklärung zustimmen, um fortzufahren.",
-        termsOfService: "Nutzungsbedingungen",
-        privacyPolicy: "Datenschutzerklärung",
-        close: "Schließen",
-        loadingDocument: "Rechtlichen Text laden...",
-        ageRestriction: "Um diese App zu verwenden, müssen Sie mindestens 18 Jahre alt sein",
-        age: "Alter",
-        enterAge: "Geben Sie Ihr Alter ein",
-        ageRequired: "Das Alter ist erforderlich",
-        ageRestrictionError: "Sie müssen mindestens 18 Jahre alt sein, um diese App zu verwenden"
-      },
-      zh: {
-        createAccount: "创建账户",
-        joinAuricRX: "立即加入 AuricRX",
-        firstName: "名字",
-        lastName: "姓氏",
-        username: "用户名",
-        email: "邮箱",
-        password: "密码",
-        
-        phoneNumber: "电话号码",
-        createAccountButton: "创建账户",
-        creatingAccount: "正在创建账户...",
-        cancel: "取消",
-        passwordRequirements: "密码必须包含:",
-        enterFirstName: "输入名字",
-        enterLastName: "输入姓氏",
-        chooseUsername: "选择用户名",
-        enterEmail: "输入邮箱",
-        createPassword: "创建密码",
-        confirmPassword: "确认密码",
-        enterPhone: "输入电话号码",
-        viewTerms: "查看服务条款",
-        viewPrivacy: "查看隐私政策",
-        consentRequired: "继续操作前必须同意服务条款和隐私政策。",
-        termsOfService: "服务条款",
-        privacyPolicy: "隐私政策",
-        close: "关闭",
-        loadingDocument: "正在加载法律文档...",
-        ageRestriction: "使用此应用，您必须年满 18 岁",
-        age: "年龄",
-        enterAge: "请输入您的年龄",
-        ageRequired: "年龄是必填项",
-        ageRestrictionError: "您必须年满 18 岁才能使用此应用"
-      }
-    };
-    return translations[lang as keyof typeof translations] || translations.en;
+    
+    return uiI18n.t('authSignUp', { lng: lang, returnObjects: true }) as Record<string, string>;
   };
 
   const t = getTranslations(currentLanguage);
   const handleGoogleSignIn = async () => {
     if (loading || googleLoading) return;
     if (!formData.age || Number(formData.age) < 18) {
-      Alert.alert('Error', t.ageRestrictionError);
+      Alert.alert(uiI18n.t("adminProfile.error"), t.ageRestrictionError);
       return;
     }
     setGoogleLoading(true);
     try {
       const result = await authService.signInWithGoogle();
       if (!result.success || !('user' in result)) {
-        Alert.alert('Error', result.error || googleAuthText(currentLanguage).error);
+        Alert.alert(uiI18n.t("adminProfile.error"), result.error || googleAuthText(currentLanguage).error);
         return;
       }
       await onGoogleSuccess({ provider: 'google', user: result.user });
     } catch (error) {
-      Alert.alert('Error', googleAuthText(currentLanguage).error);
+      Alert.alert(uiI18n.t("adminProfile.error"), googleAuthText(currentLanguage).error);
     } finally {
       setGoogleLoading(false);
     }
@@ -698,7 +496,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       }
     } catch (error) {
       console.error('Failed to load legal document:', error);
-      Alert.alert('Error', 'Unable to load legal document. Please try again later.');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.unableToLoadLegalDocumentPleaseTryAgainLater"));
       setLegalModalVisible(false);
     } finally {
       setLegalModalLoading(false);
@@ -725,10 +523,10 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
   const passwordRequirements = React.useMemo(() => {
     const password = formData.password;
     return [
-      { text: "At least 8 characters", isValid: password.length >= 8 },
-      { text: "At least 1 uppercase letter", isValid: /[A-Z]/.test(password) },
-      { text: "At least 1 lowercase letter", isValid: /[a-z]/.test(password) },
-      { text: "At least 1 special character", isValid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) }
+      { text: uiI18n.t("ui.atLeast8Characters"), isValid: password.length >= 8 },
+      { text: uiI18n.t("ui.atLeast1UppercaseLetter"), isValid: /[A-Z]/.test(password) },
+      { text: uiI18n.t("ui.atLeast1LowercaseLetter"), isValid: /[a-z]/.test(password) },
+      { text: uiI18n.t("ui.atLeast1SpecialCharacter"), isValid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) }
     ];
   }, [formData.password]);
 
@@ -787,7 +585,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
         </Modal>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View style={styles.topRow}>
-            <TouchableOpacity accessibilityRole="button" accessibilityLabel={languageLabels[currentLanguage] || 'Language'} style={styles.languageSelector} onPress={() => setShowLanguageDropdown(true)}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel={languageLabels[currentLanguage] || uiI18n.t("settings.language")} style={styles.languageSelector} onPress={() => setShowLanguageDropdown(true)}>
               <Feather name="globe" color={vip.colors.gold} size={19}/><Text style={styles.languageSelectorText}>{currentLanguage.toUpperCase()}</Text><Feather name="chevron-down" size={15} color={vip.colors.gold}/>
             </TouchableOpacity>
           </View>
@@ -956,13 +754,13 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
             {passwordsMatch && (
               <View style={styles.passwordMatchContainer}>
                 <Text style={styles.passwordMatchIcon}>✓</Text>
-                <Text style={styles.passwordMatchText}>Passwords match</Text>
+                <Text style={styles.passwordMatchText}>{uiI18n.t("ui.passwordsMatch")}</Text>
               </View>
             )}
             {passwordsDontMatch && (
               <View style={styles.passwordMismatchContainer}>
                 <Text style={styles.passwordMismatchIcon}>✗</Text>
-                <Text style={styles.passwordMismatchText}>Passwords do not match</Text>
+                <Text style={styles.passwordMismatchText}>{uiI18n.t("ui.passwordsDoNotMatch")}</Text>
               </View>
             )}
 
@@ -1084,11 +882,13 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
 
 // Gold outline container
 function GoldOutline({ children, icon }: { children: React.ReactNode; icon: React.ComponentProps<typeof Feather>['name'] }) {
+  useUILanguage();
   return <View style={styles.field}><Feather name={icon} size={23} color={vip.colors.gold}/><View style={styles.goldOutline}>{children}</View></View>;
 }
 
 // Password requirement item
 function RequirementItem({ text, isValid }: { text: string; isValid: boolean }) {
+  useUILanguage();
   return (
     <View style={styles.requirementItem}>
       <Text style={[styles.requirementIcon, { color: isValid ? GOLD.y400 : '#666' }]}>
@@ -1109,6 +909,7 @@ function CountryOption({ country, label, isSelected, onPress }: {
   isSelected: boolean; 
   onPress: () => void; 
 }) {
+  useUILanguage();
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -1127,6 +928,7 @@ function CountryOption({ country, label, isSelected, onPress }: {
 
 // Gold button component
 function GoldButton({ title, onPress, disabled = false }: { title: string; onPress: () => void; disabled?: boolean }) {
+  useUILanguage();
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -1152,12 +954,8 @@ function GoldButton({ title, onPress, disabled = false }: { title: string; onPre
   );
 }
 
-const languageLabels: Record<string, string> = { es: 'Espa\u00f1ol', en: 'English', pt: 'Portugu\u00eas', fr: 'Fran\u00e7ais', de: 'Deutsch', zh: '\u4e2d\u6587' };
-const accountCopy: Record<string, [string, string]> = {
-  en: ['Already have an account?', 'Sign in'], es: ['\u00bfYa tienes una cuenta?', 'Iniciar sesi\u00f3n'],
-  pt: ['J\u00e1 tem uma conta?', 'Entrar'], fr: ['Vous avez d\u00e9j\u00e0 un compte ?', 'Se connecter'],
-  de: ['Bereits ein Konto?', 'Anmelden'], zh: ['\u5df2\u6709\u8d26\u6237\uff1f', '\u767b\u5f55'],
-};
+const languageLabels: Record<string, string> = { get es() { return uiI18n.t("localized.SignUpForm.languageLabels", { lng: 'es', returnObjects: true }) as any; }, get en() { return uiI18n.t("localized.SignUpForm.languageLabels", { lng: 'en', returnObjects: true }) as any; }, get pt() { return uiI18n.t("localized.SignUpForm.languageLabels", { lng: 'pt', returnObjects: true }) as any; }, get fr() { return uiI18n.t("localized.SignUpForm.languageLabels", { lng: 'fr', returnObjects: true }) as any; }, get de() { return uiI18n.t("localized.SignUpForm.languageLabels", { lng: 'de', returnObjects: true }) as any; }, get zh() { return uiI18n.t("localized.SignUpForm.languageLabels", { lng: 'zh', returnObjects: true }) as any; } };
+const accountCopy: Record<string, [string, string]> = { get en() { return uiI18n.t("localized.SignUpForm.accountCopy", { lng: 'en', returnObjects: true }) as any; }, get es() { return uiI18n.t("localized.SignUpForm.accountCopy", { lng: 'es', returnObjects: true }) as any; }, get pt() { return uiI18n.t("localized.SignUpForm.accountCopy", { lng: 'pt', returnObjects: true }) as any; }, get fr() { return uiI18n.t("localized.SignUpForm.accountCopy", { lng: 'fr', returnObjects: true }) as any; }, get de() { return uiI18n.t("localized.SignUpForm.accountCopy", { lng: 'de', returnObjects: true }) as any; }, get zh() { return uiI18n.t("localized.SignUpForm.accountCopy", { lng: 'zh', returnObjects: true }) as any; } };
 const styles = StyleSheet.create({
   topRow: {width: '100%', alignItems: 'flex-end', paddingTop: 18},
   languageSelector: {flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 0.7, borderColor: vip.colors.gold, borderRadius: 15, paddingHorizontal: 13, minHeight: 38, backgroundColor: 'rgba(15,25,37,0.75)'},

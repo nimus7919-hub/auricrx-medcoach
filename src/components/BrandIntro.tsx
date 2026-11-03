@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -5,6 +7,7 @@ import { darkColors as c, goldGradient } from '../theme/colors';
 
 /** One 2.65s sequence per app launch; no auth/network work is gated by this view. */
 export default function BrandIntro({ language = 'es', onComplete }: { language?: string; onComplete: () => void }) {
+  useUILanguage();
   const progress = useRef(new Animated.Value(0)).current;
   const done = useRef(false);
   const complete = useRef(onComplete);
@@ -34,7 +37,7 @@ export default function BrandIntro({ language = 'es', onComplete }: { language?:
   const split = progress.interpolate({ inputRange: [0, 0.35, 0.58, 1], outputRange: [0, 0, 19, 19] });
   const reveal = progress.interpolate({ inputRange: [0, 0.4, 0.65, 1], outputRange: [0, 0, 1, 1] });
   return (
-    <Pressable style={styles.screen} onPress={finish} accessibilityRole="button" accessibilityLabel={es ? 'Omitir introducci?n' : 'Skip introduction'}>
+    <Pressable style={styles.screen} onPress={finish} accessibilityRole="button" accessibilityLabel={uiI18n.t("localized.BrandIntro.text40")}>
       <LinearGradient colors={[c.bg, c.bgEnd, c.bg]} style={StyleSheet.absoluteFill} />
       <View style={styles.mark} accessible accessibilityLabel="AURIC">
         <Text allowFontScaling={false} style={styles.letters}>AU</Text>
@@ -47,13 +50,13 @@ export default function BrandIntro({ language = 'es', onComplete }: { language?:
         <Text allowFontScaling={false} style={styles.letters}>RIC</Text>
       </View>
       <Animated.View style={{ opacity: reduced ? 1 : reveal, alignItems: 'center', marginTop: 36, overflow: 'hidden', maxWidth: '100%' }}>
-        <Text style={styles.wordmark}>AuricRX MedCoach</Text>
-        <Text style={styles.tagline}>{es ? 'Tu salud, en modo VIP.' : 'Your health, VIP mode.'}</Text>
+        <Text style={styles.wordmark}>{uiI18n.t("ai.auricrxMedCoach")}</Text>
+        <Text style={styles.tagline}>{uiI18n.t("localized.BrandIntro.text54")}</Text>
         {!reduced && <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { width: 55, transform: [{ translateX: progress.interpolate({ inputRange: [0, 0.6, 0.95, 1], outputRange: [-80, -80, 340, 340] }) }, { skewX: '-18deg' }] }]}>
           <LinearGradient colors={['transparent', 'rgba(255,240,194,0.45)', 'transparent']} style={{ flex: 1 }} />
         </Animated.View>}
       </Animated.View>
-      <Text style={styles.skip}>{es ? 'Toca para continuar' : 'Tap to continue'}</Text>
+      <Text style={styles.skip}>{uiI18n.t("localized.BrandIntro.text59")}</Text>
     </Pressable>
   );
 }

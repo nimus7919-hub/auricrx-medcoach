@@ -1256,5 +1256,105 @@
     "month": "MXN $79 por mês",
     "year": "MXN $699 por ano",
     "disclosure": "IVA incluído. Renovação automática pelo período escolhido. Aviso 5 dias antes de cada cobrança. Cancele a qualquer momento em Configurações."
+  },
+  "authSignIn": {
+    "email": "Email",
+    "password": "Senha",
+    "signIn": "Entrar",
+    "signUp": "Cadastrar",
+    "dontHaveAccount": "Não tem uma conta?",
+    "continueWithApple": "iOS Em Breve",
+    "continueWithGoogle": "G   Continuar com Google",
+    "staySignedIn": "Manter-me conectado",
+    "legalPrefix": "Ao fazer login, você concorda com nossos ",
+    "legalConnector": " e nossa ",
+    "legalSuffix": ".",
+    "termsOfService": "Termos de Serviço",
+    "privacyPolicy": "Política de Privacidade",
+    "close": "Fechar",
+    "loadingDocument": "Carregando documento legal...",
+    "resubscribe": "Reativar Assinatura"
+  },
+  "authSignUp": {
+    "createAccount": "Criar Conta",
+    "joinAuricRX": "Junte-se ao AuricRX hoje",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "username": "Nome de Usuário",
+    "email": "Email",
+    "password": "Senha",
+    "phoneNumber": "Número de Telefone",
+    "createAccountButton": "Criar Conta",
+    "creatingAccount": "Criando Conta...",
+    "cancel": "Cancelar",
+    "passwordRequirements": "A senha deve conter:",
+    "enterFirstName": "Digite seu nome",
+    "enterLastName": "Digite seu sobrenome",
+    "chooseUsername": "Escolha um nome de usuário",
+    "enterEmail": "Digite seu email",
+    "createPassword": "Crie uma senha",
+    "confirmPassword": "Confirme sua senha",
+    "enterPhone": "Digite seu número de telefone",
+    "viewTerms": "Ver Termos de Serviço",
+    "viewPrivacy": "Ver Política de Privacidade",
+    "consentRequired": "Você deve aceitar os Termos de Serviço e a Política de Privacidade para continuar.",
+    "termsOfService": "Termos de Serviço",
+    "privacyPolicy": "Política de Privacidade",
+    "close": "Fechar",
+    "loadingDocument": "Carregando documento legal...",
+    "ageRestriction": "Para usar este aplicativo, você deve ter 18 anos ou mais",
+    "age": "Idade",
+    "enterAge": "Digite sua idade",
+    "ageRequired": "A idade é obrigatória",
+    "ageRestrictionError": "Você deve ter pelo menos 18 anos para usar este aplicativo"
+  },
+  "localized": {
+    "SignInScreen": {
+      "loginCopy": {
+        "language": "Escolher idioma",
+        "tagline": "Sua sa?de, em modo VIP.",
+        "or": "ou",
+        "email": "Email",
+        "signIn": "Entrar",
+        "loading": "Conectando...",
+        "forgot": "Esqueceu sua senha?",
+        "resetHelp": "Insira seu email para recuperar sua senha.",
+        "newHere": "Novo aqui?",
+        "createAccount": "Criar conta",
+        "terms": "Termos",
+        "privacy": "Privacidade"
+      }
+    },
+    "SignUpForm": {
+      "languageLabels": "Português",
+      "accountCopy": [
+        "Já tem uma conta?",
+        "Entrar"
+      ]
+    },
+    "translationService": {
+      "TRANSLATION_MAP": {
+        "notifications": "Notificações",
+        "security": "Segurança",
+        "privacy": "Privacidade",
+        "wallpaper": "Papel de Parede",
+        "pushNotifications": "Notificações Push",
+        "emailNotifications": "Notificações por Email",
+        "smsNotifications": "Notificações SMS",
+        "changePassword": "Alterar Senha",
+        "dataCollection": "Coleta de Dados",
+        "analytics": "Análises",
+        "changeWallpaper": "Alterar Papel de Parede",
+        "chooseWallpaperDescription": "Escolha seu papel de parede favorito para personalizar seu aplicativo",
+        "never": "Nunca",
+        "refillComplete": "Reabastecimento Concluído"
+      }
+    },
+    "MedicationRefillModal": {
+      "localeMap": "pt-BR"
+    },
+    "SupplementRefillModal": {
+      "localeMap": "pt-BR"
+    }
   }
 }

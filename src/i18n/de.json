@@ -1170,5 +1170,111 @@
     "month": "MXN $79 pro Monat",
     "year": "MXN $699 pro Jahr",
     "disclosure": "Inklusive Mehrwertsteuer. Automatische Verlängerung für den gewählten Zeitraum. Erinnerung 5 Tage vor jeder Abbuchung. Jederzeit in den Einstellungen kündbar."
+  },
+  "authSignIn": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "dontHaveAccount": "Haben Sie kein Konto?",
+    "continueWithApple": "iOS Bald Verfügbar",
+    "continueWithGoogle": "G   Mit Google fortfahren",
+    "staySignedIn": "Angemeldet bleiben",
+    "legalPrefix": "Durch die Anmeldung stimmen Sie unseren ",
+    "legalConnector": " und unserer ",
+    "legalSuffix": " zu.",
+    "termsOfService": "Nutzungsbedingungen",
+    "privacyPolicy": "Datenschutzerklärung",
+    "close": "Schließen",
+    "loadingDocument": "Rechtlichen Text laden...",
+    "resubscribe": "Erneut Abonnieren"
+  },
+  "authSignUp": {
+    "createAccount": "Konto erstellen",
+    "joinAuricRX": "Treten Sie heute AuricRX bei",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "phoneNumber": "Telefonnummer",
+    "createAccountButton": "Konto erstellen",
+    "creatingAccount": "Konto wird erstellt...",
+    "cancel": "Abbrechen",
+    "passwordRequirements": "Das Passwort muss enthalten:",
+    "enterFirstName": "Geben Sie Ihren Vornamen ein",
+    "enterLastName": "Geben Sie Ihren Nachnamen ein",
+    "chooseUsername": "Wählen Sie einen Benutzernamen",
+    "enterEmail": "Geben Sie Ihre E-Mail ein",
+    "createPassword": "Erstellen Sie ein Passwort",
+    "confirmPassword": "Bestätigen Sie Ihr Passwort",
+    "enterPhone": "Geben Sie Ihre Telefonnummer ein",
+    "viewTerms": "Nutzungsbedingungen anzeigen",
+    "viewPrivacy": "Datenschutzerklärung anzeigen",
+    "consentRequired": "Sie müssen den Nutzungsbedingungen und der Datenschutzerklärung zustimmen, um fortzufahren.",
+    "termsOfService": "Nutzungsbedingungen",
+    "privacyPolicy": "Datenschutzerklärung",
+    "close": "Schließen",
+    "loadingDocument": "Rechtlichen Text laden...",
+    "ageRestriction": "Um diese App zu verwenden, müssen Sie mindestens 18 Jahre alt sein",
+    "age": "Alter",
+    "enterAge": "Geben Sie Ihr Alter ein",
+    "ageRequired": "Das Alter ist erforderlich",
+    "ageRestrictionError": "Sie müssen mindestens 18 Jahre alt sein, um diese App zu verwenden"
+  },
+  "subscriptionExpired": {
+    "title": "Abonnement Abgelaufen",
+    "message": "Ihr Abonnement ist abgelaufen. Sie haben 30 Tage Zeit, Ihr Abonnement zu erneuern.\n\nIhre Daten werden während dieser Schonfrist sicher in der Cloud gespeichert. Nach 30 Tagen werden Ihre Kontodaten gelöscht.",
+    "subscribeButton": "Jetzt Abonnieren",
+    "dismissButton": "Später"
+  },
+  "localized": {
+    "SignInScreen": {
+      "loginCopy": {
+        "language": "Sprache w?hlen",
+        "tagline": "Ihre Gesundheit im VIP-Modus.",
+        "or": "oder",
+        "email": "E-Mail",
+        "signIn": "Anmelden",
+        "loading": "Verbinden...",
+        "forgot": "Passwort vergessen?",
+        "resetHelp": "Geben Sie Ihre E-Mail ein, um Ihr Passwort zur?ckzusetzen.",
+        "newHere": "Neu hier?",
+        "createAccount": "Konto erstellen",
+        "terms": "Bedingungen",
+        "privacy": "Datenschutz"
+      }
+    },
+    "SignUpForm": {
+      "languageLabels": "Deutsch",
+      "accountCopy": [
+        "Bereits ein Konto?",
+        "Anmelden"
+      ]
+    },
+    "translationService": {
+      "TRANSLATION_MAP": {
+        "notifications": "Benachrichtigungen",
+        "security": "Sicherheit",
+        "privacy": "Datenschutz",
+        "wallpaper": "Hintergrundbild",
+        "pushNotifications": "Push-Benachrichtigungen",
+        "emailNotifications": "E-Mail-Benachrichtigungen",
+        "smsNotifications": "SMS-Benachrichtigungen",
+        "changePassword": "Passwort ändern",
+        "dataCollection": "Datensammlung",
+        "analytics": "Analysen",
+        "changeWallpaper": "Hintergrundbild ändern",
+        "chooseWallpaperDescription": "Wählen Sie Ihr Lieblings-Hintergrundbild, um Ihre App zu personalisieren",
+        "never": "Nie",
+        "refillComplete": "Nachfüllen Abgeschlossen"
+      }
+    },
+    "MedicationRefillModal": {
+      "localeMap": "de-DE"
+    },
+    "SupplementRefillModal": {
+      "localeMap": "de-DE"
+    }
   }
 }

@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { creategetInitialAIMessage, createaddCatExpressions, creategetDoctorGreeting } from "../utils/appHelpers";
 import PremiumTabBar from "./../components/PremiumTabBar";
@@ -76,6 +78,7 @@ import createAppNavigator from "../navigation/AppNavigator";
 import AppProviders from "./AppProviders";
 
 export default function App() {
+  useUILanguage();
   // TEMP FLAG - set to false when done testing env
   const debugEnv = true;
   
@@ -120,7 +123,7 @@ export default function App() {
       // Google has already authenticated with Firebase; reuse the common success flow.
       const firebaseGoogleUser = authData.provider === 'google' ? authService.getCurrentUser() : null;
       if (authData.provider === 'google' && (!firebaseGoogleUser || firebaseGoogleUser.uid !== authData.user?.uid)) {
-        throw new Error('Google authentication session is unavailable. Please try again.');
+        throw new Error(uiI18n.t("ui.googleAuthenticationSessionIsUnavailablePleaseTryAgain"));
       }
       const result = authData.provider === 'google'
         ? { success: true, user: authData.user }
@@ -140,9 +143,9 @@ export default function App() {
         // Check if email verification is needed
         if (result.needsEmailVerification) {
           showAlert({
-            title: 'Email Verification Required',
-            message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
-            buttonText: 'Back to Sign In',
+            title: uiI18n.t("ui.emailVerificationRequired"),
+            message: uiI18n.t("ui.pleaseCheckYourEmailIncludingSpamFolderAndClickTheVerificationLinkThenReturnHereToSignIn"),
+            buttonText: uiI18n.t("ui.backToSignIn"),
             onPress: () => {
               // Trigger reset to show sign-in form
               console.log('User needs to verify email before accessing dashboard');
@@ -205,23 +208,23 @@ export default function App() {
         }
         
         showAlert({
-          title: 'Success',
-          message: result.message || (authData.isSignUp ? 'Account created successfully!' : 'Signed in successfully!'),
-          buttonText: 'Continue',
+          title: uiI18n.t("adminProfile.success"),
+          message: result.message || (authData.isSignUp ? uiI18n.t("ui.accountCreatedSuccessfully") : uiI18n.t("ui.signedInSuccessfully")),
+          buttonText: uiI18n.t("ui.continue"),
         });
       } else {
         showAlert({
-          title: 'Error',
+          title: uiI18n.t("adminProfile.error"),
           message: result.error,
-          buttonText: 'OK',
+          buttonText: uiI18n.t("adminProfile.ok"),
         });
       }
     } catch (error) {
       console.error('Auth error:', error);
       showAlert({
-        title: 'Error',
-        message: 'Authentication failed. Please try again.',
-        buttonText: 'OK',
+        title: uiI18n.t("adminProfile.error"),
+        message: uiI18n.t("ui.authenticationFailedPleaseTryAgain"),
+        buttonText: uiI18n.t("adminProfile.ok"),
       });
     }
   };
@@ -255,8 +258,8 @@ export default function App() {
       if (!token) {
         setMembershipResult({
           type: 'error',
-          title: S.error || 'Error',
-          message: S.error || 'Not authenticated. Please sign in again.'
+          title: S.error || uiI18n.t("adminProfile.error"),
+          message: S.error || uiI18n.t("ui.notAuthenticatedPleaseSignInAgain")
         });
         setShowMembershipResultModal(true);
         return;
@@ -279,7 +282,7 @@ export default function App() {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('❌ Non-JSON response from cancel endpoint:', text.substring(0, 200));
-        throw new Error('Server returned an invalid response. Please try again later.');
+        throw new Error(uiI18n.t("ui.serverReturnedAnInvalidResponsePleaseTryAgainLater"));
       }
 
       const result = await response.json();
@@ -287,8 +290,8 @@ export default function App() {
       if (response.ok && result.ok) {
         setMembershipResult({
           type: 'success',
-          title: S.success || 'Success',
-          message: S.membershipCancelled || 'Your membership has been cancelled successfully.'
+          title: S.success || uiI18n.t("adminProfile.success"),
+          message: S.membershipCancelled || uiI18n.t("settings.membershipCancelled")
         });
         setShowMembershipResultModal(true);
         // Refresh subscription status
@@ -299,25 +302,25 @@ export default function App() {
       } else {
         setMembershipResult({
           type: 'error',
-          title: S.error || 'Error',
-          message: result.message || result.error || S.cancelMembershipFailed || 'Failed to cancel membership. Please try again or contact support.'
+          title: S.error || uiI18n.t("adminProfile.error"),
+          message: result.message || result.error || S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed")
         });
         setShowMembershipResultModal(true);
       }
     } catch (error) {
       console.error('Cancel membership error:', error);
-      let errorMessage = S.cancelMembershipFailed || 'Failed to cancel membership. Please try again or contact support.';
+      let errorMessage = S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed");
       
       // Provide more specific error messages
       if (error.message && error.message.includes('JSON Parse error')) {
-        errorMessage = 'Server error: Invalid response from server. Please try again later or contact support.';
+        errorMessage = uiI18n.t("ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport");
       } else if (error.message) {
         errorMessage = error.message;
       }
       
       setMembershipResult({
         type: 'error',
-        title: S.error || 'Error',
+        title: S.error || uiI18n.t("adminProfile.error"),
         message: errorMessage
       });
       setShowMembershipResultModal(true);
@@ -331,8 +334,8 @@ export default function App() {
       if (!token) {
         setMembershipResult({
           type: 'error',
-          title: S.error || 'Error',
-          message: S.error || 'Not authenticated. Please sign in again.'
+          title: S.error || uiI18n.t("adminProfile.error"),
+          message: S.error || uiI18n.t("ui.notAuthenticatedPleaseSignInAgain")
         });
         setShowMembershipResultModal(true);
         return;
@@ -355,7 +358,7 @@ export default function App() {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('❌ Non-JSON response from resubscribe endpoint:', text.substring(0, 200));
-        throw new Error('Server returned an invalid response. Please try again later.');
+        throw new Error(uiI18n.t("ui.serverReturnedAnInvalidResponsePleaseTryAgainLater"));
       }
 
       const result = await response.json();
@@ -363,8 +366,8 @@ export default function App() {
       if (response.ok && result.ok) {
         setMembershipResult({
           type: 'success',
-          title: S.success || 'Success',
-          message: S.membershipRestarted || 'Your membership has been restarted successfully.'
+          title: S.success || uiI18n.t("adminProfile.success"),
+          message: S.membershipRestarted || uiI18n.t("settings.membershipRestarted")
         });
         setShowMembershipResultModal(true);
         // Refresh subscription status
@@ -375,24 +378,24 @@ export default function App() {
       } else {
         setMembershipResult({
           type: 'error',
-          title: S.error || 'Error',
-          message: result.message || result.error || S.restartMembershipFailed || 'Failed to restart membership. Please try again or contact support.'
+          title: S.error || uiI18n.t("adminProfile.error"),
+          message: result.message || result.error || S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed")
         });
         setShowMembershipResultModal(true);
       }
     } catch (error) {
       console.error('Restart membership error:', error);
-      let errorMessage = S.restartMembershipFailed || 'Failed to restart membership. Please try again or contact support.';
+      let errorMessage = S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed");
       
       if (error.message && error.message.includes('JSON Parse error')) {
-        errorMessage = 'Server error: Invalid response from server. Please try again later or contact support.';
+        errorMessage = uiI18n.t("ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport");
       } else if (error.message) {
         errorMessage = error.message;
       }
       
       setMembershipResult({
         type: 'error',
-        title: S.error || 'Error',
+        title: S.error || uiI18n.t("adminProfile.error"),
         message: errorMessage
       });
       setShowMembershipResultModal(true);
@@ -560,7 +563,7 @@ export default function App() {
   const [refillLoading, setRefillLoading] = useState(false);
   const [refillError, setRefillError] = useState(null);
   const [refillCoords, setRefillCoords] = useState(null);
-  const [refillCurrency, setRefillCurrency] = useState('USD');
+  const [refillCurrency, setRefillCurrency] = useState(uiI18n.t("common.usd"));
   const [refillFxMeta, setRefillFxMeta] = useState(null);
   
   // Use i18n translation hook
@@ -767,19 +770,19 @@ export default function App() {
     selected: t('reminders.selected'),
     
     // Fasting Profile
-    yourFastingProfile: t('yourFastingProfile'),
-    needsReview: t('needsReview'),
-    compatible: t('compatible'),
-    notAnalyzed: t('notAnalyzed'),
-    recommendedFastingWindow: t('recommendedFastingWindow'),
-    importantConsiderations: t('importantConsiderations'),
-    reAnalyzeFasting: t('reAnalyzeFasting'),
-    analyzeFastingCompatibility: t('analyzeFastingCompatibility'),
-    completeYourFastingProfile: t('completeYourFastingProfile'),
-    exportHealthReport: t('exportHealthReport'),
-    fastingAnalysis: t('fastingAnalysis'),
-    status: t('status'),
-    analysis: t('analysis'),
+    yourFastingProfile: t("ai.yourFastingProfile"),
+    needsReview: t("ai.needsReview"),
+    compatible: t("ai.compatible"),
+    notAnalyzed: t("ai.notAnalyzed"),
+    recommendedFastingWindow: t("ai.recommendedFastingWindow"),
+    importantConsiderations: t("ai.importantConsiderations"),
+    reAnalyzeFasting: t("ai.reAnalyzeFasting"),
+    analyzeFastingCompatibility: t("ai.analyzeFastingCompatibility"),
+    completeYourFastingProfile: t("ai.completeYourFastingProfile"),
+    exportHealthReport: t("ai.exportHealthReport"),
+    fastingAnalysis: t("ai.fastingAnalysis"),
+    status: t("ai.status"),
+    analysis: t("ai.analysis"),
     
     // Health Profile
     healthProfile: t('healthProfile.title'),
@@ -819,9 +822,9 @@ export default function App() {
     heightUnit: t('healthProfile.heightUnit'),
     
     // AI Health
-    aiHealthAssistant: t('aiHealthAssistant'),
-    intelligentHealthcareFeatures: t('intelligentHealthcareFeatures'),
-    aiHealthFeatures: t('aiHealthFeatures'),
+    aiHealthAssistant: t('ai.aiHealthAssistant'),
+    intelligentHealthcareFeatures: t('ai.intelligentHealthcareFeatures'),
+    aiHealthFeatures: t("ai.aiHealthFeatures"),
     healthInsights: t('ai.healthInsights'),
     symptomAnalyses: t('ai.symptomAnalyses'),
     drugChecks: t('ai.drugChecks'),
@@ -830,9 +833,9 @@ export default function App() {
     recentAnalyses: t('ai.recentAnalyses'),
     noHealthInsights: t('ai.noHealthInsights'),
     noSymptomAnalyses: t('ai.noSymptomAnalyses'),
-    fastingAnalytics: t('fastingAnalytics'),
-    fastingDescription: t('fastingDescription'),
-    actionItems: t('actionItems'),
+    fastingAnalytics: t("ai.fastingAnalytics"),
+    fastingDescription: t("ai.fastingDescription"),
+    actionItems: t("ui.actionItems"),
     aiGeneratedInsights: t('ai.aiGeneratedInsights'),
     recentSymptomAnalyses: t('ai.recentSymptomAnalyses'),
     
@@ -849,7 +852,7 @@ export default function App() {
     status: t('settings.status'),
     cancelMembership: t('settings.cancelMembership'),
     restartMembership: t('settings.restartMembership'),
-    cancelMembershipConfirm: t('settings.cancelMembershipConfirm', { date: (subscriptionStatus?.currentPeriodEnd || subscriptionStatus?.current_period_end) ? new Date(subscriptionStatus.currentPeriodEnd || subscriptionStatus.current_period_end).toLocaleDateString() : (lang === 'es' ? 'fin del período pagado' : 'end of the paid period') }),
+    cancelMembershipConfirm: t('settings.cancelMembershipConfirm', { date: (subscriptionStatus?.currentPeriodEnd || subscriptionStatus?.current_period_end) ? new Date(subscriptionStatus.currentPeriodEnd || subscriptionStatus.current_period_end).toLocaleDateString() : (uiI18n.t("localized.AppController.S.sObject.cancelMembershipConfirm.date.text855")) }),
     restartMembershipConfirm: t('settings.restartMembershipConfirm'),
     confirmCancel: t('settings.confirmCancel'),
     confirmRestart: t('settings.confirmRestart'),
@@ -1628,7 +1631,7 @@ export default function App() {
     totalMetrics: t('healthAnalytics.totalMetrics'),
     };
     return sObject;
-  }, [t, isReady]);
+  }, [t, isReady, uiI18n.resolvedLanguage]);
 
   // meds/reminders (light placeholder list)
   const [reminders, setReminders] = useState([]);
@@ -1639,7 +1642,7 @@ export default function App() {
       name: 'Metformina',
       strength: '500mg',
       strengthValue: '500',
-      strengthUnit: 'Mg',
+      strengthUnit: uiI18n.t("reminders.units.mg"),
       status: 'taking',
       times: ['08:00', '20:00'],
       startDate: '2024-01-15',
@@ -1648,7 +1651,7 @@ export default function App() {
       dosesLeft: '0',
       quantity: '0 tablet',
       quantityValue: '0',
-      quantityUnit: 'Tablet',
+      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
       remainingQuantity: '0',
       lastRefill: null,
       isSingleComponent: true
@@ -1658,7 +1661,7 @@ export default function App() {
       name: 'Aspirina',
       strength: '100Mg',
       strengthValue: '100',
-      strengthUnit: 'Mg',
+      strengthUnit: uiI18n.t("reminders.units.mg"),
       status: 'taking',
       times: ['17:30'],
       startDate: '2024-01-01',
@@ -1667,7 +1670,7 @@ export default function App() {
       dosesLeft: '30',
       quantity: '30 tablet',
       quantityValue: '30',
-      quantityUnit: 'Tablet',
+      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
       remainingQuantity: '30',
       lastRefill: null,
       isSingleComponent: true
@@ -1686,7 +1689,7 @@ export default function App() {
       notes: '',
       dosesLeft: '0',
       quantity: '0',
-      quantityUnit: 'Tablet',
+      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
       remainingQuantity: '0',
       refillSoon: false,
       lastRefill: null
@@ -1703,7 +1706,7 @@ export default function App() {
       notes: '',
       dosesLeft: '0',
       quantity: '0',
-      quantityUnit: 'Tablet',
+      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
       remainingQuantity: '0',
       refillSoon: false,
       lastRefill: null
@@ -1729,9 +1732,9 @@ async function handleAskMedical() {
   try {
     setMedLoading(true);
     const answer = await askMedicalAI(q);   // calls ./src/api/API.Medical-AI
-    setMedAnswer(answer || 'I could not find an answer.');
+    setMedAnswer(answer || uiI18n.t("ui.iCouldNotFindAnAnswer"));
   } catch (e) {
-    Alert.alert('AI error', 'Could not get an answer right now.');
+    Alert.alert(uiI18n.t("ui.aiError"), uiI18n.t("ui.couldNotGetAnAnswerRightNow"));
   } finally {
     setMedLoading(false);
   }
@@ -1810,7 +1813,7 @@ useEffect(() => {
         }
       } catch (error) {
         console.error('❌ Error loading pharmacies:', error);
-        setPharmaciesError('Failed to load pharmacies');
+        setPharmaciesError(uiI18n.t("ui.failedToLoadPharmacies"));
       } finally {
         setPharmaciesLoading(false);
       }
@@ -1836,7 +1839,7 @@ useEffect(() => {
         }
       } catch (error) {
         console.error('❌ Error loading labs:', error);
-        setLabsError('Failed to load labs');
+        setLabsError(uiI18n.t("ui.failedToLoadLabs"));
       } finally {
         setLabsLoading(false);
       }
@@ -1848,16 +1851,16 @@ useEffect(() => {
         setRefillCoords({ latitude: coords.latitude, longitude: coords.longitude });
         
         // Determine currency from country (same logic as refill modal)
-        let determinedCurrency = 'USD';
+        let determinedCurrency = uiI18n.t("common.usd");
         try {
           const geo = await Location.reverseGeocodeAsync({ latitude: coords.latitude, longitude: coords.longitude });
           const cc = geo?.[0]?.isoCountryCode?.toUpperCase();
           if (cc) {
             const C = {
               // North America
-              US:'USD', PR:'USD', CA:'CAD', MX:'MXN',
+              US:uiI18n.t("common.usd"), PR:uiI18n.t("common.usd"), CA:'CAD', MX:uiI18n.t("common.mxn"),
               // Latin America
-              BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:'USD', UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:'USD', DO:'DOP', PA:'PAB',
+              BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:uiI18n.t("common.usd"), UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:uiI18n.t("common.usd"), DO:'DOP', PA:'PAB',
               // Europe (Euro + others)
               ES:'EUR', PT:'EUR', FR:'EUR', DE:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', IE:'EUR', LU:'EUR', AT:'EUR', FI:'EUR', GR:'EUR', SK:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', MT:'EUR', CY:'EUR',
               PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', HR:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF', GB:'GBP', IS:'ISK', TR:'TRY',
@@ -1872,7 +1875,7 @@ useEffect(() => {
         
         // If geocode failed, use language fallback
         if (determinedCurrency === 'USD') {
-          determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
+          determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : uiI18n.t("common.usd"));
         }
         
         setRefillCurrency(determinedCurrency);
@@ -1886,7 +1889,7 @@ useEffect(() => {
         
       } catch (error) {
         console.error('❌ Error loading refill data:', error);
-        setRefillError('Failed to load refill data');
+        setRefillError(uiI18n.t("ui.failedToLoadRefillData"));
       } finally {
         setRefillLoading(false);
       }
@@ -2099,7 +2102,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     console.log('User data prepared for tool calling:', userData);
   } catch (error) {
     console.log('Error preparing user data:', error);
-    setAiMessages(m => [...m, { role: 'assistant', text: S.errorPreparingData || 'Error preparing your health data. Please try again.' }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: S.errorPreparingData || uiI18n.t("ai.errorPreparingData") }]);
     setAiSending(false);
     return;
   }
@@ -2110,7 +2113,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   console.log('API Base URL:', `${API_BASE}`);
   
   // Add immediate response
-  setAiMessages(m => [...m, { role: 'assistant', text: S.aiThinking || 'AI is thinking...' }]);
+  setAiMessages(m => [...m, { role: 'assistant', text: S.aiThinking || uiI18n.t("ai.aiThinking") }]);
   
   try {
     console.log('Sending question with user data for tool calling...');
@@ -2128,24 +2131,24 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       })
     });
     
-    if (!response.ok) throw new Error(`API returned ${response.status}`);
+    if (!response.ok) throw new Error(uiI18n.t("ui.apiReturnedValue", { value1: response.status }));
     
     const data = await response.json();
     console.log('Backend response:', data);
-    const reply = data.reply || 'No response received';
+    const reply = data.reply || uiI18n.t("ui.noResponseReceived");
     console.log('Got response with tool calling:', reply);
     
       setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
     } catch (err) {
     console.log('API Error:', err);
     // Provide a helpful response even if AI is down
-    let fallbackResponse = `API Error: ${err.message}. `;
+    let fallbackResponse = uiI18n.t("ui.apiErrorValue", { value1: err.message });
     if (q.toLowerCase().includes('aspirin')) {
-      fallbackResponse += 'However, I can tell you that aspirin is a common over-the-counter medication used to reduce pain, fever, and inflammation. It\'s also used in low doses to help prevent heart attacks and strokes. Please consult with a healthcare provider for medical advice.';
+      fallbackResponse += uiI18n.t("ui.howeverICanTellYouThatAspirinIsACommonOverTheCounterMedicationUsedToReducePainFeverAndInfl");
     } else if (q.toLowerCase().includes('aspirina')) {
       fallbackResponse += 'Aspirina es un medicamento común de venta libre usado para reducir el dolor, la fiebre y la inflamación. También se usa en dosis bajas para ayudar a prevenir ataques cardíacos y accidentes cerebrovasculares. Consulte con un proveedor de atención médica para obtener asesoramiento médico.';
     } else {
-      fallbackResponse += 'Please try again in a moment or consult with a healthcare provider for immediate medical questions.';
+      fallbackResponse += uiI18n.t("ui.pleaseTryAgainInAMomentOrConsultWithAHealthcareProviderForImmediateMedicalQuestions");
     }
     setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(fallbackResponse, selectedAIDoctor, lang) }]);
   } finally {
@@ -2276,9 +2279,9 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
             console.log('⚠️ User signed in without verified email, signing out...');
             await authService.signOut();
             showAlert({
-              title: 'Email Verification Required',
-              message: 'Please check your email (including spam folder) and click the verification link. Then return here to sign in.',
-              buttonText: 'OK',
+              title: uiI18n.t("ui.emailVerificationRequired"),
+              message: uiI18n.t("ui.pleaseCheckYourEmailIncludingSpamFolderAndClickTheVerificationLinkThenReturnHereToSignIn"),
+              buttonText: uiI18n.t("adminProfile.ok"),
             });
             return;
           }
@@ -2499,7 +2502,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
                       ? `${dbMed.quantity_value} ${dbMed.quantity_unit}` 
                       : '',
                     quantityValue: dbMed.quantity_value || '0',
-                    quantityUnit: dbMed.quantity_unit || 'Tablet',
+                    quantityUnit: dbMed.quantity_unit || uiI18n.t("medications.quantityUnits.tablet"),
                     remainingQuantity: dbMed.doses_left || '0',
                     lastRefill: dbMed.last_refill || null,
                     isSingleComponent: true, // Default for database meds
@@ -2568,7 +2571,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     }
   }, [user, showAuth]);
 
-  const theme = useMemo(() => ({ ...(PALETTES[themeKey] || PALETTES.black), ...(night ? darkColors : {}) }), [themeKey, night]);
+  const theme = useMemo(() => ({ ...(PALETTES[themeKey] || PALETTES.black), ...(night ? darkColors : {}) }), [themeKey, night, uiI18n.resolvedLanguage]);
   const [introComplete, setIntroComplete] = useState(false);
 
   // --------- Helpers ----------
@@ -2629,11 +2632,11 @@ const handleAskMedicalAI = async () => {
       
       // Default to metric for other countries
       console.log('🌍 Detected as other country (using metric)');
-      return 'OTHER';
+      return uiI18n.t("reminders.other");
     } catch (error) {
       console.log('Error detecting country:', error);
       console.log('🌍 Country detection failed, defaulting to metric');
-      return 'OTHER'; // Default to metric
+      return uiI18n.t("reminders.other"); // Default to metric
     }
   };
 
@@ -2641,7 +2644,7 @@ const handleAskMedicalAI = async () => {
   async function openPharmaciesNearMe() {
     try {
       const { status } = await requestSearchLocationPermission();
-      if (status !== 'granted') return Alert.alert('Location denied', 'Enable location to search nearby pharmacies.');
+      if (status !== 'granted') return Alert.alert(uiI18n.t("common.alerts.locationDenied"), uiI18n.t("common.alerts.enableLocation"));
       const { coords } = await Location.getCurrentPositionAsync({});
       const q = encodeURIComponent('pharmacy');
       const url = Platform.select({
@@ -2651,14 +2654,14 @@ const handleAskMedicalAI = async () => {
       });
       Linking.openURL(url);
     } catch (e) {
-      Alert.alert('Map error', 'Could not open maps.');
+      Alert.alert(uiI18n.t("ui.mapError"), uiI18n.t("ui.couldNotOpenMaps"));
     }
   }
 
   // --------- Prescription: pick image & create simple PDF ----------
   async function addRxPhoto() {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') return Alert.alert('Camera needed', 'Please allow camera.');
+    if (status !== 'granted') return Alert.alert(uiI18n.t("ui.cameraNeeded"), uiI18n.t("ui.pleaseAllowCamera"));
     const photo = await ImagePicker.launchCameraAsync({ quality: 1 });
     if (!photo.canceled) {
       const uri = photo.assets?.[0]?.uri;
@@ -2667,14 +2670,14 @@ const handleAskMedicalAI = async () => {
   }
 
   async function exportRxToPDF() {
-    if (rxPhotos.length === 0) return Alert.alert('No photos', 'Add at least one prescription photo.');
+    if (rxPhotos.length === 0) return Alert.alert(uiI18n.t("ui.noPhotos"), uiI18n.t("ui.addAtLeastOnePrescriptionPhoto"));
     const imgs = rxPhotos.map(p => `<div style="margin:12px 0"><img src="${p.uri}" style="width:100%"/></div>`).join('');
     const html = `<html><body>${imgs}</body></html>`;
     const { uri } = await Print.printToFileAsync({ html });
     if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'Share prescription PDF' });
+      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: uiI18n.t("ui.sharePrescriptionPdf") });
     } else {
-      Alert.alert('PDF saved', uri);
+      Alert.alert(uiI18n.t("ui.pdfSaved"), uri);
     }
   }
 
@@ -2708,7 +2711,7 @@ const handleAskMedicalAI = async () => {
       }
     } catch (e) {
       setIsRecording(false);
-      Alert.alert('Recording error');
+      Alert.alert(uiI18n.t("ui.recordingError"));
     }
   }
 
@@ -2735,10 +2738,10 @@ const handleAskMedicalAI = async () => {
       body: JSON.stringify({ message: q }),
     });
     const data = await res.json();
-    const reply = data?.reply || 'Sorry—no response.';
+    const reply = data?.reply || uiI18n.t("common.noResponse");
     setAiMessages(m => [...m, { role: 'assistant', text: addCatExpressions(reply, selectedAIDoctor, lang) }]);
   } catch (e) {
-    setAiMessages(m => [...m, { role: 'assistant', text: S.networkError || 'Network error. Try again.' }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: S.networkError || uiI18n.t("ai.networkError") }]);
   }
 }
 
@@ -2803,7 +2806,7 @@ const handleAskMedicalAI = async () => {
   // final return (inside the App function)
   return !fontsLoaded ? (
   <View style={{ flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'#222' }}>
-    <Text style={{ color:'#fff' }}>Loading...</Text>
+    <Text style={{ color:'#fff' }}>{uiI18n.t("common.loading")}</Text>
   </View>
 ) : (
   <AppProviders theme={theme}>
@@ -2817,12 +2820,8 @@ const handleAskMedicalAI = async () => {
     {/* Authentication Screen - Show first */}
         {isRestoringAuth ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
-            <Text style={{ color: '#D4AF37', fontSize: 18, fontFamily: 'Inter_600SemiBold', marginBottom: 20 }}>
-              🔄 Restoring your session...
-            </Text>
-            <Text style={{ color: '#D4AF37', fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7, textAlign: 'center', paddingHorizontal: 40, marginBottom: 20 }}>
-              Checking if you're already signed in
-            </Text>
+            <Text style={{ color: '#D4AF37', fontSize: 18, fontFamily: 'Inter_600SemiBold', marginBottom: 20 }}>{uiI18n.t("ui.restoringYourSession")}</Text>
+            <Text style={{ color: '#D4AF37', fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.7, textAlign: 'center', paddingHorizontal: 40, marginBottom: 20 }}>{uiI18n.t("ui.checkingIfYouReAlreadySignedIn")}</Text>
             <ActivityIndicator size="large" color="#D4AF37" />
           </View>
         ) : isLoading ? (
@@ -2879,14 +2878,14 @@ const handleAskMedicalAI = async () => {
             <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold', marginRight: 8 }}>
               {(() => {
                 const names = {
-                  'alfred': S.drAlfred || 'Alfred',
-                  'mimi': S.drMimi || 'Mimi',
-                  'pawlmer': S.pawlmer || 'Pawlmer'
+                  'alfred': S.drAlfred || uiI18n.t("ai.drAlfred"),
+                  'mimi': S.drMimi || uiI18n.t("ai.drMimi"),
+                  'pawlmer': S.pawlmer || uiI18n.t("ai.pawlmer")
                 };
-                return names[selectedAIDoctor] || (S.drAlfred || 'Alfred');
+                return names[selectedAIDoctor] || (S.drAlfred || uiI18n.t("ai.drAlfred"));
               })()}
             </Text>
-            <Text accessibilityLabel={lang === 'es' ? 'Asistente de IA' : 'AI assistant'} style={{ fontSize: 32 }}>{selectedAIDoctor === 'pawlmer' ? '\u{1F431}' : '\u{1F4AC}'}</Text>
+            <Text accessibilityLabel={uiI18n.t("localized.AppController.text2888")} style={{ fontSize: 32 }}>{selectedAIDoctor === uiI18n.t("ai.pawlmer") ? '\u{1F431}' : '\u{1F4AC}'}</Text>
         </View>
         <TouchableOpacity onPress={() => setAiOpen(false)}>
           <Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>✕</Text>
@@ -2933,7 +2932,7 @@ const handleAskMedicalAI = async () => {
               ]}
             >
               <TypingEffect 
-                text={S.aiThinking || "AI is thinking..."}
+                text={S.aiThinking || uiI18n.t("ai.aiThinking")}
                 speed={100}
                 style={{ color: theme.sub, fontFamily: 'Inter_400Regular', fontStyle: 'italic' }}
                 showCursor={true}
@@ -2961,7 +2960,7 @@ const handleAskMedicalAI = async () => {
           ref={aiInputRef}
           value={aiInput}
           onChangeText={setAiInput}
-          placeholder="Ask about medications, pharmacies…"
+          placeholder={uiI18n.t("ai.placeholder")}
           placeholderTextColor={theme.sub}
             onSubmitEditing={() => sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fastingProfile, pharmacies, labs, userCountry)}
           autoCapitalize="none"
@@ -2994,20 +2993,19 @@ const handleAskMedicalAI = async () => {
             disabled={aiSending || streamLoading}
           >
             <Text style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }}>
-              {streamLoading ? '...' : 'Send'}
+              {streamLoading ? '...' : uiI18n.t("common.send")}
             </Text>
         </PremiumButton>
         {streamLoading ? (
           <TouchableOpacity style={[styles.aiBtn, { backgroundColor: theme.card, borderWidth:1, borderColor: theme.chip }]} onPress={streamCancel}>
-            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>Stop</Text>
+            <Text style={{ color: theme.text, fontFamily: 'Inter_800ExtraBold' }}>{uiI18n.t("appointments.stop")}</Text>
           </TouchableOpacity>
         ) : null}
         </View>
       </View>
 
       <Text style={{ color: theme.sub, fontSize: 12, marginTop: 4, textAlign: 'center', fontFamily: 'Inter_400Regular' }}>
-        {S.tapToTalk}: (voice input wired in next build)
-      </Text>
+        {S.tapToTalk}{uiI18n.t("ai.voiceNote")}</Text>
     </View>
   </View></KeyboardForm>
     </Modal>
@@ -3017,7 +3015,7 @@ const handleAskMedicalAI = async () => {
       visible={!!alert}
       title={alert?.title || ''}
       message={alert?.message || ''}
-      buttonText={alert?.buttonText || 'OK'}
+      buttonText={alert?.buttonText || uiI18n.t("adminProfile.ok")}
       onPress={handlePress}
     />
 

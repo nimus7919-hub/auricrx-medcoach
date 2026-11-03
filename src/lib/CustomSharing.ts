@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { Platform, Linking, Share, Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
@@ -32,7 +33,7 @@ export class CustomSharing {
       console.log('📧 Doctor email:', doctor.email);
 
       if (!doctor.email) {
-        throw new Error('Doctor email not available');
+        throw new Error(uiI18n.t("ui.doctorEmailNotAvailable"));
       }
 
       // Copy file to a more accessible location
@@ -53,7 +54,7 @@ export class CustomSharing {
             type: options.mimeType || 'application/pdf',
             data: `file://${shareableUri}`,
             extra: {
-              'android.intent.extra.SUBJECT': options.title || `Medical Document: ${options.fileName}`,
+              'android.intent.extra.SUBJECT': options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
               'android.intent.extra.TEXT': options.message,
               'android.intent.extra.EMAIL': [doctor.email],
             },
@@ -72,7 +73,7 @@ export class CustomSharing {
             type: options.mimeType || 'application/pdf',
             data: shareableUri,
             extra: {
-              'android.intent.extra.SUBJECT': options.title || `Medical Document: ${options.fileName}`,
+              'android.intent.extra.SUBJECT': options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
               'android.intent.extra.TEXT': options.message,
               'android.intent.extra.EMAIL': [doctor.email],
             },
@@ -91,7 +92,7 @@ export class CustomSharing {
             type: options.mimeType || 'application/pdf',
             data: shareableUri,
             extra: {
-              'android.intent.extra.SUBJECT': options.title || `Medical Document: ${options.fileName}`,
+              'android.intent.extra.SUBJECT': options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
               'android.intent.extra.TEXT': options.message,
               'android.intent.extra.EMAIL': [doctor.email],
             },
@@ -110,7 +111,7 @@ export class CustomSharing {
             type: options.mimeType || 'application/pdf',
             data: contentUri,
             extra: {
-              'android.intent.extra.SUBJECT': options.title || `Medical Document: ${options.fileName}`,
+              'android.intent.extra.SUBJECT': options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
               'android.intent.extra.TEXT': options.message,
               'android.intent.extra.EMAIL': [doctor.email],
             },
@@ -129,7 +130,7 @@ export class CustomSharing {
         if (isAvailable) {
           await Sharing.shareAsync(shareableUri, {
             mimeType: options.mimeType || 'application/pdf',
-            dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+            dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue", { value1: doctor.name }),
           });
           console.log('✅ CustomSharing: Gmail opened via expo-sharing');
           return true;
@@ -141,7 +142,7 @@ export class CustomSharing {
       // Final fallback to Share.share
       const shareResult = await Share.share({
         url: shareableUri,
-        title: options.title || `Medical Document: ${options.fileName}`,
+        title: options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
         message: options.message,
       });
 
@@ -150,7 +151,7 @@ export class CustomSharing {
         return true;
       }
 
-      throw new Error('All sharing methods failed');
+      throw new Error(uiI18n.t("ui.allSharingMethodsFailed"));
     } catch (error) {
       console.error('❌ CustomSharing: Failed to share to Gmail:', error);
       return false;
@@ -167,7 +168,7 @@ export class CustomSharing {
       console.log('📱 Doctor phone:', doctor.phoneNumber);
 
       if (!doctor.phoneNumber) {
-        throw new Error('Doctor phone number not available');
+        throw new Error(uiI18n.t("ui.doctorPhoneNumberNotAvailable"));
       }
 
       // Copy file to a more accessible location
@@ -194,7 +195,7 @@ export class CustomSharing {
             data: shareableUri,
             extra: {
               'android.intent.extra.TEXT': `${options.message}\n\nPhone: ${phoneNumber}`,
-              'android.intent.extra.SUBJECT': `Medical Document: ${options.fileName}`,
+              'android.intent.extra.SUBJECT': uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
             },
           });
           console.log('✅ CustomSharing: Sharing dialog opened with WhatsApp option (Method 1)');
@@ -214,7 +215,7 @@ export class CustomSharing {
             data: shareableUri,
             extra: {
               'android.intent.extra.TEXT': `${options.message}\n\nPhone: ${phoneNumber}`,
-              'android.intent.extra.SUBJECT': `Medical Document: ${options.fileName}`,
+              'android.intent.extra.SUBJECT': uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
             },
             packageName: 'com.whatsapp',
           });
@@ -231,7 +232,7 @@ export class CustomSharing {
           if (isAvailable) {
             await Sharing.shareAsync(shareableUri, {
               mimeType: 'application/pdf',
-              dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+              dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue_cd6195", { value1: doctor.name }),
             });
             console.log('✅ CustomSharing: File shared via expo-sharing (Method 3)');
             return true;
@@ -259,11 +260,11 @@ export class CustomSharing {
             // Show an alert to guide the user to attach the file
             setTimeout(() => {
               Alert.alert(
-                '📎 Attach File',
-                'WhatsApp is now open to your doctor\'s chat. Please tap the attachment button (📎) and select "Document" to attach the PDF file.',
+                uiI18n.t("ui.attachFile"),
+                uiI18n.t("ui.whatsappIsNowOpenToYourDoctorSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThe"),
                 [
                   {
-                    text: 'Got it!',
+                    text: uiI18n.t("ui.gotIt"),
                     style: 'default'
                   }
                 ]
@@ -313,7 +314,7 @@ export class CustomSharing {
                 if (isAvailable) {
                   await Sharing.shareAsync(shareableUri, {
                     mimeType: options.mimeType || 'application/pdf',
-                    dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+                    dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue_cd6195", { value1: doctor.name }),
                   });
                   console.log('✅ CustomSharing: File shared to WhatsApp after opening chat (Method 3)');
                 }
@@ -345,11 +346,11 @@ export class CustomSharing {
             // Show an alert to guide the user to attach the file
             setTimeout(() => {
               Alert.alert(
-                '📎 Attach File',
-                'WhatsApp is now open to your doctor\'s chat. Please tap the attachment button (📎) and select "Document" to attach the PDF file.',
+                uiI18n.t("ui.attachFile"),
+                uiI18n.t("ui.whatsappIsNowOpenToYourDoctorSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThe"),
                 [
                   {
-                    text: 'Got it!',
+                    text: uiI18n.t("ui.gotIt"),
                     style: 'default'
                   }
                 ]
@@ -383,7 +384,7 @@ export class CustomSharing {
                 if (isAvailable) {
                   await Sharing.shareAsync(shareableUri, {
                     mimeType: options.mimeType || 'application/pdf',
-                    dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+                    dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue_cd6195", { value1: doctor.name }),
                   });
                   console.log('✅ CustomSharing: File shared after opening WhatsApp (Method 5)');
                 }
@@ -506,7 +507,7 @@ export class CustomSharing {
         console.log('📱 Method 12: Share.share with WhatsApp-specific message...');
         const shareResult = await Share.share({
           url: shareableUri,
-          title: options.title || `Medical Document: ${options.fileName}`,
+          title: options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
           message: `${options.message}\n\nWhatsApp: ${doctor.phoneNumber}`,
         });
 
@@ -524,7 +525,7 @@ export class CustomSharing {
         if (isAvailable) {
           await Sharing.shareAsync(shareableUri, {
             mimeType: options.mimeType || 'application/pdf',
-            dialogTitle: `Share Medical Document with Dr. ${doctor.name} via WhatsApp`,
+            dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValueViaWhatsapp", { value1: doctor.name }),
           });
           console.log('✅ CustomSharing: WhatsApp opened via expo-sharing');
           return true;
@@ -536,7 +537,7 @@ export class CustomSharing {
       // Final fallback to Share.share
       const shareResult = await Share.share({
         url: shareableUri,
-        title: options.title || `Medical Document: ${options.fileName}`,
+        title: options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
         message: options.message,
       });
 
@@ -545,7 +546,7 @@ export class CustomSharing {
         return true;
       }
 
-      throw new Error('All sharing methods failed');
+      throw new Error(uiI18n.t("ui.allSharingMethodsFailed"));
     } catch (error) {
       console.error('❌ CustomSharing: Failed to share to WhatsApp:', error);
       return false;
@@ -562,7 +563,7 @@ export class CustomSharing {
       console.log('📱 Doctor phone:', doctor.phoneNumber);
 
       if (!doctor.phoneNumber) {
-        throw new Error('Doctor phone number not available');
+        throw new Error(uiI18n.t("ui.doctorPhoneNumberNotAvailable"));
       }
 
       // Copy file to a more accessible location
@@ -592,7 +593,7 @@ export class CustomSharing {
                 if (isAvailable) {
                   await Sharing.shareAsync(shareableUri, {
                     mimeType: options.mimeType || 'application/pdf',
-                    dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+                    dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue_cd6195", { value1: doctor.name }),
                   });
                   console.log('✅ CustomSharing: File shared to WhatsApp after opening contact');
                 }
@@ -638,7 +639,7 @@ export class CustomSharing {
         if (isAvailable) {
           await Sharing.shareAsync(shareableUri, {
             mimeType: options.mimeType || 'application/pdf',
-            dialogTitle: options.title || `Share ${options.fileName}`,
+            dialogTitle: options.title || uiI18n.t("ui.shareValue_9519d8", { value1: options.fileName }),
           });
           console.log('✅ CustomSharing: Generic sharing via expo-sharing');
           return true;
@@ -650,7 +651,7 @@ export class CustomSharing {
       // Fallback to Share.share
       const shareResult = await Share.share({
         url: shareableUri,
-        title: options.title || `Medical Document: ${options.fileName}`,
+        title: options.title || uiI18n.t("ui.medicalDocumentValue_ab9331", { value1: options.fileName }),
         message: options.message,
       });
 
@@ -659,7 +660,7 @@ export class CustomSharing {
         return true;
       }
 
-      throw new Error('All sharing methods failed');
+      throw new Error(uiI18n.t("ui.allSharingMethodsFailed"));
     } catch (error) {
       console.error('❌ CustomSharing: Failed to share generically:', error);
       return false;

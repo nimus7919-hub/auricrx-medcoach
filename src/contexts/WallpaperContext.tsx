@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { darkColors } from '../theme/colors';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,6 +32,7 @@ interface WallpaperProviderProps {
 }
 
 export function WallpaperProvider({ children, theme = darkColors }: WallpaperProviderProps) {
+  useUILanguage();
   const [currentWallpaper, setCurrentWallpaper] = useState<WallpaperOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,7 +54,7 @@ export function WallpaperProvider({ children, theme = darkColors }: WallpaperPro
         // Set default wallpaper to Black Silver for new users
         const defaultWallpaper: WallpaperOption = {
           id: 'black_silver',
-          name: 'Black Silver',
+          name: uiI18n.t("wallpaper.blackSilver"),
           type: 'image',
           value: 'Black Silver.png'
         };
@@ -63,7 +66,7 @@ export function WallpaperProvider({ children, theme = darkColors }: WallpaperPro
       // Set default wallpaper even on error
       const defaultWallpaper: WallpaperOption = {
         id: 'black_silver',
-        name: 'Black Silver',
+        name: uiI18n.t("wallpaper.blackSilver"),
         type: 'image',
         value: 'Black Silver.png'
       };

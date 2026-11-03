@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -39,6 +42,7 @@ interface DocumentItem {
 }
 
 const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigation }) => {
+  useUILanguage();
   const { t } = useTranslation();
   const { getCardBackgroundColor, getCardTextColor } = useWallpaper();
   
@@ -153,7 +157,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       }
     } catch (error) {
       console.error('Failed to upload document:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to upload document');
+      Alert.alert('❌ ' + t("common.error"), uiI18n.t("medicalDocuments.uploadFailed"));
     } finally {
       setIsProcessing(false);
     }
@@ -165,15 +169,15 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       triggerHaptic('medium');
       
       Alert.alert(
-        '🗑️ ' + t('delete'),
-        `Are you sure you want to delete "${document.name}"?`,
+        '🗑️ ' + t("common.delete"),
+        uiI18n.t("ui.areYouSureYouWantToDeleteValue", { value1: document.name }),
         [
           {
-            text: t('cancel'),
+            text: t("common.cancel"),
             style: 'cancel'
           },
           {
-            text: t('delete'),
+            text: t("common.delete"),
             style: 'destructive',
             onPress: async () => {
               await FileSystem.deleteAsync(document.uri);
@@ -185,7 +189,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       );
     } catch (error) {
       console.error('Failed to delete document:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to delete document');
+      Alert.alert('❌ ' + t("common.error"), uiI18n.t("medicalDocuments.deleteFailed"));
     }
   };
 
@@ -215,14 +219,14 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       if (isAvailable) {
         await Sharing.shareAsync(shareableUri, {
           mimeType: document.mimeType,
-          dialogTitle: `Share ${document.name}`,
+          dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
         });
       } else {
-        Alert.alert('❌ ' + t('error'), 'Sharing not available on this device');
+        Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.sharingNotAvailableOnThisDevice"));
       }
     } catch (error) {
       console.error('Failed to share to email:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share to email');
+      Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToShareToEmail"));
     }
   };
 
@@ -238,14 +242,14 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       if (isAvailable) {
         await Sharing.shareAsync(shareableUri, {
           mimeType: document.mimeType,
-          dialogTitle: `Share ${document.name}`,
+          dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
         });
       } else {
-        Alert.alert('❌ ' + t('error'), 'Sharing not available on this device');
+        Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.sharingNotAvailableOnThisDevice"));
       }
     } catch (error) {
       console.error('Failed to share to all apps:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share to all apps');
+      Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToShareToAllApps"));
     }
   };
 
@@ -531,7 +535,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
       <View style={[dynamicStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#3B82F6" />
         <DynamicText type="card" style={{ marginTop: 16, fontSize: 16 }}>
-          {t('loading')}...
+          {t("common.loading")}...
         </DynamicText>
       </View>
     );
@@ -561,7 +565,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
               />
             </TouchableOpacity>
             <DynamicText type="card" style={dynamicStyles.title}>
-              {t('medicalDocuments')}
+              {t("medicalDocuments.title")}
             </DynamicText>
           </View>
 
@@ -571,18 +575,14 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
             disabled={isProcessing}
           >
             <DynamicText type="card" style={dynamicStyles.uploadButtonText}>
-              {isProcessing ? '⏳ Uploading...' : '📁 Upload Document'}
+              {isProcessing ? uiI18n.t("medicalDocuments.uploading") : uiI18n.t("medicalDocuments.uploadDocument")}
             </DynamicText>
           </TouchableOpacity>
 
           {documents.length === 0 ? (
             <View style={{ alignItems: 'center', marginTop: 50 }}>
-              <DynamicText type="card" style={{ fontSize: 18, marginBottom: 8 }}>
-                📁 No documents yet
-              </DynamicText>
-              <DynamicText type="card" style={{ fontSize: 14, textAlign: 'center', opacity: 0.7 }}>
-                Tap "Upload Document" to add your first medical document
-              </DynamicText>
+              <DynamicText type="card" style={{ fontSize: 18, marginBottom: 8 }}>{uiI18n.t("medicalDocuments.noDocumentsYet")}</DynamicText>
+              <DynamicText type="card" style={{ fontSize: 14, textAlign: 'center', opacity: 0.7 }}>{uiI18n.t("medicalDocuments.uploadFirstDocument")}</DynamicText>
             </View>
           ) : (
             documents.map(renderDocumentItem)
@@ -638,8 +638,7 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
                 >
                   <DynamicText type="card" style={dynamicStyles.closeButtonText}>✕</DynamicText>
                 </TouchableOpacity>
-                <DynamicText type="card" style={dynamicStyles.modalTitle}>
-                  Share "{selectedDocument.name}"
+                <DynamicText type="card" style={dynamicStyles.modalTitle}>{uiI18n.t("medicalDocuments.share")}{selectedDocument.name}"
                 </DynamicText>
                 <View style={{ width: 30 }} />
               </View>
@@ -652,8 +651,8 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
                 >
                   <DynamicText type="card" style={dynamicStyles.sharingOptionIcon}>📧</DynamicText>
                   <View style={dynamicStyles.sharingOptionText}>
-                    <DynamicText type="card" style={dynamicStyles.sharingOptionTitle}>Send to Email</DynamicText>
-                    <DynamicText type="card" style={dynamicStyles.sharingOptionSubtitle}>Send via email</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.sharingOptionTitle}>{uiI18n.t("ui.sendToEmail")}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.sharingOptionSubtitle}>{uiI18n.t("ui.sendViaEmail")}</DynamicText>
                   </View>
                 </TouchableOpacity>
 
@@ -664,8 +663,8 @@ const MedicalDocumentsScreen: React.FC<MedicalDocumentsScreenProps> = ({ navigat
                 >
                   <DynamicText type="card" style={dynamicStyles.sharingOptionIcon}>📤</DynamicText>
                   <View style={dynamicStyles.sharingOptionText}>
-                    <DynamicText type="card" style={dynamicStyles.sharingOptionTitle}>Share</DynamicText>
-                    <DynamicText type="card" style={dynamicStyles.sharingOptionSubtitle}>Share with all apps</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.sharingOptionTitle}>{uiI18n.t("medicalDocuments.share")}</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.sharingOptionSubtitle}>{uiI18n.t("ui.shareWithAllApps")}</DynamicText>
                   </View>
                 </TouchableOpacity>
               </View>

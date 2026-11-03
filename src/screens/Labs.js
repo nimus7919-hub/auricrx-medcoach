@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
 import { requestSearchLocationPermission } from "./../lib/locationPermission";
 import { useState } from "react";
@@ -10,6 +12,7 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createLabs(getScope) {
   return () => {
+  useUILanguage();
     const { lang, labs, setLabs, labsLoading, setLabsLoading, labsError, setLabsError, S, theme, userCountry, Header } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
@@ -28,7 +31,7 @@ export default function createLabs(getScope) {
         
         const { status } = await requestSearchLocationPermission();
         if (status !== 'granted') {
-          setLabsError('Location permission denied. Please enable location services.');
+          setLabsError(uiI18n.t("ui.locationPermissionDeniedPleaseEnableLocationServices"));
           return;
         }
         
@@ -49,7 +52,7 @@ export default function createLabs(getScope) {
         console.log('🧪 Refreshed labs:', labsWithTests.length);
       } catch (e) {
         console.error('Error refreshing labs:', e);
-        setLabsError('Failed to refresh labs. Please try again.');
+        setLabsError(uiI18n.t("ui.failedToRefreshLabsPleaseTryAgain"));
       } finally {
         setLabsLoading(false);
       }
@@ -98,10 +101,10 @@ export default function createLabs(getScope) {
         console.log('❌ No phone number found for lab:', lab.name);
         // Show alert if no phone number available
         Alert.alert(
-          'Phone Not Available',
-          `No phone number found for ${lab.name}. Please try calling them directly or visit their website.`,
+          uiI18n.t("ui.phoneNotAvailable"),
+          uiI18n.t("ui.noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite", { value1: lab.name }),
           [
-            { text: 'OK', style: 'cancel' }
+            { text: uiI18n.t("adminProfile.ok"), style: 'cancel' }
           ]
         );
         return;
@@ -114,15 +117,15 @@ export default function createLabs(getScope) {
       const phoneUrl = `tel:${cleanPhoneNumber}`;
       
       Alert.alert(
-        'Call Lab',
-        `Call ${lab.name}?\n${phoneNumber}`,
+        uiI18n.t("ui.callLab"),
+        uiI18n.t("ui.callValueValue", { value1: lab.name, value2: phoneNumber }),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
           { 
-            text: 'Call', 
+            text: uiI18n.t("labs.buttons.call"), 
             onPress: () => {
               Linking.openURL(phoneUrl).catch(() => {
-                Alert.alert('Error', 'Unable to make phone call');
+                Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("common.pharmacy.callError"));
               });
             }
           }
@@ -163,15 +166,15 @@ export default function createLabs(getScope) {
 
     const getTestTypeDescription = (testType) => {
       const descriptions = {
-        'blood-work': 'Complete blood count, metabolic panels, lipid profiles, thyroid function, diabetes screening, vitamin levels, and more.',
-        'imaging': 'X-rays, MRI, CT scans, ultrasounds, mammography, bone density tests, and other diagnostic imaging.',
-        'cardiac': 'EKG/ECG, stress tests, echocardiograms, Holter monitoring, and other heart-related diagnostics.',
-        'pathology': 'Biopsies, cytology, histology, cancer screening, tumor markers, and genetic testing.',
-        'infectious-disease': 'COVID-19 testing, flu tests, STD screening, hepatitis panels, HIV testing, and tuberculosis tests.',
-        'allergy': 'Allergy testing, food allergy panels, environmental allergy tests, patch testing, and RAST testing.',
-        'specialty': 'Sleep studies, pulmonary function tests, neurological testing, endocrinology, rheumatology, and dermatology tests.'
+        'blood-work': uiI18n.t("ui.completeBloodCountMetabolicPanelsLipidProfilesThyroidFunctionDiabetesScreeningVitaminLevel"),
+        'imaging': uiI18n.t("ui.xRaysMriCtScansUltrasoundsMammographyBoneDensityTestsAndOtherDiagnosticImaging"),
+        'cardiac': uiI18n.t("ui.ekgEcgStressTestsEchocardiogramsHolterMonitoringAndOtherHeartRelatedDiagnostics"),
+        'pathology': uiI18n.t("ui.biopsiesCytologyHistologyCancerScreeningTumorMarkersAndGeneticTesting"),
+        'infectious-disease': uiI18n.t("ui.covid19TestingFluTestsStdScreeningHepatitisPanelsHivTestingAndTuberculosisTests"),
+        'allergy': uiI18n.t("ui.allergyTestingFoodAllergyPanelsEnvironmentalAllergyTestsPatchTestingAndRastTesting"),
+        'specialty': uiI18n.t("ui.sleepStudiesPulmonaryFunctionTestsNeurologicalTestingEndocrinologyRheumatologyAndDermatolo")
       };
-      return descriptions[testType] || 'Various medical tests and diagnostics available.';
+      return descriptions[testType] || uiI18n.t("ui.variousMedicalTestsAndDiagnosticsAvailable");
     };
 
     return (
@@ -183,8 +186,8 @@ export default function createLabs(getScope) {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, flex: 1, opacity: 0.8 }}>
               {labs.length > 0 
-                ? (S.foundLabs || 'Found {count} labs nearby').replace('{count}', labs.length)
-                : (S.findNearbyLabs || 'Find nearby labs')
+                ? (S.foundLabs || uiI18n.t("labs.foundLabs")).replace('{count}', labs.length)
+                : (S.findNearbyLabs || uiI18n.t("labs.findNearbyLabs"))
               }
             </DynamicText>
             <PremiumButton 
@@ -289,16 +292,12 @@ export default function createLabs(getScope) {
             ))
           ) : !labsLoading && !labsError ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <DynamicText type="card" style={{ fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>
-                No labs loaded yet
-              </DynamicText>
+              <DynamicText type="card" style={{ fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular', opacity: 0.7 }}>{uiI18n.t("ui.noLabsLoadedYet")}</DynamicText>
               <PremiumButton 
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
                 onPress={refreshLabs}
               >
-                <DynamicText type="card" style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
-                  Find Nearby Labs
-                </DynamicText>
+                <DynamicText type="card" style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{uiI18n.t("labs.findNearbyLabs")}</DynamicText>
               </PremiumButton>
             </View>
           ) : null}

@@ -1,3 +1,5 @@
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
@@ -6,6 +8,7 @@ import { API_BASE } from '../src/config/api';
 
 const MedicationAutocomplete = forwardRef(function MedicationAutocomplete(
   { value, onChangeText, onSelect, enabled = true, onFocus, onBlur, style, ...props }, ref) {
+  useUILanguage();
   const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const [items, setItems] = useState([]);
@@ -22,7 +25,7 @@ const MedicationAutocomplete = forwardRef(function MedicationAutocomplete(
       setStatus('loading');
       try {
         const response = await fetch(`${API_BASE}/api/meds/search?q=${encodeURIComponent(value.trim())}`, { signal: controller.signal });
-        if (!response.ok) throw new Error('Search unavailable');
+        if (!response.ok) throw new Error(uiI18n.t("ui.searchUnavailable"));
         const result = await response.json();
         if (active) { setItems(Array.isArray(result) ? result : []); setStatus(result.length ? '' : 'empty'); }
       } catch { if (active) setStatus('unavailable'); }

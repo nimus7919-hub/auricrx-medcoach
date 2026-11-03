@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -29,15 +32,11 @@ interface SmartNotificationsScreenProps {
 }
 
 export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNotificationsScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
   
   // Create translation function from S object
-  const t = (key: string) => {
-    if (S && typeof S === 'object' && S[key]) {
-      return S[key];
-    }
-    return key; // fallback to key if translation not found
-  };
+  const { t } = useScreenTranslation();
   
   // Default theme if not provided
   const defaultTheme = {
@@ -298,7 +297,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
     
     if (!smartService) {
       console.error('❌ Smart service not available');
-      Alert.alert('❌ ' + t('error'), t('smartServiceNotAvailable'));
+      Alert.alert('❌ ' + t("common.error"), t("settings.smartServiceNotAvailable"));
       return;
     }
     
@@ -313,15 +312,15 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
     }
     
     Alert.prompt(
-      '📍 ' + t('addLocationReminder'),
-      t('enterLocationName'),
+      '📍 ' + t("settings.addLocationReminder"),
+      t("reminders.enterLocationName"),
       async (name) => {
         console.log('📍 Location name entered:', name);
         if (!name) return;
         
         Alert.prompt(
-          '📝 ' + t('reminderMessage'),
-          t('reminderMessagePrompt'),
+          '📝 ' + t("reminders.reminderMessage"),
+          t("reminders.reminderMessagePrompt"),
           async (message) => {
             console.log('📝 Message entered:', message);
             if (!message) return;
@@ -342,10 +341,10 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
               console.log('✅ Location reminder created:', newReminder);
               setLocationReminders(prev => [...prev, newReminder]);
               triggerHaptic('medium');
-              Alert.alert('✅ ' + t('success'), t('locationReminderAdded'));
+              Alert.alert('✅ ' + t("common.success"), t("settings.locationReminderAdded"));
             } catch (error) {
               console.error('Failed to add location reminder:', error);
-              Alert.alert('❌ ' + t('error'), t('failedToAddLocationReminder'));
+              Alert.alert('❌ ' + t("common.error"), t("settings.failedToAddLocationReminder"));
             }
           }
         );
@@ -355,7 +354,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
 
   const addWeatherAlert = async () => {
     if (!smartService) {
-      Alert.alert('❌ ' + t('error'), t('smartServiceNotAvailable'));
+      Alert.alert('❌ ' + t("common.error"), t("settings.smartServiceNotAvailable"));
       return;
     }
     
@@ -364,7 +363,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
 
   const createWeatherAlert = async (condition: 'pollen' | 'temperature' | 'humidity' | 'air_quality', message: string) => {
     if (!smartService) {
-      Alert.alert('❌ ' + t('error'), t('smartServiceNotAvailable'));
+      Alert.alert('❌ ' + t("common.error"), t("settings.smartServiceNotAvailable"));
       return;
     }
     
@@ -379,22 +378,22 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
       
       setWeatherAlerts(prev => [...prev, newAlert]);
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t('success'), t('weatherAlertAdded'));
+      Alert.alert('✅ ' + t("common.success"), t("settings.weatherAlertAdded"));
     } catch (error) {
       console.error('Failed to add weather alert:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToAddWeatherAlert'));
+      Alert.alert('❌ ' + t("common.error"), t("settings.failedToAddWeatherAlert"));
     }
   };
 
   const deleteLocationReminder = async (id: string) => {
     triggerHaptic('heavy');
     Alert.alert(
-      t('deleteReminder'),
-      t('deleteReminderConfirm'),
+      t("common.deleteReminder"),
+      t("common.deleteReminderConfirm"),
       [
-        { text: t('cancel'), style: 'cancel' },
+        { text: t("common.cancel"), style: 'cancel' },
         { 
-          text: t('delete'), 
+          text: t("common.delete"), 
           style: 'destructive',
           onPress: async () => {
             try {
@@ -405,7 +404,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
               triggerHaptic('medium');
             } catch (error) {
               console.error('Failed to delete location reminder:', error);
-              Alert.alert('❌ ' + t('error'), t('failedToDeleteReminder'));
+              Alert.alert('❌ ' + t("common.error"), t("common.failedToDeleteReminder"));
             }
           }
         }
@@ -416,7 +415,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
   const handleLocationInputSubmit = async () => {
     if (!smartService) return;
     if (!locationInput.name.trim() || !locationInput.message.trim()) {
-      Alert.alert('❌ ' + t('error'), t('fillBothFields'));
+      Alert.alert('❌ ' + t("common.error"), t("common.fillBothFields"));
       return;
     }
 
@@ -436,32 +435,32 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
       setShowLocationInputModal(false);
       setLocationInput({ name: '', message: '' });
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t('success'), t('reminderAdded'));
+      Alert.alert('✅ ' + t("common.success"), t("common.reminderAdded"));
     } catch (error) {
       console.error('Failed to add location reminder:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToAddReminder'));
+      Alert.alert('❌ ' + t("common.error"), t("common.failedToAddReminder"));
     }
   };
 
   const getWeatherAlertName = (condition: string) => {
     switch (condition) {
-      case 'pollen': return t('pollenAlert');
-      case 'temperature': return t('temperatureAlert');
-      case 'humidity': return t('humidityAlert');
-      case 'air_quality': return t('airQualityAlert');
-      default: return condition.charAt(0).toUpperCase() + condition.slice(1) + ' Alert';
+      case 'pollen': return t("settings.pollenAlert");
+      case 'temperature': return t("settings.temperatureAlert");
+      case 'humidity': return t("settings.humidityAlert");
+      case 'air_quality': return t("settings.airQualityAlert");
+      default: return condition.charAt(0).toUpperCase() + condition.slice(1) + uiI18n.t("ui.alert");
     }
   };
 
   const deleteWeatherAlert = async (id: string) => {
     triggerHaptic('heavy');
     Alert.alert(
-      t('deleteAlert'),
-      t('deleteAlertConfirm'),
+      t("common.deleteAlert"),
+      t("common.deleteAlertConfirm"),
       [
-        { text: t('cancel'), style: 'cancel' },
+        { text: t("common.cancel"), style: 'cancel' },
         { 
-          text: t('delete'), 
+          text: t("common.delete"), 
           style: 'destructive',
           onPress: async () => {
             try {
@@ -472,7 +471,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
               triggerHaptic('medium');
             } catch (error) {
               console.error('Failed to delete weather alert:', error);
-              Alert.alert('❌ ' + t('error'), t('failedToDeleteAlert'));
+              Alert.alert('❌ ' + t("common.error"), t("common.failedToDeleteAlert"));
             }
           }
         }
@@ -490,9 +489,9 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📍 {t('locationBasedReminders')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📍 {t("settings.locationBasedReminders")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('locationBasedRemindersDesc')}
+        {t("settings.locationBasedRemindersDesc")}
       </DynamicText>
       
       {locationReminders.length > 0 ? (
@@ -501,7 +500,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
             <View style={dynamicStyles.reminderInfo}>
               <DynamicText type="card" style={dynamicStyles.reminderName}>{reminder.name}</DynamicText>
               <DynamicText type="card" style={dynamicStyles.reminderDetails}>
-                {reminder.radius}m radius • {reminder.enabled ? t('active') : t('disabled')}
+                {reminder.radius}{uiI18n.t("ui.mRadius")}{reminder.enabled ? t("settings.active") : t("settings.disabled")}
               </DynamicText>
             </View>
             <TouchableOpacity
@@ -517,7 +516,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         ))
       ) : (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noLocationReminders')}
+          {t("settings.noLocationReminders")}
         </DynamicText>
       )}
       
@@ -525,7 +524,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         style={dynamicStyles.addButton}
         onPress={addLocationReminder}
       >
-        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t('addLocationReminder')}</DynamicText>
+        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t("settings.addLocationReminder")}</DynamicText>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -540,9 +539,9 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>🌤️ {t('weatherBasedAlerts')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>🌤️ {t("settings.weatherBasedAlerts")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('weatherBasedAlertsDesc')}
+        {t("settings.weatherBasedAlertsDesc")}
       </DynamicText>
       
       {weatherAlerts.length > 0 ? (
@@ -551,12 +550,12 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
             <View style={dynamicStyles.reminderInfo}>
               <DynamicText type="card" style={dynamicStyles.reminderName}>
                 {alert.weatherCondition === 'pollen' ? '🌼' : 
-                 alert.weatherCondition === 'temperature' ? '🌡️' :
+                 alert.weatherCondition === uiI18n.t("healthAnalytics.temperature") ? '🌡️' :
                  alert.weatherCondition === 'humidity' ? '💧' : '🌫️'} 
                 {getWeatherAlertName(alert.weatherCondition)}
               </DynamicText>
               <DynamicText type="card" style={dynamicStyles.reminderDetails}>
-                {t('threshold')}: {alert.threshold} • {alert.enabled ? t('active') : t('disabled')}
+                {t("settings.threshold")}: {alert.threshold} • {alert.enabled ? t("settings.active") : t("settings.disabled")}
               </DynamicText>
             </View>
             <TouchableOpacity
@@ -572,7 +571,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         ))
       ) : (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noWeatherAlerts')}
+          {t("settings.noWeatherAlerts")}
         </DynamicText>
       )}
       
@@ -580,7 +579,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         style={dynamicStyles.addButton}
         onPress={addWeatherAlert}
       >
-        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t('addWeatherAlert')}</DynamicText>
+        <DynamicText type="card" style={dynamicStyles.addButtonText}>+ {t("settings.addWeatherAlert")}</DynamicText>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -595,16 +594,16 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>🧠 {t('smartFeatures')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>🧠 {t("settings.smartFeatures")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('smartFeaturesDesc')}
+        {t("settings.smartFeaturesDesc")}
       </DynamicText>
       
       <View style={dynamicStyles.settingRow}>
         <View style={{ flex: 1 }}>
-          <DynamicText type="card" style={dynamicStyles.settingLabel}>{t('smartRefillPredictions')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.settingLabel}>{t("settings.smartRefillPredictions")}</DynamicText>
           <DynamicText type="card" style={dynamicStyles.settingDescription}>
-            {t('smartRefillPredictionsDesc')}
+            {t("settings.smartRefillPredictionsDesc")}
           </DynamicText>
         </View>
         <Switch
@@ -617,9 +616,9 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
       
       <View style={dynamicStyles.settingRow}>
         <View style={{ flex: 1 }}>
-          <DynamicText type="card" style={dynamicStyles.settingLabel}>{t('intelligentTiming')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.settingLabel}>{t("settings.intelligentTiming")}</DynamicText>
           <DynamicText type="card" style={dynamicStyles.settingDescription}>
-            {t('intelligentTimingDesc')}
+            {t("settings.intelligentTimingDesc")}
           </DynamicText>
         </View>
         <Switch
@@ -632,9 +631,9 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
       
       <View style={dynamicStyles.settingRow}>
         <View style={{ flex: 1 }}>
-          <DynamicText type="card" style={dynamicStyles.settingLabel}>{t('contextAwareReminders')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.settingLabel}>{t("settings.contextAwareReminders")}</DynamicText>
           <DynamicText type="card" style={dynamicStyles.settingDescription}>
-            {t('contextAwareRemindersDesc')}
+            {t("settings.contextAwareRemindersDesc")}
           </DynamicText>
         </View>
         <Switch
@@ -686,10 +685,10 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
             ]}
           >
             <DynamicText type="primary" style={styles.title}>
-              🧠 {t('smartNotifications')}
+              🧠 {t("reminders.smartNotifications")}
             </DynamicText>
             <DynamicText type="secondary" style={styles.subtitle}>
-              {t('smartNotificationsDesc')}
+              {t("settings.smartNotificationsDesc")}
             </DynamicText>
           </Animated.View>
 
@@ -708,7 +707,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
               { backgroundColor: isInitialized ? '#10b981' : '#ef4444' }
             ]} />
             <DynamicText type="primary" style={dynamicStyles.statusText}>
-              {isInitialized ? t('smartNotificationsActive') : t('initializing')}
+              {isInitialized ? t("settings.smartNotificationsActive") : t("settings.initializing")}
             </DynamicText>
           </Animated.View>
 
@@ -733,7 +732,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         <KeyboardForm><View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0' }]}><ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
             <DynamicText type="primary" style={styles.modalTitle}>
-              📍 {t('addLocationReminderTitle')}
+              📍 {t("common.addLocationReminderTitle")}
             </DynamicText>
             
             <TextInput
@@ -742,7 +741,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
                 color: '#ffffff',
                 borderColor: getCardBorderColor() 
               }]}
-              placeholder={t('locationNamePlaceholder')}
+              placeholder={t("common.locationNamePlaceholder")}
               placeholderTextColor="#ffffff80"
               value={locationInput.name}
               onChangeText={(text) => setLocationInput(prev => ({ ...prev, name: text }))}
@@ -754,7 +753,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
                 color: '#ffffff',
                 borderColor: getCardBorderColor() 
               }]}
-              placeholder={t('reminderMessagePlaceholder')}
+              placeholder={t("common.reminderMessagePlaceholder")}
               placeholderTextColor="#ffffff80"
               value={locationInput.message}
               onChangeText={(text) => setLocationInput(prev => ({ ...prev, message: text }))}
@@ -767,14 +766,14 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
                 style={[styles.modalButton, { backgroundColor: getCardBackgroundColor() + '80' }]}
                 onPress={() => setShowLocationInputModal(false)}
               >
-                <DynamicText type="card" style={styles.modalButtonText}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={styles.modalButtonText}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: currentTheme.accent + 'CC' }]}
                 onPress={handleLocationInputSubmit}
               >
-                <DynamicText type="card" style={[styles.modalButtonText, { color: '#fff' }]}>{t('add')}</DynamicText>
+                <DynamicText type="card" style={[styles.modalButtonText, { color: '#fff' }]}>{t("common.add")}</DynamicText>
               </TouchableOpacity>
             </View>
           </ScrollView></View>
@@ -791,51 +790,51 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'F0' }]}>
             <DynamicText type="primary" style={styles.modalTitle}>
-              🌤️ {t('addWeatherAlertTitle')}
+              🌤️ {t("common.addWeatherAlertTitle")}
             </DynamicText>
             
             <DynamicText type="secondary" style={[styles.modalDescription, { marginBottom: 20 }]}>
-              {t('chooseWeatherCondition')}
+              {t("common.chooseWeatherCondition")}
             </DynamicText>
             
             <TouchableOpacity
               style={[styles.weatherOption, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor() }]}
               onPress={() => {
                 setShowWeatherModal(false);
-                createWeatherAlert('pollen', t('pollenMessage'));
+                createWeatherAlert('pollen', t("settings.pollenMessage"));
               }}
             >
-              <DynamicText type="card" style={styles.weatherOptionText}>🌼 {t('highPollen')}</DynamicText>
+              <DynamicText type="card" style={styles.weatherOptionText}>🌼 {t("common.highPollen")}</DynamicText>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={[styles.weatherOption, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor() }]}
               onPress={() => {
                 setShowWeatherModal(false);
-                createWeatherAlert('temperature', t('temperatureMessage'));
+                createWeatherAlert('temperature', t("settings.temperatureMessage"));
               }}
             >
-              <DynamicText type="card" style={styles.weatherOptionText}>🌡️ {t('extremeTemperature')}</DynamicText>
+              <DynamicText type="card" style={styles.weatherOptionText}>🌡️ {t("common.extremeTemperature")}</DynamicText>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={[styles.weatherOption, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor() }]}
               onPress={() => {
                 setShowWeatherModal(false);
-                createWeatherAlert('humidity', t('humidityMessage'));
+                createWeatherAlert('humidity', t("settings.humidityMessage"));
               }}
             >
-              <DynamicText type="card" style={styles.weatherOptionText}>💧 {t('highHumidity')}</DynamicText>
+              <DynamicText type="card" style={styles.weatherOptionText}>💧 {t("common.highHumidity")}</DynamicText>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={[styles.weatherOption, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor() }]}
               onPress={() => {
                 setShowWeatherModal(false);
-                createWeatherAlert('air_quality', t('airQualityMessage'));
+                createWeatherAlert('air_quality', t("settings.airQualityMessage"));
               }}
             >
-              <DynamicText type="card" style={styles.weatherOptionText}>🌫️ {t('poorAirQuality')}</DynamicText>
+              <DynamicText type="card" style={styles.weatherOptionText}>🌫️ {t("common.poorAirQuality")}</DynamicText>
             </TouchableOpacity>
             
             <View style={styles.modalButtons}>
@@ -843,7 +842,7 @@ export default function SmartNotificationsScreen({ onClose, theme, S }: SmartNot
                 style={[styles.modalButton, { backgroundColor: getCardBackgroundColor() + '80' }]}
                 onPress={() => setShowWeatherModal(false)}
               >
-                <DynamicText type="card" style={styles.modalButtonText}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={styles.modalButtonText}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>

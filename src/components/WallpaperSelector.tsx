@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -27,18 +30,18 @@ interface WallpaperOption {
 
 const WALLPAPER_OPTIONS: WallpaperOption[] = [
   // Solid colors
-  { id: 'solid_white', name: 'White', type: 'color', value: '#FFFFFF' },
-  { id: 'solid_black', name: 'Black', type: 'color', value: '#000000' },
+  { id: 'solid_white', get name() { return uiI18n.t("wallpaper.white"); }, type: 'color', value: '#FFFFFF' },
+  { id: 'solid_black', get name() { return uiI18n.t("wallpaper.black"); }, type: 'color', value: '#000000' },
   
   // Wallpaper images
-  { id: 'black_gold_dr', name: 'Black Gold Dr.', type: 'image', value: 'Black Gold Dr..png' },
-  { id: 'black_gold', name: 'Black Gold', type: 'image', value: 'Black Gold.png' },
-  { id: 'black_silver', name: 'Black Silver', type: 'image', value: 'Black Silver.png' },
-  { id: 'bold_cream', name: 'Bold Cream', type: 'image', value: 'Bold Cream.png' },
-  { id: 'cream_wallpaper', name: 'Cream Wallpaper', type: 'image', value: 'Cream Wallpaper.png' },
-  { id: 'dark_cream', name: 'Dark Cream', type: 'image', value: 'Dark Cream.png' },
-  { id: 'dark_green_gold', name: 'Dark Green-Gold', type: 'image', value: 'Dark Green-Gold.png' },
-  { id: 'white_gold_dr', name: 'White Gold Dr.', type: 'image', value: 'White Gold Dr..png' },
+  { id: 'black_gold_dr', get name() { return uiI18n.t("wallpaper.blackGoldDr"); }, type: 'image', value: 'Black Gold Dr..png' },
+  { id: 'black_gold', get name() { return uiI18n.t("wallpaper.blackGold"); }, type: 'image', value: 'Black Gold.png' },
+  { id: 'black_silver', get name() { return uiI18n.t("wallpaper.blackSilver"); }, type: 'image', value: 'Black Silver.png' },
+  { id: 'bold_cream', get name() { return uiI18n.t("wallpaper.boldCream"); }, type: 'image', value: 'Bold Cream.png' },
+  { id: 'cream_wallpaper', get name() { return uiI18n.t("wallpaper.creamWallpaper"); }, type: 'image', value: 'Cream Wallpaper.png' },
+  { id: 'dark_cream', get name() { return uiI18n.t("wallpaper.darkCream"); }, type: 'image', value: 'Dark Cream.png' },
+  { id: 'dark_green_gold', get name() { return uiI18n.t("wallpaper.darkGreenGold"); }, type: 'image', value: 'Dark Green-Gold.png' },
+  { id: 'white_gold_dr', get name() { return uiI18n.t("wallpaper.whiteGoldDr"); }, type: 'image', value: 'White Gold Dr..png' },
 ];
 
 interface WallpaperSelectorProps {
@@ -49,26 +52,27 @@ interface WallpaperSelectorProps {
 }
 
 export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange }: WallpaperSelectorProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const { t } = useScreenTranslation();
   
   // Function to get translated wallpaper name
   const getTranslatedWallpaperName = (wallpaper: WallpaperOption) => {
     const nameMap: { [key: string]: string } = {
-      'solid_white': t('white'),
-      'solid_black': t('black'),
-      'black_gold_dr': t('blackGoldDr'),
-      'black_gold': t('blackGold'),
-      'black_silver': t('blackSilver'),
-      'bold_cream': t('boldCream'),
-      'cream_wallpaper': t('creamWallpaper'),
-      'dark_cream': t('darkCream'),
-      'dark_green_gold': t('darkGreenGold'),
-      'white_gold_dr': t('whiteGoldDr'),
+      'solid_white': t("wallpaper.white"),
+      'solid_black': t("wallpaper.black"),
+      'black_gold_dr': t("wallpaper.blackGoldDr"),
+      'black_gold': t("wallpaper.blackGold"),
+      'black_silver': t("wallpaper.blackSilver"),
+      'bold_cream': t("wallpaper.boldCream"),
+      'cream_wallpaper': t("wallpaper.creamWallpaper"),
+      'dark_cream': t("wallpaper.darkCream"),
+      'dark_green_gold': t("wallpaper.darkGreenGold"),
+      'white_gold_dr': t("wallpaper.whiteGoldDr"),
     };
     return nameMap[wallpaper.id] || wallpaper.name;
   };
@@ -106,10 +110,10 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
         onWallpaperChange(wallpaper);
       }
       
-      Alert.alert('✅ ' + t('wallpaperSuccess'), t('wallpaperChangedSuccessfully'));
+      Alert.alert('✅ ' + t("wallpaper.success"), t("wallpaper.wallpaperChangedSuccessfully"));
     } catch (error) {
       console.error('Failed to save wallpaper:', error);
-      Alert.alert('❌ ' + t('wallpaperError'), t('failedToSaveWallpaper'));
+      Alert.alert('❌ ' + t("wallpaper.error"), t("wallpaper.failedToSaveWallpaper"));
     }
   };
 
@@ -194,7 +198,7 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
     return (
       <View style={styles.container}>
         <DynamicText type="card" style={styles.loadingText}>
-          {t('loadingWallpapers')}
+          {t("wallpaper.loadingWallpapers")}
         </DynamicText>
       </View>
     );
@@ -221,7 +225,7 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
           />
         </TouchableOpacity>
         <DynamicText type="primary" style={styles.title}>
-          {t('chooseWallpaper')}
+          {t("wallpaper.chooseWallpaper")}
         </DynamicText>
         <View style={styles.placeholder} />
       </View>
@@ -232,14 +236,14 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
         contentContainerStyle={styles.scrollContent}
       >
         <DynamicText type="card" style={[styles.sectionTitle, { opacity: 0.7 }]}>
-          {t('solidColors')}
+          {t("wallpaper.solidColors")}
         </DynamicText>
         <View style={styles.wallpaperGrid}>
           {WALLPAPER_OPTIONS.filter(w => w.type === 'color').map(renderWallpaperOption)}
         </View>
 
         <DynamicText type="card" style={[styles.sectionTitle, { opacity: 0.7 }]}>
-          {t('wallpaperImages')}
+          {t("wallpaper.wallpaperImages")}
         </DynamicText>
         <View style={styles.wallpaperGrid}>
           {WALLPAPER_OPTIONS.filter(w => w.type === 'image').map(renderWallpaperOption)}

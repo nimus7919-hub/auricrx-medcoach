@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, FlatList, Image, Alert, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -6,13 +8,14 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 
 export default function DocumentsCard() {
+  useUILanguage();
   const [items, setItems] = useState<Array<{ id: string; uri: string }>>([]);
 
   useEffect(() => {
     (async () => {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission required", "Camera permission is required to scan documents.");
+        Alert.alert(uiI18n.t("ui.permissionRequired"), uiI18n.t("ui.cameraPermissionIsRequiredToScanDocuments"));
       }
     })();
   }, []);
@@ -26,7 +29,7 @@ export default function DocumentsCard() {
         setItems((s) => [{ id, uri }, ...s]);
       }
     } catch (e) {
-      Alert.alert("Error", String(e));
+      Alert.alert(uiI18n.t("adminProfile.error"), String(e));
     }
   };
 
@@ -39,7 +42,7 @@ export default function DocumentsCard() {
         setItems((s) => [{ id, uri }, ...s]);
       }
     } catch (e) {
-      Alert.alert("Error", String(e));
+      Alert.alert(uiI18n.t("adminProfile.error"), String(e));
     }
   };
 
@@ -49,7 +52,7 @@ export default function DocumentsCard() {
 
   const exportPdf = async () => {
     if (items.length === 0) {
-      Alert.alert("No documents", "Add or scan images first.");
+      Alert.alert(uiI18n.t("ui.noDocuments"), uiI18n.t("ui.addOrScanImagesFirst"));
       return;
     }
 
@@ -72,10 +75,10 @@ export default function DocumentsCard() {
       const dest = FileSystem.documentDirectory + `documents-${Date.now()}.pdf`;
       await FileSystem.copyAsync({ from: pdfUri, to: dest });
 
-      Alert.alert("PDF created", `Saved to: ${dest}`);
+      Alert.alert(uiI18n.t("ui.pdfCreated"), uiI18n.t("ui.savedToValue", { value1: dest }));
       return { pdfUri: dest };
     } catch (e) {
-      Alert.alert("Export error", String(e));
+      Alert.alert(uiI18n.t("ui.exportError"), String(e));
     }
   };
 
@@ -85,34 +88,34 @@ export default function DocumentsCard() {
     try {
       await shareAsync(res.pdfUri, { mimeType: 'application/pdf' });
     } catch (e) {
-      Alert.alert('Share failed', String(e));
+      Alert.alert(uiI18n.t("ui.shareFailed"), String(e));
     }
   };
 
   const downloadPdf = async () => {
     const res = await exportPdf();
     if (!res || !res.pdfUri) return;
-    Alert.alert('Download', `PDF saved to: ${res.pdfUri}`);
+    Alert.alert(uiI18n.t("ui.download"), uiI18n.t("ui.pdfSavedToValue", { value1: res.pdfUri }));
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Documents (mobile)</Text>
+      <Text style={styles.title}>{uiI18n.t("ui.documentsMobile")}</Text>
 
       <View style={styles.row}>
-        <Button title="Scan (camera)" onPress={takePhoto} />
+        <Button title={uiI18n.t("ui.scanCamera")} onPress={takePhoto} />
         <View style={styles.spacer} />
-        <Button title="Upload" onPress={pickFromLibrary} />
+        <Button title={uiI18n.t("ui.upload")} onPress={pickFromLibrary} />
       </View>
 
       <View style={{ height: 12 }} />
 
       <View style={styles.row}>
-        <Button title="Export PDF" onPress={exportPdf} />
+        <Button title={uiI18n.t("documents.exportPDF")} onPress={exportPdf} />
         <View style={styles.spacer} />
-        <Button title="Share PDF" onPress={sharePdf} />
+        <Button title={uiI18n.t("ui.sharePdf")} onPress={sharePdf} />
         <View style={styles.spacer} />
-        <Button title="Download" onPress={downloadPdf} />
+        <Button title={uiI18n.t("ui.download")} onPress={downloadPdf} />
       </View>
 
       <View style={{ height: 12 }} />
@@ -124,11 +127,11 @@ export default function DocumentsCard() {
           <View style={styles.item}>
             <Image source={{ uri: item.uri }} style={styles.image} />
             <View style={styles.itemButtons}>
-              <Button title="Delete" onPress={() => removeItem(item.id)} />
+              <Button title={uiI18n.t("ai.delete")} onPress={() => removeItem(item.id)} />
             </View>
           </View>
         )}
-        ListEmptyComponent={<Text style={{ color: '#666' }}>No pages yet — scan or upload images.</Text>}
+        ListEmptyComponent={<Text style={{ color: '#666' }}>{uiI18n.t("ui.noPagesYetScanOrUploadImages")}</Text>}
       />
     </View>
   );

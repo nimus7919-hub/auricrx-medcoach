@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { parseReminderTime } from './reminderTime';
 /**
  * Centralized time formatting utility
@@ -69,12 +70,12 @@ export function formatTime(
     // Handle timestamp
     date = new Date(input);
   } else {
-    throw new Error('Invalid time input');
+    throw new Error(uiI18n.t("ui.invalidTimeInput"));
   }
 
   // Validate date
   if (isNaN(date.getTime())) {
-    throw new Error('Invalid date');
+    throw new Error(uiI18n.t("ui.invalidDate"));
   }
 
   // Determine the actual format to use
@@ -160,7 +161,7 @@ export const TIME_FORMATS = {
 
 // Export format labels for UI
 export const TIME_FORMAT_LABELS = {
-  system: 'Use device setting',
-  '12h': '12-hour (AM/PM)',
+  get system() { return uiI18n.t("settings.useDeviceSetting"); },
+  get '12h'() { return uiI18n.t("settings.twelveHour"); },
   '24h': '24-hour',
 } as const;

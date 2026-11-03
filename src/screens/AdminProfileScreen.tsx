@@ -1,3 +1,6 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
+import { useTranslation as useScreenTranslation } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 // src/screens/AdminProfileScreen.tsx
 // Admin profile management screen
@@ -29,11 +32,12 @@ interface AdminProfileScreenProps {
 }
 
 export default function AdminProfileScreen({ onClose, currentUser, theme, S, onNavigateToSettings }: AdminProfileScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const { alert, showAlert, handlePress } = useCustomAlert();
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const { t } = useScreenTranslation();
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
     displayName: currentUser?.displayName || '',
@@ -172,9 +176,9 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
   const handleUpdateProfile = async () => {
     if (!profile.displayName.trim()) {
       showAlert({
-        title: t('error'),
-        message: t('displayNameRequired'),
-        buttonText: t('ok'),
+        title: t("adminProfile.error"),
+        message: t("adminProfile.displayNameRequired"),
+        buttonText: t("adminProfile.ok"),
       });
       return;
     }
@@ -186,26 +190,26 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
       setTimeout(() => {
         setLoading(false);
         showAlert({
-          title: t('success'),
-          message: t('profileUpdatedSuccessfully'),
-          buttonText: t('ok'),
+          title: t("adminProfile.success"),
+          message: t("adminProfile.profileUpdatedSuccessfully"),
+          buttonText: t("adminProfile.ok"),
         });
       }, 2000);
     } catch (error) {
       setLoading(false);
       showAlert({
-        title: t('error'),
-        message: t('failedToUpdateProfile'),
-        buttonText: t('ok'),
+        title: t("adminProfile.error"),
+        message: t("adminProfile.failedToUpdateProfile"),
+        buttonText: t("adminProfile.ok"),
       });
     }
   };
 
   const handleChangePassword = () => {
     showAlert({
-      title: t('changePasswordTitle'),
-      message: t('passwordResetMessage'),
-      buttonText: t('sendResetEmail'),
+      title: t("adminProfile.changePasswordTitle"),
+      message: t("adminProfile.passwordResetMessage"),
+      buttonText: t("adminProfile.sendResetEmail"),
       onPress: handlePasswordReset,
     });
   };
@@ -213,9 +217,9 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
   const handlePasswordReset = async () => {
     if (!profile.email) {
       showAlert({
-        title: t('error'),
-        message: t('emailRequiredForReset'),
-        buttonText: t('ok'),
+        title: t("adminProfile.error"),
+        message: t("adminProfile.emailRequiredForReset"),
+        buttonText: t("adminProfile.ok"),
       });
       return;
     }
@@ -225,22 +229,22 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
       const result = await authService.resetPassword(profile.email);
       if (result.success) {
         showAlert({
-          title: t('success'),
-          message: t('passwordResetEmailSent'),
-          buttonText: t('ok'),
+          title: t("adminProfile.success"),
+          message: t("adminProfile.passwordResetEmailSent"),
+          buttonText: t("adminProfile.ok"),
         });
       } else {
         showAlert({
-          title: t('error'),
+          title: t("adminProfile.error"),
           message: result.error,
-          buttonText: t('ok'),
+          buttonText: t("adminProfile.ok"),
         });
       }
     } catch (error) {
       showAlert({
-        title: t('error'),
-        message: t('failedToSendResetEmail'),
-        buttonText: t('ok'),
+        title: t("adminProfile.error"),
+        message: t("adminProfile.failedToSendResetEmail"),
+        buttonText: t("adminProfile.ok"),
       });
     } finally {
       setLoading(false);
@@ -249,29 +253,29 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
 
   const handleDeleteAccount = () => {
     showAlert({
-      title: t('deleteAccountTitle'),
-      message: t('deleteAccountMessage'),
-      buttonText: t('deleteAccount'),
+      title: t("adminProfile.deleteAccountTitle"),
+      message: t("adminProfile.deleteAccountMessage"),
+      buttonText: t("adminProfile.deleteAccount"),
       onPress: confirmDeleteAccount,
     });
   };
 
   const confirmDeleteAccount = () => {
     showAlert({
-      title: t('confirmDeletion'),
-      message: t('confirmDeletionMessage'),
-      buttonText: t('yesDeleteForever'),
+      title: t("adminProfile.confirmDeletion"),
+      message: t("adminProfile.confirmDeletionMessage"),
+      buttonText: t("adminProfile.yesDeleteForever"),
       onPress: async () => {
         setLoading(true);
         try {
         await authService.deleteAccount();
         showAlert({
-          title: t('accountDeleted'),
-          message: t('accountDeletedMessage'),
-          buttonText: t('ok'),
+          title: t("adminProfile.accountDeleted"),
+          message: t("adminProfile.accountDeletedMessage"),
+          buttonText: t("adminProfile.ok"),
         });
         } catch (error: any) {
-          showAlert({ title: t('error'), message: error.message, buttonText: t('ok') });
+          showAlert({ title: t("adminProfile.error"), message: error.message, buttonText: t("adminProfile.ok") });
         } finally { setLoading(false); }
       },
     });
@@ -288,14 +292,14 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
           </TouchableOpacity>
         </View>
 
-        <DynamicText type="primary" style={dynamicStyles.title}>{t('adminProfileTitle')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.title}>{t("adminProfile.adminProfileTitle")}</DynamicText>
 
 
         {/* Profile Form */}
         <View style={dynamicStyles.formContainer}>
           <TextInput
             style={dynamicStyles.input}
-            placeholder={t('displayName')}
+            placeholder={t("adminProfile.displayName")}
             placeholderTextColor={getCardTextColor() + '60'}
             value={profile.displayName}
             onChangeText={(text) => setProfile(prev => ({ ...prev, displayName: text }))}
@@ -303,7 +307,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
           
           <TextInput
             style={[dynamicStyles.input, { backgroundColor: getCardBackgroundColor() + '60' }]}
-            placeholder={t('email')}
+            placeholder={t("adminProfile.email")}
             placeholderTextColor={getCardTextColor() + '60'}
             value={profile.email}
             editable={false}
@@ -311,9 +315,9 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
           
           <TextInput
             style={[dynamicStyles.input, { backgroundColor: getCardBackgroundColor() + '60' }]}
-            placeholder={t('phoneNumber')}
+            placeholder={t("adminProfile.phoneNumber")}
             placeholderTextColor={getCardTextColor() + '60'}
-            value={currentUser?.phoneNumber || t('noPhoneNumber')}
+            value={currentUser?.phoneNumber || t("adminProfile.noPhoneNumber")}
             editable={false}
           />
 
@@ -322,14 +326,14 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
             onPress={handleUpdateProfile}
             disabled={loading}
           >
-            <DynamicText type="card" style={dynamicStyles.secondaryButtonText}>{t('updateProfile')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.secondaryButtonText}>{t("adminProfile.updateProfile")}</DynamicText>
           </TouchableOpacity>
         </View>
 
         {/* Security Settings */}
         <View style={dynamicStyles.formContainer}>
           <DynamicText type="card" style={dynamicStyles.sectionTitle}>
-            {t('securitySettings')}
+            {t("adminProfile.securitySettings")}
           </DynamicText>
           
           <TouchableOpacity
@@ -338,7 +342,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
             disabled={loading}
           >
             <DynamicText type="card" style={dynamicStyles.secondaryButtonText}>
-              {t('changePassword')}
+              {t("adminProfile.changePassword")}
             </DynamicText>
           </TouchableOpacity>
         </View>
@@ -351,7 +355,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
             disabled={loading}
           >
             <DynamicText type="card" style={dynamicStyles.buttonText}>
-              {t('deleteAccount')}
+              {t("adminProfile.deleteAccount")}
             </DynamicText>
           </TouchableOpacity>
         </View>
@@ -359,7 +363,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
         {loading && (
           <View style={dynamicStyles.loadingContainer}>
             <ActivityIndicator color={theme?.accent || '#D4AF37'} />
-            <DynamicText type="card" style={dynamicStyles.loadingText}>{t('processing')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.loadingText}>{t("adminProfile.processing")}</DynamicText>
           </View>
         )}
       </ScrollView>
@@ -369,7 +373,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
         visible={!!alert}
         title={alert?.title || ''}
         message={alert?.message || ''}
-        buttonText={alert?.buttonText || 'OK'}
+        buttonText={alert?.buttonText || uiI18n.t("adminProfile.ok")}
         onPress={handlePress}
       />
     </View></KeyboardForm>

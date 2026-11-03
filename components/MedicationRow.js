@@ -1,7 +1,10 @@
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 export default function MedicationRow({ time, name, onMark, onMissed, onLocate }) {
+  useUILanguage();
   return (
     <View style={styles.rowContainer}>
       <View style={styles.timeBadge}>
@@ -12,13 +15,13 @@ export default function MedicationRow({ time, name, onMark, onMissed, onLocate }
 
       <View style={styles.buttonGroup}>
         <TouchableOpacity style={styles.btn} onPress={onMark}>
-          <Text style={styles.btnText}>Mark</Text>
+          <Text style={styles.btnText}>{uiI18n.t("ui.mark")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.btn} onPress={onMissed}>
-          <Text style={styles.btnText}>Missed?</Text>
+          <Text style={styles.btnText}>{uiI18n.t("healthAnalytics.missed")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.btn, styles.locate]} onPress={onLocate}>
-          <Text style={styles.btnText}>Locate</Text>
+          <Text style={styles.btnText}>{uiI18n.t("ui.locate")}</Text>
         </TouchableOpacity>
       </View>
     </View>

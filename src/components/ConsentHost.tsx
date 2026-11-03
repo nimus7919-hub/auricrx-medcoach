@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Text, ScrollView, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
@@ -9,6 +11,7 @@ import authService from '../services/authService';
 import * as Notifications from 'expo-notifications';
 
 function ConsentButton({ title, disabled, onPress, primary = false, destructive = false }: any) {
+  useUILanguage();
   return <TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled: !!disabled }}
     disabled={disabled} onPress={onPress}
     style={[styles.button, primary && styles.primaryButton, disabled && styles.disabledButton]}>
@@ -17,6 +20,7 @@ function ConsentButton({ title, disabled, onPress, primary = false, destructive 
 }
 
 export default function ConsentHost({ language, user, privacyOpen, onPrivacyClose, onHealthConsentChange }: any) {
+  useUILanguage();
   const [visible, setVisible] = useState(false);
   const [choices, setChoices] = useState({ terms: false, privacy: false, health: false });
   const [method, setMethod] = useState('email');
@@ -78,7 +82,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
         onPrivacyClose();
         setChoices({ terms: false, privacy: false, health: false });
         await Notifications.cancelAllScheduledNotificationsAsync();
-        setError(es ? 'Consentimiento retirado. Las funciones de salud están bloqueadas hasta que vuelvas a consentir.' : 'Consent withdrawn. Health features are blocked until you consent again.');
+        setError(uiI18n.t("localized.ConsentHost.save.text85"));
       } else { onHealthConsentChange(choices.health); setVisible(false); onPrivacyClose(); resolvePrompt?.(); setResolvePrompt(null); setRejectPrompt(null); }
     } catch (e: any) { setError(e.message); }
     finally { setBusy(false); }
@@ -86,30 +90,30 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
   return <Modal visible={visible} onRequestClose={() => {}} animationType="slide">
     <KeyboardForm><ScrollView keyboardShouldPersistTaps="handled" style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.card}>
-      <Text accessibilityRole="header" style={styles.title}>{es ? 'Privacidad' : 'Privacy'}</Text>
-      {document ? <><Text style={styles.document}>{document}</Text><ConsentButton title={es ? 'Volver' : 'Back'} onPress={() => setDocument('')} /></> : <>
-        <ConsentButton title={es ? "Aviso de Privacidad / Política de Datos de Salud" : "Privacy Notice / Consumer Health Data Privacy Policy"} onPress={async () => setDocument(await loadPrivacyText(language))} />
+      <Text accessibilityRole="header" style={styles.title}>{uiI18n.t("localized.ConsentHost.text93")}</Text>
+      {document ? <><Text style={styles.document}>{document}</Text><ConsentButton title={uiI18n.t("localized.ConsentHost.text94")} onPress={() => setDocument('')} /></> : <>
+        <ConsentButton title={uiI18n.t("localized.ConsentHost.text95")} onPress={async () => setDocument(await loadPrivacyText(language))} />
         <ConsentChoices language={language} value={choices} onChange={setChoices} openLegal={async type => {
           try { setDocument(await (type === 'terms' ? loadTermsText(language) : loadPrivacyText(language))); }
-          catch { setError(es ? 'No se pudo abrir el documento.' : 'Could not open document.'); }
+          catch { setError(uiI18n.t("localized.ConsentHost.text98")); }
         }} />
-        <Text style={styles.description}>{es ? 'Términos y aviso requeridos para la cuenta. El consentimiento de salud es necesario antes de usar funciones de salud.' : 'Terms and notice are required for an account. Health consent is needed before using health features.'}</Text>
-        <ConsentButton primary title={es ? 'Continuar' : 'Continue'} disabled={busy || !choices.terms || !choices.privacy || (!!user && !choices.health)} onPress={() => save()} />
-        {!!user && <ConsentButton title={es ? 'Retirar consentimiento de salud' : 'Withdraw health consent'} disabled={busy} onPress={() => save(true)} />}
-        {!!user && <ConsentButton destructive title={es ? 'Eliminar cuenta' : 'Delete account'} disabled={busy} onPress={() => Alert.alert(
-          es ? 'Eliminar cuenta y datos' : 'Delete account and data',
-          es ? 'Esta acción es permanente.' : 'This action is permanent.',
-          [{ text: es ? 'Cancelar' : 'Cancel', style: 'cancel' }, { text: es ? 'Eliminar' : 'Delete', style: 'destructive', onPress: async () => {
+        <Text style={styles.description}>{uiI18n.t("localized.ConsentHost.text100")}</Text>
+        <ConsentButton primary title={uiI18n.t("localized.ConsentHost.text101")} disabled={busy || !choices.terms || !choices.privacy || (!!user && !choices.health)} onPress={() => save()} />
+        {!!user && <ConsentButton title={uiI18n.t("localized.ConsentHost.text102")} disabled={busy} onPress={() => save(true)} />}
+        {!!user && <ConsentButton destructive title={uiI18n.t("localized.ConsentHost.text103")} disabled={busy} onPress={() => Alert.alert(
+          uiI18n.t("localized.ConsentHost.text104"),
+          uiI18n.t("localized.ConsentHost.text105"),
+          [{ text: uiI18n.t("localized.ConsentHost.item0.text.text106"), style: 'cancel' }, { text: uiI18n.t("localized.ConsentHost.item1.text.text106"), style: 'destructive', onPress: async () => {
             setBusy(true);
-            try { await authService.deleteAccount(); setVisible(false); Alert.alert(es ? 'Cuenta eliminada' : 'Account deleted'); }
+            try { await authService.deleteAccount(); setVisible(false); Alert.alert(uiI18n.t("localized.ConsentHost.item1.onPress.text108")); }
             catch (e: any) { setError(e.message); }
             finally { setBusy(false); }
           } }]
         )} />}
-        <ConsentButton title={es ? 'Cerrar sesión' : 'Sign out'} disabled={busy} onPress={async () => {
-          await authService.signOut(); setVisible(false); rejectPrompt?.(new Error('Consent canceled')); setRejectPrompt(null); setResolvePrompt(null);
+        <ConsentButton title={uiI18n.t("localized.ConsentHost.text113")} disabled={busy} onPress={async () => {
+          await authService.signOut(); setVisible(false); rejectPrompt?.(new Error(uiI18n.t("ui.consentCanceled"))); setRejectPrompt(null); setResolvePrompt(null);
         }} />
-        {!!privacyOpen && <ConsentButton title={es ? 'Cerrar' : 'Close'} onPress={() => { setVisible(false); onPrivacyClose(); }} />}
+        {!!privacyOpen && <ConsentButton title={uiI18n.t("localized.ConsentHost.text116")} onPress={() => { setVisible(false); onPrivacyClose(); }} />}
         <Text style={styles.error}>{error}</Text>
       </>}
     </View>

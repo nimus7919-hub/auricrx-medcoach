@@ -1,3 +1,4 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
 import React, { useState } from 'react';
 import {
   View,
@@ -28,22 +29,22 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
   const [showSelector, setShowSelector] = useState(false);
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const { t } = useScreenTranslation();
   
   // Function to get translated wallpaper name
   const getTranslatedWallpaperName = (wallpaper: any) => {
-    if (!wallpaper) return t('default');
+    if (!wallpaper) return t("wallpaper.default");
     const nameMap: { [key: string]: string } = {
-      'solid_white': t('white'),
-      'solid_black': t('black'),
-      'black_gold_dr': t('blackGoldDr'),
-      'black_gold': t('blackGold'),
-      'black_silver': t('blackSilver'),
-      'bold_cream': t('boldCream'),
-      'cream_wallpaper': t('creamWallpaper'),
-      'dark_cream': t('darkCream'),
-      'dark_green_gold': t('darkGreenGold'),
-      'white_gold_dr': t('whiteGoldDr'),
+      'solid_white': t("wallpaper.white"),
+      'solid_black': t("wallpaper.black"),
+      'black_gold_dr': t("wallpaper.blackGoldDr"),
+      'black_gold': t("wallpaper.blackGold"),
+      'black_silver': t("wallpaper.blackSilver"),
+      'bold_cream': t("wallpaper.boldCream"),
+      'cream_wallpaper': t("wallpaper.creamWallpaper"),
+      'dark_cream': t("wallpaper.darkCream"),
+      'dark_green_gold': t("wallpaper.darkGreenGold"),
+      'white_gold_dr': t("wallpaper.whiteGoldDr"),
     };
     return nameMap[wallpaper.id] || wallpaper.name;
   };
@@ -90,7 +91,7 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
           />
         </TouchableOpacity>
           <DynamicText type="primary" style={styles.title}>
-            {t('wallpaperTitle')}
+            {t("wallpaper.title")}
           </DynamicText>
           <View style={styles.placeholder} />
         </View>
@@ -99,7 +100,7 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
         <View style={[styles.content, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]}>
           <View style={styles.section}>
             <DynamicText type="card" style={styles.sectionTitle}>
-              {t('currentWallpaper')}
+              {t("wallpaper.currentWallpaper")}
             </DynamicText>
             <View style={[styles.currentWallpaper, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor(), borderWidth: 1 }]}>
               <DynamicText type="card" style={[styles.currentWallpaperText, { opacity: 0.7 }]}>
@@ -113,31 +114,31 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
             onPress={() => setShowSelector(true)}
           >
             <DynamicText type="card" style={[styles.changeButtonText, { color: theme?.bg === '#ffffff' || theme?.bg === '#fefefe' ? '#000000' : '#ffffff' }]}>
-              {t('changeWallpaper')}
+              {t("wallpaper.changeWallpaper")}
             </DynamicText>
           </TouchableOpacity>
 
           <View style={styles.infoSection}>
             <DynamicText type="card" style={styles.infoTitle}>
-              {t('aboutWallpapers')}
+              {t("wallpaper.aboutWallpapers")}
             </DynamicText>
             <DynamicText type="card" style={[styles.infoText, { opacity: 0.7 }]}>
-              {t('aboutWallpapersDescription')}
+              {t("wallpaper.aboutWallpapersDescription")}
             </DynamicText>
           </View>
 
           <View style={styles.featuresList}>
             <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
-              • {t('uniqueWallpaperDesigns')}
+              • {t("wallpaper.uniqueWallpaperDesigns")}
             </DynamicText>
             <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
-              • {t('solidColorOptions')}
+              • {t("wallpaper.solidColorOptions")}
             </DynamicText>
             <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
-              • {t('instantPreviewAndApplication')}
+              • {t("wallpaper.instantPreviewAndApplication")}
             </DynamicText>
             <DynamicText type="card" style={[styles.featureItem, { opacity: 0.7 }]}>
-              • {t('settingsSavedAutomatically')}
+              • {t("wallpaper.settingsSavedAutomatically")}
             </DynamicText>
           </View>
         </View>

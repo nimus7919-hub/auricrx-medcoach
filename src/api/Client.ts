@@ -1,10 +1,11 @@
+import uiI18n from "../i18n";
 const BASE = 'https://YOUR_ENDPOINT';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export class HttpError extends Error {
   constructor(public status: number, public body: any) {
-    super(`HTTP ${status}`);
+    super(uiI18n.t("ui.httpValue_924362", { value1: status }));
   }
 }
 

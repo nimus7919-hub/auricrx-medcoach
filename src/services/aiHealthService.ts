@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { symptomInformation } from './symptomInformation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SmartNotificationService from './smartNotifications';
@@ -86,32 +87,32 @@ class AIHealthService {
     {
       id: 'warfarin_aspirin',
       drug1: 'Warfarin',
-      drug2: 'Aspirin',
+      drug2: "Aspirin",
       severity: 'major',
-      description: 'Increased risk of bleeding when taken together',
-      clinicalEffects: ['Increased bleeding risk', 'Prolonged bleeding time', 'Bruising'],
-      management: "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
-      references: ['Drug Interaction Database', 'Clinical Pharmacology']
+      get description() { return uiI18n.t("ui.increasedRiskOfBleedingWhenTakenTogether"); },
+      get clinicalEffects() { return [uiI18n.t("ui.increasedBleedingRisk"), uiI18n.t("ui.prolongedBleedingTime"), uiI18n.t("ui.bruising")]; },
+      get management() { return uiI18n.t("ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl"); },
+      get references() { return [uiI18n.t("ai.drugInteractionDatabase"), uiI18n.t("ui.clinicalPharmacology")]; }
     },
     {
       id: 'metformin_contrast',
-      drug1: 'Metformin',
-      drug2: 'Contrast Dye',
+      drug1: "Metformin",
+      drug2: "Contrast Dye",
       severity: 'major',
-      description: 'Risk of lactic acidosis with contrast media',
-      clinicalEffects: ['Lactic acidosis', 'Kidney damage', 'Metabolic acidosis'],
-      management: "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
-      references: ['Radiology Guidelines', 'Diabetes Management']
+      get description() { return uiI18n.t("ui.riskOfLacticAcidosisWithContrastMedia"); },
+      get clinicalEffects() { return [uiI18n.t("ui.lacticAcidosis"), uiI18n.t("ui.kidneyDamage"), uiI18n.t("ui.metabolicAcidosis")]; },
+      get management() { return uiI18n.t("ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl"); },
+      get references() { return [uiI18n.t("ui.radiologyGuidelines"), uiI18n.t("ui.diabetesManagement")]; }
     },
     {
       id: 'statin_grapefruit',
-      drug1: 'Statins',
-      drug2: 'Grapefruit Juice',
+      drug1: "Statins",
+      drug2: "Grapefruit Juice",
       severity: 'moderate',
-      description: 'Grapefruit juice increases statin levels',
-      clinicalEffects: ['Increased statin levels', 'Muscle pain', 'Liver toxicity'],
-      management: "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
-      references: ['Food-Drug Interactions', 'Cardiology Guidelines']
+      get description() { return uiI18n.t("ui.grapefruitJuiceIncreasesStatinLevels"); },
+      get clinicalEffects() { return [uiI18n.t("ui.increasedStatinLevels"), uiI18n.t("ui.musclePain"), uiI18n.t("ui.liverToxicity")]; },
+      get management() { return uiI18n.t("ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl"); },
+      get references() { return [uiI18n.t("ui.foodDrugInteractions"), uiI18n.t("ui.cardiologyGuidelines")]; }
     }
   ];
 
@@ -254,33 +255,33 @@ class AIHealthService {
         {
           name: 'Lisinopril',
           dosage: '10mg',
-          frequency: 'Once daily',
-          duration: 'Long-term',
-          reasoning: 'ACE inhibitor, first-line treatment for hypertension',
-          sideEffects: ['Dry cough', 'Dizziness', 'Fatigue'],
-          interactions: ['Potassium supplements', 'NSAIDs']
+          frequency: uiI18n.t("ui.onceDaily"),
+          duration: uiI18n.t("ui.longTerm"),
+          reasoning: uiI18n.t("ui.aceInhibitorFirstLineTreatmentForHypertension"),
+          sideEffects: [uiI18n.t("ui.dryCough"), uiI18n.t("ui.dizziness"), uiI18n.t("ui.fatigue")],
+          interactions: [uiI18n.t("ui.potassiumSupplements"), 'NSAIDs']
         }
       ],
       'diabetes': [
         {
-          name: 'Metformin',
+          name: uiI18n.t("ai.metformin"),
           dosage: '500mg',
-          frequency: 'Twice daily',
-          duration: 'Long-term',
-          reasoning: 'First-line treatment for type 2 diabetes',
-          sideEffects: ['Nausea', 'Diarrhea', 'Metallic taste'],
-          interactions: ['Contrast dye', 'Alcohol']
+          frequency: uiI18n.t("ui.twiceDaily"),
+          duration: uiI18n.t("ui.longTerm"),
+          reasoning: uiI18n.t("ui.firstLineTreatmentForType2Diabetes"),
+          sideEffects: [uiI18n.t("ui.nausea"), uiI18n.t("ai.diarrhea"), uiI18n.t("ui.metallicTaste")],
+          interactions: [uiI18n.t("ui.contrastDye_99c59b"), uiI18n.t("ui.alcohol")]
         }
       ],
       'pain': [
         {
           name: 'Ibuprofen',
           dosage: '400mg',
-          frequency: 'Every 6-8 hours',
-          duration: 'Short-term',
-          reasoning: 'NSAID for pain and inflammation',
-          sideEffects: ['Stomach upset', 'Dizziness', 'Headache'],
-          interactions: ['Warfarin', 'ACE inhibitors']
+          frequency: uiI18n.t("ui.every68Hours"),
+          duration: uiI18n.t("ui.shortTerm"),
+          reasoning: uiI18n.t("ui.nsaidForPainAndInflammation"),
+          sideEffects: [uiI18n.t("ai.stomachUpset"), uiI18n.t("ui.dizziness"), uiI18n.t("ui.headache")],
+          interactions: ['Warfarin', uiI18n.t("ui.aceInhibitors")]
         }
       ]
     };
@@ -293,29 +294,29 @@ class AIHealthService {
     }
 
     return [{
-      name: 'Consult Healthcare Provider',
-      dosage: 'As prescribed',
-      frequency: 'As directed',
-      duration: 'As needed',
-      reasoning: 'Professional medical evaluation required',
-      sideEffects: ['Varies by medication'],
-      interactions: ['Varies by medication']
+      name: uiI18n.t("ui.consultHealthcareProvider"),
+      dosage: uiI18n.t("ui.asPrescribed"),
+      frequency: uiI18n.t("ui.asDirected"),
+      duration: uiI18n.t("ui.asNeeded"),
+      reasoning: uiI18n.t("ui.professionalMedicalEvaluationRequired"),
+      sideEffects: [uiI18n.t("ui.variesByMedication")],
+      interactions: [uiI18n.t("ui.variesByMedication")]
     }];
   }
 
   private getAlternativeMedications(condition: string): MedicationRecommendation['alternativeOptions'] {
     return [
       {
-        name: 'Natural Remedies',
-        reasoning: 'May provide relief with fewer side effects',
-        pros: ['Fewer side effects', 'Natural approach', 'Cost-effective'],
-        cons: ['Limited evidence', 'May not be as effective', 'Interactions possible']
+        name: uiI18n.t("ui.naturalRemedies"),
+        reasoning: uiI18n.t("ui.mayProvideReliefWithFewerSideEffects"),
+        pros: [uiI18n.t("ui.fewerSideEffects"), uiI18n.t("ui.naturalApproach"), uiI18n.t("ui.costEffective")],
+        cons: [uiI18n.t("ui.limitedEvidence"), uiI18n.t("ui.mayNotBeAsEffective"), uiI18n.t("ui.interactionsPossible")]
       },
       {
-        name: 'Lifestyle Modifications',
-        reasoning: 'Address underlying causes through behavior changes',
-        pros: ['No side effects', 'Long-term benefits', 'Cost-effective'],
-        cons: ['Requires commitment', 'May take time to see results', 'Not always sufficient']
+        name: uiI18n.t("ui.lifestyleModifications"),
+        reasoning: uiI18n.t("ui.addressUnderlyingCausesThroughBehaviorChanges"),
+        pros: [uiI18n.t("ui.noSideEffects"), uiI18n.t("ui.longTermBenefits"), uiI18n.t("ui.costEffective")],
+        cons: [uiI18n.t("ui.requiresCommitment"), uiI18n.t("ui.mayTakeTimeToSeeResults"), uiI18n.t("ui.notAlwaysSufficient")]
       }
     ];
   }
@@ -324,22 +325,22 @@ class AIHealthService {
     const recommendations: string[] = [];
     
     if (condition.toLowerCase().includes('hypertension')) {
-      recommendations.push('Reduce sodium intake to less than 2g per day');
-      recommendations.push('Engage in regular aerobic exercise');
-      recommendations.push('Maintain healthy weight');
-      recommendations.push('Limit alcohol consumption');
+      recommendations.push(uiI18n.t("ui.reduceSodiumIntakeToLessThan2gPerDay"));
+      recommendations.push(uiI18n.t("ui.engageInRegularAerobicExercise"));
+      recommendations.push(uiI18n.t("ui.maintainHealthyWeight"));
+      recommendations.push(uiI18n.t("ui.limitAlcoholConsumption"));
     }
     
     if (condition.toLowerCase().includes('diabetes')) {
-      recommendations.push('Follow carbohydrate-controlled diet');
-      recommendations.push('Monitor blood glucose regularly');
-      recommendations.push('Engage in regular physical activity');
-      recommendations.push('Maintain consistent meal timing');
+      recommendations.push(uiI18n.t("ui.followCarbohydrateControlledDiet"));
+      recommendations.push(uiI18n.t("ui.monitorBloodGlucoseRegularly"));
+      recommendations.push(uiI18n.t("ui.engageInRegularPhysicalActivity"));
+      recommendations.push(uiI18n.t("ui.maintainConsistentMealTiming"));
     }
     
-    recommendations.push('Get adequate sleep (7-9 hours)');
-    recommendations.push('Manage stress through relaxation techniques');
-    recommendations.push('Stay hydrated with water');
+    recommendations.push(uiI18n.t("ui.getAdequateSleep79Hours"));
+    recommendations.push(uiI18n.t("ui.manageStressThroughRelaxationTechniques"));
+    recommendations.push(uiI18n.t("ui.stayHydratedWithWater"));
     
     return recommendations;
   }
@@ -348,20 +349,20 @@ class AIHealthService {
     const requirements: string[] = [];
     
     if (condition.toLowerCase().includes('hypertension')) {
-      requirements.push('Monitor blood pressure daily');
-      requirements.push('Regular kidney function tests');
-      requirements.push('Annual eye examination');
+      requirements.push(uiI18n.t("ui.monitorBloodPressureDaily"));
+      requirements.push(uiI18n.t("ui.regularKidneyFunctionTests"));
+      requirements.push(uiI18n.t("ui.annualEyeExamination"));
     }
     
     if (condition.toLowerCase().includes('diabetes')) {
-      requirements.push('Daily blood glucose monitoring');
-      requirements.push('Quarterly HbA1c testing');
-      requirements.push('Annual comprehensive eye exam');
-      requirements.push('Regular foot examinations');
+      requirements.push(uiI18n.t("ui.dailyBloodGlucoseMonitoring"));
+      requirements.push(uiI18n.t("ui.quarterlyHba1cTesting"));
+      requirements.push(uiI18n.t("ui.annualComprehensiveEyeExam"));
+      requirements.push(uiI18n.t("ui.regularFootExaminations"));
     }
     
-    requirements.push('Regular follow-up with healthcare provider');
-    requirements.push('Monitor for medication side effects');
+    requirements.push(uiI18n.t("ui.regularFollowUpWithHealthcareProvider"));
+    requirements.push(uiI18n.t("ui.monitorForMedicationSideEffects"));
     
     return requirements;
   }
@@ -387,11 +388,11 @@ class AIHealthService {
       insights.push({
         id: `insight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: 'medication_adherence',
-        title: 'Medication Adherence Alert',
-        description: `Your medication adherence rate is ${adherence.toFixed(1)}%, which is below the recommended 80%.`,
+        title: uiI18n.t("ui.medicationAdherenceAlert"),
+        description: uiI18n.t("ui.yourMedicationAdherenceRateIsValueWhichIsBelowTheRecommended80", { value1: adherence.toFixed(1) }),
         severity: 'warning',
         actionable: true,
-        actionItems: ['Set up medication reminders', 'Use pill organizer', 'Discuss with healthcare provider'],
+        actionItems: [uiI18n.t("ui.setUpMedicationReminders"), uiI18n.t("ui.usePillOrganizer"), uiI18n.t("ui.discussWithHealthcareProvider")],
         relatedData: { adherenceRate: adherence },
         confidence: 0.9,
         createdAt: new Date().toISOString()
@@ -404,11 +405,11 @@ class AIHealthService {
       insights.push({
         id: `insight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: 'appointment_reminder',
-        title: 'Schedule Regular Checkup',
-        description: 'You have no upcoming appointments scheduled. Consider scheduling a routine checkup.',
+        title: uiI18n.t("ui.scheduleRegularCheckup"),
+        description: uiI18n.t("ui.youHaveNoUpcomingAppointmentsScheduledConsiderSchedulingARoutineCheckup"),
         severity: 'info',
         actionable: true,
-        actionItems: ['Schedule annual physical', 'Book routine lab work', 'Update vaccination records'],
+        actionItems: [uiI18n.t("ui.scheduleAnnualPhysical"), uiI18n.t("ui.bookRoutineLabWork"), uiI18n.t("ui.updateVaccinationRecords")],
         relatedData: { appointmentStats: stats },
         confidence: 0.8,
         createdAt: new Date().toISOString()
@@ -422,8 +423,8 @@ class AIHealthService {
     const insight: HealthInsight = {
       id: `insight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: 'symptom_pattern',
-      title: 'High Priority Symptom Analysis',
-      description: `Your symptoms require immediate attention: ${analysis.symptoms.join(', ')}`,
+      title: uiI18n.t("ui.highPrioritySymptomAnalysis"),
+      description: uiI18n.t("ui.yourSymptomsRequireImmediateAttentionValue", { value1: analysis.symptoms.join(', ') }),
       severity: 'warning',
       actionable: true,
       actionItems: analysis.followUpActions,

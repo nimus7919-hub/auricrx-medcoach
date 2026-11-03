@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 // src/screens/AuthScreen.tsx
 // Authentication screen with Firebase Auth integration
 
@@ -24,6 +26,7 @@ interface AuthScreenProps {
 }
 
 export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'phone' | 'email'>('login');
   const [loading, setLoading] = useState(false);
@@ -147,12 +150,12 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
 
   const handleEmailAuth = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.pleaseFillInAllFields"));
       return;
     }
 
     if (authMode === 'register' && password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.passwordsDoNotMatch"));
       return;
     }
 
@@ -170,13 +173,13 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       }, 2000);
     } catch (error) {
       setLoading(false);
-      Alert.alert('Error', 'Authentication failed');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.authenticationFailed"));
     }
   };
 
   const handlePhoneAuth = async () => {
     if (!phoneNumber) {
-      Alert.alert('Error', 'Please enter your phone number');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.pleaseEnterYourPhoneNumber"));
       return;
     }
 
@@ -193,7 +196,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       }, 2000);
     } catch (error) {
       setLoading(false);
-      Alert.alert('Error', 'Phone authentication failed');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.phoneAuthenticationFailed"));
     }
   };
 
@@ -203,14 +206,14 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
         <>
           <TextInput
             style={dynamicStyles.input}
-            placeholder="First Name"
+            placeholder={uiI18n.t("ui.firstName")}
             placeholderTextColor={vip.colors.white + '60'}
             value={firstName}
             onChangeText={setFirstName}
           />
           <TextInput
             style={dynamicStyles.input}
-            placeholder="Last Name"
+            placeholder={uiI18n.t("ui.lastName")}
             placeholderTextColor={vip.colors.white + '60'}
             value={lastName}
             onChangeText={setLastName}
@@ -219,7 +222,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       )}
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Email"
+        placeholder={uiI18n.t("adminProfile.email")}
         placeholderTextColor={vip.colors.white + '60'}
         value={email}
         onChangeText={setEmail}
@@ -228,7 +231,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       />
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Password"
+        placeholder={uiI18n.t("ui.password")}
         placeholderTextColor={vip.colors.white + '60'}
         value={password}
         onChangeText={setPassword}
@@ -237,7 +240,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
       {authMode === 'register' && (
         <TextInput
           style={dynamicStyles.input}
-          placeholder="Confirm Password"
+          placeholder={uiI18n.t("ui.confirmPassword")}
           placeholderTextColor={vip.colors.white + '60'}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
@@ -250,7 +253,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
         disabled={loading}
       >
         <Text style={dynamicStyles.buttonText}>
-          {authMode === 'login' ? 'Sign In' : 'Create Account'}
+          {authMode === 'login' ? uiI18n.t("ui.signIn") : uiI18n.t("ui.createAccount")}
         </Text>
       </TouchableOpacity>
     </View>
@@ -260,7 +263,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
     <View style={dynamicStyles.formContainer}>
       <TextInput
         style={dynamicStyles.input}
-        placeholder="Phone Number (e.g., +1234567890)"
+        placeholder={uiI18n.t("ui.phoneNumberEG1234567890")}
         placeholderTextColor={vip.colors.white + '60'}
         value={phoneNumber}
         onChangeText={setPhoneNumber}
@@ -271,7 +274,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
         onPress={handlePhoneAuth}
         disabled={loading}
       >
-        <Text style={dynamicStyles.buttonText}>Send Verification Code</Text>
+        <Text style={dynamicStyles.buttonText}>{uiI18n.t("ui.sendVerificationCode")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -289,15 +292,15 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
         </View>
 
         <DynamicText style={dynamicStyles.title}>
-          {authMode === 'login' ? 'Welcome Back' : 
-           authMode === 'register' ? 'Create Account' : 
-           authMode === 'phone' ? 'Phone Verification' : 'Email Verification'}
+          {authMode === 'login' ? uiI18n.t("ui.welcomeBack") : 
+           authMode === 'register' ? uiI18n.t("ui.createAccount") : 
+           authMode === uiI18n.t("ui.phone") ? uiI18n.t("ui.phoneVerification") : uiI18n.t("ui.emailVerification")}
         </DynamicText>
 
         <DynamicText style={dynamicStyles.subtitle}>
-          {authMode === 'login' ? 'Sign in to your account' : 
-           authMode === 'register' ? 'Create your AuricRX account' : 
-           'Verify your phone number to continue'}
+          {authMode === 'login' ? uiI18n.t("ui.signInToYourAccount") : 
+           authMode === 'register' ? uiI18n.t("ui.createYourAuricrxAccount") : 
+           uiI18n.t("ui.verifyYourPhoneNumberToContinue")}
         </DynamicText>
 
         <View style={dynamicStyles.modeSelector}>
@@ -305,35 +308,29 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
             style={[dynamicStyles.modeButton, authMode === 'login' && dynamicStyles.modeButtonActive]}
             onPress={() => setAuthMode('login')}
           >
-            <Text style={[dynamicStyles.modeButtonText, authMode === 'login' && dynamicStyles.modeButtonTextActive]}>
-              Sign In
-            </Text>
+            <Text style={[dynamicStyles.modeButtonText, authMode === 'login' && dynamicStyles.modeButtonTextActive]}>{uiI18n.t("ui.signIn")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[dynamicStyles.modeButton, authMode === 'register' && dynamicStyles.modeButtonActive]}
             onPress={() => setAuthMode('register')}
           >
-            <Text style={[dynamicStyles.modeButtonText, authMode === 'register' && dynamicStyles.modeButtonTextActive]}>
-              Sign Up
-            </Text>
+            <Text style={[dynamicStyles.modeButtonText, authMode === 'register' && dynamicStyles.modeButtonTextActive]}>{uiI18n.t("ui.signUp")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[dynamicStyles.modeButton, authMode === 'phone' && dynamicStyles.modeButtonActive]}
             onPress={() => setAuthMode('phone')}
           >
-            <Text style={[dynamicStyles.modeButtonText, authMode === 'phone' && dynamicStyles.modeButtonTextActive]}>
-              Phone
-            </Text>
+            <Text style={[dynamicStyles.modeButtonText, authMode === 'phone' && dynamicStyles.modeButtonTextActive]}>{uiI18n.t("ui.phone_77064d")}</Text>
           </TouchableOpacity>
         </View>
 
-        {authMode === 'phone' ? renderPhoneForm() : renderEmailForm()}
+        {authMode === uiI18n.t("ui.phone") ? renderPhoneForm() : renderEmailForm()}
 
         {loading && (
           <View style={dynamicStyles.loadingContainer}>
             <ActivityIndicator color={vip.colors.gold} />
             <Text style={dynamicStyles.loadingText}>
-              {authMode === 'phone' ? 'Sending verification code...' : 'Authenticating...'}
+              {authMode === uiI18n.t("ui.phone") ? uiI18n.t("ui.sendingVerificationCode") : uiI18n.t("ui.authenticating")}
             </Text>
           </View>
         )}
@@ -343,7 +340,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
           onPress={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
         >
           <Text style={[dynamicStyles.buttonText, dynamicStyles.secondaryButtonText]}>
-            {authMode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            {authMode === 'login' ? uiI18n.t("ui.donTHaveAnAccountSignUp_e7eacd") : uiI18n.t("ui.alreadyHaveAnAccountSignIn_6603c2")}
           </Text>
         </TouchableOpacity>
       </ScrollView>

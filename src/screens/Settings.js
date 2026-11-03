@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import { useTimeFormat } from "./../hooks/useTimeFormat";
@@ -9,6 +11,7 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createSettings(getScope) {
   return () => {
+  useUILanguage();
     const { setRoute, setPrivacyOpen, handleSignOut, handleCancelMembership, handleRestartMembership, lang, notificationsEnabled, setNotificationsEnabled, emailNotifications, setEmailNotifications, smsNotifications, setSmsNotifications, selectedAIDoctor, setSelectedAIDoctor, dataCollection, setDataCollection, analytics, setAnalytics, subscriptionStatus, t, currentLanguage, handleLanguageChange, S, theme, setExpandedSections, CollapsibleSection, Header, RowSwitch, SwitchRow } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
@@ -116,7 +119,7 @@ export default function createSettings(getScope) {
                 fontSize: 14,
                 marginBottom: 8,
                 opacity: 0.8
-              }}>{S.selectAI || 'Select AI assistant'}</DynamicText>
+              }}>{S.selectAI || uiI18n.t("ai.selectAI")}</DynamicText>
               
               <TouchableOpacity 
                 onPress={() => setSelectedAIDoctor('alfred')}
@@ -136,7 +139,7 @@ export default function createSettings(getScope) {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>💬 {S.drAlfred || 'Alfred'}</DynamicText>
+                }}>💬 {S.drAlfred || uiI18n.t("ai.drAlfred")}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -157,7 +160,7 @@ export default function createSettings(getScope) {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>💬 {S.drMimi || 'Mimi'}</DynamicText>
+                }}>💬 {S.drMimi || uiI18n.t("ai.drMimi")}</DynamicText>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -177,13 +180,13 @@ export default function createSettings(getScope) {
                   fontFamily: 'Inter_700Bold', 
                   fontSize: 15,
                   textAlign: 'center'
-                }}>🐱 {S.pawlmer || 'Pawlmer'}</DynamicText>
+                }}>🐱 {S.pawlmer || uiI18n.t("ai.pawlmer")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
         </CollapsibleSection>
         
-        <TouchableOpacity onPress={() => setPrivacyOpen(true)} style={{ padding: 16 }}><Text style={{ color: theme.text }}>{lang === 'es' ? 'Aviso de Privacidad / Datos de Salud' : 'Privacy Notice / Consumer Health Data Privacy Policy'}</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => setPrivacyOpen(true)} style={{ padding: 16 }}><Text style={{ color: theme.text }}>{uiI18n.t("localized.Settings.text189")}</Text></TouchableOpacity>
         <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 
@@ -397,7 +400,7 @@ export default function createSettings(getScope) {
           </View>
         </CollapsibleSection>
         
-        <CollapsibleSection title={S.subscription || 'Subscription'} sectionKey="subscription" onToggle={toggleSection}>
+        <CollapsibleSection title={S.subscription || uiI18n.t("settings.subscription")} sectionKey="subscription" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             {subscriptionStatus && (
               <View style={{ marginBottom: 12 }}>
@@ -409,7 +412,7 @@ export default function createSettings(getScope) {
                     opacity: 0.8,
                     marginRight: 8
                   }}>
-                    {S.status || 'Status'}:
+                    {S.status || uiI18n.t("ai.status")}:
                   </DynamicText>
                   <DynamicText type="card" style={{ 
                     fontFamily: 'Inter_700Bold', 
@@ -417,7 +420,7 @@ export default function createSettings(getScope) {
                     color: subscriptionStatus.plan === 'pro' ? '#22c55e' : '#f59e0b',
                     marginRight: 8
                   }}>
-                    {subscriptionStatus.plan === 'pro' ? (S.proPlan || 'Pro') : (S.trial || 'Trial')}
+                    {subscriptionStatus.plan === uiI18n.t("settings.proPlan") ? (S.proPlan || uiI18n.t("settings.proPlan")) : (S.trial || uiI18n.t("settings.trial"))}
                   </DynamicText>
                   {/* Only show days if subscription is cancelled */}
                   {subscriptionStatus.subscription_cancelled_at && subscriptionStatus.daysLeft !== undefined && subscriptionStatus.daysLeft >= 0 && (
@@ -426,15 +429,14 @@ export default function createSettings(getScope) {
                       fontSize: 12,
                       opacity: 0.7
                     }}>
-                      ({subscriptionStatus.daysLeft} {S.daysUntilCancellation || 'days until cancellation'})
+                      ({subscriptionStatus.daysLeft} {S.daysUntilCancellation || uiI18n.t("settings.daysUntilCancellation")})
                     </DynamicText>
                   )}
                 </View>
               </View>
             )}
             
-            <DynamicText type="card" style={{ marginBottom: 12 }}>
-              Pro: {t('subscriptionPlans.month')} / {t('subscriptionPlans.year')}
+            <DynamicText type="card" style={{ marginBottom: 12 }}>{uiI18n.t("settings.proPlan")}{t('subscriptionPlans.month')} / {t('subscriptionPlans.year')}
             </DynamicText>
 
             {/* Cancel or Restart Button */}
@@ -463,7 +465,7 @@ export default function createSettings(getScope) {
                   fontSize: 15,
                   textAlign: 'center'
                 }}>
-                  {S.restartMembership || 'Restart Membership'}
+                  {S.restartMembership || uiI18n.t("settings.restartMembership")}
                 </DynamicText>
               </TouchableOpacity>
             ) : (
@@ -491,7 +493,7 @@ export default function createSettings(getScope) {
                   fontSize: 15,
                   textAlign: 'center'
                 }}>
-                  {S.cancelMembership || 'Cancel Membership'}
+                  {S.cancelMembership || uiI18n.t("settings.cancelMembership")}
                 </DynamicText>
               </TouchableOpacity>
             )}

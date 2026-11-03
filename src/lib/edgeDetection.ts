@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Dimensions } from 'react-native';
 
@@ -57,7 +58,7 @@ export class EdgeDetector {
         console.log('⚠️ Edge detection failed, using full image');
         return {
           success: false,
-          error: 'Could not detect document edges'
+          error: uiI18n.t("ui.couldNotDetectDocumentEdges")
         };
       }
 
@@ -65,7 +66,7 @@ export class EdgeDetector {
       console.error('❌ Edge detection error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : uiI18n.t("ui.unknownError")
       };
     }
   }
@@ -285,7 +286,7 @@ export class EdgeDetector {
       console.error('❌ Document processing failed:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : uiI18n.t("ui.unknownError")
       };
     }
   }
@@ -331,7 +332,7 @@ export class EdgeDetector {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : uiI18n.t("ui.unknownError")
       };
     }
   }

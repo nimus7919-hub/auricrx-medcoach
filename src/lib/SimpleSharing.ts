@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { Platform, Linking, Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { WebPDFService } from './WebPDFService';
@@ -31,7 +32,7 @@ export class SimpleSharing {
       console.log('📱 File:', options.fileName);
       
       if (!doctor.phoneNumber) {
-        throw new Error('Doctor phone number not available');
+        throw new Error(uiI18n.t("ui.doctorPhoneNumberNotAvailable"));
       }
       
       // Step 1: Upload PDF to web service and get shareable link
@@ -40,7 +41,7 @@ export class SimpleSharing {
       
       if (!uploadResult.success || !uploadResult.url) {
         console.error('❌ SimpleSharing: Failed to upload PDF to web service');
-        throw new Error(uploadResult.error || 'Failed to upload PDF');
+        throw new Error(uploadResult.error || uiI18n.t("ui.failedToUploadPdf"));
       }
       
       console.log('✅ SimpleSharing: PDF uploaded successfully');
@@ -71,11 +72,11 @@ export class SimpleSharing {
         
         // Show success alert
         Alert.alert(
-          '✅ Success!',
-          `WhatsApp opened to Dr. ${doctor.name}'s chat with the PDF link. The doctor can click the link to view your document.`,
+          uiI18n.t("adminProfile.success"),
+          uiI18n.t("ui.whatsappOpenedToDrValueSChatWithThePdfLinkTheDoctorCanClickTheLinkToViewYourDocument", { value1: doctor.name }),
           [
             {
-              text: 'Got it!',
+              text: uiI18n.t("ui.gotIt"),
               style: 'default'
             }
           ]
@@ -84,18 +85,18 @@ export class SimpleSharing {
         return true;
       } else {
         console.log('⚠️ SimpleSharing: Cannot open WhatsApp URL');
-        throw new Error('Cannot open WhatsApp');
+        throw new Error(uiI18n.t("ui.cannotOpenWhatsapp"));
       }
     } catch (error) {
       console.error('❌ SimpleSharing: Failed to share to WhatsApp:', error);
       
       // Show error alert
       Alert.alert(
-        '❌ Error',
-        `Failed to open WhatsApp: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToOpenWhatsappValue_c60ff1", { value1: error instanceof Error ? error.message : 'Unknown error' }),
         [
           {
-            text: 'OK',
+            text: uiI18n.t("adminProfile.ok"),
             style: 'default'
           }
         ]
@@ -116,7 +117,7 @@ export class SimpleSharing {
       console.log('📧 File:', options.fileName);
       
       if (!doctor.email) {
-        throw new Error('Doctor email not available');
+        throw new Error(uiI18n.t("ui.doctorEmailNotAvailable"));
       }
       
       // Step 1: Upload PDF to web service and get shareable link
@@ -125,7 +126,7 @@ export class SimpleSharing {
       
       if (!uploadResult.success || !uploadResult.url) {
         console.error('❌ SimpleSharing: Failed to upload PDF to web service');
-        throw new Error(uploadResult.error || 'Failed to upload PDF');
+        throw new Error(uploadResult.error || uiI18n.t("ui.failedToUploadPdf"));
       }
       
       console.log('✅ SimpleSharing: PDF uploaded successfully');
@@ -155,11 +156,11 @@ export class SimpleSharing {
         
         // Show success alert
         Alert.alert(
-          '✅ Success!',
-          `Gmail opened to Dr. ${doctor.name}'s email with the PDF link. The doctor can click the link to view your document.`,
+          uiI18n.t("adminProfile.success"),
+          uiI18n.t("ui.gmailOpenedToDrValueSEmailWithThePdfLinkTheDoctorCanClickTheLinkToViewYourDocument", { value1: doctor.name }),
           [
             {
-              text: 'Got it!',
+              text: uiI18n.t("ui.gotIt"),
               style: 'default'
             }
           ]
@@ -168,18 +169,18 @@ export class SimpleSharing {
         return true;
       } else {
         console.log('⚠️ SimpleSharing: Cannot open Gmail URL');
-        throw new Error('Cannot open Gmail');
+        throw new Error(uiI18n.t("ui.cannotOpenGmail"));
       }
     } catch (error) {
       console.error('❌ SimpleSharing: Failed to share to Gmail:', error);
       
       // Show error alert
       Alert.alert(
-        '❌ Error',
-        `Failed to open Gmail: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToOpenGmailValue_fe0fdc", { value1: error instanceof Error ? error.message : 'Unknown error' }),
         [
           {
-            text: 'OK',
+            text: uiI18n.t("adminProfile.ok"),
             style: 'default'
           }
         ]

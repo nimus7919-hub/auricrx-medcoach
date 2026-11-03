@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { Platform, Linking, Alert, Share } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
@@ -31,7 +32,7 @@ export class SecureSharing {
       console.log('📱 File:', options.fileName);
       
       if (!doctor.phoneNumber) {
-        throw new Error('Doctor phone number not available');
+        throw new Error(uiI18n.t("ui.doctorPhoneNumberNotAvailable"));
       }
       
       // Step 1: Copy file to a shareable location
@@ -46,7 +47,7 @@ export class SecureSharing {
       console.log('📁 Shareable URI:', shareableUri);
       
       // Step 2: Generate WhatsApp message
-      const whatsappMessage = `Hi Dr. ${doctor.name}, please find attached my medical document: ${options.fileName}\n\nThis document was shared securely through AuricRX Medical Coach.`;
+      const whatsappMessage = uiI18n.t("ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric", { value1: doctor.name, value2: options.fileName });
       
       console.log('📝 Generated WhatsApp message:', whatsappMessage);
       
@@ -67,11 +68,11 @@ export class SecureSharing {
         // Show alert to guide user to attach file
         setTimeout(() => {
           Alert.alert(
-            '📎 Attach File',
-            `WhatsApp is now open to Dr. ${doctor.name}'s chat. Please tap the attachment button (📎) and select "Document" to attach the PDF file.`,
+            uiI18n.t("ui.attachFile"),
+            uiI18n.t("ui.whatsappIsNowOpenToDrValueSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThePdf", { value1: doctor.name }),
             [
               {
-                text: 'Got it!',
+                text: uiI18n.t("ui.gotIt"),
                 style: 'default'
               }
             ]
@@ -87,12 +88,12 @@ export class SecureSharing {
         if (isAvailable) {
           await Sharing.shareAsync(shareableUri, {
             mimeType: 'application/pdf',
-            dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+            dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue_cd6195", { value1: doctor.name }),
           });
           console.log('✅ SecureSharing: File shared via expo-sharing fallback');
           return true;
         } else {
-          throw new Error('Sharing not available');
+          throw new Error(uiI18n.t("medicalDocuments.sharingNotAvailable"));
         }
       }
     } catch (error) {
@@ -100,11 +101,11 @@ export class SecureSharing {
       
       // Show error alert
       Alert.alert(
-        '❌ Error',
-        `Failed to open WhatsApp: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToOpenWhatsappValue", { value1: error instanceof Error ? error.message : 'Unknown error' }),
         [
           {
-            text: 'OK',
+            text: uiI18n.t("adminProfile.ok"),
             style: 'default'
           }
         ]
@@ -125,7 +126,7 @@ export class SecureSharing {
       console.log('📧 File:', options.fileName);
       
       if (!doctor.email) {
-        throw new Error('Doctor email not available');
+        throw new Error(uiI18n.t("ui.doctorEmailNotAvailable"));
       }
       
       // Step 1: Copy file to a shareable location
@@ -140,7 +141,7 @@ export class SecureSharing {
       console.log('📁 Shareable URI:', shareableUri);
       
       // Step 2: Generate Gmail message
-      const gmailMessage = `Hi Dr. ${doctor.name},\n\nPlease find attached my medical document: ${options.fileName}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient`;
+      const gmailMessage = uiI18n.t("ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric_cab0e2", { value1: doctor.name, value2: options.fileName });
       
       console.log('📝 Generated Gmail message:', gmailMessage);
       
@@ -160,11 +161,11 @@ export class SecureSharing {
         // Show alert to guide user to attach file
         setTimeout(() => {
           Alert.alert(
-            '📎 Attach File',
-            `Gmail is now open to Dr. ${doctor.name}'s email. Please tap the attachment button (📎) and select the PDF file to attach.`,
+            uiI18n.t("ui.attachFile"),
+            uiI18n.t("ui.gmailIsNowOpenToDrValueSEmailPleaseTapTheAttachmentButtonAndSelectThePdfFileToAttach", { value1: doctor.name }),
             [
               {
-                text: 'Got it!',
+                text: uiI18n.t("ui.gotIt"),
                 style: 'default'
               }
             ]
@@ -180,12 +181,12 @@ export class SecureSharing {
         if (isAvailable) {
           await Sharing.shareAsync(shareableUri, {
             mimeType: 'application/pdf',
-            dialogTitle: `Share Medical Document with Dr. ${doctor.name}`,
+            dialogTitle: uiI18n.t("ui.shareMedicalDocumentWithDrValue_cd6195", { value1: doctor.name }),
           });
           console.log('✅ SecureSharing: File shared via expo-sharing fallback');
           return true;
         } else {
-          throw new Error('Sharing not available');
+          throw new Error(uiI18n.t("medicalDocuments.sharingNotAvailable"));
         }
       }
     } catch (error) {
@@ -193,11 +194,11 @@ export class SecureSharing {
       
       // Show error alert
       Alert.alert(
-        '❌ Error',
-        `Failed to open Gmail: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToOpenGmailValue", { value1: error instanceof Error ? error.message : 'Unknown error' }),
         [
           {
-            text: 'OK',
+            text: uiI18n.t("adminProfile.ok"),
             style: 'default'
           }
         ]

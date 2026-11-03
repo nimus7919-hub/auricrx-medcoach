@@ -1,43 +1,44 @@
+import uiI18n from "../i18n";
 // Herbs data for AuricRx MedCoach
 export const herbs = [
   {
     id: 1,
-    name: 'Echinacea',
-    description: 'Immune system support and cold prevention',
-    benefits: ['Boosts immunity', 'Reduces cold duration', 'Anti-inflammatory'],
-    dosage: '300-500mg, 2-3 times daily',
-    precautions: 'Not recommended for autoimmune conditions'
+    get name() { return uiI18n.t("ui.echinacea"); },
+    get description() { return uiI18n.t("ui.immuneSystemSupportAndColdPrevention"); },
+    benefits: [uiI18n.t("ui.boostsImmunity"), uiI18n.t("ui.reducesColdDuration"), uiI18n.t("ui.antiInflammatory")],
+    get dosage() { return uiI18n.t("ui.300500mg23TimesDaily"); },
+    get precautions() { return uiI18n.t("ui.notRecommendedForAutoimmuneConditions"); }
   },
   {
     id: 2,
-    name: 'Ginger',
-    description: 'Digestive aid and nausea relief',
-    benefits: ['Reduces nausea', 'Aids digestion', 'Anti-inflammatory'],
-    dosage: '1-3g daily in capsules or tea',
-    precautions: 'May interact with blood thinners'
+    get name() { return uiI18n.t("ui.ginger"); },
+    get description() { return uiI18n.t("ui.digestiveAidAndNauseaRelief"); },
+    benefits: [uiI18n.t("ui.reducesNausea"), uiI18n.t("ui.aidsDigestion"), uiI18n.t("ui.antiInflammatory")],
+    get dosage() { return uiI18n.t("ui.13gDailyInCapsulesOrTea"); },
+    get precautions() { return uiI18n.t("ui.mayInteractWithBloodThinners"); }
   },
   {
     id: 3,
-    name: 'Turmeric',
-    description: 'Anti-inflammatory and antioxidant properties',
-    benefits: ['Reduces inflammation', 'Supports joint health', 'Antioxidant'],
-    dosage: '500-1000mg daily with black pepper',
-    precautions: 'May interact with blood thinners'
+    get name() { return uiI18n.t("ui.turmeric"); },
+    get description() { return uiI18n.t("ui.antiInflammatoryAndAntioxidantProperties"); },
+    benefits: [uiI18n.t("ui.reducesInflammation"), uiI18n.t("ui.supportsJointHealth"), uiI18n.t("ui.antioxidant")],
+    get dosage() { return uiI18n.t("ui.5001000mgDailyWithBlackPepper"); },
+    get precautions() { return uiI18n.t("ui.mayInteractWithBloodThinners"); }
   },
   {
     id: 4,
-    name: 'Chamomile',
-    description: 'Calming and sleep support',
-    benefits: ['Promotes relaxation', 'Improves sleep', 'Digestive aid'],
-    dosage: '1-2 cups of tea daily',
-    precautions: 'May cause allergic reactions in ragweed allergy'
+    get name() { return uiI18n.t("ui.chamomile"); },
+    get description() { return uiI18n.t("ui.calmingAndSleepSupport"); },
+    benefits: [uiI18n.t("ui.promotesRelaxation"), uiI18n.t("ui.improvesSleep"), uiI18n.t("ui.digestiveAid")],
+    get dosage() { return uiI18n.t("ui.12CupsOfTeaDaily"); },
+    get precautions() { return uiI18n.t("ui.mayCauseAllergicReactionsInRagweedAllergy"); }
   },
   {
     id: 5,
-    name: 'Elderberry',
-    description: 'Immune support and flu prevention',
-    benefits: ['Boosts immunity', 'Reduces flu symptoms', 'Antioxidant'],
-    dosage: '10-15ml syrup daily during illness',
-    precautions: 'Not recommended during pregnancy'
+    get name() { return uiI18n.t("ui.elderberry"); },
+    get description() { return uiI18n.t("ui.immuneSupportAndFluPrevention"); },
+    benefits: [uiI18n.t("ui.boostsImmunity"), uiI18n.t("ui.reducesFluSymptoms"), uiI18n.t("ui.antioxidant")],
+    get dosage() { return uiI18n.t("ui.1015mlSyrupDailyDuringIllness"); },
+    get precautions() { return uiI18n.t("ui.notRecommendedDuringPregnancy"); }
   }
 ];

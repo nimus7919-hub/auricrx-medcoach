@@ -1,3 +1,5 @@
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from './KeyboardForm';
 import MedicationAutocomplete from './MedicationAutocomplete';
 import { contributeMedication } from '../src/services/medicationCatalog';
@@ -30,6 +32,7 @@ interface Props {
 }
 
 export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry, onRefillComplete, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }: Props) {
+  useUILanguage();
   const catalogSelection = useRef<{ name: string; components: any[] } | null>(null);
   const slide = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
@@ -57,7 +60,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     AsyncStorage.getItem(SORT_KEY).then(v=>{ if (v === 'distance' || v==='price' || v==='name') setSort(v); else setSort('price'); }).catch(()=>{});
   },[]);
   const [showAll, setShowAll] = useState(false);
-  const [currency, setCurrency] = useState<string>('USD');
+  const [currency, setCurrency] = useState<string>(uiI18n.t("common.usd"));
   const [mockMode, setMockMode] = useState(false);
   const [coordsUsed, setCoordsUsed] = useState<{lat:number; lon:number}|null>(null);
   const LAST_LOC_KEY = 'AURIC_LAST_LOC';
@@ -92,7 +95,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       // Use pre-loaded data if available for faster loading
       let hasCoords = !!preloadedCoords;
       let coords = preloadedCoords || { latitude: 0, longitude: 0 };
-      let determinedCurrency: string = preloadedCurrency || 'USD';
+      let determinedCurrency: string = preloadedCurrency || uiI18n.t("common.usd");
       let near = preloadedPharmacies || [];
       
       // If no pre-loaded data, load it manually (fallback)
@@ -130,9 +133,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
               // Expanded mapping (common global currencies)
               const C: Record<string,string> = {
                 // North America
-                US:'USD', PR:'USD', CA:'CAD', MX:'MXN',
+                US:uiI18n.t("common.usd"), PR:uiI18n.t("common.usd"), CA:'CAD', MX:uiI18n.t("common.mxn"),
                 // Latin America
-                BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:'USD', UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:'USD', DO:'DOP', PA:'PAB',
+                BR:'BRL', AR:'ARS', CL:'CLP', CO:'COP', PE:'PEN', VE:'VES', EC:uiI18n.t("common.usd"), UY:'UYU', PY:'PYG', BO:'BOB', CR:'CRC', GT:'GTQ', HN:'HNL', NI:'NIO', SV:uiI18n.t("common.usd"), DO:'DOP', PA:'PAB',
                 // Europe (Euro + others)
                 ES:'EUR', PT:'EUR', FR:'EUR', DE:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', IE:'EUR', LU:'EUR', AT:'EUR', FI:'EUR', GR:'EUR', SK:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', MT:'EUR', CY:'EUR',
                 PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', HR:'EUR', SE:'SEK', NO:'NOK', DK:'DKK', CH:'CHF', GB:'GBP', IS:'ISK', TR:'TRY',
@@ -146,7 +149,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           } catch {}
           // If geocode failed we can do a crude language fallback
           if (!determinedCurrency) {
-            determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : 'USD');
+            determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : uiI18n.t("common.usd"));
           }
         }
         setCurrency(determinedCurrency); // single definitive assignment
@@ -164,10 +167,10 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       
       let state: string | undefined;
       try { if (hasCoords) state = (await Location.reverseGeocodeAsync(coords))[0]?.region || undefined; } catch {}
-      const { prices, meta, quote } = await getMedicationPrices(near, medication, { currency: 'MXN', lat: hasCoords ? coords.latitude : undefined, lng: hasCoords ? coords.longitude : undefined, state });
+      const { prices, meta, quote } = await getMedicationPrices(near, medication, { currency: uiI18n.t("common.mxn"), lat: hasCoords ? coords.latitude : undefined, lng: hasCoords ? coords.longitude : undefined, state });
       setQqpQuote(quote || null);
       setResults(prices);
-      setCurrency('MXN');
+      setCurrency(uiI18n.t("common.mxn"));
       if (meta) setFxMeta(meta);
       setMockMode(false);
     } catch (e) {
@@ -197,9 +200,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     // Validate form
     if (!contributionData.medicationName.trim() || !contributionData.price.trim() || !contributionData.storeName.trim()) {
       Alert.alert(
-        strings.contributionError || 'Missing Information',
-        strings.contributionErrorText || 'Please fill in medication name, price, and store name.',
-        [{ text: strings.ok || 'OK' }]
+        strings.contributionError || uiI18n.t("ai.contributionError"),
+        strings.contributionErrorText || uiI18n.t("localized.appConstants.STRINGS.contributionErrorText"),
+        [{ text: strings.ok || uiI18n.t("adminProfile.ok") }]
       );
       return;
     }
@@ -217,11 +220,11 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       console.log('📊 Price contribution saved to server:', contribution);
 
       Alert.alert(
-        strings.contributionSuccess || 'Thank You!',
-        strings.contributionSuccessText || 'Your price information has been saved and will help improve our database for everyone.',
+        strings.contributionSuccess || uiI18n.t("ai.contributionSuccess"),
+        strings.contributionSuccessText || uiI18n.t("ai.contributionSuccessText"),
         [
           {
-            text: strings.ok || 'OK',
+            text: strings.ok || uiI18n.t("adminProfile.ok"),
             onPress: () => {
               setShowContributionModal(false);
               setSelectedPharmacy(null);
@@ -241,9 +244,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     } catch (error) {
       console.error('❌ Failed to save contribution:', error);
       Alert.alert(
-        strings.contributionError || 'Error',
-        strings.contributionErrorText || 'Failed to save your contribution. Please try again.',
-        [{ text: strings.ok || 'OK' }]
+        strings.contributionError || uiI18n.t("adminProfile.error"),
+        strings.contributionErrorText || uiI18n.t("ui.failedToSaveYourContributionPleaseTryAgain"),
+        [{ text: strings.ok || uiI18n.t("adminProfile.ok") }]
       );
     }
   };
@@ -295,7 +298,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       price: r.price
     })));
     return showAll ? list : list.slice(0,5);
-  }, [results, showAll, sort, descending]);
+  }, [results, showAll, sort, descending, uiI18n.resolvedLanguage]);
 
   // Precompute current lowest price once per results array (excluding "price not available" items)
   const lowestPrice = useMemo(() => {
@@ -307,7 +310,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       }
     }
     return isFinite(min) ? min : null;
-  }, [results]);
+  }, [results, uiI18n.resolvedLanguage]);
 
   // Basic product info extraction from medication name/dosage text (heuristic)
   const productInfo = useMemo(() => {
@@ -331,7 +334,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
     const strengthDisplay = strengths.join(' / ');
     const display = [strengthDisplay || null, packageSize].filter(Boolean).join(' • ');
     return { display, strengthDisplay, packageSize };
-  }, [medication.name, medication.dosage]);
+  }, [medication.name, medication.dosage, uiI18n.resolvedLanguage]);
   const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
 
   // Use country-based distance units: miles for USA, kilometers for other countries
@@ -351,20 +354,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
   }
   // currency formatting
   const symbolMap: Record<string,string> = {
-    USD:'$', CAD:'C$', MXN:'MX$','BRL':'R$','ARS':'AR$','CLP':'CLP$','COP':'COL$','PEN':'S/','VES':'Bs.','UYU':'$U','PYG':'Gs.','BOB':'Bs','CRC':'₡','GTQ':'Q','HNL':'L','NIO':'C$','DOP':'RD$','PAB':'B/.',
+    USD:'$', CAD:'C$', MXN:'MX$','BRL':'R$','ARS':'AR$','CLP':'CLP$','COP':'COL$','PEN':"S/",'VES':'Bs.','UYU':'$U','PYG':'Gs.','BOB':'Bs','CRC':'₡','GTQ':'Q','HNL':uiI18n.t("unitLabels.L"),'NIO':'C$','DOP':'RD$','PAB':'B/.',
     EUR:'€','GBP':'£','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'лв','SEK':'kr','NOK':'kr','DKK':'kr','CHF':'CHF','ISK':'kr','TRY':'₺',
     AED:'د.إ','SAR':'﷼','QAR':'﷼','KWD':'KD','BHD':'BD','OMR':'﷼','ILS':'₪','EGP':'E£','MAD':'د.م.','NGN':'₦','KES':'KSh','ZAR':'R','GHS':'₵',
-    CNY:'¥','JPY':'¥','KRW':'₩','INR':'₹','HKD':'HK$','TWD':'NT$','SGD':'S$','MYR':'RM','THB':'฿','IDR':'Rp','PHP':'₱','VND':'₫','AUD':'A$','NZD':'NZ$','FJD':'FJ$'
+    CNY:'¥','JPY':'¥','KRW':'₩','INR':'₹','HKD':'HK$','TWD':'NT$','SGD':"S$",'MYR':'RM','THB':'฿','IDR':'Rp','PHP':'₱','VND':'₫','AUD':'A$','NZD':'NZ$','FJD':'FJ$'
   };
   // Map language codes to proper locales for currency formatting
-  const localeMap: Record<string, string> = {
-    'en': 'en-US',
-    'es': 'es-MX', // Mexican Spanish for MXN currency
-    'zh': 'zh-CN',
-    'fr': 'fr-FR',
-    'de': 'de-DE',
-    'pt': 'pt-BR'
-  };
+  const localeMap: Record<string, string> = {"en":"en-US","es":"es-MX","zh":"zh-CN","fr":"fr-FR","de":"de-DE","pt":"pt-BR"};
   
   const locale = localeMap[lang] || 'en-US';
   const nf = new Intl.NumberFormat(locale, { style:'currency', currency, maximumFractionDigits:2 });
@@ -429,7 +425,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           ? (item.purchase_url && !item.priceNotAvailable ? Linking.openURL(item.purchase_url) : undefined)
           : openInMaps({ lat: item.lat, lon: item.lon, address: item.address })}
         accessibilityRole="button"
-        accessibilityLabel={item.online ? `Open ${item.name}` : `Open directions to ${item.name}`}
+        accessibilityLabel={item.online ? uiI18n.t("ui.openValue", { value1: item.name }) : uiI18n.t("ui.openDirectionsToValue", { value1: item.name })}
         hitSlop={8}
         style={{
           backgroundColor: colors.card,
@@ -460,7 +456,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 </Text>
               ) : (
                 <Text style={{ color: colors.sub, fontSize:11, fontStyle: 'italic' }}>
-                  {strings.productInfoNotAvailable || 'Product details not available'}
+                  {strings.productInfoNotAvailable || uiI18n.t("medications.productInfoNotAvailable")}
                 </Text>
               )}
             </View>
@@ -471,12 +467,12 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             <View style={{ alignItems: 'flex-end', gap: 4 }}>
               <Text style={{ color: colors.sub, fontSize:14, fontWeight:'500', fontStyle: 'italic' }}>
                 {item.pharmacyNotAvailable ? 
-                  (lang === 'es' ? 'Farmacia no disponible' : 
+                  (lang === 'es' ? uiI18n.t("ui.farmaciaNoDisponible") : 
                    lang === 'zh' ? '药店不可用' : 
-                   'Pharmacy not available') :
-                  (lang === 'es' ? 'Precio no disponible' : 
+                   uiI18n.t("ui.pharmacyNotAvailable")) :
+                  (lang === 'es' ? uiI18n.t("ui.precioNoDisponible") : 
                    lang === 'zh' ? '价格不可用' : 
-                   'Price not available')
+                   uiI18n.t("supplements.priceNotAvailable"))
                 }
               </Text>
               <Pressable 
@@ -484,7 +480,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 style={{ backgroundColor: '#10b981', borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 4, minHeight:28, justifyContent:'center' }}
               >
                 <Text style={{ color:'#ffffff', fontWeight:'600', fontSize:11 }}>
-                  {strings.helpUsGetPrice || 'Help Us Get Price'}
+                  {strings.helpUsGetPrice || uiI18n.t("ai.helpUsGetPrice")}
                 </Text>
               </Pressable>
             </View>
@@ -496,19 +492,19 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           {item.observed_at && (
             <Text style={{ color: colors.sub, fontSize: 11, maxWidth: 210 }}>
               {lang === 'es'
-                ? 'Precio aproximado al ' + new Date(item.observed_at).toLocaleDateString('es-MX') + '. Puede variar en tienda.'
-                : 'Approximate price as of ' + new Date(item.observed_at).toLocaleDateString('en-US') + '. May vary in store.'}
+                ? uiI18n.t("ui.precioAproximadoAl") + new Date(item.observed_at).toLocaleDateString('es-MX') + uiI18n.t("ui.puedeVariarEnTienda")
+                : uiI18n.t("ui.approximatePriceAsOf") + new Date(item.observed_at).toLocaleDateString('en-US') + uiI18n.t("ui.mayVaryInStore")}
             </Text>
           )}
-          {item.verified && !item.priceNotAvailable && <Text style={{ color: colors.sub, fontSize: 11 }}>Precio verificado</Text>}
-          {item.purchase_url && !item.priceNotAvailable && <Pressable onPress={() => Linking.openURL(item.purchase_url!)}><Text style={{ color: colors.sub }}>Mercado Libre ?</Text></Pressable>}
+          {item.verified && !item.priceNotAvailable && <Text style={{ color: colors.sub, fontSize: 11 }}>{uiI18n.t("ui.precioVerificado")}</Text>}
+          {item.purchase_url && !item.priceNotAvailable && <Pressable onPress={() => Linking.openURL(item.purchase_url!)}><Text style={{ color: colors.sub }}>{uiI18n.t("ui.mercadoLibre")}</Text></Pressable>}
           {isLowest && !item.priceNotAvailable && (
             <View style={{ backgroundColor: colors.gold, paddingHorizontal:8, paddingVertical:2, borderRadius: radius.pill }}>
-              <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest||'Lowest'}</Text>
+              <Text style={{ color:'#000', fontSize:10, fontWeight:'700' }}>{strings.lowest||uiI18n.t("medications.lowest")}</Text>
             </View>
           )}
           {!item.online && (<Pressable onPress={() => openInMaps({ lat: item.lat, lon: item.lon, address: item.address })} style={{ backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: spacing.lg, paddingVertical: 6, minHeight:32, justifyContent:'center' }}>
-            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{strings.directions || 'Directions'}</Text>
+            <Text style={{ color:'#000', fontWeight:'700', fontSize:12 }}>{strings.directions || uiI18n.t("common.directions")}</Text>
           </Pressable>)}
         </View>
       </Pressable>
@@ -528,26 +524,26 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
         }}>
           {/* Header */}
           <View style={{ gap: spacing.sm }}>
-            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{(strings.refill||'Refill')} {`(${(strings.sortBy||'Sort')}: ${strings[sort]||sort}${descending?' ↓':' ↑'})`}</Text>
+            <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600" }}>{(strings.refill||uiI18n.t("medications.refill"))} {`(${(strings.sortBy||uiI18n.t("common.sort"))}: ${strings[sort]||sort}${descending?' ↓':' ↑'})`}</Text>
             <Text style={{ color: colors.sub, fontSize: 14 }}>
-              {medication.name} • {medication.dosage}{medication.quantity && medication.quantity !== 'N/A' ? ` • ${medication.quantity}` : ""}{medication.lastRefill ? ` • ${(strings.lastRefill||'Last refill')}: ${medication.lastRefill}` : ""}
+              {medication.name} • {medication.dosage}{medication.quantity && medication.quantity !== 'N/A' ? uiI18n.t("healthAnalytics.value", { value1: medication.quantity }) : ""}{medication.lastRefill ? ` • ${(strings.lastRefill||uiI18n.t("medications.lastRefill"))}: ${medication.lastRefill}` : ""}
             </Text>
             {qqpQuote && (
               <View style={{ backgroundColor: '#10243A', borderColor: colors.gold, borderWidth: 1, borderRadius: 12, padding: 12, gap: 4 }}>
                 <Text style={{ color: colors.gold, fontWeight: '600' }}>
-                  {lang === 'es' ? 'Precio aproximado' : 'Approximate price'}{qqpQuote.as_of ? ' - ' + String(qqpQuote.as_of).slice(0, 10) : ''}
+                  {uiI18n.t("localized.MedicationRefillModal.text541")}{qqpQuote.as_of ? ' - ' + String(qqpQuote.as_of).slice(0, 10) : ''}
                 </Text>
                 <Text style={{ color: '#fff', fontSize: 12 }}>
-                  {qqpQuote.summary.count ? 'MXN ' + Number(qqpQuote.summary.min).toFixed(2) + ' - ' + Number(qqpQuote.summary.max).toFixed(2) + (lang === 'es' ? ' - Promedio ' : ' - Average ') + Number(qqpQuote.summary.avg).toFixed(2) : (lang === 'es' ? 'Sin precios recientes para este medicamento.' : 'No recent prices for this medication.')}
+                  {qqpQuote.summary.count ? uiI18n.t("common.mxn") + Number(qqpQuote.summary.min).toFixed(2) + ' - ' + Number(qqpQuote.summary.max).toFixed(2) + (uiI18n.t("localized.MedicationRefillModal.text544")) + Number(qqpQuote.summary.avg).toFixed(2) : (uiI18n.t("localized.MedicationRefillModal.text544"))}
                 </Text>
-                {qqpQuote.fallback && <Text style={{ color: '#fff', fontSize: 11 }}>{lang === 'es' ? 'Referencia nacional: sin datos para tu estado.' : 'National reference: no data for your state.'}</Text>}
-                <Text style={{ color: '#fff', fontSize: 10 }}>Fuente: PROFECO, Quién es Quién en los Precios (CC-BY 4.0)</Text>
+                {qqpQuote.fallback && <Text style={{ color: '#fff', fontSize: 11 }}>{uiI18n.t("localized.MedicationRefillModal.text546")}</Text>}
+                <Text style={{ color: '#fff', fontSize: 10 }}>{uiI18n.t("ui.fuenteProfecoQuienEsQuienEnLosPreciosCcBy40")}</Text>
               </View>
             )}
-            {priceError && <Text style={{ color: colors.gold }}>{lang === 'es' ? 'No se pudieron cargar los precios. Intenta de nuevo.' : 'Unable to load prices. Please try again.'}</Text>}
+            {priceError && <Text style={{ color: colors.gold }}>{uiI18n.t("localized.MedicationRefillModal.text550")}</Text>}
             {mockMode && (
               <View style={{ backgroundColor: '#fbbf24', paddingHorizontal: spacing.md, paddingVertical: 6, borderRadius: radius.xl }}>
-                <Text style={{ color:'#000', fontSize:12, fontWeight:'600' }}>Mock data (add GOOGLE_PLACES_API_KEY for live pharmacies)</Text>
+                <Text style={{ color:'#000', fontSize:12, fontWeight:'600' }}>{uiI18n.t("ui.mockDataAddGooglePlacesApiKeyForLivePharmacies")}</Text>
               </View>
             )}
             {/* DISABLED: Excel data indicator removed since we're not using Excel data */}
@@ -565,26 +561,26 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             )}
             {/* Sorting row */}
             <View style={{ flexDirection:'row', alignItems:'center', flexWrap:'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
-              <Text style={{ color: colors.sub, fontSize: 12 }}>{strings.sortBy || 'Sort:'}</Text>
+              <Text style={{ color: colors.sub, fontSize: 12 }}>{strings.sortBy || uiI18n.t("common.sort")}</Text>
               {['distance','price','name'].map(key => {
-                const label = key === 'distance' ? (strings.distance||'Distance') : key === 'price' ? (strings.price||'Price') : (strings.name||'Name');
+                const label = key === 'distance' ? (strings.distance||uiI18n.t("medications.sort.distance")) : key === 'price' ? (strings.price||uiI18n.t("medications.sort.price")) : (strings.name||uiI18n.t("medications.sort.name"));
                 const active = sort === key;
                 return (
-                  <Pressable accessibilityRole="button" accessibilityLabel={`Sort by ${label}`} key={key} onPress={()=> { setSort(key as any); AsyncStorage.setItem(SORT_KEY, key).catch(()=>{}); }} style={{ backgroundColor: active? colors.gold: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
+                  <Pressable accessibilityRole="button" accessibilityLabel={uiI18n.t("ui.sortByValue", { value1: label })} key={key} onPress={()=> { setSort(key as any); AsyncStorage.setItem(SORT_KEY, key).catch(()=>{}); }} style={{ backgroundColor: active? colors.gold: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
                     <Text style={{ color: active? '#000': colors.text, fontSize: 12 }}>{label}</Text>
                   </Pressable>
                 );
               })}
-              <Pressable accessibilityRole="button" accessibilityLabel={descending? 'Ascending order':'Descending order'} onPress={()=> setDescending(d=>!d)} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
+              <Pressable accessibilityRole="button" accessibilityLabel={descending? uiI18n.t("common.ascending"):uiI18n.t("common.descending")} onPress={()=> setDescending(d=>!d)} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
                 <Text style={{ color: colors.text, fontSize: 12 }}>{descending? '↓':'↑'}</Text>
               </Pressable>
-              <Pressable accessibilityRole="button" accessibilityLabel={'Refresh pharmacies'} onPress={()=>{ load(); }} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
-                <Text style={{ color: colors.text, fontSize: 12 }}>{strings.refresh||'Refresh'}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel={uiI18n.t("ui.refreshPharmacies")} onPress={()=>{ load(); }} style={{ backgroundColor: colors.muted, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: radius.pill }}>
+                <Text style={{ color: colors.text, fontSize: 12 }}>{strings.refresh||uiI18n.t("appointments.refresh")}</Text>
               </Pressable>
             </View>
-            {fxMeta && currency !== 'MXN' && (
+            {fxMeta && currency !== uiI18n.t("common.mxn") && (
               <Text style={{ color: colors.sub, fontSize: 10, marginTop: spacing.xs }}>
-                {(strings.fxLabel||'FX')+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
+                {(strings.fxLabel||uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
               </Text>
             )}
           </View>
@@ -599,9 +595,9 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 keyExtractor={item => item.id}
                 ListHeaderComponent={placements.length ? <View style={{ padding: 12, gap: 8 }}>
                   {placements.map(ad => <View key={ad.id} style={{ padding: 10, backgroundColor: colors.muted }}>
-                    <Text style={{ color: colors.sub }}>Patrocinado ? {ad.chain}</Text>
+                    <Text style={{ color: colors.sub }}>{uiI18n.t("ui.patrocinado")}{ad.chain}</Text>
                     <Text style={{ color: colors.text }}>{ad.title}</Text>
-                    <Text style={{ color: colors.sub }}>Consulte a su medico</Text>
+                    <Text style={{ color: colors.sub }}>{uiI18n.t("ui.consulteASuMedico")}</Text>
                   </View>)}
                 </View> : null}
                 renderItem={renderItem}
@@ -609,7 +605,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             )}
             {!showAll && results.length > 5 && !loading && (
               <Pressable onPress={() => setShowAll(true)} style={{ alignSelf: 'center', marginTop: spacing.sm }}>
-                <Text style={{ color: colors.gold, fontSize: 14, fontWeight: '600' }}>{strings.showAll || 'Show all'}</Text>
+                <Text style={{ color: colors.gold, fontSize: 14, fontWeight: '600' }}>{strings.showAll || uiI18n.t("common.showAll")}</Text>
               </Pressable>
             )}
           </View>
@@ -617,7 +613,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
           {/* Footer actions */}
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
             <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-              <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.close || 'Close'}</Text>
+              <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.close || uiI18n.t("ai.close")}</Text>
             </Pressable>
             {onRefillComplete && (
               <Pressable 
@@ -627,12 +623,12 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 }}
                 style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}
               >
-                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.refillComplete || 'Refill Complete'}</Text>
+                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.refillComplete || uiI18n.t("common.refillComplete")}</Text>
               </Pressable>
             )}
             {!onRefillComplete && (
               <Pressable style={{ flex: 1, backgroundColor: colors.gold, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.reserve || 'Reserve (stub)'}</Text>
+                <Text style={{ color: '#000', fontWeight: '700' }}>{strings.reserve || uiI18n.t("medications.reserve")}</Text>
               </Pressable>
             )}
           </View>
@@ -651,7 +647,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             {/* Header */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
               <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>
-                {strings.helpUsGetPrice || 'Help Us Get Price'}
+                {strings.helpUsGetPrice || uiI18n.t("ai.helpUsGetPrice")}
               </Text>
               <Pressable onPress={closeContributionModal} style={{ padding: spacing.xs }}>
                 <Text style={{ color: colors.sub, fontSize: 24 }}>×</Text>
@@ -666,13 +662,13 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             >
               <View style={{ gap: spacing.md }}>
                 <Text style={{ color: colors.sub, fontSize: 14, marginBottom: spacing.sm }}>
-                  {strings.contributionDescription || 'Help us improve our medication price database by sharing what you found:'}
+                  {strings.contributionDescription || uiI18n.t("ui.helpUsImproveOurMedicationPriceDatabaseBySharingWhatYouFound")}
                 </Text>
 
                 {/* Medication Name */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.medicationName || 'Medication Name'} *
+                    {strings.medicationName || uiI18n.t("medications.medicationName")} *
                   </Text>
                   <MedicationAutocomplete
                     onSelect={(med: any) => { catalogSelection.current = med; setContributionData(prev => ({ ...prev, medicationName: med.name, strength: med.components.map((c: any) => `${c.strength || ''}${c.unit || ''}`).join('/') })); }}
@@ -685,7 +681,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.medicationName}
                     onChangeText={(text: string) => { catalogSelection.current = null; setContributionData(prev => ({ ...prev, medicationName: text })); }}
-                    placeholder={strings.medicationNamePlaceholder || 'Enter medication name'}
+                    placeholder={strings.medicationNamePlaceholder || uiI18n.t("localized.appConstants.STRINGS.medicationNamePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                   {!!catalogSelection.current?.components.length && <Text style={{ color: colors.text, marginTop: 8 }}>
@@ -696,7 +692,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Strength */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.strength || 'Strength/Dosage'}
+                    {strings.strength || uiI18n.t("ui.strengthDosage")}
                   </Text>
                   <TextInput
                     style={{
@@ -708,7 +704,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.strength}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, strength: text }))}
-                    placeholder={strings.strengthPlaceholder || 'e.g., 100mg, 50mg/500mg'}
+                    placeholder={strings.strengthPlaceholder || uiI18n.t("medications.strengthPlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -716,7 +712,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Price */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.price || 'Price'} *
+                    {strings.price || uiI18n.t("medications.sort.price")} *
                   </Text>
                   <TextInput
                     style={{
@@ -728,7 +724,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.price}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, price: text }))}
-                    placeholder={strings.pricePlaceholder || 'Enter price (e.g., 25.50)'}
+                    placeholder={strings.pricePlaceholder || uiI18n.t("ai.pricePlaceholder")}
                     placeholderTextColor={colors.sub}
                     keyboardType="numeric"
                   />
@@ -737,7 +733,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Quantity */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.quantity || 'Quantity/Package Size'}
+                    {strings.quantity || uiI18n.t("ui.quantityPackageSize")}
                   </Text>
                   <TextInput
                     style={{
@@ -749,7 +745,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.quantity}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, quantity: text }))}
-                    placeholder={strings.quantityPlaceholder || 'e.g., 30 tablets, 1 bottle'}
+                    placeholder={strings.quantityPlaceholder || uiI18n.t("ai.quantityPlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -757,7 +753,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Store Name */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.storeName || 'Store Name'} *
+                    {strings.storeName || uiI18n.t("ui.storeName")} *
                   </Text>
                   <TextInput
                     style={{
@@ -769,7 +765,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.storeName}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, storeName: text }))}
-                    placeholder={strings.storeNamePlaceholder || 'Enter store name'}
+                    placeholder={strings.storeNamePlaceholder || uiI18n.t("ai.storeNamePlaceholder")}
                     placeholderTextColor={colors.sub}
                   />
                 </View>
@@ -777,7 +773,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                 {/* Store Address */}
                 <View>
                   <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500', marginBottom: spacing.xs }}>
-                    {strings.storeAddress || 'Store Address'}
+                    {strings.storeAddress || uiI18n.t("ui.storeAddress")}
                   </Text>
                   <TextInput
                     style={{
@@ -789,7 +785,7 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
                     }}
                     value={contributionData.storeAddress}
                     onChangeText={(text) => setContributionData(prev => ({ ...prev, storeAddress: text }))}
-                    placeholder={strings.storeAddressPlaceholder || 'Enter store address'}
+                    placeholder={strings.storeAddressPlaceholder || uiI18n.t("ai.storeAddressPlaceholder")}
                     placeholderTextColor={colors.sub}
                     multiline
                     numberOfLines={2}
@@ -801,10 +797,10 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
             {/* Footer Actions */}
             <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
               <Pressable onPress={closeContributionModal} style={{ flex: 1, backgroundColor: colors.muted, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.cancel || 'Cancel'}</Text>
+                <Text style={{ color: colors.text, fontWeight: '700' }}>{strings.cancel || uiI18n.t("healthAnalytics.cancel")}</Text>
               </Pressable>
               <Pressable onPress={submitContribution} style={{ flex: 1, backgroundColor: '#10b981', borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center' }}>
-                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{strings.submitContribution || 'Submit'}</Text>
+                <Text style={{ color: '#ffffff', fontWeight: '700' }}>{strings.submitContribution || uiI18n.t("ai.submitContribution")}</Text>
               </Pressable>
             </View>
           </View>

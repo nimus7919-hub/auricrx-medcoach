@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { View, TouchableOpacity, Modal } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
@@ -5,6 +7,7 @@ import DynamicText from "./../components/DynamicText";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createMembershipModals(getScope) {
   return () => {
+  useUILanguage();
     const { showCancelMembershipModal, setShowCancelMembershipModal, showMembershipResultModal, setShowMembershipResultModal, membershipResult, confirmCancelMembership, S } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
@@ -45,7 +48,7 @@ export default function createMembershipModals(getScope) {
                 marginBottom: 16,
                 textAlign: 'center'
               }}>
-                {S.cancelMembership || 'Cancel Membership'}
+                {S.cancelMembership || uiI18n.t("settings.cancelMembership")}
               </DynamicText>
               
               <DynamicText type="card" style={{
@@ -56,7 +59,7 @@ export default function createMembershipModals(getScope) {
                 opacity: 0.8,
                 lineHeight: 22
               }}>
-                {S.cancelMembershipConfirm || 'Cancel membership. You keep Pro until the end of the paid period. No more charges. You can resubscribe anytime.'}
+                {S.cancelMembershipConfirm || uiI18n.t("ui.cancelMembershipYouKeepProUntilTheEndOfThePaidPeriodNoMoreChargesYouCanResubscribeAnytime")}
               </DynamicText>
               
               <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -77,7 +80,7 @@ export default function createMembershipModals(getScope) {
                     fontFamily: 'Inter_600SemiBold',
                     fontSize: 15
                   }}>
-                    {S.cancel || 'Cancel'}
+                    {S.cancel || uiI18n.t("healthAnalytics.cancel")}
                   </DynamicText>
                 </TouchableOpacity>
                 
@@ -104,7 +107,7 @@ export default function createMembershipModals(getScope) {
                     fontSize: 15,
                     color: '#ffffff'
                   }}>
-                    {S.confirmCancel || 'Yes, Cancel Membership'}
+                    {S.confirmCancel || uiI18n.t("settings.confirmCancel")}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
@@ -183,7 +186,7 @@ export default function createMembershipModals(getScope) {
                   fontSize: 15,
                   color: '#ffffff'
                 }}>
-                  {S.ok || 'OK'}
+                  {S.ok || uiI18n.t("adminProfile.ok")}
                 </DynamicText>
               </TouchableOpacity>
             </View>

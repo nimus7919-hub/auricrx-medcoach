@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { authenticatedFetch } from '../services/authenticatedFetch';
 import { symptomInformation } from '../services/symptomInformation';
@@ -71,6 +73,7 @@ interface DrugInteraction {
 }
 
 export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   // Use translation hook directly for AI Health
@@ -80,9 +83,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
   const aiTranslations: Record<string, string> = createAIHealthTranslations(i18nT);
   
   // Translation function using aiTranslations object
-  const t = (key: string) => {
-    return aiTranslations[key] || key;
-  };
+  const t = i18nT;
   
   // Default theme if not provided
   const defaultTheme = {
@@ -759,15 +760,15 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const emptyAllSymptoms = () => {
     Alert.alert(
-      S?.confirmEmptySymptoms || 'Empty All Symptoms',
-      S?.confirmEmptySymptomsMessage || 'Are you sure you want to delete all tracked symptoms? This cannot be undone.',
+      S?.confirmEmptySymptoms || uiI18n.t("ai.emptyAllSymptoms"),
+      S?.confirmEmptySymptomsMessage || uiI18n.t("ai.confirmEmptySymptomsMessage"),
       [
         {
-          text: S?.cancel || 'Cancel',
+          text: S?.cancel || uiI18n.t("healthAnalytics.cancel"),
           style: 'cancel'
         },
         {
-          text: S?.delete || 'Delete All',
+          text: S?.delete || uiI18n.t("ui.deleteAll"),
           style: 'destructive',
           onPress: () => {
             setSymptomAnalyses([]);
@@ -780,7 +781,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
   const analyzeSymptoms = async () => {
     if (!symptomText.trim()) {
-      Alert.alert('❌ Error', t('pleaseEnterSymptoms'));
+      Alert.alert(uiI18n.t("adminProfile.error"), t("ai.pleaseEnterSymptoms"));
       return;
     }
 
@@ -824,8 +825,8 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
     if (allItems.length < 2) {
       Alert.alert(
-        '❌ ' + (S?.error || 'Error'), 
-        S?.needTwoItems || 'You need at least 2 medications or supplements to check for interactions.'
+        '❌ ' + (S?.error || uiI18n.t("adminProfile.error")), 
+        S?.needTwoItems || uiI18n.t("ai.needTwoItems")
       );
       return;
     }
@@ -849,7 +850,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
 
       // Create a timeout promise
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout - AI server may not be running')), 15000); // 15 second timeout
+        setTimeout(() => reject(new Error(uiI18n.t("ui.requestTimeoutAiServerMayNotBeRunning"))), 15000); // 15 second timeout
       });
 
       // Detect current language
@@ -857,7 +858,7 @@ export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medi
                              i18n.language === 'zh' ? 'Chinese' : 
                              i18n.language === 'fr' ? 'French' : 
                              i18n.language === 'de' ? 'German' : 
-                             i18n.language === 'pt' ? 'Portuguese' : 'English';
+                             i18n.language === 'pt' ? 'Portuguese' : uiI18n.t("settings.languages.en");
 
       // Race between fetch and timeout
       const fetchPromise = authenticatedFetch(apiUrl, {
@@ -930,7 +931,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       if (!response.ok) {
         const errorText = await response.text();
         console.log('Error response:', errorText);
-        throw new Error(`Server responded with ${response.status}: ${errorText}`);
+        throw new Error(uiI18n.t("ui.serverRespondedWithValueValue", { value1: response.status, value2: errorText }));
       }
 
       const data = await response.json();
@@ -942,7 +943,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         aiResult = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
       } catch {
         aiResult = {
-          disclaimer: data.result || 'Unable to parse response',
+          disclaimer: data.result || uiI18n.t("ui.unableToParseResponse"),
           interactions: [],
           overallRisk: 'unknown',
           summary: data.result
@@ -977,23 +978,23 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       console.error('Failed to check drug interactions:', error);
       console.error('Error details:', error.message);
       
-      let errorMessage = S?.failedToCheckInteractions || 'Failed to check interactions.';
+      let errorMessage = S?.failedToCheckInteractions || uiI18n.t("ui.failedToCheckInteractions");
       
       // Check for timeout
       if (error.message?.includes('timeout')) {
-        errorMessage = '⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   npm start\n\n2. Check that port 4000 is available\n\n3. Verify server environment is configured';
+        errorMessage = uiI18n.t("ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta");
       }
       // Check for network errors
       else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        errorMessage = '🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: cd server; npm start\n2. Check if running on port 4000\n3. Make sure firewall allows the connection';
+        errorMessage = uiI18n.t("ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP");
       }
       // Add error details for other errors
       else if (error.message) {
-        errorMessage += `\n\nDetails: ${error.message}`;
+        errorMessage += uiI18n.t("ui.detailsValue", { value1: error.message });
       }
       
       Alert.alert(
-        '❌ ' + (S?.error || 'Error'), 
+        '❌ ' + (S?.error || uiI18n.t("adminProfile.error")), 
         errorMessage
       );
     }
@@ -1042,32 +1043,32 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
   // Helper function to translate stored values
   const translateValue = (value: string | undefined, translationKey: string) => {
-    if (!value) return t('notSpecified');
+    if (!value) return t("ai.notSpecified");
     
     // Map stored values to translation keys
     const valueTranslations: { [key: string]: string } = {
-      'normal': t('normal'),
-      'high': t('high'),
-      'low': t('low'),
-      'poor': t('poor'),
-      'fair': t('fair'),
-      'good': t('good'),
-      'excellent': t('excellent'),
-      'sedentary': t('sedentary'),
-      'light': t('light'),
-      'moderate': t('moderate'),
-      'athlete': t('athlete'),
-      'timeRestricted': t('timeRestricted'),
-      'alternateDay': t('alternateDay'),
-      'extended': t('extended'),
-      'custom': t('custom'),
-      'daily': t('daily'),
-      'weekly': t('weekly'),
-      'monthly': t('monthly'),
-      'weightLoss': t('weightLoss'),
-      'metabolicHealth': t('metabolicHealth'),
-      'generalHealth': t('generalHealth'),
-      'spiritual': t('spiritual'),
+      'normal': t("healthProfile.normal"),
+      'high': t("healthProfile.high"),
+      'low': t("healthProfile.low"),
+      'poor': t("healthProfile.poor"),
+      'fair': t("healthProfile.fair"),
+      'good': t("healthProfile.good"),
+      'excellent': t("healthProfile.excellent"),
+      'sedentary': t("healthProfile.sedentary"),
+      'light': t("healthProfile.light"),
+      'moderate': t("healthProfile.moderate"),
+      'athlete': t("healthProfile.athlete"),
+      'timeRestricted': t("healthProfile.timeRestricted"),
+      'alternateDay': t("healthProfile.alternateDay"),
+      'extended': t("healthProfile.extended"),
+      'custom': t("healthProfile.custom"),
+      'daily': t("healthProfile.daily"),
+      'weekly': t("healthProfile.weekly"),
+      'monthly': t("healthProfile.monthly"),
+      'weightLoss': t("healthProfile.weightLoss"),
+      'metabolicHealth': t("healthProfile.metabolicHealth"),
+      'generalHealth': t("healthProfile.generalHealth"),
+      'spiritual': t("healthProfile.spiritual"),
     };
     
     return valueTranslations[value] || value;
@@ -1109,7 +1110,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       );
       
       if (!compressedLogo.base64) {
-        throw new Error('Failed to compress logo');
+        throw new Error(uiI18n.t("ui.failedToCompressLogo"));
       }
       
       const logoBase64 = compressedLogo.base64;
@@ -1120,78 +1121,78 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         medications.map((med, index) => `
           <div class="medication-item">
             <h3>${index + 1}. ${med.name || 'N/A'}</h3>
-            <p><strong>${t('dosage')}:</strong> ${med.strength || 'N/A'}</p>
-            <p><strong>${t('quantity')}:</strong> ${med.quantity || 'N/A'}</p>
-            <p><strong>${t('times')}:</strong> ${med.times ? med.times.join(', ') : 'N/A'}</p>
-            ${med.notes ? `<p><strong>${t('notes')}:</strong> ${med.notes}</p>` : ''}
+            <p><strong>${t("ai.dosage")}:</strong> ${med.strength || 'N/A'}</p>
+            <p><strong>${t("ai.quantity")}:</strong> ${med.quantity || 'N/A'}</p>
+            <p><strong>${t("ai.times")}:</strong> ${med.times ? med.times.join(', ') : 'N/A'}</p>
+            ${med.notes ? `<p><strong>${t("ai.notes")}:</strong> ${med.notes}</p>` : ''}
           </div>
         `).join('') : 
-        `<p>${t('noMedicationsRecorded')}</p>`;
+        `<p>${t("ai.noMedicationsRecorded")}</p>`;
 
       const fastingProfileHtml = fastingProfile ? `
         <div class="profile-section">
-          <h3>${t('basicInformation')}</h3>
-          <p><strong>${t('healthProfile.weight')}:</strong> ${fastingProfile.weight || t('notSpecified')} ${fastingProfile.weightUnit || 'kg'}</p>
-          <p><strong>${t('healthProfile.height')}:</strong> ${fastingProfile.height || t('notSpecified')} ${fastingProfile.heightUnit || 'cm'}</p>
+          <h3>${t("ai.basicInformation")}</h3>
+          <p><strong>${t("healthProfile.weight")}:</strong> ${fastingProfile.weight || t("ai.notSpecified")} ${fastingProfile.weightUnit || 'kg'}</p>
+          <p><strong>${t("healthProfile.height")}:</strong> ${fastingProfile.height || t("ai.notSpecified")} ${fastingProfile.heightUnit || 'cm'}</p>
           
-          <h3>${t('healthConditions')}</h3>
-          <p><strong>${t('healthConditions')}:</strong> ${[
-            fastingProfile.diabetes ? t('diabetes') : '',
-            fastingProfile.hypoglycemia ? t('hypoglycemia') : '',
-            fastingProfile.heartConditions ? t('heartConditions') : '',
-            fastingProfile.kidneyDisease ? t('kidneyDisease') : '',
-            fastingProfile.liverDisease ? t('liverDisease') : '',
-            fastingProfile.eatingDisorders ? t('eatingDisorders') : '',
-            fastingProfile.pregnancy ? t('pregnancy') : '',
-            fastingProfile.breastfeeding ? t('breastfeeding') : '',
-            fastingProfile.gastrointestinalIssues ? t('gastrointestinalIssues') : '',
+          <h3>${t("ai.healthConditions")}</h3>
+          <p><strong>${t("ai.healthConditions")}:</strong> ${[
+            fastingProfile.diabetes ? t("ai.diabetes") : '',
+            fastingProfile.hypoglycemia ? t("ai.hypoglycemia") : '',
+            fastingProfile.heartConditions ? t("ai.heartConditions") : '',
+            fastingProfile.kidneyDisease ? t("ai.kidneyDisease") : '',
+            fastingProfile.liverDisease ? t("ai.liverDisease") : '',
+            fastingProfile.eatingDisorders ? t("ai.eatingDisorders") : '',
+            fastingProfile.pregnancy ? t("ai.pregnancy") : '',
+            fastingProfile.breastfeeding ? t("ai.breastfeeding") : '',
+            fastingProfile.gastrointestinalIssues ? t("ai.gastrointestinalIssues") : '',
             ...(fastingProfile.otherHealthConditions || [])
-          ].filter(Boolean).join(', ') || t('noneReported')}</p>
+          ].filter(Boolean).join(', ') || t("ai.noneReported")}</p>
           
-          <h3>${t('nutritionalStatusBodyComposition')}</h3>
-          <p><strong>${t('bodyFatLevel')}:</strong> ${translateValue(fastingProfile.bodyFatLevel, 'bodyFatLevel')}</p>
-          <p><strong>${t('muscleMass')}:</strong> ${translateValue(fastingProfile.muscleMass, 'muscleMass')}</p>
-          <p><strong>${t('micronutrientLevels')}:</strong> ${translateValue(fastingProfile.micronutrientLevels, 'micronutrientLevels')}</p>
-          <p><strong>${t('hydrationLevel')}:</strong> ${translateValue(fastingProfile.hydrationLevel, 'hydrationLevel')}</p>
+          <h3>${t("ai.nutritionalStatusBodyComposition")}</h3>
+          <p><strong>${t("ai.bodyFatLevel")}:</strong> ${translateValue(fastingProfile.bodyFatLevel, 'bodyFatLevel')}</p>
+          <p><strong>${t("ai.muscleMass")}:</strong> ${translateValue(fastingProfile.muscleMass, 'muscleMass')}</p>
+          <p><strong>${t("ai.micronutrientLevels")}:</strong> ${translateValue(fastingProfile.micronutrientLevels, 'micronutrientLevels')}</p>
+          <p><strong>${t("ai.hydrationLevel")}:</strong> ${translateValue(fastingProfile.hydrationLevel, 'hydrationLevel')}</p>
           
-          <h3>${t('mentalHealthCognitiveDemands')}</h3>
-          <p><strong>${t('highStressEnvironment')}:</strong> ${fastingProfile.highStressEnvironment ? t('yes') : t('no')}</p>
-          <p><strong>${t('intensiveMentalTasks')}:</strong> ${fastingProfile.intensiveMentalTasks ? t('yes') : t('no')}</p>
-          <p><strong>${t('anxiety')}:</strong> ${fastingProfile.anxiety ? t('yes') : t('no')}</p>
-          <p><strong>${t('depression')}:</strong> ${fastingProfile.depression ? t('yes') : t('no')}</p>
+          <h3>${t("ai.mentalHealthCognitiveDemands")}</h3>
+          <p><strong>${t("ai.highStressEnvironment")}:</strong> ${fastingProfile.highStressEnvironment ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.intensiveMentalTasks")}:</strong> ${fastingProfile.intensiveMentalTasks ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.anxiety")}:</strong> ${fastingProfile.anxiety ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.depression")}:</strong> ${fastingProfile.depression ? t("ai.yes") : t("ai.no")}</p>
           
-          <h3>${t('lifestyleActivityLevel')}</h3>
-          <p><strong>${t('activityLevel')}:</strong> ${translateValue(fastingProfile.activityLevel, 'activityLevel')}</p>
-          <p><strong>${t('physicalLaborJob')}:</strong> ${fastingProfile.physicalLabor ? t('yes') : t('no')}</p>
-          <p><strong>${t('longWorkShifts')}:</strong> ${fastingProfile.longShifts ? t('yes') : t('no')}</p>
-          <p><strong>${t('sleepQuality')}:</strong> ${translateValue(fastingProfile.sleepQuality, 'sleepQuality')}</p>
+          <h3>${t("ai.lifestyleActivityLevel")}</h3>
+          <p><strong>${t("ai.activityLevel")}:</strong> ${translateValue(fastingProfile.activityLevel, 'activityLevel')}</p>
+          <p><strong>${t("ai.physicalLaborJob")}:</strong> ${fastingProfile.physicalLabor ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.longWorkShifts")}:</strong> ${fastingProfile.longShifts ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.sleepQuality")}:</strong> ${translateValue(fastingProfile.sleepQuality, 'sleepQuality')}</p>
           
-          <h3>${t('fastingProtocolPreferences')}</h3>
-          <p><strong>${t('preferredFastingType')}:</strong> ${translateValue(fastingProfile.preferredFastingType, 'preferredFastingType')}</p>
-          <p><strong>${t('maximumFastingHours')}:</strong> ${fastingProfile.maxFastingHours || t('notSpecified')}</p>
-          <p><strong>${t('fastingFrequency')}:</strong> ${translateValue(fastingProfile.fastingFrequency, 'fastingFrequency')}</p>
+          <h3>${t("ai.fastingProtocolPreferences")}</h3>
+          <p><strong>${t("ai.preferredFastingType")}:</strong> ${translateValue(fastingProfile.preferredFastingType, 'preferredFastingType')}</p>
+          <p><strong>${t("ai.maximumFastingHours")}:</strong> ${fastingProfile.maxFastingHours || t("ai.notSpecified")}</p>
+          <p><strong>${t("ai.fastingFrequency")}:</strong> ${translateValue(fastingProfile.fastingFrequency, 'fastingFrequency')}</p>
           
-          <h3>${t('goals')}</h3>
-          <p><strong>${t('primaryGoal')}:</strong> ${translateValue(fastingProfile.primaryGoal, 'primaryGoal')}</p>
+          <h3>${t("ai.goals")}</h3>
+          <p><strong>${t("ai.primaryGoal")}:</strong> ${translateValue(fastingProfile.primaryGoal, 'primaryGoal')}</p>
           
-          <h3>${t('medicalSupervisionMonitoring')}</h3>
-          <p><strong>${t('medicalSupervision')}:</strong> ${fastingProfile.medicalSupervision ? t('yes') : t('no')}</p>
-          <p><strong>${t('selfMonitoring')}:</strong> ${fastingProfile.selfMonitoring ? t('yes') : t('no')}</p>
-          <p><strong>${t('wearableDevices')}:</strong> ${fastingProfile.wearableDevices ? t('yes') : t('no')}</p>
+          <h3>${t("ai.medicalSupervisionMonitoring")}</h3>
+          <p><strong>${t("ai.medicalSupervision")}:</strong> ${fastingProfile.medicalSupervision ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.selfMonitoring")}:</strong> ${fastingProfile.selfMonitoring ? t("ai.yes") : t("ai.no")}</p>
+          <p><strong>${t("ai.wearableDevices")}:</strong> ${fastingProfile.wearableDevices ? t("ai.yes") : t("ai.no")}</p>
         </div>
-      ` : `<p>${t('noFastingProfileCompleted')}</p>`;
+      ` : `<p>${t("ai.noFastingProfileCompleted")}</p>`;
 
       const fastingAnalysisHtml = fastingAnalysis ? `
         <div class="analysis-section">
-          <h3>${t('fastingAnalysis')}</h3>
+          <h3>${t("ai.fastingAnalysis")}</h3>
           <div class="analysis-result ${fastingAnalysis.compatible ? 'compatible' : 'needs-review'}">
-            <p><strong>${t('status')}:</strong> ${fastingAnalysis.compatible ? t('compatible') : t('needsReview')}</p>
-            <p><strong>${t('recommendedFastingWindow')}:</strong> ${fastingAnalysis.suggestedHours > 0 ? fastingAnalysis.suggestedHours + ':' + (24-fastingAnalysis.suggestedHours) : fastingAnalysis.message}</p>
-            <p><strong>${t('analysis')}:</strong> ${fastingAnalysis.message}</p>
+            <p><strong>${t("ai.status")}:</strong> ${fastingAnalysis.compatible ? t("ai.compatible") : t("ai.needsReview")}</p>
+            <p><strong>${t("ai.recommendedFastingWindow")}:</strong> ${fastingAnalysis.suggestedHours > 0 ? fastingAnalysis.suggestedHours + ':' + (24-fastingAnalysis.suggestedHours) : fastingAnalysis.message}</p>
+            <p><strong>${t("ai.analysis")}:</strong> ${fastingAnalysis.message}</p>
           </div>
           ${fastingAnalysis.warnings && fastingAnalysis.warnings.length > 0 ? `
             <div class="warnings">
-              <h4>${S?.importantConsiderations || 'Important Considerations'}:</h4>
+              <h4>${S?.importantConsiderations || uiI18n.t("ai.importantConsiderations")}:</h4>
               <ul>
                 ${fastingAnalysis.warnings.map(warning => `<li>${warning}</li>`).join('')}
               </ul>
@@ -1304,12 +1305,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             </div>
 
             <div class="section">
-              <h2 class="section-title">${t('currentMedications')}</h2>
+              <h2 class="section-title">${t("ai.currentMedications")}</h2>
               ${medicationsHtml}
             </div>
 
             <div class="section" style="page-break-before: always;">
-              <h2 class="section-title">${t('healthProfile')}</h2>
+              <h2 class="section-title">${t("ai.healthProfile")}</h2>
               ${fastingProfileHtml}
             </div>
 
@@ -1362,7 +1363,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       console.log('📤 Sharing PDF with expo-sharing...');
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
-        throw new Error('Sharing is not available on this platform');
+        throw new Error(uiI18n.t("medicalDocuments.sharingNotAvailablePlatform"));
       }
       
       // Share the PDF with timeout to prevent app hang if dialog doesn't close properly
@@ -1371,10 +1372,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         await Promise.race([
           Sharing.shareAsync(finalUri, {
             mimeType: 'application/pdf',
-            dialogTitle: 'Share Health Report',
+            dialogTitle: uiI18n.t("ui.shareHealthReport"),
           }),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Share timeout')), 10000)
+            setTimeout(() => reject(new Error(uiI18n.t("ui.shareTimeout"))), 10000)
           )
         ]);
         console.log('✅ PDF share completed');
@@ -1393,9 +1394,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       // Show error to user so they know what happened
       Alert.alert(
-        'Error',
-        'Failed to export health report. This may be due to large file size or special characters in the content. Please try again or contact support if the issue persists.',
-        [{ text: 'OK' }]
+        uiI18n.t("adminProfile.error"),
+        uiI18n.t("ui.failedToExportHealthReportThisMayBeDueToLargeFileSizeOrSpecialCharactersInTheContentPlease"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
     }
   };
@@ -1407,9 +1408,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     
     if (!symptomAnalyses || symptomAnalyses.length === 0) {
       Alert.alert(
-        S?.noActiveSymptoms || 'No Active Symptoms',
-        S?.noActiveSymptomsMessage || 'There are no active symptoms to export.',
-        [{ text: S?.ok || 'OK' }]
+        S?.noActiveSymptoms || uiI18n.t("ai.noActiveSymptoms"),
+        S?.noActiveSymptomsMessage || uiI18n.t("ai.noActiveSymptomsMessage"),
+        [{ text: S?.ok || uiI18n.t("adminProfile.ok") }]
       );
       return;
     }
@@ -1444,7 +1445,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         );
         
         if (!compressedLogo.base64) {
-          throw new Error('Failed to compress logo');
+          throw new Error(uiI18n.t("ui.failedToCompressLogo"));
         }
         logoBase64 = compressedLogo.base64;
         console.log('✅ Logo compressed, size:', logoBase64.length);
@@ -1459,8 +1460,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       const symptomsHtml = symptomAnalyses.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
           <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || 'Date'}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-          ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || 'Notes'}: ${analysis.notes}</p>` : ''}
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || uiI18n.t("ai.notes")}: ${analysis.notes}</p>` : ''}
         </div>
       `).join('');
 
@@ -1469,7 +1470,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         <html>
           <head>
             <meta charset="utf-8">
-            <title>${S?.activeSymptomReport || 'Active Symptom Report'}</title>
+            <title>${S?.activeSymptomReport || uiI18n.t("ai.activeSymptomReport")}</title>
             <style>
               body { font-family: Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif; margin: 20px; }
               .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #D4AF37; }
@@ -1482,16 +1483,16 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           <body>
             <div class="header">
               ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" alt="Logo" class="logo">` : ''}
-              <h1>${S?.auricrxMedCoach || 'AuricRX MedCoach'}</h1>
-              <h2>${S?.activeSymptomReport || 'Active Symptom Report'}</h2>
-              <p style="color: #666; font-size: 12px;">${S?.generatedOn || 'Generated on'}: ${currentDate}</p>
+              <h1>${S?.auricrxMedCoach || uiI18n.t("ai.auricrxMedCoach")}</h1>
+              <h2>${S?.activeSymptomReport || uiI18n.t("ai.activeSymptomReport")}</h2>
+              <p style="color: #666; font-size: 12px;">${S?.generatedOn || uiI18n.t("ai.generatedOn")}: ${currentDate}</p>
             </div>
             <div style="margin: 15px 0; padding: 10px; background: #f0f9ff; border-left: 3px solid #0284c7;">
-              <p><strong>${S?.activeSymptoms || 'Active symptoms'}:</strong> ${symptomAnalyses.length}</p>
+              <p><strong>${S?.activeSymptoms || uiI18n.t("ai.activeSymptoms")}:</strong> ${symptomAnalyses.length}</p>
             </div>
             ${symptomsHtml}
             <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center;">
-              <p style="font-size: 10px; color: #666;">${S?.symptomTrackerDisclaimer || 'This symptom tracker report is for personal health monitoring purposes only.'}</p>
+              <p style="font-size: 10px; color: #666;">${S?.symptomTrackerDisclaimer || uiI18n.t("ai.symptomTrackerDisclaimer")}</p>
             </div>
           </body>
         </html>
@@ -1530,7 +1531,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       console.log('📤 Sharing PDF with expo-sharing...');
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
-        throw new Error('Sharing is not available on this platform');
+        throw new Error(uiI18n.t("medicalDocuments.sharingNotAvailablePlatform"));
       }
       
       // Share the PDF with timeout to prevent app hang if dialog doesn't close properly
@@ -1539,10 +1540,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         await Promise.race([
           Sharing.shareAsync(finalUri, {
             mimeType: 'application/pdf',
-            dialogTitle: 'Share Symptom Report',
+            dialogTitle: uiI18n.t("ui.shareSymptomReport"),
           }),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Share timeout')), 10000)
+            setTimeout(() => reject(new Error(uiI18n.t("ui.shareTimeout"))), 10000)
           )
         ]);
         console.log('✅ PDF share completed');
@@ -1560,9 +1561,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       }
       
       Alert.alert(
-        S?.exportFailed || 'Export Failed',
-        S?.symptomReportFailed || 'Failed to generate symptom report. Please try again.',
-        [{ text: 'OK' }]
+        S?.exportFailed || uiI18n.t("ai.exportFailed"),
+        S?.symptomReportFailed || uiI18n.t("ai.symptomReportFailed"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
     }
   };
@@ -1575,9 +1576,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     
     if (allSymptoms.length === 0) {
       Alert.alert(
-        S?.noSymptomsToExport || 'No Symptoms to Export',
-        S?.noSymptomsMessage || 'There are no symptoms to export.',
-        [{ text: S?.ok || 'OK' }]
+        S?.noSymptomsToExport || uiI18n.t("ai.noSymptomsToExport"),
+        S?.noSymptomsMessage || uiI18n.t("ai.noSymptomsMessage"),
+        [{ text: S?.ok || uiI18n.t("adminProfile.ok") }]
       );
       return;
     }
@@ -1612,7 +1613,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         );
         
         if (!compressedLogo.base64) {
-          throw new Error('Failed to compress logo');
+          throw new Error(uiI18n.t("ui.failedToCompressLogo"));
         }
         logoBase64 = compressedLogo.base64;
         console.log('✅ Logo compressed, size:', logoBase64.length);
@@ -1632,8 +1633,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       const symptomsHtml = sortedSymptoms.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
           <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || 'Date'}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-          ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || 'Notes'}: ${analysis.notes}</p>` : ''}
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || uiI18n.t("ai.notes")}: ${analysis.notes}</p>` : ''}
         </div>
       `).join('');
 
@@ -1642,7 +1643,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         <html>
           <head>
             <meta charset="utf-8">
-            <title>${S?.symptomTrackerReport || 'Symptom Tracker Report'}</title>
+            <title>${S?.symptomTrackerReport || uiI18n.t("ai.symptomTrackerReport")}</title>
             <style>
               body { font-family: Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif; margin: 20px; }
               .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #D4AF37; }
@@ -1655,17 +1656,17 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           <body>
             <div class="header">
               ${logoBase64 ? `<img src="data:image/png;base64,${logoBase64}" alt="Logo" class="logo">` : ''}
-              <h1>${S?.auricrxMedCoach || 'AuricRX MedCoach'}</h1>
-              <h2>${S?.symptomTrackerReport || 'Symptom Tracker Report'}</h2>
-              <p style="color: #666; font-size: 12px;">${S?.generatedOn || 'Generated on'}: ${currentDate}</p>
+              <h1>${S?.auricrxMedCoach || uiI18n.t("ai.auricrxMedCoach")}</h1>
+              <h2>${S?.symptomTrackerReport || uiI18n.t("ai.symptomTrackerReport")}</h2>
+              <p style="color: #666; font-size: 12px;">${S?.generatedOn || uiI18n.t("ai.generatedOn")}: ${currentDate}</p>
             </div>
             <div style="margin: 15px 0; padding: 10px; background: #f0f9ff; border-left: 3px solid #0284c7;">
-              <p><strong>${S?.totalSymptoms || 'Total symptoms'}:</strong> ${allSymptoms.length}</p>
-              <p><strong>${S?.storedSymptoms || 'Stored'}:</strong> ${storedSymptomAnalyses.length} | <strong>${S?.activeSymptoms || 'Active'}:</strong> ${symptomAnalyses.length}</p>
+              <p><strong>${S?.totalSymptoms || uiI18n.t("ui.totalSymptoms")}:</strong> ${allSymptoms.length}</p>
+              <p><strong>${S?.storedSymptoms || uiI18n.t("ui.stored")}:</strong> ${storedSymptomAnalyses.length} | <strong>${S?.activeSymptoms || uiI18n.t("settings.active")}:</strong> ${symptomAnalyses.length}</p>
             </div>
             ${symptomsHtml}
             <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center;">
-              <p style="font-size: 10px; color: #666;">${S?.symptomTrackerDisclaimer || 'This symptom tracker report is for personal health monitoring purposes only.'}</p>
+              <p style="font-size: 10px; color: #666;">${S?.symptomTrackerDisclaimer || uiI18n.t("ai.symptomTrackerDisclaimer")}</p>
             </div>
           </body>
         </html>
@@ -1704,7 +1705,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       console.log('📤 Sharing PDF with expo-sharing...');
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
-        throw new Error('Sharing is not available on this platform');
+        throw new Error(uiI18n.t("medicalDocuments.sharingNotAvailablePlatform"));
       }
       
       // Share the PDF with timeout to prevent app hang if dialog doesn't close properly
@@ -1713,10 +1714,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         await Promise.race([
           Sharing.shareAsync(finalUri, {
             mimeType: 'application/pdf',
-            dialogTitle: 'Share Symptom Tracker Report',
+            dialogTitle: uiI18n.t("ui.shareSymptomTrackerReport"),
           }),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Share timeout')), 10000)
+            setTimeout(() => reject(new Error(uiI18n.t("ui.shareTimeout"))), 10000)
           )
         ]);
         console.log('✅ PDF share completed');
@@ -1734,9 +1735,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       }
       
       Alert.alert(
-        S?.exportFailed || 'Export Failed',
-        S?.symptomReportFailed || 'Failed to generate symptom report. Please try again.',
-        [{ text: 'OK' }]
+        S?.exportFailed || uiI18n.t("ai.exportFailed"),
+        S?.symptomReportFailed || uiI18n.t("ai.symptomReportFailed"),
+        [{ text: uiI18n.t("adminProfile.ok") }]
       );
     }
   };
@@ -1765,10 +1766,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
   const getSeverityLabel = (severity: string) => {
     switch (severity) {
-      case 'info': return t('info');
-      case 'warning': return t('warning');
-      case 'critical': return t('critical');
-      default: return t('unknown');
+      case 'info': return t("ai.info");
+      case 'warning': return t("ai.warning");
+      case 'critical': return t("ai.critical");
+      default: return t("ai.unknown");
     }
   };
 
@@ -1788,24 +1789,24 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           style={{ width: 24, height: 24, marginRight: 8 }} 
           resizeMode="contain" 
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('aiHealthFeatures')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.aiHealthFeatures")}</DynamicText>
       </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('intelligentHealthcareFeatures')}
+        {t("ai.intelligentFeatures")}
       </DynamicText>
       
       <View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{insights.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{S?.healthInsights || 'Health Insights'}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{S?.healthInsights || uiI18n.t("ai.insights")}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{symptomAnalyses.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('symptomAnalyses')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t("ai.symptomAnalyses")}</DynamicText>
         </View>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{drugInteractions.length}</DynamicText>
-          <DynamicText type="card" style={dynamicStyles.statLabel}>{t('drugChecks')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.statLabel}>{t("ai.drugChecks")}</DynamicText>
         </View>
       </View>
 
@@ -1819,7 +1820,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
               style={{ width: 18, height: 18, marginRight: 6 }}
             />
-            <DynamicText type="card" style={dynamicStyles.quickActionText}>{t('analyzeSymptoms')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.quickActionText}>{t("ai.analyzeSymptoms")}</DynamicText>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -1831,7 +1832,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
               style={{ width: 18, height: 18, marginRight: 6 }}
             />
-            <DynamicText type="card" style={dynamicStyles.quickActionText}>{t('checkInteractions')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.quickActionText}>{t("ai.checkInteractions")}</DynamicText>
           </View>
         </TouchableOpacity>
       </View>
@@ -1864,25 +1865,25 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             style={{ width: 24, height: 24, marginRight: 8 }} 
             resizeMode="contain" 
           />
-          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('fastingAnalytics')}</DynamicText>
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.fastingAnalytics")}</DynamicText>
         </View>
         
         <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-          {t('fastingDescription')}
+          {t("ai.fastingDescription")}
         </DynamicText>
 
         {hasProfile ? (
           <View style={dynamicStyles.fastingProfileCard}>
             <View style={dynamicStyles.fastingProfileHeader}>
               <DynamicText type="card" style={dynamicStyles.fastingProfileTitle}>
-                {t('yourFastingProfile')}
+                {t("ai.yourFastingProfile")}
               </DynamicText>
               <View style={[
                 dynamicStyles.fastingStatusBadge,
                 { backgroundColor: fastingAnalysis?.compatible ? '#10b981' : '#f59e0b' }
               ]}>
                 <DynamicText type="card" style={dynamicStyles.fastingStatusText}>
-                  {fastingAnalysis ? (fastingAnalysis.compatible ? t('compatible') : t('needsReview')) : t('notAnalyzed')}
+                  {fastingAnalysis ? (fastingAnalysis.compatible ? t("ai.compatible") : t("ai.needsReview")) : t("ai.notAnalyzed")}
                 </DynamicText>
               </View>
             </View>
@@ -1890,7 +1891,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             {fastingAnalysis ? (
               <View style={dynamicStyles.fastingAnalysisResult}>
                 {fastingAnalysis.suggestedHours > 0 && <View style={dynamicStyles.fastingTimeRecommendation}>
-                  <DynamicText type="card" style={dynamicStyles.fastingTimeLabel}>{t('recommendedFastingWindow')}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.fastingTimeLabel}>{t("ai.recommendedFastingWindow")}</DynamicText>
                   <DynamicText type="card" style={dynamicStyles.fastingTimeValue}>
                     {fastingAnalysis.suggestedHours}:{24-fastingAnalysis.suggestedHours}
                   </DynamicText>
@@ -1903,7 +1904,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 {fastingAnalysis.warnings.length > 0 && (
                   <View style={dynamicStyles.fastingWarnings}>
                     <DynamicText type="card" style={dynamicStyles.fastingWarningsTitle}>
-                      {S?.importantConsiderations || 'Important Considerations'}:
+                      {S?.importantConsiderations || uiI18n.t("ai.importantConsiderations")}:
                     </DynamicText>
                     {fastingAnalysis.warnings.map((warning, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.fastingWarningItem}>
@@ -1916,7 +1917,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             ) : (
               <View style={dynamicStyles.fastingAnalysisPrompt}>
                 <DynamicText type="card" style={dynamicStyles.fastingAnalysisPromptText}>
-                  {t('fastingCompatibilityDescription')}
+                  {t("ai.fastingCompatibilityDescription")}
                 </DynamicText>
               </View>
             )}
@@ -1926,34 +1927,30 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               onPress={analyzeFastingCompatibility}
             >
               <DynamicText type="card" style={dynamicStyles.fastingAnalyzeButtonText}>
-                {fastingAnalysis ? (S?.reAnalyzeFasting || 'Re-analyze Fasting') : (S?.analyzeFastingCompatibility || 'Analyze Fasting Compatibility')}
+                {fastingAnalysis ? (S?.reAnalyzeFasting || uiI18n.t("ai.reAnalyzeFasting")) : (S?.analyzeFastingCompatibility || uiI18n.t("ai.analyzeFastingCompatibility"))}
               </DynamicText>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={dynamicStyles.fastingNoProfileCard}>
             <DynamicText type="card" style={dynamicStyles.fastingNoProfileTitle}>
-              {t('completeYourFastingProfile')}
+              {t("ai.completeYourFastingProfile")}
             </DynamicText>
-            <DynamicText type="card" style={dynamicStyles.fastingNoProfileDescription}>
-              Set up your fasting profile in Settings to get personalized fasting recommendations based on your health conditions, medications, and lifestyle.
-            </DynamicText>
+            <DynamicText type="card" style={dynamicStyles.fastingNoProfileDescription}>{uiI18n.t("ui.setUpYourFastingProfileInSettingsToGetPersonalizedFastingRecommendationsBasedOnYourHealthC")}</DynamicText>
             <TouchableOpacity
               style={[dynamicStyles.fastingSetupButton, { backgroundColor: getAccentColor() }]}
               onPress={() => {
                 // This would navigate to settings - you might want to add a callback prop for this
-                Alert.alert(t('setupRequired'), t('pleaseGoToSettings'));
+                Alert.alert(t("ai.setupRequired"), t("ai.pleaseGoToSettings"));
               }}
             >
-              <DynamicText type="card" style={dynamicStyles.fastingSetupButtonText}>
-                Go to Settings
-              </DynamicText>
+              <DynamicText type="card" style={dynamicStyles.fastingSetupButtonText}>{uiI18n.t("ui.goToSettings")}</DynamicText>
             </TouchableOpacity>
           </View>
         )}
 
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
-          {t('consultHealthcareProviderDisclaimer')}
+          {t("ai.consultHealthcareProviderDisclaimer")}
         </DynamicText>
       </Animated.View>
 
@@ -1970,9 +1967,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {S?.healthInsights || 'Health Insights'}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {S?.healthInsights || uiI18n.t("ai.insights")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {S?.aiGeneratedInsights || 'AI-generated insights based on your health data'}
+        {S?.aiGeneratedInsights || uiI18n.t("ai.aiGeneratedInsights")}
       </DynamicText>
       
       {insights.slice(0, 5).map(insight => (
@@ -1999,7 +1996,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           {insight.actionable && insight.actionItems.length > 0 && (
             <View style={dynamicStyles.actionItems}>
               <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                {S?.actionItems || 'Action Items'}
+                {S?.actionItems || uiI18n.t("ui.actionItems")}
               </DynamicText>
               {insight.actionItems.slice(0, 3).map((item, index) => (
                 <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
@@ -2013,7 +2010,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       {insights.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {S?.noHealthInsights || 'No health insights available yet'}
+          {S?.noHealthInsights || uiI18n.t("ai.noHealthInsights")}
         </DynamicText>
       )}
     </Animated.View>
@@ -2035,7 +2032,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
             style={{ width: 20, height: 20, marginRight: 8 }}
           />
-          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('recentAnalyses')}</DynamicText>
+          <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.recentAnalyses")}</DynamicText>
         </View>
         
         {/* Export Active Symptoms Button - Small, Top Right */}
@@ -2055,13 +2052,13 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             }}
           >
             <DynamicText type="card" style={{ fontSize: 12, fontWeight: '600', letterSpacing: 0.3 }}>
-              {S?.export || 'Export'}
+              {S?.export || uiI18n.t("ai.export")}
             </DynamicText>
           </TouchableOpacity>
         )}
       </View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('recentSymptomAnalyses')}
+        {t("ai.recentSymptomAnalyses")}
       </DynamicText>
       
       {symptomAnalyses.slice(0, 3).map(analysis => (
@@ -2075,7 +2072,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               { backgroundColor: getSeverityColor('info') }
             ]}>
               <DynamicText type="card" style={dynamicStyles.severityText}>
-                {t('analyzeSymptoms')}
+                {t("ai.analyzeSymptoms")}
               </DynamicText>
             </View>
           </View>
@@ -2092,7 +2089,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 onPress={() => storeSymptomAnalysis(analysis.id)}
               >
                 <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                  📁 {S?.store || 'Store'}
+                  📁 {S?.store || uiI18n.t("ai.store")}
                 </DynamicText>
               </TouchableOpacity>
               
@@ -2106,7 +2103,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                     style={{ width: 16, height: 16, marginRight: 4 }}
                   />
                   <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                    {S?.delete || 'Delete'}
+                    {S?.delete || uiI18n.t("ai.delete")}
                   </DynamicText>
                 </View>
               </TouchableOpacity>
@@ -2117,7 +2114,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       {symptomAnalyses.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noSymptomAnalyses')}
+          {t("ai.noSymptomAnalyses")}
         </DynamicText>
       )}
       
@@ -2134,7 +2131,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             style={{ width: 16, height: 16, marginRight: 6 }}
           />
           <DynamicText type="card" style={dynamicStyles.viewAllButtonText}>
-            {S?.viewAllSymptoms || 'View All Symptoms'} ({symptomAnalyses.length + storedSymptomAnalyses.length})
+            {S?.viewAllSymptoms || uiI18n.t("ai.viewAllSymptoms")} ({symptomAnalyses.length + storedSymptomAnalyses.length})
           </DynamicText>
         </View>
       </TouchableOpacity>
@@ -2188,11 +2185,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 resizeMode="contain" 
               />
               <DynamicText type="primary" style={styles.title}>
-                {t('aiHealthAssistant')}
+                {t("ai.assistant")}
               </DynamicText>
             </View>
             <DynamicText type="secondary" style={styles.subtitle}>
-              {t('intelligentHealthcareFeatures')}
+              {t("ai.intelligentFeatures")}
             </DynamicText>
           </Animated.View>
 
@@ -2216,11 +2213,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 style={{ width: 24, height: 24, marginRight: 8 }} 
                 resizeMode="contain" 
               />
-              <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('exportHealthReport')}</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.exportHealthReport")}</DynamicText>
             </View>
             
             <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-              {t('generateHealthReportDescription')}
+              {t("ai.generateHealthReportDescription")}
             </DynamicText>
 
             <TouchableOpacity
@@ -2228,7 +2225,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               onPress={exportToPDF}
             >
               <DynamicText type="card" style={dynamicStyles.exportButtonText}>
-                {t('exportHealthReport')}
+                {t("ai.exportHealthReport")}
               </DynamicText>
             </TouchableOpacity>
           </Animated.View>
@@ -2255,11 +2252,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
                 style={{ width: 24, height: 24, marginRight: 8 }}
               />
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>Symptom Analysis</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{uiI18n.t("ai.symptomAnalysis")}</DynamicText>
             </View>
             
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>Describe your symptoms</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{uiI18n.t("ai.describeSymptoms")}</DynamicText>
               <TextInput
                 style={dynamicStyles.multilineInput}
                 placeholder={aiTranslations.enterSymptomsPlaceholder}
@@ -2275,13 +2272,13 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowSymptomModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{S?.cancel || 'Cancel'}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{S?.cancel || uiI18n.t("healthAnalytics.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeSymptoms}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyze || 'Analyze'}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyze || uiI18n.t("ai.analyze")}</DynamicText>
               </TouchableOpacity>
             </View>
           </ScrollView></View>
@@ -2302,7 +2299,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
                 style={{ width: 24, height: 24, marginRight: 8 }}
               />
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{S?.drugInteractionCheck || 'Drug Interaction Check'}</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{S?.drugInteractionCheck || uiI18n.t("ai.drugInteractionCheck")}</DynamicText>
             </View>
             
             {/* Medical Disclaimer */}
@@ -2313,11 +2310,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   style={{ width: 18, height: 18, marginRight: 6 }}
                 />
                 <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
-                  {S?.medicalDisclaimer || 'Medical Disclaimer'}
+                  {S?.medicalDisclaimer || uiI18n.t("ai.medicalDisclaimer")}
                 </DynamicText>
               </View>
               <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
-                {S?.interactionDisclaimerText || 'This is AI-generated information for educational purposes only. Always consult your doctor or pharmacist before making any changes to your medications.'}
+                {S?.interactionDisclaimerText || uiI18n.t("ai.interactionDisclaimerText")}
               </DynamicText>
             </View>
 
@@ -2331,7 +2328,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       style={{ width: 18, height: 18, marginRight: 6 }}
                     />
                     <DynamicText type="card" style={dynamicStyles.inputLabel}>
-                      {S?.yourMedications || 'Your Medications'} ({medications.length})
+                      {S?.yourMedications || uiI18n.t("ai.yourMedications")} ({medications.length})
                     </DynamicText>
                   </View>
                   {medications.map((med: any, index: number) => (
@@ -2363,7 +2360,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       style={{ width: 18, height: 18, marginRight: 6 }}
                     />
                     <DynamicText type="card" style={dynamicStyles.inputLabel}>
-                      {S?.yourSupplements || 'Your Supplements'} ({supplements.length})
+                      {S?.yourSupplements || uiI18n.t("ai.yourSupplements")} ({supplements.length})
                     </DynamicText>
                   </View>
                   {supplements.map((sup: any, index: number) => (
@@ -2385,7 +2382,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               {(!medications || medications.length === 0) && (!supplements || supplements.length === 0) && (
                 <View style={{ padding: 20, alignItems: 'center' }}>
                   <DynamicText type="secondary" style={{ textAlign: 'center', fontStyle: 'italic' }}>
-                    {S?.noMedicationsToCheck || 'No medications or supplements found. Please add them in the Medications or Supplements cards first.'}
+                    {S?.noMedicationsToCheck || uiI18n.t("ai.noMedicationsToCheck")}
                   </DynamicText>
                 </View>
               )}
@@ -2397,7 +2394,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 onPress={() => setShowDrugCheckModal(false)}
               >
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {S?.cancel || 'Cancel'}
+                  {S?.cancel || uiI18n.t("healthAnalytics.cancel")}
                 </DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
@@ -2410,7 +2407,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 disabled={(medications?.length || 0) + (supplements?.length || 0) < 2}
               >
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary, { textAlign: 'center' }]}>
-                  {S?.checkInteractions || 'Check Interactions'}
+                  {S?.checkInteractions || uiI18n.t("ai.checkInteractions")}
                 </DynamicText>
               </TouchableOpacity>
             </View>
@@ -2433,7 +2430,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
 
                     <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                      {S?.symptomAnalysisComplete || 'Symptom Analysis Complete'}
+                      {S?.symptomAnalysisComplete || uiI18n.t("ai.symptomAnalysisComplete")}
                     </DynamicText>
                   </View>
                 </View>
@@ -2452,20 +2449,20 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                         style={{ width: 18, height: 18, marginRight: 6 }}
                       />
                       <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
-                        {S?.importantNotice || 'Important Notice'}
+                        {S?.importantNotice || uiI18n.t("ai.importantNotice")}
                       </DynamicText>
                     </View>
                     <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
-                      {S?.contactDoctorImmediately || 'Contact your doctor immediately if symptoms worsen'}
+                      {S?.contactDoctorImmediately || uiI18n.t("ai.contactDoctorImmediately")}
                     </DynamicText>
                     <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
-                      {S?.exportSymptomReport || 'Export your symptom report to share with your healthcare provider'}
+                      {S?.exportSymptomReport || uiI18n.t("ai.exportSymptomReport")}
                     </DynamicText>
                   </View>
 
                   <View style={dynamicStyles.analysisSection}>
                     <DynamicText type="card" style={dynamicStyles.sectionTitle}>
-                      {S?.followUpActions || 'Follow-up Actions'}:
+                      {S?.followUpActions || uiI18n.t("ai.followUpActions")}:
                     </DynamicText>
                     {currentSymptomAnalysis.followUpActions.map((action, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.followUpItem}>
@@ -2484,7 +2481,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonTextPrimary}>
-                      {S?.ok || 'OK'}
+                      {S?.ok || uiI18n.t("adminProfile.ok")}
                     </DynamicText>
                   </TouchableOpacity>
                 </View>
@@ -2510,7 +2507,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   style={{ width: 24, height: 24, marginRight: 8 }}
                 />
                 <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                  {S?.symptomHistory || 'Symptom History'}
+                  {S?.symptomHistory || uiI18n.t("ai.symptomHistory")}
                 </DynamicText>
               </View>
               <TouchableOpacity
@@ -2522,7 +2519,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             </View>
 
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { marginBottom: 12 }]}>
-              {S?.totalSymptoms || 'Total symptoms tracked'}: {symptomAnalyses.length + storedSymptomAnalyses.length}
+              {S?.totalSymptoms || uiI18n.t("ai.totalSymptoms")}: {symptomAnalyses.length + storedSymptomAnalyses.length}
             </DynamicText>
 
             <ScrollView keyboardShouldPersistTaps="handled" style={{ flexGrow: 1, flexShrink: 1, maxHeight: '60%' }} contentContainerStyle={[{ paddingBottom: 10 }, { paddingBottom: 24 }]} showsVerticalScrollIndicator={true}>
@@ -2539,7 +2536,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                         { backgroundColor: '#22c55e', paddingHorizontal: 8, paddingVertical: 3 }
                       ]}>
                         <DynamicText type="card" style={[dynamicStyles.severityText, { fontSize: 10 }]}>
-                          {S?.saved || 'SAVED'}
+                          {S?.saved || uiI18n.t("ai.saved")}
                         </DynamicText>
                       </View>
                       <View style={[
@@ -2547,7 +2544,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                         { backgroundColor: getSeverityColor('info') }
                       ]}>
                         <DynamicText type="card" style={dynamicStyles.severityText}>
-                          {t('analyzeSymptoms')}
+                          {t("ai.analyzeSymptoms")}
                         </DynamicText>
                       </View>
                     </View>
@@ -2572,7 +2569,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                             style={{ width: 16, height: 16, marginRight: 4 }}
                           />
                           <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                            {S?.delete || 'Delete'}
+                            {S?.delete || uiI18n.t("ai.delete")}
                           </DynamicText>
                         </View>
                       </TouchableOpacity>
@@ -2593,7 +2590,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       { backgroundColor: getSeverityColor('info') }
                     ]}>
                       <DynamicText type="card" style={dynamicStyles.severityText}>
-                        {t('analyzeSymptoms')}
+                        {t("ai.analyzeSymptoms")}
                       </DynamicText>
                     </View>
                   </View>
@@ -2611,7 +2608,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                         }}
                       >
                         <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                          📁 {S?.store || 'Store'}
+                          📁 {S?.store || uiI18n.t("ai.store")}
                         </DynamicText>
                       </TouchableOpacity>
                       
@@ -2627,7 +2624,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                             style={{ width: 16, height: 16, marginRight: 4 }}
                           />
                           <DynamicText type="card" style={dynamicStyles.actionButtonText}>
-                            {S?.delete || 'Delete'}
+                            {S?.delete || uiI18n.t("ai.delete")}
                           </DynamicText>
                         </View>
                       </TouchableOpacity>
@@ -2638,7 +2635,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
               {symptomAnalyses.length === 0 && storedSymptomAnalyses.length === 0 && (
                 <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic', marginTop: 20 }]}>
-                  {S?.noSymptomAnalyses || 'No symptoms tracked yet'}
+                  {S?.noSymptomAnalyses || uiI18n.t("ai.noSymptomAnalyses")}
                 </DynamicText>
               )}
             </ScrollView>
@@ -2675,7 +2672,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                     letterSpacing: 0.3,
                     width: '100%'
                   }}>
-                    {S?.exportPDF || 'Export PDF'}
+                    {S?.exportPDF || uiI18n.t("documents.exportPDF")}
                   </DynamicText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -2709,7 +2706,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                     letterSpacing: 0.3,
                     width: '100%'
                   }}>
-                    {S?.emptyAllSymptoms || 'Empty All Symptoms'}
+                    {S?.emptyAllSymptoms || uiI18n.t("ai.emptyAllSymptoms")}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -2743,7 +2740,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 textAlign: 'center',
                 letterSpacing: 0.3
               }}>
-                {S?.close || 'Close'}
+                {S?.close || uiI18n.t("ai.close")}
               </DynamicText>
             </TouchableOpacity>
           </View>
@@ -2778,7 +2775,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               fontFamily: 'Inter_700Bold',
               textAlign: 'center'
             }}>
-              ✅ {S?.saved || 'Saved'}
+              ✅ {S?.saved || uiI18n.t("ai.saved")}
             </DynamicText>
           </View>
         </View>
@@ -2798,14 +2795,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
                 style={{ width: 24, height: 24, marginRight: 8 }}
               />
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>Fasting Analytics</DynamicText>
+              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{uiI18n.t("ai.fastingAnalytics")}</DynamicText>
             </View>
             
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>Fasting Compatibility Check</DynamicText>
-              <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-                Check if your current medications are compatible with intermittent fasting
-              </DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{uiI18n.t("ai.fastingCompatibilityCheck")}</DynamicText>
+              <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>{uiI18n.t("ai.fastingDescription")}</DynamicText>
             </View>
 
             {fastingAnalysis && (
@@ -2822,7 +2817,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       />
                     )}
                     <DynamicText type="card" style={dynamicStyles.insightTitle}>
-                      {fastingAnalysis.compatible ? 'Compatible' : 'Warning'}
+                      {fastingAnalysis.compatible ? uiI18n.t("ai.compatible") : uiI18n.t("ai.warning")}
                     </DynamicText>
                   </View>
                   <View style={[
@@ -2839,9 +2834,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 </DynamicText>
                 {fastingAnalysis.warnings.length > 0 && (
                   <View style={dynamicStyles.actionItems}>
-                    <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>
-                      Warnings:
-                    </DynamicText>
+                    <DynamicText type="card" style={[dynamicStyles.actionItem, { fontWeight: '600', marginBottom: 4 }]}>{uiI18n.t("ai.warnings")}</DynamicText>
                     {fastingAnalysis.warnings.map((warning, index) => (
                       <DynamicText key={index} type="card" style={dynamicStyles.actionItem}>
                         • {warning}
@@ -2857,18 +2850,18 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowFastingModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{S?.cancel || 'Cancel'}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{S?.cancel || uiI18n.t("healthAnalytics.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={analyzeFastingCompatibility}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyzeFastingCompatibility || 'Analyze'}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{S?.analyzeFastingCompatibility || uiI18n.t("ai.analyze")}</DynamicText>
               </TouchableOpacity>
             </View>
             
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { fontSize: 12, fontStyle: 'italic', marginTop: 8 }]}>
-              {t('consultHealthcareProviderDisclaimer')}
+              {t("ai.consultHealthcareProviderDisclaimer")}
             </DynamicText>
           </View>
         </View>
@@ -2894,10 +2887,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 style={{ width: 48, height: 48, marginBottom: 16 }}
               />
               <DynamicText type="primary" style={[dynamicStyles.modalTitle, { textAlign: 'center', marginBottom: 8 }]}>
-                {S?.analyzing || 'Analyzing...'}
+                {S?.analyzing || uiI18n.t("ai.analyzing")}
               </DynamicText>
               <DynamicText type="secondary" style={{ textAlign: 'center', fontSize: 13, lineHeight: 20 }}>
-                {S?.checkingInteractions || 'Checking for drug interactions using AI...'}
+                {S?.checkingInteractions || uiI18n.t("ai.checkingInteractions")}
               </DynamicText>
             </View>
           </View>
@@ -2919,7 +2912,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 style={{ width: 20, height: 20, marginRight: 8 }}
               />
               <DynamicText type="primary" style={[dynamicStyles.modalTitle, { flex: 1 }]}>
-                {S?.interactionResults || 'Interaction Check Results'}
+                {S?.interactionResults || uiI18n.t("ai.interactionResults")}
               </DynamicText>
             </View>
 
@@ -2937,7 +2930,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               {interactionResult?.summary && (
                 <View style={[dynamicStyles.insightCard, { marginBottom: 16 }]}>
                   <DynamicText type="card" style={{ fontSize: 14, fontWeight: '600', marginBottom: 8 }}>
-                    {S?.generalSummary || 'General Summary'}
+                    {S?.generalSummary || uiI18n.t("ai.generalSummary")}
                   </DynamicText>
                   <DynamicText type="card" style={{ fontSize: 13, lineHeight: 20 }}>
                     {interactionResult.summary}
@@ -2949,7 +2942,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               {interactionResult?.interactions && interactionResult.interactions.length > 0 ? (
                 <View style={{ marginBottom: 16 }}>
                   <DynamicText type="card" style={{ fontSize: 14, fontWeight: '600', marginBottom: 12 }}>
-                    {S?.foundInteractions || `Found ${interactionResult.interactions.length} interaction(s):`}
+                    {S?.foundInteractions || uiI18n.t("ui.foundValueInteractionS", { value1: interactionResult.interactions.length })}
                   </DynamicText>
                   
                   {interactionResult.interactions.map((interaction: any, index: number) => (
@@ -2962,7 +2955,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       
                       <View style={{ marginBottom: 6 }}>
                         <DynamicText type="card" style={{ fontSize: 12, fontWeight: '600', color: '#D4AF37' }}>
-                          {S?.severity || 'Severity'}: {interaction.severity}
+                          {S?.severity || uiI18n.t("ai.severity")}: {interaction.severity}
                         </DynamicText>
                       </View>
                       
@@ -2973,7 +2966,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       {interaction.clinicalEffects && interaction.clinicalEffects.length > 0 && (
                         <View style={{ marginBottom: 8 }}>
                           <DynamicText type="card" style={{ fontSize: 11, fontWeight: '600', marginBottom: 4 }}>
-                            {S?.clinicalEffects || 'Clinical Effects'}:
+                            {S?.clinicalEffects || uiI18n.t("ai.clinicalEffects")}:
                           </DynamicText>
                           {interaction.clinicalEffects.map((effect: string, i: number) => (
                             <DynamicText key={i} type="card" style={{ fontSize: 11, lineHeight: 16, marginLeft: 8 }}>
@@ -2986,7 +2979,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                       {interaction.management && (
                         <View>
                           <DynamicText type="card" style={{ fontSize: 11, fontWeight: '600', marginBottom: 4 }}>
-                            {S?.management || 'Management'}:
+                            {S?.management || uiI18n.t("ai.management")}:
                           </DynamicText>
                           <DynamicText type="card" style={{ fontSize: 11, lineHeight: 16 }}>
                             {interaction.management}
@@ -2999,7 +2992,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
               ) : (
                 <View style={[dynamicStyles.insightCard, { marginBottom: 16 }]}>
                   <DynamicText type="card" style={{ fontSize: 13, textAlign: 'center', fontStyle: 'italic' }}>
-                    {S?.noInteractionsFound || 'No significant interactions found.'}
+                    {S?.noInteractionsFound || uiI18n.t("ai.noInteractionsFound")}
                   </DynamicText>
                 </View>
               )}
@@ -3012,7 +3005,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                 onPress={() => setShowInteractionResultModal(false)}
               >
                 <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>
-                  {S?.ok || 'OK'}
+                  {S?.ok || uiI18n.t("adminProfile.ok")}
                 </DynamicText>
               </TouchableOpacity>
             </View>

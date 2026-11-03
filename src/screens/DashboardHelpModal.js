@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { useMemo } from "react";
 import { View, TouchableOpacity, ScrollView, Modal, Image } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
@@ -7,6 +9,7 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createDashboardHelpModal(getScope) {
   return () => {
+  useUILanguage();
     const { showHelpModal, setShowHelpModal, lang, t, isReady, S } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
@@ -14,78 +17,78 @@ export default function createDashboardHelpModal(getScope) {
     // Create helpCards array inside render to ensure translations are available
     const helpCards = useMemo(() => [
       {
-        title: S.healthJournal || t('dashboard.healthJournal') || 'Health Journal',
+        title: S.healthJournal || t('dashboard.healthJournal'),
         icon: <Image source={require('../../assets/dashboard Emojies/Reminders.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.healthJournal') || 'Shows your next medication reminder. Tap to see all your upcoming reminders and manage your medication schedule.',
+        description: t('help.cards.healthJournal') || uiI18n.t("help.cards.healthJournal"),
         iconSize: 32
       },
       {
-        title: S.labsLocations || t('tiles.labsLocations') || 'Lab Locations',
+        title: S.labsLocations || t('tiles.labsLocations'),
         icon: <Image source={require('../../assets/dashboard Emojies/Lab Locations.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.labsLocations') || 'Find nearby medical labs and testing centers. Shows distance from your location and provides directions to help you get there.',
+        description: t('help.cards.labsLocations') || uiI18n.t("help.cards.labsLocations"),
         iconSize: 32
       },
       {
-        title: S.pharmacyLocations || t('tiles.pharmacyLocations') || 'Pharmacy Locations',
+        title: S.pharmacyLocations || t('tiles.pharmacyLocations') || uiI18n.t("tiles.pharmacyLocations"),
         icon: <Image source={require('../../assets/dashboard Emojies/Pharmacy locations.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.pharmacyLocations') || 'Find pharmacies near you with real-time distance calculations. Shows how far each pharmacy is and provides directions to help you get there.',
+        description: t('help.cards.pharmacyLocations') || uiI18n.t("help.cards.pharmacyLocations"),
         iconSize: 32
       },
       {
-        title: S.reminders || t('tiles.reminders') || 'Reminders',
+        title: S.reminders || t('tiles.reminders') || uiI18n.t("tiles.reminders"),
         icon: <Image source={require('../../assets/dashboard Emojies/Reminders.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.reminders') || 'Set and manage medication reminders. Get notified when it\'s time to take your medications, refill prescriptions, or attend appointments.',
+        description: t('help.cards.reminders') || uiI18n.t("help.cards.reminders"),
         iconSize: 32
       },
       {
-        title: S.medications || t('tiles.medications') || 'Medications',
+        title: S.medications || t('tiles.medications') || uiI18n.t("tiles.medications"),
         icon: <Image source={require('../../assets/dashboard Emojies/Medications.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.medications') || 'Track all your medications, dosages, and schedules. Get refill reminders, check drug interactions, and manage your prescription history.',
+        description: t('help.cards.medications') || uiI18n.t("help.cards.medications"),
         iconSize: 32
       },
       {
-        title: S.herbs || t('tiles.herbs') || 'Herbs',
+        title: S.herbs || t('tiles.herbs') || uiI18n.t("tiles.herbs"),
         icon: <Image source={require('../../assets/dashboard Emojies/Herbs.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.herbs') || 'Explore herbal remedies and natural supplements. Learn about benefits, dosages, and potential interactions with your medications.',
+        description: t('help.cards.herbs') || uiI18n.t("help.cards.herbs"),
         iconSize: 32
       },
       {
-        title: S.supplements || t('tiles.supplements') || 'Supplements',
+        title: S.supplements || t('tiles.supplements') || uiI18n.t("tiles.supplements"),
         icon: <Image source={require('../../assets/dashboard Emojies/supplements.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.supplements') || 'Manage your vitamins and supplements. Track daily intake, set reminders, and ensure you\'re getting the right nutrients.',
+        description: t('help.cards.supplements') || uiI18n.t("help.cards.supplements"),
         iconSize: 32
       },
       {
-        title: S.smartAlerts || t('tiles.smartAlerts') || 'Smart Alerts',
+        title: S.smartAlerts || t('tiles.smartAlerts') || uiI18n.t("localized.appConstants.STRINGS.smartAlerts"),
         icon: <Image source={require('../../assets/dashboard Emojies/Smart Alerts.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />,
-        description: t('help.cards.smartAlerts') || 'Intelligent notifications that adapt to your routine. Get location-based reminders, weather alerts, and personalized health tips.',
+        description: t('help.cards.smartAlerts') || uiI18n.t("help.cards.smartAlerts"),
         iconSize: 40
       },
       {
-        title: S.healthAnalytics || t('tiles.healthAnalytics') || 'Health Analytics',
+        title: S.healthAnalytics || t('tiles.healthAnalytics') || uiI18n.t("tiles.healthAnalytics"),
         icon: <Image source={require('../../assets/dashboard Emojies/Health Analytics.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />,
-        description: t('help.cards.healthAnalytics') || 'Track your health metrics over time. Monitor medication adherence, side effects, and health trends with detailed charts and insights.',
+        description: t('help.cards.healthAnalytics') || uiI18n.t("help.cards.healthAnalytics"),
         iconSize: 40
       },
       {
-        title: S.appointmentLog || t('tiles.appointmentLog') || 'Appointment Tracker',
+        title: S.appointmentLog || t('tiles.appointmentLog') || uiI18n.t("localized.appConstants.STRINGS.appointmentLog"),
         icon: <Image source={require('../../assets/dashboard Emojies/Appointment Tracker.png')} style={{ width: 32, height: 32 }} resizeMode="contain" />,
-        description: t('help.cards.appointmentLog') || 'Schedule and manage doctor appointments. Store doctor contacts, track visit history, and never miss an important healthcare appointment.',
+        description: t('help.cards.appointmentLog') || uiI18n.t("help.cards.appointmentLog"),
         iconSize: 32
       },
       {
-        title: S.aiHealth || t('tiles.aiHealth') || 'AI Health',
+        title: S.aiHealth || t('tiles.aiHealth') || uiI18n.t("tiles.aiHealth"),
         icon: <Image source={require('../../assets/dashboard Emojies/AI Health.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />,
-        description: t('help.cards.aiHealth') || 'Explore general symptom, health and medication information with AI assistants. They are not doctors and do not provide medical advice.',
+        description: t('help.cards.aiHealth') || uiI18n.t("help.cards.aiHealth"),
         iconSize: 48
       },
       {
-        title: S.documents || t('tiles.documents') || 'Medical Documents',
+        title: S.documents || t('tiles.documents') || uiI18n.t("medicalDocuments.title"),
         icon: <Image source={require('../../assets/dashboard Emojies/Documents.png')} style={{ width: 48, height: 48 }} resizeMode="contain" />,
-        description: t('help.cards.documents') || 'Store and organize your medical documents. Keep insurance cards, lab results, prescriptions, and ID cards in one secure place for easy access during doctor visits.',
+        description: t('help.cards.documents') || uiI18n.t("help.cards.documents"),
         iconSize: 48
       }
-    ], [S, t, lang, isReady]);
+    ], [S, t, lang, isReady, uiI18n.resolvedLanguage]);
 
     return (
       <Modal
@@ -111,7 +114,7 @@ export default function createDashboardHelpModal(getScope) {
               contentContainerStyle={{ paddingBottom: 20 }}
             >
               <DynamicText type="card" style={[styles.helpModalIntro, { fontFamily: 'Inter_400Regular', marginBottom: 20 }]}>
-                {t('help.intro') || 'Welcome to your health dashboard! Each card helps you manage different aspects of your health. Here\'s what each one does:'}
+                {t('help.intro') || uiI18n.t("help.intro")}
               </DynamicText>
               
               {helpCards.map((card, index) => (
@@ -135,7 +138,7 @@ export default function createDashboardHelpModal(getScope) {
               
               <View style={[styles.helpCardItem, { backgroundColor: getCardBackgroundColor() + '80', borderColor: getCardBorderColor(), marginTop: 8 }]}>
                 <DynamicText type="card" style={[styles.helpCardDescription, { fontFamily: 'Inter_400Regular', fontStyle: 'italic' }]}>
-                  {t('help.tip') || '💡 Tip: Tap any card to explore its features. The floating AI button opens a general health-information assistant. It is not a doctor.'}
+                  {t('help.tip') || uiI18n.t("help.tip")}
                 </DynamicText>
               </View>
             </ScrollView>

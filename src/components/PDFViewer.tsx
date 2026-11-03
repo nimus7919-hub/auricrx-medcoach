@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -21,6 +23,7 @@ interface PDFViewerProps {
 }
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
+  useUILanguage();
   // Default theme if not provided
   const defaultTheme = {
     background: '#1a1a1a',
@@ -64,7 +67,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
         setLoading(false);
       } catch (err) {
         console.error('Failed to prepare PDF for WebView:', err);
-        setError('Failed to load PDF. Please try again.');
+        setError(uiI18n.t("ui.failedToLoadPdfPleaseTryAgain"));
         setLoading(false);
       }
     };
@@ -157,7 +160,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
 
   const handleError = (error: any) => {
     console.error('PDF WebView Error:', error);
-    setError('Failed to load PDF. Please try again.');
+    setError(uiI18n.t("ui.failedToLoadPdfPleaseTryAgain"));
     setLoading(false);
   };
 
@@ -207,7 +210,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AuricRX ID Document Viewer</title>
+        <${uiI18n.t("ui.auricrxIDDocumentViewer")}Viewer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
           * {
@@ -329,9 +332,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
               padding: 10px;
             }
           }
-        </style>
-      </head>
-      <body>
+        </styl${uiI18n.t("ui.loadingIDDocument")}   <body>
         <div class="container">
           <div id="pdf-content">
             <div class="loading">Loading ID Document...</div>
@@ -447,7 +448,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>PDF Viewer</title>
+        <${uiI18n.t("ui.pdfViewer")}Viewer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
           * {
@@ -517,7 +518,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
         <div id="pdf-container">
           <div class="header">PDF Viewer - ${name}</div>
           <div id="pdf-viewer">
-            <div class="loading">Loading PDF...</div>
+            <div class="loading${uiI18n.t("ui.loadingPdf")}..</div>
           </div>
         </div>
         <script>
@@ -606,9 +607,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
         {loading && (
           <View style={dynamicStyles.loadingContainer}>
             <ActivityIndicator size="large" color={currentTheme.accent} />
-            <DynamicText type="card" style={{ marginTop: 10, color: currentTheme.text }}>
-              Loading PDF...
-            </DynamicText>
+            <DynamicText type="card" style={{ marginTop: 10, color: currentTheme.text }}>{uiI18n.t("ui.loadingPdf")}</DynamicText>
           </View>
         )}
 
@@ -618,9 +617,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
               {error}
             </DynamicText>
             <TouchableOpacity style={dynamicStyles.retryButton} onPress={handleRetry}>
-              <DynamicText type="card" style={dynamicStyles.retryButtonText}>
-                Retry
-              </DynamicText>
+              <DynamicText type="card" style={dynamicStyles.retryButtonText}>{uiI18n.t("common.sanpablo.retry")}</DynamicText>
             </TouchableOpacity>
           </View>
         ) : pdfDataUri ? (
@@ -646,9 +643,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
         ) : (
           <View style={dynamicStyles.loadingContainer}>
             <ActivityIndicator size="large" color={currentTheme.accent} />
-            <DynamicText type="card" style={{ marginTop: 10, color: currentTheme.text }}>
-              Preparing PDF...
-            </DynamicText>
+            <DynamicText type="card" style={{ marginTop: 10, color: currentTheme.text }}>{uiI18n.t("ui.preparingPdf")}</DynamicText>
           </View>
         )}
       </View>

@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import with fallback for development
 let Calendar: typeof import('expo-calendar') | null = null;
@@ -495,7 +496,7 @@ class AppointmentService {
       const defaultCalendar = calendars.find(cal => cal.allowsModifications) || calendars[0];
       
       if (!defaultCalendar) {
-        throw new Error('No writable calendar found');
+        throw new Error(uiI18n.t("ui.noWritableCalendarFound"));
       }
 
       const eventDetails = {
@@ -565,7 +566,7 @@ class AppointmentService {
       
         const notificationId = await Notifications.scheduleNotificationAsync({
           content: {
-            title: `📅 Appointment Reminder`,
+            title: uiI18n.t("ui.appointmentReminder"),
             body: `${appointment.title} in ${minutesBefore} minutes`,
             data: {
               appointmentId: appointment.id,

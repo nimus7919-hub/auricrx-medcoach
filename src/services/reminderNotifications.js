@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 ﻿import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { parseReminderTime } from '../utils/reminderTime';
@@ -14,7 +15,7 @@ const serialized = (work) => {
 export async function initializeReminderNotifications() {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(REMINDER_CHANNEL, {
-      name: 'Recordatorios / Reminders', importance: Notifications.AndroidImportance.MAX,
+      name: uiI18n.t("ui.recordatoriosReminders"), importance: Notifications.AndroidImportance.MAX,
       sound: 'default', enableVibrate: true, vibrationPattern: [0, 250, 250, 250],
     });
   }
@@ -25,11 +26,11 @@ export async function ensureReminderPermission(request = false) {
   if (!permission.granted && request && permission.canAskAgain) {
     permission = await Notifications.requestPermissionsAsync();
   }
-  if (!permission.granted) throw new Error('Activa las notificaciones en Ajustes. / Enable notifications in Settings.');
+  if (!permission.granted) throw new Error(uiI18n.t("ui.activaLasNotificacionesEnAjustesEnableNotificationsInSettings"));
   if (Platform.OS === 'android') {
     const channel = await Notifications.getNotificationChannelAsync(REMINDER_CHANNEL);
     if (channel?.importance === Notifications.AndroidImportance.NONE) {
-      throw new Error('Activa el canal de recordatorios en Ajustes. / Enable the reminder channel in Settings.');
+      throw new Error(uiI18n.t("ui.activaElCanalDeRecordatoriosEnAjustesEnableTheReminderChannelInSettings"));
     }
   }
 }
@@ -38,18 +39,18 @@ function triggersFor(reminder) {
   const base = { hour, minute, channelId: REMINDER_CHANNEL };
   const types = Notifications.SchedulableTriggerInputTypes;
   const anchor = reminder.startDate ? new Date(reminder.startDate) : new Date();
-  if (Number.isNaN(anchor.getTime())) throw new Error('Invalid reminder start date');
+  if (Number.isNaN(anchor.getTime())) throw new Error(uiI18n.t("ui.invalidReminderStartDate"));
   switch (reminder.frequency || 'daily') {
     case 'daily': return [{ ...base, type: types.DAILY }];
     case 'weekly': return [{ ...base, type: types.WEEKLY, weekday: anchor.getDay() + 1 }];
     case 'monthly': return [{ ...base, type: types.MONTHLY, day: anchor.getDate() }];
     case 'custom': {
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const days = [uiI18n.t("reminders.sunday"), uiI18n.t("reminders.monday"), uiI18n.t("reminders.tuesday"), uiI18n.t("reminders.wednesday"), uiI18n.t("reminders.thursday"), uiI18n.t("reminders.friday"), uiI18n.t("reminders.saturday")];
       const selected = (reminder.customDays || []).map(day => days.indexOf(day) + 1);
-      if (!selected.length || selected.some(day => day < 1)) throw new Error('Selecciona los dias. / Select reminder days.');
+      if (!selected.length || selected.some(day => day < 1)) throw new Error(uiI18n.t("ui.seleccionaLosDiasSelectReminderDays"));
       return selected.map(weekday => ({ ...base, type: types.WEEKLY, weekday }));
     }
-    default: throw new Error('Unsupported reminder frequency');
+    default: throw new Error(uiI18n.t("ui.unsupportedReminderFrequency"));
   }
 }
 async function upsert(reminder, existing) {
@@ -62,7 +63,7 @@ async function upsert(reminder, existing) {
     for (const [index, trigger] of triggers.entries()) {
       const id = await Notifications.scheduleNotificationAsync({
         identifier: `${OWNER}:${reminder.id}:${index}`,
-        content: { title: 'Recordatorio / Reminder', body: reminder.name, sound: 'default',
+        content: { title: uiI18n.t("ui.recordatorioReminder"), body: reminder.name, sound: 'default',
           data: { owner: OWNER, reminderId: String(reminder.id), fingerprint } }, trigger,
       });
       ids.push(id);
@@ -94,7 +95,7 @@ export function reconcileReminderNotifications(reminders) {
 export async function testReminderNotification() {
   await ensureReminderPermission(true);
   const id = await Notifications.scheduleNotificationAsync({
-    content: { title: 'Recordatorio de prueba / Test reminder', body: 'AuricRX MedCoach', sound: 'default' },
+    content: { title: uiI18n.t("ui.recordatorioDePruebaTestReminder"), body: uiI18n.t("ai.auricrxMedCoach"), sound: 'default' },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 10, repeats: false, channelId: REMINDER_CHANNEL },
   });
   console.info('[Reminders] test scheduled', { id, seconds: 10, channelId: REMINDER_CHANNEL });

@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
 import { requestSearchLocationPermission } from "./../lib/locationPermission";
 import { useState } from "react";
@@ -10,6 +12,7 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createPharmacies(getScope) {
   return () => {
+  useUILanguage();
     const { lang, pharmacies, setPharmacies, pharmaciesLoading, setPharmaciesLoading, pharmaciesError, setPharmaciesError, labsLoading, labsError, S, theme, userCountry, Header } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
@@ -26,7 +29,7 @@ export default function createPharmacies(getScope) {
         
         const { status } = await requestSearchLocationPermission();
         if (status !== 'granted') {
-          setPharmaciesError(lang === 'es' ? 'Activa los servicios de ubicación para buscar farmacias.' : 'Enable location services to find pharmacies.');
+          setPharmaciesError(uiI18n.t("localized.Pharmacies.refreshPharmacies.text32"));
           return;
         }
         
@@ -41,7 +44,7 @@ export default function createPharmacies(getScope) {
         console.log('🏪 Refreshed pharmacies:', nearbyPharmacies.length);
       } catch (e) {
         console.error('Error refreshing pharmacies:', e);
-        setPharmaciesError(lang === 'es' ? 'No se pudieron cargar las farmacias. Intenta de nuevo.' : 'Unable to load pharmacies. Please try again.');
+        setPharmaciesError(uiI18n.t("localized.Pharmacies.refreshPharmacies.text47"));
       } finally {
         setPharmaciesLoading(false);
       }
@@ -86,10 +89,10 @@ export default function createPharmacies(getScope) {
         console.log('❌ No phone number found for pharmacy:', pharmacy.name);
         // Show alert if no phone number available
         Alert.alert(
-          'Phone Not Available',
-          `No phone number found for ${pharmacy.name}. Please try calling them directly or visit their website.`,
+          uiI18n.t("ui.phoneNotAvailable"),
+          uiI18n.t("ui.noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite_781fca", { value1: pharmacy.name }),
           [
-            { text: 'OK', style: 'cancel' }
+            { text: uiI18n.t("adminProfile.ok"), style: 'cancel' }
           ]
         );
         return;
@@ -102,15 +105,15 @@ export default function createPharmacies(getScope) {
       const phoneUrl = `tel:${cleanPhoneNumber}`;
       
       Alert.alert(
-        'Call Pharmacy',
-        `Call ${pharmacy.name}?\n${phoneNumber}`,
+        uiI18n.t("ui.callPharmacy"),
+        uiI18n.t("ui.callValueValue_59a584", { value1: pharmacy.name, value2: phoneNumber }),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
           { 
-            text: 'Call', 
+            text: uiI18n.t("labs.buttons.call"), 
             onPress: () => {
               Linking.openURL(phoneUrl).catch(() => {
-                Alert.alert('Error', 'Unable to make phone call');
+                Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("common.pharmacy.callError"));
               });
             }
           }
@@ -122,16 +125,16 @@ export default function createPharmacies(getScope) {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Header title={S.pharmacyLocations} />
         <View style={{ backgroundColor: '#10243A', borderColor: '#C9A962', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 12 }}>
-          <Text style={{ color: '#C9A962', fontSize: 12 }}>{lang === 'es' ? 'Farmacias cercanas - INEGI DENUE / tiendas monitoreadas por PROFECO' : 'Nearby pharmacies - INEGI DENUE / stores monitored by PROFECO'}</Text>
-          <Text style={{ color: '#fff', fontSize: 10 }}>Fuente: PROFECO, Quién es Quién en los Precios (CC-BY 4.0)</Text>
+          <Text style={{ color: '#C9A962', fontSize: 12 }}>{uiI18n.t("localized.Pharmacies.text128")}</Text>
+          <Text style={{ color: '#fff', fontSize: 10 }}>{uiI18n.t("ui.fuenteProfecoQuienEsQuienEnLosPreciosCcBy40")}</Text>
         </View>
           
           {/* Header with refresh button */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, flex: 1, opacity: 0.8 }}>
               {pharmacies.length > 0 
-                ? (S.foundPharmacies || 'Found {count} pharmacies nearby').replace('{count}', pharmacies.length)
-                : (S.findNearbyPharmacies || 'Find nearby pharmacies')
+                ? (S.foundPharmacies || uiI18n.t("pharmacies.foundPharmacies")).replace('{count}', pharmacies.length)
+                : (S.findNearbyPharmacies || uiI18n.t("pharmacies.findNearbyPharmacies"))
               }
             </DynamicText>
             <PremiumButton 
@@ -200,7 +203,7 @@ export default function createPharmacies(getScope) {
                     {/* Additional info */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                       <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_400Regular', opacity: 0.6 }}>
-                        {pharmacy.pickup ? '🏃 Pickup' : ''} {pharmacy.delivery ? '🚚 Delivery' : ''}
+                        {pharmacy.pickup ? uiI18n.t("medications.filters.pickup") : ''} {pharmacy.delivery ? uiI18n.t("medications.filters.delivery") : ''}
                       </DynamicText>
                     </View>
                   </View>
@@ -231,16 +234,12 @@ export default function createPharmacies(getScope) {
             ))
           ) : !labsLoading && !labsError ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>
-                No pharmacies loaded yet
-              </Text>
+              <Text style={{ color: theme.sub, fontSize: 16, marginBottom: 16, fontFamily: 'Inter_400Regular' }}>{uiI18n.t("ui.noPharmaciesLoadedYet")}</Text>
               <PremiumButton 
                 style={[styles.btn, { backgroundColor: theme.accent }]} 
                 onPress={refreshPharmacies}
               >
-                <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>
-                  Find Nearby Pharmacies
-                </Text>
+                <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{uiI18n.t("pharmacies.findNearbyPharmacies")}</Text>
               </PremiumButton>
             </View>
           ) : null}

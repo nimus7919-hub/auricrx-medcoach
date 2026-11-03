@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState } from "react";
 import {
   View,
@@ -39,50 +41,51 @@ interface SettingsScreenProps {
 }
 
 export default function SettingsScreen({ userData, onSignOut }: SettingsScreenProps) {
+  useUILanguage();
   const [activeTab, setActiveTab] = useState<'account' | 'theme' | 'language'>('account');
 
   const handleSignOut = () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      uiI18n.t("settings.signOut"),
+      uiI18n.t("ui.areYouSureYouWantToSignOut"),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', style: 'destructive', onPress: onSignOut },
+        { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
+        { text: uiI18n.t("settings.signOut"), style: 'destructive', onPress: onSignOut },
       ]
     );
   };
 
   const renderAccountDetails = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Account Details</Text>
+      <Text style={styles.sectionTitle}>{uiI18n.t("ui.accountDetails")}</Text>
       
       {userData ? (
         <View style={styles.accountInfo}>
-          <InfoRow label="Unique ID" value={userData.uniqueId} />
-          <InfoRow label="First Name" value={userData.firstName} />
-          <InfoRow label="Last Name" value={userData.lastName} />
-          <InfoRow label="Username" value={userData.username} />
-          <InfoRow label="Email" value={userData.email} />
-          <InfoRow label="Phone Number" value={userData.phoneNumber} />
-          <InfoRow label="Member Since" value={new Date(userData.createdAt).toLocaleDateString()} />
+          <InfoRow label={uiI18n.t("ui.uniqueId")} value={userData.uniqueId} />
+          <InfoRow label={uiI18n.t("ui.firstName")} value={userData.firstName} />
+          <InfoRow label={uiI18n.t("ui.lastName")} value={userData.lastName} />
+          <InfoRow label={uiI18n.t("ui.username")} value={userData.username} />
+          <InfoRow label={uiI18n.t("adminProfile.email")} value={userData.email} />
+          <InfoRow label={uiI18n.t("adminProfile.phoneNumber")} value={userData.phoneNumber} />
+          <InfoRow label={uiI18n.t("ui.memberSince")} value={new Date(userData.createdAt).toLocaleDateString()} />
         </View>
       ) : (
-        <Text style={styles.noDataText}>No account data available</Text>
+        <Text style={styles.noDataText}>{uiI18n.t("ui.noAccountDataAvailable")}</Text>
       )}
     </View>
   );
 
   const renderThemeSettings = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Theme Settings</Text>
-      <Text style={styles.comingSoonText}>Theme customization coming soon!</Text>
+      <Text style={styles.sectionTitle}>{uiI18n.t("ui.themeSettings")}</Text>
+      <Text style={styles.comingSoonText}>{uiI18n.t("ui.themeCustomizationComingSoon")}</Text>
     </View>
   );
 
   const renderLanguageSettings = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Language Settings</Text>
-      <Text style={styles.comingSoonText}>Language selection coming soon!</Text>
+      <Text style={styles.sectionTitle}>{uiI18n.t("ui.languageSettings")}</Text>
+      <Text style={styles.comingSoonText}>{uiI18n.t("ui.languageSelectionComingSoon")}</Text>
     </View>
   );
 
@@ -91,7 +94,7 @@ export default function SettingsScreen({ userData, onSignOut }: SettingsScreenPr
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.title}>{uiI18n.t("settings.title")}</Text>
         </View>
 
         {/* Tabs */}
@@ -100,39 +103,33 @@ export default function SettingsScreen({ userData, onSignOut }: SettingsScreenPr
             style={[styles.tab, activeTab === 'account' && styles.activeTab]}
             onPress={() => setActiveTab('account')}
           >
-            <Text style={[styles.tabText, activeTab === 'account' && styles.activeTabText]}>
-              Account Details
-            </Text>
+            <Text style={[styles.tabText, activeTab === 'account' && styles.activeTabText]}>{uiI18n.t("ui.accountDetails")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'theme' && styles.activeTab]}
             onPress={() => setActiveTab('theme')}
           >
-            <Text style={[styles.tabText, activeTab === 'theme' && styles.activeTabText]}>
-              Theme
-            </Text>
+            <Text style={[styles.tabText, activeTab === 'theme' && styles.activeTabText]}>{uiI18n.t("ui.theme")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'language' && styles.activeTab]}
             onPress={() => setActiveTab('language')}
           >
-            <Text style={[styles.tabText, activeTab === 'language' && styles.activeTabText]}>
-              Language
-            </Text>
+            <Text style={[styles.tabText, activeTab === 'language' && styles.activeTabText]}>{uiI18n.t("settings.language")}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Content */}
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {activeTab === 'account' && renderAccountDetails()}
-          {activeTab === 'theme' && renderThemeSettings()}
-          {activeTab === 'language' && renderLanguageSettings()}
+          {activeTab === uiI18n.t("ui.theme_dc151a") && renderThemeSettings()}
+          {activeTab === uiI18n.t("settings.language") && renderLanguageSettings()}
         </ScrollView>
 
         {/* Sign Out Button */}
         <View style={styles.footer}>
           <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={styles.signOutText}>{uiI18n.t("settings.signOut")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -142,6 +139,7 @@ export default function SettingsScreen({ userData, onSignOut }: SettingsScreenPr
 
 // Info row component
 function InfoRow({ label, value }: { label: string; value: string }) {
+  useUILanguage();
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>

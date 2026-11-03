@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -37,10 +40,11 @@ interface AppointmentManagementScreenProps {
 type AppointmentType = 'doctor' | 'lab' | 'pharmacy' | 'specialist' | 'emergency' | 'follow_up' | 'checkup' | 'other';
 
 export default function AppointmentManagementScreen({ onClose, theme, S }: AppointmentManagementScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const { t } = useScreenTranslation();
   
   // Default theme if not provided
   const defaultTheme = {
@@ -524,223 +528,223 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
   };
 
   const appointmentTypes: { value: AppointmentType; label: string; icon: string }[] = [
-    { value: 'doctor', label: t('doctorVisit'), icon: '👨‍⚕️' },
-    { value: 'lab', label: t('labTest'), icon: '🧪' },
-    { value: 'pharmacy', label: t('pharmacy'), icon: '💊' },
-    { value: 'specialist', label: t('specialist'), icon: '🏥' },
-    { value: 'emergency', label: t('emergency'), icon: '🚨' },
-    { value: 'follow_up', label: t('followUp'), icon: '🔄' },
-    { value: 'checkup', label: t('checkup'), icon: '✅' },
-    { value: 'other', label: t('other'), icon: '📅' },
+    { value: 'doctor', label: t("appointments.doctorVisit"), icon: '👨‍⚕️' },
+    { value: 'lab', label: t("appointments.labTest"), icon: '🧪' },
+    { value: 'pharmacy', label: t("appointments.pharmacy"), icon: '💊' },
+    { value: 'specialist', label: t("appointments.specialist"), icon: '🏥' },
+    { value: 'emergency', label: t("appointments.emergency"), icon: '🚨' },
+    { value: 'follow_up', label: t("appointments.followUp"), icon: '🔄' },
+    { value: 'checkup', label: t("appointments.checkup"), icon: '✅' },
+    { value: 'other', label: t("appointments.other"), icon: '📅' },
   ];
 
   const countryCodes = [
-    { code: '+1', country: '🇺🇸 United States', flag: '🇺🇸' },
-    { code: '+52', country: '🇲🇽 Mexico', flag: '🇲🇽' },
-    { code: '+86', country: '🇨🇳 China', flag: '🇨🇳' },
-    { code: '+44', country: '🇬🇧 United Kingdom', flag: '🇬🇧' },
-    { code: '+33', country: '🇫🇷 France', flag: '🇫🇷' },
-    { code: '+49', country: '🇩🇪 Germany', flag: '🇩🇪' },
-    { code: '+81', country: '🇯🇵 Japan', flag: '🇯🇵' },
-    { code: '+91', country: '🇮🇳 India', flag: '🇮🇳' },
-    { code: '+55', country: '🇧🇷 Brazil', flag: '🇧🇷' },
-    { code: '+61', country: '🇦🇺 Australia', flag: '🇦🇺' },
-    { code: '+34', country: '🇪🇸 Spain', flag: '🇪🇸' },
-    { code: '+39', country: '🇮🇹 Italy', flag: '🇮🇹' },
-    { code: '+31', country: '🇳🇱 Netherlands', flag: '🇳🇱' },
-    { code: '+46', country: '🇸🇪 Sweden', flag: '🇸🇪' },
-    { code: '+47', country: '🇳🇴 Norway', flag: '🇳🇴' },
-    { code: '+45', country: '🇩🇰 Denmark', flag: '🇩🇰' },
-    { code: '+41', country: '🇨🇭 Switzerland', flag: '🇨🇭' },
-    { code: '+43', country: '🇦🇹 Austria', flag: '🇦🇹' },
-    { code: '+32', country: '🇧🇪 Belgium', flag: '🇧🇪' },
-    { code: '+351', country: '🇵🇹 Portugal', flag: '🇵🇹' },
-    { code: '+30', country: '🇬🇷 Greece', flag: '🇬🇷' },
-    { code: '+48', country: '🇵🇱 Poland', flag: '🇵🇱' },
-    { code: '+420', country: '🇨🇿 Czech Republic', flag: '🇨🇿' },
-    { code: '+36', country: '🇭🇺 Hungary', flag: '🇭🇺' },
-    { code: '+40', country: '🇷🇴 Romania', flag: '🇷🇴' },
-    { code: '+359', country: '🇧🇬 Bulgaria', flag: '🇧🇬' },
-    { code: '+385', country: '🇭🇷 Croatia', flag: '🇭🇷' },
-    { code: '+386', country: '🇸🇮 Slovenia', flag: '🇸🇮' },
-    { code: '+421', country: '🇸🇰 Slovakia', flag: '🇸🇰' },
-    { code: '+370', country: '🇱🇹 Lithuania', flag: '🇱🇹' },
-    { code: '+371', country: '🇱🇻 Latvia', flag: '🇱🇻' },
-    { code: '+372', country: '🇪🇪 Estonia', flag: '🇪🇪' },
-    { code: '+353', country: '🇮🇪 Ireland', flag: '🇮🇪' },
-    { code: '+358', country: '🇫🇮 Finland', flag: '🇫🇮' },
-    { code: '+7', country: '🇷🇺 Russia', flag: '🇷🇺' },
-    { code: '+380', country: '🇺🇦 Ukraine', flag: '🇺🇦' },
-    { code: '+375', country: '🇧🇾 Belarus', flag: '🇧🇾' },
-    { code: '+370', country: '🇱🇹 Lithuania', flag: '🇱🇹' },
-    { code: '+371', country: '🇱🇻 Latvia', flag: '🇱🇻' },
-    { code: '+372', country: '🇪🇪 Estonia', flag: '🇪🇪' },
-    { code: '+90', country: '🇹🇷 Turkey', flag: '🇹🇷' },
-    { code: '+20', country: '🇪🇬 Egypt', flag: '🇪🇬' },
-    { code: '+27', country: '🇿🇦 South Africa', flag: '🇿🇦' },
-    { code: '+234', country: '🇳🇬 Nigeria', flag: '🇳🇬' },
-    { code: '+254', country: '🇰🇪 Kenya', flag: '🇰🇪' },
-    { code: '+233', country: '🇬🇭 Ghana', flag: '🇬🇭' },
-    { code: '+212', country: '🇲🇦 Morocco', flag: '🇲🇦' },
-    { code: '+213', country: '🇩🇿 Algeria', flag: '🇩🇿' },
-    { code: '+216', country: '🇹🇳 Tunisia', flag: '🇹🇳' },
-    { code: '+218', country: '🇱🇾 Libya', flag: '🇱🇾' },
-    { code: '+220', country: '🇬🇲 Gambia', flag: '🇬🇲' },
-    { code: '+221', country: '🇸🇳 Senegal', flag: '🇸🇳' },
-    { code: '+222', country: '🇲🇷 Mauritania', flag: '🇲🇷' },
-    { code: '+223', country: '🇲🇱 Mali', flag: '🇲🇱' },
-    { code: '+224', country: '🇬🇳 Guinea', flag: '🇬🇳' },
-    { code: '+225', country: '🇨🇮 Ivory Coast', flag: '🇨🇮' },
-    { code: '+226', country: '🇧🇫 Burkina Faso', flag: '🇧🇫' },
-    { code: '+227', country: '🇳🇪 Niger', flag: '🇳🇪' },
-    { code: '+228', country: '🇹🇬 Togo', flag: '🇹🇬' },
-    { code: '+229', country: '🇧🇯 Benin', flag: '🇧🇯' },
-    { code: '+230', country: '🇲🇺 Mauritius', flag: '🇲🇺' },
-    { code: '+231', country: '🇱🇷 Liberia', flag: '🇱🇷' },
-    { code: '+232', country: '🇸🇱 Sierra Leone', flag: '🇸🇱' },
-    { code: '+235', country: '🇹🇩 Chad', flag: '🇹🇩' },
-    { code: '+236', country: '🇨🇫 Central African Republic', flag: '🇨🇫' },
-    { code: '+237', country: '🇨🇲 Cameroon', flag: '🇨🇲' },
-    { code: '+238', country: '🇨🇻 Cape Verde', flag: '🇨🇻' },
-    { code: '+239', country: '🇸🇹 São Tomé and Príncipe', flag: '🇸🇹' },
-    { code: '+240', country: '🇬🇶 Equatorial Guinea', flag: '🇬🇶' },
-    { code: '+241', country: '🇬🇦 Gabon', flag: '🇬🇦' },
-    { code: '+242', country: '🇨🇬 Republic of the Congo', flag: '🇨🇬' },
-    { code: '+243', country: '🇨🇩 Democratic Republic of the Congo', flag: '🇨🇩' },
-    { code: '+244', country: '🇦🇴 Angola', flag: '🇦🇴' },
-    { code: '+245', country: '🇬🇼 Guinea-Bissau', flag: '🇬🇼' },
-    { code: '+246', country: '🇮🇴 British Indian Ocean Territory', flag: '🇮🇴' },
-    { code: '+248', country: '🇸🇨 Seychelles', flag: '🇸🇨' },
-    { code: '+249', country: '🇸🇩 Sudan', flag: '🇸🇩' },
-    { code: '+250', country: '🇷🇼 Rwanda', flag: '🇷🇼' },
-    { code: '+251', country: '🇪🇹 Ethiopia', flag: '🇪🇹' },
-    { code: '+252', country: '🇸🇴 Somalia', flag: '🇸🇴' },
-    { code: '+253', country: '🇩🇯 Djibouti', flag: '🇩🇯' },
-    { code: '+255', country: '🇹🇿 Tanzania', flag: '🇹🇿' },
-    { code: '+256', country: '🇺🇬 Uganda', flag: '🇺🇬' },
-    { code: '+257', country: '🇧🇮 Burundi', flag: '🇧🇮' },
-    { code: '+258', country: '🇲🇿 Mozambique', flag: '🇲🇿' },
-    { code: '+260', country: '🇿🇲 Zambia', flag: '🇿🇲' },
-    { code: '+261', country: '🇲🇬 Madagascar', flag: '🇲🇬' },
-    { code: '+262', country: '🇷🇪 Réunion', flag: '🇷🇪' },
-    { code: '+263', country: '🇿🇼 Zimbabwe', flag: '🇿🇼' },
-    { code: '+264', country: '🇳🇦 Namibia', flag: '🇳🇦' },
-    { code: '+265', country: '🇲🇼 Malawi', flag: '🇲🇼' },
-    { code: '+266', country: '🇱🇸 Lesotho', flag: '🇱🇸' },
-    { code: '+267', country: '🇧🇼 Botswana', flag: '🇧🇼' },
-    { code: '+268', country: '🇸🇿 Swaziland', flag: '🇸🇿' },
-    { code: '+269', country: '🇰🇲 Comoros', flag: '🇰🇲' },
-    { code: '+290', country: '🇸🇭 Saint Helena', flag: '🇸🇭' },
-    { code: '+291', country: '🇪🇷 Eritrea', flag: '🇪🇷' },
-    { code: '+297', country: '🇦🇼 Aruba', flag: '🇦🇼' },
-    { code: '+298', country: '🇫🇴 Faroe Islands', flag: '🇫🇴' },
-    { code: '+299', country: '🇬🇱 Greenland', flag: '🇬🇱' },
-    { code: '+350', country: '🇬🇮 Gibraltar', flag: '🇬🇮' },
-    { code: '+352', country: '🇱🇺 Luxembourg', flag: '🇱🇺' },
-    { code: '+354', country: '🇮🇸 Iceland', flag: '🇮🇸' },
-    { code: '+355', country: '🇦🇱 Albania', flag: '🇦🇱' },
-    { code: '+356', country: '🇲🇹 Malta', flag: '🇲🇹' },
-    { code: '+357', country: '🇨🇾 Cyprus', flag: '🇨🇾' },
-    { code: '+358', country: '🇫🇮 Finland', flag: '🇫🇮' },
-    { code: '+359', country: '🇧🇬 Bulgaria', flag: '🇧🇬' },
-    { code: '+370', country: '🇱🇹 Lithuania', flag: '🇱🇹' },
-    { code: '+371', country: '🇱🇻 Latvia', flag: '🇱🇻' },
-    { code: '+372', country: '🇪🇪 Estonia', flag: '🇪🇪' },
-    { code: '+373', country: '🇲🇩 Moldova', flag: '🇲🇩' },
-    { code: '+374', country: '🇦🇲 Armenia', flag: '🇦🇲' },
-    { code: '+375', country: '🇧🇾 Belarus', flag: '🇧🇾' },
-    { code: '+376', country: '🇦🇩 Andorra', flag: '🇦🇩' },
-    { code: '+377', country: '🇲🇨 Monaco', flag: '🇲🇨' },
-    { code: '+378', country: '🇸🇲 San Marino', flag: '🇸🇲' },
-    { code: '+380', country: '🇺🇦 Ukraine', flag: '🇺🇦' },
-    { code: '+381', country: '🇷🇸 Serbia', flag: '🇷🇸' },
-    { code: '+382', country: '🇲🇪 Montenegro', flag: '🇲🇪' },
-    { code: '+383', country: '🇽🇰 Kosovo', flag: '🇽🇰' },
-    { code: '+385', country: '🇭🇷 Croatia', flag: '🇭🇷' },
-    { code: '+386', country: '🇸🇮 Slovenia', flag: '🇸🇮' },
-    { code: '+387', country: '🇧🇦 Bosnia and Herzegovina', flag: '🇧🇦' },
-    { code: '+389', country: '🇲🇰 North Macedonia', flag: '🇲🇰' },
-    { code: '+420', country: '🇨🇿 Czech Republic', flag: '🇨🇿' },
-    { code: '+421', country: '🇸🇰 Slovakia', flag: '🇸🇰' },
-    { code: '+423', country: '🇱🇮 Liechtenstein', flag: '🇱🇮' },
-    { code: '+500', country: '🇫🇰 Falkland Islands', flag: '🇫🇰' },
-    { code: '+501', country: '🇧🇿 Belize', flag: '🇧🇿' },
-    { code: '+502', country: '🇬🇹 Guatemala', flag: '🇬🇹' },
-    { code: '+503', country: '🇸🇻 El Salvador', flag: '🇸🇻' },
-    { code: '+504', country: '🇭🇳 Honduras', flag: '🇭🇳' },
-    { code: '+505', country: '🇳🇮 Nicaragua', flag: '🇳🇮' },
-    { code: '+506', country: '🇨🇷 Costa Rica', flag: '🇨🇷' },
-    { code: '+507', country: '🇵🇦 Panama', flag: '🇵🇦' },
-    { code: '+508', country: '🇵🇲 Saint Pierre and Miquelon', flag: '🇵🇲' },
-    { code: '+509', country: '🇭🇹 Haiti', flag: '🇭🇹' },
-    { code: '+590', country: '🇬🇵 Guadeloupe', flag: '🇬🇵' },
-    { code: '+591', country: '🇧🇴 Bolivia', flag: '🇧🇴' },
-    { code: '+592', country: '🇬🇾 Guyana', flag: '🇬🇾' },
-    { code: '+593', country: '🇪🇨 Ecuador', flag: '🇪🇨' },
-    { code: '+594', country: '🇬🇫 French Guiana', flag: '🇬🇫' },
-    { code: '+595', country: '🇵🇾 Paraguay', flag: '🇵🇾' },
-    { code: '+596', country: '🇲🇶 Martinique', flag: '🇲🇶' },
-    { code: '+597', country: '🇸🇷 Suriname', flag: '🇸🇷' },
-    { code: '+598', country: '🇺🇾 Uruguay', flag: '🇺🇾' },
-    { code: '+599', country: '🇳🇱 Netherlands Antilles', flag: '🇳🇱' },
-    { code: '+670', country: '🇹🇱 East Timor', flag: '🇹🇱' },
-    { code: '+672', country: '🇦🇶 Antarctica', flag: '🇦🇶' },
-    { code: '+673', country: '🇧🇳 Brunei', flag: '🇧🇳' },
-    { code: '+674', country: '🇳🇷 Nauru', flag: '🇳🇷' },
-    { code: '+675', country: '🇵🇬 Papua New Guinea', flag: '🇵🇬' },
-    { code: '+676', country: '🇹🇴 Tonga', flag: '🇹🇴' },
-    { code: '+677', country: '🇸🇧 Solomon Islands', flag: '🇸🇧' },
-    { code: '+678', country: '🇻🇺 Vanuatu', flag: '🇻🇺' },
-    { code: '+679', country: '🇫🇯 Fiji', flag: '🇫🇯' },
-    { code: '+680', country: '🇵🇼 Palau', flag: '🇵🇼' },
-    { code: '+681', country: '🇼🇫 Wallis and Futuna', flag: '🇼🇫' },
-    { code: '+682', country: '🇨🇰 Cook Islands', flag: '🇨🇰' },
-    { code: '+683', country: '🇳🇺 Niue', flag: '🇳🇺' },
-    { code: '+684', country: '🇦🇸 American Samoa', flag: '🇦🇸' },
-    { code: '+685', country: '🇼🇸 Samoa', flag: '🇼🇸' },
-    { code: '+686', country: '🇰🇮 Kiribati', flag: '🇰🇮' },
-    { code: '+687', country: '🇳🇨 New Caledonia', flag: '🇳🇨' },
-    { code: '+688', country: '🇹🇻 Tuvalu', flag: '🇹🇻' },
-    { code: '+689', country: '🇵🇫 French Polynesia', flag: '🇵🇫' },
-    { code: '+690', country: '🇹🇰 Tokelau', flag: '🇹🇰' },
-    { code: '+691', country: '🇫🇲 Micronesia', flag: '🇫🇲' },
-    { code: '+692', country: '🇲🇭 Marshall Islands', flag: '🇲🇭' },
-    { code: '+850', country: '🇰🇵 North Korea', flag: '🇰🇵' },
-    { code: '+852', country: '🇭🇰 Hong Kong', flag: '🇭🇰' },
-    { code: '+853', country: '🇲🇴 Macau', flag: '🇲🇴' },
-    { code: '+855', country: '🇰🇭 Cambodia', flag: '🇰🇭' },
-    { code: '+856', country: '🇱🇦 Laos', flag: '🇱🇦' },
-    { code: '+880', country: '🇧🇩 Bangladesh', flag: '🇧🇩' },
-    { code: '+886', country: '🇹🇼 Taiwan', flag: '🇹🇼' },
-    { code: '+960', country: '🇲🇻 Maldives', flag: '🇲🇻' },
-    { code: '+961', country: '🇱🇧 Lebanon', flag: '🇱🇧' },
-    { code: '+962', country: '🇯🇴 Jordan', flag: '🇯🇴' },
-    { code: '+963', country: '🇸🇾 Syria', flag: '🇸🇾' },
-    { code: '+964', country: '🇮🇶 Iraq', flag: '🇮🇶' },
-    { code: '+965', country: '🇰🇼 Kuwait', flag: '🇰🇼' },
-    { code: '+966', country: '🇸🇦 Saudi Arabia', flag: '🇸🇦' },
-    { code: '+967', country: '🇾🇪 Yemen', flag: '🇾🇪' },
-    { code: '+968', country: '🇴🇲 Oman', flag: '🇴🇲' },
-    { code: '+970', country: '🇵🇸 Palestine', flag: '🇵🇸' },
-    { code: '+971', country: '🇦🇪 United Arab Emirates', flag: '🇦🇪' },
-    { code: '+972', country: '🇮🇱 Israel', flag: '🇮🇱' },
-    { code: '+973', country: '🇧🇭 Bahrain', flag: '🇧🇭' },
-    { code: '+974', country: '🇶🇦 Qatar', flag: '🇶🇦' },
-    { code: '+975', country: '🇧🇹 Bhutan', flag: '🇧🇹' },
-    { code: '+976', country: '🇲🇳 Mongolia', flag: '🇲🇳' },
-    { code: '+977', country: '🇳🇵 Nepal', flag: '🇳🇵' },
-    { code: '+992', country: '🇹🇯 Tajikistan', flag: '🇹🇯' },
-    { code: '+993', country: '🇹🇲 Turkmenistan', flag: '🇹🇲' },
-    { code: '+994', country: '🇦🇿 Azerbaijan', flag: '🇦🇿' },
-    { code: '+995', country: '🇬🇪 Georgia', flag: '🇬🇪' },
-    { code: '+996', country: '🇰🇬 Kyrgyzstan', flag: '🇰🇬' },
-    { code: '+998', country: '🇺🇿 Uzbekistan', flag: '🇺🇿' },
+    { code: '+1', country: uiI18n.t("ui.unitedStates_f36d8a"), flag: '🇺🇸' },
+    { code: '+52', country: uiI18n.t("ui.mexico_778a03"), flag: '🇲🇽' },
+    { code: '+86', country: uiI18n.t("ui.china_79bd55"), flag: '🇨🇳' },
+    { code: '+44', country: uiI18n.t("ui.unitedKingdom_5d429f"), flag: '🇬🇧' },
+    { code: '+33', country: uiI18n.t("ui.france_a93bbf"), flag: '🇫🇷' },
+    { code: '+49', country: uiI18n.t("ui.germany_beb866"), flag: '🇩🇪' },
+    { code: '+81', country: uiI18n.t('countryLabels.JP'), flag: '🇯🇵' },
+    { code: '+91', country: uiI18n.t("ui.india_32ed4f"), flag: '🇮🇳' },
+    { code: '+55', country: uiI18n.t("ui.brazil_7557a7"), flag: '🇧🇷' },
+    { code: '+61', country: uiI18n.t('countryLabels.AU'), flag: '🇦🇺' },
+    { code: '+34', country: uiI18n.t('countryLabels.ES'), flag: '🇪🇸' },
+    { code: '+39', country: uiI18n.t('countryLabels.IT'), flag: '🇮🇹' },
+    { code: '+31', country: uiI18n.t('countryLabels.NL'), flag: '🇳🇱' },
+    { code: '+46', country: uiI18n.t('countryLabels.SE'), flag: '🇸🇪' },
+    { code: '+47', country: uiI18n.t('countryLabels.NO'), flag: '🇳🇴' },
+    { code: '+45', country: uiI18n.t('countryLabels.DK'), flag: '🇩🇰' },
+    { code: '+41', country: uiI18n.t('countryLabels.CH'), flag: '🇨🇭' },
+    { code: '+43', country: uiI18n.t('countryLabels.AT'), flag: '🇦🇹' },
+    { code: '+32', country: uiI18n.t('countryLabels.BE'), flag: '🇧🇪' },
+    { code: '+351', country: uiI18n.t('countryLabels.PT'), flag: '🇵🇹' },
+    { code: '+30', country: uiI18n.t('countryLabels.GR'), flag: '🇬🇷' },
+    { code: '+48', country: uiI18n.t('countryLabels.PL'), flag: '🇵🇱' },
+    { code: '+420', country: uiI18n.t('countryLabels.CZ'), flag: '🇨🇿' },
+    { code: '+36', country: uiI18n.t('countryLabels.HU'), flag: '🇭🇺' },
+    { code: '+40', country: uiI18n.t('countryLabels.RO'), flag: '🇷🇴' },
+    { code: '+359', country: uiI18n.t('countryLabels.BG'), flag: '🇧🇬' },
+    { code: '+385', country: uiI18n.t('countryLabels.HR'), flag: '🇭🇷' },
+    { code: '+386', country: uiI18n.t('countryLabels.SI'), flag: '🇸🇮' },
+    { code: '+421', country: uiI18n.t('countryLabels.SK'), flag: '🇸🇰' },
+    { code: '+370', country: uiI18n.t('countryLabels.LT'), flag: '🇱🇹' },
+    { code: '+371', country: uiI18n.t('countryLabels.LV'), flag: '🇱🇻' },
+    { code: '+372', country: uiI18n.t('countryLabels.EE'), flag: '🇪🇪' },
+    { code: '+353', country: uiI18n.t('countryLabels.IE'), flag: '🇮🇪' },
+    { code: '+358', country: uiI18n.t('countryLabels.FI'), flag: '🇫🇮' },
+    { code: '+7', country: uiI18n.t('countryLabels.RU'), flag: '🇷🇺' },
+    { code: '+380', country: uiI18n.t('countryLabels.UA'), flag: '🇺🇦' },
+    { code: '+375', country: uiI18n.t('countryLabels.BY'), flag: '🇧🇾' },
+    { code: '+370', country: uiI18n.t('countryLabels.LT'), flag: '🇱🇹' },
+    { code: '+371', country: uiI18n.t('countryLabels.LV'), flag: '🇱🇻' },
+    { code: '+372', country: uiI18n.t('countryLabels.EE'), flag: '🇪🇪' },
+    { code: '+90', country: uiI18n.t('countryLabels.TR'), flag: '🇹🇷' },
+    { code: '+20', country: uiI18n.t('countryLabels.EG'), flag: '🇪🇬' },
+    { code: '+27', country: uiI18n.t('countryLabels.ZA'), flag: '🇿🇦' },
+    { code: '+234', country: uiI18n.t('countryLabels.NG'), flag: '🇳🇬' },
+    { code: '+254', country: uiI18n.t('countryLabels.KE'), flag: '🇰🇪' },
+    { code: '+233', country: uiI18n.t('countryLabels.GH'), flag: '🇬🇭' },
+    { code: '+212', country: uiI18n.t('countryLabels.MA'), flag: '🇲🇦' },
+    { code: '+213', country: uiI18n.t('countryLabels.DZ'), flag: '🇩🇿' },
+    { code: '+216', country: uiI18n.t('countryLabels.TN'), flag: '🇹🇳' },
+    { code: '+218', country: uiI18n.t('countryLabels.LY'), flag: '🇱🇾' },
+    { code: '+220', country: uiI18n.t('countryLabels.GM'), flag: '🇬🇲' },
+    { code: '+221', country: uiI18n.t('countryLabels.SN'), flag: '🇸🇳' },
+    { code: '+222', country: uiI18n.t('countryLabels.MR'), flag: '🇲🇷' },
+    { code: '+223', country: uiI18n.t('countryLabels.ML'), flag: '🇲🇱' },
+    { code: '+224', country: uiI18n.t('countryLabels.GN'), flag: '🇬🇳' },
+    { code: '+225', country: uiI18n.t('countryLabels.CI'), flag: '🇨🇮' },
+    { code: '+226', country: uiI18n.t('countryLabels.BF'), flag: '🇧🇫' },
+    { code: '+227', country: uiI18n.t('countryLabels.NE'), flag: '🇳🇪' },
+    { code: '+228', country: uiI18n.t('countryLabels.TG'), flag: '🇹🇬' },
+    { code: '+229', country: uiI18n.t('countryLabels.BJ'), flag: '🇧🇯' },
+    { code: '+230', country: uiI18n.t('countryLabels.MU'), flag: '🇲🇺' },
+    { code: '+231', country: uiI18n.t('countryLabels.LR'), flag: '🇱🇷' },
+    { code: '+232', country: uiI18n.t('countryLabels.SL'), flag: '🇸🇱' },
+    { code: '+235', country: uiI18n.t('countryLabels.TD'), flag: '🇹🇩' },
+    { code: '+236', country: uiI18n.t('countryLabels.CF'), flag: '🇨🇫' },
+    { code: '+237', country: uiI18n.t('countryLabels.CM'), flag: '🇨🇲' },
+    { code: '+238', country: uiI18n.t('countryLabels.CV'), flag: '🇨🇻' },
+    { code: '+239', country: uiI18n.t('countryLabels.ST'), flag: '🇸🇹' },
+    { code: '+240', country: uiI18n.t('countryLabels.GQ'), flag: '🇬🇶' },
+    { code: '+241', country: uiI18n.t('countryLabels.GA'), flag: '🇬🇦' },
+    { code: '+242', country: uiI18n.t('countryLabels.CG'), flag: '🇨🇬' },
+    { code: '+243', country: uiI18n.t('countryLabels.CD'), flag: '🇨🇩' },
+    { code: '+244', country: uiI18n.t('countryLabels.AO'), flag: '🇦🇴' },
+    { code: '+245', country: uiI18n.t('countryLabels.GW'), flag: '🇬🇼' },
+    { code: '+246', country: uiI18n.t('countryLabels.IO'), flag: '🇮🇴' },
+    { code: '+248', country: uiI18n.t('countryLabels.SC'), flag: '🇸🇨' },
+    { code: '+249', country: uiI18n.t('countryLabels.SD'), flag: '🇸🇩' },
+    { code: '+250', country: uiI18n.t('countryLabels.RW'), flag: '🇷🇼' },
+    { code: '+251', country: uiI18n.t('countryLabels.ET'), flag: '🇪🇹' },
+    { code: '+252', country: uiI18n.t('countryLabels.SO'), flag: '🇸🇴' },
+    { code: '+253', country: uiI18n.t('countryLabels.DJ'), flag: '🇩🇯' },
+    { code: '+255', country: uiI18n.t('countryLabels.TZ'), flag: '🇹🇿' },
+    { code: '+256', country: uiI18n.t('countryLabels.UG'), flag: '🇺🇬' },
+    { code: '+257', country: uiI18n.t('countryLabels.BI'), flag: '🇧🇮' },
+    { code: '+258', country: uiI18n.t('countryLabels.MZ'), flag: '🇲🇿' },
+    { code: '+260', country: uiI18n.t('countryLabels.ZM'), flag: '🇿🇲' },
+    { code: '+261', country: uiI18n.t('countryLabels.MG'), flag: '🇲🇬' },
+    { code: '+262', country: uiI18n.t('countryLabels.RE'), flag: '🇷🇪' },
+    { code: '+263', country: uiI18n.t('countryLabels.ZW'), flag: '🇿🇼' },
+    { code: '+264', country: uiI18n.t('countryLabels.NA'), flag: '🇳🇦' },
+    { code: '+265', country: uiI18n.t('countryLabels.MW'), flag: '🇲🇼' },
+    { code: '+266', country: uiI18n.t('countryLabels.LS'), flag: '🇱🇸' },
+    { code: '+267', country: uiI18n.t('countryLabels.BW'), flag: '🇧🇼' },
+    { code: '+268', country: uiI18n.t('countryLabels.SZ'), flag: '🇸🇿' },
+    { code: '+269', country: uiI18n.t('countryLabels.KM'), flag: '🇰🇲' },
+    { code: '+290', country: uiI18n.t('countryLabels.SH'), flag: '🇸🇭' },
+    { code: '+291', country: uiI18n.t('countryLabels.ER'), flag: '🇪🇷' },
+    { code: '+297', country: uiI18n.t('countryLabels.AW'), flag: '🇦🇼' },
+    { code: '+298', country: uiI18n.t('countryLabels.FO'), flag: '🇫🇴' },
+    { code: '+299', country: uiI18n.t('countryLabels.GL'), flag: '🇬🇱' },
+    { code: '+350', country: uiI18n.t('countryLabels.GI'), flag: '🇬🇮' },
+    { code: '+352', country: uiI18n.t('countryLabels.LU'), flag: '🇱🇺' },
+    { code: '+354', country: uiI18n.t('countryLabels.IS'), flag: '🇮🇸' },
+    { code: '+355', country: uiI18n.t('countryLabels.AL'), flag: '🇦🇱' },
+    { code: '+356', country: uiI18n.t('countryLabels.MT'), flag: '🇲🇹' },
+    { code: '+357', country: uiI18n.t('countryLabels.CY'), flag: '🇨🇾' },
+    { code: '+358', country: uiI18n.t('countryLabels.FI'), flag: '🇫🇮' },
+    { code: '+359', country: uiI18n.t('countryLabels.BG'), flag: '🇧🇬' },
+    { code: '+370', country: uiI18n.t('countryLabels.LT'), flag: '🇱🇹' },
+    { code: '+371', country: uiI18n.t('countryLabels.LV'), flag: '🇱🇻' },
+    { code: '+372', country: uiI18n.t('countryLabels.EE'), flag: '🇪🇪' },
+    { code: '+373', country: uiI18n.t('countryLabels.MD'), flag: '🇲🇩' },
+    { code: '+374', country: uiI18n.t('countryLabels.AM'), flag: '🇦🇲' },
+    { code: '+375', country: uiI18n.t('countryLabels.BY'), flag: '🇧🇾' },
+    { code: '+376', country: uiI18n.t('countryLabels.AD'), flag: '🇦🇩' },
+    { code: '+377', country: uiI18n.t('countryLabels.MC'), flag: '🇲🇨' },
+    { code: '+378', country: uiI18n.t('countryLabels.SM'), flag: '🇸🇲' },
+    { code: '+380', country: uiI18n.t('countryLabels.UA'), flag: '🇺🇦' },
+    { code: '+381', country: uiI18n.t('countryLabels.RS'), flag: '🇷🇸' },
+    { code: '+382', country: uiI18n.t('countryLabels.ME'), flag: '🇲🇪' },
+    { code: '+383', country: uiI18n.t('countryLabels.XK'), flag: '🇽🇰' },
+    { code: '+385', country: uiI18n.t('countryLabels.HR'), flag: '🇭🇷' },
+    { code: '+386', country: uiI18n.t('countryLabels.SI'), flag: '🇸🇮' },
+    { code: '+387', country: uiI18n.t('countryLabels.BA'), flag: '🇧🇦' },
+    { code: '+389', country: uiI18n.t('countryLabels.MK'), flag: '🇲🇰' },
+    { code: '+420', country: uiI18n.t('countryLabels.CZ'), flag: '🇨🇿' },
+    { code: '+421', country: uiI18n.t('countryLabels.SK'), flag: '🇸🇰' },
+    { code: '+423', country: uiI18n.t('countryLabels.LI'), flag: '🇱🇮' },
+    { code: '+500', country: uiI18n.t('countryLabels.FK'), flag: '🇫🇰' },
+    { code: '+501', country: uiI18n.t('countryLabels.BZ'), flag: '🇧🇿' },
+    { code: '+502', country: uiI18n.t('countryLabels.GT'), flag: '🇬🇹' },
+    { code: '+503', country: uiI18n.t('countryLabels.SV'), flag: '🇸🇻' },
+    { code: '+504', country: uiI18n.t('countryLabels.HN'), flag: '🇭🇳' },
+    { code: '+505', country: uiI18n.t('countryLabels.NI'), flag: '🇳🇮' },
+    { code: '+506', country: uiI18n.t('countryLabels.CR'), flag: '🇨🇷' },
+    { code: '+507', country: uiI18n.t("ui.panama_1ccdfc"), flag: '🇵🇦' },
+    { code: '+508', country: uiI18n.t('countryLabels.PM'), flag: '🇵🇲' },
+    { code: '+509', country: uiI18n.t('countryLabels.HT'), flag: '🇭🇹' },
+    { code: '+590', country: uiI18n.t('countryLabels.GP'), flag: '🇬🇵' },
+    { code: '+591', country: uiI18n.t("ui.bolivia_dff286"), flag: '🇧🇴' },
+    { code: '+592', country: uiI18n.t('countryLabels.GY'), flag: '🇬🇾' },
+    { code: '+593', country: uiI18n.t("ui.ecuador_f95cbe"), flag: '🇪🇨' },
+    { code: '+594', country: uiI18n.t('countryLabels.GF'), flag: '🇬🇫' },
+    { code: '+595', country: uiI18n.t("ui.paraguay_4be072"), flag: '🇵🇾' },
+    { code: '+596', country: uiI18n.t('countryLabels.MQ'), flag: '🇲🇶' },
+    { code: '+597', country: uiI18n.t('countryLabels.SR'), flag: '🇸🇷' },
+    { code: '+598', country: uiI18n.t("ui.uruguay_3332a9"), flag: '🇺🇾' },
+    { code: '+599', country: uiI18n.t('countryLabels.NL'), flag: '🇳🇱' },
+    { code: '+670', country: uiI18n.t('countryLabels.TL'), flag: '🇹🇱' },
+    { code: '+672', country: uiI18n.t('countryLabels.AQ'), flag: '🇦🇶' },
+    { code: '+673', country: uiI18n.t('countryLabels.BN'), flag: '🇧🇳' },
+    { code: '+674', country: uiI18n.t('countryLabels.NR'), flag: '🇳🇷' },
+    { code: '+675', country: uiI18n.t('countryLabels.PG'), flag: '🇵🇬' },
+    { code: '+676', country: uiI18n.t('countryLabels.TO'), flag: '🇹🇴' },
+    { code: '+677', country: uiI18n.t('countryLabels.SB'), flag: '🇸🇧' },
+    { code: '+678', country: uiI18n.t('countryLabels.VU'), flag: '🇻🇺' },
+    { code: '+679', country: uiI18n.t('countryLabels.FJ'), flag: '🇫🇯' },
+    { code: '+680', country: uiI18n.t('countryLabels.PW'), flag: '🇵🇼' },
+    { code: '+681', country: uiI18n.t('countryLabels.WF'), flag: '🇼🇫' },
+    { code: '+682', country: uiI18n.t('countryLabels.CK'), flag: '🇨🇰' },
+    { code: '+683', country: uiI18n.t('countryLabels.NU'), flag: '🇳🇺' },
+    { code: '+684', country: uiI18n.t('countryLabels.AS'), flag: '🇦🇸' },
+    { code: '+685', country: uiI18n.t('countryLabels.WS'), flag: '🇼🇸' },
+    { code: '+686', country: uiI18n.t('countryLabels.KI'), flag: '🇰🇮' },
+    { code: '+687', country: uiI18n.t('countryLabels.NC'), flag: '🇳🇨' },
+    { code: '+688', country: uiI18n.t('countryLabels.TV'), flag: '🇹🇻' },
+    { code: '+689', country: uiI18n.t('countryLabels.PF'), flag: '🇵🇫' },
+    { code: '+690', country: uiI18n.t('countryLabels.TK'), flag: '🇹🇰' },
+    { code: '+691', country: uiI18n.t('countryLabels.FM'), flag: '🇫🇲' },
+    { code: '+692', country: uiI18n.t('countryLabels.MH'), flag: '🇲🇭' },
+    { code: '+850', country: uiI18n.t('countryLabels.KP'), flag: '🇰🇵' },
+    { code: '+852', country: uiI18n.t('countryLabels.HK'), flag: '🇭🇰' },
+    { code: '+853', country: uiI18n.t('countryLabels.MO'), flag: '🇲🇴' },
+    { code: '+855', country: uiI18n.t('countryLabels.KH'), flag: '🇰🇭' },
+    { code: '+856', country: uiI18n.t('countryLabels.LA'), flag: '🇱🇦' },
+    { code: '+880', country: uiI18n.t('countryLabels.BD'), flag: '🇧🇩' },
+    { code: '+886', country: uiI18n.t('countryLabels.TW'), flag: '🇹🇼' },
+    { code: '+960', country: uiI18n.t('countryLabels.MV'), flag: '🇲🇻' },
+    { code: '+961', country: uiI18n.t('countryLabels.LB'), flag: '🇱🇧' },
+    { code: '+962', country: uiI18n.t('countryLabels.JO'), flag: '🇯🇴' },
+    { code: '+963', country: uiI18n.t('countryLabels.SY'), flag: '🇸🇾' },
+    { code: '+964', country: uiI18n.t('countryLabels.IQ'), flag: '🇮🇶' },
+    { code: '+965', country: uiI18n.t('countryLabels.KW'), flag: '🇰🇼' },
+    { code: '+966', country: uiI18n.t('countryLabels.SA'), flag: '🇸🇦' },
+    { code: '+967', country: uiI18n.t('countryLabels.YE'), flag: '🇾🇪' },
+    { code: '+968', country: uiI18n.t('countryLabels.OM'), flag: '🇴🇲' },
+    { code: '+970', country: uiI18n.t('countryLabels.PS'), flag: '🇵🇸' },
+    { code: '+971', country: uiI18n.t('countryLabels.AE'), flag: '🇦🇪' },
+    { code: '+972', country: uiI18n.t('countryLabels.IL'), flag: '🇮🇱' },
+    { code: '+973', country: uiI18n.t('countryLabels.BH'), flag: '🇧🇭' },
+    { code: '+974', country: uiI18n.t('countryLabels.QA'), flag: '🇶🇦' },
+    { code: '+975', country: uiI18n.t('countryLabels.BT'), flag: '🇧🇹' },
+    { code: '+976', country: uiI18n.t('countryLabels.MN'), flag: '🇲🇳' },
+    { code: '+977', country: uiI18n.t('countryLabels.NP'), flag: '🇳🇵' },
+    { code: '+992', country: uiI18n.t('countryLabels.TJ'), flag: '🇹🇯' },
+    { code: '+993', country: uiI18n.t('countryLabels.TM'), flag: '🇹🇲' },
+    { code: '+994', country: uiI18n.t('countryLabels.AZ'), flag: '🇦🇿' },
+    { code: '+995', country: uiI18n.t('countryLabels.GE'), flag: '🇬🇪' },
+    { code: '+996', country: uiI18n.t('countryLabels.KG'), flag: '🇰🇬' },
+    { code: '+998', country: uiI18n.t('countryLabels.UZ'), flag: '🇺🇿' },
   ];
 
   const dialingMethods: { value: DoctorContact['dialingMethod']; label: string; icon: string }[] = [
-    { value: 'phone', label: t('phoneOnly'), icon: '' },
-    { value: 'whatsapp', label: t('whatsappOnly'), icon: '' },
-    { value: 'both', label: t('bothPhoneWhatsapp'), icon: '' },
+    { value: 'phone', label: t("appointments.phoneOnly"), icon: '' },
+    { value: 'whatsapp', label: t("appointments.whatsappOnly"), icon: '' },
+    { value: 'both', label: t("appointments.bothPhoneWhatsapp"), icon: '' },
   ];
 
   // Date and time picker handlers
@@ -860,12 +864,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
 
   const addAppointment = async () => {
     if (!appointmentTitle || !appointmentLocation) {
-      Alert.alert('❌ ' + t('error'), t('fillAllFields'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.fillAllFields"));
       return;
     }
 
     if (!appointmentService) {
-      Alert.alert('❌ ' + t('error'), t('appointmentServiceNotAvailable'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.appointmentServiceNotAvailable"));
       return;
     }
 
@@ -903,21 +907,21 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       loadData();
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t('success'), t('appointmentScheduled'));
+      Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"));
     } catch (error) {
       console.error('Failed to add appointment:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToSchedule'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToSchedule"));
     }
   };
 
   const addDoctorContact = async () => {
     if (!doctorName || !doctorSpecialty || !doctorPhone || !doctorAddress) {
-      Alert.alert('❌ ' + t('error'), t('fillAllFields'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.fillAllFields"));
       return;
     }
 
     if (!appointmentService) {
-      Alert.alert('❌ ' + t('error'), t('appointmentServiceNotAvailable'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.appointmentServiceNotAvailable"));
       return;
     }
 
@@ -945,10 +949,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       loadData();
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t('success'), t('doctorContactAdded'));
+      Alert.alert('✅ ' + t("appointments.success"), t("appointments.doctorContactAdded"));
     } catch (error) {
       console.error('Failed to add doctor contact:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToAddDoctor'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToAddDoctor"));
     }
   };
 
@@ -966,12 +970,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
 
   const updateDoctorContact = async () => {
     if (!editingDoctor || !doctorName || !doctorSpecialty || !doctorPhone || !doctorAddress) {
-      Alert.alert('❌ ' + t('error'), t('fillAllFields'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.fillAllFields"));
       return;
     }
 
     if (!appointmentService) {
-      Alert.alert('❌ ' + t('error'), t('appointmentServiceNotAvailable'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.appointmentServiceNotAvailable"));
       return;
     }
 
@@ -1000,39 +1004,39 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       loadData();
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t('success'), t('doctorContactUpdated'));
+      Alert.alert('✅ ' + t("appointments.success"), t("appointments.doctorContactUpdated"));
     } catch (error) {
       console.error('Failed to update doctor contact:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToUpdateDoctor'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToUpdateDoctor"));
     }
   };
 
   const deleteDoctorContact = async (doctorId: string, doctorName: string) => {
     if (!appointmentService) {
-      Alert.alert('❌ ' + t('error'), t('appointmentServiceNotAvailable'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.appointmentServiceNotAvailable"));
       return;
     }
 
     Alert.alert(
-      t('deleteDoctorContact'),
-      `${t('deleteDoctorConfirm')}`,
+      t("appointments.deleteDoctorContact"),
+      `${t("appointments.deleteDoctorConfirm")}`,
       [
         {
-          text: t('cancel'),
+          text: t("common.cancel"),
           style: 'cancel'
         },
         {
-          text: t('delete'),
+          text: t("common.delete"),
           style: 'destructive',
           onPress: async () => {
             try {
               await appointmentService.deleteDoctorContact(doctorId);
               loadData();
               triggerHaptic('medium');
-              Alert.alert('✅ ' + t('success'), t('doctorContactDeleted'));
+              Alert.alert('✅ ' + t("appointments.success"), t("appointments.doctorContactDeleted"));
             } catch (error) {
               console.error('Failed to delete doctor contact:', error);
-              Alert.alert('❌ ' + t('error'), t('failedToDeleteDoctor'));
+              Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToDeleteDoctor"));
             }
           }
         }
@@ -1042,7 +1046,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
 
   const markAppointmentCompleted = async (id: string) => {
     if (!appointmentService) {
-      Alert.alert('❌ ' + t('error'), t('appointmentServiceNotAvailable'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.appointmentServiceNotAvailable"));
       return;
     }
 
@@ -1050,10 +1054,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       await appointmentService.markAppointmentCompleted(id);
       loadData();
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t('success'), t('appointmentCompleted'));
+      Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentCompleted"));
     } catch (error) {
       console.error('Failed to mark appointment completed:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToUpdate'));
+      Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToUpdate"));
     }
   };
 
@@ -1070,12 +1074,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'scheduled': return t('scheduled');
-      case 'confirmed': return t('confirmed');
-      case 'completed': return t('completed');
-      case 'cancelled': return t('cancelled');
-      case 'rescheduled': return t('rescheduled');
-      default: return t('unknown');
+      case 'scheduled': return t("appointments.scheduled");
+      case 'confirmed': return t("appointments.confirmed");
+      case 'completed': return t("appointments.completed");
+      case 'cancelled': return t("appointments.cancelled");
+      case 'rescheduled': return t("appointments.rescheduled");
+      default: return t("appointments.unknown");
     }
   };
 
@@ -1108,26 +1112,26 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
           style={{ width: 20, height: 20, marginRight: 8 }}
         />
-        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t('appointmentOverview')}</DynamicText>
+        <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("appointments.appointmentOverview")}</DynamicText>
       </View>
       
       {stats && (
         <View style={dynamicStyles.statsGrid}>
           <View style={dynamicStyles.statCard}>
             <DynamicText type="card" style={dynamicStyles.statValue}>{stats?.totalAppointments || 0}</DynamicText>
-            <DynamicText type="card" style={dynamicStyles.statLabel}>{t('totalAppointments')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.statLabel}>{t("appointments.totalAppointments")}</DynamicText>
           </View>
           <View style={dynamicStyles.statCard}>
             <DynamicText type="card" style={dynamicStyles.statValue}>{stats?.upcomingAppointments || 0}</DynamicText>
-            <DynamicText type="card" style={dynamicStyles.statLabel}>{t('upcoming')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.statLabel}>{t("appointments.upcoming")}</DynamicText>
           </View>
           <View style={dynamicStyles.statCard}>
             <DynamicText type="card" style={dynamicStyles.statValue}>{stats?.completedAppointments || 0}</DynamicText>
-            <DynamicText type="card" style={dynamicStyles.statLabel}>{t('completed')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.statLabel}>{t("appointments.completed")}</DynamicText>
           </View>
           <View style={dynamicStyles.statCard}>
             <DynamicText type="card" style={dynamicStyles.statValue}>{doctorContacts.length}</DynamicText>
-            <DynamicText type="card" style={dynamicStyles.statLabel}>{t('doctors')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.statLabel}>{t("appointments.doctors")}</DynamicText>
           </View>
         </View>
       )}
@@ -1137,25 +1141,25 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowAddAppointmentModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>📅{'\n'}{t('schedule')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>📅{'\n'}{t("appointments.schedule")}</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowAddDoctorModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>👨‍⚕️{'\n'}{t('addDoctor')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>👨‍⚕️{'\n'}{t("appointments.addDoctor")}</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={loadData}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>🔄{'\n'}{t('refresh')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>🔄{'\n'}{t("appointments.refresh")}</DynamicText>
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
           onPress={() => setShowPastAppointmentsModal(true)}
         >
-          <DynamicText type="card" style={dynamicStyles.quickActionText}>📋{'\n'}{t('pastAppts')}</DynamicText>
+          <DynamicText type="card" style={dynamicStyles.quickActionText}>📋{'\n'}{t("appointments.pastAppts")}</DynamicText>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -1171,9 +1175,9 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📅 {t('upcomingAppointments')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>📅 {t("appointments.upcomingAppointments")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('upcomingAppointmentsDesc')}
+        {t("appointments.upcomingAppointmentsDesc")}
       </DynamicText>
       
       {upcomingAppointments.slice(0, 5).map(appointment => (
@@ -1189,11 +1193,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           </View>
           
           <DynamicText type="card" style={dynamicStyles.appointmentDetails}>
-            {appointment.doctorName && `👨‍⚕️ ${appointment.doctorName}`}
+            {appointment.doctorName && uiI18n.t("healthAnalytics.value", { value1: appointment.doctorName })}
           </DynamicText>
           
           <DynamicText type="card" style={dynamicStyles.appointmentDateTime}>
-            📅 {new Date(appointment.startDate).toLocaleDateString()} at {new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            📅 {new Date(appointment.startDate).toLocaleDateString()}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </DynamicText>
           
           <DynamicText type="card" style={dynamicStyles.appointmentLocation}>
@@ -1213,7 +1217,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       {upcomingAppointments.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noUpcomingAppointments')}
+          {t("appointments.noUpcomingAppointments")}
         </DynamicText>
       )}
     </Animated.View>
@@ -1229,9 +1233,9 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>👨‍⚕️ {t('doctorContacts')}</DynamicText>
+      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>👨‍⚕️ {t("appointments.doctorContacts")}</DynamicText>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t('doctorContactsDesc')}
+        {t("appointments.doctorContactsDesc")}
       </DynamicText>
       
       {doctorContacts.map(doctor => (
@@ -1249,7 +1253,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             
             {/* Dialing Options */}
             <View style={dynamicStyles.dialingOptions}>
-              {(doctor.dialingMethod === 'phone' || doctor.dialingMethod === 'both') && (
+              {(doctor.dialingMethod === uiI18n.t("ui.phone") || doctor.dialingMethod === 'both') && (
                 <TouchableOpacity
                   style={[dynamicStyles.dialButton, { backgroundColor: currentTheme.accent + 'CC' }]}
                   onPress={() => {
@@ -1257,11 +1261,11 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
                     Linking.openURL(phoneUrl).catch(err => console.error('Failed to open phone:', err));
                   }}
                 >
-                  <DynamicText type="card" style={dynamicStyles.dialButtonText}>{t('call')}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.dialButtonText}>{t("appointments.call")}</DynamicText>
                 </TouchableOpacity>
               )}
               
-              {(doctor.dialingMethod === 'whatsapp' || doctor.dialingMethod === 'both') && (
+              {(doctor.dialingMethod === uiI18n.t("appointments.whatsapp") || doctor.dialingMethod === 'both') && (
                 <TouchableOpacity
                   style={[dynamicStyles.dialButton, { backgroundColor: '#25D366' + 'CC' }]}
                   onPress={() => {
@@ -1269,7 +1273,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
                     Linking.openURL(whatsappUrl).catch(err => console.error('Failed to open WhatsApp:', err));
                   }}
                 >
-                  <DynamicText type="card" style={dynamicStyles.dialButtonText}>{t('whatsapp')}</DynamicText>
+                  <DynamicText type="card" style={dynamicStyles.dialButtonText}>{t("appointments.whatsapp")}</DynamicText>
                 </TouchableOpacity>
               )}
             </View>
@@ -1294,7 +1298,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           
           {doctor.isPrimary && (
             <View style={dynamicStyles.primaryBadge}>
-              <DynamicText type="card" style={dynamicStyles.primaryBadgeText}>{t('primary')}</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.primaryBadgeText}>{t("appointments.primary")}</DynamicText>
             </View>
           )}
         </View>
@@ -1302,7 +1306,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       {doctorContacts.length === 0 && (
         <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
-          {t('noDoctorContactsYet')}
+          {t("appointments.noDoctorContactsYet")}
         </DynamicText>
       )}
     </Animated.View>
@@ -1347,10 +1351,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             ]}
           >
             <DynamicText type="primary" style={styles.title}>
-              📅 {t('appointmentManagement')}
+              📅 {t("appointments.appointmentManagement")}
             </DynamicText>
             <DynamicText type="secondary" style={styles.subtitle}>
-              {t('appointmentManagementDesc')}
+              {t("appointments.appointmentManagementDesc")}
             </DynamicText>
           </Animated.View>
 
@@ -1374,7 +1378,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       >
         <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📅 {t('scheduleAppointment')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📅 {t("appointments.scheduleAppointment")}</DynamicText>
             
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
@@ -1382,12 +1386,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               keyboardShouldPersistTaps="handled"
             >
               <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('appointmentType')}</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.appointmentType")}</DynamicText>
               <TouchableOpacity
                 style={dynamicStyles.pickerButton}
                 onPress={() => {
                   Alert.alert(
-                    t('selectAppointmentType'),
+                    t("appointments.selectAppointmentType"),
                     '',
                     appointmentTypes.map(type => ({
                       text: `${type.icon} ${type.label}`,
@@ -1404,10 +1408,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('title')} *</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.title")} *</DynamicText>
               <TextInput
                 style={dynamicStyles.textInput}
-                placeholder={t('titlePlaceholder')}
+                placeholder={t("appointments.titlePlaceholder")}
                 placeholderTextColor="#ffffff80"
                 value={appointmentTitle}
                 onChangeText={setAppointmentTitle}
@@ -1415,10 +1419,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('location')} *</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.location")} *</DynamicText>
               <TextInput
                 style={dynamicStyles.textInput}
-                placeholder={t('locationPlaceholder')}
+                placeholder={t("appointments.locationPlaceholder")}
                 placeholderTextColor="#ffffff80"
                 value={appointmentLocation}
                 onChangeText={setAppointmentLocation}
@@ -1426,7 +1430,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('date')} *</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.date")} *</DynamicText>
               <TouchableOpacity
                 style={dynamicStyles.pickerButton}
                 onPress={() => setShowDatePicker(true)}
@@ -1439,7 +1443,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('time')} *</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.time")} *</DynamicText>
               <TouchableOpacity
                 style={dynamicStyles.pickerButton}
                 onPress={() => setShowTimePicker(true)}
@@ -1452,10 +1456,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             </View>
 
             <View style={dynamicStyles.inputGroup}>
-              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('notesOptional')}</DynamicText>
+              <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.notesOptional")}</DynamicText>
               <TextInput
                 style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                placeholder={t('notesPlaceholder')}
+                placeholder={t("appointments.notesPlaceholder")}
                 placeholderTextColor="#ffffff80"
                 value={appointmentNotes}
                 onChangeText={setAppointmentNotes}
@@ -1489,13 +1493,13 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowAddAppointmentModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={addAppointment}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('schedule')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t("appointments.schedule")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1511,7 +1515,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       >
         <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>👨‍⚕️ {t('addDoctorContact')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>👨‍⚕️ {t("appointments.addDoctorContact")}</DynamicText>
             
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
@@ -1519,10 +1523,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               keyboardShouldPersistTaps="handled"
             >
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('doctorName')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.doctorName")} *</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={t('doctorNamePlaceholder')}
+                  placeholder={t("appointments.doctorNamePlaceholder")}
                   placeholderTextColor="#ffffff80"
                   value={doctorName}
                   onChangeText={setDoctorName}
@@ -1530,10 +1534,10 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               </View>
 
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('specialty')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.specialty")} *</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={`${t('enterValue').replace(' value', '')} ${t('specialty')}`}
+                  placeholder={`${t("healthAnalytics.enterValue").replace(uiI18n.t("healthAnalytics.value"), '')} ${t("appointments.specialty")}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorSpecialty}
                   onChangeText={setDoctorSpecialty}
@@ -1542,7 +1546,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
 
               {/* Country Code Selection */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>🌍 {t('selectCountry')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>🌍 {t("appointments.selectCountry")} *</DynamicText>
                 <TouchableOpacity
                   style={dynamicStyles.pickerButton}
                   onPress={() => {
@@ -1558,14 +1562,14 @@ setShowCountryPicker(true)
 
               {/* {t('phoneNumber')} */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('phoneNumber')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.phoneNumber")} *</DynamicText>
                 <View style={dynamicStyles.phoneInputContainer}>
                   <View style={dynamicStyles.countryCodeDisplay}>
                     <DynamicText type="card" style={dynamicStyles.countryCodeText}>{doctorCountryCode}</DynamicText>
                   </View>
                   <TextInput
                     style={[dynamicStyles.textInput, dynamicStyles.phoneNumberInput]}
-                    placeholder={`${t('enterValue').replace(' value', '')} ${t('phoneNumber').replace('Número de ', '')}`}
+                    placeholder={`${t("healthAnalytics.enterValue").replace(uiI18n.t("healthAnalytics.value"), '')} ${t("appointments.phoneNumber").replace(uiI18n.t("ui.numeroDe"), '')}`}
                     placeholderTextColor="#ffffff80"
                     value={doctorPhone}
                     onChangeText={setDoctorPhone}
@@ -1576,10 +1580,10 @@ setShowCountryPicker(true)
 
               {/* Email Address */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>📧 {t('doctorEmailAddress')}</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>📧 {t("appointments.doctorEmailAddress")}</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={t('doctorEmailPlaceholder')}
+                  placeholder={t("appointments.doctorEmailPlaceholder")}
                   placeholderTextColor="#ffffff80"
                   value={doctorEmail}
                   onChangeText={setDoctorEmail}
@@ -1590,13 +1594,13 @@ setShowCountryPicker(true)
 
               {/* Dialing Method Selection */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('dialingMethod')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.dialingMethod")} *</DynamicText>
                 <TouchableOpacity
                   style={dynamicStyles.pickerButton}
                   onPress={() => {
                     Alert.alert(
-                      t('selectDialingMethod'),
-                      t('howToContactDoctor'),
+                      t("appointments.selectDialingMethod"),
+                      t("appointments.howToContactDoctor"),
                       dialingMethods.map(method => ({
                         text: `${method.icon} ${method.label}`,
                         onPress: () => setDoctorDialingMethod(method.value)
@@ -1612,10 +1616,10 @@ setShowCountryPicker(true)
               </View>
 
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('address')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.address")} *</DynamicText>
                 <TextInput
                   style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                  placeholder={`${t('enterValue').replace(' value', '')} ${t('address')}`}
+                  placeholder={`${t("healthAnalytics.enterValue").replace(uiI18n.t("healthAnalytics.value"), '')} ${t("appointments.address")}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorAddress}
                   onChangeText={setDoctorAddress}
@@ -1629,13 +1633,13 @@ setShowCountryPicker(true)
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowAddDoctorModal(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={addDoctorContact}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('addDoctor')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t("appointments.addDoctor")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1651,7 +1655,7 @@ setShowCountryPicker(true)
       >
         <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={dynamicStyles.modalContent}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>✏️ {t('editDoctorContact')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>✏️ {t("appointments.editDoctorContact")}</DynamicText>
             
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} 
               style={dynamicStyles.modalScrollView}
@@ -1659,10 +1663,10 @@ setShowCountryPicker(true)
               keyboardShouldPersistTaps="handled"
             >
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('doctorName')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.doctorName")} *</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={t('doctorNamePlaceholder')}
+                  placeholder={t("appointments.doctorNamePlaceholder")}
                   placeholderTextColor="#ffffff80"
                   value={doctorName}
                   onChangeText={setDoctorName}
@@ -1670,10 +1674,10 @@ setShowCountryPicker(true)
               </View>
 
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('specialty')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.specialty")} *</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={`${t('enterValue').replace(' value', '')} ${t('specialty')}`}
+                  placeholder={`${t("healthAnalytics.enterValue").replace(uiI18n.t("healthAnalytics.value"), '')} ${t("appointments.specialty")}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorSpecialty}
                   onChangeText={setDoctorSpecialty}
@@ -1682,7 +1686,7 @@ setShowCountryPicker(true)
 
               {/* Country Code Selection */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>🌍 {t('selectCountry')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>🌍 {t("appointments.selectCountry")} *</DynamicText>
                 <TouchableOpacity
                   style={dynamicStyles.pickerButton}
                   onPress={() => {
@@ -1698,14 +1702,14 @@ setShowCountryPicker(true)
 
               {/* {t('phoneNumber')} */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('phoneNumber')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.phoneNumber")} *</DynamicText>
                 <View style={dynamicStyles.phoneInputContainer}>
                   <View style={dynamicStyles.countryCodeDisplay}>
                     <DynamicText type="card" style={dynamicStyles.countryCodeText}>{doctorCountryCode}</DynamicText>
                   </View>
                   <TextInput
                     style={[dynamicStyles.textInput, dynamicStyles.phoneNumberInput]}
-                    placeholder={`${t('enterValue').replace(' value', '')} ${t('phoneNumber').replace('Número de ', '')}`}
+                    placeholder={`${t("healthAnalytics.enterValue").replace(uiI18n.t("healthAnalytics.value"), '')} ${t("appointments.phoneNumber").replace(uiI18n.t("ui.numeroDe"), '')}`}
                     placeholderTextColor="#ffffff80"
                     value={doctorPhone}
                     onChangeText={setDoctorPhone}
@@ -1716,10 +1720,10 @@ setShowCountryPicker(true)
 
               {/* Email Address */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>📧 {t('doctorEmailAddress')}</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>📧 {t("appointments.doctorEmailAddress")}</DynamicText>
                 <TextInput
                   style={dynamicStyles.textInput}
-                  placeholder={t('doctorEmailPlaceholder')}
+                  placeholder={t("appointments.doctorEmailPlaceholder")}
                   placeholderTextColor="#ffffff80"
                   value={doctorEmail}
                   onChangeText={setDoctorEmail}
@@ -1730,13 +1734,13 @@ setShowCountryPicker(true)
 
               {/* Dialing Method Selection */}
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('dialingMethod')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.dialingMethod")} *</DynamicText>
                 <TouchableOpacity
                   style={dynamicStyles.pickerButton}
                   onPress={() => {
                     Alert.alert(
-                      t('selectDialingMethod'),
-                      t('howToContactDoctor'),
+                      t("appointments.selectDialingMethod"),
+                      t("appointments.howToContactDoctor"),
                       dialingMethods.map(method => ({
                         text: `${method.icon} ${method.label}`,
                         onPress: () => setDoctorDialingMethod(method.value)
@@ -1752,10 +1756,10 @@ setShowCountryPicker(true)
               </View>
 
               <View style={dynamicStyles.inputGroup}>
-                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t('address')} *</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("appointments.address")} *</DynamicText>
                 <TextInput
                   style={[dynamicStyles.textInput, { height: 60, textAlignVertical: 'top' }]}
-                  placeholder={`${t('enterValue').replace(' value', '')} ${t('address')}`}
+                  placeholder={`${t("healthAnalytics.enterValue").replace(uiI18n.t("healthAnalytics.value"), '')} ${t("appointments.address")}`}
                   placeholderTextColor="#ffffff80"
                   value={doctorAddress}
                   onChangeText={setDoctorAddress}
@@ -1772,13 +1776,13 @@ setShowCountryPicker(true)
                   setEditingDoctor(null);
                 }}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonPrimary]}
                 onPress={updateDoctorContact}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t('updateDoctor')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary]}>{t("appointments.updateDoctor")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -1797,13 +1801,13 @@ setShowCountryPicker(true)
       >
         <KeyboardForm><View style={dynamicStyles.modalOverlay}>
           <View style={[dynamicStyles.modalContent, { maxHeight: '80%' }]}><ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled contentContainerStyle={{ paddingBottom: 24 }} style={{ flexShrink: 1 }}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📋 {t('pastAppointments')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>📋 {t("appointments.pastAppointments")}</DynamicText>
             
             {/* Search Input */}
             <View style={dynamicStyles.searchContainer}>
               <TextInput
                 style={dynamicStyles.searchInput}
-                placeholder={t('searchPastAppointments')}
+                placeholder={t("appointments.searchPastAppointments")}
                 placeholderTextColor="#ffffff80"
                 value={pastAppointmentsSearch}
                 onChangeText={setPastAppointmentsSearch}
@@ -1818,8 +1822,8 @@ setShowCountryPicker(true)
                 <View style={dynamicStyles.emptyState}>
                   <DynamicText type="secondary" style={dynamicStyles.emptyStateText}>
                     {pastAppointmentsSearch.trim() ? 
-                      `${t('noAppointmentsFound')}` : 
-                      t('noPastAppointments')
+                      `${t("appointments.noAppointmentsFound")}` : 
+                      t("appointments.noPastAppointments")
                     }
                   </DynamicText>
                 </View>
@@ -1838,7 +1842,7 @@ setShowCountryPicker(true)
                         }
                       ]}>
                         <DynamicText type="card" style={dynamicStyles.statusText}>
-                          {appointment.status === 'completed' ? `✅ ${t('attended')}` : `❌ ${t('missed')}`}
+                          {appointment.status === uiI18n.t("appointments.completed") ? uiI18n.t("healthAnalytics.value", { value1: t("appointments.attended") }) : uiI18n.t("healthAnalytics.value", { value1: t("appointments.missed") })}
                         </DynamicText>
                       </View>
                     </View>
@@ -1854,7 +1858,7 @@ setShowCountryPicker(true)
                     )}
                     
                     <DynamicText type="card" style={dynamicStyles.appointmentDateTime}>
-                      📅 {new Date(appointment.startDate).toLocaleDateString()} at {new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      📅 {new Date(appointment.startDate).toLocaleDateString()}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </DynamicText>
                     
                     {appointment.notes && (
@@ -1875,7 +1879,7 @@ setShowCountryPicker(true)
                   setPastAppointmentsSearch('');
                 }}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('close')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("appointments.close")}</DynamicText>
               </TouchableOpacity>
             </View>
           </ScrollView></View>
@@ -1891,9 +1895,9 @@ setShowCountryPicker(true)
       >
         <View style={dynamicStyles.modalOverlay}>
           <View style={[dynamicStyles.modalContent, { maxHeight: '80%', width: '95%' }]}>
-            <DynamicText type="primary" style={dynamicStyles.modalTitle}>🌍 {t('selectCountry')}</DynamicText>
+            <DynamicText type="primary" style={dynamicStyles.modalTitle}>🌍 {t("appointments.selectCountry")}</DynamicText>
             <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { marginBottom: 16 }]}>
-              {t('chooseCountryCode')}
+              {t("appointments.chooseCountryCode")}
             </DynamicText>
             
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" 
@@ -1937,7 +1941,7 @@ setShowCountryPicker(true)
                 style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
                 onPress={() => setShowCountryPicker(false)}
               >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>

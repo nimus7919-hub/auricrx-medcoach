@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { Platform } from 'react-native';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -39,7 +40,7 @@ export class OcrProcessor {
           this.isInitialized = true;
           console.log('ML Kit OCR initialized successfully');
         } else {
-          throw new Error('ML Kit not properly imported');
+          throw new Error(uiI18n.t("ui.mlKitNotProperlyImported"));
         }
       } catch (error) {
         console.log('ML Kit OCR test failed, falling back to basic mode:', error);
@@ -54,7 +55,7 @@ export class OcrProcessor {
   static async recognizeText(imageUri: string, language?: string): Promise<OcrResult> {
     try {
       if (!this.isInitialized) {
-        throw new Error('ML Kit OCR not available on this device');
+        throw new Error(uiI18n.t("ui.mlKitOcrNotAvailableOnThisDevice"));
       }
 
       // Preprocess image for better OCR results
@@ -64,7 +65,7 @@ export class OcrProcessor {
       const result = await TextRecognition.recognize(processedImageUri);
       
       if (!result || !result.text) {
-        throw new Error('No text detected in image');
+        throw new Error(uiI18n.t("ui.noTextDetectedInImage"));
       }
 
       // Clean up the text for better readability
@@ -96,7 +97,7 @@ export class OcrProcessor {
       
       // Fallback to basic text detection
       return {
-        text: 'Text recognition failed - please ensure image is clear and contains readable text',
+        text: uiI18n.t("ui.textRecognitionFailedPleaseEnsureImageIsClearAndContainsReadableText"),
         confidence: 0.0,
         blocks: [],
         language: language || 'en'

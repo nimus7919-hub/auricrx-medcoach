@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import AuricWordmark, { CROSSBAR, WORDMARK } from './AuricWordmark';
@@ -7,6 +9,7 @@ import { vip } from '../theme/vip';
 export default function LoginIntro({ enabled, language = 'es', onComplete, children }: {
   enabled: boolean; language?: string; onComplete: () => void; children: React.ReactNode;
 }) {
+  useUILanguage();
   const pill = useRef(new Animated.Value(0)).current;
   const reveal = useRef(new Animated.Value(0)).current;
   const callback = useRef(onComplete);
@@ -58,7 +61,7 @@ export default function LoginIntro({ enabled, language = 'es', onComplete, child
       {children}
     </Animated.View>
     {visible && <Animated.View style={[StyleSheet.absoluteFill, { opacity: reveal.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }), transform: [{ translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [0, -28] }) }] }]}>
-      <Pressable onPress={finish} style={styles.intro} accessibilityRole="button" accessibilityLabel={es ? 'Omitir introducción' : 'Skip introduction'}>
+      <Pressable onPress={finish} style={styles.intro} accessibilityRole="button" accessibilityLabel={uiI18n.t("localized.LoginIntro.text64")}>
         <View style={styles.mark} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           <AuricWordmark hidePill />
           {/* Same SVG capsule and coordinates as the static crossbar. */}
@@ -68,7 +71,7 @@ export default function LoginIntro({ enabled, language = 'es', onComplete, child
           ] }]}><AuricWordmark pillOnly /></Animated.View>
         </View>
         <Text style={styles.subtitle}>RX MEDCOACH</Text>
-        <Text style={styles.skip}>{es ? 'Toca para continuar' : 'Tap to continue'}</Text>
+        <Text style={styles.skip}>{uiI18n.t("localized.LoginIntro.text74")}</Text>
       </Pressable>
     </Animated.View>}
   </View>;

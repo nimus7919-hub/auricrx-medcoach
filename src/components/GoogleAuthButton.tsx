@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { vip } from '../theme/vip';
@@ -5,17 +7,17 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const googleAuthText = (language: string) => language === 'es' ? {
-  label: 'Continuar con Google', or: 'o', loading: 'Conectando...',
-  error: 'No se pudo iniciar sesi\u00f3n con Google. Int\u00e9ntalo de nuevo.',
-} : {
-  label: 'Continue with Google', or: 'or', loading: 'Connecting...',
-  error: 'Google Sign-In failed. Please try again.',
-};
+export const googleAuthText = (_language: string) => ({
+  label: uiI18n.t('googleAuth.label'),
+  or: uiI18n.t('googleAuth.or'),
+  loading: uiI18n.t('googleAuth.loading'),
+  error: uiI18n.t('googleAuth.error'),
+});
 
 export default function GoogleAuthButton({ language, loading, disabled, onPress, variant }: {
   variant?: 'vip'; language: string; loading: boolean; disabled: boolean; onPress: () => void;
 }) {
+  useUILanguage();
   const t = googleAuthText(language);
   if (variant === 'vip') return <TouchableOpacity accessibilityRole="button" accessibilityLabel={t.label} accessibilityState={{disabled, busy: loading}} disabled={disabled} onPress={onPress} activeOpacity={0.9} style={{borderRadius:99,backgroundColor:vip.colors.white,minHeight:49,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:15,paddingHorizontal:12,opacity:disabled ? 0.6 : 1}}>
     {loading ? <ActivityIndicator color="#4285F4"/> : <Svg width={29} height={29} viewBox="0 0 24 24">
@@ -24,7 +26,7 @@ export default function GoogleAuthButton({ language, loading, disabled, onPress,
       <Path fill="#FBBC05" d="M6.4 13.92a6 6 0 0 1 0-3.84V7.49H3.06a10 10 0 0 0 0 9.02Z"/>
       <Path fill="#EA4335" d="M12 5.96c1.47 0 2.79.51 3.83 1.51l2.87-2.87A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.94 5.49l3.34 2.59A6 6 0 0 1 12 5.96Z"/>
     </Svg>}
-    <Text style={{color:'#202124',fontSize:18,fontWeight:'500',flexShrink:1}}>{loading ? t.loading : ({pt:'Continuar com Google',fr:'Continuer avec Google',de:'Mit Google fortfahren',zh:'?? Google ??'}[language] || t.label)}</Text>
+    <Text style={{color:'#202124',fontSize:18,fontWeight:'500',flexShrink:1}}>{loading ? t.loading : t.label}</Text>
   </TouchableOpacity>;
   return <View>
     <View style={styles.divider}><View style={styles.line} /><Text style={styles.or}>{t.or}</Text><View style={styles.line} /></View>
@@ -37,7 +39,7 @@ export default function GoogleAuthButton({ language, loading, disabled, onPress,
       </LinearGradient>
     </TouchableOpacity>
     <Text style={{ color: '#E9C978', fontSize: 12, marginTop: 8 }}>
-      {language === 'es' ? 'Después de identificarte, revisa los consentimientos antes de crear tu perfil.' : 'After signing in, review consent choices before your profile is created.'}
+      {uiI18n.t("localized.GoogleAuthButton.text43")}
     </Text>
   </View>;
 }

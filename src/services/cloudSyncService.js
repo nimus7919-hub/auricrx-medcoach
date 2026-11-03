@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 // src/services/cloudSyncService.js
 // Cloud sync service for active health data
 
@@ -9,7 +10,7 @@ import { API_BASE as API_BASE_URL } from '../config/api';
 // Keep the timeout active until the response body has been consumed.
 async function requestSync(path, options = {}) {
   const token = await getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(uiI18n.t("ui.notAuthenticated"));
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
   try {
@@ -18,12 +19,12 @@ async function requestSync(path, options = {}) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error(`Server error: ${response.status}`);
+    if (!response.ok) throw new Error(uiI18n.t("ui.serverErrorValue_2600e2", { value1: response.status }));
     if (!response.headers.get('content-type')?.includes('application/json')) {
-      throw new Error('Server returned non-JSON response');
+      throw new Error(uiI18n.t("ui.serverReturnedNonJsonResponse"));
     }
     const data = await response.json();
-    if (!data.ok) throw new Error(data.message || 'Sync failed');
+    if (!data.ok) throw new Error(data.message || uiI18n.t("ui.syncFailed"));
     return data;
   } finally {
     clearTimeout(timeout);

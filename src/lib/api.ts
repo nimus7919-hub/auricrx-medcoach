@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 const API = "https://sanpablo-proxy.onrender.com";
 
 /** San Pablo price search */
@@ -9,7 +10,7 @@ export async function searchPrices(q: string, pageSize = 10, page = 0) {
   url.searchParams.set("pageSize", String(pageSize));
   url.searchParams.set("page", String(page));
   const r = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!r.ok) throw new Error(`search failed: ${r.status}`);
+  if (!r.ok) throw new Error(uiI18n.t("ui.searchFailedValue", { value1: r.status }));
   return r.json() as Promise<{
     query: string; page: number; pageSize: number; totalResults: number;
     items: Array<{
@@ -29,7 +30,7 @@ export async function nearbyPharmacies(
   lat: number,
   lng: number,
   radius = 5000,
-  keyword = "Farmacia"
+  keyword = uiI18n.t("ui.farmacia")
 ) {
   const url = new URL("/api/pharmacies/nearby", API);
   url.searchParams.set("lat", String(lat));
@@ -37,7 +38,7 @@ export async function nearbyPharmacies(
   url.searchParams.set("radius", String(radius));
   url.searchParams.set("keyword", keyword);
   const r = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!r.ok) throw new Error(`nearby failed: ${r.status}`);
+  if (!r.ok) throw new Error(uiI18n.t("ui.nearbyFailedValue", { value1: r.status }));
   return r.json() as Promise<{
     results: Array<{
       placeId: string;

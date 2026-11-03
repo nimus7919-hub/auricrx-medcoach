@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { gold as GOLD } from '../theme/colors';
 import React from 'react';
 import {
@@ -31,42 +33,12 @@ export default function SubscriptionExpiredModal({
   theme,
   lang 
 }: SubscriptionExpiredModalProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardTextColor } = useWallpaper();
 
-  const translations = {
-    en: {
-      title: 'Subscription Expired',
-      message: "30 days after your subscription ends we delete your account and all your data, except what the law requires us to keep, such as invoices.",
-      subscribeButton: 'Subscribe Now',
-      dismissButton: 'Later',
-    },
-    es: {
-      title: 'Suscripción Expirada',
-      message: "30 días después de que termine tu suscripción eliminamos tu cuenta y todos tus datos, salvo lo que la ley nos obligue a conservar (por ejemplo, facturas).",
-      subscribeButton: 'Suscribirse Ahora',
-      dismissButton: 'Más Tarde',
-    },
-    fr: {
-      title: 'Abonnement Expiré',
-      message: 'Votre abonnement a expiré. Vous avez 30 jours pour renouveler votre abonnement.\n\nVos données seront stockées en toute sécurité dans le cloud pendant cette période de grâce. Après 30 jours, les données de votre compte seront supprimées.',
-      subscribeButton: 'S\'abonner Maintenant',
-      dismissButton: 'Plus Tard',
-    },
-    de: {
-      title: 'Abonnement Abgelaufen',
-      message: 'Ihr Abonnement ist abgelaufen. Sie haben 30 Tage Zeit, Ihr Abonnement zu erneuern.\n\nIhre Daten werden während dieser Schonfrist sicher in der Cloud gespeichert. Nach 30 Tagen werden Ihre Kontodaten gelöscht.',
-      subscribeButton: 'Jetzt Abonnieren',
-      dismissButton: 'Später',
-    },
-    zh: {
-      title: '订阅已过期',
-      message: '您的订阅已过期。您有 30 天的时间续订订阅。\n\n在此宽限期内，您的数据将安全地存储在云端。30 天后，您的账户数据将被删除。',
-      subscribeButton: '立即订阅',
-      dismissButton: '稍后',
-    },
-  };
+  
 
-  const t = translations[lang as keyof typeof translations] || translations.en;
+  const t = uiI18n.t('subscriptionExpired', { returnObjects: true }) as Record<string, string>;
 
   return (
     <Modal

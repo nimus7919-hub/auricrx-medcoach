@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 // Copied from components/DocumentsCard.tsx — placed under src for alias @/* resolution
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,17 +18,17 @@ import {
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 const COUNTRY_INSURANCE_LABEL: Record<string, string> = {
-  MX: "IMSS / Seguro (credencial)",
-  US: "Insurance / Medicare card",
-  CA: "Provincial Health Card",
-  BR: "SUS Card",
-  UK: "NHS Number Card",
-  IN: "Ayushman / Insurance Card",
+  get MX() { return uiI18n.t("ui.imssSeguroCredencial"); },
+  get US() { return uiI18n.t("ui.insuranceMedicareCard"); },
+  get CA() { return uiI18n.t("ui.provincialHealthCard"); },
+  get BR() { return uiI18n.t("ui.susCard"); },
+  get UK() { return uiI18n.t("ui.nhsNumberCard"); },
+  get IN() { return uiI18n.t("ui.ayushmanInsuranceCard"); },
 };
 
 function insuranceLabel(country?: string) {
-  if (!country) return "Insurance ID";
-  return COUNTRY_INSURANCE_LABEL[country] ?? "Insurance ID";
+  if (!country) return uiI18n.t("ui.insuranceId");
+  return COUNTRY_INSURANCE_LABEL[country] ?? uiI18n.t("ui.insuranceId");
 }
 
 type DocKind = "lab" | "official_id" | "insurance_id";
@@ -41,9 +43,10 @@ type Props = {
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/heic", "image/heif", "image/webp"];
 
 export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete, existing }: Props) {
+  useUILanguage();
   const [country, setCountry] = useState(defaultCountry);
   const [active, setActive] = useState<DocKind>("lab");
-  const insLabel = useMemo(() => insuranceLabel(country), [country]);
+  const insLabel = useMemo(() => insuranceLabel(country), [country, uiI18n.resolvedLanguage]);
 
   const [recent, setRecent] = useState<Array<{ kind: DocKind; name: string; url: string; file?: File }>>([]);
 
@@ -53,10 +56,10 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
         if (onSave) await onSave(kind, file);
         const url = URL.createObjectURL(file);
         setRecent((r) => [{ kind, name: file.name, url, file }, ...r].slice(0, 10));
-        toast.success("Document saved", { description: `${file.name} (${Math.round(file.size / 1024)} KB)` });
+        toast.success(uiI18n.t("ui.documentSaved"), { description: `${file.name} (${Math.round(file.size / 1024)} KB)` });
       } catch (e: any) {
         console.error(e);
-        toast.error("Save failed", { description: e?.message ?? "Unknown error" });
+        toast.error(uiI18n.t("ui.saveFailed"), { description: e?.message ?? uiI18n.t("ui.unknownError") });
       }
     },
     [onSave]
@@ -66,23 +69,23 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
     <Card className="w-full shadow-sm">
       <CardHeader className="flex items-start justify-between gap-4">
         <div>
-          <CardTitle className="text-2xl">Documents</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">Upload or scan to PDF. Accepted: JPG/PNG/PDF</p>
+          <CardTitle className="text-2xl">{uiI18n.t("tiles.documents")}</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">{uiI18n.t("ui.uploadOrScanToPdfAcceptedJpgPngPdf")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="country" className="text-xs text-muted-foreground">Country</Label>
+          <Label htmlFor="country" className="text-xs text-muted-foreground">{uiI18n.t("ui.country")}</Label>
           <Select value={country} onValueChange={(v: string) => setCountry(v)}>
             <SelectTrigger className="w-[170px]">
-              <SelectValue placeholder="Country" />
+              <SelectValue placeholder={uiI18n.t("ui.country")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="MX">Mexico</SelectItem>
-                <SelectItem value="US">United States</SelectItem>
-                <SelectItem value="CA">Canada</SelectItem>
-                <SelectItem value="BR">Brazil</SelectItem>
-                <SelectItem value="UK">United Kingdom</SelectItem>
-                <SelectItem value="IN">India</SelectItem>
+                <SelectItem value="MX">{uiI18n.t("ui.mexico")}</SelectItem>
+                <SelectItem value="US">{uiI18n.t("ui.unitedStates")}</SelectItem>
+                <SelectItem value="CA">{uiI18n.t("ui.canada")}</SelectItem>
+                <SelectItem value="BR">{uiI18n.t("ui.brazil")}</SelectItem>
+                <SelectItem value="UK">{uiI18n.t("ui.unitedKingdom")}</SelectItem>
+                <SelectItem value="IN">{uiI18n.t("ui.india")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -92,7 +95,7 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
       <CardContent>
         <Tabs value={active} onValueChange={(v: string) => setActive(v as DocKind)} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="lab">Lab results</TabsTrigger>
+            <TabsTrigger value="lab">{uiI18n.t("medicalDocuments.labResults")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="lab"><DocSection kind="lab" onSaved={handleSaved} allowMulti /></TabsContent>
@@ -100,7 +103,7 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
 
         {(existing || recent.length > 0) && (
           <div className="mt-6">
-            <h3 className="text-sm font-medium mb-2">Recent / Existing</h3>
+            <h3 className="text-sm font-medium mb-2">{uiI18n.t("ui.recentExisting")}</h3>
             <ScrollArea className="h-[180px] rounded-md border p-2">
               <div className="flex flex-col gap-2">
 
@@ -109,16 +112,13 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
                     <div className="min-w-0">
                       <div className="text-sm font-medium truncate">{labelForKind(d.kind)} — {d.name}</div>
                       <a href={d.url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground underline inline-flex items-center gap-1">
-                        <ExternalLink className="w-3 h-3" /> Open
-                      </a>
+                        <ExternalLink className="w-3 h-3" />{uiI18n.t("ui.open")}</a>
                     </div>
                     <div className="shrink-0 flex items-center gap-1">
                       <Button size="sm" variant="outline" onClick={() => downloadBlobOrUrl(d.file ?? d.url, d.name)}>
-                        <Download className="w-4 h-4 mr-1" />Download
-                      </Button>
+                        <Download className="w-4 h-4 mr-1" />{uiI18n.t("ui.download")}</Button>
                       <Button size="sm" onClick={() => shareDocument(d)}>
-                        <Share2 className="w-4 h-4 mr-1" />Share
-                      </Button>
+                        <Share2 className="w-4 h-4 mr-1" />{uiI18n.t("medicalDocuments.share")}</Button>
                       <Button size="sm" variant="destructive" onClick={() => setRecent((r) => r.filter((_, idx) => idx !== i))}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -132,19 +132,16 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
                       <div className="min-w-0">
                         <div className="text-sm font-medium truncate">{labelForKind(k as DocKind)} — {d.name}</div>
                         <a href={d.url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground underline inline-flex items-center gap-1">
-                          <ExternalLink className="w-3 h-3" /> Open
-                        </a>
+                          <ExternalLink className="w-3 h-3" />{uiI18n.t("ui.open")}</a>
                       </div>
                       <div className="shrink-0 flex items-center gap-1">
                         <Button size="sm" variant="outline" onClick={async () => {
                           const blob = await fetchBlob(d.url);
                           downloadBlobOrUrl(blob ?? d.url, d.name);
                         }}>
-                          <Download className="w-4 h-4 mr-1" />Download
-                        </Button>
+                          <Download className="w-4 h-4 mr-1" />{uiI18n.t("ui.download")}</Button>
                         <Button size="sm" onClick={() => shareDocument({ kind: k as DocKind, name: d.name, url: d.url })}>
-                          <Share2 className="w-4 h-4 mr-1" />Share
-                        </Button>
+                          <Share2 className="w-4 h-4 mr-1" />{uiI18n.t("medicalDocuments.share")}</Button>
                         <Button
                           size="sm"
                           variant="destructive"
@@ -153,7 +150,7 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
                             try {
                               if (onDelete) await onDelete(k as DocKind, d);
                             } catch {
-                              toast.error("Delete failed");
+                              toast.error(uiI18n.t("ui.deleteFailed"));
                             }
                           }}
                         >
@@ -175,13 +172,14 @@ export default function DocumentsCard({ defaultCountry = "MX", onSave, onDelete,
 
 function labelForKind(k: DocKind) {
   switch (k) {
-    case "lab": return "Lab results";
-    case "official_id": return "Official ID";
-    case "insurance_id": return "Insurance ID";
+    case "lab": return uiI18n.t("medicalDocuments.labResults");
+    case "official_id": return uiI18n.t("ui.officialId");
+    case "insurance_id": return uiI18n.t("ui.insuranceId");
   }
 }
 
 function DocSection({ kind, onSaved, allowMulti = false }: { kind: DocKind; onSaved: (k: DocKind, f: File) => void | Promise<void>; allowMulti?: boolean }) {
+  useUILanguage();
   const [scannerOpen, setScannerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -190,7 +188,7 @@ function DocSection({ kind, onSaved, allowMulti = false }: { kind: DocKind; onSa
     if (!files || !files.length) return;
     for (const f of Array.from(files)) {
       if (!ALLOWED_IMAGE_TYPES.includes(f.type) && f.type !== "application/pdf") {
-        toast.error("Unsupported file", { description: `${f.name} (${f.type})` });
+        toast.error(uiI18n.t("ui.unsupportedFile"), { description: `${f.name} (${f.type})` });
         continue;
       }
       await onSaved(kind, f);
@@ -202,8 +200,8 @@ function DocSection({ kind, onSaved, allowMulti = false }: { kind: DocKind; onSa
     <div className="mt-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-2xl border p-4">
-          <div className="flex items-center gap-2 mb-2"><FileUp className="w-4 h-4"/><span className="font-medium">Upload {labelForKind(kind)}</span></div>
-          <p className="text-xs text-muted-foreground mb-3">Choose JPG/PNG or an existing PDF. For photos, you can select multiple.</p>
+          <div className="flex items-center gap-2 mb-2"><FileUp className="w-4 h-4"/><span className="font-medium">{uiI18n.t("ui.upload_fa0d2f")}{labelForKind(kind)}</span></div>
+          <p className="text-xs text-muted-foreground mb-3">{uiI18n.t("ui.chooseJpgPngOrAnExistingPdfForPhotosYouCanSelectMultiple")}</p>
           <Input
             ref={fileInputRef}
             type="file"
@@ -215,10 +213,10 @@ function DocSection({ kind, onSaved, allowMulti = false }: { kind: DocKind; onSa
         </div>
 
         <div className="rounded-2xl border p-4">
-          <div className="flex items-center gap-2 mb-2"><ScanLine className="w-4 h-4"/><span className="font-medium">Scan with camera → PDF</span></div>
-          <p className="text-xs text-muted-foreground mb-3">Use your device camera to capture one or more pages and export to a single PDF.</p>
+          <div className="flex items-center gap-2 mb-2"><ScanLine className="w-4 h-4"/><span className="font-medium">{uiI18n.t("ui.scanWithCameraPdf")}</span></div>
+          <p className="text-xs text-muted-foreground mb-3">{uiI18n.t("ui.useYourDeviceCameraToCaptureOneOrMorePagesAndExportToASinglePdf")}</p>
           <div className="flex gap-2">
-            <Button variant="default" onClick={() => setScannerOpen(true)}><Camera className="w-4 h-4 mr-2"/>Open scanner</Button>
+            <Button variant="default" onClick={() => setScannerOpen(true)}><Camera className="w-4 h-4 mr-2"/>{uiI18n.t("ui.openScanner")}</Button>
           </div>
         </div>
       </div>
@@ -234,6 +232,7 @@ function DocSection({ kind, onSaved, allowMulti = false }: { kind: DocKind; onSa
 }
 
 function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boolean; onOpenChange: (v: boolean) => void; onExport: (file: File) => void | Promise<void>; allowMulti: boolean; }) {
+  useUILanguage();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -250,7 +249,7 @@ function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boo
       }
       setIsStreaming(true);
     } catch (e: any) {
-      toast.error("Camera error", { description: e?.message ?? "Could not access camera" });
+      toast.error(uiI18n.t("ui.cameraError"), { description: e?.message ?? uiI18n.t("ui.couldNotAccessCamera") });
     }
   }, []);
 
@@ -308,7 +307,7 @@ function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boo
   const removePage = (idx: number) => setPages((p) => p.filter((_, i) => i !== idx));
 
   const exportPdf = useCallback(async () => {
-    if (!pages.length) return toast.error("Nothing to export");
+    if (!pages.length) return toast.error(uiI18n.t("ui.nothingToExport"));
     const pdf = await PDFDocument.create();
 
     for (const dataUrl of [...pages].reverse()) {
@@ -339,7 +338,7 @@ function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boo
     const blob = new Blob([bytesArr.buffer], { type: "application/pdf" });
     const file = new File([blob], `scan_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.pdf`, { type: "application/pdf" });
     await onExport(file);
-    toast.success("PDF exported");
+    toast.success(uiI18n.t("ui.pdfExported"));
     onOpenChange(false);
   }, [pages, onExport, onOpenChange]);
 
@@ -347,7 +346,7 @@ function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><ScanLine className="w-5 h-5"/> Scanner</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><ScanLine className="w-5 h-5"/>{uiI18n.t("ui.scanner")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -357,28 +356,26 @@ function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boo
             </div>
             <div className="flex items-center gap-2 mt-3">
               {!isStreaming ? (
-                <Button onClick={start} variant="secondary"><Play className="w-4 h-4 mr-2"/>Start camera</Button>
+                <Button onClick={start} variant="secondary"><Play className="w-4 h-4 mr-2"/>{uiI18n.t("ui.startCamera")}</Button>
               ) : (
                 <>
-                  <Button onClick={capture}><Camera className="w-4 h-4 mr-2"/>Capture</Button>
-                  <Button onClick={stop} variant="ghost"><StopCircle className="w-4 h-4 mr-2"/>Stop</Button>
+                  <Button onClick={capture}><Camera className="w-4 h-4 mr-2"/>{uiI18n.t("ui.capture")}</Button>
+                  <Button onClick={stop} variant="ghost"><StopCircle className="w-4 h-4 mr-2"/>{uiI18n.t("appointments.stop")}</Button>
                 </>
               )}
               <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
-                <input type="checkbox" className="accent-primary" checked={enhance} onChange={(e) => setEnhance(e.target.checked)} />
-                Enhance (B/W + contrast)
-              </label>
+                <input type="checkbox" className="accent-primary" checked={enhance} onChange={(e) => setEnhance(e.target.checked)} />{uiI18n.t("ui.enhanceBWContrast")}</label>
             </div>
           </div>
 
           <div className="col-span-1">
-            <h4 className="text-sm font-medium mb-2">Pages ({pages.length})</h4>
+            <h4 className="text-sm font-medium mb-2">{uiI18n.t("ui.pages")}{pages.length})</h4>
             <ScrollArea className="h-[300px] rounded-md border p-2">
               <div className="grid grid-cols-2 gap-2">
                 {pages.map((p, i) => (
                   <div key={i} className="relative group">
                     <img src={p} className="w-full aspect-[3/4] object-cover rounded-lg border" />
-                    <button className="absolute top-1 right-1 p-1 bg-white/70 rounded-full opacity-0 group-hover:opacity-100 transition" onClick={() => removePage(i)} title="Remove">
+                    <button className="absolute top-1 right-1 p-1 bg-white/70 rounded-full opacity-0 group-hover:opacity-100 transition" onClick={() => removePage(i)} title={uiI18n.t("healthProfile.removeHealthCondition")}>
                       <Trash2 className="w-4 h-4"/>
                     </button>
                   </div>
@@ -386,16 +383,16 @@ function ScannerDialog({ open, onOpenChange, onExport, allowMulti }: { open: boo
               </div>
             </ScrollArea>
             <div className="flex gap-2 mt-3">
-              <Button onClick={exportPdf} disabled={!pages.length} className="flex-1"><Download className="w-4 h-4 mr-2"/>Export PDF</Button>
-              <Button variant="outline" onClick={() => setPages([])} disabled={!pages.length}><X className="w-4 h-4 mr-2"/>Clear</Button>
+              <Button onClick={exportPdf} disabled={!pages.length} className="flex-1"><Download className="w-4 h-4 mr-2"/>{uiI18n.t("documents.exportPDF")}</Button>
+              <Button variant="outline" onClick={() => setPages([])} disabled={!pages.length}><X className="w-4 h-4 mr-2"/>{uiI18n.t("medicalDocuments.clear")}</Button>
             </div>
           </div>
         </div>
 
         <DialogFooter className="sm:justify-between">
-          <div className="text-xs text-muted-foreground">Tip: On mobile Safari/Chrome, the Upload input also offers Camera. This scanner adds multi-page + enhancement + PDF.</div>
+          <div className="text-xs text-muted-foreground">{uiI18n.t("ui.tipOnMobileSafariChromeTheUploadInputAlsoOffersCameraThisScannerAddsMultiPageEnhancementPd")}</div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}><X className="w-4 h-4 mr-2"/>Close</Button>
+            <Button variant="ghost" onClick={() => onOpenChange(false)}><X className="w-4 h-4 mr-2"/>{uiI18n.t("ai.close")}</Button>
           </div>
         </DialogFooter>
       </DialogContent>
@@ -451,7 +448,7 @@ async function shareDocument(d: { name: string; url: string; file?: File; kind?:
     } catch { }
   }
   try { if (d.url && navigator.clipboard) await navigator.clipboard.writeText(d.url); } catch {}
-  const subject = encodeURIComponent(`Sharing document: ${d.name}`);
-  const body = d.url ? encodeURIComponent(`Here is the document:\n${d.url}`) : "";
+  const subject = encodeURIComponent(uiI18n.t("ui.sharingDocumentValue", { value1: d.name }));
+  const body = d.url ? encodeURIComponent(uiI18n.t("ui.hereIsTheDocumentValue", { value1: d.url })) : "";
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }

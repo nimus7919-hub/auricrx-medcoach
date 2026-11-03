@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { ScrollView } from 'react-native';
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useEffect, useRef, useState } from "react";
@@ -34,6 +36,7 @@ const GOLD = {
 };
 
 export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClose }: any) {
+  useUILanguage();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
 
@@ -137,7 +140,7 @@ export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClos
             <TextInput
               value={email}
               onChangeText={setEmail}
-              placeholder="Email"
+              placeholder={uiI18n.t("adminProfile.email")}
               placeholderTextColor="#CBA24F"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -151,7 +154,7 @@ export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClos
             <TextInput
               value={pw}
               onChangeText={setPw}
-              placeholder="Password"
+              placeholder={uiI18n.t("ui.password")}
               placeholderTextColor="#CBA24F"
               secureTextEntry
               style={styles.input}
@@ -160,32 +163,30 @@ export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClos
 
           <View style={{ height: 18 }} />
 
-          <GoldButton title="Sign In" onPress={onSignIn} />
+          <GoldButton title={uiI18n.t("ui.signIn")} onPress={onSignIn} />
 
           <View style={{ height: 16 }} />
 
           {/* SSO rows */}
           <GoldRow>
-            <Text style={styles.rowText}>🍎  Continue with Apple</Text>
+            <Text style={styles.rowText}>{uiI18n.t("ui.continueWithApple_8cfb44")}</Text>
           </GoldRow>
 
           <View style={{ height: 12 }} />
 
           <GoldRow>
-            <Text style={styles.rowText}>G   Continue with Google</Text>
+            <Text style={styles.rowText}>{uiI18n.t("ui.gContinueWithGoogle")}</Text>
           </GoldRow>
 
           <View style={{ height: 20 }} />
 
-          <TouchableOpacity onPress={() => navigation?.navigate?.("SignUp")}>
-            <Text style={styles.signUp}>Don't have an account? <Text style={{ color: GOLD.a300 }}>Sign Up</Text></Text>
+          <TouchableOpacity onPress={() => navigation?.navigate?.(uiI18n.t("ui.signup"))}>
+            <Text style={styles.signUp}>{uiI18n.t("ui.donTHaveAnAccount")}<Text style={{ color: GOLD.a300 }}>{uiI18n.t("ui.signUp")}</Text></Text>
           </TouchableOpacity>
 
           <View style={{ height: 18 }} />
 
-          <Text style={styles.legal}>
-            By signing in, you agree to our Terms of Service and Privacy Policy
-          </Text>
+          <Text style={styles.legal}>{uiI18n.t("ui.bySigningInYouAgreeToOurTermsOfServiceAndPrivacyPolicy")}</Text>
         </View>
       </ScrollView>
     </SafeAreaView></KeyboardForm>
@@ -196,6 +197,7 @@ export default function MetallicSignInScreen({ navigation, onAuthSuccess, onClos
 
 // Metallic gold button (gradient + gloss + subtle bevel)
 function GoldButton({ title, onPress }: { title: string; onPress: () => void }) {
+  useUILanguage();
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.goldBtnWrap}>
       <LinearGradient
@@ -219,16 +221,19 @@ function GoldButton({ title, onPress }: { title: string; onPress: () => void }) 
 
 // Gold outline container with glow (inputs/SSO rows)
 function GoldOutline({ children }: { children: React.ReactNode }) {
+  useUILanguage();
   return <View style={styles.goldOutline}>{children}</View>;
 }
 
 // Gold outline row for SSO
 function GoldRow({ children }: { children: React.ReactNode }) {
+  useUILanguage();
   return <View style={styles.goldRow}>{children}</View>;
 }
 
 // Gradient text for AURIC RX
 function GradientText({ text }: { text: string }) {
+  useUILanguage();
   return (
     <MaskedView
       maskElement={<Text style={styles.titleMask}>{text}</Text>}

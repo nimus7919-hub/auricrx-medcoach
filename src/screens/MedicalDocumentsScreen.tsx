@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { vip } from '../theme/vip';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -61,10 +64,11 @@ interface DocumentItem {
 // This will be defined inside the component to access translations
 
 export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDocumentsScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const { t } = useScreenTranslation();
   
   // Check if expo-print is available (diagnostic)
   useEffect(() => {
@@ -85,49 +89,49 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   
   const DOCUMENT_CATEGORIES: Record<DocumentCategory, { title: string; icon: string; description: string; supportsDualSides: boolean; frontLabel?: string; backLabel?: string }> = {
     photo_id: {
-      title: t('photoID'),
+      title: t("medicalDocuments.photoID"),
       icon: '',
-      description: t('driversLicensePassport'),
+      description: t("medicalDocuments.driversLicensePassport"),
       supportsDualSides: true,
-      frontLabel: t('frontSide'),
-      backLabel: t('backSide')
+      frontLabel: t("medicalDocuments.frontSide"),
+      backLabel: t("medicalDocuments.backSide")
     },
     birth_certificate: {
-      title: t('birthCertificate'),
+      title: t("medicalDocuments.birthCertificate"),
       icon: '',
-      description: t('officialBirthCertificate'),
+      description: t("medicalDocuments.officialBirthCertificate"),
       supportsDualSides: false
     },
     insurance: {
-      title: t('insuranceCard'),
+      title: t("medicalDocuments.insuranceCard"),
       icon: '',
-      description: t('healthInsuranceInfo'),
+      description: t("medicalDocuments.healthInsuranceInfo"),
       supportsDualSides: true,
-      frontLabel: t('frontOfCard'),
-      backLabel: t('backOfCard')
+      frontLabel: t("medicalDocuments.frontOfCard"),
+      backLabel: t("medicalDocuments.backOfCard")
     },
     lab_results: {
-      title: t('labResults'),
+      title: t("medicalDocuments.labResults"),
       icon: '',
-      description: t('bloodTestsLabWork'),
+      description: t("medicalDocuments.bloodTestsLabWork"),
       supportsDualSides: false
     },
     prescriptions: {
-      title: t('prescriptions'),
+      title: t("medicalDocuments.prescriptions"),
       icon: '',
-      description: t('currentAndPastPrescriptions'),
+      description: t("medicalDocuments.currentAndPastPrescriptions"),
       supportsDualSides: false
     },
     medical_records: {
-      title: t('medicalRecords'),
+      title: t("medicalDocuments.medicalRecords"),
       icon: '',
-      description: t('medicalHistoryReports'),
+      description: t("medicalDocuments.medicalHistoryReports"),
       supportsDualSides: false
     },
     other: {
-      title: t('otherDocuments'),
+      title: t("medicalDocuments.otherDocuments"),
       icon: '',
-      description: t('anyOtherMedicalDocuments'),
+      description: t("medicalDocuments.anyOtherMedicalDocuments"),
       supportsDualSides: false
     }
   };
@@ -612,9 +616,9 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          '📱 ' + t('permissionRequired'),
-          t('grantCameraRollAccess'),
-          [{ text: t('ok') }]
+          '📱 ' + t("medicalDocuments.permissionRequired"),
+          t("medicalDocuments.grantCameraRollAccess"),
+          [{ text: t("adminProfile.ok") }]
         );
         return false;
       }
@@ -647,13 +651,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                        asset.uri.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/);
         
         if (!isImage) {
-          Alert.alert('❌ ' + t('error'), t('pleaseUseUploadPDF'));
+          Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.pleaseUseUploadPDF"));
           return;
         }
         
         const newDocument: DocumentItem = {
           id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('document') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.document") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
           uri: asset.uri,
           type,
           category,
@@ -665,11 +669,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         await saveDocuments(updatedDocuments);
         
         triggerHaptic('medium');
-        showCustomAlertMsg(t('success'), t('documentUploadedSuccessfully'), 'success');
+        showCustomAlertMsg(t("common.success"), t("medicalDocuments.uploadSuccess"), 'success');
       }
     } catch (error) {
       console.error('Failed to upload document:', error);
-      showCustomAlertMsg(t('error'), t('failedToUploadDocument'), 'error');
+      showCustomAlertMsg(t("common.error"), t("medicalDocuments.uploadFailed"), 'error');
     }
   };
 
@@ -709,12 +713,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Verify the copied file is still a valid PDF
             const fileInfo = await FileSystem.getInfoAsync(newUri);
             if (!fileInfo.exists || (fileInfo.exists ? fileInfo.size : 0) === 0) {
-              throw new Error(t('pdfCorrupted'));
+              throw new Error(t("medicalDocuments.pdfCorrupted"));
             }
                       
                       const newDocument: DocumentItem = {
                         id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                        name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+                        name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.pdfDocument") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
                         uri: newUri,
                         type,
                         category,
@@ -727,20 +731,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       await saveDocuments(updatedDocuments);
                       
                       triggerHaptic('medium');
-                      showCustomAlertMsg(t('success'), t('uploadSuccess'), 'success');
+                      showCustomAlertMsg(t("common.success"), t("medicalDocuments.uploadSuccess"), 'success');
                     } catch (copyError) {
                       console.error('Failed to copy PDF:', copyError);
-                      showCustomAlertMsg(t('error'), t('failedToSavePDF'), 'error');
+                      showCustomAlertMsg(t("common.error"), t("medicalDocuments.failedToSavePDF"), 'error');
                     }
         } else {
-          showCustomAlertMsg(t('error'), 'Please select a PDF file. The selected file is not a PDF document.', 'error');
+          showCustomAlertMsg(t("common.error"), uiI18n.t("ui.pleaseSelectAPdfFileTheSelectedFileIsNotAPdfDocument"), 'error');
         }
       }
     } catch (error) {
       console.error('Failed to upload PDF:', error);
-      Alert.alert(t('error'), /native module|cannot find|not available/i.test(String(error))
-        ? 'PDF import is unavailable in this installed app. Install a new native build with expo-document-picker. You can use the camera or gallery to create a PDF.'
-        : 'Could not open or read the PDF. Try again using the Files app and choose a PDF saved on this device. You can also use the camera or gallery to create a PDF.');
+      Alert.alert(t("common.error"), /native module|cannot find|not available/i.test(String(error))
+        ? uiI18n.t("ui.pdfImportIsUnavailableInThisInstalledAppInstallANewNativeBuildWithExpoDocumentPickerYouCan")
+        : uiI18n.t("ui.couldNotOpenOrReadThePdfTryAgainUsingTheFilesAppAndChooseAPdfSavedOnThisDeviceYouCanAlsoUs"));
     }
   };
 
@@ -749,9 +753,9 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
-          '📷 ' + t('permissionRequired'),
-          t('grantCameraAccess'),
-          [{ text: t('ok') }]
+          '📷 ' + t("medicalDocuments.permissionRequired"),
+          t("medicalDocuments.grantCameraAccess"),
+          [{ text: t("adminProfile.ok") }]
         );
         return;
       }
@@ -769,7 +773,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         const asset = result.assets[0];
         const newDocument: DocumentItem = {
           id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('document') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.document") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
           uri: asset.uri,
           type,
           category,
@@ -781,19 +785,19 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         await saveDocuments(updatedDocuments);
         
         triggerHaptic('medium');
-        showCustomAlertMsg(t('success'), t('photoTakenSuccessfully'), 'success');
+        showCustomAlertMsg(t("common.success"), t("medicalDocuments.photoTakenSuccessfully"), 'success');
       }
     } catch (error) {
       console.error('Failed to take photo:', error);
-      showCustomAlertMsg(t('error'), t('failedToTakePhoto'), 'error');
+      showCustomAlertMsg(t("common.error"), t("medicalDocuments.failedToTakePhoto"), 'error');
     }
   };
 
   const deleteDocument = async (documentId: string) => {
     triggerHaptic('heavy');
     showDeleteConfirmDialog(
-      t('deleteDocument'),
-      t('areYouSureDeleteDocument'),
+      t("medicalDocuments.deleteDocument"),
+      t("medicalDocuments.deleteConfirm"),
       async () => {
         const updatedDocuments = documents.filter(doc => doc.id !== documentId);
         await saveDocuments(updatedDocuments);
@@ -833,7 +837,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             const backBase64 = await convertImageToDataUri(pair.back.uri);
             
             if (!frontBase64 || !backBase64) {
-              Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
+              Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToProcessImages"));
               return;
             }
 
@@ -855,7 +859,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               // Convert blob to base64
               const reader = new FileReader();
               logoBase64 = await new Promise<string>((resolve, reject) => {
-                reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Expected image data URL'));
+                reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error(uiI18n.t("ui.expectedImageDataUrl")));
                 reader.onerror = reject;
                 reader.readAsDataURL(blob);
               });
@@ -926,22 +930,22 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               <body>
                 <div class="header">
                   ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="AuricRX Logo">` : ''}
-                  <div class="title">${t('auricrxMedicalID')}</div>
+                  <div class="title">${t("medicalDocuments.auricrxMedicalID")}</div>
                 </div>
                 
                 <div class="id-container">
                   <div class="id-side">
-                    <h3>${t('front')}</h3>
-                    <img src="${frontBase64}" class="id-image" alt="${t('idFront')}">
+                    <h3>${t("medicalDocuments.front")}</h3>
+                    <img src="${frontBase64}" class="id-image" alt="${t("medicalDocuments.idFront")}">
                   </div>
                   <div class="id-side">
-                    <h3>${t('back')}</h3>
-                    <img src="${backBase64}" class="id-image" alt="${t('idBack')}">
+                    <h3>${t("medicalDocuments.back")}</h3>
+                    <img src="${backBase64}" class="id-image" alt="${t("medicalDocuments.idBack")}">
                   </div>
                 </div>
                 
                 <div class="footer">
-                  <p>Generated by AuricRX Medical Coach</p>
+                ${uiI18n.t("ui.generatedbyAuricRXMedicalCoach")}Coach</p>
                   <p>Document created: ${new Date().toLocaleDateString()}</p>
                 </div>
               </body>
@@ -976,7 +980,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               if (isAvailable) {
                 await Sharing.shareAsync(shareableUri, {
                   mimeType: 'application/pdf',
-                  dialogTitle: `Share AuricRX ID Document: ${pair.front.name}`,
+                  dialogTitle: uiI18n.t("ui.shareAuricrxIdDocumentValue", { value1: pair.front.name }),
                 });
                 console.log('✅ ID PDF shared successfully');
               } else {
@@ -984,18 +988,18 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 // Try sharing anyway - sometimes the availability check fails in dev builds
                 await Sharing.shareAsync(shareableUri, {
                   mimeType: 'application/pdf',
-                  dialogTitle: `Share AuricRX ID Document: ${pair.front.name}`,
+                  dialogTitle: uiI18n.t("ui.shareAuricrxIdDocumentValue_a7b18a", { value1: pair.front.name }),
                 });
                 console.log('✅ ID PDF shared successfully (fallback)');
               }
             } catch (shareError) {
               console.error('❌ ID PDF sharing failed:', shareError);
-              Alert.alert('❌ Error', `Failed to share PDF: ${(shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error'}`);
+              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToSharePdfValue", { value1: (shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error' }));
             }
             
           } catch (pdfError) {
             console.error('❌ Failed to create PDF:', pdfError);
-            Alert.alert('❌ Error', 'Failed to create PDF. Sharing original image instead.');
+            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreatePdfSharingOriginalImageInstead"));
             
             // Fallback to sharing the original image
             console.log('📤 Fallback: sharing original image:', document.uri);
@@ -1007,20 +1011,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               if (isAvailable) {
                 await Sharing.shareAsync(shareableUri, {
                   mimeType: document.mimeType,
-                  dialogTitle: `Share ${document.name}`,
+                  dialogTitle: uiI18n.t("ui.shareValue", { value1: document.name }),
                 });
                 console.log('✅ Fallback sharing successful');
               } else {
                 console.log('⚠️ Fallback sharing not available, trying direct share anyway...');
                 await Sharing.shareAsync(shareableUri, {
                   mimeType: document.mimeType,
-                  dialogTitle: `Share ${document.name}`,
+                  dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
                 });
                 console.log('✅ Fallback sharing successful (fallback)');
               }
             } catch (fallbackError) {
               console.error('❌ Fallback sharing failed:', fallbackError);
-              Alert.alert('❌ Error', `Failed to share document: ${(fallbackError instanceof Error ? fallbackError.message : String(fallbackError)) || 'Unknown error'}`);
+              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue", { value1: (fallbackError instanceof Error ? fallbackError.message : String(fallbackError)) || 'Unknown error' }));
             }
           }
         } else {
@@ -1035,20 +1039,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             if (isAvailable) {
               await Sharing.shareAsync(shareableUri, {
                 mimeType: document.mimeType,
-                dialogTitle: `Share ${document.name}`,
+                dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
               });
               console.log('✅ Regular sharing successful');
             } else {
               console.log('⚠️ Regular sharing not available, trying direct share anyway...');
               await Sharing.shareAsync(shareableUri, {
                 mimeType: document.mimeType,
-                dialogTitle: `Share ${document.name}`,
+                dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
               });
               console.log('✅ Regular sharing successful (fallback)');
             }
           } catch (regularError) {
             console.error('❌ Regular sharing failed:', regularError);
-            Alert.alert('❌ Error', `Failed to share document: ${(regularError instanceof Error ? regularError.message : String(regularError)) || 'Unknown error'}`);
+            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue_8669f8", { value1: (regularError instanceof Error ? regularError.message : String(regularError)) || 'Unknown error' }));
           }
         }
       } else {
@@ -1062,26 +1066,26 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           if (isAvailable) {
             await Sharing.shareAsync(shareableUri, {
               mimeType: document.mimeType,
-              dialogTitle: `Share ${document.name}`,
+              dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
             });
             console.log('✅ Non-ID sharing successful');
           } else {
             console.log('⚠️ Non-ID sharing not available, trying direct share anyway...');
             await Sharing.shareAsync(shareableUri, {
               mimeType: document.mimeType,
-              dialogTitle: `Share ${document.name}`,
+              dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: document.name }),
             });
             console.log('✅ Non-ID sharing successful (fallback)');
           }
         } catch (nonIdError) {
           console.error('❌ Non-ID sharing failed:', nonIdError);
-          Alert.alert('❌ Error', `Failed to share document: ${(nonIdError instanceof Error ? nonIdError.message : String(nonIdError)) || 'Unknown error'}`);
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue_8669f8", { value1: (nonIdError instanceof Error ? nonIdError.message : String(nonIdError)) || 'Unknown error' }));
         }
       }
       
     } catch (error) {
       console.error('Failed to share document:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToShareDocument'));
+      Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToShareDocument"));
     }
   };
 
@@ -1095,15 +1099,15 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       // Check if doctor has email
       if (!doctor.email) {
         Alert.alert(
-          '📧 No Email Available',
-          `${doctor.name} doesn't have an email address. Please add their email in the Appointment Tracker.`,
+          uiI18n.t("ui.noEmailAvailable"),
+          uiI18n.t("ui.valueDoesnTHaveAnEmailAddressPleaseAddTheirEmailInTheAppointmentTracker", { value1: doctor.name }),
           [
             {
-              text: t('useWhatsApp'),
+              text: t("medicalDocuments.useWhatsApp"),
               onPress: () => shareToSpecificDoctorWhatsApp(document, doctor)
             },
             {
-              text: t('cancel'),
+              text: t("common.cancel"),
               style: 'cancel'
             }
           ]
@@ -1132,7 +1136,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             const backBase64 = await convertImageToDataUri(pair.back.uri);
             
             if (!frontBase64 || !backBase64) {
-              Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
+              Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToProcessImages"));
               return;
             }
 
@@ -1253,18 +1257,16 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       <div style="font-size: 32px; font-weight: 700; color: #333;">
                         AURIC<span style="color: #C5860A;">RX</span>
                       </div>
-                      <div style="font-size: 14px; color: #666; margin-top: 5px;">Medical Coach App</div>
+                      <div style="font-size: 14px; color: #666; margin-top: 5${uiI18n.t("ui.medicalCoachApp")}h App</div>
                     </div>
                   `}
                 </div>
                 
-                <div class="document-title">
-                  📋 Medical ID Document
-                </div>
+                <div class="document-titl${uiI18n.t("ui.medicalIDDocument")}     </div>
                 
                 <!-- Single page layout with both IDs side by side -->
                 <div class="single-page-layout">
-                  <div class="id-label">🆔 Front & Back ID Document</div>
+                  <div class="i${uiI18n.t("ui.frontBackIDDocument")} Document</div>
                   <div class="id-images-container">
                     <div class="id-image-wrapper">
                       <div class="id-side-label">Front</div>
@@ -1278,8 +1280,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 </div>
                 
                 <div class="footer">
-                  <div style="font-weight: bold; color: #C5860A;">Generated by AuricRX Medical Coach App</div>
-                  <div style="margin-top: 5px;">Secure • Professional • Reliable</div>
+                  <div style="font-weight: bold; color: #C58${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}ch App</div>
+                  <div style="margin-top:${uiI18n.t("ui.secureProfessionalReliable")}eliable</div>
                   <div style="margin-top: 10px; font-size: 10px;">
                     Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
                   </div>
@@ -1304,7 +1306,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             console.log('🔍 PDF file exists:', fileInfo.exists);
             
             if (!fileInfo.exists) {
-              Alert.alert('❌ ' + t('error'), t('pdfNotCreated'));
+              Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.pdfNotCreated"));
               return;
             }
             
@@ -1323,13 +1325,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         const success = await SecureSharing.shareToGmail({
           fileUri: gmailUri,
           fileName: `ID_Document_${Date.now()}.pdf`,
-          message: `Hi Dr. ${doctor.name}, please find attached my ID document for your records.`,
-          title: `Medical ID Document - Dr. ${doctor.name}`,
+          message: uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords", { value1: doctor.name }),
+          title: uiI18n.t("ui.medicalIdDocumentDrValue", { value1: doctor.name }),
           mimeType: 'application/pdf',
         }, doctor);
         
         if (!success) {
-          throw new Error(t('secureSharingFailed'));
+          throw new Error(t("medicalDocuments.secureSharingFailed"));
         }
               
               console.log('✅ ID PDF opened in Gmail successfully');
@@ -1342,11 +1344,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 if (isAvailable) {
                   await Sharing.shareAsync(uri, {
                     mimeType: 'application/pdf',
-                    dialogTitle: `Share ID Document with Dr. ${doctor.name}`,
+                    dialogTitle: uiI18n.t("ui.shareIdDocumentWithDrValue", { value1: doctor.name }),
                   });
                   console.log('✅ ID PDF shared successfully with expo-sharing');
                 } else {
-                  throw new Error(t('sharingNotAvailable'));
+                  throw new Error(t("medicalDocuments.sharingNotAvailable"));
                 }
               } catch (sharingError) {
                 console.log('⚠️ expo-sharing failed, trying Share.share:', sharingError);
@@ -1354,8 +1356,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 // Final fallback to Share.share
                 const shareResult = await Share.share({
                   url: uri,
-                  title: `ID Document for Dr. ${doctor.name}`,
-                  message: `Hi Dr. ${doctor.name}, please find attached my ID document.`,
+                  title: uiI18n.t("ui.idDocumentForDrValue", { value1: doctor.name }),
+                  message: uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocument", { value1: doctor.name }),
                 });
                 
                 if (shareResult.action === Share.sharedAction) {
@@ -1365,7 +1367,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             }
           } catch (pdfError) {
             console.error('❌ PDF generation failed:', pdfError);
-            Alert.alert('❌ Error', 'Failed to create PDF. Using regular sharing instead.');
+            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreatePdfUsingRegularSharingInstead"));
             
             // Fallback to regular sharing
             await shareRegularDocumentToEmail(document, doctor);
@@ -1382,7 +1384,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       
     } catch (error) {
       console.error('Failed to share to doctor via email:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToShareToEmail'));
+      Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToShareToEmail"));
     }
   };
 
@@ -1393,15 +1395,15 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       // Check if doctor has phone number
       if (!doctor.phoneNumber) {
         Alert.alert(
-          '📱 No Phone Number Available',
-          `${doctor.name} doesn't have a phone number. Please add their phone number in the Appointment Tracker.`,
+          uiI18n.t("ui.noPhoneNumberAvailable"),
+          uiI18n.t("ui.valueDoesnTHaveAPhoneNumberPleaseAddTheirPhoneNumberInTheAppointmentTracker", { value1: doctor.name }),
           [
             {
-              text: t('useEmail'),
+              text: t("medicalDocuments.useEmail"),
               onPress: () => shareToSpecificDoctor(document, doctor)
             },
             {
-              text: t('cancel'),
+              text: t("common.cancel"),
               style: 'cancel'
             }
           ]
@@ -1430,7 +1432,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             const backBase64 = await convertImageToDataUri(pair.back.uri);
             
             if (!frontBase64 || !backBase64) {
-              Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
+              Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToProcessImages"));
               return;
             }
 
@@ -1551,18 +1553,16 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       <div style="font-size: 32px; font-weight: 700; color: #333;">
                         AURIC<span style="color: #C5860A;">RX</span>
                       </div>
-                      <div style="font-size: 14px; color: #666; margin-top: 5px;">Medical Coach App</div>
+                      <div style="font-size: 14px; color: #666; margin-top: 5${uiI18n.t("ui.medicalCoachApp")}h App</div>
                     </div>
                   `}
                 </div>
                 
-                <div class="document-title">
-                  📋 Medical ID Document
-                </div>
+                <div class="document-titl${uiI18n.t("ui.medicalIDDocument")}     </div>
                 
                 <!-- Single page layout with both IDs side by side -->
                 <div class="single-page-layout">
-                  <div class="id-label">🆔 Front & Back ID Document</div>
+                  <div class="i${uiI18n.t("ui.frontBackIDDocument")} Document</div>
                   <div class="id-images-container">
                     <div class="id-image-wrapper">
                       <div class="id-side-label">Front</div>
@@ -1576,8 +1576,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 </div>
                 
                 <div class="footer">
-                  <div style="font-weight: bold; color: #C5860A;">Generated by AuricRX Medical Coach App</div>
-                  <div style="margin-top: 5px;">Secure • Professional • Reliable</div>
+                  <div style="font-weight: bold; color: #C58${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}ch App</div>
+                  <div style="margin-top:${uiI18n.t("ui.secureProfessionalReliable")}eliable</div>
                   <div style="margin-top: 10px; font-size: 10px;">
                     Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
                   </div>
@@ -1602,7 +1602,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             console.log('🔍 PDF file exists:', fileInfo.exists);
             
             if (!fileInfo.exists) {
-              Alert.alert('❌ ' + t('error'), t('pdfNotCreated'));
+              Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.pdfNotCreated"));
               return;
             }
             
@@ -1629,7 +1629,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     type: 'single',
                     data: whatsappUri,
                     extra: {
-                      'android.intent.extra.TEXT': `Hi Dr. ${doctor.name}, please find attached my ID document for your records.`,
+                      'android.intent.extra.TEXT': uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95", { value1: doctor.name }),
                     },
                     packageName: 'com.whatsapp',
                   });
@@ -1643,7 +1643,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       type: 'single',
                       data: whatsappUri,
                       extra: {
-                        'android.intent.extra.TEXT': `Hi Dr. ${doctor.name}, please find attached my ID document for your records.`,
+                        'android.intent.extra.TEXT': uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95", { value1: doctor.name }),
                       },
                     });
                     console.log('✅ WhatsApp opened directly with ID document without package restriction');
@@ -1655,11 +1655,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     if (isAvailable) {
                       await Sharing.shareAsync(whatsappUri, {
                         mimeType: 'application/pdf',
-                        dialogTitle: `Share Medical ID Document with Dr. ${doctor.name}`,
+                        dialogTitle: uiI18n.t("ui.shareMedicalIdDocumentWithDrValue", { value1: doctor.name }),
                       });
                       console.log('✅ ID document shared via expo-sharing fallback');
                     } else {
-                      throw new Error(t('sharingNotAvailable'));
+                      throw new Error(t("medicalDocuments.sharingNotAvailable"));
                     }
                   }
                 }
@@ -1669,14 +1669,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 // Final fallback: Use Share.share
                 const shareResult = await Share.share({
                   url: whatsappUri,
-                  title: `Medical ID Document: ${document.name}`,
-                  message: `Hi Dr. ${doctor.name}, please find attached my ID document for your records.`,
+                  title: uiI18n.t("ui.medicalIdDocumentValue", { value1: document.name }),
+                  message: uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95", { value1: doctor.name }),
                 });
                 
                 if (shareResult.action === Share.sharedAction) {
                   console.log('✅ ID document shared to WhatsApp with Share API');
                 } else {
-                  throw new Error(t('shareWasDismissed'));
+                  throw new Error(t("medicalDocuments.shareWasDismissed"));
                 }
               }
               
@@ -1690,11 +1690,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 if (isAvailable) {
                   await Sharing.shareAsync(uri, {
                     mimeType: 'application/pdf',
-                    dialogTitle: `Share ID Document with Dr. ${doctor.name} via WhatsApp`,
+                    dialogTitle: uiI18n.t("ui.shareIdDocumentWithDrValueViaWhatsapp", { value1: doctor.name }),
                   });
                   console.log('✅ ID PDF shared successfully with expo-sharing');
                 } else {
-                  throw new Error(t('sharingNotAvailable'));
+                  throw new Error(t("medicalDocuments.sharingNotAvailable"));
                 }
               } catch (sharingError) {
                 console.log('⚠️ expo-sharing failed, trying Share.share:', sharingError);
@@ -1702,8 +1702,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 // Final fallback to Share.share
                 const shareResult = await Share.share({
                   url: uri,
-                  title: `ID Document for Dr. ${doctor.name}`,
-                  message: `Hi Dr. ${doctor.name}, please find attached my ID document.`,
+                  title: uiI18n.t("ui.idDocumentForDrValue_8e0ccb", { value1: doctor.name }),
+                  message: uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocument_7370a7", { value1: doctor.name }),
                 });
                 
                 if (shareResult.action === Share.sharedAction) {
@@ -1713,7 +1713,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             }
           } catch (pdfError) {
             console.error('❌ PDF generation failed:', pdfError);
-            Alert.alert('❌ Error', 'Failed to create PDF. Using regular sharing instead.');
+            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreatePdfUsingRegularSharingInstead"));
             
             // Fallback to regular sharing
             await shareRegularDocumentToWhatsApp(document, doctor);
@@ -1730,7 +1730,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       
     } catch (error) {
       console.error('Failed to share to doctor via WhatsApp:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToShareToWhatsApp'));
+      Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToShareToWhatsApp"));
     }
   };
 
@@ -1750,7 +1750,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Check if sharing is available
             const isAvailable = await Sharing.isAvailableAsync();
             if (!isAvailable) {
-              throw new Error(t('sharingNotAvailablePlatform'));
+              throw new Error(t("medicalDocuments.sharingNotAvailablePlatform"));
             }
             
             // Share the PDF directly to Gmail using IntentLauncher
@@ -1769,8 +1769,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 type: 'single',
                 data: `file://${gmailUri}`,
                 extra: {
-                  'android.intent.extra.SUBJECT': `Medical Document - Dr. ${doctor.name}`,
-                  'android.intent.extra.TEXT': `Hi Dr. ${doctor.name},\n\nPlease find attached: ${document.name}\n\nBest regards,\nPatient`,
+                  'android.intent.extra.SUBJECT': uiI18n.t("ui.medicalDocumentDrValue", { value1: doctor.name }),
+                  'android.intent.extra.TEXT': uiI18n.t("ui.hiDrValuePleaseFindAttachedValueBestRegardsPatient", { value1: doctor.name, value2: document.name }),
                 },
               });
               
@@ -1781,17 +1781,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               // Fallback to expo-sharing
               await Sharing.shareAsync(document.uri, {
                 mimeType: 'application/pdf',
-                dialogTitle: `Share ${document.name} with Dr. ${doctor.name}`,
+                dialogTitle: uiI18n.t("ui.shareValueWithDrValue", { value1: document.name, value2: doctor.name }),
               });
               
               console.log('✅ PDF shared to Gmail successfully');
             }
           } else {
-            Alert.alert('❌ ' + t('error'), t('documentNotFound'));
+            Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.documentNotFound"));
           }
         } catch (error) {
           console.error('Failed to share PDF to Gmail:', error);
-          Alert.alert('❌ Error', 'Failed to share PDF to Gmail. Please try using the general sharing option.');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToSharePdfToGmailPleaseTryUsingTheGeneralSharingOption"));
         }
       } else {
         // For images, convert to shareable URI and use general sharing
@@ -1802,7 +1802,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           const shareResult = await Share.share({
             url: shareableUri,
             title: document.name,
-            message: `Hi Dr. ${doctor.name}, please find attached: ${document.name}`,
+            message: uiI18n.t("ui.hiDrValuePleaseFindAttachedValue", { value1: doctor.name, value2: document.name }),
           });
           
           if (shareResult.action === Share.sharedAction) {
@@ -1812,12 +1812,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (error) {
           console.error('Failed to share image to Gmail:', error);
-          Alert.alert('❌ Error', 'Failed to share image to Gmail. Please try using the general sharing option.');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareImageToGmailPleaseTryUsingTheGeneralSharingOption"));
         }
       }
     } catch (error) {
       console.error('Failed to share regular document to email:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToShareRegularDocumentEmail'));
+      Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToShareRegularDocumentEmail"));
     }
   };
 
@@ -1837,7 +1837,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Check if sharing is available
             const isAvailable = await Sharing.isAvailableAsync();
             if (!isAvailable) {
-              throw new Error(t('sharingNotAvailablePlatform'));
+              throw new Error(t("medicalDocuments.sharingNotAvailablePlatform"));
             }
             
             // Share the PDF directly to WhatsApp using IntentLauncher
@@ -1855,13 +1855,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         const success = await SecureSharing.shareToWhatsApp({
           fileUri: whatsappUri,
           fileName: `${document.name}_${Date.now()}.pdf`,
-          message: `Hi Dr. ${doctor.name}, please find attached: ${document.name}`,
-          title: `Medical Document: ${document.name}`,
+          message: uiI18n.t("ui.hiDrValuePleaseFindAttachedValue_68e9e9", { value1: doctor.name, value2: document.name }),
+          title: uiI18n.t("ui.medicalDocumentValue", { value1: document.name }),
           mimeType: 'application/pdf',
         }, doctor);
         
         if (!success) {
-          throw new Error(t('secureSharingFailed'));
+          throw new Error(t("medicalDocuments.secureSharingFailed"));
         }
               
               console.log('✅ PDF opened in WhatsApp successfully');
@@ -1871,17 +1871,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               // Fallback to expo-sharing
               await Sharing.shareAsync(document.uri, {
                 mimeType: 'application/pdf',
-                dialogTitle: `Share ${document.name} with Dr. ${doctor.name} via WhatsApp`,
+                dialogTitle: uiI18n.t("ui.shareValueWithDrValueViaWhatsapp", { value1: document.name, value2: doctor.name }),
               });
               
               console.log('✅ PDF shared to WhatsApp successfully');
             }
           } else {
-            Alert.alert('❌ ' + t('error'), t('documentNotFound'));
+            Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.documentNotFound"));
           }
         } catch (error) {
           console.error('Failed to share PDF to WhatsApp:', error);
-          Alert.alert('❌ Error', 'Failed to share PDF to WhatsApp. Please try using the general sharing option.');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToSharePdfToWhatsappPleaseTryUsingTheGeneralSharingOption"));
         }
       } else {
         // For images, convert to shareable URI and use general sharing
@@ -1892,7 +1892,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           const shareResult = await Share.share({
             url: shareableUri,
             title: document.name,
-            message: `Hi Dr. ${doctor.name}, please find attached: ${document.name}`,
+            message: uiI18n.t("ui.hiDrValuePleaseFindAttachedValue_68e9e9", { value1: doctor.name, value2: document.name }),
           });
           
           if (shareResult.action === Share.sharedAction) {
@@ -1902,12 +1902,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (error) {
           console.error('Failed to share image to WhatsApp:', error);
-          Alert.alert('❌ Error', 'Failed to share image to WhatsApp. Please try using the general sharing option.');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareImageToWhatsappPleaseTryUsingTheGeneralSharingOption"));
         }
       }
     } catch (error) {
       console.error('Failed to share regular document to WhatsApp:', error);
-      Alert.alert('❌ ' + t('error'), t('failedToShareRegularDocumentWhatsApp'));
+      Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToShareRegularDocumentWhatsApp"));
     }
   };
 
@@ -1918,23 +1918,23 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       // Check if doctor has email
       if (!doctor.email) {
         Alert.alert(
-          '📧 No Email Available',
-          `${doctor.name} doesn't have an email address. Please add their email in the Appointment Tracker or use WhatsApp sharing.`,
+          uiI18n.t("ui.noEmailAvailable"),
+          uiI18n.t("ui.valueDoesnTHaveAnEmailAddressPleaseAddTheirEmailInTheAppointmentTrackerOrUseWhatsappSharin", { value1: doctor.name }),
           [
             {
-              text: t('addEmail'),
+              text: t("medicalDocuments.addEmail"),
               onPress: () => {
                 // Navigate to appointment tracker to add email
                 // This would require navigation logic
-                Alert.alert(t('info'), t('goToAppointmentTracker'));
+                Alert.alert(t("common.info"), t("medicalDocuments.goToAppointmentTracker"));
               }
             },
             {
-              text: t('useWhatsApp'),
+              text: t("medicalDocuments.useWhatsApp"),
               onPress: () => shareToSpecificDoctorWhatsApp(document, doctor)
             },
             {
-              text: t('cancel'),
+              text: t("common.cancel"),
               style: 'cancel'
             }
           ]
@@ -1956,22 +1956,22 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             // Check if sharing is available
             const isAvailable = await Sharing.isAvailableAsync();
             if (!isAvailable) {
-              throw new Error(t('sharingNotAvailablePlatform'));
+              throw new Error(t("medicalDocuments.sharingNotAvailablePlatform"));
             }
             
             // Share the PDF file directly using expo-sharing
             await Sharing.shareAsync(document.uri, {
               mimeType: 'application/pdf',
-              dialogTitle: `Share ${document.name} with ${doctor.name}`,
+              dialogTitle: uiI18n.t("ui.shareValueWithValue", { value1: document.name, value2: doctor.name }),
             });
             
             console.log('✅ PDF shared to doctor successfully');
           } else {
-            Alert.alert('❌ ' + t('error'), t('documentNotFound'));
+            Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.documentNotFound"));
           }
         } catch (shareError) {
           console.error('Failed to share PDF to doctor:', shareError);
-          Alert.alert('❌ Error', 'Failed to share PDF to doctor. Please try using the general sharing option.');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToSharePdfToDoctorPleaseTryUsingTheGeneralSharingOption"));
         }
       } else {
         // For images, convert to shareable URI and use general sharing
@@ -1982,7 +1982,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           const shareResult = await Share.share({
             url: shareableUri,
             title: document.name,
-            message: `Medical Document: ${document.name} - For Dr. ${doctor.name}`,
+            message: uiI18n.t("ui.medicalDocumentValueForDrValue", { value1: document.name, value2: doctor.name }),
           });
           
           if (shareResult.action === Share.sharedAction) {
@@ -1992,13 +1992,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           }
         } catch (error) {
           console.error('Failed to share image to doctor:', error);
-          Alert.alert('❌ Error', 'Failed to share image to doctor. Please try using the general sharing option.');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareImageToDoctorPleaseTryUsingTheGeneralSharingOption"));
         }
       }
       
     } catch (error) {
       console.error('Failed to share to doctor:', error);
-      Alert.alert('❌ ' + t('error'), 'Failed to share to doctor');
+      Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToShareToDoctor"));
     }
   };
 
@@ -2209,7 +2209,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         <html>
         <head>
           <meta charset="utf-8">
-          <title>AuricRX ID Document</title>
+          <t${uiI18n.t("ui.auricrxIDDocument")}ument</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -2296,7 +2296,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           </div>
           
           <div class="footer">
-            <p>Generated by AuricRX Medical Coach App</p>
+          ${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}h App</p>
             <p>Document created on ${new Date().toLocaleString()}</p>
           </div>
         </body>
@@ -2375,7 +2375,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               // Create a temporary document object for the PDF viewer
               const pdfDocument: DocumentItem = {
                 id: `view-${Date.now()}`,
-                name: `ID_Document_${new Date().toISOString().split('T')[0]}.pdf`,
+                name: `ID_Document_${new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0]}.pdf`,
                 uri: pdfUri,
                 type: 'single',
                 mimeType: 'application/pdf',
@@ -2389,11 +2389,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               setShowPDFViewer(true);
             } else {
               console.error('❌ Failed to create formatted PDF for viewing');
-              Alert.alert('❌ Error', 'Failed to create formatted view for ID document');
+              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreateFormattedViewForIdDocument"));
             }
           } catch (error) {
             console.error('❌ Error creating formatted PDF for viewing:', error);
-            Alert.alert('❌ Error', 'Failed to create formatted view for ID document');
+            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreateFormattedViewForIdDocument"));
           }
         } else {
           // For regular images, show in single modal
@@ -2452,7 +2452,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         uri: document.uri,
         type: document.type
       });
-      Alert.alert('❌ ' + t('error'), `Failed to open document: ${(error instanceof Error ? error.message : String(error)) || 'Unknown error'}`);
+      Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToOpenDocumentValue", { value1: (error instanceof Error ? error.message : String(error)) || 'Unknown error' }));
     }
   };
 
@@ -2510,7 +2510,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
       
     } catch (error) {
       console.error('Failed to share selected documents:', error);
-      Alert.alert('❌ Error', 'Failed to share selected documents');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareSelectedDocuments"));
     }
   };
 
@@ -2542,10 +2542,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
   const shareCombinedIDDocuments = async (docs: DocumentItem[]) => {
     try {
       const uri = await createDocumentPdf([...docs].sort((a, b) => (a.type === 'front' ? -1 : b.type === 'front' ? 1 : 0)), true);
-      if (!(await Sharing.isAvailableAsync())) throw new Error('Sharing is unavailable');
+      if (!(await Sharing.isAvailableAsync())) throw new Error(uiI18n.t("ui.sharingIsUnavailable"));
       await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
     } catch (error) {
-      Alert.alert(t('error'), 'Could not export ID. Use one image or a single-page PDF for each side and try again.');
+      Alert.alert(t("common.error"), uiI18n.t("ui.couldNotExportIdUseOneImageOrASinglePagePdfForEachSideAndTryAgain"));
     }
   };
 
@@ -2570,8 +2570,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             type: 'application/octet-stream',
             extra: {
               'android.intent.extra.STREAM': shareableUris.map(item => item.uri),
-              'android.intent.extra.TEXT': `Sharing ${docs.length} documents from AuricRX Medical Coach`,
-              'android.intent.extra.SUBJECT': 'Medical Documents'
+              'android.intent.extra.TEXT': uiI18n.t("ui.sharingValueDocumentsFromAuricrxMedicalCoach", { value1: docs.length }),
+              'android.intent.extra.SUBJECT': uiI18n.t("medicalDocuments.title")
             }
           });
           console.log('✅ Multiple files shared via Android intent');
@@ -2586,9 +2586,9 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         await shareDocument(docs[0]);
         if (docs.length > 1) {
           Alert.alert(
-            'Multiple Documents',
-            `Shared first document. ${docs.length - 1} more documents available. Please share them individually.`,
-            [{ text: 'OK' }]
+            uiI18n.t("ui.multipleDocuments"),
+            uiI18n.t("ui.sharedFirstDocumentValueMoreDocumentsAvailablePleaseShareThemIndividually", { value1: docs.length - 1 }),
+            [{ text: uiI18n.t("adminProfile.ok") }]
           );
         }
       }
@@ -2679,7 +2679,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           {new Date(document.createdAt).toLocaleDateString()}
         </DynamicText>
         <DynamicText type="card" style={[dynamicStyles.documentType, { fontSize: 10, opacity: 0.7 }]}>
-              🆔 {hasBackSide ? 'Front & Back ID' : 'Photo Id'}
+              🆔 {hasBackSide ? uiI18n.t("ui.frontBackId") : uiI18n.t("medicalDocuments.photoID")}
         </DynamicText>
           </View>
           
@@ -2719,8 +2719,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             onPress={() => {
               if (hasBackSide) {
                 showDeleteConfirmDialog(
-                  'Delete ID Documents',
-                  'Are you sure you want to delete both front and back ID documents?',
+                  uiI18n.t("ui.deleteIdDocuments"),
+                  uiI18n.t("ui.areYouSureYouWantToDeleteBothFrontAndBackIdDocuments"),
                   () => {
                     deleteDocument(document.id);
                     if (pair && pair.back) deleteDocument(pair.back.id);
@@ -2834,7 +2834,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
               triggerHaptic('light');
             }}
           >
-            <DynamicText type="card" style={dynamicStyles.scanButtonText}>{t('addDocument')}</DynamicText>
+            <DynamicText type="card" style={dynamicStyles.scanButtonText}>{t("medicalDocuments.addDocument")}</DynamicText>
           </TouchableOpacity>
         </View>
         
@@ -2847,7 +2847,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
         ) : (
           <View style={dynamicStyles.emptyState}>
             <DynamicText type="secondary" style={dynamicStyles.emptyStateText}>
-              {t('noDocumentsUploaded')}
+              {t("medicalDocuments.noDocumentsUploaded")}
             </DynamicText>
           </View>
         )}
@@ -2889,7 +2889,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 onPress={toggleSelectionMode}
               >
                 <Text style={[styles.selectionButtonText, isSelectionMode && styles.selectionButtonTextActive]}>
-                  {isSelectionMode ? t('cancel') : t('multiSelectDoc')}
+                  {isSelectionMode ? t("common.cancel") : t("medicalDocuments.multiSelectDoc")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -2902,14 +2902,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 style={styles.selectionActionButton}
                 onPress={selectAllDocuments}
               >
-                <Text style={styles.selectionActionButtonText}>{t('selectAll')}</Text>
+                <Text style={styles.selectionActionButtonText}>{t("medicalDocuments.selectAll")}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.selectionActionButton}
                 onPress={clearSelection}
               >
-                <Text style={styles.selectionActionButtonText}>{t('clear')}</Text>
+                <Text style={styles.selectionActionButtonText}>{t("medicalDocuments.clear")}</Text>
               </TouchableOpacity>
               
               {selectedDocuments.size > 0 && (
@@ -2918,7 +2918,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   onPress={shareSelectedDocuments}
                 >
                   <Text style={styles.shareSelectedButtonText}>
-                    {t('share')} ({selectedDocuments.size})
+                    {t("medicalDocuments.share")} ({selectedDocuments.size})
                   </Text>
                 </TouchableOpacity>
               )}
@@ -2936,10 +2936,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
             ]}
           >
             <DynamicText type="primary" style={styles.title}>
-              🏥 {t('medicalDocuments')}
+              🏥 {t("medicalDocuments.medicalDocuments")}
             </DynamicText>
             <DynamicText type="secondary" style={styles.subtitle}>
-              {t('organizeDocuments')}
+              {t("medicalDocuments.organizeDocuments")}
             </DynamicText>
           </Animated.View>
 
@@ -2954,7 +2954,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
           <View style={dynamicStyles.modalOverlay}>
             <View style={dynamicStyles.modalContent}>
               <DynamicText type="primary" style={dynamicStyles.modalTitle}>
-                {t('addDocument')} {DOCUMENT_CATEGORIES[selectedCategory].title}
+                {t("medicalDocuments.addDocument")} {DOCUMENT_CATEGORIES[selectedCategory].title}
               </DynamicText>
               
               {DOCUMENT_CATEGORIES[selectedCategory].supportsDualSides ? (
@@ -2967,7 +2967,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t('takePhoto')} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
+                      📷 {t("medicalDocuments.takePhoto")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -2979,7 +2979,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t('takePhoto')} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
+                      📷 {t("medicalDocuments.takePhoto")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -2991,7 +2991,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      🖼️ {t('uploadFromGallery')} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
+                      🖼️ {t("medicalDocuments.uploadFromGallery")} - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -3003,12 +3003,12 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      🖼️ {t('uploadFromGallery')} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
+                      🖼️ {t("medicalDocuments.uploadFromGallery")} - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
                     </DynamicText>
                   </TouchableOpacity>
                   
                   {/* PDF upload only for non-photo ID categories */}
-                  {selectedCategory !== 'photo_id' && (
+                  {selectedCategory !== uiI18n.t("medicalDocuments.photoID") && (
                     <>
                       <TouchableOpacity
                         style={[dynamicStyles.modalButton, { backgroundColor: '#8B5CF6' + 'CC' }]}
@@ -3017,8 +3017,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                           uploadPDF(selectedCategory, 'front');
                         }}
                       >
-                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                          📄 Upload PDF - {DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
+                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("medicalDocuments.uploadPDF")}{DOCUMENT_CATEGORIES[selectedCategory].frontLabel}
                         </DynamicText>
                       </TouchableOpacity>
                       
@@ -3029,8 +3028,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                           uploadPDF(selectedCategory, 'back');
                         }}
                       >
-                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                          📄 Upload PDF - {DOCUMENT_CATEGORIES[selectedCategory].backLabel}
+                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("medicalDocuments.uploadPDF")}{DOCUMENT_CATEGORIES[selectedCategory].backLabel}
                         </DynamicText>
                       </TouchableOpacity>
                     </>
@@ -3046,7 +3044,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📷 {t('takePhoto')}
+                      📷 {t("medicalDocuments.takePhoto")}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -3058,7 +3056,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      🖼️ {t('uploadFromGallery')}
+                      🖼️ {t("medicalDocuments.uploadFromGallery")}
                     </DynamicText>
                   </TouchableOpacity>
                   
@@ -3070,7 +3068,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     }}
                   >
                     <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                      📄 {t('uploadPDF')}
+                      📄 {t("medicalDocuments.uploadPDF")}
                     </DynamicText>
                   </TouchableOpacity>
                 </>
@@ -3084,7 +3082,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                   triggerHaptic('light');
                 }}
               >
-                <DynamicText type="card" style={dynamicStyles.modalCancelButtonText}>{t('cancel')}</DynamicText>
+                <DynamicText type="card" style={dynamicStyles.modalCancelButtonText}>{t("common.cancel")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -3133,17 +3131,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 >
                   {isPDFFile(selectedDocument) ? (
                     <View style={dynamicStyles.pdfViewer}>
-                      <DynamicText type="secondary" style={dynamicStyles.pdfMessage}>
-                        PDF Document
-                      </DynamicText>
+                      <DynamicText type="secondary" style={dynamicStyles.pdfMessage}>{uiI18n.t("medicalDocuments.pdfDocument")}</DynamicText>
                       <DynamicText type="card" style={dynamicStyles.pdfInfo}>
                         {selectedDocument.name}
                       </DynamicText>
-                      <DynamicText type="card" style={dynamicStyles.pdfInfo}>
-                        Created: {new Date(selectedDocument.createdAt).toLocaleDateString()}
+                      <DynamicText type="card" style={dynamicStyles.pdfInfo}>{uiI18n.t("ui.created")}{new Date(selectedDocument.createdAt).toLocaleDateString()}
                       </DynamicText>
-                      <DynamicText type="card" style={dynamicStyles.pdfInfo}>
-                        URI: {selectedDocument.uri}
+                      <DynamicText type="card" style={dynamicStyles.pdfInfo}>{uiI18n.t("ui.uri")}{selectedDocument.uri}
                       </DynamicText>
                       
                       <TouchableOpacity
@@ -3175,19 +3169,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                             }
                             
                             Alert.alert(
-                              'Debug Info', 
-                              `URI: ${selectedDocument.uri}\nExists: ${fileInfo.exists}\nSize: ${(fileInfo.exists ? fileInfo.size : 0)}\n\nCheck console for detailed logs.`,
-                              [{ text: 'OK' }]
+                              uiI18n.t("ui.debugInfo"), 
+                              uiI18n.t("ui.uriValueExistsValueSizeValueCheckConsoleForDetailedLogs", { value1: selectedDocument.uri, value2: fileInfo.exists, value3: fileInfo.exists ? fileInfo.size : 0 }),
+                              [{ text: uiI18n.t("adminProfile.ok") }]
                             );
                           } catch (error) {
                             console.error('Debug failed:', error);
-                            Alert.alert('Debug Error', (error instanceof Error ? error.message : String(error)));
+                            Alert.alert(uiI18n.t("ui.debugError"), (error instanceof Error ? error.message : String(error)));
                           }
                         }}
                       >
-                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                          🔍 Debug Info
-                        </DynamicText>
+                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("ui.debugInfo_d2dd93")}</DynamicText>
                       </TouchableOpacity>
                         <TouchableOpacity
                           style={[dynamicStyles.modalButton, { marginTop: 20, backgroundColor: '#ff6b6b' }]}
@@ -3209,19 +3201,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                               console.log('===================================');
                               
                               Alert.alert(
-                                '🔍 File Debug Info',
-                                `Name: ${selectedDocument.name}\nURI: ${selectedDocument.uri}\nSize: ${(fileInfo.exists ? fileInfo.size : 0)} bytes\nExists: ${fileInfo.exists}\n\nCheck console for full details.`,
-                                [{ text: 'OK' }]
+                                uiI18n.t("ui.fileDebugInfo"),
+                                uiI18n.t("ui.nameValueUriValueSizeValueBytesExistsValueCheckConsoleForFullDetails", { value1: selectedDocument.name, value2: selectedDocument.uri, value3: fileInfo.exists ? fileInfo.size : 0, value4: fileInfo.exists }),
+                                [{ text: uiI18n.t("adminProfile.ok") }]
                               );
                             } catch (error) {
                               console.error('Debug failed:', error);
-                              Alert.alert('Debug Error', String(error));
+                              Alert.alert(uiI18n.t("ui.debugError"), String(error));
                             }
                           }}
                         >
-                          <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                            🔍 Debug File Info
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("ui.debugFileInfo")}</DynamicText>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -3248,7 +3238,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                    // Check if sharing is available
                    const isAvailable = await Sharing.isAvailableAsync();
                    if (!isAvailable) {
-                     throw new Error(t('sharingNotAvailablePlatform'));
+                     throw new Error(t("medicalDocuments.sharingNotAvailablePlatform"));
                    }
                    
                    // Create a content URI using FileProvider
@@ -3258,7 +3248,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                    // but it will be filtered to PDF-compatible apps
                    await Sharing.shareAsync(contentUri, {
                      mimeType: 'application/pdf',
-                     dialogTitle: `Share ${selectedDocument.name}`,
+                     dialogTitle: uiI18n.t("ui.shareValue_9519d8", { value1: selectedDocument.name }),
                    });
                    
                    console.log('PDF shared successfully with FileProvider');
@@ -3280,18 +3270,16 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                    console.log('FileProvider sharing failed:', shareError);
                    
                    // Final fallback - show error
-                   Alert.alert('❌ ' + t('error'), 'Failed to share PDF file. Please try a different app.');
+                   Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToSharePdfFilePleaseTryADifferentApp"));
                  }
                               
                             } catch (error) {
                               console.error('Failed to share PDF:', error);
-                              Alert.alert('❌ ' + t('error'), 'Failed to share PDF file');
+                              Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToSharePdfFile"));
                             }
                           }}
                         >
-                          <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                            📤 Share PDF
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("ui.sharePdf_ef4ea6")}</DynamicText>
                         </TouchableOpacity>
 
                       <TouchableOpacity
@@ -3352,24 +3340,22 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                                   
                                   // Final fallback - show error
                                   Alert.alert(
-                                    '❌ Cannot Open PDF', 
-                                    'Unable to open PDF file. Please make sure you have a PDF viewer app installed.',
-                                    [{ text: 'OK' }]
+                                    uiI18n.t("ui.cannotOpenPdf"), 
+                                    uiI18n.t("ui.unableToOpenPdfFilePleaseMakeSureYouHaveAPdfViewerAppInstalled"),
+                                    [{ text: uiI18n.t("adminProfile.ok") }]
                                   );
                                 }
                               }
                             } else {
-                              Alert.alert('❌ ' + t('error'), 'PDF file not found. Please try uploading again.');
+                              Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.pdfFileNotFoundPleaseTryUploadingAgain"));
                             }
                           } catch (error) {
                             console.error('Failed to open PDF:', error);
-                            Alert.alert('❌ ' + t('error'), 'Failed to open PDF file. Please try again.');
+                            Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToOpenPdfFilePleaseTryAgain"));
                           }
                         }}
                       >
-                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                          📄 Open PDF
-                        </DynamicText>
+                        <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("ui.openPdf")}</DynamicText>
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -3380,9 +3366,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       
                       {imageLoading && !imageError && (
                         <View style={dynamicStyles.loadingContainer}>
-                          <DynamicText type="card" style={dynamicStyles.loadingText}>
-                            📷 Loading image...
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.loadingText}>{uiI18n.t("ui.loadingImage")}</DynamicText>
                           <TouchableOpacity
                             style={[dynamicStyles.modalButton, { marginTop: 10, backgroundColor: '#6B7280' }]}
                             onPress={() => {
@@ -3391,21 +3375,15 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                               setImageError(true);
                             }}
                           >
-                            <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                              ⏰ Stop Loading
-                            </DynamicText>
+                            <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("ui.stopLoading")}</DynamicText>
                           </TouchableOpacity>
                         </View>
                       )}
                       
                       {imageError && (
                         <View style={dynamicStyles.loadingContainer}>
-                          <DynamicText type="card" style={[dynamicStyles.loadingText, { color: '#EF4444' }]}>
-                            ❌ Failed to load image
-                          </DynamicText>
-                          <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, textAlign: 'center' }]}>
-                            The image file may be corrupted or in an unsupported format.
-                          </DynamicText>
+                          <DynamicText type="card" style={[dynamicStyles.loadingText, { color: '#EF4444' }]}>{uiI18n.t("ui.failedToLoadImage")}</DynamicText>
+                          <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, textAlign: 'center' }]}>{uiI18n.t("ui.theImageFileMayBeCorruptedOrInAnUnsupportedFormat")}</DynamicText>
                           <TouchableOpacity
                             style={[dynamicStyles.modalButton, { marginTop: 10, backgroundColor: vip.colors.goldDark }]}
                             onPress={async () => {
@@ -3433,13 +3411,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                                 console.error('❌ Retry failed:', error);
                                 setImageLoading(false);
                                 setImageError(true);
-                                Alert.alert('❌ Error', 'Failed to retry: ' + (error as Error).message);
+                                Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToRetry") + (error as Error).message);
                               }
                             }}
                           >
-                            <DynamicText type="card" style={dynamicStyles.modalButtonText}>
-                              🔄 Retry
-                            </DynamicText>
+                            <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("common.sanpablo.retry")}</DynamicText>
                           </TouchableOpacity>
                         </View>
                       )}
@@ -3501,7 +3477,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                             setImageError(true);
                             // Don't show error alert for PDFs being displayed as images
                             if (!isPDFFile(selectedDocument)) {
-                          Alert.alert('❌ ' + t('error'), 'Failed to load image. The file may be corrupted or in an unsupported format.');
+                          Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToLoadImageTheFileMayBeCorruptedOrInAnUnsupportedFormat"));
                             }
                           }}
                           onLoadEnd={() => {
@@ -3513,23 +3489,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                       )}
                       
                       {/* Debug URI display */}
-                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, fontSize: 10, opacity: 0.5 }]}>
-                        Debug - Original: {selectedDocument.uri}
+                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, fontSize: 10, opacity: 0.5 }]}>{uiI18n.t("ui.debugOriginal")}{selectedDocument.uri}
                       </DynamicText>
-                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 2, fontSize: 10, opacity: 0.5 }]}>
-                        Debug - Decoded: {decodeURIComponent(selectedDocument.uri)}
+                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 2, fontSize: 10, opacity: 0.5 }]}>{uiI18n.t("ui.debugDecoded")}{decodeURIComponent(selectedDocument.uri)}
                       </DynamicText>
-                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 2, fontSize: 10, opacity: 0.5 }]}>
-                        Debug - Data URI: {imageDataUri ? 'Available (' + imageDataUri.length + ' chars)' : 'Not available'}
+                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 2, fontSize: 10, opacity: 0.5 }]}>{uiI18n.t("ui.debugDataUri")}{imageDataUri ? uiI18n.t("ui.available") + imageDataUri.length + uiI18n.t("ui.chars_7b5331") : uiI18n.t("ui.notAvailable")}
                       </DynamicText>
-                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 2, fontSize: 10, opacity: 0.5 }]}>
-                        Debug - Loading: {imageLoading ? 'Yes' : 'No'}, Error: {imageError ? 'Yes' : 'No'}
+                      <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 2, fontSize: 10, opacity: 0.5 }]}>{uiI18n.t("ui.debugLoading")}{imageLoading ? uiI18n.t("ai.yes") : uiI18n.t("ai.no")}{uiI18n.t("adminProfile.error")}{imageError ? uiI18n.t("ai.yes") : uiI18n.t("ai.no")}
                       </DynamicText>
                       
                       {isPDFFile(selectedDocument) && (
-                        <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, color: '#6B7280' }]}>
-                          Note: PDF preview not available. Use "Open PDF" button below to view.
-                        </DynamicText>
+                        <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, color: '#6B7280' }]}>{uiI18n.t("ui.notePdfPreviewNotAvailableUseOpenPdfButtonBelowToView")}</DynamicText>
                       )}
                     </View>
                   )}
@@ -3540,7 +3510,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                     style={[dynamicStyles.modalButton, { flex: 1, marginRight: 8 }]}
                     onPress={() => shareDocument(selectedDocument)}
                   >
-                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>📤 Share</DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("medicalDocuments.share")}</DynamicText>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[dynamicStyles.modalButton, { flex: 1, marginLeft: 8, backgroundColor: '#dc2626' + 'CC' }]}
@@ -3555,7 +3525,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         source={require('../../assets/dashboard Emojies/trash.png')} 
                         style={{ width: 16, height: 16, marginRight: 6 }}
                       />
-                      <DynamicText type="card" style={dynamicStyles.modalButtonText}>Delete</DynamicText>
+                      <DynamicText type="card" style={dynamicStyles.modalButtonText}>{uiI18n.t("ai.delete")}</DynamicText>
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -3597,9 +3567,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 >
                   <DynamicText type="card" style={dynamicStyles.closeButtonText}>✕</DynamicText>
                 </TouchableOpacity>
-                <DynamicText type="card" style={[dynamicStyles.modalTitle, { fontSize: 16, textAlign: 'center', flex: 1 }]}>
-                  ID Document - Front & Back
-                </DynamicText>
+                <DynamicText type="card" style={[dynamicStyles.modalTitle, { fontSize: 16, textAlign: 'center', flex: 1 }]}>{uiI18n.t("ui.idDocumentFrontBack")}</DynamicText>
       </View>
               
               <View style={[dynamicStyles.dualIDContainer, { flex: 1 }]}>
@@ -3610,25 +3578,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                 >
                   {/* Front Side */}
                   <View style={dynamicStyles.idSideContainer}>
-                    <DynamicText type="card" style={dynamicStyles.idSideLabel}>
-                      📷 Front Side
-                    </DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.idSideLabel}>{uiI18n.t("medicalDocuments.frontSide")}</DynamicText>
                     <View style={dynamicStyles.idImageContainer}>
                       {imageLoading ? (
                         <View style={dynamicStyles.loadingContainer}>
                           <ActivityIndicator size="large" color={vip.colors.gold} />
-                          <DynamicText type="card" style={dynamicStyles.loadingText}>
-                            Loading front image...
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.loadingText}>{uiI18n.t("ui.loadingFrontImage")}</DynamicText>
     </View>
                       ) : imageError || !imageDataUri ? (
                         <View style={dynamicStyles.emptyIDContainer}>
-                          <DynamicText type="card" style={dynamicStyles.emptyIDText}>
-                            📷 No front image available
-                          </DynamicText>
-                          <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, textAlign: 'center' }]}>
-                            Upload a front image to see it here
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.emptyIDText}>{uiI18n.t("ui.noFrontImageAvailable")}</DynamicText>
+                          <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, textAlign: 'center' }]}>{uiI18n.t("ui.uploadAFrontImageToSeeItHere")}</DynamicText>
                         </View>
                       ) : (
                         <Image 
@@ -3644,25 +3604,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
 
                   {/* Back Side */}
                   <View style={dynamicStyles.idSideContainer}>
-                    <DynamicText type="card" style={dynamicStyles.idSideLabel}>
-                      📷 Back Side
-                    </DynamicText>
+                    <DynamicText type="card" style={dynamicStyles.idSideLabel}>{uiI18n.t("medicalDocuments.backSide")}</DynamicText>
                     <View style={dynamicStyles.idImageContainer}>
                       {imageLoading ? (
                         <View style={dynamicStyles.loadingContainer}>
                           <ActivityIndicator size="large" color={vip.colors.gold} />
-                          <DynamicText type="card" style={dynamicStyles.loadingText}>
-                            Loading back image...
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.loadingText}>{uiI18n.t("ui.loadingBackImage")}</DynamicText>
                         </View>
                       ) : imageError || !backImageDataUri ? (
                         <View style={dynamicStyles.emptyIDContainer}>
-                          <DynamicText type="card" style={dynamicStyles.emptyIDText}>
-                            📷 No back image available
-                          </DynamicText>
-                          <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, textAlign: 'center' }]}>
-                            Upload a back image to see it here
-                          </DynamicText>
+                          <DynamicText type="card" style={dynamicStyles.emptyIDText}>{uiI18n.t("ui.noBackImageAvailable")}</DynamicText>
+                          <DynamicText type="card" style={[dynamicStyles.pdfInfo, { marginTop: 10, textAlign: 'center' }]}>{uiI18n.t("ui.uploadABackImageToSeeItHere")}</DynamicText>
                         </View>
                       ) : (
                         <Image 
@@ -3701,7 +3653,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         setShowDualIDViewer(false);
                         
         if (!idPair || !idPair.front || !idPair.back) {
-          Alert.alert('❌ Error', 'Both front and back images are required');
+          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.bothFrontAndBackImagesAreRequired"));
           return;
         }
 
@@ -3712,7 +3664,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         const backBase64 = await convertImageToDataUri(idPair.back.uri);
                         
                         if (!frontBase64 || !backBase64) {
-                          Alert.alert('❌ ' + t('error'), t('failedToProcessImages'));
+                          Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.failedToProcessImages"));
                           return;
                         }
 
@@ -3734,7 +3686,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                           // Convert blob to base64
                           const reader = new FileReader();
                           const base64Promise = new Promise<string>((resolve, reject) => {
-                            reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Expected image data URL'));
+                            reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error(uiI18n.t("ui.expectedImageDataUrl")));
                             reader.onerror = reject;
                           });
                           reader.readAsDataURL(blob);
@@ -3752,7 +3704,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         const htmlContent = `
                           <html>
                           <head>
-                            <title>AuricRX ID Document</title>
+                            <tit${uiI18n.t("ui.auricrxIDDocument")}ent</title>
                             <style>
                               body { 
                                 font-family: Arial, sans-serif; 
@@ -3871,18 +3823,16 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                                   <div style="font-size: 32px; font-weight: 700; color: #333;">
                                     AURIC<span style="color: #C5860A;">RX</span>
                                   </div>
-                                  <div style="font-size: 14px; color: #666; margin-top: 5px;">Medical Coach App</div>
+                                  <div style="font-size: 14px; color: #666; margin-top: 5${uiI18n.t("ui.medicalCoachApp")}h App</div>
                                 </div>
                               `}
                             </div>
                             
-                            <div class="document-title">
-                              📋 Medical ID Document
-                            </div>
+                            <div class="document-titl${uiI18n.t("ui.medicalIDDocument")}     </div>
                             
                             <!-- Single page layout with both IDs side by side -->
                             <div class="single-page-layout">
-                              <div class="id-label">🆔 Front & Back ID Document</div>
+                              <div class="i${uiI18n.t("ui.frontBackIDDocument")} Document</div>
                               <div class="id-images-container">
                                 <div class="id-image-wrapper">
                                   <div class="id-side-label">Front</div>
@@ -3896,8 +3846,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                             </div>
                             
                             <div class="footer">
-                              <div style="font-weight: bold; color: #C5860A;">Generated by AuricRX Medical Coach App</div>
-                              <div style="margin-top: 5px;">Secure • Professional • Reliable</div>
+                              <div style="font-weight: bold; color: #C58${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}ch App</div>
+                              <div style="margin-top:${uiI18n.t("ui.secureProfessionalReliable")}eliable</div>
                               <div style="margin-top: 10px; font-size: 10px;">
                                 Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
                               </div>
@@ -3930,7 +3880,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S }: MedicalDoc
                         console.log('🔍 PDF file URI:', fileInfo.uri);
                         
                         if (!fileInfo.exists) {
-                          Alert.alert('❌ ' + t('error'), t('pdfNotCreated'));
+                          Alert.alert('❌ ' + t("common.error"), t("medicalDocuments.pdfNotCreated"));
                           return;
                         }
                         
@@ -4012,14 +3962,14 @@ startxref
                           if (isAvailable) {
                             await Sharing.shareAsync(manualPdfUri, {
                               mimeType: 'application/pdf',
-                              dialogTitle: `Share AuricRX ID Document: ${idPair && idPair.front ? idPair.front.name : 'ID Document'}`,
+                              dialogTitle: uiI18n.t("ui.shareAuricrxIdDocumentValue_a7b18a", { value1: idPair && idPair.front ? idPair.front.name : 'ID Document' }),
                             });
                             console.log('✅ Manual PDF shared successfully');
                           } else {
                             await Share.share({
-                              message: `AuricRX ID Document: ${idPair && idPair.front ? idPair.front.name : 'ID Document'} (Front & Back)`,
+                              message: uiI18n.t("ui.auricrxIdDocumentValueFrontBack", { value1: idPair && idPair.front ? idPair.front.name : 'ID Document' }),
                               url: manualPdfUri,
-                              title: 'ID Document PDF',
+                              title: uiI18n.t("ui.idDocumentPdf"),
                             });
                             console.log('✅ Manual PDF shared successfully with Share API');
                           }
@@ -4030,15 +3980,15 @@ startxref
                           if (isAvailable) {
                             await Sharing.shareAsync(uri, {
                               mimeType: 'application/pdf',
-                              dialogTitle: `Share AuricRX ID Document: ${idPair && idPair.front ? idPair.front.name : 'ID Document'}`,
+                              dialogTitle: uiI18n.t("ui.shareAuricrxIdDocumentValue_a7b18a", { value1: idPair && idPair.front ? idPair.front.name : 'ID Document' }),
                             });
                             console.log('✅ ID PDF shared successfully with expo-sharing');
                           } else {
                             // Fallback to React Native Share API
                             await Share.share({
-                              message: `AuricRX ID Document: ${idPair && idPair.front ? idPair.front.name : 'ID Document'} (Front & Back)`,
+                              message: uiI18n.t("ui.auricrxIdDocumentValueFrontBack_da9414", { value1: idPair && idPair.front ? idPair.front.name : 'ID Document' }),
                               url: uri,
-                              title: 'ID Document PDF',
+                              title: uiI18n.t("ui.idDocumentPdf"),
                             });
                             console.log('✅ ID PDF shared successfully with Share API');
                           }
@@ -4046,13 +3996,11 @@ startxref
                         
                       } catch (error) {
                         console.error('❌ Error creating/sharing PDF:', error);
-                        Alert.alert('❌ Error', 'Failed to create or share PDF: ' + (error instanceof Error ? error.message : String(error)));
+                        Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreateOrSharePdf") + (error instanceof Error ? error.message : String(error)));
                       }
                     }}
                   >
-                    <DynamicText type="card" style={[dynamicStyles.modalButtonText, { fontSize: 12, textAlign: 'center' }]}>
-                      📤 Share
-                    </DynamicText>
+                    <DynamicText type="card" style={[dynamicStyles.modalButtonText, { fontSize: 12, textAlign: 'center' }]}>{uiI18n.t("medicalDocuments.share")}</DynamicText>
                   </TouchableOpacity>
                   
                   <TouchableOpacity
@@ -4067,8 +4015,8 @@ startxref
                     }]}
                     onPress={() => {
                       showDeleteConfirmDialog(
-                        'Delete ID Documents',
-                        'Are you sure you want to delete both front and back ID documents?',
+                        uiI18n.t("ui.deleteIdDocuments"),
+                        uiI18n.t("ui.areYouSureYouWantToDeleteBothFrontAndBackIdDocuments"),
                         () => {
                           if (idPair && idPair.front) deleteDocument(idPair.front.id);
                           if (idPair && idPair.back) deleteDocument(idPair.back.id);
@@ -4082,9 +4030,7 @@ startxref
                         source={require('../../assets/dashboard Emojies/trash.png')} 
                         style={{ width: 14, height: 14, marginRight: 4 }}
                       />
-                      <DynamicText type="card" style={[dynamicStyles.modalButtonText, { fontSize: 12, textAlign: 'center' }]}>
-                        Delete
-                      </DynamicText>
+                      <DynamicText type="card" style={[dynamicStyles.modalButtonText, { fontSize: 12, textAlign: 'center' }]}>{uiI18n.t("ai.delete")}</DynamicText>
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -4118,7 +4064,7 @@ startxref
                   backgroundColor: customAlertMessage.type === 'success' ? '#22c55e' : '#ef4444' 
                 }]}>
                   <DynamicText type="card" style={styles.customAlertIconText}>
-                    {customAlertMessage.type === 'success' ? '✓' : '✕'}
+                    {customAlertMessage.type === uiI18n.t("adminProfile.success") ? '✓' : '✕'}
                   </DynamicText>
                 </View>
                 <DynamicText type="primary" style={styles.customAlertTitle}>
@@ -4133,9 +4079,7 @@ startxref
                   }]}
                   onPress={() => setShowCustomAlert(false)}
                 >
-                  <DynamicText type="card" style={styles.customAlertButtonText}>
-                    OK
-                  </DynamicText>
+                  <DynamicText type="card" style={styles.customAlertButtonText}>{uiI18n.t("adminProfile.ok")}</DynamicText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -4182,7 +4126,7 @@ startxref
                     onPress={() => setShowDeleteConfirm(false)}
                   >
                     <DynamicText type="card" style={styles.deleteCancelButtonText}>
-                      {t('cancel')}
+                      {t("common.cancel")}
                     </DynamicText>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -4196,7 +4140,7 @@ startxref
                     }}
                   >
                     <DynamicText type="card" style={styles.deleteConfirmButtonText}>
-                      {t('delete')}
+                      {t("common.delete")}
                     </DynamicText>
                   </TouchableOpacity>
                 </View>

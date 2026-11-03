@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 // src/services/trialService.js
 // Trial eligibility and management service
 
@@ -41,7 +42,7 @@ export async function checkTrialEligibility(email, phoneE164) {
     const token = await getAuthToken();
     
     if (!token) {
-      throw new Error('Not authenticated');
+      throw new Error(uiI18n.t("ui.notAuthenticated"));
     }
     
     const response = await fetch(`${API_BASE_URL}/api/trial/eligibility`, {
@@ -73,7 +74,7 @@ export async function startTrial(phoneE164, user = null) {
     const token = await getAuthToken(user);
     
     if (!token) {
-      throw new Error('Not authenticated');
+      throw new Error(uiI18n.t("ui.notAuthenticated"));
     }
     
     const response = await fetch(`${API_BASE_URL}/api/trial/start`, {
@@ -105,7 +106,7 @@ export async function getSubscriptionStatus(user = null) {
     
     if (!token) {
       console.error('❌ DEBUG: No auth token found');
-      throw new Error('Not authenticated');
+      throw new Error(uiI18n.t("ui.notAuthenticated"));
     }
     
     console.log('🔍 DEBUG: Fetching subscription status from:', `${API_BASE_URL}/api/me/subscription`);
@@ -125,7 +126,7 @@ export async function getSubscriptionStatus(user = null) {
       const text = await response.text();
       console.error('❌ Subscription status HTTP error:', response.status);
       console.error('❌ Response body:', text.substring(0, 500));
-      throw new Error(`Server error: ${response.status}`);
+      throw new Error(uiI18n.t("ui.serverErrorValue_2600e2", { value1: response.status }));
     }
     
     // Check if response is JSON
@@ -135,7 +136,7 @@ export async function getSubscriptionStatus(user = null) {
       console.error('❌ Subscription status non-JSON response');
       console.error('❌ Content-Type:', contentType);
       console.error('❌ Response body:', text.substring(0, 500));
-      throw new Error('Server returned non-JSON response');
+      throw new Error(uiI18n.t("ui.serverReturnedNonJsonResponse"));
     }
     
     const data = await response.json();

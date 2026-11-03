@@ -1,3 +1,5 @@
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
 import KeyboardForm from './KeyboardForm';
 import MedicationAutocomplete from './MedicationAutocomplete';
@@ -20,6 +22,7 @@ import { useTimeFormat } from '../src/hooks/useTimeFormat';
 
 // Medications component moved outside App to prevent remounting
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
+  useUILanguage();
   // Mount/unmount detection
   const mounted = useRef(0);
   const { t } = useTranslation();
@@ -36,17 +39,17 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   
   // Unit options for strength and quantity (sorted alphabetically)
   const strengthUnits = [
-    '% v/v', '% w/v', '% w/w', 'FTU', 'IU', 'IU/mL', 'L', 'U', 'U/kg', 'U/mL', 'U/hour',
-    'Actuations', 'Drops', 'G', 'Mcg', 'Mcg/kg', 'Mcg/kg/min', 'Mcg/hour', 'Mcg/mL',
-    'Mg', 'Mg/kg', 'Mg/m²', 'Mg/day', 'Mg/hour', 'Mg/mL', 'Mg/5mL', 'ML', 'ML/hour',
-    'MEq', 'MEq/L', 'Mmol', 'Mmol/L', 'Puffs', 'Units', 'USP units'
+    uiI18n.t("unitLabels.% v/v"), uiI18n.t("unitLabels.% w/v"), uiI18n.t("unitLabels.% w/w"), 'FTU', uiI18n.t("unitLabels.IU"), 'IU/mL', uiI18n.t("unitLabels.L"), 'U', 'U/kg', 'U/mL', 'U/hour',
+    uiI18n.t("unitLabels.Actuations"), uiI18n.t("medications.quantityUnits.drops"), uiI18n.t("reminders.units.g"), uiI18n.t("unitLabels.Mcg"), 'Mcg/kg', 'Mcg/kg/min', 'Mcg/hour', uiI18n.t("unitLabels.Mcg/mL"),
+    uiI18n.t("reminders.units.mg"), 'Mg/kg', 'Mg/m²', 'Mg/day', 'Mg/hour', uiI18n.t("unitLabels.Mg/mL"), uiI18n.t("unitLabels.Mg/5mL"), uiI18n.t("medications.quantityUnits.ml"), 'ML/hour',
+    'MEq', 'MEq/L', 'Mmol', 'Mmol/L', uiI18n.t("unitLabels.Puffs"), uiI18n.t("reminders.units.units"), uiI18n.t("unitLabels.USP units")
   ];
   
   const quantityUnits = [
-    'Ampule', 'Ampules', 'Bottle', 'Bottles', 'Box', 'Boxes', 'Capsule', 'Capsules',
-    'Drop', 'Drops', 'Pack', 'Packs', 'Piece', 'Pieces', 'Puff', 'Puffs', 'Pump', 'Pumps',
-    'Sachet', 'Sachets', 'Strip', 'Strips', 'Suppository', 'Suppositories',
-    'Tablet', 'Tablets', 'Unit', 'Units', 'Vial', 'Vials'
+    "Ampule", "Ampules", "Bottle", "Bottles", "Box", "Boxes", "Capsule", "Capsules",
+    "Drop", "Drops", "Pack", "Packs", "Piece", "Pieces", "Puff", "Puffs", "Pump", "Pumps",
+    "Sachet", "Sachets", "Strip", "Strips", "Suppository", "Suppositories",
+    "Tablet", "Tablets", "Unit", "units", "Vial", "Vials"
   ];
   
   useEffect(() => {
@@ -107,7 +110,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     if (showAdd) {
       setAddForm({ 
         name:'', 
-        components: [{ strength: '', unit: 'Mg' }], // Multi-component system
+        components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }], // Multi-component system
         times:'', 
         status:'taking', 
         startDate:'', 
@@ -144,7 +147,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const [holdUntil, setHoldUntil] = useState('');
   const [addForm, setAddForm] = useState({ 
     name:'', 
-    components: [{ strength: '', unit: 'Mg' }], // Multi-component system
+    components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }], // Multi-component system
     times:'', 
     status:'taking', 
     startDate:'', 
@@ -206,7 +209,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const addComponent = () => {
     setAddForm(prev => ({
       ...prev,
-      components: [...prev.components, { strength: '', unit: 'Mg' }]
+      components: [...prev.components, { strength: '', unit: uiI18n.t("reminders.units.mg") }]
     }));
   };
 
@@ -233,7 +236,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     id:'', 
     name:'', 
     strengthValue:'', 
-    strengthUnit:'Mg', 
+    strengthUnit:uiI18n.t("reminders.units.mg"), 
     times:'', 
     status:'taking', 
     startDate:'', 
@@ -242,7 +245,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     notes:'', 
     dosesLeft:'', 
     quantityValue:'', 
-    quantityUnit:'Tablet' 
+    quantityUnit:"Tablet" 
   });
 
   // Unit dropdown states
@@ -292,8 +295,8 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
           addForm.components.map(comp => comp.strength).join('/') : 
           '500',
         strengthUnit: addForm.components ? 
-          addForm.components[0]?.unit || 'Mg' : 
-          'Mg',
+          addForm.components[0]?.unit || uiI18n.t("reminders.units.mg") : 
+          uiI18n.t("reminders.units.mg"),
         status: addForm.status,
         times: addTimes,
         startDate: addForm.startDate,
@@ -363,7 +366,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       
       setAddForm({ 
         name:'', 
-        components: [{ strength: '', unit: 'Mg' }], // Multi-component system
+        components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }], // Multi-component system
         times:'', 
         status:'taking', 
         startDate:'', 
@@ -437,7 +440,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       try {
         const medicationId = medToDelete.dbId || medToDelete.id;
         const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}&medicationId=${medicationId}`, {
-          method: 'DELETE',
+          method: uiI18n.t("ai.delete"),
           headers: {
             'Content-Type': 'application/json',
           }
@@ -487,7 +490,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       dosage: medication.strength || 'N/A',
       quantity: medication.quantity || 'N/A',
       quantityUnit: medication.quantityUnit || undefined, // Only include if explicitly set (avoid defaulting to 'tablet')
-      lastRefill: medication.lastRefill || S.never || 'Never',
+      lastRefill: medication.lastRefill || S.never || uiI18n.t("common.never"),
       isSingleComponent: medication.isSingleComponent !== undefined ? medication.isSingleComponent : true // Default to true for existing meds
     };
     
@@ -507,11 +510,11 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       if (!locationEnabled) {
         // Modal is already open, just show alert
         Alert.alert(
-          'Location Services Disabled',
-          'Please enable location services in your device settings to find nearby pharmacies.',
+          uiI18n.t("ui.locationServicesDisabled"),
+          uiI18n.t("ui.pleaseEnableLocationServicesInYourDeviceSettingsToFindNearbyPharmacies"),
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+            { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
+            { text: uiI18n.t("ui.openSettings"), onPress: () => Linking.openSettings() }
           ]
         );
         return;
@@ -522,11 +525,11 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       if (status !== 'granted') {
         // Modal is already open, just show alert
         Alert.alert(
-          'Location Permission Required',
-          'This app needs location permission to find nearby pharmacies. Please grant permission in settings.',
+          uiI18n.t("ui.locationPermissionRequired"),
+          uiI18n.t("ui.thisAppNeedsLocationPermissionToFindNearbyPharmaciesPleaseGrantPermissionInSettings"),
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+            { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
+            { text: uiI18n.t("ui.openSettings"), onPress: () => Linking.openSettings() }
           ]
         );
         return;
@@ -544,26 +547,26 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       // Provide specific error messages based on error type
       if (error.message.includes('location services')) {
         Alert.alert(
-          'Location Services Unavailable',
-          'Please enable location services in your device settings and try again.',
+          uiI18n.t("ui.locationServicesUnavailable"),
+          uiI18n.t("ui.pleaseEnableLocationServicesInYourDeviceSettingsAndTryAgain"),
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+            { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
+            { text: uiI18n.t("ui.openSettings"), onPress: () => Linking.openSettings() }
           ]
         );
       } else if (error.message.includes('timeout')) {
         Alert.alert(
-          'Location Timeout',
-          'Getting your location is taking too long. Please check your GPS signal and try again.',
-          [{ text: 'OK' }]
+          uiI18n.t("ui.locationTimeout"),
+          uiI18n.t("ui.gettingYourLocationIsTakingTooLongPleaseCheckYourGpsSignalAndTryAgain"),
+          [{ text: uiI18n.t("adminProfile.ok") }]
         );
       } else {
         Alert.alert(
-          'Location Error',
-          'Unable to get your current location. Please check your device settings and try again.',
+          uiI18n.t("ui.locationError"),
+          uiI18n.t("ui.unableToGetYourCurrentLocationPleaseCheckYourDeviceSettingsAndTryAgain"),
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+            { text: uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
+            { text: uiI18n.t("ui.openSettings"), onPress: () => Linking.openSettings() }
           ]
         );
       }
@@ -714,9 +717,9 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                       ...med, 
                       times: med.times.join(', '),
                       strengthValue: med.strengthValue || med.strength?.split(' ')[0] || '',
-                      strengthUnit: toSentenceCase(med.strengthUnit || med.strength?.split(' ').slice(1).join(' ') || 'Mg'),
+                      strengthUnit: toSentenceCase(med.strengthUnit || med.strength?.split(' ').slice(1).join(' ') || uiI18n.t("reminders.units.mg")),
                       quantityValue: med.quantityValue || med.quantity?.split(' ')[0] || '',
-                      quantityUnit: toSentenceCase(med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || 'Tablet'),
+                      quantityUnit: toSentenceCase(med.quantityUnit || med.quantity?.split(' ').slice(1).join(' ') || "Tablet"),
                       notes: med.notes || '',
                       dosesLeft: med.dosesLeft || ''
                     });
@@ -767,7 +770,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
-                  {parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0')} {S?.left || 'left'}
+                  {parseFloat(med.remainingQuantity || med.quantity?.replace(/[^\d.]/g, '') || '0')} {S?.left || uiI18n.t("supplements.left")}
                 </DynamicText>
                 <TextInput
                   placeholder="0"
@@ -821,7 +824,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#fff', fontSize: 8, fontFamily: 'Inter_600SemiBold' }}>
-                    {S?.took || 'Took'}
+                    {S?.took || uiI18n.t("supplements.took")}
                   </DynamicText>
                 </TouchableOpacity>
               </View>
@@ -921,7 +924,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                       <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
-                        {S?.components || 'Components'} ({addForm.components.length})
+                        {S?.components || uiI18n.t("medications.components")} ({addForm.components.length})
                       </DynamicText>
                       
                       {/* Compact Multi-Component Checkbox */}
@@ -1099,8 +1102,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                         fontFamily: 'Inter_500Medium', 
                         color: getCardTextColor() + '80',
                         textAlign: 'center'
-                      }}>
-                        Total: {addForm.components.map(comp => `${comp.strength || '0'}${comp.unit}`).join(' / ')}
+                      }}>{uiI18n.t("reminders.total")}{addForm.components.map(comp => `${comp.strength || '0'}${comp.unit}`).join(' / ')}
                       </DynamicText>
                     </View>
                   )}
@@ -1389,7 +1391,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 </View>
 
                 <MedicationAutocomplete
-                  onSelect={med => setEditForm(prev => ({ ...prev, ...medicationFields(med), name: med.name , strengthValue: med.components.map(c => c.strength || '').join('/'), strengthUnit: med.components[0]?.unit || 'Mg' }))}
+                  onSelect={med => setEditForm(prev => ({ ...prev, ...medicationFields(med), name: med.name , strengthValue: med.components.map(c => c.strength || '').join('/'), strengthUnit: med.components[0]?.unit || uiI18n.t("reminders.units.mg") }))}
                   placeholder={S.medicationName}
                   placeholderTextColor={getSubTextColor()}
                   value={editForm.name}
@@ -1813,12 +1815,12 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             onStartShouldSetResponder={() => true}
           >
             <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
-              {S?.selectUnit || 'Select Unit'}
+              {S?.selectUnit || uiI18n.t("healthAnalytics.selectUnit")}
             </DynamicText>
             <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
               {strengthUnits.map((unit) => (
                 <TouchableOpacity
-                  key={unit}
+                  key={uiI18n.t('unitLabels.' + unit, { defaultValue: unit })}
                   onPress={() => {
                     updateComponent(currentComponentIndex, 'unit', unit);
                     setShowUnitDropdown(false);
@@ -1850,7 +1852,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       <QuantityUnitDropdown
         visible={showQuantityUnitDropdown}
         units={quantityUnits}
-        selectedUnit={addForm.quantityUnit}
+        selectedUnit={uiI18n.t('unitLabels.' + addForm.quantityUnit, { defaultValue: addForm.quantityUnit })}
         onSelect={(unit) => setAddForm(prev => ({ ...prev, quantityUnit: unit }))}
         onClose={() => setShowQuantityUnitDropdown(false)}
         theme={theme}
@@ -1877,7 +1879,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       <QuantityUnitDropdown
         visible={showEditQuantityUnitDropdown}
         units={quantityUnits}
-        selectedUnit={editForm.quantityUnit}
+        selectedUnit={uiI18n.t('unitLabels.' + editForm.quantityUnit, { defaultValue: editForm.quantityUnit })}
         onSelect={(unit) => setEditForm(prev => ({ ...prev, quantityUnit: unit }))}
         onClose={() => setShowEditQuantityUnitDropdown(false)}
         theme={theme}
@@ -1934,14 +1936,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
               textAlign: 'center',
               color: theme.text,
             }}>
-              {S?.searchingPharmacies || 'Searching for pharmacies...'}
+              {S?.searchingPharmacies || uiI18n.t("medications.searchingPharmacies")}
             </Text>
             <Text style={{
               fontSize: 11,
               textAlign: 'center',
               color: theme.subtext,
             }}>
-              {S?.pleaseWait || 'Please wait'}
+              {S?.pleaseWait || uiI18n.t("common.pleaseWait")}
             </Text>
           </View>
         </View>
@@ -1952,6 +1954,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
 
 // Dropdown components using Modal for top-level rendering
 const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor, buttonLayout }) => {
+  useUILanguage();
   return (
     <Modal
       visible={visible}
@@ -2009,7 +2012,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
                     fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                   }}
                 >
-                  {unit}
+                  {uiI18n.t('unitLabels.' + unit, { defaultValue: unit })}
                 </DynamicText>
               </TouchableOpacity>
             ))}
@@ -2021,6 +2024,7 @@ const StrengthUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
 };
 
 const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor, buttonLayout }) => {
+  useUILanguage();
   return (
     <Modal
       visible={visible}
@@ -2078,7 +2082,7 @@ const QuantityUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose,
                     fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                   }}
                 >
-                  {unit}
+                  {uiI18n.t('unitLabels.' + unit, { defaultValue: unit })}
                 </DynamicText>
               </TouchableOpacity>
             ))}

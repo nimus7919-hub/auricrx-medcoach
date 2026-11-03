@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 // Crash Logger Utility
 // Logs crashes and errors to AsyncStorage for debugging
 
@@ -15,7 +16,7 @@ class CrashLogger {
         timestamp,
         message: error?.message || String(error),
         stack: error?.stack || 'No stack trace',
-        name: error?.name || 'Unknown',
+        name: error?.name || uiI18n.t("ai.unknown"),
         context,
         platform: Platform?.OS || 'unknown',
       };

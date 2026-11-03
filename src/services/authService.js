@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { authenticatedFetch } from './authenticatedFetch';
 import { API_BASE } from '../config/api';
 import { consentRequest, requireAccountConsent, clearConsentCache } from './consentService';
@@ -55,7 +56,7 @@ class AuthService {
 
   // Email/Password Authentication
   async signUpWithEmail(email, password, firstName, lastName, consents) {
-    if (!consents?.terms || !consents?.privacy) return { success: false, error: 'Terms and privacy acknowledgment are required.' };
+    if (!consents?.terms || !consents?.privacy) return { success: false, error: uiI18n.t("ui.termsAndPrivacyAcknowledgmentAreRequired") };
     try {
       console.log('signUpWithEmail called with:', { email, password: '***', firstName, lastName });
       this.authInProgress = true;
@@ -90,7 +91,7 @@ class AuthService {
           emailVerified: user.emailVerified,
         },
         firebaseUser: user, // Return Firebase user object for trial start
-        message: 'Account created successfully! Please check your email (including spam folder) for a verification link.',
+        message: uiI18n.t("ui.accountCreatedSuccessfullyPleaseCheckYourEmailIncludingSpamFolderForAVerificationLink"),
       };
     } catch (error) {
       this.authInProgress = false;
@@ -115,7 +116,7 @@ class AuthService {
         await signOut(this.auth);
         return {
           success: false,
-          error: 'Please verify your email address before signing in. Check your inbox (including spam folder) for a verification email.',
+          error: uiI18n.t("ui.pleaseVerifyYourEmailAddressBeforeSigningInCheckYourInboxIncludingSpamFolderForAVerificati"),
           needsEmailVerification: true,
         };
       }
@@ -152,8 +153,8 @@ class AuthService {
     console.warn('⚠️ Phone verification requires native build with @react-native-firebase');
     return {
       success: false,
-      error: 'Phone verification requires native build',
-      message: 'Phone verification will be available after building with EAS'
+      error: uiI18n.t("ui.phoneVerificationRequiresNativeBuild"),
+      message: uiI18n.t("ui.phoneVerificationWillBeAvailableAfterBuildingWithEas")
     };
   }
 
@@ -161,7 +162,7 @@ class AuthService {
     console.warn('⚠️ Phone verification requires native build with @react-native-firebase');
     return {
       success: false,
-      error: 'Phone verification requires native build',
+      error: uiI18n.t("ui.phoneVerificationRequiresNativeBuild"),
     };
   }
 
@@ -171,7 +172,7 @@ class AuthService {
       await sendPasswordResetEmail(this.auth, email);
       return {
         success: true,
-        message: 'Password reset email sent',
+        message: uiI18n.t("adminProfile.passwordResetEmailSent"),
       };
     } catch (error) {
       return {
@@ -185,11 +186,11 @@ class AuthService {
   async signInWithGoogle() {
     try {
       if (Platform.OS !== 'web' && Constants.appOwnership === 'expo') {
-        return { success: false, error: 'Google Sign-In requires a development build. Open this app in your installed dev build.' };
+        return { success: false, error: uiI18n.t("ui.googleSignInRequiresADevelopmentBuildOpenThisAppInYourInstalledDevBuild") };
       }
       if (Platform.OS === 'android' || Platform.OS === 'ios') {
         if (!googleAuthConfig.webClientId) {
-          return { success: false, error: 'Google Sign-In is not configured. Please add your Google web client ID.' };
+          return { success: false, error: uiI18n.t("ui.googleSignInIsNotConfiguredPleaseAddYourGoogleWebClientId") };
         }
         const GoogleSignin = this.configureGoogleSignIn();
         if (Platform.OS === 'android') {
@@ -199,11 +200,11 @@ class AuthService {
         try { await GoogleSignin.signOut(); } catch (e) {}
         const response = await GoogleSignin.signIn();
         if (response.type === 'cancelled') {
-          return { success: false, error: 'Google Sign-In was cancelled.' };
+          return { success: false, error: uiI18n.t("ui.googleSignInWasCancelled") };
         }
         const idToken = response.data?.idToken;
         if (!idToken) {
-          return { success: false, error: 'Google Sign-In did not return a valid ID token. Please try again.' };
+          return { success: false, error: uiI18n.t("ui.googleSignInDidNotReturnAValidIdTokenPleaseTryAgain") };
         }
         return await this.signInWithGoogleTokens(idToken);
       }
@@ -214,7 +215,7 @@ class AuthService {
         console.warn('⚠️ Google Sign-In attempted without client ID configuration');
         return {
           success: false,
-          error: 'Google Sign-In is not configured yet. Please add your Google OAuth client IDs.',
+          error: uiI18n.t("ui.googleSignInIsNotConfiguredYetPleaseAddYourGoogleOauthClientIds"),
         };
       }
 
@@ -236,7 +237,7 @@ class AuthService {
       if (result.type === 'dismiss' || result.type === 'cancel') {
         return {
           success: false,
-          error: 'Google Sign-In was cancelled.',
+          error: uiI18n.t("ui.googleSignInWasCancelled"),
         };
       }
 
@@ -244,7 +245,7 @@ class AuthService {
         const errorDescription =
           result.params?.error_description ||
           result.error?.message ||
-          'Google Sign-In failed. Please try again.';
+          uiI18n.t("googleAuth.error");
         console.warn('⚠️ Google Sign-In did not complete successfully:', result);
         return {
           success: false,
@@ -271,7 +272,7 @@ class AuthService {
         console.error('❌ Google Sign-In response did not include an ID token');
         return {
           success: false,
-          error: 'Google Sign-In did not return a valid ID token. Please try again.',
+          error: uiI18n.t("ui.googleSignInDidNotReturnAValidIdTokenPleaseTryAgain"),
         };
       }
 
@@ -280,7 +281,7 @@ class AuthService {
       console.error('Google Sign-In Error:', error);
       return {
         success: false,
-        error: 'Google Sign-In failed. Please try again.',
+        error: uiI18n.t("googleAuth.error"),
       };
     }
   }
@@ -288,7 +289,7 @@ class AuthService {
   async signInWithGoogleTokens(idToken, accessToken) {
     try {
       if (!idToken) {
-        throw new Error('Missing Google ID token');
+        throw new Error(uiI18n.t("ui.missingGoogleIdToken"));
       }
 
       const credential = GoogleAuthProvider.credential(idToken, accessToken);
@@ -317,12 +318,12 @@ class AuthService {
     } catch (error) {
       this.authInProgress = false;
       console.error('Google Sign-In (Firebase credential) error:', error);
-      let errorMessage = 'Google Sign-In failed. Please try again.';
+      let errorMessage = uiI18n.t("googleAuth.error");
       if (error?.code === 'auth/account-exists-with-different-credential') {
         errorMessage =
-          'An account already exists with the same email address but a different sign-in method. Please sign in using your original provider.';
+          uiI18n.t("ui.anAccountAlreadyExistsWithTheSameEmailAddressButADifferentSignInMethodPleaseSignInUsingYou");
       } else if (error?.code === 'auth/invalid-credential') {
-        errorMessage = 'The Google credential is invalid or has expired. Please try again.';
+        errorMessage = uiI18n.t("ui.theGoogleCredentialIsInvalidOrHasExpiredPleaseTryAgain");
       }
       return {
         success: false,
@@ -359,9 +360,9 @@ class AuthService {
 
   async deleteAccount() {
     const token = await this.auth.currentUser?.getIdToken();
-    if (!token) throw new Error('Please sign in again. / Inicia sesi\u00f3n de nuevo.');
-    const response = await authenticatedFetch(API_BASE + '/api/account', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
-    if (!response.ok) throw new Error('Deletion did not complete. Please retry. / No se complet\u00f3 la eliminaci\u00f3n. Intenta de nuevo.');
+    if (!token) throw new Error(uiI18n.t("ui.pleaseSignInAgainIniciaSesionDeNuevo"));
+    const response = await authenticatedFetch(API_BASE + '/api/account', { method: uiI18n.t("ai.delete"), headers: { Authorization: 'Bearer ' + token } });
+    if (!response.ok) throw new Error(uiI18n.t("ui.deletionDidNotCompletePleaseRetryNoSeCompletoLaEliminacionIntentaDeNuevo"));
     const result = await this.signOut();
     if (!result.success) throw new Error(result.error);
     return { success: true };
@@ -375,19 +376,19 @@ class AuthService {
   // Error Message Helper
   getErrorMessage(errorCode) {
     const errorMessages = {
-      'auth/email-already-in-use': 'This email is already registered',
-      'auth/invalid-email': 'Invalid email address',
-      'auth/weak-password': 'Password should be at least 6 characters',
-      'auth/user-not-found': 'No account found with this email',
-      'auth/wrong-password': 'Incorrect password',
-      'auth/too-many-requests': 'Too many attempts. Please try again later',
-      'auth/network-request-failed': 'Network error. Please check your connection',
-      'auth/invalid-phone-number': 'Invalid phone number format',
-      'auth/invalid-verification-code': 'Invalid verification code',
-      'auth/code-expired': 'Verification code has expired',
+      'auth/email-already-in-use': uiI18n.t("ui.thisEmailIsAlreadyRegistered"),
+      'auth/invalid-email': uiI18n.t("ui.invalidEmailAddress"),
+      'auth/weak-password': uiI18n.t("ui.passwordShouldBeAtLeast6Characters"),
+      'auth/user-not-found': uiI18n.t("ui.noAccountFoundWithThisEmail"),
+      'auth/wrong-password': uiI18n.t("ui.incorrectPassword"),
+      'auth/too-many-requests': uiI18n.t("ui.tooManyAttemptsPleaseTryAgainLater"),
+      'auth/network-request-failed': uiI18n.t("ui.networkErrorPleaseCheckYourConnection"),
+      'auth/invalid-phone-number': uiI18n.t("ui.invalidPhoneNumberFormat"),
+      'auth/invalid-verification-code': uiI18n.t("ui.invalidVerificationCode"),
+      'auth/code-expired': uiI18n.t("ui.verificationCodeHasExpired"),
     };
 
-    return errorMessages[errorCode] || 'An error occurred. Please try again';
+    return errorMessages[errorCode] || uiI18n.t("ui.anErrorOccurredPleaseTryAgain");
   }
 
   // Handle both sign-in and sign-up
@@ -400,7 +401,7 @@ class AuthService {
       if (isSignUp) {
         // Create account with Firebase
         console.log('Creating account...');
-        const result = await this.signUpWithEmail(email, password, userData.firstName || 'User', userData.lastName || 'Name', userData.consents);
+        const result = await this.signUpWithEmail(email, password, userData.firstName || uiI18n.t("ui.user"), userData.lastName || uiI18n.t("medications.sort.name"), userData.consents);
         console.log('Sign up result:', result);
         
         if (result.success) {
@@ -432,7 +433,7 @@ class AuthService {
           return {
             ...result,
             needsEmailVerification: true,
-            message: 'Account created successfully! Your 14-day free trial has started. Please check your email to verify your account.'
+            message: uiI18n.t("ui.accountCreatedSuccessfullyYour14DayFreeTrialHasStartedPleaseCheckYourEmailToVerifyYourAcco")
           };
         } else {
           console.error('Sign up failed:', result.error);
@@ -447,7 +448,7 @@ class AuthService {
       console.error('Error message:', error.message);
       return {
         success: false,
-        error: this.getErrorMessage(error.code) || error.message || 'An error occurred. Please try again',
+        error: this.getErrorMessage(error.code) || error.message || uiI18n.t("ui.anErrorOccurredPleaseTryAgain"),
       };
     }
   }
@@ -479,7 +480,7 @@ class AuthService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Server response:', response.status, errorText);
-        throw new Error(`Server error: ${response.status} - ${errorText}`);
+        throw new Error(uiI18n.t("ui.serverErrorValueValue", { value1: response.status, value2: errorText }));
       }
       
       const result = await response.json();
@@ -499,9 +500,9 @@ class AuthService {
       
       if (!response.ok) {
         if (response.status === 404) {
-          return { success: false, error: 'User data not found' };
+          return { success: false, error: uiI18n.t("ui.userDataNotFound") };
         }
-        throw new Error(`Server error: ${response.status}`);
+        throw new Error(uiI18n.t("ui.serverErrorValue", { value1: response.status }));
       }
       
       const result = await response.json();
@@ -521,15 +522,15 @@ class AuthService {
       
       return {
         success: false,
-        error: 'Phone verification requires native implementation. Please verify your phone number later in settings.',
-        message: 'Account created successfully! Phone verification will be available soon.'
+        error: uiI18n.t("ui.phoneVerificationRequiresNativeImplementationPleaseVerifyYourPhoneNumberLaterInSettings"),
+        message: uiI18n.t("ui.accountCreatedSuccessfullyPhoneVerificationWillBeAvailableSoon")
       };
     } catch (error) {
       console.error('Phone verification error:', error);
       return {
         success: false,
-        error: 'Phone verification failed',
-        message: 'Account created successfully! Phone verification failed.'
+        error: uiI18n.t("ui.phoneVerificationFailed"),
+        message: uiI18n.t("ui.accountCreatedSuccessfullyPhoneVerificationFailed")
       };
     }
   }

@@ -1,4 +1,6 @@
 "use client";
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -10,6 +12,7 @@ import { motion } from "framer-motion";
  * - Replace <ARMonogram/> with your real logo when ready
  */
 export default function AuricRXSignIn() {
+  useUILanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -61,22 +64,18 @@ export default function AuricRXSignIn() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="px-8 pb-10">
-              <label htmlFor="email" className="mb-2 block text-sm text-neutral-300">
-                Email
-              </label>
+              <label htmlFor="email" className="mb-2 block text-sm text-neutral-300">{uiI18n.t("adminProfile.email")}</label>
               <input
                 id="email"
                 type="email"
-                placeholder="you@domain.com"
+                placeholder={uiI18n.t("ui.youDomainCom")}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mb-4 w-full rounded-xl bg-black/40 px-4 py-3 text-sm outline-none ring-1 ring-white/10 placeholder:text-neutral-500 focus:ring-2 focus:ring-amber-400/60"
               />
 
-              <label htmlFor="password" className="mb-2 block text-sm text-neutral-300">
-                Password
-              </label>
+              <label htmlFor="password" className="mb-2 block text-sm text-neutral-300">{uiI18n.t("ui.password")}</label>
               <input
                 id="password"
                 type="password"
@@ -96,7 +95,7 @@ export default function AuricRXSignIn() {
               >
                 <span className="absolute inset-0 rounded-xl bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500" />
                 <span className="absolute inset-[1px] rounded-[0.70rem] bg-gradient-to-b from-yellow-100/80 to-amber-100/50 opacity-10" />
-                <span className="relative">Sign in</span>
+                <span className="relative">{uiI18n.t("ui.signIn_ada2e9")}</span>
               </motion.button>
 
               {/* Sign up (outline gold) */}
@@ -104,9 +103,7 @@ export default function AuricRXSignIn() {
                 type="button"
                 onClick={() => (window.location.href = "/sign-up")}
                 className="relative mb-6 w-full rounded-xl px-4 py-3 text-sm font-medium text-amber-300 border border-amber-300/60 hover:bg-amber-50/5"
-              >
-                Sign up
-              </button>
+              >{uiI18n.t("ui.signUp_0b8149")}</button>
 
               {/* SSO */}
               <div className="grid grid-cols-1 gap-3">
@@ -114,26 +111,18 @@ export default function AuricRXSignIn() {
                   type="button"
                   className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm hover:bg-white/5"
                 >
-                  <span className="text-lg">🍎</span> Continue with Apple
-                </button>
+                  <span className="text-lg">🍎</span>{uiI18n.t("ui.continueWithApple_4db371")}</button>
                 <button
                   type="button"
                   className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm hover:bg-white/5"
                 >
-                  <span className="text-lg">G</span> Continue with Google
-                </button>
+                  <span className="text-lg">{"G"}</span>{uiI18n.t("ui.continueWithGoogle_acdbaa")}</button>
               </div>
 
               {/* Legal */}
-              <p className="mt-5 text-center text-xs text-neutral-500">
-                By signing in, you agree to our{" "}
-                <a className="text-neutral-300 underline-offset-4 hover:underline" href="#">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a className="text-neutral-300 underline-offset-4 hover:underline" href="#">
-                  Privacy Policy
-                </a>
+              <p className="mt-5 text-center text-xs text-neutral-500">{uiI18n.t("ui.bySigningInYouAgreeToOur")}{" "}
+                <a className="text-neutral-300 underline-offset-4 hover:underline" href="#">{uiI18n.t("ui.termsOfService")}</a>{" "}{uiI18n.t("ui.and")}{" "}
+                <a className="text-neutral-300 underline-offset-4 hover:underline" href="#">{uiI18n.t("ui.privacyPolicy")}</a>
                 .
               </p>
             </form>
@@ -146,6 +135,7 @@ export default function AuricRXSignIn() {
 
 /** Animated top beam: slit + pulse + sweep */
 function AnimatedTopBeam() {
+  useUILanguage();
   return (
     <div className="pointer-events-none absolute left-0 right-0 top-0 h-48">
       {/* narrow slit */}
@@ -189,6 +179,7 @@ function AnimatedTopBeam() {
 
 /** Placeholder AR monogram; replace with your SVG logo */
 function ARMonogram() {
+  useUILanguage();
   return (
     <svg viewBox="0 0 64 64" className="h-8 w-8" aria-hidden>
       <defs>

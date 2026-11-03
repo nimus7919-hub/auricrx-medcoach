@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -189,35 +190,35 @@ class SmartNotificationService {
             // High pollen count
             if (weatherData.pollen > alert.threshold) {
               shouldTrigger = true;
-              message = `🌼 High pollen alert! ${message}`;
+              message = uiI18n.t("ui.highPollenAlertValue", { value1: message });
             }
             break;
           case 'temperature':
             // Extreme temperatures
             if (weatherData.temperature > alert.threshold || weatherData.temperature < -alert.threshold) {
               shouldTrigger = true;
-              message = `🌡️ Temperature alert! ${message}`;
+              message = uiI18n.t("ui.temperatureAlertValue", { value1: message });
             }
             break;
           case 'humidity':
             // High humidity
             if (weatherData.humidity > alert.threshold) {
               shouldTrigger = true;
-              message = `💧 High humidity alert! ${message}`;
+              message = uiI18n.t("ui.highHumidityAlertValue", { value1: message });
             }
             break;
           case 'air_quality':
             // Poor air quality
             if (weatherData.airQuality > alert.threshold) {
               shouldTrigger = true;
-              message = `🌫️ Air quality alert! ${message}`;
+              message = uiI18n.t("ui.airQualityAlertValue", { value1: message });
             }
             break;
         }
 
         if (shouldTrigger) {
           await this.sendNotification({
-            title: '🌤️ Weather Alert',
+            title: uiI18n.t("ui.weatherAlert"),
             message,
             data: { type: 'weather_alert', alertId: alert.id, medicationId: alert.medicationId }
           });
@@ -230,7 +231,7 @@ class SmartNotificationService {
 
   private async getWeatherData() {
     if (!this.currentLocation) {
-      throw new Error('No location available');
+      throw new Error(uiI18n.t("ui.noLocationAvailable"));
     }
 
     // Mock weather data for now - replace with real API
@@ -239,7 +240,7 @@ class SmartNotificationService {
       humidity: 60, // Percentage
       pollen: 3, // Scale 1-5
       airQuality: 2, // Scale 1-5
-      description: 'Partly cloudy'
+      description: uiI18n.t("ui.partlyCloudy")
     };
   }
 
@@ -285,7 +286,7 @@ class SmartNotificationService {
   // Public methods for managing notifications
 
   async addLocationReminder(reminder: Omit<LocationReminder, 'id'>): Promise<LocationReminder> {
-    throw new Error('Proximity reminders are unavailable. / Los recordatorios por proximidad no están disponibles.');
+    throw new Error(uiI18n.t("ui.proximityRemindersAreUnavailableLosRecordatoriosPorProximidadNoEstanDisponibles"));
   }
 
   async deleteLocationReminder(id: string) {

@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 /**
  * Custom hook for managing global time format preferences
  * Provides centralized time format state with AsyncStorage persistence
@@ -78,8 +79,8 @@ export function useTimeFormat(options?: UseTimeFormatOptions) {
   const getTimeFormatLabel = useCallback((format?: TimeFormat) => {
     const formatToUse = format || timeFormat;
     const labels = {
-      system: options?.translations?.useDeviceSetting || 'Use device setting',
-      '12h': options?.translations?.twelveHour || '12-hour (AM/PM)',
+      system: options?.translations?.useDeviceSetting || uiI18n.t("settings.useDeviceSetting"),
+      '12h': options?.translations?.twelveHour || uiI18n.t("settings.twelveHour"),
       '24h': options?.translations?.twentyFourHour || '24-hour',
     };
     return labels[formatToUse];
@@ -90,8 +91,8 @@ export function useTimeFormat(options?: UseTimeFormatOptions) {
    */
   const getTimeFormatOptions = useCallback(() => {
     const labels = {
-      system: options?.translations?.useDeviceSetting || 'Use device setting',
-      '12h': options?.translations?.twelveHour || '12-hour (AM/PM)',
+      system: options?.translations?.useDeviceSetting || uiI18n.t("settings.useDeviceSetting"),
+      '12h': options?.translations?.twelveHour || uiI18n.t("settings.twelveHour"),
       '24h': options?.translations?.twentyFourHour || '24-hour',
     };
     

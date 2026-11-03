@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { View, ScrollView, Image } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
@@ -7,6 +9,7 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createDashboard(getScope) {
   return () => {
+  useUILanguage();
     const { setRoute, S, Card, TopBar, nextReminder } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
@@ -48,13 +51,13 @@ export default function createDashboard(getScope) {
               title={S.smartAlerts} 
               icon={<Image source={require('../../assets/dashboard Emojies/Smart Alerts.png')} style={styles.cardIconLarge} resizeMode="contain" />} 
               onPress={() => setRoute('smart-notifications')}
-              subtitle="Intelligent reminders & notifications"
+              subtitle={uiI18n.t("ui.intelligentRemindersNotifications")}
             />
             <Card 
               title={S.healthAnalytics} 
               icon={<Image source={require('../../assets/dashboard Emojies/Health Analytics.png')} style={styles.cardIconLarge} resizeMode="contain" />} 
               onPress={() => setRoute('health-analytics')}
-              subtitle="Track metrics, adherence & insights"
+              subtitle={uiI18n.t("ui.trackMetricsAdherenceInsights")}
             />
             <Card 
               title={S.appointmentLog} 
@@ -66,13 +69,13 @@ export default function createDashboard(getScope) {
               title={S.aiHealth} 
               icon={<Image source={require('../../assets/dashboard Emojies/AI Health.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('ai-health')}
-              subtitle="Intelligent health insights & analysis"
+              subtitle={uiI18n.t("ui.intelligentHealthInsightsAnalysis")}
             />
             <Card 
               title={S.documents} 
               icon={<Image source={require('../../assets/dashboard Emojies/Documents.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('documents')}
-              subtitle="Medical documents for doctor visits"
+              subtitle={uiI18n.t("ui.medicalDocumentsForDoctorVisits")}
             />
             {/* Medication Promotions - Hidden for now */}
             {/* <Card 

@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { View, Text, StyleSheet, Pressable, Linking } from "react-native";
 
 export function StoreRow(props: {
@@ -10,13 +12,14 @@ export function StoreRow(props: {
   priceable: boolean; // true if name matches San Pablo
   strings: any;
 }) {
+  useUILanguage();
   const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${props.lat},${props.lng}`;
   return (
     <View style={[styles.row, props.priceable && styles.priceable]}>
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{props.name}{props.priceable ? ` ${props.strings.sanpablo.withPrice}` : ""}</Text>
         {props.address ? <Text style={styles.addr}>{props.address}</Text> : null}
-        {typeof props.km === "number" ? <Text style={styles.km}>{props.km.toFixed(1)} km</Text> : null}
+        {typeof props.km === "number" ? <Text style={styles.km}>{props.km.toFixed(1)}{uiI18n.t("common.km")}</Text> : null}
       </View>
       <Pressable onPress={() => Linking.openURL(mapUrl)} style={styles.btn}>
         <Text style={styles.btnText}>{props.strings.sanpablo.go}</Text>

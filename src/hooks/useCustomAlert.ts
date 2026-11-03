@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { useState } from 'react';
 
 interface AlertOptions {
@@ -12,7 +13,7 @@ export function useCustomAlert() {
 
   const showAlert = (options: AlertOptions) => {
     setAlert({
-      buttonText: 'OK',
+      buttonText: uiI18n.t("adminProfile.ok"),
       ...options,
     });
   };

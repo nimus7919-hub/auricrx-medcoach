@@ -1,3 +1,6 @@
+import { useTranslation as useScreenTranslation } from "react-i18next";
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import React, { useState } from 'react';
 import {
@@ -37,11 +40,12 @@ export default function FastingProfileScreen({
   setFastingProfile,
   saveFastingProfileToDB
 }: FastingProfileScreenProps) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, getAccentColor } = useWallpaper();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Use S object for translations, fallback to key if not available
-  const t = (key: string) => S?.[key] || key;
+  const { t } = useScreenTranslation();
   
   const updateProfile = (key: string, value: any) => {
     setFastingProfile(prev => ({
@@ -150,7 +154,7 @@ export default function FastingProfileScreen({
     <View style={styles.sliderRow}>
       <DynamicText type="card" style={[styles.sliderLabel, { color: getCardTextColor() }]}>{label}</DynamicText>
       <View style={styles.sliderContainer}>
-        <DynamicText type="card" style={[styles.sliderValue, { color: getCardTextColor() }]}>{Number(fastingProfile[key])} hours</DynamicText>
+        <DynamicText type="card" style={[styles.sliderValue, { color: getCardTextColor() }]}>{Number(fastingProfile[key])}{uiI18n.t("ui.hours")}</DynamicText>
         <View style={styles.sliderButtons}>
           <TouchableOpacity
             onPress={() => updateProfile(key, Math.max(min, Number(fastingProfile[key]) - step))}
@@ -242,38 +246,38 @@ export default function FastingProfileScreen({
           showsVerticalScrollIndicator={true}
         >
           {/* Basic Information */}
-          {renderSection(t('basicInfo'), (
+          {renderSection(t("healthProfile.basicInfo"), (
             <View style={styles.sectionContent}>
-              {renderTextInput('weight', t('weight'), 'Enter your weight', 'numeric')}
-              {renderUnitSelect('weightUnit', t('weightUnit'), [
-                { value: 'kg', label: t('kg') },
-                { value: 'lbs', label: t('lbs') },
+              {renderTextInput('weight', t("healthProfile.weight"), uiI18n.t("ui.enterYourWeight"), 'numeric')}
+              {renderUnitSelect('weightUnit', t("healthProfile.weightUnit"), [
+                { value: 'kg', label: t("healthProfile.kg") },
+                { value: 'lbs', label: t("healthProfile.lbs") },
               ])}
-              {renderTextInput('height', t('height'), 'Enter your height', 'numeric')}
-              {renderUnitSelect('heightUnit', t('heightUnit'), [
-                { value: 'cm', label: t('cm') },
-                { value: 'ft', label: t('ft') },
+              {renderTextInput('height', t("healthProfile.height"), uiI18n.t("ui.enterYourHeight"), 'numeric')}
+              {renderUnitSelect('heightUnit', t("healthProfile.heightUnit"), [
+                { value: 'cm', label: t("healthProfile.cm") },
+                { value: 'ft', label: t("healthProfile.ft") },
               ])}
             </View>
           ))}
 
           {/* Health Conditions */}
-          {renderSection(t('healthConditions'), (
+          {renderSection(t("healthProfile.healthConditions"), (
             <View style={styles.sectionContent}>
-              {renderSwitch('diabetes', t('diabetes'))}
-              {renderSwitch('hypoglycemia', t('hypoglycemia'))}
-              {renderSwitch('heartConditions', t('heartConditions'))}
-              {renderSwitch('kidneyDisease', t('kidneyDisease'))}
-              {renderSwitch('liverDisease', t('liverDisease'))}
-              {renderSwitch('eatingDisorders', t('eatingDisorders'))}
-              {renderSwitch('pregnancy', t('pregnancy'))}
-              {renderSwitch('breastfeeding', t('breastfeeding'))}
-              {renderSwitch('gastrointestinalIssues', t('gastrointestinalIssues'))}
+              {renderSwitch('diabetes', t("healthProfile.diabetes"))}
+              {renderSwitch('hypoglycemia', t("healthProfile.hypoglycemia"))}
+              {renderSwitch('heartConditions', t("healthProfile.heartConditions"))}
+              {renderSwitch('kidneyDisease', t("healthProfile.kidneyDisease"))}
+              {renderSwitch('liverDisease', t("healthProfile.liverDisease"))}
+              {renderSwitch('eatingDisorders', t("healthProfile.eatingDisorders"))}
+              {renderSwitch('pregnancy', t("healthProfile.pregnancy"))}
+              {renderSwitch('breastfeeding', t("healthProfile.breastfeeding"))}
+              {renderSwitch('gastrointestinalIssues', t("healthProfile.gastrointestinalIssues"))}
               
               {/* Other Health Conditions */}
               <View style={styles.otherHealthConditionsSection}>
                 <DynamicText type="card" style={[styles.subsectionTitle, { color: getCardTextColor() }]}>
-                  {t('otherHealthConditions')}
+                  {t("healthProfile.otherHealthConditions")}
                 </DynamicText>
                 
                 {/* Add new health condition */}
@@ -289,7 +293,7 @@ export default function FastingProfileScreen({
                     }]}
                     value={fastingProfile.customHealthCondition}
                     onChangeText={(text) => updateProfile('customHealthCondition', text)}
-                    placeholder={t('enterHealthCondition')}
+                    placeholder={t("healthProfile.enterHealthCondition")}
                     placeholderTextColor={getSubTextColor()}
                   />
                   <TouchableOpacity
@@ -300,7 +304,7 @@ export default function FastingProfileScreen({
                     }]}
                   >
                     <DynamicText type="card" style={[styles.addButtonText, { color: '#ffffff' }]}>
-                      {t('others') || 'Others'}
+                      {t("healthProfile.others") || uiI18n.t("ui.others")}
                     </DynamicText>
                   </TouchableOpacity>
                 </View>
@@ -319,7 +323,7 @@ export default function FastingProfileScreen({
                       }]}
                     >
                       <DynamicText type="card" style={[styles.removeButtonText, { color: '#ffffff' }]}>
-                        {t('removeHealthCondition')}
+                        {t("healthProfile.removeHealthCondition")}
                       </DynamicText>
                     </TouchableOpacity>
                   </View>
@@ -329,99 +333,99 @@ export default function FastingProfileScreen({
           ))}
 
           {/* Nutritional Status & Body Composition */}
-          {renderSection(t('nutritionalStatus'), (
+          {renderSection(t("healthProfile.nutritionalStatus"), (
             <View style={styles.sectionContent}>
-              {renderSelect('bodyFatLevel', t('bodyFatLevel'), [
-                { value: 'low', label: t('low') },
-                { value: 'normal', label: t('normal') },
-                { value: 'high', label: t('high') }
+              {renderSelect('bodyFatLevel', t("healthProfile.bodyFatLevel"), [
+                { value: 'low', label: t("healthProfile.low") },
+                { value: 'normal', label: t("healthProfile.normal") },
+                { value: 'high', label: t("healthProfile.high") }
               ])}
-              {renderSelect('muscleMass', t('muscleMass'), [
-                { value: 'low', label: t('low') },
-                { value: 'normal', label: t('normal') },
-                { value: 'high', label: t('high') }
+              {renderSelect('muscleMass', t("healthProfile.muscleMass"), [
+                { value: 'low', label: t("healthProfile.low") },
+                { value: 'normal', label: t("healthProfile.normal") },
+                { value: 'high', label: t("healthProfile.high") }
               ])}
-              {renderSelect('micronutrientLevels', t('micronutrientLevels'), [
-                { value: 'low', label: t('low') },
-                { value: 'normal', label: t('normal') },
-                { value: 'high', label: t('high') }
+              {renderSelect('micronutrientLevels', t("healthProfile.micronutrientLevels"), [
+                { value: 'low', label: t("healthProfile.low") },
+                { value: 'normal', label: t("healthProfile.normal") },
+                { value: 'high', label: t("healthProfile.high") }
               ])}
-              {renderSelect('hydrationLevel', t('hydrationLevel'), [
-                { value: 'poor', label: t('poor') },
-                { value: 'good', label: t('good') },
-                { value: 'excellent', label: t('excellent') }
+              {renderSelect('hydrationLevel', t("healthProfile.hydrationLevel"), [
+                { value: 'poor', label: t("healthProfile.poor") },
+                { value: 'good', label: t("healthProfile.good") },
+                { value: 'excellent', label: t("healthProfile.excellent") }
               ])}
             </View>
           ))}
 
           {/* Mental Health & Cognitive Demands */}
-          {renderSection(t('mentalHealth'), (
+          {renderSection(t("healthProfile.mentalHealth"), (
             <View style={styles.sectionContent}>
-              {renderSwitch('highStressEnvironment', t('highStressEnvironment'))}
-              {renderSwitch('intensiveMentalTasks', t('intensiveMentalTasks'))}
-              {renderSwitch('anxiety', t('anxiety'))}
-              {renderSwitch('depression', t('depression'))}
+              {renderSwitch('highStressEnvironment', t("healthProfile.highStressEnvironment"))}
+              {renderSwitch('intensiveMentalTasks', t("healthProfile.intensiveMentalTasks"))}
+              {renderSwitch('anxiety', t("healthProfile.anxiety"))}
+              {renderSwitch('depression', t("healthProfile.depression"))}
             </View>
           ))}
 
           {/* Lifestyle & Activity Level */}
-          {renderSection(t('lifestyleActivity'), (
+          {renderSection(t("healthProfile.lifestyleActivity"), (
             <View style={styles.sectionContent}>
-              {renderSelect('activityLevel', t('activityLevel'), [
-                { value: 'sedentary', label: t('sedentary') },
-                { value: 'light', label: t('light') },
-                { value: 'moderate', label: t('moderate') },
-                { value: 'high', label: t('high') },
-                { value: 'athlete', label: t('athlete') }
+              {renderSelect('activityLevel', t("healthProfile.activityLevel"), [
+                { value: 'sedentary', label: t("healthProfile.sedentary") },
+                { value: 'light', label: t("healthProfile.light") },
+                { value: 'moderate', label: t("healthProfile.moderate") },
+                { value: 'high', label: t("healthProfile.high") },
+                { value: 'athlete', label: t("healthProfile.athlete") }
               ])}
-              {renderSwitch('physicalLabor', t('physicalLabor'))}
-              {renderSwitch('longShifts', t('longShifts'))}
-              {renderSelect('sleepQuality', t('sleepQuality'), [
-                { value: 'poor', label: t('poor') },
-                { value: 'fair', label: t('fair') },
-                { value: 'good', label: t('good') },
-                { value: 'excellent', label: t('excellent') }
+              {renderSwitch('physicalLabor', t("healthProfile.physicalLabor"))}
+              {renderSwitch('longShifts', t("healthProfile.longShifts"))}
+              {renderSelect('sleepQuality', t("healthProfile.sleepQuality"), [
+                { value: 'poor', label: t("healthProfile.poor") },
+                { value: 'fair', label: t("healthProfile.fair") },
+                { value: 'good', label: t("healthProfile.good") },
+                { value: 'excellent', label: t("healthProfile.excellent") }
               ])}
             </View>
           ))}
 
           {/* Fasting Protocol Preferences */}
-          {renderSection(t('fastingPreferences'), (
+          {renderSection(t("healthProfile.fastingPreferences"), (
             <View style={styles.sectionContent}>
-              {renderSelect('preferredFastingType', t('preferredFastingType'), [
-                { value: 'timeRestricted', label: t('timeRestricted') },
-                { value: 'alternateDay', label: t('alternateDay') },
-                { value: 'extended', label: t('extended') },
-                { value: 'custom', label: t('custom') }
+              {renderSelect('preferredFastingType', t("healthProfile.preferredFastingType"), [
+                { value: 'timeRestricted', label: t("healthProfile.timeRestricted") },
+                { value: 'alternateDay', label: t("healthProfile.alternateDay") },
+                { value: 'extended', label: t("healthProfile.extended") },
+                { value: 'custom', label: t("healthProfile.custom") }
               ])}
-              {renderSlider('maxFastingHours', t('maxFastingHours'), 8, 24, 2)}
-              {renderSelect('fastingFrequency', t('fastingFrequency'), [
-                { value: 'daily', label: t('daily') },
-                { value: 'weekly', label: t('weekly') },
-                { value: 'monthly', label: t('monthly') }
+              {renderSlider('maxFastingHours', t("healthProfile.maxFastingHours"), 8, 24, 2)}
+              {renderSelect('fastingFrequency', t("healthProfile.fastingFrequency"), [
+                { value: 'daily', label: t("healthProfile.daily") },
+                { value: 'weekly', label: t("healthProfile.weekly") },
+                { value: 'monthly', label: t("healthProfile.monthly") }
               ])}
             </View>
           ))}
 
           {/* Goals */}
-          {renderSection(t('fastingGoals'), (
+          {renderSection(t("healthProfile.fastingGoals"), (
             <View style={styles.sectionContent}>
-              {renderSelect('primaryGoal', t('primaryGoal'), [
-                { value: 'weightLoss', label: t('weightLoss') },
-                { value: 'metabolicHealth', label: t('metabolicHealth') },
-                { value: 'generalHealth', label: t('generalHealth') },
-                { value: 'spiritual', label: t('spiritual') },
-                { value: 'medical', label: t('medical') }
+              {renderSelect('primaryGoal', t("healthProfile.primaryGoal"), [
+                { value: 'weightLoss', label: t("healthProfile.weightLoss") },
+                { value: 'metabolicHealth', label: t("healthProfile.metabolicHealth") },
+                { value: 'generalHealth', label: t("healthProfile.generalHealth") },
+                { value: 'spiritual', label: t("healthProfile.spiritual") },
+                { value: 'medical', label: t("healthProfile.medical") }
               ])}
             </View>
           ))}
 
           {/* Health Monitoring & Tracking */}
-          {renderSection(t('healthMonitoring'), (
+          {renderSection(t("healthProfile.healthMonitoring"), (
             <View style={styles.sectionContent}>
-              {renderSwitch('medicalSupervision', t('medicalSupervision'))}
-              {renderSwitch('selfMonitoring', t('selfMonitoring'))}
-              {renderSwitch('wearableDevices', t('wearableDevices'))}
+              {renderSwitch('medicalSupervision', t("healthProfile.medicalSupervision"))}
+              {renderSwitch('selfMonitoring', t("healthProfile.selfMonitoring"))}
+              {renderSwitch('wearableDevices', t("healthProfile.wearableDevices"))}
             </View>
           ))}
 
@@ -431,7 +435,7 @@ export default function FastingProfileScreen({
             style={[styles.saveButton, { backgroundColor: getAccentColor(), borderColor: getCardBorderColor() }]}
           >
             <DynamicText type="card" style={[styles.saveButtonText, { color: '#ffffff' }]}>
-              {t('saveProfile')}
+              {t("healthProfile.saveProfile")}
             </DynamicText>
           </TouchableOpacity>
         </ScrollView>
@@ -460,7 +464,7 @@ export default function FastingProfileScreen({
               style={[styles.modalButton, { backgroundColor: getAccentColor() }]}
             >
               <DynamicText type="card" style={[styles.modalButtonText, { color: '#ffffff' }]}>
-                {S.ok || 'OK'}
+                {S.ok || uiI18n.t("adminProfile.ok")}
               </DynamicText>
             </TouchableOpacity>
           </View>

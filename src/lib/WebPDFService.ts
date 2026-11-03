@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import * as FileSystem from 'expo-file-system';
 
 export interface PDFUploadResult {
@@ -46,7 +47,7 @@ export class WebPDFService {
       console.error('❌ WebPDFService: Failed to upload PDF:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : uiI18n.t("ui.unknownError"),
       };
     }
   }
@@ -55,13 +56,13 @@ export class WebPDFService {
    * Generate WhatsApp message with PDF link
    */
   static generateWhatsAppMessage(doctorName: string, fileName: string, pdfUrl: string): string {
-    return `Hi Dr. ${doctorName}, please find attached my medical document: ${fileName}\n\n📄 View Document: ${pdfUrl}\n\nThis document was shared securely through AuricRX Medical Coach.`;
+    return uiI18n.t("ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec", { value1: doctorName, value2: fileName, value3: pdfUrl });
   }
   
   /**
    * Generate Gmail message with PDF link
    */
   static generateGmailMessage(doctorName: string, fileName: string, pdfUrl: string): string {
-    return `Hi Dr. ${doctorName},\n\nPlease find attached my medical document: ${fileName}\n\n📄 View Document: ${pdfUrl}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient`;
+    return uiI18n.t("ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5", { value1: doctorName, value2: fileName, value3: pdfUrl });
   }
 }

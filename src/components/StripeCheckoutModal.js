@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from './PremiumButton';
 // src/components/StripeCheckoutModal.js
 // Stripe checkout modal matching app theme
@@ -40,6 +42,7 @@ async function getAuthToken() {
 }
 
 export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess, country = 'US' }) {
+  useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
   const { t, i18n } = useTranslation();
   const es = i18n.language.startsWith('es');
@@ -56,7 +59,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
       
       const token = await getAuthToken();
       if (!token) {
-        throw new Error('Not authenticated');
+        throw new Error(uiI18n.t("ui.notAuthenticated"));
       }
 
       console.log('🔍 Fetching checkout URL from:', `${API_BASE_URL}/api/stripe/create-checkout`);
@@ -93,12 +96,12 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           onSuccess();
         }
       } else {
-        throw new Error(data.message || 'Failed to create checkout session');
+        throw new Error(data.message || uiI18n.t("ui.failedToCreateCheckoutSession"));
       }
     } catch (err) {
       console.error('❌ Checkout creation failed:', err);
       setError(err.message);
-      Alert.alert('Error', `Failed to start checkout: ${err.message}`);
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToStartCheckoutValue", { value1: err.message }));
     } finally {
       setLoading(false);
     }
@@ -125,7 +128,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: getCardBorderColor() }]}>
             <DynamicText type="primary" style={styles.title}>
-              {es ? 'Mejorar a Pro' : 'Upgrade to Pro'}
+              {uiI18n.t("localized.StripeCheckoutModal.text131")}
             </DynamicText>
             <TouchableOpacity
               onPress={onClose}
@@ -150,14 +153,12 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
             ))}
             <DynamicText type="secondary">{t('subscriptionPlans.disclosure')}</DynamicText>
           </View>
-          {Platform.OS !== 'web' ? <DynamicText type="secondary" style={{ padding: 20 }}>{es ? 'Las compras móviles están temporalmente deshabilitadas mientras integramos la facturación de la tienda.' : 'Mobile purchases are temporarily unavailable while store billing is integrated.'}</DynamicText> : <TouchableOpacity onPress={openCheckoutInBrowser} disabled={loading}><DynamicText type="primary" style={{ padding: 20 }}>{es ? 'Continuar al pago' : 'Continue to checkout'}</DynamicText></TouchableOpacity>}
+          {Platform.OS !== 'web' ? <DynamicText type="secondary" style={{ padding: 20 }}>{uiI18n.t("localized.StripeCheckoutModal.text156")}</DynamicText> : <TouchableOpacity onPress={openCheckoutInBrowser} disabled={loading}><DynamicText type="primary" style={{ padding: 20 }}>{uiI18n.t("localized.StripeCheckoutModal.text156")}</DynamicText></TouchableOpacity>}
           {/* Content */}
           {loading && (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={theme?.accent || '#d4af37'} />
-              <DynamicText type="secondary" style={styles.loadingText}>
-                Loading checkout...
-              </DynamicText>
+              <DynamicText type="secondary" style={styles.loadingText}>{uiI18n.t("ui.loadingCheckout")}</DynamicText>
             </View>
           )}
 
@@ -170,7 +171,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
                 onPress={openCheckoutInBrowser}
                 style={[styles.retryButton, { backgroundColor: theme?.accent || '#d4af37' }]}
               >
-                <DynamicText type="primary" style={styles.retryText}>Retry</DynamicText>
+                <DynamicText type="primary" style={styles.retryText}>{uiI18n.t("common.sanpablo.retry")}</DynamicText>
               </PremiumButton>
             </View>
           )}

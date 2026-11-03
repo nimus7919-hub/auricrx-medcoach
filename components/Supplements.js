@@ -1,3 +1,5 @@
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from './KeyboardForm';
 import { vip } from '../src/theme/vip';
 import PremiumButton from '../src/components/PremiumButton';
@@ -13,6 +15,7 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 
 // Supplements component moved outside App to prevent remounting
 const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
+  useUILanguage();
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
@@ -20,37 +23,37 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
   // Unit options for supplements (dosage strength units only - NOT package types)
   const dosageUnits = [
     // Mass units
-    'Mcg', 'Mg', 'G', 'Kg',
+    "Mcg", "mg", "g", "Kg",
     // International units
-    'IU',
+    "IU",
     // Special vitamin units
-    'Mcg DFE', 'Mg NE', 'Mg alpha-tocopherol',
+    "Mcg DFE", "Mg NE", "Mg alpha-tocopherol",
     // Probiotics
-    'CFU', 'Billion CFU',
+    "CFU", "Billion CFU",
     // Enzyme activity units
-    'HUT', 'DU', 'FIP', 'ALU', 'GDU', 'FCC units',
+    "HUT", "DU", "FIP", "ALU", "GDU", "FCC units",
     // Liquid volumes
-    'mL', 'L',
+    'mL', "L",
     // Concentrations
-    'Mg/mL', 'Mcg/mL', 'Mg/5mL', '% w/w', '% w/v', '% v/v',
+    "Mg/mL", "Mcg/mL", "Mg/5mL", "% w/w", "% w/v", "% v/v",
     // Ratios
     '1:1', '1:2', '1:5',
     // Powder measurements
-    'Tsp', 'Tbsp', 'Scoop',
+    "Tsp", "Tbsp", "Scoop",
     // General
-    'Unit', 'Units'
+    "Unit", "units"
   ];
 
   // Quantity unit options (package/container types)
   const quantityUnits = [
-    'Tablet', 'Tablets', 'Capsule', 'Capsules', 'Softgel', 'Softgels', 'Gel cap', 'Gel caps',
-    'Caplet', 'Caplets', 'Lozenge', 'Lozenges', 'Gummy', 'Gummies', 'Chewable', 'Chewables',
-    'mL', 'L', 'Bottle', 'Bottles', 'Vial', 'Vials', 'Ampoule', 'Ampoules',
-    'Drop', 'Drops', 'Spray', 'Sprays', 'Puff', 'Puffs',
-    'Patch', 'Patches', 'Suppository', 'Suppositories',
-    'Sachet', 'Sachets', 'Stick pack', 'Stick packs', 'Scoop', 'Scoops',
-    'Box', 'Boxes', 'Pack', 'Packs', 'Jar', 'Jars', 'Container', 'Containers',
-    'Serving', 'Servings', 'Dose', 'Doses', 'Unit', 'Units'
+    "Tablet", "Tablets", "Capsule", "Capsules", "Softgel", "Softgels", "Gel Cap", "Gel Caps",
+    "Caplet", "Caplets", "Lozenge", "Lozenges", "Gummy", "Gummies", "Chewable", "Chewables",
+    'mL', "L", "Bottle", "Bottles", "Vial", "Vials", "ampoule", "ampoules",
+    "Drop", "Drops", "Spray", "Sprays", "Puff", "Puffs",
+    "Patch", "Patches", "Suppository", "Suppositories",
+    "Sachet", "Sachets", "Stick pack", "Stick packs", "Scoop", "Scoops",
+    "Box", "Boxes", "Pack", "Packs", "Jar", "Jars", "Container", "Containers",
+    "Serving", "Servings", "Dose", "Doses", "Unit", "units"
   ];
   useEffect(() => {
     mounted.current += 1;
@@ -78,9 +81,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
     notes: '', 
     dosesLeft: '', 
     dosageValue: '', 
-    dosageUnit: 'Mg',
+    dosageUnit: "mg",
     quantityValue: '',
-    quantityUnit: 'Tablet',
+    quantityUnit: "Tablet",
     brand: '' 
   });
   const [addTimes, setAddTimes] = useState([]);
@@ -103,9 +106,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
     notes: '', 
     dosesLeft: '', 
     dosageValue: '', 
-    dosageUnit: 'Mg',
+    dosageUnit: "mg",
     quantityValue: '',
-    quantityUnit: 'Tablet',
+    quantityUnit: "Tablet",
     brand: '' 
   });
   const [editingSupplement, setEditingSupplement] = useState(null);
@@ -183,11 +186,11 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
 
   const getSuppStatuses = () => {
     const statuses = [
-      { key: 'taking', label: S.taking || 'Taking', emoji: '💊', color: '#2dd4bf' },
-      { key: 'onhold', label: S.onHold || 'On Hold', emoji: '⏸️', color: '#fbbf24' },
-      { key: 'prn', label: S.prn || 'PRN', emoji: '🕒', color: '#60a5fa' },
-      { key: 'finished', label: S.finished || 'Finished', emoji: '✅', color: '#a3e635' },
-      { key: 'stopped', label: S.stopped || 'Stopped', emoji: '⛔', color: '#f87171' }
+      { key: 'taking', label: S.taking || uiI18n.t("medications.filters.taking"), emoji: '💊', color: '#2dd4bf' },
+      { key: 'onhold', label: S.onHold || uiI18n.t("supplements.statuses.onhold"), emoji: '⏸️', color: '#fbbf24' },
+      { key: 'prn', label: S.prn || uiI18n.t("medications.filters.prn"), emoji: '🕒', color: '#60a5fa' },
+      { key: 'finished', label: S.finished || uiI18n.t("medications.statuses.finished"), emoji: '✅', color: '#a3e635' },
+      { key: 'stopped', label: S.stopped || uiI18n.t("medications.statuses.stopped"), emoji: '⛔', color: '#f87171' }
     ];
     console.log('[SUPPLEMENTS] Status labels:', statuses.map(s => ({ key: s.key, label: s.label })));
     return statuses;
@@ -218,13 +221,13 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       
       // Show loading state
       setShowAiAnalysis(true);
-      setAiAnalysisQuery('Searching for nearby stores...');
+      setAiAnalysisQuery(uiI18n.t("ui.searchingForNearbyStores"));
       
       // Search for supplement stores using the same API pattern as pharmacies
       const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/supplements/nearby?lat=${latitude}&lon=${longitude}&supplement=${encodeURIComponent(supplementName)}&limit=10`);
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(uiI18n.t("ui.httpValue", { value1: response.status }));
       }
       
       const data = await response.json();
@@ -320,7 +323,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         }
       }
       
-      setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'Mg', quantityValue: '', quantityUnit: 'Tablet', brand: '' });
+      setAddForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: "mg", quantityValue: '', quantityUnit: "Tablet", brand: '' });
       setAddTimes([]);
       setShowAdd(false);
     } catch (error) {
@@ -351,7 +354,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
           }
         : supp
     ));
-    setEditForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: 'Mg', quantityValue: '', quantityUnit: 'Tablet', brand: '' });
+    setEditForm({ name: '', times: '', status: 'taking', startDate: '', endDate: '', notes: '', dosesLeft: '', dosageValue: '', dosageUnit: "mg", quantityValue: '', quantityUnit: "Tablet", brand: '' });
     setEditTimes([]);
     setEditingSupplement(null);
     setShowEdit(false);
@@ -366,7 +369,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
 
   const handleRefillComplete = (supplementName) => {
     // Update the supplement's last refill date
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0];
     setSupplements(prev => prev.map(s => 
       s.name === supplementName ? { ...s, lastRefill: currentDate } : s
     ));
@@ -545,9 +548,9 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       setEditForm({
                         ...supp,
                         dosageValue: supp.dosageValue || supp.dosage?.split(' ')[0] || '',
-                        dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || 'Mg',
+                        dosageUnit: supp.dosageUnit || supp.dosage?.split(' ').slice(1).join(' ') || "mg",
                         quantityValue: supp.quantityValue || supp.quantity?.split(' ')[0] || '',
-                        quantityUnit: supp.quantityUnit || supp.quantity?.split(' ').slice(1).join(' ') || 'Tablet'
+                        quantityUnit: supp.quantityUnit || supp.quantity?.split(' ').slice(1).join(' ') || "Tablet"
                       });
                       setEditTimes(supp.times ? (typeof supp.times === 'string' ? supp.times.split(', ') : supp.times) : []);
                       setEditingSupplement(supp);
@@ -590,12 +593,12 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                   <TouchableOpacity
                     onPress={() => {
                       Alert.alert(
-                        S.deleteSupplement || 'Delete Supplement',
-                        S.deleteSupplementConfirm || 'Are you sure you want to delete this supplement?',
+                        S.deleteSupplement || uiI18n.t("ui.deleteSupplement"),
+                        S.deleteSupplementConfirm || uiI18n.t("ui.areYouSureYouWantToDeleteThisSupplement"),
                         [
-                          { text: S.cancel || 'Cancel', style: 'cancel' },
+                          { text: S.cancel || uiI18n.t("healthAnalytics.cancel"), style: 'cancel' },
                           { 
-                            text: S.delete || 'Delete', 
+                            text: S.delete || uiI18n.t("ai.delete"), 
                             style: 'destructive',
                             onPress: async () => {
                               // Delete the supplement from local state first for immediate UI update
@@ -612,7 +615,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                                 try {
                                   const supplementId = supp.dbId || supp.id;
                                   const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/supplements?userId=${user.uid}&supplementId=${supplementId}`, {
-                                    method: 'DELETE'
+                                    method: uiI18n.t("ai.delete")
                                   });
                                   
                                   const result = await response.json();
@@ -865,7 +868,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       fontFamily: 'Inter_600SemiBold'
                     }}
                   >
-                    {addForm.dosageUnit}
+                    {uiI18n.t('unitLabels.' + addForm.dosageUnit, { defaultValue: addForm.dosageUnit })}
                   </DynamicText>
                   <DynamicText 
                     type="sub" 
@@ -1053,7 +1056,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       fontFamily: 'Inter_600SemiBold'
                     }}
                   >
-                    {addForm.quantityUnit}
+                    {uiI18n.t('unitLabels.' + addForm.quantityUnit, { defaultValue: addForm.quantityUnit })}
                   </DynamicText>
                   <DynamicText 
                     type="sub" 
@@ -1130,7 +1133,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), maxHeight: '80%' }]}>
             <View style={styles.modalHeader}>
-              <DynamicText type="card" style={styles.modalTitle}>AI Analysis</DynamicText>
+              <DynamicText type="card" style={styles.modalTitle}>{uiI18n.t("ui.aiAnalysis_e63991")}</DynamicText>
               <TouchableOpacity onPress={() => setShowAiAnalysis(false)}>
                 <DynamicText type="sub" style={{ fontSize: 18 }}>✕</DynamicText>
               </TouchableOpacity>
@@ -1147,7 +1150,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                 onPress={() => setShowAiAnalysis(false)}
                 style={[styles.button, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor(), flex: 1 }]}
               >
-                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>Close</DynamicText>
+                <DynamicText type="card" style={{ color: getCardTextColor(), textAlign: 'center' }}>{uiI18n.t("ai.close")}</DynamicText>
               </TouchableOpacity>
               
               <PremiumButton 
@@ -1159,7 +1162,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                 }}
                 style={[styles.button, { backgroundColor: theme.accent, flex: 1 }]}
               >
-                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>Search Again</DynamicText>
+                <DynamicText type="card" style={{ color: '#fff', textAlign: 'center' }}>{uiI18n.t("ui.searchAgain")}</DynamicText>
               </PremiumButton>
             </View>
           </View>
@@ -1199,7 +1202,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
-                  {S.editSupplement || 'Edit Supplement'}
+                  {S.editSupplement || uiI18n.t("supplements.editSupplement")}
                 </DynamicText>
                 <TouchableOpacity onPress={() => {
                   setShowEdit(false);
@@ -1308,7 +1311,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       fontFamily: 'Inter_600SemiBold'
                     }}
                   >
-                    {editForm.dosageUnit}
+                    {uiI18n.t('unitLabels.' + editForm.dosageUnit, { defaultValue: editForm.dosageUnit })}
                   </DynamicText>
                   <DynamicText 
                     type="sub" 
@@ -1496,7 +1499,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                       fontFamily: 'Inter_600SemiBold'
                     }}
                   >
-                    {editForm.quantityUnit}
+                    {uiI18n.t('unitLabels.' + editForm.quantityUnit, { defaultValue: editForm.quantityUnit })}
                   </DynamicText>
                   <DynamicText 
                     type="sub" 
@@ -1539,7 +1542,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                     alignItems: 'center'
                   }}
                 >
-                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold' }}>{S.save || 'Save'}</DynamicText>
+                  <DynamicText type="card" style={{ color: '#fff', fontFamily: 'Inter_600SemiBold' }}>{S.save || uiI18n.t("medications.save")}</DynamicText>
                 </PremiumButton>
               </View>
             </ScrollView>
@@ -1589,7 +1592,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       <DosageUnitDropdown
         visible={showDosageUnitDropdown}
         units={dosageUnits}
-        selectedUnit={addForm.dosageUnit}
+        selectedUnit={uiI18n.t('unitLabels.' + addForm.dosageUnit, { defaultValue: addForm.dosageUnit })}
         onSelect={(unit) => setAddForm(prev => ({ ...prev, dosageUnit: unit }))}
         onClose={() => setShowDosageUnitDropdown(false)}
         theme={theme}
@@ -1602,7 +1605,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       <DosageUnitDropdown
         visible={showEditDosageUnitDropdown}
         units={dosageUnits}
-        selectedUnit={editForm.dosageUnit}
+        selectedUnit={uiI18n.t('unitLabels.' + editForm.dosageUnit, { defaultValue: editForm.dosageUnit })}
         onSelect={(unit) => setEditForm(prev => ({ ...prev, dosageUnit: unit }))}
         onClose={() => setShowEditDosageUnitDropdown(false)}
         theme={theme}
@@ -1616,7 +1619,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       <DosageUnitDropdown
         visible={showQuantityUnitDropdown}
         units={quantityUnits}
-        selectedUnit={addForm.quantityUnit}
+        selectedUnit={uiI18n.t('unitLabels.' + addForm.quantityUnit, { defaultValue: addForm.quantityUnit })}
         onSelect={(unit) => setAddForm(prev => ({ ...prev, quantityUnit: unit }))}
         onClose={() => setShowQuantityUnitDropdown(false)}
         theme={theme}
@@ -1629,7 +1632,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
       <DosageUnitDropdown
         visible={showEditQuantityUnitDropdown}
         units={quantityUnits}
-        selectedUnit={editForm.quantityUnit}
+        selectedUnit={uiI18n.t('unitLabels.' + editForm.quantityUnit, { defaultValue: editForm.quantityUnit })}
         onSelect={(unit) => setEditForm(prev => ({ ...prev, quantityUnit: unit }))}
         onClose={() => setShowEditQuantityUnitDropdown(false)}
         theme={theme}
@@ -1648,7 +1651,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
             if (selectedDate && dateTarget && dateField) {
-              const formattedDate = selectedDate.toISOString().split('T')[0];
+              const formattedDate = selectedDate.toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0];
               if (dateTarget === 'add') {
                 setAddForm(prev => ({ ...prev, [dateField]: formattedDate }));
               } else if (dateTarget === 'edit') {
@@ -1706,14 +1709,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
               textAlign: 'center',
               color: theme.text,
             }}>
-              {S?.searchingPharmacies || 'Searching for pharmacies...'}
+              {S?.searchingPharmacies || uiI18n.t("medications.searchingPharmacies")}
             </Text>
             <Text style={{
               fontSize: 11,
               textAlign: 'center',
               color: theme.subtext,
             }}>
-              {S?.pleaseWait || 'Please wait'}
+              {S?.pleaseWait || uiI18n.t("common.pleaseWait")}
             </Text>
           </View>
         </View>
@@ -1724,6 +1727,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
 
 // Dosage Unit Dropdown Component using Modal for top-level rendering
 const DosageUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, theme, getCardBackgroundColor, getCardBorderColor, getCardTextColor, buttonLayout }) => {
+  useUILanguage();
   return (
     <Modal
       visible={visible}
@@ -1781,7 +1785,7 @@ const DosageUnitDropdown = ({ visible, units, selectedUnit, onSelect, onClose, t
                     fontFamily: selectedUnit === unit ? 'Inter_600SemiBold' : 'Inter_400Regular'
                   }}
                 >
-                  {unit}
+                  {uiI18n.t('unitLabels.' + unit, { defaultValue: unit })}
                 </DynamicText>
               </TouchableOpacity>
             ))}

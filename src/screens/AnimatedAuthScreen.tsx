@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -21,6 +23,7 @@ const { width, height } = Dimensions.get('window');
 
 type AuthUser = { uid: string; email: string | null; displayName: string | null; emailVerified: boolean };
 const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?: AuthUser) => void; onClose: () => void }) => {
+  useUILanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -77,25 +80,25 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
 
   const handleAuth = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.pleaseFillInAllFields"));
       return;
     }
 
     setLoading(true);
     try {
       const result = await authService.signInWithEmail(email, password);
-      if (!result.success) throw new Error(result.error || 'Sign-in failed');
-      Alert.alert('Success', 'Signed in successfully!');
+      if (!result.success) throw new Error(result.error || uiI18n.t("ui.signInFailed"));
+      Alert.alert(uiI18n.t("adminProfile.success"), uiI18n.t("ui.signedInSuccessfully"));
       onAuthSuccess();
     } catch (error) {
-      Alert.alert('Error', (error instanceof Error ? error.message : String(error)));
+      Alert.alert(uiI18n.t("adminProfile.error"), (error instanceof Error ? error.message : String(error)));
     } finally {
       setLoading(false);
     }
   };
 
   const handlePhoneAuth = async () => {
-    Alert.alert('Phone Authentication', 'Phone authentication will be implemented soon!');
+    Alert.alert(uiI18n.t("ui.phoneAuthentication"), uiI18n.t("ui.phoneAuthenticationWillBeImplementedSoon"));
   };
 
   const handleGoogleAuth = async () => {
@@ -103,13 +106,13 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
     try {
       const result = await authService.signInWithGoogle();
       if (result.success && 'user' in result) {
-        Alert.alert('Success', 'Signed in with Google successfully!');
+        Alert.alert(uiI18n.t("adminProfile.success"), uiI18n.t("ui.signedInWithGoogleSuccessfully"));
         onAuthSuccess(result.user);
       } else {
-        Alert.alert('Error', result.error);
+        Alert.alert(uiI18n.t("adminProfile.error"), result.error);
       }
     } catch (error) {
-      Alert.alert('Error', 'Google authentication failed');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.googleAuthenticationFailed"));
     } finally {
       setLoading(false);
     }
@@ -133,8 +136,8 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
       onGoogleSuccess={async ({ user }: { user: AuthUser }) => { onAuthSuccess(user); }}
       onSignUp={async (data: { email: string; password: string; firstName: string; lastName: string; consents: { terms: boolean; privacy: boolean; health: boolean } }) => {
         const result = await authService.signUpWithEmail(data.email, data.password, data.firstName, data.lastName, data.consents);
-        if (!result.success) throw new Error(result.error || 'Sign-up failed');
-        Alert.alert('Success', result.message || 'Please verify your email before signing in.');
+        if (!result.success) throw new Error(result.error || uiI18n.t("ui.signUpFailed"));
+        Alert.alert(uiI18n.t("adminProfile.success"), result.message || uiI18n.t("ui.pleaseVerifyYourEmailBeforeSigningIn"));
         setIsSignUp(false);
       }}
     />;
@@ -187,7 +190,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Email"
+                  placeholder={uiI18n.t("adminProfile.email")}
                   placeholderTextColor="#D4AF37"
                   value={email}
                   onChangeText={setEmail}
@@ -199,7 +202,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Password"
+                  placeholder={uiI18n.t("ui.password")}
                   placeholderTextColor="#D4AF37"
                   value={password}
                   onChangeText={setPassword}
@@ -220,7 +223,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
                   style={styles.signInButton}
                 >
                   <Text style={styles.signInButtonText}>
-                    {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                    {loading ? uiI18n.t("common.loading") : (isSignUp ? uiI18n.t("ui.signUp") : uiI18n.t("ui.signIn"))}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -229,12 +232,12 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
               <View style={styles.socialContainer}>
                 <TouchableOpacity style={styles.socialButton} onPress={handlePhoneAuth}>
                   <Text style={styles.socialIcon}>🍎</Text>
-                  <Text style={styles.socialButtonText}>Continue with Apple</Text>
+                  <Text style={styles.socialButtonText}>{uiI18n.t("ui.continueWithApple")}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.socialButton} onPress={handleGoogleAuth}>
-                  <Text style={styles.socialIcon}>G</Text>
-                  <Text style={styles.socialButtonText}>Continue with Google</Text>
+                  <Text style={styles.socialIcon}>{"G"}</Text>
+                  <Text style={styles.socialButtonText}>{uiI18n.t("ui.continueWithGoogle")}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -244,14 +247,12 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
                 onPress={() => setIsSignUp(!isSignUp)}
               >
                 <Text style={styles.toggleText}>
-                  {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                  {isSignUp ? uiI18n.t("ui.alreadyHaveAnAccountSignIn") : uiI18n.t("ui.donTHaveAnAccountSignUp")}
                 </Text>
               </TouchableOpacity>
 
               {/* Legal Text */}
-              <Text style={styles.legalText}>
-                By signing in, you agree to our Terms of Service and Privacy Policy
-              </Text>
+              <Text style={styles.legalText}>{uiI18n.t("ui.bySigningInYouAgreeToOurTermsOfServiceAndPrivacyPolicy")}</Text>
             </View>
           </Animated.View>
         </View>
@@ -262,6 +263,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
 
 /** Animated top beam: slit + pulse + sweep */
 function AnimatedTopBeam() {
+  useUILanguage();
   return (
     <View style={styles.topBeamContainer}>
       {/* narrow slit */}

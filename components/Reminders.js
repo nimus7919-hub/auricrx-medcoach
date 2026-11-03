@@ -1,3 +1,5 @@
+import uiI18n from "../src/i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
 import KeyboardForm from './KeyboardForm';
 import MedicationAutocomplete from './MedicationAutocomplete';
@@ -31,6 +33,7 @@ const Reminders = ({
   meds,
   setMeds
 }) => {
+  useUILanguage();
   // Mount/unmount detection
   const mounted = useRef(0);
   const { t, i18n } = useTranslation();
@@ -75,9 +78,9 @@ const Reminders = ({
     notes: '',
     // Medication-specific fields
     medicationName: '',
-    components: [{ strength: '', unit: 'Mg' }], // Array for multiple components
+    components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }], // Array for multiple components
     quantity: '',
-    quantityUnit: 'Tablets',
+    quantityUnit: uiI18n.t("medications.quantityUnits.tablets"),
     isSingleComponent: true, // Default to single component
     // Supplement-specific fields
     supplementName: '',
@@ -137,9 +140,9 @@ const Reminders = ({
         notes: '',
         // Medication-specific fields
         medicationName: '',
-        components: [{ strength: '', unit: 'Mg' }],
+        components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }],
         quantity: '',
-        quantityUnit: 'Tablets',
+        quantityUnit: uiI18n.t("medications.quantityUnits.tablets"),
         isSingleComponent: true, // Default to single component
         // Appointment-specific fields
         address: ''
@@ -158,9 +161,9 @@ const Reminders = ({
       // Clear medication fields when switching away from medication
       ...(newType !== 'medication' && {
         medicationName: '',
-        components: [{ strength: '', unit: 'Mg' }],
+        components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }],
         quantity: '',
-        quantityUnit: 'Tablets',
+        quantityUnit: uiI18n.t("medications.quantityUnits.tablets"),
         isSingleComponent: true,
       }),
       // Clear appointment fields when switching away from appointment
@@ -174,7 +177,7 @@ const Reminders = ({
   const addComponent = () => {
     setAddForm(prev => ({
       ...prev,
-      components: [...prev.components, { strength: '', unit: 'Mg' }]
+      components: [...prev.components, { strength: '', unit: uiI18n.t("reminders.units.mg") }]
     }));
   };
 
@@ -229,7 +232,7 @@ const Reminders = ({
           isSingleComponent: reminderData.isSingleComponent !== undefined ? reminderData.isSingleComponent : true,
           times: [reminderData.time],
           status: 'taking',
-          startDate: reminderData.startDate || new Date().toISOString().split('T')[0],
+          startDate: reminderData.startDate || new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0],
           endDate: reminderData.endDate || '',
           notes: reminderData.notes || '',
           // Add reminder reference
@@ -261,7 +264,7 @@ const Reminders = ({
           quantityUnit: reminderData.quantityUnit || 'capsules',
           times: [reminderData.time],
           status: 'taking',
-          startDate: reminderData.startDate || new Date().toISOString().split('T')[0],
+          startDate: reminderData.startDate || new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0],
           endDate: reminderData.endDate || '',
           notes: reminderData.notes || '',
           dosesLeft: '',
@@ -418,9 +421,9 @@ const Reminders = ({
                     endDate: r.endDate || '',
                     notes: r.notes || '',
                     medicationName: r.medicationName || '',
-                    components: r.components || [{ strength: '', unit: 'Mg' }],
+                    components: r.components || [{ strength: '', unit: uiI18n.t("reminders.units.mg") }],
                     quantity: r.quantity || '',
-                    quantityUnit: r.quantityUnit || 'Tablets',
+                    quantityUnit: r.quantityUnit || uiI18n.t("medications.quantityUnits.tablets"),
                     isSingleComponent: r.isSingleComponent !== undefined ? r.isSingleComponent : true,
                     address: r.address || ''
                   };
@@ -437,9 +440,7 @@ const Reminders = ({
                   paddingVertical: 4
                 }}
               >
-                <DynamicText type="card" style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
-                  Edit
-                </DynamicText>
+                <DynamicText type="card" style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>{uiI18n.t("medications.edit")}</DynamicText>
               </TouchableOpacity>
 
               {/* Delete Button */}
@@ -452,9 +453,7 @@ const Reminders = ({
                   paddingVertical: 4
                 }}
               >
-                <DynamicText type="card" style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>
-                  Delete
-                </DynamicText>
+                <DynamicText type="card" style={{ color: '#ffffff', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>{uiI18n.t("ai.delete")}</DynamicText>
               </TouchableOpacity>
             </View>
           </View>
@@ -506,7 +505,7 @@ const Reminders = ({
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <DynamicText type="card" style={{ fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
-                    {editingReminderId ? (S.editReminder || 'Edit Reminder') : (S.addReminder || 'Add Reminder')}
+                    {editingReminderId ? (S.editReminder || uiI18n.t("reminders.editReminder")) : (S.addReminder || uiI18n.t("reminders.addReminder"))}
                   </DynamicText>
                   <TouchableOpacity onPress={() => {
                     setShowAdd(false);
@@ -522,7 +521,7 @@ const Reminders = ({
                   onSelect={med => setAddForm(prev => ({ ...prev, ...medicationFields(med), name: med.name, medicationName: med.name }))}
                   enabled={addForm.type === 'medication'}
                   ref={reminderNameRef}
-                  placeholder={S.namePlaceholder || "Reminder Name"}
+                  placeholder={S.namePlaceholder || uiI18n.t("ui.reminderName")}
                   placeholderTextColor={getCardTextColor() + '80'}
                   value={addForm.name}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, name: text, selectedMedicationName: null }))}
@@ -559,7 +558,7 @@ const Reminders = ({
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
-                    {addForm.time ? formatTime(addForm.time, { format: timeFormat }) : (S.selectTime || "Select Time")}
+                    {addForm.time ? formatTime(addForm.time, { format: timeFormat }) : (S.selectTime || uiI18n.t("reminders.selectTime"))}
                   </DynamicText>
                   <DynamicText type="sub">⏰</DynamicText>
                 </TouchableOpacity>
@@ -567,7 +566,7 @@ const Reminders = ({
                 {/* Reminder Type */}
                 <View style={{ marginBottom: 12 }}>
                   <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                    {S.reminderType || 'Type'}
+                    {S.reminderType || uiI18n.t("reminders.type")}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {['medication', 'supplement', 'appointment', 'exercise', 'other'].map((type) => (
@@ -593,10 +592,10 @@ const Reminders = ({
                             textAlign: 'center'
                           }}
                         >
-                          {type === 'medication' ? (S.medication || 'Medication') :
-                           type === 'appointment' ? (S.appointment || 'Appointment') :
-                           type === 'exercise' ? (S.exercise || 'Exercise') :
-                           type === 'other' ? (S.other || 'Other') :
+                          {type === uiI18n.t("reminders.medication") ? (S.medication || uiI18n.t("reminders.medication")) :
+                           type === uiI18n.t("reminders.appointment") ? (S.appointment || uiI18n.t("reminders.appointment")) :
+                           type === uiI18n.t("reminders.exercise") ? (S.exercise || uiI18n.t("reminders.exercise")) :
+                           type === uiI18n.t("reminders.other") ? (S.other || uiI18n.t("reminders.other")) :
                            type.charAt(0).toUpperCase() + type.slice(1)}
                         </DynamicText>
                       </TouchableOpacity>
@@ -607,7 +606,7 @@ const Reminders = ({
                 {/* Frequency */}
                 <View style={{ marginBottom: 12 }}>
                   <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                    {S.frequency || 'Frequency'}
+                    {S.frequency || uiI18n.t("reminders.frequency")}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {['daily', 'weekly', 'monthly', 'custom'].map((freq) => (
@@ -633,10 +632,10 @@ const Reminders = ({
                             textAlign: 'center'
                           }}
                         >
-                          {freq === 'daily' ? (S.daily || 'Daily') :
-                           freq === 'weekly' ? (S.weekly || 'Weekly') :
-                           freq === 'monthly' ? (S.monthly || 'Monthly') :
-                           freq === 'custom' ? (S.custom || 'Custom') :
+                          {freq === uiI18n.t("healthProfile.daily") ? (S.daily || uiI18n.t("healthProfile.daily")) :
+                           freq === uiI18n.t("healthProfile.weekly") ? (S.weekly || uiI18n.t("healthProfile.weekly")) :
+                           freq === uiI18n.t("ai.monthly") ? (S.monthly || uiI18n.t("ai.monthly")) :
+                           freq === uiI18n.t("healthProfile.custom") ? (S.custom || uiI18n.t("healthProfile.custom")) :
                            freq.charAt(0).toUpperCase() + freq.slice(1)}
                         </DynamicText>
                       </TouchableOpacity>
@@ -645,20 +644,20 @@ const Reminders = ({
                 </View>
 
                 {/* Custom Days Selection (only show when frequency is 'custom') */}
-                {addForm.frequency === 'custom' && (
+                {addForm.frequency === uiI18n.t("healthProfile.custom") && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                      {S.selectDays || 'Select Days'}
+                      {S.selectDays || uiI18n.t("reminders.selectDays")}
                     </DynamicText>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
                       {[
-                        { full: 'Monday', shortKey: 'mondayShort' },
-                        { full: 'Tuesday', shortKey: 'tuesdayShort' },
-                        { full: 'Wednesday', shortKey: 'wednesdayShort' },
-                        { full: 'Thursday', shortKey: 'thursdayShort' },
-                        { full: 'Friday', shortKey: 'fridayShort' },
-                        { full: 'Saturday', shortKey: 'saturdayShort' },
-                        { full: 'Sunday', shortKey: 'sundayShort' }
+                        { full: uiI18n.t("reminders.monday"), shortKey: 'mondayShort' },
+                        { full: uiI18n.t("reminders.tuesday"), shortKey: 'tuesdayShort' },
+                        { full: uiI18n.t("reminders.wednesday"), shortKey: 'wednesdayShort' },
+                        { full: uiI18n.t("reminders.thursday"), shortKey: 'thursdayShort' },
+                        { full: uiI18n.t("reminders.friday"), shortKey: 'fridayShort' },
+                        { full: uiI18n.t("reminders.saturday"), shortKey: 'saturdayShort' },
+                        { full: uiI18n.t("reminders.sunday"), shortKey: 'sundayShort' }
                       ].map((day) => {
                         const isSelected = addForm.customDays.includes(day.full);
                         return (
@@ -700,24 +699,24 @@ const Reminders = ({
                     </View>
                     {addForm.customDays.length > 0 && (
                       <DynamicText type="sub" style={{ fontSize: 10, marginTop: 8, color: getCardTextColor() + '80' }}>
-                        {S.selected || 'Selected'}: {addForm.customDays.join(', ')}
+                        {S.selected || uiI18n.t("reminders.selected")}: {addForm.customDays.join(', ')}
                       </DynamicText>
                     )}
                   </View>
                 )}
 
                 {/* Medication-specific fields */}
-                {addForm.type === 'medication' && (
+                {addForm.type === uiI18n.t("reminders.medication") && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                      {S.medicationDetails || 'Medication Details'}
+                      {S.medicationDetails || uiI18n.t("reminders.medicationDetails")}
                     </DynamicText>
                     
                     {/* Medication Name */}
                     <MedicationAutocomplete
                   onSelect={med => setAddForm(prev => ({ ...prev, ...medicationFields(med), name: med.name, medicationName: med.name }))}
                   enabled={addForm.type === 'medication'}
-                      placeholder={S.medicationNamePlaceholder || "Medication Name (e.g., Galvus Met)"}
+                      placeholder={S.medicationNamePlaceholder || uiI18n.t("reminders.medicationNamePlaceholder")}
                       placeholderTextColor={getCardTextColor() + '80'}
                       value={addForm.medicationName}
                       onChangeText={(text) => setAddForm(prev => ({ ...prev, medicationName: text, selectedMedicationName: null }))}
@@ -743,7 +742,7 @@ const Reminders = ({
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                           <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', color: getCardTextColor() }}>
-                            {S?.components || 'Components'} ({addForm.components.length})
+                            {S?.components || uiI18n.t("medications.components")} ({addForm.components.length})
                           </DynamicText>
                           
                           {/* Compact Multi-Component Checkbox */}
@@ -923,7 +922,7 @@ const Reminders = ({
                             color: getCardTextColor() + '80',
                             textAlign: 'center'
                           }}>
-                            {(S.total || 'Total')}: {addForm.components.map(comp => `${comp.strength || '0'}${comp.unit}`).join(' / ')}
+                            {(S.total || uiI18n.t("reminders.total"))}: {addForm.components.map(comp => `${comp.strength || '0'}${comp.unit}`).join(' / ')}
                           </DynamicText>
                         </View>
                       )}
@@ -1000,12 +999,12 @@ const Reminders = ({
                 {addForm.type === 'supplement' && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                      {'Supplement Details'}
+                      {uiI18n.t("ui.supplementDetails")}
                     </DynamicText>
                     
                     {/* Supplement Name */}
                     <TextInput
-                      placeholder={"Supplement Name (e.g., Vitamin D3)"}
+                      placeholder={uiI18n.t("ui.supplementNameEGVitaminD3")}
                       placeholderTextColor={getCardTextColor() + '80'}
                       value={addForm.supplementName}
                       onChangeText={(text) => setAddForm(prev => ({ ...prev, supplementName: text }))}
@@ -1028,7 +1027,7 @@ const Reminders = ({
 
                     {/* Brand (Optional) */}
                     <TextInput
-                      placeholder={"Brand (Optional)"}
+                      placeholder={uiI18n.t("ui.brandOptional")}
                       placeholderTextColor={getCardTextColor() + '80'}
                       value={addForm.brand}
                       onChangeText={(text) => setAddForm(prev => ({ ...prev, brand: text }))}
@@ -1051,7 +1050,7 @@ const Reminders = ({
 
                     {/* Dosage */}
                     <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                      {'Dosage per serving'}
+                      {uiI18n.t("ui.dosagePerServing")}
                     </DynamicText>
                     <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                       <TextInput
@@ -1075,7 +1074,7 @@ const Reminders = ({
                         returnKeyType="next"
                       />
                       <TextInput
-                        placeholder="mg"
+                        placeholder={uiI18n.t("reminders.units.mg")}
                         placeholderTextColor={getCardTextColor() + '80'}
                         value={addForm.dosageUnit}
                         onChangeText={(text) => setAddForm(prev => ({ ...prev, dosageUnit: text }))}
@@ -1098,7 +1097,7 @@ const Reminders = ({
 
                     {/* Quantity */}
                     <DynamicText type="card" style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                      {'Quantity in bottle/package'}
+                      {uiI18n.t("ui.quantityInBottlePackage")}
                     </DynamicText>
                     <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                       <TextInput
@@ -1122,7 +1121,7 @@ const Reminders = ({
                         returnKeyType="done"
                       />
                       <TextInput
-                        placeholder="capsules"
+                        placeholder={uiI18n.t("reminders.units.capsules")}
                         placeholderTextColor={getCardTextColor() + '80'}
                         value={addForm.quantityUnit}
                         onChangeText={(text) => setAddForm(prev => ({ ...prev, quantityUnit: text }))}
@@ -1146,15 +1145,15 @@ const Reminders = ({
                 )}
 
                 {/* Appointment-specific fields */}
-                {addForm.type === 'appointment' && (
+                {addForm.type === uiI18n.t("reminders.appointment") && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
-                      {S.appointmentDetails || 'Appointment Details'}
+                      {S.appointmentDetails || uiI18n.t("reminders.appointmentDetails")}
                     </DynamicText>
                     
                     {/* Address */}
                     <TextInput
-                      placeholder={S.addressPlaceholder || "Address (Optional)"}
+                      placeholder={S.addressPlaceholder || uiI18n.t("reminders.addressPlaceholder")}
                       placeholderTextColor={getCardTextColor() + '80'}
                       value={addForm.address}
                       onChangeText={(text) => setAddForm(prev => ({ ...prev, address: text }))}
@@ -1196,7 +1195,7 @@ const Reminders = ({
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
-                    {addForm.startDate || (S.startDateOptional || "Start Date (Optional)")}
+                    {addForm.startDate || (S.startDateOptional || uiI18n.t("reminders.startDateOptional"))}
                   </DynamicText>
                   <DynamicText type="sub">📅</DynamicText>
                 </TouchableOpacity>
@@ -1220,14 +1219,14 @@ const Reminders = ({
                   }}
                 >
                   <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular' }}>
-                    {addForm.endDate || (S.endDateOptional || "End Date (Optional)")}
+                    {addForm.endDate || (S.endDateOptional || uiI18n.t("reminders.endDateOptional"))}
                   </DynamicText>
                   <DynamicText type="sub">📅</DynamicText>
                 </TouchableOpacity>
 
                 {/* Notes */}
                 <TextInput
-                  placeholder={S.notesOptional || "Notes (Optional)"}
+                  placeholder={S.notesOptional || uiI18n.t("healthAnalytics.notesOptional")}
                   placeholderTextColor={getCardTextColor() + '80'}
                   value={addForm.notes}
                   onChangeText={(text) => setAddForm(prev => ({ ...prev, notes: text }))}
@@ -1251,10 +1250,10 @@ const Reminders = ({
                 <PremiumButton onPress={async () => {
                   try {
                     await testReminderNotification();
-                    Alert.alert(es ? 'Prueba programada' : 'Test scheduled', es ? 'Llegara en 10 segundos.' : 'Arrives in 10 seconds.');
-                  } catch (error) { Alert.alert(es ? 'Error de recordatorio' : 'Reminder error', error.message); }
+                    Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1253"), uiI18n.t("localized.Reminders.Reminders.text1253"));
+                  } catch (error) { Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), error.message); }
                 }} style={{ padding: 16, alignItems: 'center' }}>
-                  <DynamicText type="card">{es ? 'Probar recordatorio' : 'Test reminder'}</DynamicText>
+                  <DynamicText type="card">{uiI18n.t("localized.Reminders.Reminders.text1256")}</DynamicText>
                 </PremiumButton>
                 {/* Save Button */}
                 <PremiumButton
@@ -1324,12 +1323,12 @@ const Reminders = ({
                     setEditingReminderId(null);
                     } catch (error) {
                       console.error('[Reminders] save failed', error);
-                      Alert.alert(es ? 'No se pudo programar' : 'Could not schedule reminder', error.message);
+                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), error.message);
                     } finally { setSaving(false); }
                   }}
                 >
                   <DynamicText type="card" style={{ color: '#ffffff', fontFamily: 'Inter_800ExtraBold', fontSize: 16 }}>
-                    {editingReminderId ? (S.updateReminder || "Update Reminder") : (S.addReminder || "Add Reminder")}
+                    {editingReminderId ? (S.updateReminder || uiI18n.t("reminders.updateReminder")) : (S.addReminder || uiI18n.t("reminders.addReminder"))}
                   </DynamicText>
                 </PremiumButton>
               </ScrollView>
@@ -1383,9 +1382,9 @@ const Reminders = ({
               onStartShouldSetResponder={() => true}
             >
               <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
-                {S?.selectUnit || 'Select Unit'}
+                {S?.selectUnit || uiI18n.t("healthAnalytics.selectUnit")}
               </DynamicText>
-              {['Mg', 'G', 'Ml', 'Tablets', 'Capsules', 'Units'].map((unit) => (
+              {[uiI18n.t("reminders.units.mg"), uiI18n.t("reminders.units.g"), uiI18n.t("medications.quantityUnits.ml"), uiI18n.t("medications.quantityUnits.tablets"), uiI18n.t("medications.quantityUnits.capsules"), uiI18n.t("reminders.units.units")].map((unit) => (
                 <TouchableOpacity
                   key={unit}
                   onPress={() => {
@@ -1440,9 +1439,9 @@ const Reminders = ({
               onStartShouldSetResponder={() => true}
             >
               <DynamicText type="card" style={{ fontSize: 16, fontFamily: 'Inter_600SemiBold', marginBottom: 12, color: getCardTextColor() }}>
-                {S?.selectQuantityUnit || 'Select Quantity Unit'}
+                {S?.selectQuantityUnit || uiI18n.t("reminders.selectQuantityUnit")}
               </DynamicText>
-              {['Tablets', 'Capsules', 'Ml', 'Mg', 'G', 'Units', 'Pills'].map((unit) => (
+              {[uiI18n.t("medications.quantityUnits.tablets"), uiI18n.t("medications.quantityUnits.capsules"), uiI18n.t("medications.quantityUnits.ml"), uiI18n.t("reminders.units.mg"), uiI18n.t("reminders.units.g"), uiI18n.t("reminders.units.units"), uiI18n.t("reminders.units.pills")].map((unit) => (
                 <TouchableOpacity
                   key={unit}
                   onPress={() => {

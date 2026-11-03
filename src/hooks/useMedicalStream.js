@@ -1,3 +1,4 @@
+import uiI18n from "../i18n";
 import { API_BASE } from "../config/api";
 import { useEffect, useRef, useState } from "react";
 
@@ -15,7 +16,7 @@ export function useMedicalStream(serverUrl = `${API_BASE}/api/ai/stream`, option
   }, []);
 
   async function ask(messages) {
-    if (!serverUrl) throw new Error("No stream endpoint provided");
+    if (!serverUrl) throw new Error(uiI18n.t("ui.noStreamEndpointProvided"));
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -30,14 +31,14 @@ export function useMedicalStream(serverUrl = `${API_BASE}/api/ai/stream`, option
         body: JSON.stringify({ ...options, messages }),
         signal: controller.signal,
       });
-      if (!response.ok) throw new Error(`AI request failed: HTTP ${response.status}`);
+      if (!response.ok) throw new Error(uiI18n.t("ui.aiRequestFailedHttpValue", { value1: response.status }));
       if (!isCurrent()) return;
       if (options.stream === false) {
         const full = await response.text();
         if (isCurrent()) setText(full);
         return isCurrent() ? full : undefined;
       }
-      if (!response.body) throw new Error("No response body");
+      if (!response.body) throw new Error(uiI18n.t("ui.noResponseBody"));
       reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let full = "";

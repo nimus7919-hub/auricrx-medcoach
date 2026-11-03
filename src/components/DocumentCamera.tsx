@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -30,6 +32,7 @@ export default function DocumentCamera({
   enableEdgeDetection = true,
   theme
 }: DocumentCameraProps) {
+  useUILanguage();
   const [permission, requestPermission] = useCameraPermissions();
   const [cameraType, setCameraType] = useState<'back' | 'front'>('back');
   const [isCapturing, setIsCapturing] = useState(false);
@@ -81,7 +84,7 @@ export default function DocumentCamera({
       onCapture(photo.uri);
     } catch (error) {
       console.error('Failed to capture photo:', error);
-      Alert.alert('Error', 'Failed to capture photo');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCapturePhoto"));
     } finally {
       setIsCapturing(false);
     }
@@ -91,7 +94,7 @@ export default function DocumentCamera({
   if (!permission) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.permissionText, { color: currentTheme.text }]}>Requesting camera permission...</Text>
+        <Text style={[styles.permissionText, { color: currentTheme.text }]}>{uiI18n.t("ui.requestingCameraPermission")}</Text>
       </View>
     );
   }
@@ -99,12 +102,12 @@ export default function DocumentCamera({
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.permissionText, { color: currentTheme.text }]}>No access to camera</Text>
+        <Text style={[styles.permissionText, { color: currentTheme.text }]}>{uiI18n.t("ui.noAccessToCamera")}</Text>
         <TouchableOpacity style={[styles.closeButton, { backgroundColor: currentTheme.accent }]} onPress={requestPermission}>
-          <Text style={[styles.closeButtonText, { color: currentTheme.text }]}>Grant Permission</Text>
+          <Text style={[styles.closeButtonText, { color: currentTheme.text }]}>{uiI18n.t("ui.grantPermission")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.closeButton, { backgroundColor: currentTheme.chip }]} onPress={onClose}>
-          <Text style={[styles.closeButtonText, { color: currentTheme.text }]}>Close</Text>
+          <Text style={[styles.closeButtonText, { color: currentTheme.text }]}>{uiI18n.t("ai.close")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -162,7 +165,7 @@ export default function DocumentCamera({
         </TouchableOpacity>
         
         <TouchableOpacity style={[styles.doneButton, { backgroundColor: currentTheme.accent }]}>
-          <Text style={[styles.doneButtonText, { color: currentTheme.text }]}>Done</Text>
+          <Text style={[styles.doneButtonText, { color: currentTheme.text }]}>{uiI18n.t("ui.done")}</Text>
         </TouchableOpacity>
       </View>
 

@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { BlurView } from 'expo-blur';
 import { Feather } from '@expo/vector-icons';
 import Svg, { Defs, RadialGradient, Stop, Rect, Line, Path } from 'react-native-svg';
@@ -22,6 +24,7 @@ import { loadPrivacyText, loadTermsText } from '../services/legalService';
 
 
 export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLanguageChange, resetToSignIn, onResubscribe }: any) {
+  useUILanguage();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +51,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
 
   const onSignIn = async () => {
     if (!email || !pw) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.pleaseFillInAllFields"));
       return;
     }
     
@@ -71,7 +74,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
       } catch (e) {
         console.error('Failed to import CrashLogger:', e);
       }
-      Alert.alert('Error', 'Authentication failed. Please try again.');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.authenticationFailedPleaseTryAgain"));
     } finally {
       setLoading(false);
     }
@@ -83,12 +86,12 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     try {
       const result = await authService.signInWithGoogle();
       if (!result.success || !('user' in result)) {
-        Alert.alert('Error', result.error || googleAuthText(selectedLanguage).error);
+        Alert.alert(uiI18n.t("adminProfile.error"), result.error || googleAuthText(selectedLanguage).error);
         return;
       }
       await onAuthSuccess({ provider: 'google', user: result.user });
     } catch (error) {
-      Alert.alert('Error', googleAuthText(selectedLanguage).error);
+      Alert.alert(uiI18n.t("adminProfile.error"), googleAuthText(selectedLanguage).error);
     } finally {
       setGoogleLoading(false);
     }
@@ -112,129 +115,20 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
 
   const getLanguageLabel = (lang: string) => {
     switch (lang) {
-      case 'en': return 'English';
-      case 'es': return 'Español';
-      case 'pt': return 'Português';
-      case 'fr': return 'Français';
-      case 'de': return 'Deutsch';
+      case 'en': return uiI18n.t("settings.languages.en");
+      case 'es': return uiI18n.t("settings.languages.es");
+      case 'pt': return uiI18n.t("settings.languages.pt");
+      case 'fr': return uiI18n.t("settings.languages.fr");
+      case 'de': return uiI18n.t("settings.languages.de");
       case 'zh': return '中文';
-      default: return 'English';
+      default: return uiI18n.t("settings.languages.en");
     }
   };
 
   // Translation system
   const getTranslations = (lang: string) => {
-    const translations = {
-      en: {
-        email: "Email",
-        password: "Password",
-        signIn: "Sign In",
-        signUp: "Sign Up",
-        dontHaveAccount: "Don't have an account?",
-        continueWithApple: "iOS Coming Soon",
-        continueWithGoogle: "G   Continue with Google",
-        staySignedIn: "Stay signed in",
-        legalPrefix: "By signing in, you agree to our ",
-        legalConnector: " and ",
-        legalSuffix: ".",
-        termsOfService: "Terms of Service",
-        privacyPolicy: "Privacy Policy",
-        close: "Close",
-        loadingDocument: "Loading legal document...",
-        resubscribe: "Resubscribe"
-      },
-      es: {
-        email: "Correo",
-        password: "Contraseña",
-        signIn: "Iniciar Sesión",
-        signUp: "Registrarse",
-        dontHaveAccount: "¿No tienes una cuenta?",
-        continueWithApple: "iOS Próximamente",
-        continueWithGoogle: "G   Continuar con Google",
-        staySignedIn: "Mantenerme conectado",
-        legalPrefix: "Al iniciar sesión aceptas nuestros ",
-        legalConnector: " y nuestra ",
-        legalSuffix: ".",
-        termsOfService: "Términos de Servicio",
-        privacyPolicy: "Política de Privacidad",
-        close: "Cerrar",
-        loadingDocument: "Cargando documento legal...",
-        resubscribe: "Reactivar Suscripción"
-      },
-      pt: {
-        email: "Email",
-        password: "Senha",
-        signIn: "Entrar",
-        signUp: "Cadastrar",
-        dontHaveAccount: "Não tem uma conta?",
-        continueWithApple: "iOS Em Breve",
-        continueWithGoogle: "G   Continuar com Google",
-        staySignedIn: "Manter-me conectado",
-        legalPrefix: "Ao fazer login, você concorda com nossos ",
-        legalConnector: " e nossa ",
-        legalSuffix: ".",
-        termsOfService: "Termos de Serviço",
-        privacyPolicy: "Política de Privacidade",
-        close: "Fechar",
-        loadingDocument: "Carregando documento legal...",
-        resubscribe: "Reativar Assinatura"
-      },
-      fr: {
-        email: "Email",
-        password: "Mot de passe",
-        signIn: "Se connecter",
-        signUp: "S'inscrire",
-        dontHaveAccount: "Vous n'avez pas de compte ?",
-        continueWithApple: "iOS Bientôt Disponible",
-        continueWithGoogle: "G   Continuer avec Google",
-        staySignedIn: "Rester connecté",
-        legalPrefix: "En vous connectant, vous acceptez nos ",
-        legalConnector: " et notre ",
-        legalSuffix: ".",
-        termsOfService: "Conditions d'utilisation",
-        privacyPolicy: "Politique de confidentialité",
-        close: "Fermer",
-        loadingDocument: "Chargement du document légal...",
-        resubscribe: "Réabonner"
-      },
-      de: {
-        email: "E-Mail",
-        password: "Passwort",
-        signIn: "Anmelden",
-        signUp: "Registrieren",
-        dontHaveAccount: "Haben Sie kein Konto?",
-        continueWithApple: "iOS Bald Verfügbar",
-        continueWithGoogle: "G   Mit Google fortfahren",
-        staySignedIn: "Angemeldet bleiben",
-        legalPrefix: "Durch die Anmeldung stimmen Sie unseren ",
-        legalConnector: " und unserer ",
-        legalSuffix: " zu.",
-        termsOfService: "Nutzungsbedingungen",
-        privacyPolicy: "Datenschutzerklärung",
-        close: "Schließen",
-        loadingDocument: "Rechtlichen Text laden...",
-        resubscribe: "Erneut Abonnieren"
-      },
-      zh: {
-        email: "邮箱",
-        password: "密码",
-        signIn: "登录",
-        signUp: "注册",
-        dontHaveAccount: "没有账户？",
-        continueWithApple: "iOS 即将推出",
-        continueWithGoogle: "G   使用 Google 继续",
-        staySignedIn: "保持登录",
-        legalPrefix: "登录即表示您同意我们的",
-        legalConnector: "和",
-        legalSuffix: "。",
-        termsOfService: "服务条款",
-        privacyPolicy: "隐私政策",
-        close: "关闭",
-        loadingDocument: "正在加载法律文档...",
-        resubscribe: "重新订阅"
-      }
-    };
-    return translations[lang as keyof typeof translations] || translations.en;
+    
+    return uiI18n.t('authSignIn', { lng: lang, returnObjects: true }) as Record<string, string>;
   };
 
   const t = getTranslations(selectedLanguage);
@@ -255,7 +149,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
       }
     } catch (error) {
       console.error('Failed to load legal document:', error);
-      Alert.alert('Error', 'Unable to load legal document. Please try again later.');
+      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.unableToLoadLegalDocumentPleaseTryAgainLater"));
       setLegalModalVisible(false);
     } finally {
       setLegalModalLoading(false);
@@ -278,7 +172,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
     );
   }
 
-  const copy = { resetSent: selectedLanguage === 'es' ? 'Revisa tu correo electr?nico para restablecer tu contrase?a.' : 'Check your email for password reset instructions.', ...(loginCopy[selectedLanguage] || loginCopy.en) };
+  const copy = { resetSent: uiI18n.t("localized.SignInScreen.copy.resetSent.text175"), ...(loginCopy[selectedLanguage] || loginCopy.en) };
   return (
     <SafeAreaView style={styles.safe}>
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -355,14 +249,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
   );
 }
 
-const loginCopy: Record<string, any> = {
-  es: {language:'Elegir idioma', tagline:'Tu salud, en modo VIP.', or:'o', email:'Correo electrónico', signIn:'Iniciar sesión', loading:'Conectando...', forgot:'¿Olvidaste tu contraseña?', resetHelp:'Introduce tu correo electr?nico para recuperar tu contrase?a.', newHere:'¿Nuevo aquí?', createAccount:'Crear cuenta', terms:'Términos', privacy:'Privacidad'},
-  en: {language:'Choose language', tagline:'Your health, in VIP mode.', or:'or', email:'Email', signIn:'Sign in', loading:'Connecting...', forgot:'Forgot your password?', resetHelp:'Enter your email to recover your password.', newHere:'New here?', createAccount:'Create account', terms:'Terms', privacy:'Privacy'},
-  pt: {language:'Escolher idioma', tagline:'Sua sa?de, em modo VIP.', or:'ou', email:'Email', signIn:'Entrar', loading:'Conectando...', forgot:'Esqueceu sua senha?', resetHelp:'Insira seu email para recuperar sua senha.', newHere:'Novo aqui?', createAccount:'Criar conta', terms:'Termos', privacy:'Privacidade'},
-  fr: {language:'Choisir la langue', tagline:'Votre sant?, en mode VIP.', or:'ou', email:'E-mail', signIn:'Se connecter', loading:'Connexion...', forgot:'Mot de passe oubli? ?', resetHelp:'Saisissez votre e-mail pour r?cup?rer votre mot de passe.', newHere:'Nouveau ici ?', createAccount:'Cr?er un compte', terms:'Conditions', privacy:'Confidentialit?'},
-  de: {language:'Sprache w?hlen', tagline:'Ihre Gesundheit im VIP-Modus.', or:'oder', email:'E-Mail', signIn:'Anmelden', loading:'Verbinden...', forgot:'Passwort vergessen?', resetHelp:'Geben Sie Ihre E-Mail ein, um Ihr Passwort zur?ckzusetzen.', newHere:'Neu hier?', createAccount:'Konto erstellen', terms:'Bedingungen', privacy:'Datenschutz'},
-  zh: {language:'????', tagline:'?????VIP ???', or:'?', email:'????', signIn:'??', loading:'???...', forgot:'?????', resetHelp:'??????????', newHere:'????', createAccount:'????', terms:'??', privacy:'??'},
-};
+const loginCopy: Record<string, any> = { get es() { return uiI18n.t("localized.SignInScreen.loginCopy", { lng: 'es', returnObjects: true }) as any; }, get en() { return uiI18n.t("localized.SignInScreen.loginCopy", { lng: 'en', returnObjects: true }) as any; }, get pt() { return uiI18n.t("localized.SignInScreen.loginCopy", { lng: 'pt', returnObjects: true }) as any; }, get fr() { return uiI18n.t("localized.SignInScreen.loginCopy", { lng: 'fr', returnObjects: true }) as any; }, get de() { return uiI18n.t("localized.SignInScreen.loginCopy", { lng: 'de', returnObjects: true }) as any; }, get zh() { return uiI18n.t("localized.SignInScreen.loginCopy", { lng: 'zh', returnObjects: true }) as any; } };
 const styles = StyleSheet.create({
   safe:{flex:1,backgroundColor:vip.colors.navy}, container:{flex:1},
   scrollContent:{flexGrow:1,alignItems:'center',paddingHorizontal:vip.spacing.lg,paddingBottom:20},

@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import { View, Image } from "react-native";
 import DynamicText from "./../components/DynamicText";
 
@@ -6,9 +8,10 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createHeader(getScope) {
   return ({ title }) => {
+  useUILanguage();
     const { route, setRoute, theme, AnimatedButton } = getScope();
     return (<View style={[styles.header, { borderColor: theme.chip }]}>
-      {route !== 'dashboard' ? (
+      {route !== uiI18n.t("dashboard.title") ? (
         <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.headerHomeButton, { marginLeft: -65 }]}>
           <Image 
             source={require('../../assets/AuricRX_home_button_across_screens.png')} 
@@ -28,7 +31,7 @@ export default function createHeader(getScope) {
         transform: [{ translateX: -50 }],
         maxWidth: '60%'
       }]}>{title}</DynamicText>
-      {route !== 'dashboard' ? (
+      {route !== uiI18n.t("dashboard.title") ? (
         <View style={{ width: 40 }} />
       ) : (
         <AnimatedButton onPress={() => setRoute('settings')} style={styles.headerSettingsButton}>

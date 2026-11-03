@@ -1,3 +1,5 @@
+import uiI18n from "../i18n";
+import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 
@@ -6,9 +8,10 @@ import { styles } from "./appStyles";
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppointments(getScope) {
   return () => {
+  useUILanguage();
     const { S, voiceNotes, theme, isRecording, toggleRecord, playNote, Header } = getScope();
     return (<ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
-      <Header title="Appointments" />
+      <Header title={uiI18n.t("ui.appointments")} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <PremiumButton style={[styles.btnSm, { backgroundColor: theme.accent }]} onPress={toggleRecord}>
             <Text style={[styles.btnText, { color: '#ffffff', fontFamily: 'Inter_800ExtraBold' }]}>{isRecording ? S.stop : S.record}</Text>
