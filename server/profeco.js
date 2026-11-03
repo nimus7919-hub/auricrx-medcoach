@@ -140,8 +140,8 @@ function install(app, sql) {
     let count = 0;
     for (let state=1;state<=32;state++) for (const scian of ['464111','464112']) {
       for (let start=1;;start+=1000) {
-        const url = `https://www.inegi.org.mx/app/api/denue/v1/consulta/BuscarAreaActEstr/${String(state).padStart(2,'0')}/0/0/0/0/0/0/0/0/${scian}/0/${start}/${start+999}/0/0/${encodeURIComponent(token)}`;
-        const page = await jsonFetch(url);
+        const url = `https://www.inegi.org.mx/app/api/denue/v1/consulta/BuscarAreaActEstr/${String(state).padStart(2,'0')}/0/0/0/0/0/0/0/${scian}/0/${start}/${start+999}/0/0/${encodeURIComponent(token)}`;
+        let page; try { page = await jsonFetch(url); } catch (e) { if (e.message === 'upstream_http_404') page = []; else throw e; }
         if (!Array.isArray(page)) throw new Error('denue_invalid_response');
         const rows = page.filter(r=>r.Id && Number.isFinite(Number(r.Latitud)) && Number.isFinite(Number(r.Longitud))).map(r=>({id:String(r.Id),name:r.Nombre,razon_social:r.Razon_social,chain:r.Razon_social || r.Nombre,address:[r.Calle,r.Num_Exterior,r.Colonia,r.CP].filter(Boolean).join(' '),state:r.Entidad || String(r.Ubicacion || '').split(',').pop()?.trim(),municipio:r.Municipio || String(r.Ubicacion || '').split(',')[1]?.trim(),lat:Number(r.Latitud),lng:Number(r.Longitud),phone:r.Telefono,scian}));
         await sql`INSERT INTO denue_pharmacies(id,name,razon_social,chain,address,state,municipio,lat,lng,phone,scian) SELECT id,name,razon_social,chain,address,state,municipio,lat,lng,phone,scian FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS r(id text,name text,razon_social text,chain text,address text,state text,municipio text,lat float8,lng float8,phone text,scian text) ON CONFLICT(id) DO UPDATE SET name=excluded.name,razon_social=excluded.razon_social,chain=excluded.chain,address=excluded.address,state=excluded.state,municipio=excluded.municipio,lat=excluded.lat,lng=excluded.lng,phone=excluded.phone,scian=excluded.scian,updated_at=now()`;
@@ -198,7 +198,8 @@ function install(app, sql) {
     const med = String(req.query.med || '').trim();
     if (!med || med.length>300) throw new Error('med_required');
     const origin = coordinates(req.query), state = normalize(req.query.state);
-    const ids = [...new Set(catalog.filter(m=>m.id===med || m.name===normalize(med)).map(m=>m.id))];
+    let ids = [...new Set(catalog.filter(m=>m.id===med || m.name===normalize(med)).map(m=>m.id))];
+    if (!ids.length) { const q = normalize(med); ids = [...new Set(catalog.filter(m=>m.name.startsWith(q)).slice(0,200).map(m=>m.id))]; }
     const rows = await sql`WITH matched AS (SELECT p.* FROM qqp_prices p WHERE EXISTS(SELECT 1 FROM med_qqp_map m WHERE m.producto=p.producto AND m.presentacion=p.presentacion AND m.med_id=ANY(${ids}::text[]))) SELECT p.*,s.chain,s.branch,s.address,s.state,s.lat,s.lng FROM matched p JOIN qqp_stores s ON s.id=p.store_id WHERE p.fecha>=(SELECT max(fecha) FROM matched)-INTERVAL '90 days' ORDER BY p.fecha DESC,p.id DESC`;
     const summary = list => { const values=list.map(r=>Number(r.precio)); return {min:values.length?values.reduce((a,b)=>Math.min(a,b),Infinity):null,avg:values.length?values.reduce((a,b)=>a+b,0)/values.length:null,max:values.length?values.reduce((a,b)=>Math.max(a,b),-Infinity):null,count:values.length}; };
     const local = state ? rows.filter(r=>normalize(r.state)===state) : [], fallback = !local.length;
