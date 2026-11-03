@@ -1316,6 +1316,10 @@
     "ingredient": "Active ingredient"
   },
   "ui": {
+    "reminderNotificationsOff": "Notifications are off. You can turn them on in Settings.",
+    "openNotificationSettings": "Open Settings",
+    "homeGreeting": "Hello, {{name}}",
+
     "consentCanceled": "Consent canceled",
     "failedToCapturePhoto": "Failed to capture photo",
     "requestingCameraPermission": "Requesting camera permission...",
@@ -1732,9 +1736,9 @@
     "consentCouldNotBeSavedNoSePudoGuardarElConsentimiento": "Consent could not be saved. / No se pudo guardar el consentimiento.",
     "consentScreenUnavailable": "Consent screen unavailable",
     "healthReportValue": "Health Report - {{value1}}",
-    "recordatoriosReminders": "Recordatorios / Reminders",
-    "activaLasNotificacionesEnAjustesEnableNotificationsInSettings": "Activa las notificaciones en Ajustes. / Enable notifications in Settings.",
-    "activaElCanalDeRecordatoriosEnAjustesEnableTheReminderChannelInSettings": "Activa el canal de recordatorios en Ajustes. / Enable the reminder channel in Settings.",
+    "recordatoriosReminders": "Reminders",
+    "activaLasNotificacionesEnAjustesEnableNotificationsInSettings": "Turn on notifications in Settings.",
+    "activaElCanalDeRecordatoriosEnAjustesEnableTheReminderChannelInSettings": "Turn on the reminder channel in Settings.",
     "invalidReminderStartDate": "Invalid reminder start date",
     "seleccionaLosDiasSelectReminderDays": "Selecciona los dias. / Select reminder days.",
     "unsupportedReminderFrequency": "Unsupported reminder frequency",

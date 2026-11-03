@@ -38,7 +38,7 @@ export default function createTrialWidget(getScope) {
         ) : isGrace ? (
           <Text style={{ color: '#f59e0b', fontSize: 11, fontFamily: 'Inter_700Bold' }}>{uiI18n.t("ui.grace")}{daysLeft}{uiI18n.t("ui.d")}</Text>
         ) : (
-          <Text style={{ color: '#22c55e', fontSize: 11, fontFamily: 'Inter_700Bold' }}>{uiI18n.t("settings.trial")}{daysLeft}{uiI18n.t("ui.d")}</Text>
+          <Text style={{ color: '#D4AF37', fontSize: 11, fontFamily: 'Inter_700Bold' }}>{uiI18n.t("settings.trial")}{daysLeft}{uiI18n.t("ui.d")}</Text>
         )}
       </TouchableOpacity>
     );

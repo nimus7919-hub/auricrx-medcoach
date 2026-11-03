@@ -1,3 +1,5 @@
+import ReminderPermissionBanner from '../components/ReminderPermissionBanner';
+import { Text } from 'react-native';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { View, ScrollView, Image } from "react-native";
@@ -10,8 +12,9 @@ import { styles } from "./appStyles";
 export default function createDashboard(getScope) {
   return () => {
   useUILanguage();
-    const { setRoute, S, Card, TopBar, nextReminder } = getScope();
+    const { setRoute, S, Card, TopBar, nextReminder, user, userData } = getScope();
 
+    const name = (userData?.firstName || userData?.displayName || user?.displayName || user?.email?.split('@')[0] || '').trim();
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
     return (
     <>
@@ -23,6 +26,7 @@ export default function createDashboard(getScope) {
 
           {/* Health widget */}
           <View style={[styles.widget, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), marginTop: 16 }]}>
+            {!!name && <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: '#D8C99E', fontSize: 13, marginBottom: 8 }}>{uiI18n.t('ui.homeGreeting', { name })}</Text>}
             <DynamicText type="primary" style={[styles.widgetTitle, { fontFamily: 'Inter_800ExtraBold' }]}>
               {S.healthJournal}
             </DynamicText>
@@ -36,6 +40,7 @@ export default function createDashboard(getScope) {
               <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold' }}>
                 {nextReminder?.time || '--:--'}
               </DynamicText>
+              <ReminderPermissionBanner />
             </View>
           </View>
 

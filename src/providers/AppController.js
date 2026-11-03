@@ -21,7 +21,7 @@ import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
 
 import * as Notifications from "expo-notifications";
-import { initializeReminderNotifications, reconcileReminderNotifications } from "../services/reminderNotifications";
+import { ensureReminderPermission, initializeReminderNotifications, reconcileReminderNotifications } from "../services/reminderNotifications";
 
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
@@ -80,6 +80,8 @@ import createAppNavigator from "../navigation/AppNavigator";
 
 import useAndroidBackNavigation from '../navigation/useAndroidBackNavigation';
 import AppProviders from "./AppProviders";
+
+let reminderPermissionRequestedThisLaunch = false;
 
 export default function App() {
   useUILanguage();
@@ -2231,10 +2233,19 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     })();
   }, []);
 
+  useEffect(() => {
+    if (USING_EXPO_GO || showAuth || isRestoringAuth || isLoading || !user || !healthConsentReady) return;
+    if (reminderPermissionRequestedThisLaunch) return;
+    reminderPermissionRequestedThisLaunch = true;
+    ensureReminderPermission(true)
+      .then(granted => { if (granted && remindersLoaded) return reconcileReminderNotifications(reminders); })
+      .catch(error => console.warn('[Reminders] permission check failed', error));
+  }, [showAuth, isRestoringAuth, isLoading, user?.uid, healthConsentReady, remindersLoaded, reminders]);
+
   // Reconcile restored/cloud-synced reminders, edits, deletions and consent re-acceptance.
   useEffect(() => {
     if (USING_EXPO_GO || !remindersLoaded || !user || !healthConsentReady) return;
-    const sync = () => reconcileReminderNotifications(reminders).catch(error => console.error('[Reminders] reconcile failed', error));
+    const sync = () => reconcileReminderNotifications(reminders).catch(error => console.warn('[Reminders] reconcile failed', error));
     sync();
     const subscription = AppState.addEventListener('change', state => { if (state === 'active') sync(); });
     return () => subscription.remove();
@@ -2588,7 +2599,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   // Trial countdown widget
   const TrialWidget = createTrialWidget(() => ({ subscriptionStatus, setShowCheckout }));
 
-  const TopBar = createTopBar(() => ({ setRoute, setShowHelpModal, theme, AnimatedButton, TrialWidget }));
+  const TopBar = createTopBar(() => ({ setRoute, setShowHelpModal, theme, AnimatedButton, TrialWidget, user, userData }));
 
   // --------- Dashboard ----------
   const nextReminder = reminders.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''))[0];
@@ -2756,7 +2767,7 @@ const handleAskMedicalAI = async () => {
   const DashboardHelpModal = createDashboardHelpModal(() => ({ showHelpModal, setShowHelpModal, lang, t, isReady, S }));
 
   // --------- Screens ----------
-  const Dashboard = createDashboard(() => ({ setRoute, S, Card, TopBar, nextReminder }));
+  const Dashboard = createDashboard(() => ({ setRoute, S, Card, TopBar, nextReminder, user, userData }));
 
   const Pharmacies = createPharmacies(() => ({ lang, pharmacies, setPharmacies, pharmaciesLoading, setPharmaciesLoading, pharmaciesError, setPharmaciesError, labsLoading, labsError, S, theme, userCountry, Header }));
 

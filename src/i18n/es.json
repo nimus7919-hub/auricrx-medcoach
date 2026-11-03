@@ -1316,6 +1316,10 @@
     "ingredient": "Principio activo"
   },
   "ui": {
+    "reminderNotificationsOff": "Las notificaciones est\u00e1n desactivadas. Puedes activarlas en Ajustes.",
+    "openNotificationSettings": "Abrir Ajustes",
+    "homeGreeting": "Hola, {{name}}",
+
     "consentCanceled": "Consentimiento cancelado",
     "failedToCapturePhoto": "No se pudo tomar la foto",
     "requestingCameraPermission": "Solicitando permiso para la cámara...",

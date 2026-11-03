@@ -1,5 +1,5 @@
 import uiI18n from "../i18n";
-﻿import * as Notifications from 'expo-notifications';
+import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { parseReminderTime } from '../utils/reminderTime';
 
@@ -7,6 +7,15 @@ import { parseReminderTime } from '../utils/reminderTime';
 export const REMINDER_CHANNEL = 'medication-reminders-v2';
 const OWNER = 'auricrx-reminders-v2';
 let queue = Promise.resolve();
+const permissionListeners = new Set();
+export const subscribeReminderPermission = (listener) => {
+  permissionListeners.add(listener);
+  return () => permissionListeners.delete(listener);
+};
+function publishPermission(granted) {
+  permissionListeners.forEach(listener => listener(granted));
+  return granted;
+}
 const serialized = (work) => {
   const result = queue.then(work);
   queue = result.catch(() => {});
@@ -26,13 +35,14 @@ export async function ensureReminderPermission(request = false) {
   if (!permission.granted && request && permission.canAskAgain) {
     permission = await Notifications.requestPermissionsAsync();
   }
-  if (!permission.granted) throw new Error(uiI18n.t("ui.activaLasNotificacionesEnAjustesEnableNotificationsInSettings"));
+  if (!permission.granted) return publishPermission(false);
   if (Platform.OS === 'android') {
     const channel = await Notifications.getNotificationChannelAsync(REMINDER_CHANNEL);
     if (channel?.importance === Notifications.AndroidImportance.NONE) {
-      throw new Error(uiI18n.t("ui.activaElCanalDeRecordatoriosEnAjustesEnableTheReminderChannelInSettings"));
+      return publishPermission(false);
     }
   }
+  return publishPermission(true);
 }
 function triggersFor(reminder) {
   const { hour, minute } = parseReminderTime(reminder.time);
@@ -75,13 +85,13 @@ async function upsert(reminder, existing) {
 }
 export function saveReminderNotification(reminder) {
   return serialized(async () => {
-    await ensureReminderPermission(true);
+    if (!await ensureReminderPermission(false)) return [];
     return upsert(reminder, await Notifications.getAllScheduledNotificationsAsync());
   });
 }
 export function reconcileReminderNotifications(reminders) {
   return serialized(async () => {
-    await ensureReminderPermission(false);
+    if (!await ensureReminderPermission(false)) return;
     const existing = await Notifications.getAllScheduledNotificationsAsync();
     for (const reminder of reminders) await upsert(reminder, existing);
     const wanted = new Set(reminders.map(r => String(r.id)));
@@ -93,7 +103,7 @@ export function reconcileReminderNotifications(reminders) {
   });
 }
 export async function testReminderNotification() {
-  await ensureReminderPermission(true);
+  if (!await ensureReminderPermission(false)) return null;
   const id = await Notifications.scheduleNotificationAsync({
     content: { title: uiI18n.t("ui.recordatorioDePruebaTestReminder"), body: uiI18n.t("ai.auricrxMedCoach"), sound: 'default' },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 10, repeats: false, channelId: REMINDER_CHANNEL },

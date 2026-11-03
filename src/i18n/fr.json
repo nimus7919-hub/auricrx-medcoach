@@ -1366,5 +1366,10 @@
     "SupplementRefillModal": {
       "localeMap": "fr-FR"
     }
-  }
+  },
+  "ui": {
+    "reminderNotificationsOff": "Les notifications sont d\u00e9sactiv\u00e9es. Vous pouvez les activer dans les r\u00e9glages.",
+    "openNotificationSettings": "Ouvrir les r\u00e9glages",
+    "homeGreeting": "Bonjour, {{name}}"
+}
 }

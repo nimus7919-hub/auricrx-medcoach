@@ -1280,5 +1280,10 @@
     "SupplementRefillModal": {
       "localeMap": "de-DE"
     }
-  }
+  },
+  "ui": {
+    "reminderNotificationsOff": "Benachrichtigungen sind deaktiviert. Du kannst sie in den Einstellungen aktivieren.",
+    "openNotificationSettings": "Einstellungen \u00f6ffnen",
+    "homeGreeting": "Hallo, {{name}}"
+}
 }

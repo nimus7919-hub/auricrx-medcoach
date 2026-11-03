@@ -1,3 +1,4 @@
+import ReminderPermissionBanner from '../src/components/ReminderPermissionBanner';
 import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -380,6 +381,7 @@ const Reminders = ({
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: 24 }]}>
+        <ReminderPermissionBanner />
         {/* Add Reminder Button */}
           <PremiumButton
           onPress={() => setShowAdd(true)}
@@ -1250,7 +1252,8 @@ const Reminders = ({
 
                 <PremiumButton onPress={async () => {
                   try {
-                    await testReminderNotification();
+                    const notificationId = await testReminderNotification();
+                    if (!notificationId) return;
                     Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1253"), uiI18n.t("localized.Reminders.Reminders.text1253"));
                   } catch (error) { Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), error.message); }
                 }} style={{ padding: 16, alignItems: 'center' }}>
