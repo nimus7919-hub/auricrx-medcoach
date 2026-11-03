@@ -2,6 +2,22 @@ import records from './herbReview.json';
 import uiI18n from '../i18n';
 const placeholder = require('../../assets/icons/herb_emoji_transparent.png');
 const images = {
+  'damiana': require('../../assets/herbs/damiana.jpg'),
+  'chamomile': require('../../assets/herbs/chamomile.jpg'),
+  'garlic': require('../../assets/herbs/garlic.jpg'),
+  'litsea_glaucescens': require('../../assets/herbs/litsea_glaucescens.jpg'),
+  'artemisia_annua': require('../../assets/herbs/artemisia_annua.jpg'),
+  'mexican_oregano': require('../../assets/herbs/mexican_oregano.jpg'),
+  'heliopsis_longipes': require('../../assets/herbs/heliopsis_longipes.jpg'),
+  'lippia_dulcis': require('../../assets/herbs/lippia_dulcis.jpg'),
+  'astragalus': require('../../assets/herbs/astragalus.jpg'),
+  'ganoderma': require('../../assets/herbs/ganoderma.jpg'),
+  'cinnamon': require('../../assets/herbs/cinnamon.jpg'),
+  'st_johns_wort': require('../../assets/herbs/st_johns_wort.jpg'),
+  'eucalyptus': require('../../assets/herbs/eucalyptus.jpg'),
+  'peppermint': require('../../assets/herbs/peppermint.jpg'),
+  'holy_basil': require('../../assets/herbs/holy_basil.jpg'),
+  'hibiscus': require('../../assets/herbs/hibiscus.jpg'),
   'agastache_rugosa': require('../../assets/herbs/agastache_rugosa.png'),
   'aloe_vera': require('../../assets/herbs/aloe_vera.png'),
   'aristolochia': require('../../assets/herbs/aristolochia.png'),

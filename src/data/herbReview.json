@@ -29,7 +29,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Turnera diffusa",
+      "author": "H. Zell",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Turnera_diffusa_var._aphrodisiaca_002.JPG"
+    }
   },
   {
     "id": "2",
@@ -141,7 +147,14 @@
       "checked": "2026-11-03"
     },
     "specificSource": true,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Matricaria chamomilla",
+      "author": "JackyM59",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Camomille_sauvage_(Matricaria_chamomilla),_coquelicots_(Papaver_rhoeas)_au_bord_d%27un_champ_d%27orge_(Hordeum_vulgare).jpg",
+      "modification": "Cropped to chamomile flowers; poppies removed."
+    }
   },
   {
     "id": "5",
@@ -179,7 +192,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": true,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Allium sativum bulb",
+      "author": "Paul van de Velde",
+      "license": "CC BY 2.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Bulb_flowers_-_Allium_sativum_(50267124912).jpg"
+    }
   },
   {
     "id": "6",
@@ -307,7 +326,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Litsea glaucescens",
+      "author": "Ernestolapeña",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:LITSEA_GLAUCESCENS.JPG"
+    }
   },
   {
     "id": "10",
@@ -339,7 +364,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Artemisia annua",
+      "author": "Kristian Peters -- Fabelfroh 11:39, 16 September 2007 (UTC)",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Artemisia_annua.jpeg"
+    }
   },
   {
     "id": "11",
@@ -720,7 +751,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Lippia graveolens",
+      "author": "Dick Culbert from Gibsons, B.C., Canada",
+      "license": "CC BY 2.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Lippia_graveolens,_known_as_Mexican_Oregano_(11628265214).jpg"
+    }
   },
   {
     "id": "22",
@@ -848,7 +885,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Heliopsis longipes",
+      "author": "J. Ivan Castro",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Heliopsis_longipes_flor.jpg"
+    }
   },
   {
     "id": "26",
@@ -880,7 +923,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Phyla dulcis",
+      "author": "Krzysztof Ziarnek, Kenraiz",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Phyla_scaberrima_kz1.jpg"
+    }
   },
   {
     "id": "27",
@@ -949,7 +998,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": true,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Astragalus membranaceus",
+      "author": "Doronenko",
+      "license": "CC BY 2.5",
+      "url": "https://commons.wikimedia.org/wiki/File:Astragalus_membranaceus.jpg"
+    }
   },
   {
     "id": "29",
@@ -1050,7 +1105,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Ganoderma lingzhi",
+      "author": "This image was created by user TecheOldFox (Techieoldfox) at Mushroom Observer,",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Ganoderma_lingzhi_Wu,_Cao_%26_Dai_574883.jpg"
+    }
   },
   {
     "id": "32",
@@ -1085,7 +1146,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": true,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Cinnamomum cassia",
+      "author": "Honmingjun",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Cinnamomum_cassia_Leaf.jpg"
+    }
   },
   {
     "id": "33",
@@ -1121,7 +1188,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": true,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Hypericum perforatum",
+      "author": "Didier Descouens",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:(MHNT)_Hypericum_perforatum_flower_and_buttons.jpg"
+    }
   },
   {
     "id": "34",
@@ -1153,7 +1226,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Eucalyptus globulus",
+      "author": "H. Zell",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Eucalyptus_globulus_-_Levada_da_Serra_do_Faial_-_Madeira_01.jpg"
+    }
   },
   {
     "id": "35",
@@ -1188,7 +1267,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": true,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Mentha piperita",
+      "author": "Kızıl",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Mentha_%C3%97_piperita%E2%80%93IMG_6075.jpg"
+    }
   },
   {
     "id": "36",
@@ -1293,7 +1378,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Ocimum tenuiflorum",
+      "author": "Joydeep",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Ocimum_tenuiflorum_3_09_2012.JPG"
+    }
   },
   {
     "id": "39",
@@ -1325,7 +1416,13 @@
       "checked": "2026-11-03"
     },
     "specificSource": false,
-    "imageVerified": false
+    "imageVerified": true,
+    "imageAttribution": {
+      "species": "Hibiscus sabdariffa",
+      "author": "Mokkie",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Roselle_(Hibiscus_sabdariffa)_2.jpg"
+    }
   },
   {
     "id": "40",

@@ -1,5 +1,16 @@
 # Herb image audit — 2026-11-03
 
+## Licensed photo update ? 2026-11-03
+
+The 16 supplied Commons photos now replace the neutral icon for: damiana, chamomile, garlic, litsea_glaucescens, artemisia_annua, mexican_oregano, heliopsis_longipes, lippia_dulcis, astragalus, ganoderma, cinnamon, st_johns_wort, eucalyptus, peppermint, holy_basil, hibiscus. Assets use the existing slug convention at `assets/herbs/<slug>.jpg`; previous PNGs are retained. The historical audit below describes the previous assets, not the new photos.
+
+Author, license, species and Commons page URL are stored in each herb's `imageAttribution` record. These entries have `imageVerified: true`, removing their pending caption. The detail modal displays ?Foto: {author}, {license}, Wikimedia Commons? with links to the license and source. See [HERB_PHOTO_CREDITS.md](HERB_PHOTO_CREDITS.md) for the supplied credits.
+
+The app copy of chamomile.jpg is cropped with jimp-compact to x=230, y=330, width=255, height=280 from the 960?628 source, focusing on chamomile flowers and excluding the poppies. The modification is recorded in its attribution and shown as ?Recorte?. The crop remains under CC BY-SA 4.0. All source files in tmp_herb_photos remain unchanged.
+
+Toronjil de monte, Zarzaparrilla Gris, Epazote, Peric?n, Yauhtli, Ang?lica China, Notoginseng and Regaliz retain the neutral placeholder and pending-verification caption. Other existing image mappings are unchanged. JS/data/assets only; no new native build is required.
+
+
 All 40 active catalog entries were visually compared with their local files. This is a mismatch audit, not botanical authentication. Existing images may be illustrations; no source/license provenance is inferred. No images were downloaded, deleted or overwritten.
 
 Manzanilla and Ajo have no verified replacement elsewhere among the local herb images. `chamomile_backup.png` is also ginger. No reciprocal mislabeled pair was found that could responsibly be swapped. Incorrect and uncertain pictures now use `assets/icons/herb_emoji_transparent.png`, with a localized pending-verification caption. Ginger remains assigned to ginger.png.

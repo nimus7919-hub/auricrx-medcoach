@@ -40,6 +40,14 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
     <View>
       <Image source={herb.image} accessibilityLabel={nameOf(herb)} resizeMode="contain" style={large ? styles.modalImage : styles.image} />
       {!herb.imageVerified && <Text style={styles.caption}>{tr('imagePending')}</Text>}
+      {large && herb.imageAttribution && <Text style={styles.caption}>
+        Foto: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
+          onPress={() => openSource('https://creativecommons.org/licenses/' +
+            (herb.imageAttribution.license.includes('BY-SA') ? 'by-sa/' : 'by/') +
+            herb.imageAttribution.license.split(' ').pop() + '/')}>{herb.imageAttribution.license}</Text>, <Text
+          accessibilityRole="link" style={styles.photoLink} onPress={() => openSource(herb.imageAttribution.url)}>Wikimedia Commons</Text>
+        {herb.imageAttribution.modification ? ' ? Recorte' : ''}
+      </Text>}
     </View>
   );
   const summary = herb => {
@@ -137,6 +145,7 @@ const styles = StyleSheet.create({
   name: { color: '#F4E3B1', fontSize: 16, fontWeight: '600', marginVertical: 6 },
   risk: { color: '#E2C57D', fontSize: 14, lineHeight: 20, marginVertical: 6 },
   caption: { color: '#BAC5D5', fontSize: 12, lineHeight: 18 },
+  photoLink: { textDecorationLine: 'underline' },
   sourceButton: { paddingVertical: 10 },
   source: { color: '#E2C57D', textDecorationLine: 'underline', fontSize: 12, lineHeight: 18 },
   body: { color: '#F3F5F9', fontSize: 15, lineHeight: 23, marginVertical: 6 },
