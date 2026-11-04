@@ -3820,5 +3820,9 @@
     "denied": "Notification permission was not granted. You can enable it in system settings.",
     "inventoryTitle": "Inventory reminder",
     "inventoryBody": "About {{days}} days of {{name}} remain based on your entries. Confirm refill availability with your pharmacy."
+  },
+  "usOnboarding": {
+    "change": "Change",
+    "continue": "Continue"
   }
 }
