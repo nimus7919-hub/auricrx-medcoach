@@ -28,7 +28,8 @@
       },
       "ios": {
         "simulator": false
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
@@ -40,7 +41,8 @@
         "NODE_ENV": "production"
       },
       "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
-      "developmentClient": false
+      "developmentClient": false,
+      "channel": "production"
     },
     "us-internal": {
       "extends": "production",

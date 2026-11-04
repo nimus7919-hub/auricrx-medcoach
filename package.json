@@ -54,6 +54,7 @@
     "expo-sharing": "~13.1.5",
     "expo-status-bar": "~2.2.3",
     "expo-task-manager": "~13.1.6",
+    "expo-updates": "~0.28.18",
     "expo-video": "^2.2.2",
     "expo-web-browser": "~14.2.0",
     "html2canvas": "^1.4.1",
