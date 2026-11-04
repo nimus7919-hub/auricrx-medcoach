@@ -21,6 +21,7 @@ import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
 
 import * as Notifications from "expo-notifications";
+import { reconcileSmart } from "../services/smartNotificationEngine";
 import { ensureReminderPermission, initializeReminderNotifications, reconcileReminderNotifications } from "../services/reminderNotifications";
 
 import * as Print from "expo-print";
@@ -2271,11 +2272,11 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   // Reconcile restored/cloud-synced reminders, edits, deletions and consent re-acceptance.
   useEffect(() => {
     if (USING_EXPO_GO || !remindersLoaded || !user || !healthConsentReady) return;
-    const sync = () => reconcileReminderNotifications(reminders).catch(error => console.warn('[Reminders] reconcile failed', error));
+    const sync = () => Promise.all([reconcileReminderNotifications(reminders), reconcileSmart(meds, reminders)]).catch(error => console.warn('[Reminders] reconcile failed', error));
     sync();
     const subscription = AppState.addEventListener('change', state => { if (state === 'active') sync(); });
     return () => subscription.remove();
-  }, [reminders, remindersLoaded, user?.uid, healthConsentReady]);
+  }, [meds, reminders, remindersLoaded, user?.uid, healthConsentReady]);
 
   // Sync lang state with i18n when it becomes ready
   useEffect(() => {

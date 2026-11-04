@@ -1,3 +1,4 @@
+import { readSmart, quietDate, contextualBody, occurrences } from './smartNotificationEngine';
 import uiI18n from "../i18n";
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
@@ -83,8 +84,11 @@ function triggersFor(reminder) {
   return triggers;
 }
 async function upsert(reminder, existing) {
-  const triggers = triggersFor(reminder);
-  const fingerprint = JSON.stringify({ name: reminder.name, triggers });
+  const state = await readSmart();
+  const body = contextualBody(reminder, state);
+  // A bounded queue can express quiet hours, unlike repeating native triggers.
+  const triggers = reminder.enabled === false ? [] : state.context ? occurrences(reminder, 32).map(date => ({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: quietDate(date, state), channelId: REMINDER_CHANNEL })) : triggersFor(reminder);
+  const fingerprint = JSON.stringify({ name: body, triggers });
   const previous = existing.filter(n => n.content.data?.owner === OWNER && n.content.data?.reminderId === String(reminder.id));
   if (previous.length === triggers.length && previous.every(n => n.content.data?.fingerprint === fingerprint)) return previous.map(n => n.identifier);
   const ids = [];
@@ -92,7 +96,7 @@ async function upsert(reminder, existing) {
     for (const [index, trigger] of triggers.entries()) {
       const id = await Notifications.scheduleNotificationAsync({
         identifier: `${OWNER}:${reminder.id}:${index}`,
-        content: { title: uiI18n.t("ui.recordatorioReminder"), body: reminder.name, sound: 'default',
+        content: { title: uiI18n.t("ui.recordatorioReminder"), body, sound: 'default',
           data: { owner: OWNER, reminderId: String(reminder.id), fingerprint } }, trigger,
       });
       ids.push(id);

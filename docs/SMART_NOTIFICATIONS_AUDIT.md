@@ -1,0 +1,42 @@
+﻿# Smart Notifications audit — 2026-11-03
+
+## Baseline (before implementation)
+- `src/navigation/AppNavigator.js:34`: routes to SmartNotificationsScreen without medication/reminder data.
+- `src/screens/SmartNotificationsScreen.tsx:20`: intelligent notifications screen; switches are screen state and initialized service is presented as active rather than checking operational capability.
+- `src/services/smartNotifications.ts:1`: location imported eagerly; missing native modules can fail on older builds.
+- `src/services/smartNotifications.ts:169`: location tracking/check methods are empty. Adding a place throws an unavailable error.
+- `src/services/smartNotifications.ts:174`: weather uses a foreground interval; no background task. `getWeatherData` returns mock values, and currentLocation is never populated.
+- `src/services/smartNotifications.ts:333`: usage patterns do not compare a scheduled occurrence with a recorded dose; refill prediction is a mock without inventory.
+- `components/Medications.js:310`: remainingQuantity already exists. `:808` decrements an entered amount but does not record scheduled-versus-actual doses. Units per dose and schedule-derived days remaining are missing.
+- `src/services/reminderNotifications.js:49`: native daily/weekly/monthly/custom scheduling exists, including bounded queues for start/end dates. No quiet-hours or place-message behavior.
+- `src/providers/AppController.js:2272`: reconciles reminders on restoration, edits and app foreground.
+- `src/i18n/es.json:1082`: active status/feature strings, including duplicated settings text near :3133.
+- `app.json:ios/android/plugins`: background location/task/fetch configuration missing. package.json has location/notifications but lacks task-manager/background-fetch.
+
+## Implementation contract
+All settings, inventory metadata, dose logs, dismissed suggestions, places, alerts and notification bookkeeping stay in AsyncStorage. Only rounded coordinates are sent to Open-Meteo for forecasts. No automatic changes to medication reminder times. Permission refusals must show a settings CTA. No server changes required.
+
+A **new native build (APK)** is required for expo-location background permissions, expo-task-manager and expo-background-fetch. Module loading and native availability must be guarded so the older APK can still open the app. Background fetch is opportunistic: Android/iOS choose execution times; exact morning execution is not guaranteed, and force-stopped apps may not execute. App-open checks provide a fallback. Geofencing likewise requires OS background permission and a physical device.
+
+## Implemented state
+- `src/services/smartNotificationEngine.js:44`: schedule-based inventory estimates; disabled reminders are excluded, schedule bounds are respected, and unknown/invalid inventory returns no estimate. Inventory inputs are on medicine cards (`components/Medications.js:771`) and in the smart screen. A medicine must have a linked reminder and positive units per dose.
+- `src/services/smartNotificationEngine.js:74`: records scheduled occurrence, actual local timestamp, reminder ID and delay. Duplicate occurrence logs are excluded. The existing Took button decrements stock and records the dose; with multiple linked reminders the user selects which occurrence to log.
+- `src/services/smartNotificationEngine.js:83`: minimum five samples, median delay greater than 20 minutes, explicit Accept/No controls. Accepted times update the reminder and its native schedule; rejected suggestions remain dismissed for that schedule. Logging is local even when suggestions are disabled.
+- `src/services/smartNotificationEngine.js:145`: serialized inventory reconciliation, configurable 3/5/7-day alerts, cancellation when disabled or inventory/reminders are removed, and inventory fingerprint bookkeeping to prevent repeat alerts for unchanged exhausted stock.
+- `src/services/smartNotificationEngine.js:184`: module-scope geofence task, entry/exit state and local notifications, including refresh of tailored reminder text. Places support current coordinates or address lookup, 150–300 m radius, selected reminder, entry/exit, custom text, edit and delete. At most 20 places for iOS compatibility. Address lookup uses the operating system geocoder; saved places are never sent to the AuricRX server.
+- `src/screens/SmartNotificationsScreen.tsx:7`: persisted switches, explicit Spanish foreground/background permission explanation, settings CTAs, real capability/registration status and gold outline Feather badges replacing broken emoji labels. Timing analysis can be active without notification permission because its suggestions are in-app.
+- `src/services/smartNotificationEngine.js:120`: real Open-Meteo daily forecast (temperature, precipitation, humidity, UV), coordinates rounded to two decimals, request timeout, one notification per saved alert per local date, retry after failed fetch, morning background eligibility after 07:00 and app-open fallback. Neutral user-authored practical messages; no generated medical claims.
+- `src/services/smartNotificationEngine.js:55`: quiet-hour postponement, including overnight ranges. `:64` selects the saved place's text for its chosen reminder when context and location features are enabled.
+- `src/services/reminderNotifications.js`: context mode uses 32 upcoming dated occurrences per reminder so quiet-hour postponement can be represented natively. Opening the app replenishes this queue. Existing native repeating schedules continue when context is disabled. Long periods without reopening can exhaust a context queue; total pending notifications are also subject to OS limits (notably iOS).
+- `src/providers/AppController.js:2275`: reconciles inventory and reminder schedules on app activation and medicine/reminder changes. The route passes real medicine/reminder state. No hooks were added to the navigation render function.
+- `src/services/smartNotifications.ts`: compatibility facade now delegates to the real engine; removed the old simulated weather, fake refill estimates and foreground interval.
+- `app.json`: background/coarse/fine location, foreground service permissions, iOS usage strings/background modes and location/background-fetch plugins. Task-manager is autolinked and tasks are defined at module scope; it has no separate config plugin entry.
+
+## Verification and outstanding environment constraint
+Passed `node --check` on the new engine and reminder service, Babel parsing on all seven changed JS/TS/TSX source files, and `node scripts/test-smart-notifications.cjs`. The isolated tests cover inventory and start/end schedules, invalid data, overnight quiet hours, five-sample median suggestions, duplicate logs, refusal/dismissal, notification permission denial, weather deduplication, toggle cancellation, old-APK missing-native fallback, mocked geofence entry/exit, tailored text, and task registration/unregistration.
+
+**Dependency installation is blocked in this environment:** npm returned EACCES fetching expo-background-fetch; the offline attempt returned ENOTCACHED. `package.json` declares the SDK 53 versions from installed `expo/bundledNativeModules.json`: expo-task-manager ~13.1.6 and expo-background-fetch ~13.1.6. Run `npm install` with registry access to install them and regenerate package-lock.json before bundling/building. A Metro bundle cannot resolve these packages until installation succeeds. Runtime optional-native guards protect older APKs after JS dependencies are installed; they do not replace dependency installation.
+
+A new native APK is required. No APK/bundle or physical-device delivery validation was possible here. Before release, verify foreground then background permission acceptance/refusal, entry/exit at a real place with the app backgrounded, notification channel denial, weather with live network, quiet-hour delivery, reboot behavior, and restoration after app restart. Background fetch execution is OS-controlled, not an exact alarm. This implementation uses background-fetch as requested, although Expo has deprecated it in favor of background-task.
+
+API references: [Open-Meteo forecast parameters](https://open-meteo.com/en/docs), [Expo Location](https://docs.expo.dev/versions/latest/sdk/location/), [Expo BackgroundFetch](https://docs.expo.dev/versions/latest/sdk/background-fetch/). SDK-compatible package versions were verified against the local SDK 53 manifest rather than the latest package versions.
