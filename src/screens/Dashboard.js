@@ -1,3 +1,4 @@
+import { getRegion } from '../services/region';
 import ReminderPermissionBanner from '../components/ReminderPermissionBanner';
 import { Text } from 'react-native';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
@@ -75,10 +76,10 @@ export default function createDashboard(getScope) {
               subtitle={S.appointmentSubtitle}
             />
             <Card 
-              title={S.aiHealth} 
+              title={getRegion() === 'US' ? 'Medicine Lookup' : S.aiHealth} 
               icon={<Image source={require('../../assets/dashboard Emojies/AI Health.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('ai-health')}
-              subtitle={uiI18n.t("ui.intelligentHealthInsightsAnalysis")}
+              subtitle={getRegion() === 'US' ? 'Medicine info, recalls, prices and pharmacies' : uiI18n.t("ui.intelligentHealthInsightsAnalysis")}
             />
             <Card 
               title={S.documents} 
