@@ -3164,5 +3164,5 @@ const styles = StyleSheet.create({
 });
 
 export default function AIHealthScreen(props: AIHealthScreenProps) {
-  return getRegion() === 'US' ? <USScreen onClose={props.onClose} initialMode="interactions" /> : <MexicoAIHealthScreen {...props} />;
+  return getRegion() === 'US' ? <USScreen onClose={props.onClose} initialMode="drugs" /> : <MexicoAIHealthScreen {...props} />;
 }
