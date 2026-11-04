@@ -87,6 +87,15 @@ import AppProviders from "./AppProviders";
 
 let reminderPermissionRequestedThisLaunch = false;
 
+// Component factories must keep a stable identity across App renders; recreating them each
+// render remounts the screen (e.g. Settings ScrollView jumped to top on every tap).
+function useStableComponent(factory, getScope) {
+  const scopeRef = useRef(getScope);
+  scopeRef.current = getScope;
+  const [Component] = useState(() => factory(() => scopeRef.current()));
+  return Component;
+}
+
 export default function App() {
   const { region } = useRegion();
   useUILanguage();
@@ -2626,16 +2635,16 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   const [introComplete, setIntroComplete] = useState(false);
 
   // --------- Helpers ----------
-  const Card = createCard(() => ({  }));
+  const Card = useStableComponent(createCard, () => ({  }));
 
-  const AnimatedFloatingButton = createAnimatedFloatingButton(() => ({ lang, selectedAIDoctor, S, setAiOpen, getInitialAIMessage, setAiMessages }));
+  const AnimatedFloatingButton = useStableComponent(createAnimatedFloatingButton, () => ({ lang, selectedAIDoctor, S, setAiOpen, getInitialAIMessage, setAiMessages }));
 
-  const AnimatedButton = createAnimatedButton(() => ({  }));
+  const AnimatedButton = useStableComponent(createAnimatedButton, () => ({  }));
 
   // Trial countdown widget
-  const TrialWidget = createTrialWidget(() => ({ subscriptionStatus, setShowCheckout }));
+  const TrialWidget = useStableComponent(createTrialWidget, () => ({ subscriptionStatus, setShowCheckout }));
 
-  const TopBar = createTopBar(() => ({ setRoute, setShowHelpModal, theme, AnimatedButton, TrialWidget, user, userData }));
+  const TopBar = useStableComponent(createTopBar, () => ({ setRoute, setShowHelpModal, theme, AnimatedButton, TrialWidget, user, userData }));
 
   // --------- Dashboard ----------
   const nextReminder = reminders.slice().sort((a, b) => (a.time || '').localeCompare(b.time || ''))[0];
@@ -2798,21 +2807,21 @@ const handleAskMedicalAI = async () => {
 }
 
   // --------- Membership Modals Component (Cancel Confirmation + Result) ----------
-  const MembershipModals = createMembershipModals(() => ({ showCancelMembershipModal, setShowCancelMembershipModal, showMembershipResultModal, setShowMembershipResultModal, membershipResult, confirmCancelMembership, S }));
+  const MembershipModals = useStableComponent(createMembershipModals, () => ({ showCancelMembershipModal, setShowCancelMembershipModal, showMembershipResultModal, setShowMembershipResultModal, membershipResult, confirmCancelMembership, S }));
 
   // --------- Dashboard Help Modal ----------
-  const DashboardHelpModal = createDashboardHelpModal(() => ({ showHelpModal, setShowHelpModal, lang, t, isReady, S }));
+  const DashboardHelpModal = useStableComponent(createDashboardHelpModal, () => ({ showHelpModal, setShowHelpModal, lang, t, isReady, S }));
 
   // --------- Screens ----------
-  const Dashboard = createDashboard(() => ({ setRoute, openAddReminder, S, Card, TopBar, nextReminder, user, userData }));
+  const Dashboard = useStableComponent(createDashboard, () => ({ setRoute, openAddReminder, S, Card, TopBar, nextReminder, user, userData }));
 
-  const Pharmacies = createPharmacies(() => ({ lang, pharmacies, setPharmacies, pharmaciesLoading, setPharmaciesLoading, pharmaciesError, setPharmaciesError, labsLoading, labsError, S, theme, userCountry, Header }));
+  const Pharmacies = useStableComponent(createPharmacies, () => ({ lang, pharmacies, setPharmacies, pharmaciesLoading, setPharmaciesLoading, pharmaciesError, setPharmaciesError, labsLoading, labsError, S, theme, userCountry, Header }));
 
-  const Labs = createLabs(() => ({ lang, labs, setLabs, labsLoading, setLabsLoading, labsError, setLabsError, S, theme, userCountry, Header }));
+  const Labs = useStableComponent(createLabs, () => ({ lang, labs, setLabs, labsLoading, setLabsLoading, labsError, setLabsError, S, theme, userCountry, Header }));
 
-  const Prescription = createPrescription(() => ({ S, rxPhotos, theme, addRxPhoto, exportRxToPDF, Header }));
+  const Prescription = useStableComponent(createPrescription, () => ({ S, rxPhotos, theme, addRxPhoto, exportRxToPDF, Header }));
 
-  const Appointments = createAppointments(() => ({ S, voiceNotes, theme, isRecording, toggleRecord, playNote, Header }));
+  const Appointments = useStableComponent(createAppointments, () => ({ S, voiceNotes, theme, isRecording, toggleRecord, playNote, Header }));
 
   // State for dropdown sections
   const [expandedSections, setExpandedSections] = useState({
@@ -2830,17 +2839,17 @@ const handleAskMedicalAI = async () => {
     account: false
   });
 
-  const CollapsibleSection = createCollapsibleSection(() => ({ theme, expandedSections }));
+  const CollapsibleSection = useStableComponent(createCollapsibleSection, () => ({ theme, expandedSections }));
 
-  const Header = createHeader(() => ({ route, setRoute, theme, AnimatedButton }));
+  const Header = useStableComponent(createHeader, () => ({ route, setRoute, theme, AnimatedButton }));
 
-  const Settings = createSettings(() => ({ user, setRoute, setPrivacyOpen, handleSignOut, handleCancelMembership, handleRestartMembership, lang, notificationsEnabled, setNotificationsEnabled, emailNotifications, setEmailNotifications, smsNotifications, setSmsNotifications, selectedAIDoctor, setSelectedAIDoctor, dataCollection, setDataCollection, analytics, setAnalytics, subscriptionStatus, t, currentLanguage, handleLanguageChange, S, theme, setExpandedSections, CollapsibleSection, Header, RowSwitch, SwitchRow }));
+  const Settings = useStableComponent(createSettings, () => ({ user, setRoute, setPrivacyOpen, handleSignOut, handleCancelMembership, handleRestartMembership, lang, notificationsEnabled, setNotificationsEnabled, emailNotifications, setEmailNotifications, smsNotifications, setSmsNotifications, selectedAIDoctor, setSelectedAIDoctor, dataCollection, setDataCollection, analytics, setAnalytics, subscriptionStatus, t, currentLanguage, handleLanguageChange, S, theme, setExpandedSections, CollapsibleSection, Header, RowSwitch, SwitchRow }));
 
-  const Section = createSection(() => ({  }));
+  const Section = useStableComponent(createSection, () => ({  }));
 
-  const RowSwitch = createRowSwitch(() => ({ theme }));
+  const RowSwitch = useStableComponent(createRowSwitch, () => ({ theme }));
 
-  const SwitchRow = createSwitchRow(() => ({  }));
+  const SwitchRow = useStableComponent(createSwitchRow, () => ({  }));
 // --------- Medications Screen ----------
 // Medications component now imported from separate file
 
