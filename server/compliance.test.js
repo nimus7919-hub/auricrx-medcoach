@@ -131,6 +131,6 @@ test('US append-only receipt versions each consent and supports independent with
   assert.equal(response.statusCode, 200);
   assert.equal(events[0].usInsert[0], 'verified-user');
   assert.equal(events[0].usInsert[5], false);
-  assert.deepEqual(events[0].usInsert.slice(6), ['US-2026-11-03', 'US-2026-11-03', 'US-2026-11-03']);
+  assert.deepEqual(events[0].usInsert.slice(6, 9), ['US-2026-11-03', 'US-2026-11-03', 'US-2026-11-03']);
   assert.equal((await request('POST /api/consents', { terms: true, privacy: true, health: true, noticeVersion: 'US-2026-11-03' })).statusCode, 400);
 });

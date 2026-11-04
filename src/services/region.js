@@ -26,6 +26,7 @@ export function hasUSStartupConsent() {
   return startupConsent?.version === US_CONSENT_VERSION && startupConsent.terms && startupConsent.collect && startupConsent.share && startupConsent.adult;
 }
 export async function saveUSStartupConsent(value) {
-  startupConsent = { ...value, version: US_CONSENT_VERSION, recordedAt: new Date().toISOString() };
-  await AsyncStorage.setItem('AURIC_US_STARTUP_CONSENT', JSON.stringify(startupConsent));
+  const record = { ...value, version: US_CONSENT_VERSION, recordedAt: new Date().toISOString() };
+  await AsyncStorage.setItem('AURIC_US_STARTUP_CONSENT', JSON.stringify(record));
+  startupConsent = record;
 }

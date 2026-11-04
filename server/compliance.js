@@ -14,12 +14,15 @@ module.exports = function registerCompliance(app, sql, getStripe) {
   } catch (e) { console.error('[compliance] consents migration failed:', e?.message); } })();
   let usTableReady;
   function ensureUSConsents() {
-    if (!usTableReady) usTableReady = sql`CREATE TABLE IF NOT EXISTS us_consents (
+    if (!usTableReady) usTableReady = (async () => { await sql`CREATE TABLE IF NOT EXISTS us_consents (
       id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, user_id TEXT NOT NULL,
       recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), notice_version TEXT NOT NULL,
       terms BOOLEAN NOT NULL, privacy BOOLEAN NOT NULL, health BOOLEAN NOT NULL, share BOOLEAN NOT NULL,
       terms_version TEXT NOT NULL, collection_version TEXT NOT NULL, sharing_version TEXT NOT NULL
-    )`.catch(error => { usTableReady = null; throw error; });
+    )`;
+      await sql`ALTER TABLE us_consents ADD COLUMN IF NOT EXISTS event_id TEXT, ADD COLUMN IF NOT EXISTS accepted_at TIMESTAMPTZ, ADD COLUMN IF NOT EXISTS adult BOOLEAN`;
+      await sql`CREATE UNIQUE INDEX IF NOT EXISTS us_consents_event ON us_consents(user_id, event_id)`;
+    })().catch(error => { usTableReady = null; throw error; });
     return usTableReady;
   }
   async function identity(req, res, next) {
@@ -58,13 +61,16 @@ module.exports = function registerCompliance(app, sql, getStripe) {
     } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
   });
   app.post('/api/consents', identity, async (req, res) => {
-    const { terms, privacy, health, noticeVersion, share } = req.body;
+    const { terms, privacy, health, noticeVersion, share, eventId, recordedAt, adult } = req.body;
     if (req.get('X-Auric-Region') === 'US') {
       if ([terms, privacy, health, share].some(value => typeof value !== 'boolean') || noticeVersion !== US_VERSION) return res.status(400).json({ error: 'INVALID_US_CONSENT' });
+      if ((eventId != null && (typeof eventId !== 'string' || eventId.length > 300)) ||
+          (recordedAt != null && !Number.isFinite(Date.parse(recordedAt))) ||
+          (adult != null && typeof adult !== 'boolean')) return res.status(400).json({ error: 'INVALID_US_CONSENT_EVENT' });
       try {
         await ensureUSConsents();
-        await sql`INSERT INTO us_consents (user_id, notice_version, terms, privacy, health, share, terms_version, collection_version, sharing_version)
-          VALUES (${req.complianceUser.uid}, ${US_VERSION}, ${terms}, ${privacy}, ${health}, ${share}, ${US_VERSION}, ${US_VERSION}, ${US_VERSION})`;
+        await sql`INSERT INTO us_consents (user_id, notice_version, terms, privacy, health, share, terms_version, collection_version, sharing_version, event_id, accepted_at, adult)
+          VALUES (${req.complianceUser.uid}, ${US_VERSION}, ${terms}, ${privacy}, ${health}, ${share}, ${US_VERSION}, ${US_VERSION}, ${US_VERSION}, ${eventId || null}, ${recordedAt || null}, ${adult ?? null}) ON CONFLICT (user_id, event_id) DO NOTHING`;
         return res.json({ ok: true });
       } catch { return res.status(503).json({ error: 'CONSENT_NOT_SAVED' }); }
     }

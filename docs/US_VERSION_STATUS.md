@@ -52,3 +52,13 @@ US pharmacies, refills, interactions and wellness dispatch to dedicated componen
 4. Confirm Adriana Hernandez/controller details, existing contact mailbox, processor contracts/data locations/retention/backups/deletion behavior, and incident contacts; deploy server and policies, verify live services and complete the smoke matrix.
 
 Public US release remains blocked on these owner/legal/store actions. The code does not submit, publish or invite testers automatically.
+
+## Consent follow-up (q43)
+
+Fixed the split between the device startup receipt and the account consent flow: the original startup choices/version/timestamp are now bound once to the signed-in account and queued for server synchronization. The US Privacy modal is Settings-only; document links are listed once, and stored choices are displayed for review. Collection and sharing remain separate. Durable per-account queues retain withdrawals across sign-out, retry every 30 seconds while mounted and on foreground, and use fresh Firebase ID tokens and captured region headers. Cloud routes continue enforcing server consent until synchronization succeeds.
+
+The previous client threw the same bilingual error for every non-2xx response and had no durable save fallback. Client `/api/consents`, region/version and server registration match in source. The deployment requirement above is still unresolved: a credential-free probe of the configured fallback Render URL failed with network EACCES in this workspace. No authenticated live request, deployed revision, configured runtime URL, or actual DB grants/schema could be verified; no environment files were opened. Thus a specific production HTTP/DB/auth failure cannot be claimed as confirmed. U13 currently concerns location reminders, not backend deployment.
+
+Deploy updated `server/compliance.js`. It automatically creates/alters `us_consents` and adds a unique event index to deduplicate retries, preserving original acceptance time separately from server receipt time. If its DB role lacks DDL rights, run `server/migrate-us-consent-events.sql` with the database owner first. Verify authenticated GET/POST against the app's actual runtime API base and Firebase project. No deployment or migration was executed here. These changes require no new native build or dependency.
+
+Validation: 15 focused client/server/region tests passed and changed source files parsed successfully. `npm test` has no configured script. Full `tsc --noEmit` encounters existing unrelated missing web packages and type errors; see `consent-typecheck.txt` for the captured run. No Expo command was run (to avoid automatic environment loading).
