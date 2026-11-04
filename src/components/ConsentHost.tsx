@@ -1,3 +1,6 @@
+import { getRegion } from '../services/region';
+import { useRegion } from '../providers/RegionProvider';
+import { US_POLICIES } from '../legal/usPolicies';
 import Modal from './BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -22,8 +25,9 @@ function ConsentButton({ title, disabled, onPress, primary = false, destructive 
 
 export default function ConsentHost({ language, user, privacyOpen, onPrivacyClose, onHealthConsentChange }: any) {
   useUILanguage();
+  const { region } = useRegion();
   const [visible, setVisible] = useState(false);
-  const [choices, setChoices] = useState({ terms: false, privacy: false, health: false });
+  const [choices, setChoices] = useState({ terms: false, privacy: false, health: false, share: false });
   const [method, setMethod] = useState('email');
   const [resolvePrompt, setResolvePrompt] = useState<(() => void) | null>(null);
   const [rejectPrompt, setRejectPrompt] = useState<((error: Error) => void) | null>(null);
@@ -34,7 +38,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
   const es = language === 'es';
   useEffect(() => {
     registerConsentPrompt(provider => new Promise<void>((resolve, reject) => {
-      setChoices({ terms: false, privacy: false, health: false });
+      setChoices({ terms: false, privacy: false, health: false, share: false });
       setMethod(provider); setResolvePrompt(() => resolve); setRejectPrompt(() => reject); setVisible(true);
     }));
     return () => registerConsentPrompt(undefined);
@@ -45,11 +49,11 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
     const revision = ++checkRevision.current;
     setVisible(false);
     setError('');
-    setChoices({ terms: false, privacy: false, health: false });
+    setChoices({ terms: false, privacy: false, health: false, share: false });
     onHealthConsentChange(false);
     const isCurrent = () => active && checkRevision.current === revision;
     const check = async () => {
-      if (await readCachedConsent(user.uid)) {
+      if (getRegion() !== 'US' && await readCachedConsent(user.uid)) {
         if (!isCurrent()) return;
         onHealthConsentChange(true);
       }
@@ -58,7 +62,7 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
       const accepted = hasCurrentConsent(current);
       onHealthConsentChange(accepted);
       if (!accepted) {
-        setChoices({ terms: false, privacy: false, health: false }); setVisible(true);
+        setChoices({ terms: false, privacy: false, health: false, share: false }); setVisible(true);
       }
     };
     // An unavailable server is not evidence of missing consent; retain cached access
@@ -69,22 +73,22 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
     }); };
     run();
     return () => { active = false; clearTimeout(retry); };
-  }, [user?.uid]);
+  }, [user?.uid, region]);
   useEffect(() => {
-    if (privacyOpen) { setVisible(true); setChoices({ terms: false, privacy: false, health: false }); }
+    if (privacyOpen) { setVisible(true); setChoices({ terms: false, privacy: false, health: false, share: false }); }
   }, [privacyOpen]);
   const save = async (withdraw = false) => {
     checkRevision.current += 1;
     setBusy(true); setError('');
     try {
-      await consentRequest('POST', withdraw ? { terms: true, privacy: true, health: false } : choices, method);
+      await consentRequest('POST', withdraw ? { terms: true, privacy: true, health: false, share: false } : choices, method);
       if (withdraw) {
         onHealthConsentChange(false);
         onPrivacyClose();
-        setChoices({ terms: false, privacy: false, health: false });
+        setChoices({ terms: false, privacy: false, health: false, share: false });
         await Notifications.cancelAllScheduledNotificationsAsync();
         setError(uiI18n.t("localized.ConsentHost.save.text85"));
-      } else { onHealthConsentChange(choices.health); setVisible(false); onPrivacyClose(); resolvePrompt?.(); setResolvePrompt(null); setRejectPrompt(null); }
+      } else { onHealthConsentChange(choices.health && (getRegion() !== 'US' || choices.share)); setVisible(false); onPrivacyClose(); resolvePrompt?.(); setResolvePrompt(null); setRejectPrompt(null); }
     } catch (e: any) { setError(e.message); }
     finally { setBusy(false); }
   };
@@ -102,12 +106,13 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
       <Text accessibilityRole="header" style={styles.title}>{uiI18n.t("localized.ConsentHost.text93")}</Text>
       {document ? <><Text style={styles.document}>{document}</Text><ConsentButton title={uiI18n.t("localized.ConsentHost.text94")} onPress={() => setDocument('')} /></> : <>
         <ConsentButton title={uiI18n.t("localized.ConsentHost.text95")} onPress={async () => setDocument(await loadPrivacyText(language))} />
+        {getRegion() === 'US' && <ConsentButton title="Consumer Health Data Privacy Policy" onPress={() => setDocument(US_POLICIES['Consumer Health Data Privacy Policy'])} />}
         <ConsentChoices language={language} value={choices} onChange={setChoices} openLegal={async type => {
           try { setDocument(await (type === 'terms' ? loadTermsText(language) : loadPrivacyText(language))); }
           catch { setError(uiI18n.t("localized.ConsentHost.text98")); }
         }} />
         <Text style={styles.description}>{uiI18n.t("localized.ConsentHost.text100")}</Text>
-        <ConsentButton primary title={uiI18n.t("localized.ConsentHost.text101")} disabled={busy || !choices.terms || !choices.privacy || (!!user && !choices.health)} onPress={() => save()} />
+        <ConsentButton primary title={uiI18n.t("localized.ConsentHost.text101")} disabled={busy || !choices.terms || !choices.privacy || (!!user && (!choices.health || (getRegion() === 'US' && !choices.share)))} onPress={() => save()} />
         {!!user && <ConsentButton title={uiI18n.t("localized.ConsentHost.text102")} disabled={busy} onPress={() => save(true)} />}
         {!!user && <ConsentButton destructive title={uiI18n.t("localized.ConsentHost.text103")} disabled={busy} onPress={() => Alert.alert(
           uiI18n.t("localized.ConsentHost.text104"),

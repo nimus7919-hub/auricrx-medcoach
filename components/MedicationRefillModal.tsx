@@ -1,3 +1,5 @@
+import { getRegion } from '../src/services/region';
+import USRefillModal from '../src/components/USRefillModal';
 import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -32,7 +34,7 @@ interface Props {
   preloadedFxMeta?: any;
 }
 
-export default function MedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry, onRefillComplete, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }: Props) {
+function MexicoMedicationRefillModal({ visible, onClose, medication, strings, lang, userCountry, onRefillComplete, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta }: Props) {
   useUILanguage();
   const catalogSelection = useRef<{ name: string; components: any[] } | null>(null);
   const slide = useRef(new Animated.Value(0)).current;
@@ -807,4 +809,8 @@ export default function MedicationRefillModal({ visible, onClose, medication, st
       </Modal>
     </Modal>
   );
+}
+
+export default function MedicationRefillModal(props: Props) {
+  return getRegion() === 'US' ? <USRefillModal {...props} /> : <MexicoMedicationRefillModal {...props} />;
 }

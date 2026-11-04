@@ -1,3 +1,5 @@
+import { getRegion } from './region';
+import { US_POLICIES } from '../legal/usPolicies';
 // Import legal text from the generated module
 import * as legalTexts from '../legal/legalTexts';
 
@@ -20,6 +22,7 @@ function loadLegalFile(language: string): string {
 }
 
 export async function loadTermsText(language: string): Promise<string> {
+  if (getRegion() === 'US') return US_POLICIES['Terms'];
   const content = loadLegalFile(language);
   if (content.includes(PRIVACY_ANCHOR)) {
     const [termsContent] = content.split(PRIVACY_ANCHOR);
@@ -29,6 +32,7 @@ export async function loadTermsText(language: string): Promise<string> {
 }
 
 export async function loadPrivacyText(language: string): Promise<string> {
+  if (getRegion() === 'US') return US_POLICIES['Privacy Policy'];
   const content = loadLegalFile(language);
   if (content.includes(PRIVACY_ANCHOR)) {
     const [, privacyContent] = content.split(PRIVACY_ANCHOR);

@@ -1,3 +1,4 @@
+import { getRegion } from '../services/region';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import React from 'react';
@@ -14,12 +15,12 @@ export default function ConsentChoices({ language, value, onChange, openLegal }:
   useUILanguage();
   const { t: translate } = useTranslation();
   const t = translate('consentChoices', { returnObjects: true }) as Record<string, string>;
-  return <View>{(['terms', 'privacy', 'health'] as const).map(key => <View key={key} style={{ marginVertical: 8 }}>
+  return <View>{(getRegion() === 'US' ? ['terms', 'privacy', 'health', 'share'] as const : ['terms', 'privacy', 'health'] as const).map(key => <View key={key} style={{ marginVertical: 8 }}>
     <TouchableOpacity accessibilityRole="checkbox" accessibilityState={{ checked: value[key] }}
       onPress={() => onChange({ ...value, [key]: !value[key] })} style={{ flexDirection: 'row', gap: vip.spacing.sm, paddingVertical: vip.spacing.sm, minHeight: 48 }}>
       <Feather name={value[key] ? 'check-square' : 'square'} size={24} color={vip.colors.gold} />
-      <Text style={{ color: vip.colors.white, flex: 1, fontSize: 15, lineHeight: 23 }}>{t[key]}</Text>
+      <Text style={{ color: vip.colors.white, flex: 1, fontSize: 15, lineHeight: 23 }}>{getRegion() === 'US' && key === 'health' ? 'I consent to collection and processing of my health data.' : getRegion() === 'US' && key === 'share' ? 'I separately consent to sharing health data with OpenAI (chat), Firebase/Google, Render, and Neon (authentication, hosting and sync).' : t[key]}</Text>
     </TouchableOpacity>
-    {key !== 'health' && <TouchableOpacity onPress={() => openLegal(key)}><Text style={{ color: vip.colors.gold, textDecorationLine: 'underline', padding: 8 }}>{uiI18n.t("localized.ConsentChoices.text22")}</Text></TouchableOpacity>}
+    {(key === 'terms' || key === 'privacy') && <TouchableOpacity onPress={() => openLegal(key)}><Text style={{ color: vip.colors.gold, textDecorationLine: 'underline', padding: 8 }}>{uiI18n.t("localized.ConsentChoices.text22")}</Text></TouchableOpacity>}
   </View>)}</View>;
 }

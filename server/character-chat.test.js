@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const { z } = require('zod');
 const { characterPrompt, appendSafety, detectUrgency, safetyText } = require('./characterPrompts');
 
-function setup(create) {
+function setup(create, region) {
   const source = fs.readFileSync(path.join(__dirname, 'index.js'), 'utf8');
   const start = source.indexOf("app.post('/ask',");
   const end = source.indexOf('// --- Streaming endpoint', start);
@@ -15,10 +15,10 @@ function setup(create) {
     app: { post(_path, callback) { handler = callback; } }, z,
     characterPrompt, appendCharacterSafety: appendSafety, detectCharacterUrgency: detectUrgency,
     client: { chat: { completions: { create } } }, tools: [],
-    console: { log() {}, error() {} }, process: { env: {} },
+    console: { log() {}, error() {} }, process: { env: {} }, require: name => name === '../src/legal/usDisclaimers.json' ? require('../src/legal/usDisclaimers.json') : require(name),
   });
   const res = { statusCode: 200, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
-  return { handler, res };
+  return { handler: (req, response) => handler({ ...req, auricRegion: region }, response), res };
 }
 
 test('each character reaches the provider with its own persona and identity limits', async () => {
@@ -65,4 +65,26 @@ test('invalid character is rejected before provider access', async () => {
   const { handler, res } = setup(() => { throw new Error('must not call'); });
   await handler({ body: { message: 'Hello', character: 'doctor' } }, res);
   assert.equal(res.statusCode, 400);
+});
+
+
+test('US emergency and mental-health referrals use exact crisis notice and bypass AI', async () => {
+  const notice = require('../src/legal/usDisclaimers.json').crisis;
+  for (const message of ['suicide', 'kill myself', 'overdose', 'poison', 'chest pain', "can't breathe", 'I am feeling depressed']) {
+    const { handler, res } = setup(() => { throw new Error('must not call AI'); }, 'US');
+    await handler({ body: { message, language: 'en' } }, res);
+    assert.equal(res.statusCode, 200);
+    assert.ok(res.body.reply.includes(notice));
+    assert.ok(!res.body.reply.includes('800 911 2000'));
+  }
+});
+test('US AI personas have no profile tools and forbid diagnosis, dosing and therapy', async () => {
+  const { handler, res } = setup(async options => {
+    assert.equal(options.tools, undefined);
+    assert.match(options.messages[0].content, /Never diagnose/);
+    assert.match(options.messages[0].content, /therapy or counseling/);
+    return { choices: [{ message: { role: 'assistant', content: 'General reference information.' } }] };
+  }, 'US');
+  await handler({ body: { message: 'Who are you?', language: 'en', character: 'mimi' } }, res);
+  assert.equal(res.statusCode, 200);
 });

@@ -1,3 +1,4 @@
+import { getRegion } from '../services/region';
 import uiI18n from "../i18n";
 // Crash Logger Utility
 // Logs crashes and errors to AsyncStorage for debugging
@@ -10,6 +11,7 @@ const MAX_LOGS = 50; // Keep last 50 crash logs
 
 class CrashLogger {
   static async logError(error, context = {}) {
+    if (getRegion() === 'US') return;
     try {
       const timestamp = new Date().toISOString();
       const errorInfo = {

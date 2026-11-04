@@ -1,3 +1,4 @@
+import { getRegion } from './region';
 import uiI18n from "../i18n";
 import { symptomInformation } from './symptomInformation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -185,6 +186,7 @@ class AIHealthService {
 
   // Drug Interaction Checking
   async checkDrugInteractions(medications: string[]): Promise<DrugInteraction[]> {
+    if (getRegion() === 'US') throw new Error('US interactions require a DailyMed label lookup with source and date.');
     const interactions: DrugInteraction[] = [];
     
     for (let i = 0; i < medications.length; i++) {

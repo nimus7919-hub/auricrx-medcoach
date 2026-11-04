@@ -5,10 +5,10 @@ const locales = {
   pt: require('../src/i18n/pt.json'), zh: require('../src/i18n/zh.json'),
 };
 const normalize = text => String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[’‘]/g, "'");
-function detectUrgency(text) {
+function detectUrgency(text, region) {
   const value = normalize(text);
   const selfHarm = /suicid|self[- ]?harm|kill myself|hurt myself|end my life|want to die|matarme|me (quiero|voy a) matar|hacerme dano|autolesion|quitarme la vida|quiero morir/.test(value);
-  return { selfHarm, emergency: selfHarm || /chest pain|pain in (my |the )?chest|can(?:not|'t) breathe|can not breathe|trouble breathing|difficulty breathing|shortness of breath|overdos|unconscious|severe bleeding|stroke|heart attack|seizure|dolor (en el |de )?pecho|no puedo respirar|dificultad para respirar|falta de aire|sobredosis|inconsciente|sangrado (grave|abundante)|derrame cerebral|infarto|convulsion/.test(value) };
+  return { selfHarm, emergency: selfHarm || (region === 'US' && /poison/.test(value)) || /chest pain|pain in (my |the )?chest|can(?:not|'t) breathe|can not breathe|trouble breathing|difficulty breathing|shortness of breath|overdos|unconscious|severe bleeding|stroke|heart attack|seizure|dolor (en el |de )?pecho|no puedo respirar|dificultad para respirar|falta de aire|sobredosis|inconsciente|sangrado (grave|abundante)|derrame cerebral|infarto|convulsion/.test(value) };
 }
 function medicationRelated(text) {
   return /medic|farmac|\bdrug|\bdos[ei]|\bpill|prescri|tablet|insulin|ibuprofen|paracetamol|acetaminophen|aspirin|antibiotic|anticoagul|metformin|arznei|comprime|remedio|药|藥|服用|剂量|劑量/i.test(normalize(text));
@@ -16,9 +16,10 @@ function medicationRelated(text) {
 function safetyText(language) {
   return (locales[String(language || 'en').split(/[-_]/)[0]] || locales.en).ai;
 }
-function appendSafety(reply, question, language) {
+function appendSafety(reply, question, language, region) {
+  if (region === 'US' && detectUrgency(question, region).emergency) return require('../src/legal/usDisclaimers.json').crisis;
   const labels = safetyText(language);
-  const urgency = detectUrgency(question);
+  const urgency = detectUrgency(question, region);
   const notices = [];
   if (urgency.emergency) notices.push(labels.emergencyBanner);
   if (urgency.selfHarm) notices.push(labels.selfHarmBanner);

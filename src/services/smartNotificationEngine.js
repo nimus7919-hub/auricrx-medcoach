@@ -1,3 +1,4 @@
+import { getRegion, initializeRegion } from './region';
 ﻿// Local smart-notification engine. Native modules are optional on older APKs.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
@@ -62,7 +63,7 @@ export function quietDate(date, state) {
   } return d;
 }
 export function contextualBody(reminder, state) {
-  const place = state.context && state.location && state.places.find(p => p.enabled !== false && state.inside.includes(p.id) && (!p.reminderId || String(p.reminderId) === String(reminder.id)));
+  const place = getRegion() !== 'US' && state.context && state.location && state.places.find(p => p.enabled !== false && state.inside.includes(p.id) && (!p.reminderId || String(p.reminderId) === String(reminder.id)));
   return place?.message || reminder.name;
 }
 async function notify(body, state, id, date = new Date(), title = 'AuricRX MedCoach') {
@@ -93,24 +94,29 @@ export function suggestions(state, reminders) {
   });
 }
 export async function foregroundLocation() {
+  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
   if (!Location) throw new Error('Se necesita un nuevo APK para usar ubicación.');
   const permission = await Location.requestForegroundPermissionsAsync();
   if (!permission.granted) throw new Error('Permiso de ubicación denegado. Puedes habilitarlo en Ajustes.');
   return Location;
 }
 export async function currentCoordinates() {
+  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
   const loc = await foregroundLocation(); const result = await loc.getCurrentPositionAsync({ accuracy: loc.Accuracy.Balanced }); return result.coords;
 }
 export async function addressCoordinates(address) {
+  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
   const loc = await foregroundLocation(); const results = await loc.geocodeAsync(address);
   if (!results.length) throw new Error('No se encontró esa dirección.'); return results[0];
 }
 export async function backgroundPermission() {
+  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
   await foregroundLocation();
   if (!Tasks || !await Tasks.isAvailableAsync()) throw new Error('Se necesita un nuevo APK con tareas en segundo plano.');
   if (!(await Location.requestBackgroundPermissionsAsync()).granted) throw new Error('Ubicación en segundo plano denegada. Selecciona permitir siempre en Ajustes.');
 }
 export async function syncGeofences(state) {
+  if (getRegion() === 'US') { if (Location && await Location.hasStartedGeofencingAsync(GEO)) await Location.stopGeofencingAsync(GEO); return; }
   if (!Location || !Tasks || !await Tasks.isAvailableAsync()) return;
   const places = state.location ? state.places.filter(p => p.enabled !== false) : [];
   if (!places.length) { if (await Location.hasStartedGeofencingAsync(GEO)) await Location.stopGeofencingAsync(GEO); return; }
@@ -118,6 +124,7 @@ export async function syncGeofences(state) {
   await Location.startGeofencingAsync(GEO, places.map(p => ({ identifier: p.id, latitude: p.latitude, longitude: p.longitude, radius: p.radius, notifyOnEnter: true, notifyOnExit: true })));
 }
 export async function checkWeather(background = false) {
+  if (await initializeRegion() === 'US') return false;
   const s = await readSmart(); if (!s.weather || !s.weatherCoords || !s.alerts.length || !Notifications || !(await Notifications.getPermissionsAsync()).granted) return false;
   const now = new Date(), day = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
   if (background && now.getHours() < 7) return false;
@@ -157,7 +164,7 @@ async function reconcileSmartNow(meds, reminders) {
       if (s.refillPlans?.[med.id]?.key === planKey && new Date(s.refillPlans[med.id].date) <= new Date()) continue;
       const date = new Date(Date.now()+Math.max(0,days-s.lead)*86400000); date.setHours(9,0,0,0);
       const when = quietDate(new Date(Math.max(Date.now()+2000,date.getTime())),s);
-      if ((await Notifications.getPermissionsAsync()).granted) { await updateSmart(latest => { latest.refillPlans = { ...latest.refillPlans, [med.id]: { key: planKey, date: when.toISOString() } }; return latest; }); await Notifications.scheduleNotificationAsync({ identifier: id, content: { title: 'Predicción de recarga', body: `Te quedan ~${Math.min(days,s.lead)} días de ${med.name}. Considera surtir tu receta.`, data: { owner: 'auricrx-smart', fingerprint }, sound: 'default' }, trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when, channelId: 'medication-reminders-v2' } }); }
+      if ((await Notifications.getPermissionsAsync()).granted) { await updateSmart(latest => { latest.refillPlans = { ...latest.refillPlans, [med.id]: { key: planKey, date: when.toISOString() } }; return latest; }); await Notifications.scheduleNotificationAsync({ identifier: id, content: { title: getRegion() === 'US' ? i18n.t('usSmart.inventoryTitle', { lng: 'en' }) : 'Predicción de recarga', body: getRegion() === 'US' ? i18n.t('usSmart.inventoryBody', { lng: 'en', days: Math.min(days, s.lead), name: med.name }) : `Te quedan ~${Math.min(days,s.lead)} días de ${med.name}. Considera surtir tu receta.`, data: { owner: 'auricrx-smart', fingerprint }, sound: 'default' }, trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when, channelId: 'medication-reminders-v2' } }); }
     }
     for (const n of pending) if (n.identifier.startsWith('smart-refill:') && !desired.has(n.identifier)) await Notifications.cancelScheduledNotificationAsync(n.identifier);
   }
@@ -166,7 +173,7 @@ async function reconcileSmartNow(meds, reminders) {
   }
   await syncGeofences(s);
   if (Tasks && Fetch && await Tasks.isAvailableAsync()) {
-    if (s.weather && s.alerts.length) await Fetch.registerTaskAsync(WEATHER, { minimumInterval: 3600, stopOnTerminate: false, startOnBoot: true });
+    if (getRegion() !== 'US' && s.weather && s.alerts.length) await Fetch.registerTaskAsync(WEATHER, { minimumInterval: 3600, stopOnTerminate: false, startOnBoot: true });
     else if (await Tasks.isTaskRegisteredAsync(WEATHER)) await Fetch.unregisterTaskAsync(WEATHER);
   }
   await checkWeather().catch(error => console.warn('[Smart weather]', error.message));
@@ -183,7 +190,7 @@ export async function smartStatus() {
 if (Tasks) {
   try {
     Tasks.defineTask(GEO, async ({ data, error }) => {
-      if (error || !data) return;
+      if (await initializeRegion() === 'US' || error || !data) return;
       const s = await readSmart(); if (!s.location) return;
       const place = s.places.find(p => p.id === data.region.identifier && p.enabled !== false); if (!place) return;
       const entering = data.eventType === Location.GeofencingEventType.Enter;
@@ -195,4 +202,13 @@ if (Tasks) {
     });
     Tasks.defineTask(WEATHER, async () => { try { return await checkWeather(true) ? Fetch.BackgroundFetchResult.NewData : Fetch.BackgroundFetchResult.NoData; } catch { return Fetch.BackgroundFetchResult.Failed; } });
   } catch (_) { /* Native task runtime unavailable. */ }
+}
+
+// Stop previously registered MX tasks when US is selected, before any US health use.
+export async function disableUSLocationTasks() {
+  if (Location && await Location.hasStartedGeofencingAsync(GEO)) await Location.stopGeofencingAsync(GEO);
+  if (Tasks && Fetch && await Tasks.isTaskRegisteredAsync(WEATHER)) await Fetch.unregisterTaskAsync(WEATHER);
+  if (Notifications) for (const item of await Notifications.getAllScheduledNotificationsAsync()) {
+    if (item.identifier.startsWith('smart-place:') || item.identifier.startsWith('smart-weather:')) await Notifications.cancelScheduledNotificationAsync(item.identifier);
+  }
 }

@@ -1,4 +1,5 @@
 import { daysRemaining, recordDose, linkedReminders } from '../src/services/smartNotificationEngine';
+import { getRegion } from '../src/services/region';
 import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -770,14 +771,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
 
             {/* Optional inventory is stored with the medicine in AsyncStorage. */}
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>Cantidad actual (opcional)</Text><TextInput accessibilityLabel="Cantidad actual" keyboardType="decimal-pad" value={String(med.remainingQuantity ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, remainingQuantity: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
-              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>Unidades por toma (opcional)</Text><TextInput accessibilityLabel="Unidades por toma" keyboardType="decimal-pad" value={String(med.unitsPerDose ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, unitsPerDose: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
+              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>{getRegion() === 'US' ? uiI18n.t('usSmart.quantity', { lng: 'en' }) : 'Cantidad actual (opcional)'}</Text><TextInput accessibilityLabel={getRegion() === 'US' ? 'Current quantity' : 'Cantidad actual'} keyboardType="decimal-pad" value={String(med.remainingQuantity ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, remainingQuantity: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
+              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>{getRegion() === 'US' ? uiI18n.t('usSmart.units', { lng: 'en' }) : 'Unidades por toma (opcional)'}</Text><TextInput accessibilityLabel={getRegion() === 'US' ? 'Units per recorded dose' : 'Unidades por toma'} keyboardType="decimal-pad" value={String(med.unitsPerDose ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, unitsPerDose: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
             </View>
             {/* Counter and Took Button Row - Compact Corner */}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
-                  {parseFloat(med.remainingQuantity || '0')} {S?.left || uiI18n.t("supplements.left")} {daysRemaining(med, reminders || []) != null ? ` · ~${daysRemaining(med, reminders || [])} días restantes` : ''}
+                  {parseFloat(med.remainingQuantity || '0')} {S?.left || uiI18n.t("supplements.left")} {daysRemaining(med, reminders || []) != null ? ` · ~${daysRemaining(med, reminders || [])} ${getRegion() === 'US' ? 'days remaining' : 'días restantes'}` : ''}
                 </DynamicText>
                 <TextInput
                   placeholder="0"

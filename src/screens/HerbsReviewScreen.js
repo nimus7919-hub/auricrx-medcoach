@@ -1,3 +1,6 @@
+import { HERB_DETAILS_EN, UNREVIEWED_HERB_EN } from '../data/herbDetailsEn';
+import { getRegion } from '../services/region';
+import usNotices from '../legal/usDisclaimers.json';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -46,15 +49,15 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
       <Text style={styles.sourceUrl}>{source.url}</Text>
     </TouchableOpacity>
   );
-  const footer = <Text style={styles.footer}>{tr('footer')}</Text>;
-  const detailsOf = herb => language === 'es' ? herb?.detailsEs : null;
+  const footer = <Text style={styles.footer}>{getRegion() === 'US' ? usNotices.herbs : tr('footer')}</Text>;
+  const detailsOf = herb => getRegion() === 'US' && herb ? HERB_DETAILS_EN[herb.key] || UNREVIEWED_HERB_EN : language === 'es' ? herb?.detailsEs : null;
   const risk = herb => <Text style={styles.risk}>{detailsOf(herb)?.safety || tr(herb.safety)}</Text>;
   const herbImage = (herb, large = false) => (
     <View>
       <HerbImage key={`${herb.key}-${large}`} herb={herb} label={nameOf(herb)} large={large} fallbackLabel={tr('imagePending')} />
       {!herb.imageVerified && <Text style={styles.caption}>{tr('imagePending')}</Text>}
       {large && herb.imageAttribution && <Text style={styles.caption}>
-        Foto: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
+        {language === 'en' ? 'Photo' : 'Foto'}: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
           onPress={() => openSource('https://creativecommons.org/licenses/' +
             (herb.imageAttribution.license.includes('BY-SA') ? 'by-sa/' : 'by/') +
             herb.imageAttribution.license.split(' ').pop() + '/')}>{herb.imageAttribution.license}</Text>, <Text
@@ -113,7 +116,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 {risk(selected)}
                 {detailsOf(selected) ? <>
                   <Text style={styles.body}>{detailsOf(selected).uses}</Text>
-                  <Text style={styles.label}>Lo que dice la evidencia</Text>
+                  <Text style={styles.label}>{getRegion() === 'US' ? 'What the evidence says' : 'Lo que dice la evidencia'}</Text>
                   <Text style={styles.body}>{detailsOf(selected).evidence}</Text>
                   <Text style={styles.label}>{tr('precautions')}</Text>
                   <Text style={styles.body}>{detailsOf(selected).precautions}</Text>
@@ -137,6 +140,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 </>}
                 <Text style={styles.body}>{tr('generalPrecaution')}</Text>
                 {sourceLink(GENERAL_SOURCE)}
+                {getRegion() !== 'US' && <>
                 <Text style={styles.label}>{tr('personal')}</Text>
                 {matches.length ? matches.map((match, index) => <View key={index} style={styles.alert}>
                   <Text style={styles.body}>{tr('alert', {
@@ -147,6 +151,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                   <Text style={styles.caption}>{tr('checked', { date: match.checked })}</Text>
                 </View>) : <Text style={styles.body}>{tr('noMatches')}</Text>}
                 {missingIngredients && <Text style={styles.body}>{tr('ingredientMissing')}</Text>}
+                </>}
                 {footer}
               </>}
             </ScrollView>

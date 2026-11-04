@@ -3,6 +3,7 @@
 const path = require('path');
 const admin = require('./firebase-admin');
 const NOTICE_VERSION = '2026-11-02';
+const US_VERSION = 'US-2026-11-03';
 
 module.exports = function registerCompliance(app, sql, getStripe) {
   // Ensure the consents table exists (idempotent; mirrors migrate-consents.sql).
@@ -11,6 +12,16 @@ module.exports = function registerCompliance(app, sql, getStripe) {
     await sql`CREATE INDEX IF NOT EXISTS consents_user_latest ON consents(user_id, id DESC)`;
     console.log('[compliance] consents table ready');
   } catch (e) { console.error('[compliance] consents migration failed:', e?.message); } })();
+  let usTableReady;
+  function ensureUSConsents() {
+    if (!usTableReady) usTableReady = sql`CREATE TABLE IF NOT EXISTS us_consents (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, user_id TEXT NOT NULL,
+      recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), notice_version TEXT NOT NULL,
+      terms BOOLEAN NOT NULL, privacy BOOLEAN NOT NULL, health BOOLEAN NOT NULL, share BOOLEAN NOT NULL,
+      terms_version TEXT NOT NULL, collection_version TEXT NOT NULL, sharing_version TEXT NOT NULL
+    )`.catch(error => { usTableReady = null; throw error; });
+    return usTableReady;
+  }
   async function identity(req, res, next) {
     try {
       const token = /^Bearer (.+)$/i.exec(req.headers.authorization || '')?.[1];
@@ -35,6 +46,11 @@ module.exports = function registerCompliance(app, sql, getStripe) {
   });
   app.get('/api/consents', identity, async (req, res) => {
     try {
+      if (req.get('X-Auric-Region') === 'US') {
+        await ensureUSConsents();
+        const rows = await sql`SELECT terms, privacy, health, share, notice_version FROM us_consents WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
+        return res.json(rows[0]?.notice_version === US_VERSION ? rows[0] : { terms: false, privacy: false, health: false, share: false });
+      }
       const rows = await sql`SELECT terms, privacy, health, notice_version FROM consents
         WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
       const current = rows[0];
@@ -42,7 +58,16 @@ module.exports = function registerCompliance(app, sql, getStripe) {
     } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
   });
   app.post('/api/consents', identity, async (req, res) => {
-    const { terms, privacy, health, noticeVersion } = req.body;
+    const { terms, privacy, health, noticeVersion, share } = req.body;
+    if (req.get('X-Auric-Region') === 'US') {
+      if ([terms, privacy, health, share].some(value => typeof value !== 'boolean') || noticeVersion !== US_VERSION) return res.status(400).json({ error: 'INVALID_US_CONSENT' });
+      try {
+        await ensureUSConsents();
+        await sql`INSERT INTO us_consents (user_id, notice_version, terms, privacy, health, share, terms_version, collection_version, sharing_version)
+          VALUES (${req.complianceUser.uid}, ${US_VERSION}, ${terms}, ${privacy}, ${health}, ${share}, ${US_VERSION}, ${US_VERSION}, ${US_VERSION})`;
+        return res.json({ ok: true });
+      } catch { return res.status(503).json({ error: 'CONSENT_NOT_SAVED' }); }
+    }
     const method = req.complianceUser.firebase?.sign_in_provider === 'google.com' ? 'google' : 'email';
     if (typeof terms !== 'boolean' || typeof privacy !== 'boolean' || typeof health !== 'boolean' ||
         noticeVersion !== NOTICE_VERSION) {
@@ -107,9 +132,18 @@ module.exports = function registerCompliance(app, sql, getStripe) {
 
   // Health processing requires an explicit, current, unwithdrawn consent.
   app.use(async (req, res, next) => {
-    if (!/^\/(?:ask(?:-stream)?$|(?:medication|supplement)-contributions(?:\/|$)|api\/(?:ai(?:\/|$)|medications(?:\/|$)|symptoms(?:\/|$)|supplements(?:\/|$)|fasting-profile(?:\/|$)|health-profiles?(?:\/|$)|generate-health-report$|sync(?:\/|$)))/.test(req.path)) return next();
+    if (!/^\/(?:ask(?:-stream)?$|(?:medication|supplement)-contributions(?:\/|$)|api\/(?:us(?:\/|$)|ai(?:\/|$)|medications(?:\/|$)|symptoms(?:\/|$)|supplements(?:\/|$)|fasting-profile(?:\/|$)|health-profiles?(?:\/|$)|generate-health-report$|sync(?:\/|$)))/.test(req.path)) return next();
     await identity(req, res, async () => {
       try {
+        await ensureUSConsents();
+        const usRows = await sql`SELECT terms, privacy, health, share, notice_version FROM us_consents WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
+        if (req.get('X-Auric-Region') === 'US' || (usRows.length && req.get('X-Auric-Region') !== 'MX')) {
+          const current = usRows[0];
+          if (!current?.terms || !current?.privacy || !current?.health || !current?.share || current?.notice_version !== US_VERSION) return res.status(403).json({ error: 'US_HEALTH_CONSENT_REQUIRED' });
+          req.auricRegion = 'US';
+          if (req.path === '/api/generate-health-report') return res.status(409).json({ error: 'US_WELLNESS_DISPLAY_ONLY' });
+          return next();
+        }
         const rows = await sql`SELECT health, notice_version FROM consents WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
         if (!rows[0]?.health || rows[0].notice_version !== NOTICE_VERSION) return res.status(403).json({ error: 'HEALTH_CONSENT_REQUIRED' });
         return next();

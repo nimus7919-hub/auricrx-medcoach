@@ -1,3 +1,4 @@
+import { initializeRegion } from '../services/region';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 // import * as Localization from 'expo-localization'; // Temporarily commented out until new APK is installed
@@ -26,6 +27,7 @@ const LANGUAGE_DETECTOR = {
   detect: async (callback: (lng: string) => void) => {
     try {
       console.log('🔍 LANGUAGE_DETECTOR: Starting language detection...');
+      const region = await initializeRegion();
       const savedLanguage = await AsyncStorage.getItem('AURIC_LANG');
       console.log('🔍 LANGUAGE_DETECTOR: Retrieved from storage:', savedLanguage);
       if (savedLanguage) {
@@ -42,7 +44,7 @@ const LANGUAGE_DETECTOR = {
       
       // For now, just use Spanish as fallback
       console.log('⚠️ LANGUAGE_DETECTOR: No saved language found, using fallback: es');
-      callback('es');
+      callback(region === 'US' ? 'en' : 'es');
     } catch (error) {
       console.error('❌ LANGUAGE_DETECTOR: Language detection error:', error);
       callback('es');
@@ -71,7 +73,7 @@ try {
       resources,
       fallbackLng: 'es',
       // Don't set lng here - let LANGUAGE_DETECTOR determine it
-      debug: true, // Enable debug mode to see what's happening
+      debug: false, // Enable debug mode to see what's happening
       interpolation: {
         escapeValue: false,
       },

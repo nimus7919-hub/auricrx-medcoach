@@ -1,3 +1,6 @@
+import { useRegion } from './RegionProvider';
+import { getRegion } from '../services/region';
+import usNotices from '../legal/usDisclaimers.json';
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { getAICharacter } from '../utils/aiCharacters';
@@ -85,6 +88,7 @@ import AppProviders from "./AppProviders";
 let reminderPermissionRequestedThisLaunch = false;
 
 export default function App() {
+  const { region } = useRegion();
   useUILanguage();
   // TEMP FLAG - set to false when done testing env
   const debugEnv = true;
@@ -466,7 +470,7 @@ export default function App() {
   
   // privacy settings
   const [dataCollection, setDataCollection] = useState(true);
-  const [analytics, setAnalytics] = useState(true);
+  const [analytics, setAnalytics] = useState(getRegion() !== 'US');
   
   // subscription & trial state
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
@@ -1795,6 +1799,7 @@ useEffect(() => {
 // Auto-load pharmacy and labs data when app starts
 useEffect(() => {
   const loadLocationData = async () => {
+    if (getRegion() === 'US') return;
     try {
       // Request location permission
       const { status } = await requestSearchLocationPermission();
@@ -1957,6 +1962,10 @@ const [aiMessages, setAiMessages] = useState([
 ]);
 const [aiSending, setAiSending] = useState(false);
 
+useEffect(() => {
+  if (aiOpen && region === 'US') setAiMessages([{ role: 'assistant', text: getInitialAIMessage(selectedAIDoctor) }]);
+}, [aiOpen, region]);
+
 // auto-scroll to bottom on new message
 const aiScrollRef = useRef(null);
 useEffect(() => {
@@ -2004,8 +2013,8 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   setAiInput('');
   setAiSending(true);
 
-  if (detectUrgency(q).emergency) {
-    setAiMessages(m => [...m, { role: 'assistant', text: appendSafety('', q, lang) }]);
+  if (detectUrgency(q, getRegion()).emergency) {
+    setAiMessages(m => [...m, { role: 'assistant', text: appendSafety('', q, lang, getRegion()) }]);
     setAiSending(false);
     return;
   }
@@ -2168,7 +2177,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         message: q,
         character: selectedAIDoctor,
         language: lang,
-        userData: userData
+        userData: getRegion() === 'US' ? {} : userData
       })
     });
     
@@ -2180,7 +2189,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     const reply = data.reply;
     console.log('Got response with tool calling:', reply);
     
-      setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: appendSafety(reply, q, lang) }]);
+      setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: appendSafety(reply, q, lang, getRegion()) }]);
     } catch (err) {
     console.log('Alfred request unavailable');
     setAiMessages(m => [...m.filter(message => !message.pending), { role: 'assistant', text: uiI18n.t("ai.unavailable") }]);
@@ -2644,10 +2653,11 @@ const handleAskMedicalAI = async () => {
   const getDoctorGreeting = creategetDoctorGreeting(() => ({  }));
 
   // --------- Location-based distance formatting ----------
-  const [userCountry, setUserCountry] = useState(null);
+  const [userCountry, setUserCountry] = useState(getRegion() === 'US' ? 'US' : null);
 
   // Function to detect user's country based on coordinates
   const detectUserCountry = async (latitude, longitude) => {
+    if (getRegion() === 'US') return 'US';
     try {
       console.log('🌍 Country detection - coordinates:', { latitude, longitude });
       
@@ -2781,7 +2791,7 @@ const handleAskMedicalAI = async () => {
     });
     const data = await res.json();
     const reply = data?.reply || uiI18n.t("common.noResponse");
-    setAiMessages(m => [...m, { role: 'assistant', text: appendSafety(reply, q, lang) }]);
+    setAiMessages(m => [...m, { role: 'assistant', text: appendSafety(reply, q, lang, getRegion()) }]);
   } catch (e) {
     setAiMessages(m => [...m, { role: 'assistant', text: S.networkError || uiI18n.t("ai.networkError") }]);
   }
@@ -2890,9 +2900,10 @@ const handleAskMedicalAI = async () => {
       /* Main App Content - Only show after authentication and health consent */
       <>
         <View style={{ flex: 1 }}>
-        {createAppNavigator(() => ({ openReminderOnEntry, setOpenReminderOnEntry, route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan }))()}
+        {createAppNavigator(() => ({ openReminderOnEntry, setOpenReminderOnEntry, route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry: region === 'US' ? 'US' : userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan }))()}
         </View>
 
+        {region === 'US' && <Text style={{ color: theme.text, fontSize: 11, paddingHorizontal: 16, paddingVertical: 4 }}>{usNotices.global}</Text>}
         {/* Floating AI button */}
         <AnimatedFloatingButton />
         
@@ -2934,11 +2945,11 @@ const handleAskMedicalAI = async () => {
         </TouchableOpacity>
       </View>
 
-      <Text style={{ color: theme.sub, fontSize: 12, marginBottom: 8 }}>{uiI18n.t('ai.disclaimer')}</Text>
-      {detectUrgency(aiMessages.filter(m => m.role === 'user').map(m => m.text).join(' ')).emergency && (
+      <Text accessibilityRole="text" style={{ color: theme.sub, fontSize: 12, marginBottom: 8 }}>{region === 'US' ? usNotices.ai : uiI18n.t('ai.disclaimer')}</Text>
+      {detectUrgency(aiMessages.filter(m => m.role === 'user').map(m => m.text).join(' '), region).emergency && (
         <View accessibilityRole="alert" style={{ backgroundColor: '#541E25', borderColor: '#EDB268', borderWidth: 1, borderRadius: 12, padding: 10, marginBottom: 8 }}>
-          <Text style={{ color: '#FFF2DC', fontWeight: '700' }} onPress={() => Linking.openURL('tel:911')}>{uiI18n.t('ai.emergencyBanner')}</Text>
-          {detectUrgency(aiMessages.filter(m => m.role === 'user').map(m => m.text).join(' ')).selfHarm && <Text style={{ color: '#FFF2DC', marginTop: 6 }} onPress={() => Linking.openURL('tel:8009112000')}>{uiI18n.t('ai.selfHarmBanner')}</Text>}
+          <Text style={{ color: '#FFF2DC', fontWeight: '700' }} onPress={() => Linking.openURL('tel:911')}>{region === 'US' ? usNotices.crisis : uiI18n.t('ai.emergencyBanner')}</Text>
+          {region !== 'US' && detectUrgency(aiMessages.filter(m => m.role === 'user').map(m => m.text).join(' '), region).selfHarm && <Text style={{ color: '#FFF2DC', marginTop: 6 }} onPress={() => Linking.openURL('tel:8009112000')}>{uiI18n.t('ai.selfHarmBanner')}</Text>}
         </View>
       )}
       <View style={{ flex: 1, paddingBottom: 16 }}>
@@ -3074,7 +3085,7 @@ const handleAskMedicalAI = async () => {
       visible={showCheckout}
       onClose={() => setShowCheckout(false)}
       theme={theme}
-      country={userCountry || (userData?.country || 'US')}
+      country={region === 'US' ? 'US' : userCountry || (userData?.country || 'US')}
       onSuccess={async () => {
         // Refresh subscription status after successful payment
         try {

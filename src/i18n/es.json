@@ -49,7 +49,7 @@
     "tip": "💡 Consejo: Toca cualquier tarjeta para explorar sus funciones. El botón de IA abre un asistente de información general de salud. No es médico."
   },
   "dashboard": {
-    "noUpcomingReminders": "Sin recordatorios pr\u00f3ximos",
+    "noUpcomingReminders": "Sin recordatorios próximos",
     "addReminderAction": "Agregar",
     "title": "Panel",
     "healthJournal": "Registro de Salud",
@@ -1346,7 +1346,7 @@
   },
   "ui": {
     "successWelcomeBack": "Bienvenido de nuevo, {{name}}",
-    "sessionStarted": "Sesi\u00f3n iniciada",
+    "sessionStarted": "Sesión iniciada",
     "reminderNotificationsOff": "Las notificaciones están desactivadas. Puedes activarlas en Ajustes.",
     "openNotificationSettings": "Abrir Ajustes",
     "homeGreeting": "Hola, {{name}}",
@@ -3734,5 +3734,10 @@
     "class_wortDrugs": "Algunos antidepresivos, anticonceptivos, ciclosporina, fenitoína, carbamazepina, digoxina, ivabradina, indinavir, nevirapina, irinotecán, imatinib, docetaxel, warfarina y simvastatina",
     "class_digoxin": "Glucósidos cardíacos como digoxina (látex oral de aloe)",
     "class_warfarin": "Warfarina"
+  },
+  "region": {
+    "title": "Región",
+    "mx": "México",
+    "us": "Estados Unidos"
   }
 }

@@ -1,3 +1,4 @@
+import { getRegion } from './region';
 import uiI18n from "../i18n";
 import { auth } from '../config/firebase';
 
@@ -7,6 +8,6 @@ export async function authenticatedFetch(url, options = {}) {
   const token = await user.getIdToken();
   return fetch(url, {
     ...options,
-    headers: { ...options.headers, Authorization: `Bearer ${token}` },
+    headers: { ...options.headers, Authorization: `Bearer ${token}`, 'X-Auric-Region': getRegion() },
   });
 }

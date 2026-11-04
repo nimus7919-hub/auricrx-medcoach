@@ -1,3 +1,5 @@
+import { getRegion } from '../services/region';
+import USScreen from './USReferenceScreen';
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -62,7 +64,7 @@ interface DrugInteraction {
   references: string[];
 }
 
-export default function AIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivacy, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
+function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivacy, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
@@ -3160,3 +3162,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+export default function AIHealthScreen(props: AIHealthScreenProps) {
+  return getRegion() === 'US' ? <USScreen onClose={props.onClose} initialMode="interactions" /> : <MexicoAIHealthScreen {...props} />;
+}

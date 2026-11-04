@@ -1,3 +1,6 @@
+import ActivityHealthScreen from '../screens/ActivityHealthScreen';
+import { getRegion } from '../services/region';
+import USReferenceScreen from '../screens/USReferenceScreen';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { View, Text } from "react-native";
@@ -21,7 +24,7 @@ export default function createAppNavigator(getScope) {
   const { openReminderOnEntry, setOpenReminderOnEntry, route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan } = getScope();
   return (route === 'dashboard' ? <Dashboard /> :
      route === 'reminders' ? <Reminders openAddOnEntry={openReminderOnEntry} onAddEntryConsumed={() => setOpenReminderOnEntry(false)} theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
-     route === 'pharmacies' ? <Pharmacies /> :
+     route === 'pharmacies' ? (getRegion() === 'US' ? <USReferenceScreen initialMode="pharmacies" onClose={() => setRoute('dashboard')} /> : <Pharmacies />) :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :
      route === 'settings' ? <Settings /> :
@@ -32,9 +35,10 @@ export default function createAppNavigator(getScope) {
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'documents' ? <MedicalDocumentsScreen requestAutoDocumentScan={requestAutoDocumentScan} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'smart-notifications' ? <SmartNotificationsScreen meds={meds} setMeds={setMeds} reminders={reminders} setReminders={setReminders} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+    route === 'health-analytics' && getRegion() === 'US' ? <ActivityHealthScreen userId={user?.uid} onClose={() => setRoute('dashboard')} onConnect={() => setRoute('health-connect-consent')} onPrivacy={() => setRoute('health-connect-privacy')} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen key={user?.uid} userId={user?.uid} onConnectHealth={() => setRoute('health-connect-consent')} onHealthPrivacy={() => setRoute('health-connect-privacy')} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'appointments' ? <AppointmentManagementScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
-    route === 'ai-health' ? (isReady ? <AIHealthScreen userId={user?.uid} onConnectHealth={() => setRoute('health-connect-consent')} onHealthPrivacy={() => setRoute('health-connect-privacy')} onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} supplements={supplements} /> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>{uiI18n.t("ui.loadingTranslations")}</Text></View>) :
+    route === 'ai-health' ? (getRegion() === 'US' ? <USReferenceScreen initialMode="interactions" onClose={() => setRoute('dashboard')} /> : isReady ? <AIHealthScreen userId={user?.uid} onConnectHealth={() => setRoute('health-connect-consent')} onHealthPrivacy={() => setRoute('health-connect-privacy')} onClose={() => setRoute('dashboard')} theme={theme} S={S} fastingProfile={fastingProfile} medications={meds} supplements={supplements} /> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>{uiI18n.t("ui.loadingTranslations")}</Text></View>) :
         route === 'health-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :

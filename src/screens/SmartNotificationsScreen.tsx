@@ -1,10 +1,12 @@
+import { getRegion } from '../services/region';
+import USSmartNotificationsScreen from './USSmartNotificationsScreen';
 ﻿import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TextInput, Switch, TouchableOpacity, Alert, Linking, AppState, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { readSmart, updateSmart, nativeCapabilities, reconcileSmart, smartStatus, currentCoordinates, addressCoordinates, backgroundPermission, suggestions } from '../services/smartNotificationEngine';
 import { ensureReminderPermission, reconcileReminderNotifications } from '../services/reminderNotifications';
 
-export default function SmartNotificationsScreen({ onClose, theme, meds = [], reminders = [], setMeds, setReminders }: any) {
+function MexicoSmartNotificationsScreen({ onClose, theme, meds = [], reminders = [], setMeds, setReminders }: any) {
   const [state, setState] = useState<any>(null);
   const [status, setStatus] = useState<any>({});
   const [busy, setBusy] = useState(false);
@@ -86,3 +88,7 @@ export default function SmartNotificationsScreen({ onClose, theme, meds = [], re
   </ScrollView>;
 }
 const styles = StyleSheet.create({ container: { flex: 1, padding: 20, paddingTop: 40 }, heading: { fontSize: 24, fontWeight: '700', marginBottom: 12 }, title: { fontSize: 16, fontWeight: '600' }, card: { borderColor: '#D4AF3755', borderWidth: 1, borderRadius: 16, padding: 14, marginVertical: 8 }, row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }, badge: { borderColor: '#D4AF3770', borderWidth: 1, borderRadius: 12, padding: 9, backgroundColor: '#D4AF3714' }, input: { borderColor: '#D4AF3766', borderWidth: 1, padding: 10, marginVertical: 8, borderRadius: 8 }, button: { padding: 12, marginVertical: 3, borderRadius: 8, backgroundColor: '#D4AF3718' } });
+
+export default function SmartNotificationsScreen(props: any) {
+  return getRegion() === 'US' ? <USSmartNotificationsScreen {...props} /> : <MexicoSmartNotificationsScreen {...props} />;
+}

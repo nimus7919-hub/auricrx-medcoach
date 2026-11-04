@@ -1,3 +1,7 @@
+import i18n from '../i18n';
+import { getRegion } from '../services/region';
+import usNotices from '../legal/usDisclaimers.json';
+const usText = (key, original) => getRegion() === 'US' ? i18n.t('activityUS.' + key, { lng: 'en' }) : original;
 import GoldHealthIcon from '../components/GoldHealthIcon';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -34,15 +38,15 @@ function useConnection(userId) {
 function ConnectionActions({ status, onConnect, refresh }) {
   return <>
     <Text style={styles.body}>{statusText[status]}</Text>
-    {['disconnected', 'denied'].includes(status) && <HealthButton title="Conectar Health Connect" onPress={onConnect} />}
-    {status === 'install' && <HealthButton title="Instalar o actualizar Health Connect" onPress={() => openHealthStore().catch(() => {})} />}
-    {status === 'denied' && <HealthButton title="Abrir ajustes de Health Connect" onPress={() => openHealthSettings().catch(() => {})} />}
-    {['error', 'unavailable', 'install'].includes(status) && <HealthButton title="Volver a comprobar" onPress={refresh} />}
+    {['disconnected', 'denied'].includes(status) && <HealthButton title={usText("text1", "Conectar Health Connect")} onPress={onConnect} />}
+    {status === 'install' && <HealthButton title={usText("text2", "Instalar o actualizar Health Connect")} onPress={() => openHealthStore().catch(() => {})} />}
+    {status === 'denied' && <HealthButton title={usText("text3", "Abrir ajustes de Health Connect")} onPress={() => openHealthSettings().catch(() => {})} />}
+    {['error', 'unavailable', 'install'].includes(status) && <HealthButton title={usText("text4", "Volver a comprobar")} onPress={refresh} />}
   </>;
 }
 function Page({ title, onClose, children }) {
   return <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-    <HealthButton title="Volver" onPress={onClose} />
+    <HealthButton title={usText("text5", "Volver")} onPress={onClose} />
     <Text accessibilityRole="header" style={styles.title}>{title}</Text>{children}
   </ScrollView>;
 }
@@ -58,7 +62,7 @@ export function HealthConnectConsentScreen({ userId, onClose, onConnected }) {
       const status = await connectHealth(userId);
       if (status === 'connected') onConnected();
       else setMessage(statusText[status]);
-    } catch { setMessage('No se pudo completar la conexión. Puedes continuar usando la app e intentarlo después.'); }
+    } catch { setMessage(usText("text31", "No se pudo completar la conexión. Puedes continuar usando la app e intentarlo después.")); }
     finally { setBusy(false); }
   };
   return <Page title={privacy.title} onClose={onClose}>
@@ -66,8 +70,8 @@ export function HealthConnectConsentScreen({ userId, onClose, onConnected }) {
     <TouchableOpacity accessibilityRole="checkbox" accessibilityState={{ checked }} disabled={busy} onPress={() => setChecked(value => !value)} style={styles.checkbox}>
       <Text style={styles.body}>{checked ? '☑' : '☐'} {privacy.checkbox}</Text>
     </TouchableOpacity>
-    <HealthButton title="Aceptar y continuar" disabled={!checked || busy} onPress={accept} />
-    <HealthButton title="Ahora no" disabled={busy} onPress={onClose} />
+    <HealthButton title={usText("text6", "Aceptar y continuar")} disabled={!checked || busy} onPress={accept} />
+    <HealthButton title={usText("text7", "Ahora no")} disabled={busy} onPress={onClose} />
     {!!message && <Text accessibilityLiveRegion="polite" style={styles.body}>{message}</Text>}
   </Page>;
 }
@@ -82,27 +86,27 @@ export function HealthConnectPrivacyControls({ userId, onConnect }) {
     try {
       const revoked = await disconnectHealth(userId);
       setStatus('disconnected');
-      setMessage(revoked ? 'Conexión, consentimiento y datos importados locales borrados.' : 'Consentimiento y datos locales borrados. Retira también los permisos en los ajustes de Health Connect.');
-    } catch { setMessage('No se pudo borrar el consentimiento local. Intenta de nuevo y retira los permisos en Health Connect.'); }
+      setMessage(revoked ? usText("text32", "Conexión, consentimiento y datos importados locales borrados.") : usText("text33", "Consentimiento y datos locales borrados. Retira también los permisos en los ajustes de Health Connect."));
+    } catch { setMessage(usText("text34", "No se pudo borrar el consentimiento local. Intenta de nuevo y retira los permisos en Health Connect.")); }
     finally { setBusy(false); }
   };
   return <View style={styles.card}>
     <Text style={styles.heading}>Health Connect</Text>
     <ConnectionActions status={status} onConnect={onConnect} refresh={refresh} />
-    <HealthButton title="Desconectar Health Connect" disabled={busy || status === 'loading'} onPress={disconnect} />
-    <HealthButton title="Abrir ajustes de Health Connect" onPress={() => openHealthSettings().catch(() => setMessage('No se pudieron abrir los ajustes de Health Connect. Búscalos en los ajustes del teléfono.'))} />
+    <HealthButton title={usText("text8", "Desconectar Health Connect")} disabled={busy || status === 'loading'} onPress={disconnect} />
+    <HealthButton title={usText("text3", "Abrir ajustes de Health Connect")} onPress={() => openHealthSettings().catch(() => setMessage(usText("text35", "No se pudieron abrir los ajustes de Health Connect. Búscalos en los ajustes del teléfono.")))} />
     {!!message && <Text accessibilityLiveRegion="polite" style={styles.body}>{message}</Text>}
-    <Text style={styles.heading}>Datos de actividad y salud de Health Connect</Text>
+    <Text style={styles.heading}>{usText("text9", "Datos de actividad y salud de Health Connect")}</Text>
     <Text style={styles.body}>{privacy.body}</Text>
   </View>;
 }
 export function HealthConnectPrivacyScreen({ userId, onClose, onConnect }) {
-  return <Page title="Privacidad · Health Connect" onClose={onClose}><HealthConnectPrivacyControls userId={userId} onConnect={onConnect} /></Page>;
+  return <Page title={usText("text10", "Privacidad · Health Connect")} onClose={onClose}><HealthConnectPrivacyControls userId={userId} onConnect={onConnect} /></Page>;
 }
 
 function StepsChart({ days }) {
   const maximum = Math.max(1, ...days.map(day => day.steps));
-  return <View accessible accessibilityLabel={days.map(d => `${d.date}: ${d.steps} pasos`).join('. ')}>
+  return <View accessible accessibilityLabel={days.map(d => `${d.date}: ${d.steps} ${getRegion() === 'US' ? 'steps' : 'pasos'}`).join('. ')}>
     <Svg width="100%" height={190} viewBox="0 0 350 190">
       {days.map((day, i) => {
         const height = day.steps / maximum * 125;
@@ -124,14 +128,14 @@ function HeartChart({ samples }) {
     bucket.sum += sample.bpm; bucket.count += 1; buckets.set(hour, bucket);
   }
   const points = [...buckets].sort((a, b) => a[0] - b[0]).map(([time, value]) => ({ time, bpm: value.sum / value.count }));
-  if (!points.length) return <Text style={styles.body}>Sin registros de frecuencia cardíaca en los últimos 7 días.</Text>;
+  if (!points.length) return <Text style={styles.body}>{usText("text29", "Sin registros de frecuencia cardíaca en los últimos 7 días.")}</Text>;
   const min = Math.floor(Math.min(...points.map(p => p.bpm))) - 1;
   const max = Math.ceil(Math.max(...points.map(p => p.bpm))) + 1;
   const first = points[0].time; const last = points[points.length - 1].time;
   const coords = points.map(p => `${42 + (p.time - first) / Math.max(1, last - first) * 290},${140 - (p.bpm - min) / (max - min) * 115}`).join(' ');
-  const label = time => new Date(time).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-  return <View accessible accessibilityLabel={`Frecuencia cardíaca, promedios por hora en lpm. ${points.map(p => `${new Date(p.time).toLocaleString('es-MX')}: ${Math.round(p.bpm)}`).join('. ')}`}>
-    <Text style={styles.body}>Últimos 7 días · promedio por hora · lpm</Text>
+  const label = time => new Date(time).toLocaleDateString(getRegion() === 'US' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'short' });
+  return <View accessible accessibilityLabel={`Frecuencia cardíaca, promedios por hora en lpm. ${points.map(p => `${new Date(p.time).toLocaleString(getRegion() === 'US' ? 'en-US' : 'es-MX')}: ${Math.round(p.bpm)}`).join('. ')}`}>
+    <Text style={styles.body}>{usText("text30", "Últimos 7 días · promedio por hora · lpm")}</Text>
     <Svg width="100%" height={185} viewBox="0 0 350 185">
       <Line x1={40} x2={340} y1={145} y2={145} stroke={C.gray} />
       <SvgText x={2} y={30} fill={C.gray} fontSize={11}>{max}</SvgText>
@@ -143,7 +147,7 @@ function HeartChart({ samples }) {
     </Svg>
   </View>;
 }
-const rate = value => value == null ? 'sin registros' : `${Math.round(value)} lpm`;
+const rate = value => value == null ? usText('text36', 'sin registros') : `${Math.round(value)} ${getRegion() === 'US' ? 'bpm' : 'lpm'}`;
 
 // Display-only boundary: keep snapshots here, never lift into analytics, reports or AI state.
 export function ActivityHealthSection({ userId, onConnect, onPrivacy }) {
@@ -162,33 +166,33 @@ export function ActivityHealthSection({ userId, onConnect, onPrivacy }) {
     return () => { active = false; };
   }, [status, userId, revision, setData, setStatus]);
   return <View style={styles.section}>
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}><GoldHealthIcon name="heart-pulse" /><Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>Actividad y salud</Text></View>
-    <Text style={styles.body}>Solo visualización · datos en tu teléfono. Estos datos no se usan en análisis con IA, puntuaciones ni recomendaciones.</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}><GoldHealthIcon name="heart-pulse" /><Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>{usText("text11", "Actividad y salud")}</Text></View>
+    <Text style={styles.body}>{usText("text12", "Solo visualización · datos en tu teléfono. Estos datos no se usan en análisis con IA, puntuaciones ni recomendaciones.")}</Text>
     <ConnectionActions status={status} onConnect={onConnect} refresh={refresh} />
-    {reading && <Text style={styles.body}>Leyendo datos del teléfono…</Text>}
+    {reading && <Text style={styles.body}>{usText("text13", "Leyendo datos del teléfono…")}</Text>}
     {data && status === 'connected' && <>
-      <View style={styles.card}><Text style={styles.heading}>Pasos hoy: {data.days[data.days.length - 1]?.steps ?? 0}</Text>
-        <Text style={styles.heading}>Pasos de los últimos 7 días</Text><StepsChart days={data.days} />
-        <Text style={styles.body}>Un día con 0 puede indicar que no hay registros sincronizados.</Text></View>
-      <View style={styles.card}><Text style={styles.body}>Frecuencia cardíaca en reposo promedio esta semana: {rate(data.restingThisWeek)} (semana anterior: {rate(data.restingLastWeek)})</Text>
-        <Text style={styles.body}>Semanas de lunes a domingo; la semana actual incluye los registros disponibles hasta ahora.</Text></View>
-      <View style={styles.card}><Text style={styles.heading}>Frecuencia cardíaca</Text><HeartChart samples={data.heart} /></View>
-      <View style={styles.card}><Text style={styles.heading}>Sesiones de ejercicio: {data.exercises.length} esta semana</Text>
-        {data.exercises.map((item, i) => <Text style={styles.body} key={`${item.date}-${i}`}>{item.type} · {item.minutes} min · {new Date(item.date).toLocaleString('es-MX')}</Text>)}
-        {!data.exercises.length && <Text style={styles.body}>Sin sesiones sincronizadas esta semana.</Text>}</View>
-      <Text style={styles.body}>Fuente: Health Connect{data.origins.length ? ` (${data.origins.join(', ')})` : ''}</Text>
-      <Text style={styles.body}>Actualizado: {new Date(data.updatedAt).toLocaleString('es-MX')}</Text>
-      <HealthButton title="Actualizar datos" onPress={refresh} />
+      <View style={styles.card}><Text style={styles.heading}>{usText("text14", "Pasos hoy:")} {data.days[data.days.length - 1]?.steps ?? 0}</Text>
+        <Text style={styles.heading}>{usText("text15", "Pasos de los últimos 7 días")}</Text><StepsChart days={data.days} />
+        <Text style={styles.body}>{usText("text16", "Un día con 0 puede indicar que no hay registros sincronizados.")}</Text></View>
+      <View style={styles.card}><Text style={styles.body}>{usText("text17", "Frecuencia cardíaca en reposo promedio esta semana:")} {rate(data.restingThisWeek)} ({usText("text18", "(semana anterior:").replace("(", "")} {rate(data.restingLastWeek)})</Text>
+        <Text style={styles.body}>{usText("text19", "Semanas de lunes a domingo; la semana actual incluye los registros disponibles hasta ahora.")}</Text></View>
+      <View style={styles.card}><Text style={styles.heading}>{usText("text20", "Frecuencia cardíaca")}</Text><HeartChart samples={data.heart} /></View>
+      <View style={styles.card}><Text style={styles.heading}>{usText("text21", "Sesiones de ejercicio:")} {data.exercises.length} {usText("text22", "esta semana")}</Text>
+        {data.exercises.map((item, i) => <Text style={styles.body} key={`${item.date}-${i}`}>{item.type} · {item.minutes} min · {new Date(item.date).toLocaleString(getRegion() === 'US' ? 'en-US' : 'es-MX')}</Text>)}
+        {!data.exercises.length && <Text style={styles.body}>{usText("text23", "Sin sesiones sincronizadas esta semana.")}</Text>}</View>
+      <Text style={styles.body}>{usText("text24", "Fuente: Health Connect")}{data.origins.length ? ` (${data.origins.join(', ')})` : ''}</Text>
+      <Text style={styles.body}>{usText("text25", "Actualizado:")} {new Date(data.updatedAt).toLocaleString(getRegion() === 'US' ? 'en-US' : 'es-MX')}</Text>
+      <HealthButton title={usText("text26", "Actualizar datos")} onPress={refresh} />
     </>}
-    {!data && <Text style={styles.body}>Fuente: Health Connect</Text>}
-    <HealthButton title="Privacidad y conexión" onPress={onPrivacy} />
-    <Text style={styles.body}>Si tienes dudas sobre tus resultados, consulta a tu médico.</Text>
-    <Text style={styles.disclaimer}>{privacy.disclaimer}</Text>
+    {!data && <Text style={styles.body}>{usText("text24", "Fuente: Health Connect")}</Text>}
+    <HealthButton title={usText("text27", "Privacidad y conexión")} onPress={onPrivacy} />
+    <Text style={styles.body}>{usText("text28", "Si tienes dudas sobre tus resultados, consulta a tu médico.")}</Text>
+    <Text style={styles.disclaimer}>{getRegion() === 'US' ? usNotices.wearables : privacy.disclaimer}</Text>
   </View>;
 }
 
 export default function ActivityHealthScreen({ userId, onClose, onConnect, onPrivacy }) {
-  return <Page title="Actividad y salud" onClose={onClose}>
+  return <Page title={usText("text11", "Actividad y salud")} onClose={onClose}>
     <ActivityHealthSection userId={userId} onConnect={onConnect} onPrivacy={onPrivacy} />
   </Page>;
 }

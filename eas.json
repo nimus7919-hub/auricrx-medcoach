@@ -21,7 +21,14 @@
       "env": {
         "NODE_ENV": "production"
       },
-      "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh"
+      "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
+      "developmentClient": false,
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
     },
     "production": {
       "autoIncrement": true,
@@ -34,9 +41,26 @@
       },
       "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
       "developmentClient": false
+    },
+    "us-internal": {
+      "extends": "production",
+      "distribution": "store",
+      "developmentClient": false,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "simulator": false
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "us-internal": {
+      "android": {
+        "track": "internal"
+      },
+      "ios": {}
+    }
   }
 }

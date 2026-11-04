@@ -1,3 +1,4 @@
+require('./privacy-logging');
 require('dotenv').config({ path: require('path').join(__dirname, '.env'), quiet: true });
 const express = require('express');
 const cors = require("cors");
@@ -59,7 +60,7 @@ const askLimiter = rateLimit({
   legacyHeaders: false,
   message: { ok: false, error: "Too many requests, please slow down." },
 });
-app.use(["/ask", "/ask-stream", "/api/ai"], askLimiter);
+app.use(["/ask", "/ask-stream", "/api/ai", "/api/us"], askLimiter);
 
 // Operational endpoints are unavailable in production and fail closed without a key.
 function requireDevelopmentAdmin(req, res, next) {
@@ -74,6 +75,8 @@ app.use(['/debug', '/admin', '/api/admin', '/test-tools'], requireDevelopmentAdm
 const HEALTH_SAFETY_PROMPT = "You are a general health-information assistant, not a doctor. Do not diagnose, name likely conditions, or tell users to start, stop or change medicines or doses. Encourage consulting a licensed professional. If emergency signs appear, tell the user to call 911. Answer in the user's language. Use only information actually provided in the conversation.";
 
 require('./compliance')(app, require('./neon').neonClient, () => stripe);
+require('./us-data').registerUSData(app);
+require('./us-legal')(app);
 
 // --- Your routes here ---
 
@@ -834,8 +837,7 @@ app.post('/test-tools', async (req, res) => {
       const completion = await client.chat.completions.create({
         model: process.env.MODEL || 'gpt-4o-mini',
         messages,
-        tools,
-        tool_choice: "auto",
+        ...(req.auricRegion === 'US' ? {} : { tools, tool_choice: 'auto' }),
         temperature: 0.2
       });
 
@@ -916,14 +918,15 @@ app.post('/ask', async (req, res) => {
 
     const { message, userData, character } = parsed.data;
     const language = parsed.data.language || req.body?.userData?.language || (/\b(hola|dolor|medicamento|no puedo|sobredosis|quiero morir)\b/i.test(message) ? 'es' : 'en');
-    const urgency = detectCharacterUrgency(message);
+    if (req.auricRegion === 'US' && /mental[- ]health|depress|anxiety|therap|counsel|panic|emotional distress/i.test(message)) return res.json({ ok: true, reply: 'I am sorry you are going through this. Please contact a licensed professional. ' + require('../src/legal/usDisclaimers.json').crisis });
+    const urgency = detectCharacterUrgency(message, req.auricRegion);
     if (urgency.emergency) {
-      return res.json({ ok: true, reply: appendCharacterSafety('', message, language) });
+      return res.json({ ok: true, reply: appendCharacterSafety('', message, language, req.auricRegion) });
     }
     const messages = [
       {
         role: 'system',
-        content: characterPrompt(character, language)
+        content: characterPrompt(character, language, req.auricRegion)
       },
       { role: 'user', content: message }
     ];
@@ -939,8 +942,7 @@ app.post('/ask', async (req, res) => {
       const completion = await client.chat.completions.create({
         model: process.env.MODEL || 'gpt-4o-mini',
         messages,
-        tools,
-        tool_choice: "auto",
+        ...(req.auricRegion === 'US' ? {} : { tools, tool_choice: 'auto' }),
         temperature: 0.2
       });
 
@@ -990,7 +992,7 @@ app.post('/ask', async (req, res) => {
       // Final answer
       const text = msg.content?.trim() || '';
       console.log('Final AI response:', text);
-      res.json({ ok: true, reply: appendCharacterSafety(text, message, language) });
+      res.json({ ok: true, reply: appendCharacterSafety(text, message, language, req.auricRegion) });
       return;
     }
     
@@ -1035,6 +1037,12 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
       return res.status(400).json({ ok: false, error: 'bad_request' });
     }
 
+    if (req.auricRegion === 'US') {
+      const question = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
+      if (detectCharacterUrgency(question, req.auricRegion).emergency) return res.type('text/plain').send(require('../src/legal/usDisclaimers.json').crisis);
+      if (/mental[- ]health|depress|anxiety|therap|counsel|panic|emotional distress/i.test(question)) return res.type('text/plain').send('I am sorry you are going through this. Please contact a licensed professional. ' + require('../src/legal/usDisclaimers.json').crisis);
+      messages = [{ role: 'system', content: characterPrompt('alfred', req.body.language || 'en', 'US') }, ...messages.filter(m => m.role !== 'system')];
+    }
     // Basic validation / trimming
     messages = messages.map(m => ({
       role: m.role === 'user' || m.role === 'assistant' || m.role === 'system' ? m.role : 'user',
@@ -2268,6 +2276,7 @@ app.post('/api/generate-health-report', verifyUser, async (req, res) => {
 
 // Drug Interaction Check Endpoint
 app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
+  if (req.auricRegion === 'US') return res.status(409).json({ error: 'USE_SOURCED_LABEL_LOOKUP', path: '/api/us/labels' });
   try {
     // Only conversational text is accepted; clients cannot supply system instructions.
     const parsed = z.object({ messages: z.array(z.object({

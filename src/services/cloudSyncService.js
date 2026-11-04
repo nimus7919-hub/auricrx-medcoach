@@ -1,3 +1,4 @@
+import { getRegion } from './region';
 import uiI18n from "../i18n";
 // src/services/cloudSyncService.js
 // Cloud sync service for active health data
@@ -16,7 +17,7 @@ async function requestSync(path, options = {}) {
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, 'X-Auric-Region': getRegion() },
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(uiI18n.t("ui.serverErrorValue_2600e2", { value1: response.status }));

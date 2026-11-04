@@ -1,8 +1,10 @@
+import { getRegion } from './region';
 import uiI18n from "../i18n";
 import { API_BASE } from '../config/api';
 import { authenticatedFetch } from './authenticatedFetch';
 
 export function contributeMedication(name, components, selectedName) {
+  if (getRegion() === 'US') return;
   if (!name?.trim() || name === selectedName) return;
   void authenticatedFetch(`${API_BASE}/api/meds`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },

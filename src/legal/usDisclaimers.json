@@ -1,0 +1,16 @@
+{
+  "global": "AuricRX MedCoach provides general health information and reminders. It is not a medical device and does not diagnose, treat, cure, or prevent any disease. It is not a substitute for advice from your doctor or pharmacist. In an emergency, call 911.",
+  "ai": "AI assistant, not a doctor or a human. Answers can be wrong. Check with your doctor or pharmacist before changing any medication.",
+  "crisis": "If you think you are having a medical emergency, call 911 now. If you are thinking about suicide or are in emotional distress, call or text 988 (Suicide & Crisis Lifeline). For a possible poisoning or overdose, call Poison Control at 1-800-222-1222.",
+  "interactions": "Information from [DailyMed/NLM], last updated [date]. Not a complete list. No result does not mean a combination is safe. Ask your pharmacist.",
+  "herbs": "Herbs and supplements are not reviewed by the FDA for safety or effectiveness. Evidence is limited. Tell your doctor or pharmacist about every supplement you take.",
+  "wearables": "For general wellness only. These numbers are not medical measurements and are not checked for problems. Talk to a doctor about any health concern.",
+  "recalls": "Adverse event reports are unverified and do not prove a drug caused a problem. Source: openFDA. Don't stop a medication without talking to your doctor.",
+  "prices": "Prices are estimates for information only, may be out of date, and are not an offer. Your actual cost depends on your pharmacy, insurance, and quantity. Confirm with the pharmacy.",
+  "nadac": "NADAC is the average price pharmacies pay to buy a drug, published weekly by CMS (data.medicaid.gov). It is not what you will pay at the pharmacy and does not include dispensing fees or insurance. CMS does not endorse this app. Data as of [date].",
+  "nlm": "This product uses publicly available data courtesy of the U.S. National Library of Medicine (NLM), National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product.",
+  "fda": "Data provided by the U.S. Food and Drug Administration (https://open.fda.gov). FDA does not endorse this app.",
+  "dailymed": "Label information from DailyMed (dailymed.nlm.nih.gov), U.S. National Library of Medicine. Last updated [date].",
+  "nppes": "Pharmacy listings from the CMS NPPES NPI Registry; information is provided by the pharmacies and may be out of date.",
+  "costplus": "Cost Plus Drugs is a trademark of its owner; AuricRX is not affiliated."
+}

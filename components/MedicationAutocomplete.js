@@ -1,3 +1,5 @@
+import { getRegion } from '../src/services/region';
+import { usReference } from '../src/services/usReferenceService';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
@@ -24,6 +26,11 @@ const MedicationAutocomplete = forwardRef(function MedicationAutocomplete(
     const timer = setTimeout(async () => {
       setStatus('loading');
       try {
+        if (getRegion() === 'US') {
+          const result = await usReference('drugs', { name: value.trim() }, controller.signal);
+          if (active) { setItems(result.results.map(item => ({ ...item, components: [], source: { name: result.source, url: result.sourceUrl, date: result.dataDate } }))); setStatus(result.results.length ? '' : 'empty'); }
+          return;
+        }
         const response = await fetch(`${API_BASE}/api/meds/search?q=${encodeURIComponent(value.trim())}`, { signal: controller.signal });
         if (!response.ok) throw new Error(uiI18n.t("ui.searchUnavailable"));
         const result = await response.json();

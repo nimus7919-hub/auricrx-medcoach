@@ -1,3 +1,5 @@
+import { getRegion } from '../services/region';
+import USScreen from './ActivityHealthScreen';
 import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
@@ -81,7 +83,7 @@ interface HealthReport {
   createdAt: string;
 }
 
-export default function HealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealth, onHealthPrivacy }: HealthAnalyticsScreenProps) {
+function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealth, onHealthPrivacy }: HealthAnalyticsScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   
@@ -2155,3 +2157,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default function HealthAnalyticsScreen(props: HealthAnalyticsScreenProps) {
+  return getRegion() === 'US' ? <USScreen userId={props.userId} onClose={props.onClose} onConnect={props.onConnectHealth} onPrivacy={props.onHealthPrivacy} /> : <MexicoHealthAnalyticsScreen {...props} />;
+}

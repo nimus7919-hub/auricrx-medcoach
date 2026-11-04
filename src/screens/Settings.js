@@ -1,3 +1,5 @@
+import { getRegion } from '../services/region';
+import RegionSettings from '../components/RegionSettings';
 import { resetSearchLocationConsent } from "../lib/locationPermission";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -44,6 +46,7 @@ export default function createSettings(getScope) {
         bounces={true}
       >
         <Header title={S.settings} />
+        <RegionSettings />
         
         <CollapsibleSection title={S.profile} sectionKey="profile" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
@@ -360,16 +363,16 @@ export default function createSettings(getScope) {
             <DynamicText type="card">{uiI18n.t("locationSearch.reset")}</DynamicText>
           </TouchableOpacity>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-            <RowSwitch
+            {getRegion() !== 'US' && <RowSwitch
               label={S.dataCollection}
               value={dataCollection}
               onValueChange={setDataCollection}
-            />
-            <RowSwitch
+            />}
+            {getRegion() !== 'US' && <RowSwitch
               label={S.analytics}
               value={analytics}
               onValueChange={setAnalytics}
-            />
+            />}
           </View>
         </CollapsibleSection>
         
