@@ -15,6 +15,8 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as ImageManipulator from 'expo-image-manipulator';
 import DynamicText from '../components/DynamicText';
+import GoldHealthIcon from '../components/GoldHealthIcon';
+import { ActivityHealthSection } from './ActivityHealthScreen';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { createAIHealthTranslations } from '../services/aiHealthTranslations';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +24,9 @@ const { width: screenWidth } = Dimensions.get('window');
 
 interface AIHealthScreenProps {
   onClose: () => void;
+  userId?: string;
+  onConnectHealth: () => void;
+  onHealthPrivacy: () => void;
   theme?: any;
   S?: any;
   fastingProfile?: any;
@@ -57,7 +62,7 @@ interface DrugInteraction {
   references: string[];
 }
 
-export default function AIHealthScreen({ onClose, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
+export default function AIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivacy, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
@@ -1769,18 +1774,10 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       ]}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-        <Image 
-          source={require('../../assets/dashboard Emojies/AI Health.png')} 
-          style={{ width: 24, height: 24, marginRight: 8 }} 
-          resizeMode="contain" 
-        />
+        <GoldHealthIcon name="sparkles-outline" />
         <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.aiHealthFeatures")}</DynamicText>
       </View>
-      <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
-        {t("ai.intelligentFeatures")}
-      </DynamicText>
-      
-      <View style={dynamicStyles.statsGrid}>
+<View style={dynamicStyles.statsGrid}>
         <View style={dynamicStyles.statCard}>
           <DynamicText type="card" style={dynamicStyles.statValue}>{insights.length}</DynamicText>
           <DynamicText type="card" style={dynamicStyles.statLabel}>{S?.healthInsights || uiI18n.t("ai.insights")}</DynamicText>
@@ -1845,11 +1842,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         ]}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-          <Image 
-            source={require('../../assets/dashboard Emojies/AI Health.png')} 
-            style={{ width: 24, height: 24, marginRight: 8 }} 
-            resizeMode="contain" 
-          />
+          <GoldHealthIcon name="time-outline" />
           <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.fastingAnalytics")}</DynamicText>
         </View>
         
@@ -1952,7 +1945,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         }
       ]}
     >
-      <DynamicText type="primary" style={dynamicStyles.sectionTitle}>💡 {S?.healthInsights || uiI18n.t("ai.insights")}</DynamicText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}><GoldHealthIcon name="bulb-outline" /><DynamicText type="primary" style={[dynamicStyles.sectionTitle, { flex: 1 }]}>{S?.healthInsights || uiI18n.t("ai.insights")}</DynamicText></View>
       <DynamicText type="secondary" style={dynamicStyles.sectionDescription}>
         {S?.aiGeneratedInsights || uiI18n.t("ai.aiGeneratedInsights")}
       </DynamicText>
@@ -1994,9 +1987,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       ))}
       
       {insights.length === 0 && (
-        <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
+        <View><DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
           {S?.noHealthInsights || uiI18n.t("ai.noHealthInsights")}
         </DynamicText>
+        <TouchableOpacity accessibilityRole="button" style={styles.emptyAction} onPress={() => Alert.alert(t("ai.healthInsights"), t("ai.insightsEmptyHelp"))}><Text style={styles.emptyActionText}>{t("ai.insightsHelp")}</Text></TouchableOpacity>
+</View>
       )}
     </Animated.View>
   );
@@ -2013,10 +2008,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <Image 
-            source={require('../../assets/dashboard Emojies/med stats emoji.png')} 
-            style={{ width: 20, height: 20, marginRight: 8 }}
-          />
+          <GoldHealthIcon name="pulse-outline" />
           <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.recentAnalyses")}</DynamicText>
         </View>
         
@@ -2098,9 +2090,11 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       ))}
       
       {symptomAnalyses.length === 0 && (
-        <DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
+        <View><DynamicText type="secondary" style={[dynamicStyles.sectionDescription, { textAlign: 'center', fontStyle: 'italic' }]}>
           {t("ai.noSymptomAnalyses")}
         </DynamicText>
+        <TouchableOpacity accessibilityRole="button" style={styles.emptyAction} onPress={() => setShowSymptomModal(true)}><Text style={styles.emptyActionText}>{t("ai.recordSymptom")}</Text></TouchableOpacity>
+</View>
       )}
       
       <TouchableOpacity
@@ -2164,11 +2158,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             ]}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-              <Image 
-                source={require('../../assets/dashboard Emojies/AI Health.png')} 
-                style={{ width: 32, height: 32, marginRight: 12 }} 
-                resizeMode="contain" 
-              />
+              <GoldHealthIcon name="sparkles-outline" />
               <DynamicText type="primary" style={styles.title}>
                 {t("ai.assistant")}
               </DynamicText>
@@ -2180,6 +2170,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
           {/* AI Features */}
           {renderAIFeatures()}
+
+          {/* Display-only snapshots stay separate from AI state and reports. */}
+          <ActivityHealthSection key={userId} userId={userId} onConnect={onConnectHealth} onPrivacy={onHealthPrivacy} />
 
           {/* Fasting Analytics Section */}
           {renderFastingAnalytics()}
@@ -2193,11 +2186,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             }
           ]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-              <Image 
-                source={require('../../assets/dashboard Emojies/AI Health.png')} 
-                style={{ width: 24, height: 24, marginRight: 8 }} 
-                resizeMode="contain" 
-              />
+              <GoldHealthIcon name="file-export-outline" />
               <DynamicText type="primary" style={dynamicStyles.sectionTitle}>{t("ai.exportHealthReport")}</DynamicText>
             </View>
             
@@ -3004,6 +2993,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 }
 
 const styles = StyleSheet.create({
+  emptyAction: { alignSelf: 'center', borderWidth: 1, borderColor: '#D4AF37', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, marginBottom: 8 },
+  emptyActionText: { color: '#D4AF37', fontSize: 13, fontWeight: '600' },
   container: {
     flex: 1,
   },

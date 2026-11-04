@@ -1,3 +1,4 @@
+import GoldHealthIcon from '../components/GoldHealthIcon';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Line, Polyline, Rect, Text as SvgText } from 'react-native-svg';
@@ -161,8 +162,8 @@ export function ActivityHealthSection({ userId, onConnect, onPrivacy }) {
     return () => { active = false; };
   }, [status, userId, revision, setData, setStatus]);
   return <View style={styles.section}>
-    <Text accessibilityRole="header" style={styles.title}>Actividad y salud</Text>
-    <Text style={styles.body}>Solo visualizaci?n ? datos en tu tel?fono. Estos datos no se usan en an?lisis con IA, puntuaciones ni recomendaciones.</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}><GoldHealthIcon name="heart-pulse" /><Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>Actividad y salud</Text></View>
+    <Text style={styles.body}>Solo visualización · datos en tu teléfono. Estos datos no se usan en análisis con IA, puntuaciones ni recomendaciones.</Text>
     <ConnectionActions status={status} onConnect={onConnect} refresh={refresh} />
     {reading && <Text style={styles.body}>Leyendo datos del teléfono…</Text>}
     {data && status === 'connected' && <>
