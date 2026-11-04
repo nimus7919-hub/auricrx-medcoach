@@ -1,5 +1,19 @@
 # Herb content maintenance
 
+## Current Spanish revision — 2026-11-03
+
+`src/data/herbDetailsEs.js` now provides individual Spanish uses, evidence, precautions, interactions and dated source URLs for every catalog key. `herbCatalog.js` attaches these details; the Spanish screen renders them instead of the older shared translation summaries. Other locales retain their existing copy. The underlying JSON remains the identity/localization compatibility catalog.
+
+Sources include NCCIH, MedlinePlus, NIH ODS and WHO monographs, with institutional and scientific supplements where the requested collections lack species coverage. WHO volume 2 is read from the e-lactancia mirror because IRIS returned 403. Sources are named accurately rather than uniformly relabeled NCCIH. See [HERB_CONTENT_GAPS.md](HERB_CONTENT_GAPS.md) for source limitations, unresolved taxonomy and unavailable clinical safety data.
+
+The matcher additionally covers hibiscus antihypertensive/antidiabetic classes, chloroquine, hydrochlorothiazide (animal evidence separately sourced), garlic–saquinavir, parsley–vitamin K antagonists, notoginseng saponins–aspirin, dong quai, reishi, holy basil–paracetamol and serotonergic medicines with St. John's wort. Ingredient membership is explicit and finite. Same-source matches merge their ingredient IDs. Existing alert wording, neutral empty state and disclaimer footer remain unchanged. No brand inference or remote medication lookup was added.
+
+Validation: `node scripts/check-herb-review.cjs` parses the changed modules and checks every Spanish catalog entry, sources/dates, legal wording, unchanged alerts/footer and ingredient-match regressions. A device layout check remains outstanding. Thumbnail heights are 170 px in cards and 260 px in details. No native dependency or native configuration changed.
+
+## Historical implementation notes
+
+The notes below describe the previous translation-key content and original image review, superseded for Spanish by the revision above.
+
 Reviewed 2026-11-03. Educational copy is adapted with attribution from NCCIH public-domain text. Images on NCCIH pages may have separate copyrights and were not copied. No MedlinePlus prose is used.
 
 `src/data/herbReview.json` is the 40-entry catalog. `herbCatalog.js` contains static local image requires. The former JS and TS data entry points now re-export this catalog, avoiding inconsistent lists and therapeutic copy. `HerbsScreen.tsx` preserves the existing navigation import and delegates to the JavaScript implementation. No native dependencies were added.

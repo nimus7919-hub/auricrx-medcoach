@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { FlatList, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Modal from '../components/BackModal';
-import { HERBS } from '../data/herbCatalog.js';
+import { HERBS, HERB_IMAGE_PLACEHOLDER } from '../data/herbCatalog.js';
 import { findHerbInteractions, getMedicationIngredients } from '../data/herbInteractions.js';
 
 const GENERAL_SOURCE = {
@@ -10,6 +10,17 @@ const GENERAL_SOURCE = {
 };
 const LANGUAGES = ['es', 'en', 'fr', 'de', 'pt', 'zh'];
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// Each image owns its loading state; hooks never run inside render helpers.
+function HerbImage({ herb, label, large, fallbackLabel }) {
+  const [failed, setFailed] = useState(false);
+  return <>
+    <Image source={failed ? HERB_IMAGE_PLACEHOLDER : herb.image}
+      onError={() => setFailed(true)} accessibilityLabel={failed ? fallbackLabel : label}
+      resizeMode="contain" style={large ? styles.modalImage : styles.image} />
+    {failed && <Text style={styles.caption}>{fallbackLabel}</Text>}
+  </>;
+}
 
 export default function HerbsReviewScreen({ onClose, currentLang, medications = [] }) {
   // Hooks always run at component level, including while the modal is closed.
@@ -32,13 +43,15 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
   const sourceLink = source => (
     <TouchableOpacity accessibilityRole="link" onPress={() => openSource(source.url)} style={styles.sourceButton}>
       <Text style={styles.source}>{tr('source', { source: source.name, date: source.checked })}</Text>
+      <Text style={styles.sourceUrl}>{source.url}</Text>
     </TouchableOpacity>
   );
   const footer = <Text style={styles.footer}>{tr('footer')}</Text>;
-  const risk = herb => <Text style={styles.risk}>{tr(herb.safety)}</Text>;
+  const detailsOf = herb => language === 'es' ? herb?.detailsEs : null;
+  const risk = herb => <Text style={styles.risk}>{detailsOf(herb)?.safety || tr(herb.safety)}</Text>;
   const herbImage = (herb, large = false) => (
     <View>
-      <Image source={herb.image} accessibilityLabel={nameOf(herb)} resizeMode="contain" style={large ? styles.modalImage : styles.image} />
+      <HerbImage key={`${herb.key}-${large}`} herb={herb} label={nameOf(herb)} large={large} fallbackLabel={tr('imagePending')} />
       {!herb.imageVerified && <Text style={styles.caption}>{tr('imagePending')}</Text>}
       {large && herb.imageAttribution && <Text style={styles.caption}>
         Foto: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
@@ -46,7 +59,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
             (herb.imageAttribution.license.includes('BY-SA') ? 'by-sa/' : 'by/') +
             herb.imageAttribution.license.split(' ').pop() + '/')}>{herb.imageAttribution.license}</Text>, <Text
           accessibilityRole="link" style={styles.photoLink} onPress={() => openSource(herb.imageAttribution.url)}>Wikimedia Commons</Text>
-        {herb.imageAttribution.modification ? ' ? Recorte' : ''}
+        {herb.imageAttribution.modification ? ' · Recorte' : ''}
       </Text>}
     </View>
   );
@@ -78,9 +91,10 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
               {herbImage(item)}
               <Text style={styles.name}>{nameOf(item)}</Text>
               {risk(item)}
-              {!!item.evidence && <Text style={styles.caption}>{tr(item.evidence)}</Text>}
+              {detailsOf(item) ? <Text style={styles.caption}>{detailsOf(item).uses}</Text> :
+                !!item.evidence && <Text style={styles.caption}>{tr(item.evidence)}</Text>}
             </TouchableOpacity>
-            {sourceLink(item.source)}
+            {sourceLink(detailsOf(item)?.sources[0] || item.source)}
           </View>
         )} />
       <Modal visible={!!selected} animationType="slide" transparent onRequestClose={() => setSelected(null)}>
@@ -97,6 +111,16 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 {herbImage(selected, true)}
                 <Text style={styles.label}>{tr('safety')}</Text>
                 {risk(selected)}
+                {detailsOf(selected) ? <>
+                  <Text style={styles.body}>{detailsOf(selected).uses}</Text>
+                  <Text style={styles.label}>Lo que dice la evidencia</Text>
+                  <Text style={styles.body}>{detailsOf(selected).evidence}</Text>
+                  <Text style={styles.label}>{tr('precautions')}</Text>
+                  <Text style={styles.body}>{detailsOf(selected).precautions}</Text>
+                  <Text style={styles.label}>{tr('interactions')}</Text>
+                  <Text style={styles.body}>{detailsOf(selected).interactions}</Text>
+                  {detailsOf(selected).sources.map(source => <View key={source.url}>{sourceLink(source)}</View>)}
+                </> : <>
                 {!!selected.evidence && <Text style={styles.body}>{tr(selected.evidence)}</Text>}
                 {!!summary(selected) && <Text style={styles.body}>{summary(selected)}</Text>}
                 {!selected.specificSource && selected.summaryKey !== 'notReviewed' && <Text style={styles.body}>{tr('notReviewed')}</Text>}
@@ -106,12 +130,13 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                   <Text style={styles.body}>{tr(key)}</Text>
                   {sourceLink(selected.precautionSource || selected.source)}
                 </View>)}
-                <Text style={styles.body}>{tr('generalPrecaution')}</Text>
-                {sourceLink(GENERAL_SOURCE)}
                 <Text style={styles.label}>{tr('interactions')}</Text>
                 {/* No guessed interactions and no affirmative empty-state verdict. */}
                 {selected.interactionKeys.map(key => <Text key={key} style={styles.body}>{tr(`class_${key}`)}</Text>)}
                 {!!selected.interactionKeys.length && sourceLink(selected.source)}
+                </>}
+                <Text style={styles.body}>{tr('generalPrecaution')}</Text>
+                {sourceLink(GENERAL_SOURCE)}
                 <Text style={styles.label}>{tr('personal')}</Text>
                 {matches.length ? matches.map((match, index) => <View key={index} style={styles.alert}>
                   <Text style={styles.body}>{tr('alert', {
@@ -141,13 +166,14 @@ const styles = StyleSheet.create({
   list: { paddingHorizontal: 16, paddingBottom: 28 },
   row: { gap: 12, alignItems: 'stretch' },
   card: { flex: 1, maxWidth: '50%', padding: 12, marginBottom: 12, borderRadius: 16, borderWidth: 1, borderColor: '#9F8548', backgroundColor: '#10213A' },
-  image: { width: '100%', height: 125, marginBottom: 8 },
+  image: { width: '100%', height: 170, minHeight: 170, marginBottom: 8, backgroundColor: '#071426', borderRadius: 10 },
   name: { color: '#F4E3B1', fontSize: 16, fontWeight: '600', marginVertical: 6 },
   risk: { color: '#E2C57D', fontSize: 14, lineHeight: 20, marginVertical: 6 },
   caption: { color: '#BAC5D5', fontSize: 12, lineHeight: 18 },
   photoLink: { textDecorationLine: 'underline' },
   sourceButton: { paddingVertical: 10 },
   source: { color: '#E2C57D', textDecorationLine: 'underline', fontSize: 12, lineHeight: 18 },
+  sourceUrl: { color: '#BAC5D5', fontSize: 11, lineHeight: 16, flexShrink: 1 },
   body: { color: '#F3F5F9', fontSize: 15, lineHeight: 23, marginVertical: 6 },
   label: { color: '#E2C57D', fontSize: 17, fontWeight: '600', marginTop: 20, marginBottom: 6 },
   footer: { color: '#BAC5D5', fontSize: 13, lineHeight: 21, marginTop: 24, paddingTop: 18, borderTopWidth: 1, borderColor: '#9F8548' },
@@ -158,6 +184,6 @@ const styles = StyleSheet.create({
   closeText: { color: '#E2C57D', fontSize: 30 },
   modalScroll: { flexShrink: 1 },
   modalBody: { padding: 20, paddingBottom: 36 },
-  modalImage: { width: '100%', height: 190 },
+  modalImage: { width: '100%', height: 260, minHeight: 260, backgroundColor: '#071426', borderRadius: 10 },
   alert: { borderWidth: 1, borderColor: '#9F8548', borderRadius: 12, padding: 12, marginVertical: 8 },
 });

@@ -51,6 +51,27 @@ export const INGREDIENTS = {
   docetaxel: ['docetaxel'],
   simvastatin: ['simvastatin', 'simvastatina', 'sinvastatina', 'simvastatine'],
   caffeine: ['caffeine', 'cafeina', 'caféine', 'koffein', '咖啡因'],
+  chloroquine: ['chloroquine', 'cloroquina'],
+  saquinavir: ['saquinavir'],
+  losartan: ['losartan', 'losartán'],
+  valsartan: ['valsartan', 'valsartán'],
+  telmisartan: ['telmisartan', 'telmisartán'],
+  enalapril: ['enalapril'],
+  lisinopril: ['lisinopril'],
+  captopril: ['captopril'],
+  amlodipine: ['amlodipine', 'amlodipino', 'amlodipina'],
+  nifedipine: ['nifedipine', 'nifedipino', 'nifedipina'],
+  verapamil: ['verapamil', 'verapamilo'],
+  diltiazem: ['diltiazem'],
+  metoprolol: ['metoprolol'],
+  atenolol: ['atenolol'],
+  paracetamol: ['paracetamol', 'acetaminophen', 'acetaminofen', 'acetaminofén'],
+  clozapine: ['clozapine', 'clozapina'],
+  sertraline: ['sertraline', 'sertralina'],
+  fluoxetine: ['fluoxetine', 'fluoxetina'],
+  escitalopram: ['escitalopram'],
+  venlafaxine: ['venlafaxine', 'venlafaxina'],
+  tramadol: ['tramadol'],
 };
 
 const anticoagulants = ['warfarin', 'acenocoumarol', 'apixaban', 'rivaroxaban', 'dabigatran', 'heparin', 'enoxaparin'];
@@ -61,6 +82,16 @@ const rule = (herb, slug, ingredients, basis) => ({
   herb, ingredients, basis, source: 'NCCIH',
   url: `https://www.nccih.nih.gov/health/${slug}`, checked: '2026-11-03',
 });
+
+const sourcedRule = (herb, source, url, ingredients, basis) => ({
+  herb, source, url, ingredients, basis, checked: '2026-11-03',
+});
+const antihypertensives = ['losartan', 'valsartan', 'telmisartan', 'enalapril', 'lisinopril', 'captopril',
+  'amlodipine', 'nifedipine', 'verapamil', 'diltiazem', 'metoprolol', 'atenolol',
+  'hydrochlorothiazide', 'furosemide', 'spironolactone'];
+const antidiabetics = ['metformin', 'insulin', 'glibenclamide', 'gliclazide', 'glimepiride',
+  'empagliflozin', 'dapagliflozin', 'sitagliptin'];
+const hibiscusUrl = 'https://medlineplus.awsqa.nlm.nih.gov/druginfo/natural/211.html';
 
 export const HERB_INTERACTIONS = [
   rule('chamomile', 'chamomile', ['warfarin'], 'Reported warfarin interaction'),
@@ -75,6 +106,24 @@ export const HERB_INTERACTIONS = [
   rule('liquorice', 'licorice-root', corticosteroids, 'Reported corticosteroid interactions'),
   rule('lavender', 'lavender', sedatives, 'Theoretical sedative interaction'),
   rule('st_johns_wort', 'st-johns-wort', ['amitriptyline', 'bupropion', 'ethinylestradiol', 'cyclosporine', 'phenytoin', 'carbamazepine', 'digoxin', 'ivabradine', 'indinavir', 'nevirapine', 'irinotecan', 'imatinib', 'docetaxel', 'warfarin', 'simvastatin'], 'Ingredients named by NCCIH; oral contraceptive member ethinylestradiol'),
+  rule('st_johns_wort', 'st-johns-wort', ['sertraline', 'fluoxetine', 'escitalopram', 'venlafaxine', 'tramadol'], 'Serotonergic drug class; potential serious serotonin-related effects'),
+  sourcedRule('garlic', 'NIH/NLM · estudio clínico', 'https://pubmed.ncbi.nlm.nih.gov/11740713/',
+    ['saquinavir'], 'Human pharmacokinetic study of garlic supplements and unboosted saquinavir'),
+  sourcedRule('hibiscus', 'MedlinePlus · ficha histórica', hibiscusUrl,
+    [...antihypertensives, ...antidiabetics, 'chloroquine', 'simvastatin', 'paracetamol'],
+    'Possible additive BP/glucose effects; reduced chloroquine absorption; uncertain clinical relevance for simvastatin/paracetamol'),
+  sourcedRule('hibiscus', 'NIH/NLM · estudio en animales', 'https://pubmed.ncbi.nlm.nih.gov/21480802/',
+    ['hydrochlorothiazide'], 'Rat/rabbit pharmacokinetic and diuretic interaction; not confirmed in humans'),
+  sourcedRule('parsley', 'MedlinePlus', 'https://medlineplus.gov/ency/patientinstructions/000292.htm',
+    ['warfarin', 'acenocoumarol'], 'Vitamin K antagonist class; large dietary changes, not a prohibition of culinary intake'),
+  sourcedRule('notoginseng', 'NIH/NLM · ensayo pequeño', 'https://pubmed.ncbi.nlm.nih.gov/33370633/',
+    ['aspirin'], 'Specific Panax notoginseng saponins with aspirin; not extrapolated to every preparation'),
+  sourcedRule('angelica_sinensis', 'MSK', 'https://www.mskcc.org/cancer-care/integrative-medicine/herbs/dong-quai',
+    [...anticoagulants, 'aspirin', 'clopidogrel', 'clozapine'], 'Possible anticoagulant effect; aspirin/clopidogrel animal data; clozapine case reports involving formulas'),
+  sourcedRule('ganoderma', 'MSK', 'https://www.mskcc.org/cancer-care/integrative-medicine/herbs/reishi-mushroom',
+    [...anticoagulants, 'aspirin', 'clopidogrel', ...immunosuppressants], 'Possible bleeding and immunosuppressant interactions; reishi preparations vary'),
+  sourcedRule('holy_basil', 'OMS · datos experimentales', 'https://www.e-lactancia.org/media/papers/Plantas_medicinales_WHO_monographs-vol_2-2002.pdf#page=218',
+    ['paracetamol'], 'WHO precaution based on eugenol experiments in glutathione-depleted mice; clinical relevance unknown'),
 ];
 
 export function normalizeIngredient(value) {
@@ -107,8 +156,11 @@ export function findHerbInteractions(herbKey, medications = []) {
       const matched = entry.ingredients.filter(id => ids.has(id) &&
         !(id === 'ethinylestradiol' && route && !['oral', 'via oral', 'por via oral', 'by mouth'].includes(route)));
       if (!matched.length) continue;
-      // One alert per medicine and source, even if several components or rules match.
-      if (!matches.some(item => item.medication === medication && item.url === entry.url)) {
+      // Merge all matched components for the same medicine/source.
+      const existing = matches.find(item => item.medication === medication && item.url === entry.url);
+      if (existing) {
+        existing.matchedIngredients = [...new Set([...existing.matchedIngredients, ...matched])];
+      } else {
         matches.push({ ...entry, medication, matchedIngredients: matched });
       }
     }

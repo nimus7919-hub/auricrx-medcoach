@@ -1,6 +1,8 @@
 import records from './herbReview.json';
 import uiI18n from '../i18n';
+import { HERB_DETAILS_ES } from './herbDetailsEs';
 const placeholder = require('../../assets/icons/herb_emoji_transparent.png');
+export const HERB_IMAGE_PLACEHOLDER = placeholder;
 const images = {
   'damiana': require('../../assets/herbs/damiana.jpg'),
   'chamomile': require('../../assets/herbs/chamomile.jpg'),
@@ -20,8 +22,7 @@ const images = {
   'hibiscus': require('../../assets/herbs/hibiscus.jpg'),
   'agastache_rugosa': require('../../assets/herbs/agastache_rugosa.png'),
   'aloe_vera': require('../../assets/herbs/aloe_vera.png'),
-  'aristolochia': require('../../assets/herbs/aristolochia.png'),
-  'cilantro': require('../../assets/herbs/cilantro.png'),
+  'cilantro': { uri: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Coriandrum_sativum_003.JPG' },
   'dandelion': require('../../assets/herbs/dandelion.png'),
   'echinacea': require('../../assets/herbs/echinacea.png'),
   'fennel': require('../../assets/herbs/fennel.png'),
@@ -33,9 +34,15 @@ const images = {
   'prunella_vulgaris': require('../../assets/herbs/prunella_vulgaris.png'),
   'rosemary': require('../../assets/herbs/rosemary.png'),
   'turmeric': require('../../assets/herbs/turmeric.png'),
-  'yerba_mansa': require('../../assets/herbs/yerba_mansa.png'),
 };
-export const HERBS = records.map(record => ({ ...record, image: images[record.key] || placeholder }));
+export const HERBS = records.map(record => ({
+  ...record, detailsEs: HERB_DETAILS_ES[record.key], image: images[record.key] || placeholder,
+  imageVerified: !!images[record.key],
+  ...(record.key === 'cilantro' ? { imageAttribution: {
+    species: 'Coriandrum sativum', author: 'H. Zell; recorte de Epipelagic',
+    license: 'CC BY-SA 3.0', url: 'https://commons.wikimedia.org/wiki/File:Coriandrum_sativum_003.JPG',
+  } } : {}),
+}));
 // Compatibility for the controller's existing educational context import.
 export const herbs = HERBS.map(herb => ({
   ...herb,
