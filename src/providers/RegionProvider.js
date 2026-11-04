@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { vip } from '../theme/vip';
-import { getRegion, initializeRegion, subscribeRegion, setRegion, hasUSStartupConsent, saveUSStartupConsent } from '../services/region';
+import { getRegion, initializeRegion, subscribeRegion, setRegion, hasSavedRegionChoice, hasUSStartupConsent, saveUSStartupConsent } from '../services/region';
 import { US_POLICIES } from '../legal/usPolicies';
 import notices from '../legal/usDisclaimers.json';
 const Context = createContext(null);
@@ -16,14 +16,37 @@ export function RegionProvider({ children }) {
   const [ready, setReady] = useState(false);
   const [consented, setConsented] = useState(false);
   const [error, setError] = useState('');
+  const [regionConfirmed, setRegionConfirmed] = useState(false);
   useEffect(() => {
     const unsubscribe = subscribeRegion(value => { update(value); setConsented(hasUSStartupConsent()); });
-    initializeRegion().then(async value => { if (value === 'US') { await stopLocationTasks(); if (!hasUSStartupConsent()) { try { await require('expo-notifications').cancelAllScheduledNotificationsAsync(); } catch {} } } update(value); setConsented(hasUSStartupConsent()); setReady(true); }).catch(() => setError('Unable to load region preferences. Restart to retry.'));
+    initializeRegion().then(async value => { if (value === 'US') { await stopLocationTasks(); if (!hasUSStartupConsent()) { try { await require('expo-notifications').cancelAllScheduledNotificationsAsync(); } catch {} } } update(value); setRegionConfirmed(hasSavedRegionChoice()); setConsented(hasUSStartupConsent()); setReady(true); }).catch(() => setError('Unable to load region preferences. Restart to retry.'));
     return unsubscribe;
   }, []);
   const changeRegion = async value => { await setRegion(value); if (value === 'US') await stopLocationTasks(); await i18n.changeLanguage(value === 'US' ? 'en' : 'es'); };
   const context = { region, changeRegion, withdraw: () => setConsented(false) };
-  return <Context.Provider value={context}>{!ready ? <View style={{ flex: 1, justifyContent: 'center' }}><ActivityIndicator /><Text>{error}</Text></View> : region === 'US' && !consented ? <USStartupConsent onSaved={() => setConsented(true)} /> : children}</Context.Provider>;
+  return <Context.Provider value={context}>{!ready ? <View style={{ flex: 1, justifyContent: 'center' }}><ActivityIndicator /><Text>{error}</Text></View> : !regionConfirmed ? <RegionConfirmation onConfirmed={() => setRegionConfirmed(true)} /> : region === 'US' && !consented ? <USStartupConsent onSaved={() => setConsented(true)} /> : children}</Context.Provider>;
+}
+function RegionConfirmation({ onConfirmed }) {
+  const { region, changeRegion } = useRegion();
+  const [selection, setSelection] = useState(region);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const spanish = (i18n.resolvedLanguage || i18n.language || 'es').startsWith('es');
+  const name = value => value === 'MX' ? (spanish ? 'México' : 'Mexico') : (spanish ? 'Estados Unidos' : 'United States');
+  return <SafeAreaProvider><SafeAreaView style={styles.screen}><ScrollView contentContainerStyle={styles.content}><View style={styles.container}>
+    <Text accessibilityRole="header" style={styles.title}>AuricRX MedCoach</Text>
+    <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.region} onPress={() => setSelection(value => value === 'MX' ? 'US' : 'MX')}>
+      <Text style={styles.regionText}>{spanish ? 'Detectamos: ' : 'We detected: '}{name(region)} · {spanish ? 'Cambiar' : 'Change'}</Text>
+    </TouchableOpacity>
+    <Text style={styles.body}>{spanish ? 'Región seleccionada: ' : 'Selected region: '}{name(selection)}</Text>
+    <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.continueButton} onPress={async () => {
+      setBusy(true); setError('');
+      try { await changeRegion(selection); onConfirmed(); }
+      catch { setError(spanish ? 'No se pudo guardar. Intenta de nuevo.' : 'Could not save. Please retry.'); }
+      finally { setBusy(false); }
+    }}><Text style={styles.continueText}>{spanish ? 'Confirmar región y continuar' : 'Confirm region and continue'}</Text></TouchableOpacity>
+    {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
+  </View></ScrollView></SafeAreaView></SafeAreaProvider>;
 }
 function USStartupConsent({ onSaved }) {
   const { region, changeRegion } = useRegion();

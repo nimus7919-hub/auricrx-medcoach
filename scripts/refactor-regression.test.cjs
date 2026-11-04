@@ -32,7 +32,11 @@ function streamHarness(fetch) {
     useRef: current => ({ current }),
     useEffect: effect => { cleanup = effect(); },
   };
-  const { useMedicalStream } = loadModule('src/hooks/useMedicalStream.js', { react }, { fetch });
+  const { useMedicalStream } = loadModule('src/hooks/useMedicalStream.js', {
+    react,
+    '../i18n': { t: (key, options) => `${key} ${options?.value1 ?? ''}` },
+    '../config/api': { API_BASE: 'https://example.test' },
+  }, { fetch });
   return { hook: useMedicalStream('/ask', { stream: false }), state, unmount: () => cleanup() };
 }
 
@@ -71,6 +75,8 @@ test('cloud sync preserves result shapes, shares auth and clears its timeout', a
   let cleared = 0;
   let request;
   const service = loadModule('src/services/cloudSyncService.js', {
+    './region': { getRegion: () => 'MX' },
+    '../i18n': { t: key => key },
     '@react-native-async-storage/async-storage': { getItem: async () => null },
     '../config/firebase': { auth: { currentUser: { getIdToken: async () => 'test-token' } } },
     '../config/api': { API_BASE: 'https://example.test' },
