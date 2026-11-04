@@ -1,16 +1,152 @@
-node_modules
 .git
-.expo
-# Never upload machine-specific Gradle/autolinking caches (absolute local paths).
+node_modules
 android/build
+android/app/build
 android/.gradle
-android/.idea
-android/local.properties
 android/.cxx
 android/app/.cxx
-android/app/.gradle
-android/app/build
+.gradle
 ios/build
+ios/Pods
+.expo
+dist
+web-build
+*.aab
+*.apk
+*.bundle
 *.log
+coverage
+
+# from .gitignore
+# -----------------------------
+# Logs & diagnostics
+# -----------------------------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.*.json
+
+# -----------------------------
+# Coverage / instrumentation
+# -----------------------------
+coverage
+*.lcov
+.nyc_output
+
+# -----------------------------
+# Node / package managers
+# -----------------------------
+node_modules/
+.pnp.*
+.yarn/*
+.yarn.lock
+pnpm-lock.yaml
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.npm
+.eslintcache
+.stylelintcache
+.node_repl_history
+*.tgz
+
+# -----------------------------
+# Build / caches
+# -----------------------------
+dist/
+build/
+.cache/
+.parcel-cache
+web_modules/
+jspm_packages/
+build/Release
+*.tsbuildinfo
+
+# -----------------------------
+# Expo / React Native
+# -----------------------------
+.expo/
+.expo-shared/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+
+# -----------------------------
+# Android
+# -----------------------------
+android/.gradle/
+android/.idea/
+android/local.properties
+android/captures/
+android/app/build/
+android/app/*.keystore
+android/app/debug.keystore
+android/app/google-services.json
+*.iml
+*.orig.*
+
+# -----------------------------
+# iOS (if present later)
+# -----------------------------
+ios/Pods/
+ios/build/
+ios/GoogleService-Info.plist
+*.xcworkspace
+*.xcuserstate
+*.xcuserdatad
+*.xcscmblueprint
+*.xcodeproj/project.xcworkspace/xcuserdata
+DerivedData/
+
+# -----------------------------
+# Env / secrets
+# -----------------------------
+.env
+.env.*
+!.env.example
+.env*.local
+*.pem
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# -----------------------------
+# Server (backend)
+# -----------------------------
+server/node_modules/
+server/.env
+server/.env.*
+!server/.env.example
+
+# -----------------------------
+# Backup files
+# -----------------------------
+*.backup
+*.bak
+*.orig
+*_backup.*
+*_backup_*
+*.backup.*
+backup-*
+*-backup
+index.backup.*
+App.backup.*
+package.backup.*
+*.backup.js
+*.backup.json
+*.backup.ts
+*.backup.tsx
+
+# -----------------------------
+# OS junk
+# -----------------------------
 .DS_Store
 Thumbs.db
+
+q6-export/
