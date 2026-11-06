@@ -16,10 +16,10 @@
     "delete": "Eliminar"
   },
   "locationSearch": {
-    "disclosure": "Usamos tu ubicaci?n solo para buscar farmacias o laboratorios cercanos. No la guardamos ni la usamos para seguimiento. Las b?squedas de farmacias usan datos de INEGI DENUE/PROFECO a trav?s de nuestro servidor; las b?squedas de laboratorios y las distancias opcionales en auto usan Google Places/Maps.",
-    "reset": "Restablecer permiso de ubicaci?n",
-    "resetDone": "Consentimiento de ubicaci?n restablecido. Te preguntaremos de nuevo en tu pr?xima b?squeda.",
-    "resetError": "No se pudo restablecer el consentimiento de ubicaci?n. Int?ntalo de nuevo."
+    "disclosure": "Usamos tu ubicación solo para buscar farmacias o laboratorios cercanos. No la guardamos ni la usamos para seguimiento. Las búsquedas de farmacias usan datos de INEGI DENUE/PROFECO a través de nuestro servidor; las búsquedas de laboratorios y las distancias opcionales en auto usan Google Places/Maps.",
+    "reset": "Restablecer permiso de ubicación",
+    "resetDone": "Consentimiento de ubicación restablecido. Te preguntaremos de nuevo en tu próxima búsqueda.",
+    "resetError": "No se pudo restablecer el consentimiento de ubicación. Inténtalo de nuevo."
   },
   "documentScanner": {
     "scan": "Escanear",
@@ -2703,7 +2703,7 @@
     "SignInScreen": {
       "copy": {
         "resetSent": {
-          "text175": "Revisa tu correo electr?nico para restablecer tu contrase?a."
+          "text175": "Revisa tu correo electrónico para restablecer tu contraseña."
         }
       },
       "loginCopy": {
@@ -2714,7 +2714,7 @@
         "signIn": "Iniciar sesión",
         "loading": "Conectando...",
         "forgot": "¿Olvidaste tu contraseña?",
-        "resetHelp": "Introduce tu correo electr?nico para recuperar tu contrase?a.",
+        "resetHelp": "Introduce tu correo electrónico para recuperar tu contraseña.",
         "newHere": "¿Nuevo aquí?",
         "createAccount": "Crear cuenta",
         "terms": "Términos",
@@ -3652,14 +3652,14 @@
     "pricesFor": "Precios para: {{name}}",
     "detailsUnavailable": "Detalles del producto no disponibles",
     "within": "Dentro de {{radius}} km",
-    "expand": "Ampliar b?squeda",
+    "expand": "Ampliar búsqueda",
     "noPrices": "Sin precios PROFECO para este medicamento",
     "noNearby": "Sin tiendas con precio dentro de este radio",
     "state": "Estatal",
     "national": "Nacional",
     "units": {
       "tablets": "tabletas",
-      "capsules": "c?psulas",
+      "capsules": "cápsulas",
       "dragees": "grageas",
       "ampoules": "ampolletas",
       "sachets": "sobres"

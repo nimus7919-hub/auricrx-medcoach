@@ -16,10 +16,10 @@
     "delete": "Löschen"
   },
   "locationSearch": {
-    "disclosure": "Wir verwenden Ihren Standort nur, um Apotheken oder Labore in der N?he zu suchen. Wir speichern ihn nicht und nutzen ihn nicht zur Nachverfolgung. Apothekensuchen verwenden INEGI DENUE/PROFECO-Daten ?ber unseren Server; Laborsuchen und optionale Fahrstrecken verwenden Google Places/Maps.",
-    "reset": "Standortzustimmung zur?cksetzen",
-    "resetDone": "Standortzustimmung zur?ckgesetzt. Bei der n?chsten Suche fragen wir erneut.",
-    "resetError": "Die Standortzustimmung konnte nicht zur?ckgesetzt werden. Bitte versuchen Sie es erneut."
+    "disclosure": "Wir verwenden Ihren Standort nur, um Apotheken oder Labore in der Nähe zu suchen. Wir speichern ihn nicht und nutzen ihn nicht zur Nachverfolgung. Apothekensuchen verwenden INEGI DENUE/PROFECO-Daten über unseren Server; Laborsuchen und optionale Fahrstrecken verwenden Google Places/Maps.",
+    "reset": "Standortzustimmung zurücksetzen",
+    "resetDone": "Standortzustimmung zurückgesetzt. Bei der nächsten Suche fragen wir erneut.",
+    "resetError": "Die Standortzustimmung konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
   },
   "documentScanner": {
     "scan": "Scannen",
@@ -1261,14 +1261,14 @@
   "localized": {
     "SignInScreen": {
       "loginCopy": {
-        "language": "Sprache w?hlen",
+        "language": "Sprache wählen",
         "tagline": "Ihre Gesundheit im VIP-Modus.",
         "or": "oder",
         "email": "E-Mail",
         "signIn": "Anmelden",
         "loading": "Verbinden...",
         "forgot": "Passwort vergessen?",
-        "resetHelp": "Geben Sie Ihre E-Mail ein, um Ihr Passwort zur?ckzusetzen.",
+        "resetHelp": "Geben Sie Ihre E-Mail ein, um Ihr Passwort zurückzusetzen.",
         "newHere": "Neu hier?",
         "createAccount": "Konto erstellen",
         "terms": "Bedingungen",
