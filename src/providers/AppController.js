@@ -2229,7 +2229,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     useEffect(() => {
     (async () => {
       try {
-        const [L, T, N, M, R, P, V, MD, SD] = await Promise.all([
+        const [L, T, N, M, R, P, V, MD, SD, NE, EN, SN] = await Promise.all([
           AsyncStorage.getItem(STORAGE.lang),
           AsyncStorage.getItem(STORAGE.theme),
           AsyncStorage.getItem(STORAGE.night),
@@ -2239,6 +2239,9 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           AsyncStorage.getItem(STORAGE.voiceNotes),
           AsyncStorage.getItem(STORAGE.meds),
           AsyncStorage.getItem(STORAGE.selectedAIDoctor),
+          AsyncStorage.getItem(STORAGE.notificationsEnabled),
+          AsyncStorage.getItem(STORAGE.emailNotifications),
+          AsyncStorage.getItem(STORAGE.smsNotifications),
         ]);
 
         if (L) {
@@ -2272,6 +2275,9 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           } catch {} 
         }
         if (SD) { try { setSelectedAIDoctor(SD); } catch {} }
+        if (NE !== null) { try { setNotificationsEnabled(NE === '1'); } catch {} }
+        if (EN !== null) { try { setEmailNotifications(EN === '1'); } catch {} }
+        if (SN !== null) { try { setSmsNotifications(SN === '1'); } catch {} }
       } catch {
         // ignore corrupt storage on boot
       } finally { setRemindersLoaded(true); }
@@ -2314,6 +2320,9 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   useEffect(() => { AsyncStorage.setItem(STORAGE.voiceNotes, JSON.stringify(voiceNotes)); }, [voiceNotes]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.selectedAIDoctor, selectedAIDoctor); }, [selectedAIDoctor]);
+  useEffect(() => { AsyncStorage.setItem(STORAGE.notificationsEnabled, notificationsEnabled ? '1' : '0'); }, [notificationsEnabled]);
+  useEffect(() => { AsyncStorage.setItem(STORAGE.emailNotifications, emailNotifications ? '1' : '0'); }, [emailNotifications]);
+  useEffect(() => { AsyncStorage.setItem(STORAGE.smsNotifications, smsNotifications ? '1' : '0'); }, [smsNotifications]);
 
   // Authentication state listener and restoration
   useEffect(() => {
