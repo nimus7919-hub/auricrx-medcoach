@@ -1057,6 +1057,7 @@
     "daysUntilCancellation": "Días Hasta la Cancelación",
     "cancelMembership": "Cancelar Membresía",
     "restartMembership": "Reanudar Membresía",
+    "startSubscription": "Iniciar Suscripción",
     "cancelMembershipConfirm": "Cancelar membresía. Conservarás Pro hasta el {{date}}. No se harán más cargos. Puedes volver a suscribirte cuando quieras.",
     "restartMembershipConfirm": "¿Estás seguro de que deseas reanudar tu membresía?",
     "confirmCancel": "Sí, Cancelar Membresía",
