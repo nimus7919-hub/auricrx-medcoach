@@ -1,14 +1,15 @@
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
-import { darkColors } from '../theme/colors';
+import { darkColors, roseGoldColors, seaGlassColors } from '../theme/colors';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface WallpaperOption {
   id: string;
   name: string;
-  type: 'image' | 'color';
+  type: 'image' | 'color' | 'theme';
   value: string;
+  themeColors?: typeof darkColors;
 }
 
 interface WallpaperContextType {
@@ -51,24 +52,26 @@ export function WallpaperProvider({ children, theme = darkColors }: WallpaperPro
         setCurrentWallpaper(wallpaper);
       } else {
         console.log('🎨 WallpaperContext - No saved wallpaper found, setting default');
-        // Set default wallpaper to Black Silver for new users
+        // Set default to VIP Navy & Gold theme for new users
         const defaultWallpaper: WallpaperOption = {
-          id: 'black_silver',
-          name: uiI18n.t("wallpaper.blackSilver"),
-          type: 'image',
-          value: 'Black Silver.png'
+          id: 'theme_vip_navy_gold',
+          name: uiI18n.t("wallpaper.vipNavyGold"),
+          type: 'theme',
+          value: 'vip_navy_gold',
+          themeColors: darkColors
         };
         setCurrentWallpaper(defaultWallpaper);
       }
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to load wallpaper:', error);
-      // Set default wallpaper even on error
+      // Set default theme even on error
       const defaultWallpaper: WallpaperOption = {
-        id: 'black_silver',
-        name: uiI18n.t("wallpaper.blackSilver"),
-        type: 'image',
-        value: 'Black Silver.png'
+        id: 'theme_vip_navy_gold',
+        name: uiI18n.t("wallpaper.vipNavyGold"),
+        type: 'theme',
+        value: 'vip_navy_gold',
+        themeColors: darkColors
       };
       setCurrentWallpaper(defaultWallpaper);
       setIsLoading(false);
@@ -93,11 +96,17 @@ export function WallpaperProvider({ children, theme = darkColors }: WallpaperPro
     if (!currentWallpaper) {
       console.log('🎨 WallpaperContext - No wallpaper, using default background');
       return {
-        backgroundColor: theme.bg, // Dark background to match Black Silver theme
+        backgroundColor: theme.bg,
       };
     }
 
-    if (currentWallpaper.type === 'color') {
+    if (currentWallpaper.type === 'theme') {
+      console.log('🎨 WallpaperContext - Theme wallpaper:', currentWallpaper.value);
+      const activeTheme = getActiveTheme();
+      return {
+        backgroundColor: activeTheme.bg,
+      };
+    } else if (currentWallpaper.type === 'color') {
       console.log('🎨 WallpaperContext - Color wallpaper:', currentWallpaper.value);
       return {
         backgroundColor: currentWallpaper.value,
@@ -144,13 +153,21 @@ export function WallpaperProvider({ children, theme = darkColors }: WallpaperPro
     return luminance > 0.5;
   };
 
+  // Get the active theme colors (either from selected theme or default)
+  const getActiveTheme = () => {
+    if (currentWallpaper?.type === 'theme' && currentWallpaper?.themeColors) {
+      return currentWallpaper.themeColors;
+    }
+    return theme;
+  };
+
   // Opaque card colors keep text readable over every custom wallpaper.
-  const getTextColor = () => theme.text;
-  const getSubTextColor = () => theme.sub;
-  const getAccentColor = () => theme.accent;
-  const getCardTextColor = () => theme.text;
-  const getCardBackgroundColor = () => theme.card;
-  const getCardBorderColor = () => theme.border;
+  const getTextColor = () => getActiveTheme().text;
+  const getSubTextColor = () => getActiveTheme().sub;
+  const getAccentColor = () => getActiveTheme().accent;
+  const getCardTextColor = () => getActiveTheme().text;
+  const getCardBackgroundColor = () => getActiveTheme().card;
+  const getCardBorderColor = () => getActiveTheme().border;
 
   const value: WallpaperContextType = {
     currentWallpaper,

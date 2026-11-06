@@ -35,6 +35,9 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
   const getTranslatedWallpaperName = (wallpaper: any) => {
     if (!wallpaper) return t("wallpaper.default");
     const nameMap: { [key: string]: string } = {
+      'theme_vip_navy_gold': t("wallpaper.vipNavyGold"),
+      'theme_rose_gold': t("wallpaper.roseGold"),
+      'theme_sea_glass': t("wallpaper.seaGlass"),
       'solid_white': t("wallpaper.white"),
       'solid_black': t("wallpaper.black"),
       'black_gold_dr': t("wallpaper.blackGoldDr"),

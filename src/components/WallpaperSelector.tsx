@@ -17,18 +17,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';
+import { darkColors, roseGoldColors, seaGlassColors } from '../theme/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface WallpaperOption {
   id: string;
   name: string;
-  type: 'image' | 'color';
+  type: 'image' | 'color' | 'theme';
   value: string;
   preview?: string;
+  themeColors?: typeof darkColors;
 }
 
 const WALLPAPER_OPTIONS: WallpaperOption[] = [
+  // Color Themes
+  { id: 'theme_vip_navy_gold', get name() { return uiI18n.t("wallpaper.vipNavyGold"); }, type: 'theme', value: 'vip_navy_gold', themeColors: darkColors },
+  { id: 'theme_rose_gold', get name() { return uiI18n.t("wallpaper.roseGold"); }, type: 'theme', value: 'rose_gold', themeColors: roseGoldColors },
+  { id: 'theme_sea_glass', get name() { return uiI18n.t("wallpaper.seaGlass"); }, type: 'theme', value: 'sea_glass', themeColors: seaGlassColors },
+  
   // Solid colors
   { id: 'solid_white', get name() { return uiI18n.t("wallpaper.white"); }, type: 'color', value: '#FFFFFF' },
   { id: 'solid_black', get name() { return uiI18n.t("wallpaper.black"); }, type: 'color', value: '#000000' },
@@ -63,6 +70,9 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
   // Function to get translated wallpaper name
   const getTranslatedWallpaperName = (wallpaper: WallpaperOption) => {
     const nameMap: { [key: string]: string } = {
+      'theme_vip_navy_gold': t("wallpaper.vipNavyGold"),
+      'theme_rose_gold': t("wallpaper.roseGold"),
+      'theme_sea_glass': t("wallpaper.seaGlass"),
       'solid_white': t("wallpaper.white"),
       'solid_black': t("wallpaper.black"),
       'black_gold_dr': t("wallpaper.blackGoldDr"),
@@ -134,7 +144,23 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
   };
 
   const getWallpaperPreview = (wallpaper: WallpaperOption) => {
-    if (wallpaper.type === 'color') {
+    if (wallpaper.type === 'theme' && wallpaper.themeColors) {
+      // Show a swatch with multiple colors from the theme
+      const themeColors = wallpaper.themeColors;
+      return (
+        <View style={styles.themePreviewContainer}>
+          <View style={[styles.themeColorBlock, { backgroundColor: themeColors.bg, flex: 2 }]} />
+          <View style={styles.themeColorColumn}>
+            <View style={[styles.themeColorBlock, { backgroundColor: themeColors.card }]} />
+            <View style={[styles.themeColorBlock, { backgroundColor: themeColors.accent }]} />
+          </View>
+          <View style={styles.themeColorColumn}>
+            <View style={[styles.themeColorBlock, { backgroundColor: themeColors.border }]} />
+            <View style={[styles.themeColorBlock, { backgroundColor: themeColors.gold }]} />
+          </View>
+        </View>
+      );
+    } else if (wallpaper.type === 'color') {
       return (
         <View 
           style={[
@@ -235,6 +261,13 @@ export default function WallpaperSelector({ onClose, theme, S, onWallpaperChange
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        <DynamicText type="card" style={[styles.sectionTitle, { opacity: 0.7 }]}>
+          {t("wallpaper.colorThemes")}
+        </DynamicText>
+        <View style={styles.wallpaperGrid}>
+          {WALLPAPER_OPTIONS.filter(w => w.type === 'theme').map(renderWallpaperOption)}
+        </View>
+
         <DynamicText type="card" style={[styles.sectionTitle, { opacity: 0.7 }]}>
           {t("wallpaper.solidColors")}
         </DynamicText>
@@ -346,5 +379,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 50,
     fontFamily: 'Inter_400Regular',
+  },
+  themePreviewContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  themeColorColumn: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  themeColorBlock: {
+    flex: 1,
   },
 });
