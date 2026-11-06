@@ -33,7 +33,7 @@ function Row({ label, onPress, open, destructive, last }) {
   return (
     <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}
       style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 13, borderBottomWidth: last ? 0 : 1, borderBottomColor: GOLD + '33' }}>
-      <DynamicText type="card" style={{ flex: 1, fontFamily: 'Inter_600SemiBold', fontSize: 15, color: destructive ? '#F87171' : undefined }}>{label}</DynamicText>
+      <DynamicText type="card" style={{ flex: 1, fontFamily: 'Inter_600SemiBold', fontSize: 15, color: destructive ? '#F87171' : '#E9C978' }}>{label}</DynamicText>
       <Text style={{ color: destructive ? '#F87171' : GOLD, fontSize: 14, transform: [{ rotate: open ? '90deg' : '0deg' }] }}>▶</Text>
     </TouchableOpacity>
   );
@@ -67,10 +67,16 @@ export default function RegionSettings() {
       withdraw();
     } catch { Alert.alert('Consent withdrawal could not be saved. Please retry.'); }
   };
-  const confirmRevoke = (kind, label) => Alert.alert(label, 'Are you sure? You can give consent again later.', [
-    { text: 'Cancel', style: 'cancel' },
-    { text: 'Withdraw', style: 'destructive', onPress: () => revoke(kind) },
-  ]);
+  const confirmRevoke = (kind, label) => {
+    const message = kind === 'collect' 
+      ? 'This will disconnect Health Connect data collection and cancel scheduled reminders. AI features that require health data may be limited. You can give consent again later.'
+      : 'This will stop sharing your data with AI processors. AI health analysis features will be unavailable. You can give consent again later.';
+    
+    Alert.alert(label, message, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Withdraw', style: 'destructive', onPress: () => revoke(kind) },
+    ]);
+  };
 
   const regionOption = (code, label, flag) => {
     const selected = region === code;

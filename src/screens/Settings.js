@@ -48,75 +48,47 @@ export default function createSettings(getScope) {
         <Header title={S.settings} />
         <RegionSettings />
         
-        <CollapsibleSection title={S.profile} sectionKey="profile" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.appDescription}</DynamicText>
-            <TouchableOpacity 
-              onPress={() => setRoute('admin-profile')}
-              style={[styles.settingsButton, {
-                backgroundColor: getCardBackgroundColor() + 'CC',
-                borderColor: getCardBorderColor(),
-                borderWidth: 2,
-                borderRadius: 12,
-                paddingVertical: 10,
-                paddingHorizontal: 16,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3
-              }]}
-            >
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_700Bold', 
-                fontSize: 15,
-                textAlign: 'center'
-              }}>{S.profile}</DynamicText>
-            </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => setRoute('admin-profile')}
+          style={[styles.section, {
+            backgroundColor: getCardBackgroundColor() + 'CC',
+            borderColor: getCardBorderColor(),
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            paddingVertical: 16
+          }]}
+          activeOpacity={0.7}
+        >
+          <View style={{ flex: 1 }}>
+            <DynamicText type="card" style={[styles.sectionTitle, { fontFamily: 'Inter_700Bold', marginBottom: 4 }]}>{S.profile}</DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7 }}>{S.appDescription}</DynamicText>
           </View>
-        </CollapsibleSection>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>▶</Text>
+        </TouchableOpacity>
         
-        <CollapsibleSection title={S.healthProfile} sectionKey="healthProfile" onToggle={toggleSection}>
-          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-            <TouchableOpacity 
-              onPress={() => setRoute('health-profile')}
-              style={[styles.settingsButton, {
-                backgroundColor: getCardBackgroundColor() + 'CC',
-                borderColor: getCardBorderColor(),
-                borderWidth: 2,
-                borderRadius: 12,
-                paddingVertical: 10,
-                paddingHorizontal: 16,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3
-              }]}
-            >
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_700Bold', 
-                fontSize: 15,
-                textAlign: 'center',
-                marginBottom: 4,
-                width: '100%',
-                alignSelf: 'center'
-              }}>{S.healthProfileSettings}</DynamicText>
-              <DynamicText type="card" style={{ 
-                fontFamily: 'Inter_400Regular', 
-                fontSize: 12, 
-                opacity: 0.7,
-                textAlign: 'center'
-              }}>
-                {S.fastingProfileDescription}
-              </DynamicText>
-            </TouchableOpacity>
+        <TouchableOpacity 
+          onPress={() => setRoute('health-profile')}
+          style={[styles.section, {
+            backgroundColor: getCardBackgroundColor() + 'CC',
+            borderColor: getCardBorderColor(),
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            paddingVertical: 16
+          }]}
+          activeOpacity={0.7}
+        >
+          <View style={{ flex: 1 }}>
+            <DynamicText type="card" style={[styles.sectionTitle, { fontFamily: 'Inter_700Bold', marginBottom: 4 }]}>{S.healthProfile}</DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7 }}>
+              {S.fastingProfileDescription}
+            </DynamicText>
           </View>
-        </CollapsibleSection>
+          <Text style={{ color: theme.accent, fontSize: 18 }}>▶</Text>
+        </TouchableOpacity>
         
         <CollapsibleSection title={S.myDoctorAI} sectionKey="aiDoctor" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
@@ -454,11 +426,43 @@ export default function createSettings(getScope) {
               </View>
             )}
             
-            <DynamicText type="card" style={{ marginBottom: 12 }}>{uiI18n.t("settings.proPlan")}{t('subscriptionPlans.month')} / {t('subscriptionPlans.year')}
+            <DynamicText type="card" style={{ marginBottom: 12 }}>{t('subscriptionPlans.month')} / {t('subscriptionPlans.year')}
             </DynamicText>
 
             {/* Cancel or Restart Button */}
-            {subscriptionStatus && subscriptionStatus.subscription_cancelled_at ? (
+            {subscriptionStatus && subscriptionStatus.plan === 'trial' && !subscriptionStatus.subscription_cancelled_at ? (
+              <TouchableOpacity 
+                onPress={() => {
+                  // Open checkout for subscription
+                  setRoute('dashboard');
+                  // You can add a checkout handler here if needed
+                }}
+                style={[styles.settingsButton, {
+                  backgroundColor: '#22c55e',
+                  borderColor: '#16a34a',
+                  borderWidth: 2,
+                  borderRadius: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#22c55e',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 3
+                }]}
+              >
+                <DynamicText type="card" style={{ 
+                  fontFamily: 'Inter_700Bold',
+                  color: '#ffffff',
+                  fontSize: 15,
+                  textAlign: 'center'
+                }}>
+                  {S.startSubscription || uiI18n.t("settings.startSubscription") || "Start Subscription"}
+                </DynamicText>
+              </TouchableOpacity>
+            ) : subscriptionStatus && subscriptionStatus.subscription_cancelled_at ? (
               <TouchableOpacity 
                 onPress={handleRestartMembership}
                 style={[styles.settingsButton, {

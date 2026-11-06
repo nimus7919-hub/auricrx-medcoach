@@ -20,4 +20,7 @@ export const STORAGE = {
   voiceNotes: 'AURIC_VOICE_NOTES',
   meds: 'AURIC_MEDS',
   selectedAIDoctor: 'AURIC_SELECTED_AI_DOCTOR',
+  notificationsEnabled: 'AURIC_NOTIFICATIONS_ENABLED',
+  emailNotifications: 'AURIC_EMAIL_NOTIFICATIONS',
+  smsNotifications: 'AURIC_SMS_NOTIFICATIONS',
 };
