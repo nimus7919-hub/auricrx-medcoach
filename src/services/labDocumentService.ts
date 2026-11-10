@@ -175,12 +175,12 @@ class LabDocumentService {
   getLabGlossary(): { [key: string]: { en: string; es: string } } {
     return {
       'glucose': {
-        es: 'Glucosa: Azúcar en la sangre. Mide el nivel de energía disponible. Niveles alterados pueden indicar diabetes o prediabetes.',
-        en: 'Glucose: Sugar in the blood. Measures available energy level. Altered levels may indicate diabetes or prediabetes.'
+        es: 'Glucosa: Azúcar en la sangre. Mide el nivel de energía disponible.',
+        en: 'Glucose: Sugar in the blood. Measures available energy level.'
       },
       'hemoglobin': {
-        es: 'Hemoglobina: Proteína que transporta oxígeno en la sangre. Niveles bajos pueden indicar anemia.',
-        en: 'Hemoglobin: Protein that carries oxygen in the blood. Low levels may indicate anemia.'
+        es: 'Hemoglobina: Proteína que transporta oxígeno en la sangre.',
+        en: 'Hemoglobin: Protein that carries oxygen in the blood.'
       },
       'cholesterol': {
         es: 'Colesterol: Grasa en la sangre. El colesterol total, HDL (bueno) y LDL (malo) ayudan a evaluar riesgo cardiovascular.',
@@ -191,8 +191,8 @@ class LabDocumentService {
         en: 'Creatinine: Muscle waste product. Indicates how well the kidneys are working.'
       },
       'triglycerides': {
-        es: 'Triglicéridos: Tipo de grasa en la sangre. Niveles altos aumentan riesgo de enfermedad cardíaca.',
-        en: 'Triglycerides: Type of fat in the blood. High levels increase risk of heart disease.'
+        es: 'Triglicéridos: Tipo de grasa en la sangre.',
+        en: 'Triglycerides: Type of fat in the blood.'
       },
       'tsh': {
         es: 'TSH (Hormona Estimulante de la Tiroides): Controla la producción de hormonas tiroideas. Indica función tiroidea.',
