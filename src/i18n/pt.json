@@ -1476,18 +1476,18 @@
     "updated": "Atualizado",
     "visible": "Visível",
     "weekend": "Fim de semana",
-  "work": "Trabalho",
-  "yes": "Sim",
-  "yesterday": "Ontem",
-  "warning": "Aviso",
-  "search": "Pesquisar",
-  "shared": "Compartilhado",
-  "professional": "Profissional",
-  "school": "Escola",
-  "travel": "Viagem",
-  "vacation": "Férias",
-  "weekday": "Dia da semana"
-},
+    "work": "Trabalho",
+    "yes": "Sim",
+    "yesterday": "Ontem",
+    "warning": "Aviso",
+    "search": "Pesquisar",
+    "shared": "Compartilhado",
+    "professional": "Profissional",
+    "school": "Escola",
+    "travel": "Viagem",
+    "vacation": "Férias",
+    "weekday": "Dia da semana"
+  },
   "healthProfile": {
     "title": "Health Profile",
     "settings": "Health Profile Settings",
@@ -1647,6 +1647,11 @@
         "createAccount": "Criar conta",
         "terms": "Termos",
         "privacy": "Privacidade"
+      },
+      "copy": {
+        "resetSent": {
+          "text175": "Verifique seu e-mail para obter instruções de redefinição de senha."
+        }
       }
     },
     "SignUpForm": {
@@ -1675,10 +1680,176 @@
       }
     },
     "MedicationRefillModal": {
-      "localeMap": "pt-BR"
+      "localeMap": "pt-BR",
+      "text541": "Preço aproximado",
+      "text544": "Sem preços recentes para este medicamento.",
+      "text546": "Referência nacional: sem dados para seu estado.",
+      "text550": "Não foi possível carregar preços. Por favor, tente novamente."
     },
     "SupplementRefillModal": {
-      "localeMap": "pt-BR"
+      "localeMap": "pt-BR",
+      "normalizeUnits": {
+        "unitTranslations": {
+          "caps": "cápsulas",
+          "cap": "cápsula",
+          "ampoules": "ampolas",
+          "ampoule": "ampola",
+          "amp": "ampola",
+          "vial": "frasco",
+          "viales": "frascos",
+          "frasco": "frasco",
+          "frascos": "frascos",
+          "tabletas": "comprimidos",
+          "tableta": "comprimido",
+          "pastillas": "pílulas",
+          "pastilla": "pílula",
+          "unidades": "unidades",
+          "unidad": "unidade",
+          "piezas": "peças",
+          "pieza": "peça",
+          "sobres": "sachês",
+          "sobre": "sachê",
+          "envases": "recipientes",
+          "envase": "recipiente",
+          "botellas": "garrafas",
+          "botella": "garrafa",
+          "container": "recipiente",
+          "containers": "recipientes",
+          "sachet": "sachê",
+          "sachets": "sachês",
+          "vials": "frascos"
+        }
+      }
+    },
+    "BrandIntro": {
+      "text40": "Pular introdução",
+      "text54": "Sua saúde, modo VIP.",
+      "text59": "Toque para continuar"
+    },
+    "ConsentChoices": {
+      "text22": "Ler documento"
+    },
+    "ConsentHost": {
+      "save": {
+        "text85": "Consentimento retirado. Os recursos de saúde estão bloqueados até que você consinta novamente."
+      },
+      "text93": "Privacidade",
+      "text94": "Voltar",
+      "text95": "Aviso de Privacidade / Política de Privacidade de Dados de Saúde do Consumidor",
+      "text98": "Não foi possível abrir o documento.",
+      "text100": "Termos e aviso são necessários para uma conta. O consentimento de saúde é necessário antes de usar os recursos de saúde.",
+      "text101": "Continuar",
+      "text102": "Retirar consentimento de saúde",
+      "text103": "Excluir Conta",
+      "text104": "Excluir conta e dados",
+      "text105": "Esta ação é permanente.",
+      "item0": {
+        "text": {
+          "text106": "Cancelar"
+        }
+      },
+      "item1": {
+        "text": {
+          "text106": "Excluir"
+        },
+        "onPress": {
+          "text108": "Conta excluída"
+        }
+      },
+      "text113": "Sair",
+      "text116": "Fechar"
+    },
+    "GoogleAuthButton": {
+      "text43": "Após fazer login, revise as escolhas de consentimento antes de criar seu perfil."
+    },
+    "LoginIntro": {
+      "text64": "Pular introdução",
+      "text74": "Toque para continuar"
+    },
+    "PremiumTabBar": {
+      "tabs": {
+        "item0": {
+          "item1": {
+            "text8": "Início"
+          }
+        },
+        "item1": {
+          "item1": {
+            "text8": "Medicamentos"
+          }
+        },
+        "item2": {
+          "item1": {
+            "text8": "Lembretes"
+          }
+        },
+        "item3": {
+          "item1": {
+            "text8": "Configurações"
+          }
+        }
+      }
+    },
+    "StripeCheckoutModal": {
+      "text131": "Atualizar para Pro",
+      "text156": "Continuar para o checkout"
+    },
+    "AppController": {
+      "S": {
+        "sObject": {
+          "cancelMembershipConfirm": {
+            "date": {
+              "text855": "fim do período pago"
+            }
+          }
+        }
+      },
+      "text2888": "Assistente de IA"
+    },
+    "AnimatedFloatingButton": {
+      "text33": "Assistente de IA"
+    },
+    "Pharmacies": {
+      "refreshPharmacies": {
+        "text32": "Ative os serviços de localização para encontrar farmácias.",
+        "text47": "Não foi possível carregar farmácias. Por favor, tente novamente."
+      },
+      "text128": "Farmácias próximas - INEGI DENUE / lojas monitoradas pela PROFECO"
+    },
+    "Settings": {
+      "text189": "Aviso de Privacidade / Política de Privacidade de Dados de Saúde do Consumidor"
+    },
+    "symptomInformation": {
+      "general": {
+        "text9": "Os sintomas podem ter diferentes causas. Esta informação geral não identifica condições nem substitui uma avaliação médica."
+      },
+      "whenToSeekCare": {
+        "item0": {
+          "text13": "Se esta for uma emergência, ligue para 911 agora.",
+          "text15": "Consulte um médico se os sintomas persistirem, piorarem ou preocuparem você. Se esta for uma emergência, ligue para 911 agora."
+        },
+        "item1": {
+          "item0": {
+            "text14": "Você também pode ligar para Línea de la Vida: 800 911 2000 (México)."
+          }
+        }
+      }
+    },
+    "appConstants": {
+      "STRINGS": {
+        "appearance": "Aparência"
+      }
+    },
+    "Reminders": {
+      "Reminders": {
+        "text1253": "Chega em 10 segundos.",
+        "text1254": "Erro no lembrete",
+        "text1256": "Lembrete de teste",
+        "text1326": "Não foi possível agendar lembrete"
+      }
+    },
+    "herbs": {
+      "HERBS": {}
     }
   },
   "ui": {
@@ -3187,5 +3358,74 @@
     "shareConsentMessage": "Você está prestes a compartilhar informações de saúde de um membro da família. Este consentimento é válido por 7 dias.",
     "grantConsent": "Eu Consinto em Compartilhar",
     "permShareDocuments": "Ver e adicionar documentos na pasta de Documentos Familiares deles"
+  },
+  "activityUS": {
+    "text1": "Conectar ao Health Connect",
+    "text2": "Instalar ou atualizar Health Connect",
+    "text3": "Abrir configurações do Health Connect",
+    "text4": "Verificar novamente",
+    "text5": "Voltar",
+    "text6": "Aceitar e continuar",
+    "text7": "Agora não",
+    "text8": "Desconectar Health Connect",
+    "text9": "Atividade e Dados de Saúde do Health Connect",
+    "text10": "Privacidade · Health Connect",
+    "text11": "Atividade e Saúde",
+    "text12": "Somente exibição; os dados permanecem no telefone. Essas leituras não estão incluídas em IA, pontuações e recomendações.",
+    "text13": "Lendo dados do telefone...",
+    "text14": "Passos hoje:",
+    "text15": "Passos dos últimos 7 dias",
+    "text16": "Datas mostrando 0 podem significar que não há registros sincronizados.",
+    "text17": "Frequência cardíaca em repouso média desta semana:",
+    "text18": "(Semana passada:",
+    "text19": "A semana vai de segunda a domingo; a semana atual inclui registros disponíveis até agora.",
+    "text20": "Frequência cardíaca",
+    "text21": "Registros de exercício:",
+    "text22": "Esta semana",
+    "text23": "Nenhum registro de exercício sincronizado esta semana.",
+    "text24": "Fonte: Health Connect",
+    "text25": "Atualizado:",
+    "text26": "Atualizar leituras",
+    "text27": "Privacidade e conexão",
+    "text28": "Consulte um médico para qualquer preocupação de saúde.",
+    "text29": "Nenhum registro de frequência cardíaca nos últimos 7 dias.",
+    "text30": "Últimos 7 dias; média horária; bpm",
+    "text31": "Não foi possível concluir a conexão. Você pode continuar usando o aplicativo e tentar novamente mais tarde.",
+    "text32": "Conexão, consentimento e dados importados localmente foram limpos.",
+    "text33": "Consentimento e dados locais foram limpos. Por favor, também revogue as permissões nas configurações do Health Connect.",
+    "text34": "Não foi possível limpar o consentimento local. Por favor, tente novamente e revogue as permissões no Health Connect.",
+    "text35": "Não foi possível abrir as configurações do Health Connect. Por favor, procure nas configurações do telefone.",
+    "text36": "Nenhum registro"
+  },
+  "usSmart": {
+    "title": "Lembretes Inteligentes",
+    "back": "Voltar",
+    "loading": "Carregando configurações...",
+    "error": "Não foi possível salvar as configurações. Por favor, tente novamente.",
+    "local": "Horários de lembrete e cálculos de estoque permanecem no telefone. Lembretes de localização e clima dos EUA estão desativados pendente revisão.",
+    "refill": "Lembretes de Estoque",
+    "refillDetail": "Usa a quantidade restante e unidades por dose que você inseriu. Esta é uma estimativa de estoque, não um conselho de medicação.",
+    "lead": "{{days}} dias antes de acabar",
+    "quantity": "Quantidade atual (opcional)",
+    "units": "Unidades por dose registrada (opcional)",
+    "timing": "Sugestões de Horário de Lembrete",
+    "timingDetail": "Mostra ajuste opcional de horário de lembrete após pelo menos cinco entradas registradas. Não altera a prescrição.",
+    "suggestion": "Suas entradas registradas para {{name}} geralmente ocorrem em {{time}}. Mover este lembrete? Por favor, confirme o horário da medicação com o farmacêutico.",
+    "accept": "Aceitar horário do lembrete",
+    "dismiss": "Ignorar",
+    "quiet": "Período Silencioso",
+    "from": "De (HH:mm)",
+    "until": "Até (HH:mm)",
+    "save": "Salvar período silencioso",
+    "invalidTime": "Por favor, insira o horário no formato HH:mm.",
+    "notifications": "Permissões de Notificação",
+    "permission": "Permitir notificações",
+    "denied": "Permissão de notificação não concedida. Você pode ativar nas configurações do sistema.",
+    "inventoryTitle": "Lembrete de Estoque",
+    "inventoryBody": "Com base nos seus registros, {{name}} durará aproximadamente {{days}} dias. Por favor, confirme a reaprovisão com sua farmácia."
+  },
+  "usOnboarding": {
+    "change": "Alterar",
+    "continue": "Continuar"
   }
 }

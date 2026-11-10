@@ -1472,18 +1472,18 @@
     "updated": "已更新",
     "visible": "可见",
     "weekend": "周末",
-  "work": "工作",
-  "yes": "是",
-  "yesterday": "昨天",
-  "warning": "警告",
-  "search": "搜索",
-  "shared": "共享",
-  "professional": "专业",
-  "school": "学校",
-  "travel": "旅行",
-  "vacation": "假期",
-  "weekday": "工作日"
-},
+    "work": "工作",
+    "yes": "是",
+    "yesterday": "昨天",
+    "warning": "警告",
+    "search": "搜索",
+    "shared": "共享",
+    "professional": "专业",
+    "school": "学校",
+    "travel": "旅行",
+    "vacation": "假期",
+    "weekday": "工作日"
+  },
   "subscriptionPlans": {
     "month": "每月 MXN $79",
     "year": "每年 MXN $699",
@@ -1845,6 +1845,11 @@
         "createAccount": "????",
         "terms": "??",
         "privacy": "??"
+      },
+      "copy": {
+        "resetSent": {
+          "text175": "请查看您的电子邮件以获取密码重置说明。"
+        }
       }
     },
     "SignUpForm": {
@@ -2323,7 +2328,8 @@
         "locationDenied": "位置被拒绝",
         "enableLocation": "启用位置以搜索附近商店。",
         "noTimingSet": "未设置时间",
-        "noSupplementsFound": "未找到补充剂。添加您的第一个补充剂开始使用。"
+        "noSupplementsFound": "未找到补充剂。添加您的第一个补充剂开始使用。",
+        "appearance": "外观"
       }
     },
     "appHelpers": {
@@ -2337,7 +2343,11 @@
       ]
     },
     "MedicationRefillModal": {
-      "localeMap": "zh-CN"
+      "localeMap": "zh-CN",
+      "text541": "大约价格",
+      "text544": "此药品暂无近期价格。",
+      "text546": "全国参考：您所在州无数据。",
+      "text550": "无法加载价格。请重试。"
     },
     "SupplementRefillModal": {
       "normalizeUnits": {
@@ -2357,10 +2367,160 @@
           "comprimidos": "片",
           "comprimido": "片",
           "capsulas": "胶囊",
-          "capsula": "胶囊"
+          "capsula": "胶囊",
+          "caps": "粒",
+          "cap": "粒",
+          "ampoules": "安瓶",
+          "ampoule": "安瓶",
+          "amp": "安瓶",
+          "vial": "小瓶",
+          "viales": "小瓶",
+          "frasco": "瓶",
+          "frascos": "瓶",
+          "tabletas": "片",
+          "tableta": "片",
+          "pastillas": "丸",
+          "pastilla": "丸",
+          "unidades": "单位",
+          "unidad": "单位",
+          "piezas": "件",
+          "pieza": "件",
+          "sobres": "小袋",
+          "sobre": "小袋",
+          "envases": "容器",
+          "envase": "容器",
+          "botellas": "瓶",
+          "botella": "瓶",
+          "container": "容器",
+          "containers": "容器",
+          "sachet": "小袋",
+          "sachets": "小袋",
+          "vials": "小瓶"
         }
       },
       "localeMap": "zh-CN"
+    },
+    "BrandIntro": {
+      "text40": "跳过介绍",
+      "text54": "您的健康，VIP模式。",
+      "text59": "点击继续"
+    },
+    "ConsentChoices": {
+      "text22": "阅读文档"
+    },
+    "ConsentHost": {
+      "save": {
+        "text85": "已撤回同意。健康功能已被阻止，直到您再次同意。"
+      },
+      "text93": "隐私",
+      "text94": "返回",
+      "text95": "隐私声明/消费者健康数据隐私政策",
+      "text98": "无法打开文档。",
+      "text100": "账户需要条款和声明。使用健康功能前需要健康同意。",
+      "text101": "继续",
+      "text102": "撤回健康同意",
+      "text103": "删除账户",
+      "text104": "删除账户和数据",
+      "text105": "此操作是永久性的。",
+      "item0": {
+        "text": {
+          "text106": "取消"
+        }
+      },
+      "item1": {
+        "text": {
+          "text106": "删除"
+        },
+        "onPress": {
+          "text108": "账户已删除"
+        }
+      },
+      "text113": "登出",
+      "text116": "关闭"
+    },
+    "GoogleAuthButton": {
+      "text43": "登录后，在创建个人资料之前请查看同意选择。"
+    },
+    "LoginIntro": {
+      "text64": "跳过介绍",
+      "text74": "点击继续"
+    },
+    "PremiumTabBar": {
+      "tabs": {
+        "item0": {
+          "item1": {
+            "text8": "首页"
+          }
+        },
+        "item1": {
+          "item1": {
+            "text8": "药品"
+          }
+        },
+        "item2": {
+          "item1": {
+            "text8": "提醒"
+          }
+        },
+        "item3": {
+          "item1": {
+            "text8": "设置"
+          }
+        }
+      }
+    },
+    "StripeCheckoutModal": {
+      "text131": "升级至专业版",
+      "text156": "继续结账"
+    },
+    "AppController": {
+      "S": {
+        "sObject": {
+          "cancelMembershipConfirm": {
+            "date": {
+              "text855": "付费期结束"
+            }
+          }
+        }
+      },
+      "text2888": "AI助手"
+    },
+    "AnimatedFloatingButton": {
+      "text33": "AI助手"
+    },
+    "Pharmacies": {
+      "refreshPharmacies": {
+        "text32": "启用定位服务以查找药房。",
+        "text47": "无法加载药房。请重试。"
+      },
+      "text128": "附近药房 - INEGI DENUE / PROFECO监测的商店"
+    },
+    "Settings": {
+      "text189": "隐私声明/消费者健康数据隐私政策"
+    },
+    "symptomInformation": {
+      "general": {
+        "text9": "症状可能有不同原因。此一般信息不识别病症或替代医疗评估。"
+      },
+      "whenToSeekCare": {
+        "item0": {
+          "text13": "如果这是紧急情况，请立即拨打911。",
+          "text15": "如果症状持续、恶化或令您担忧，请就医。如果这是紧急情况，请立即拨打911。"
+        },
+        "item1": {
+          "item0": {
+            "text14": "您也可以拨打生命热线：800 911 2000（墨西哥）。"
+          }
+        }
+      }
+    },
+    "Reminders": {
+      "Reminders": {
+        "text1253": "10秒后到达。",
+        "text1254": "提醒错误",
+        "text1256": "测试提醒",
+        "text1326": "无法安排提醒"
+      }
     }
   },
   "ui": {
