@@ -1531,6 +1531,138 @@
     },
     "SupplementRefillModal": {
       "localeMap": "fr-FR"
+    },
+    "BrandIntro": {
+      "text40": "Passer l'introduction",
+      "text54": "Votre santé, en mode VIP.",
+      "text59": "Appuyez pour continuer"
+    },
+    "ConsentChoices": {
+      "text22": "Lire le document"
+    },
+    "ConsentHost": {
+      "save": {
+        "text85": "Consentement retiré. Les fonctionnalités de santé sont bloquées jusqu'à ce que vous consentiez à nouveau."
+      },
+      "text93": "Confidentialité",
+      "text94": "Retour",
+      "text95": "Avis de confidentialité / Politique de confidentialité des données de santé des consommateurs",
+      "text98": "Impossible d'ouvrir le document.",
+      "text100": "Les conditions et l'avis sont requis pour un compte. Le consentement en matière de santé est nécessaire avant d'utiliser les fonctionnalités de santé.",
+      "text101": "Continuer",
+      "text102": "Retirer le consentement en matière de santé",
+      "text103": "Supprimer le compte",
+      "text104": "Supprimer le compte et les données",
+      "text105": "Cette action est permanente.",
+      "item0": {
+        "text": {
+          "text106": "Annuler"
+        }
+      },
+      "item1": {
+        "text": {
+          "text106": "Supprimer"
+        },
+        "onPress": {
+          "text108": "Compte supprimé"
+        }
+      },
+      "text113": "Se déconnecter",
+      "text116": "Fermer"
+    },
+    "GoogleAuthButton": {
+      "text43": "Après vous être connecté, révisez les choix de consentement avant que votre profil ne soit créé."
+    },
+    "LoginIntro": {
+      "text64": "Passer l'introduction",
+      "text74": "Appuyez pour continuer"
+    },
+    "PremiumTabBar": {
+      "tabs": {
+        "item0": {
+          "item1": {
+            "text8": "Accueil"
+          }
+        },
+        "item1": {
+          "item1": {
+            "text8": "Médicaments"
+          }
+        },
+        "item2": {
+          "item1": {
+            "text8": "Rappels"
+          }
+        },
+        "item3": {
+          "item1": {
+            "text8": "Paramètres"
+          }
+        }
+      }
+    },
+    "StripeCheckoutModal": {
+      "text131": "Passer à Pro",
+      "text156": "Continuer vers le paiement"
+    },
+    "AppController": {
+      "S": {
+        "sObject": {
+          "cancelMembershipConfirm": {
+            "date": {
+              "text855": "fin de la période payée"
+            }
+          }
+        }
+      },
+      "text2888": "Assistant IA"
+    },
+    "AnimatedFloatingButton": {
+      "text33": "Assistant IA"
+    },
+    "Pharmacies": {
+      "refreshPharmacies": {
+        "text32": "Activez les services de localisation pour trouver des pharmacies.",
+        "text47": "Impossible de charger les pharmacies. Veuillez réessayer."
+      },
+      "text128": "Pharmacies à proximité - INEGI DENUE / magasins surveillés par PROFECO"
+    },
+    "Settings": {
+      "text189": "Avis de confidentialité / Politique de confidentialité des données de santé des consommateurs"
+    },
+    "symptomInformation": {
+      "general": {
+        "text9": "Les symptômes peuvent avoir différentes causes. Ces informations générales n'identifient pas les conditions et ne remplacent pas une évaluation médicale."
+      },
+      "whenToSeekCare": {
+        "item0": {
+          "text13": "S'il s'agit d'une urgence, appelez le 911 maintenant.",
+          "text15": "Consultez un médecin si les symptômes persistent, s'aggravent ou vous préoccupent. S'il s'agit d'une urgence, appelez le 911 maintenant."
+        },
+        "item1": {
+          "item0": {
+            "text14": "Vous pouvez également appeler Línea de la Vida : 800 911 2000 (Mexique)."
+          }
+        }
+      }
+    },
+    "appHelpers": {
+      "catExpressions": [
+        "Ronronne...",
+        "Miaou !",
+        "🐱",
+        "Purrfait !",
+        "Félinement parlant...",
+        "Catégoriquement parlant..."
+      ]
+    },
+    "Reminders": {
+      "Reminders": {
+        "text1253": "Arrive dans 10 secondes.",
+        "text1254": "Erreur de rappel",
+        "text1256": "Rappel de test",
+        "text1326": "Impossible de planifier le rappel"
+      }
     }
   },
   "ui": {

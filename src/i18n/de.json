@@ -1445,6 +1445,138 @@
     },
     "SupplementRefillModal": {
       "localeMap": "de-DE"
+    },
+    "BrandIntro": {
+      "text40": "Einführung überspringen",
+      "text54": "Ihre Gesundheit, VIP-Modus.",
+      "text59": "Tippen Sie, um fortzufahren"
+    },
+    "ConsentChoices": {
+      "text22": "Dokument lesen"
+    },
+    "ConsentHost": {
+      "save": {
+        "text85": "Einwilligung widerrufen. Gesundheitsfunktionen sind blockiert, bis Sie erneut zustimmen."
+      },
+      "text93": "Datenschutz",
+      "text94": "Zurück",
+      "text95": "Datenschutzhinweis / Datenschutzrichtlinie für Verbrauchergesundheitsdaten",
+      "text98": "Dokument konnte nicht geöffnet werden.",
+      "text100": "Nutzungsbedingungen und Hinweis sind für ein Konto erforderlich. Die Gesundheitseinwilligung ist vor der Nutzung von Gesundheitsfunktionen erforderlich.",
+      "text101": "Weiter",
+      "text102": "Gesundheitseinwilligung widerrufen",
+      "text103": "Konto löschen",
+      "text104": "Konto und Daten löschen",
+      "text105": "Diese Aktion ist dauerhaft.",
+      "item0": {
+        "text": {
+          "text106": "Abbrechen"
+        }
+      },
+      "item1": {
+        "text": {
+          "text106": "Löschen"
+        },
+        "onPress": {
+          "text108": "Konto gelöscht"
+        }
+      },
+      "text113": "Abmelden",
+      "text116": "Schließen"
+    },
+    "GoogleAuthButton": {
+      "text43": "Überprüfen Sie nach der Anmeldung die Einwilligungsoptionen, bevor Ihr Profil erstellt wird."
+    },
+    "LoginIntro": {
+      "text64": "Einführung überspringen",
+      "text74": "Tippen Sie, um fortzufahren"
+    },
+    "PremiumTabBar": {
+      "tabs": {
+        "item0": {
+          "item1": {
+            "text8": "Startseite"
+          }
+        },
+        "item1": {
+          "item1": {
+            "text8": "Medikamente"
+          }
+        },
+        "item2": {
+          "item1": {
+            "text8": "Erinnerungen"
+          }
+        },
+        "item3": {
+          "item1": {
+            "text8": "Einstellungen"
+          }
+        }
+      }
+    },
+    "StripeCheckoutModal": {
+      "text131": "Upgrade auf Pro",
+      "text156": "Zur Kasse fortfahren"
+    },
+    "AppController": {
+      "S": {
+        "sObject": {
+          "cancelMembershipConfirm": {
+            "date": {
+              "text855": "Ende des bezahlten Zeitraums"
+            }
+          }
+        }
+      },
+      "text2888": "KI-Assistent"
+    },
+    "AnimatedFloatingButton": {
+      "text33": "KI-Assistent"
+    },
+    "Pharmacies": {
+      "refreshPharmacies": {
+        "text32": "Aktivieren Sie die Standortdienste, um Apotheken zu finden.",
+        "text47": "Apotheken konnten nicht geladen werden. Bitte versuchen Sie es erneut."
+      },
+      "text128": "Apotheken in der Nähe - INEGI DENUE / von PROFECO überwachte Geschäfte"
+    },
+    "Settings": {
+      "text189": "Datenschutzhinweis / Datenschutzrichtlinie für Verbrauchergesundheitsdaten"
+    },
+    "symptomInformation": {
+      "general": {
+        "text9": "Symptome können verschiedene Ursachen haben. Diese allgemeinen Informationen identifizieren keine Erkrankungen und ersetzen keine medizinische Beurteilung."
+      },
+      "whenToSeekCare": {
+        "item0": {
+          "text13": "Falls dies ein Notfall ist, rufen Sie jetzt 911 an.",
+          "text15": "Suchen Sie einen Arzt auf, wenn die Symptome anhalten, sich verschlimmern oder Sie beunruhigen. Falls dies ein Notfall ist, rufen Sie jetzt 911 an."
+        },
+        "item1": {
+          "item0": {
+            "text14": "Sie können auch Línea de la Vida anrufen: 800 911 2000 (Mexiko)."
+          }
+        }
+      }
+    },
+    "appHelpers": {
+      "catExpressions": [
+        "Schnurr...",
+        "Miau!",
+        "🐱",
+        "Schnurr-fekt!",
+        "Katzenhaft gesprochen...",
+        "Kategor-isch gesprochen..."
+      ]
+    },
+    "Reminders": {
+      "Reminders": {
+        "text1253": "Kommt in 10 Sekunden.",
+        "text1254": "Erinnerungsfehler",
+        "text1256": "Testerinnerung",
+        "text1326": "Erinnerung konnte nicht geplant werden"
+      }
     }
   },
   "ui": {
