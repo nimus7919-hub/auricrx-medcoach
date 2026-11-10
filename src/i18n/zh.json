@@ -340,7 +340,17 @@
     "disclaimer": "AI 助手。我不是医生或医疗专业人员。仅提供一般信息。",
     "emergencyBanner": "可能是紧急情况：请立即拨打 911。",
     "selfHarmBanner": "如果你可能伤害自己，请拨打 911 或生命热线 Línea de la Vida：800 911 2000。",
-    "medicationWarning": "未经医生或药剂师同意，请勿更改或停用任何药物。"
+    "medicationWarning": "未经医生或药剂师同意，请勿更改或停用任何药物。",
+    "recordSymptom": "记录症状",
+    "insightsHelp": "关于洞察",
+    "insightsEmptyHelp": "可用的洞察将显示在此处。您可以从追踪器开始记录症状。",
+    "unavailable": "Alfred 目前不可用。请稍后重试。",
+    "thinking": "AI 正在思考…",
+    "send": "发送",
+    "fastingProfileRestricted": "您的禁食档案受限于隐私设置。AI 不会在分析中包含它。",
+    "referencePriceNotice": "价格仅供参考，可能过时。实际费用取决于您的药房和保险。",
+    "aiHealthAssistant": "AI 健康信息助手",
+    "intelligentHealthcareFeatures": "AI 工具用于组织您的健康信息。它们不能替代您的医生。"
   },
   "healthProfile": {
     "title": "健康档案",

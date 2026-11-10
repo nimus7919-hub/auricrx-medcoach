@@ -340,7 +340,17 @@
     "disclaimer": "KI-Assistent. Ich bin weder Arzt noch medizinisches Fachpersonal. Nur allgemeine Informationen.",
     "emergencyBanner": "Möglicher Notfall: Rufe jetzt 911 an.",
     "selfHarmBanner": "Bei Selbstverletzungsgefahr: 911 oder Línea de la Vida: 800 911 2000 anrufen.",
-    "medicationWarning": "Ändere oder beende keine Medikamente, ohne mit deinem Arzt oder Apotheker zu sprechen."
+    "medicationWarning": "Ändere oder beende keine Medikamente, ohne mit deinem Arzt oder Apotheker zu sprechen.",
+    "recordSymptom": "Symptom erfassen",
+    "insightsHelp": "Über Einblicke",
+    "insightsEmptyHelp": "Verfügbare Einblicke werden hier angezeigt. Sie können damit beginnen, Symptome im Tracker zu erfassen.",
+    "unavailable": "Alfred ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
+    "thinking": "KI denkt nach...",
+    "send": "Senden",
+    "fastingProfileRestricted": "Ihr Fastenprofil ist durch Datenschutzeinstellungen eingeschränkt. Die KI wird es nicht in die Analyse einbeziehen.",
+    "referencePriceNotice": "Preise dienen nur als Referenz und können veraltet sein. Ihre tatsächlichen Kosten hängen von Ihrer Apotheke und Versicherung ab.",
+    "aiHealthAssistant": "KI-Gesundheitsinformationsassistent",
+    "intelligentHealthcareFeatures": "KI-Tools zur Organisation Ihrer Gesundheitsinformationen. Sie ersetzen nicht Ihren Arzt."
   },
   "healthProfile": {
     "title": "Gesundheitsprofil",

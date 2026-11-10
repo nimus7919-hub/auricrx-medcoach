@@ -340,7 +340,17 @@
     "disclaimer": "Assistant IA. Je ne suis ni médecin ni professionnel de santé. Informations générales uniquement.",
     "emergencyBanner": "Urgence possible : appelez le 911 maintenant.",
     "selfHarmBanner": "Si vous risquez de vous faire du mal, appelez le 911 ou Línea de la Vida : 800 911 2000.",
-    "medicationWarning": "Ne modifiez ni n’arrêtez aucun médicament sans en parler à votre médecin ou pharmacien."
+    "medicationWarning": "Ne modifiez ni n’arrêtez aucun médicament sans en parler à votre médecin ou pharmacien.",
+    "recordSymptom": "Enregistrer un symptôme",
+    "insightsHelp": "À propos des insights",
+    "insightsEmptyHelp": "Les insights disponibles apparaîtront ici. Vous pouvez commencer par enregistrer des symptômes dans le tracker.",
+    "unavailable": "Alfred est indisponible pour le moment. Veuillez réessayer plus tard.",
+    "thinking": "L'IA réfléchit...",
+    "send": "Envoyer",
+    "fastingProfileRestricted": "Votre profil de jeûne est restreint par les paramètres de confidentialité. L'IA ne l'inclura pas dans l'analyse.",
+    "referencePriceNotice": "Les prix sont à titre indicatif uniquement et peuvent être obsolètes. Votre coût réel dépend de votre pharmacie et de votre assurance.",
+    "aiHealthAssistant": "Assistant IA d'informations santé",
+    "intelligentHealthcareFeatures": "Outils IA pour organiser vos informations de santé. Ils ne remplacent pas votre médecin."
   },
   "medicalDocuments": {
     "title": "Documents Médicaux",
