@@ -236,6 +236,39 @@ class FamilyCircleService {
     await this.deleteMember(memberId);
     // Note: This will also stop alerts as member is removed
   }
+
+  // F7: Schedule caregiver alert with compliant notification copy
+  async scheduleCaregiverAlert(
+    memberId: string,
+    memberName: string,
+    medicationName: string,
+    doseTime: string
+  ): Promise<void> {
+    // TODO: Integrate with expo-notifications
+    // F7 Block C: Minimal lock screen, detailed in-app
+    
+    const lockScreenTitle = `Family Circle: recordatorio sobre ${memberName}`;
+    const lockScreenBody = `${memberName} - recordatorio`;
+    
+    const inAppTitle = `Family Circle: recordatorio sobre ${memberName}`;
+    const inAppBody = `La dosis de las ${doseTime} de ${memberName} todavía no está marcada como tomada.`;
+    const inAppFooter = `Este es un recordatorio automático de la app, no una alerta médica. Puede llegar tarde o no llegar (por ejemplo, sin internet o con las notificaciones apagadas). Si crees que alguien necesita ayuda urgente, llama al 911.`;
+    
+    console.log('F7 Caregiver alert scheduled:', {
+      lockScreenTitle,
+      lockScreenBody,
+      inAppTitle,
+      inAppBody,
+      inAppFooter,
+      medication: medicationName,
+      member: memberName,
+    });
+    
+    // TODO: When implementing notifications:
+    // - Lock screen: Use lockScreenTitle + lockScreenBody (minimal)
+    // - In-app detail: Use inAppTitle + inAppBody + inAppFooter
+    // - Include alertDisclaimer from i18n when showing in-app
+  }
 }
 
 export default FamilyCircleService;
