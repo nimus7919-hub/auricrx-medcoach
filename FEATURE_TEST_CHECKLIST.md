@@ -355,6 +355,79 @@
 
 ---
 
+## Family Documents (Pro-only)
+
+### Test Steps:
+1. **Access Family Documents**
+   - Navigate to Family Circle → Family Documents (or Dashboard → Family Documents if wired)
+   - ✅ FamilyDocumentsScreen opens
+   - ✅ Description: "Each family member has their own document folder"
+
+2. **Select Family Member**
+   - ✅ List shows all family members
+   - Tap on a member
+   - ✅ Member's document folder opens
+
+3. **Add Document (with Premium)**
+   - Ensure Premium is active
+   - Ensure shareDocuments permission is granted (for invited adults)
+   - Tap "Add Document"
+   - ✅ Photo picker opens
+   - Select a photo
+   - ✅ Document added successfully
+   - ✅ Document appears in member's folder
+
+4. **View Documents**
+   - ✅ Documents display with category icons (prescription, lab result, vaccine, insurance, other)
+   - ✅ Each document shows: name, category, date
+   - ✅ Theme colors applied (navy-and-gold, Rose Gold, Sea Glass)
+
+5. **Delete Document**
+   - Tap delete icon on any document
+   - ✅ Confirmation dialog appears
+   - Confirm
+   - ✅ Document deleted
+
+6. **Export Documents**
+   - Tap "Export" button
+   - ✅ Success message
+   - ✅ Documents exported as JSON
+
+7. **Permission Gating: shareDocuments OFF**
+   - Family member with shareDocuments = false
+   - Open their folder
+   - ✅ "Read-only access" notice visible
+   - ✅ "Add Document" button NOT visible
+   - ✅ Can still view, export, delete existing documents
+
+8. **Read-Only After Trial Expires**
+   - Let trial expire (or mock expired state)
+   - Open any member's folder
+   - ✅ "Premium expired. You can view, export, and delete documents, but cannot add new ones."
+   - ✅ Cannot add new documents
+   - ✅ Can view, export, delete existing ones
+
+9. **Child Documents**
+   - Add child profile member
+   - Open child's document folder
+   - ✅ Documents can be added (guardian manages)
+   - ✅ Child documents excluded from AI (per existing F6 rule)
+   - ✅ Child documents excluded from summaries (per existing F6 rule)
+
+10. **Device-Only Adult**
+    - Add device-only adult member
+    - ✅ Can add documents (covered by attestation)
+    - ✅ No shareDocuments permission required (managed by attestation)
+
+11. **Premium Gate**
+    - Access Family Documents without Premium
+    - ✅ PremiumUpgradeScreen appears
+    - ✅ Feature: "familyDocuments"
+
+**Expected Result**: ✅ Pro-only during trial, read-only after expiry, shareDocuments permission enforced
+
+---
+
 ## Free Tier Verification
 
 ### Test Steps:
@@ -426,8 +499,9 @@
 - [ ] F6: Child profile with guardian attestation
 - [ ] F7: Caregiver alert copy
 - [ ] F8: Share preview with warning
+- [ ] Family Documents: Pro-only, read-only after trial, shareDocuments permission
 - [ ] Free tier: 1 member limit enforced
 - [ ] Premium gates: All features gated correctly
 - [ ] Themes: All screens adapt
 
-**Total Test Cases**: 14 major features × 3 themes = 42 test scenarios
+**Total Test Cases**: 15 major features × 3 themes = 45+ test scenarios
