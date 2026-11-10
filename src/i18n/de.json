@@ -1418,5 +1418,52 @@
     "deleteCloudSuccess": "Alle Cloud-Kopien wurden gelöscht.",
     "deleteCloudNotImplemented": "Cloud-Löschung noch nicht implementiert. Dies ist ein TODO für die Backend-Integration.",
     "disclaimer": "Lokale Dokumente funktionieren immer, auch ohne Cloud-Backup. Cloud-Backup ist optional."
+  },
+  "navigation": {
+    "pressBackAgainToExit": "Drücken Sie erneut zurück, um zu beenden"
+  },
+  "subscription": {
+    "proTitle": "AuricRX Pro",
+    "includes": "Enthält: KI-Gesundheitsinformationsassistent, Family Circle, Apotheken- und Laborsuche, Arzneimittelsuche, optionales Cloud-Backup und Gerätesynchronisierung.",
+    "trialPrice": "14 Tage kostenlos. Dann {{price}} pro Monat (MXN $79.00, MwSt. inbegriffen).",
+    "autoCharge": "Sie werden automatisch jeden Monat ab {{date}} über Ihr {{store}}-Konto belastet, bis Sie kündigen.",
+    "reminderNotice": "Wir erinnern Sie mindestens 5 Tage vor der ersten Abbuchung und vor jeder Verlängerung.",
+    "cancelAnytime": "Jederzeit kündbar unter {{cancelPath}} oder in Einstellungen > Mein Plan in der App. Wenn Sie während der Testphase kündigen, werden Ihnen keine Kosten berechnet.",
+    "freeForever": "Ohne Pro erhalten Sie weiterhin kostenlos: Medikamenten- und Gesundheitserinnerungen, Gesundheitstagebuch, Pflanzenbibliothek, auf Ihrem Telefon gespeicherte Dokumente, und Sie können Ihre Daten jederzeit ansehen, exportieren und löschen.",
+    "startTrial": "14 Tage kostenlos starten",
+    "continueFree": "Mit kostenlosem Plan fortfahren",
+    "terms": "Bedingungen",
+    "privacyNotice": "Datenschutzhinweis",
+    "restorePurchases": "Käufe wiederherstellen"
+  },
+  "renewalNotices": {
+    "trialEnding": "Ihre kostenlose Pro-Testversion endet am {{date}}. An diesem Tag werden Ihnen {{price}} (MwSt. inbegriffen) auf Ihr {{store}}-Konto berechnet, dann jeden Monat. Wenn Sie nicht fortfahren möchten, kündigen Sie vor dem {{date}}: {{link}}.",
+    "renewal": "Ihr Pro-Plan verlängert sich am {{date}} für {{price}} (MwSt. inbegriffen). Sie können ohne Strafe kündigen: {{link}}."
+  },
+  "plantBadges": {
+    "evidenceLimited": "Evidenz: begrenzt",
+    "evidenceInsufficient": "Evidenz: unzureichend",
+    "evidenceMixed": "Evidenz: gemischt",
+    "fewHumanStudies": "Wenige Humanstudien",
+    "footer": "Laut {{source}}, überprüft am {{date}}. Evidenz beschreibt, was untersucht wurde, nicht ob es für Sie funktioniert. Pflanzen und Nahrungsergänzungsmittel können mit Arzneimitteln interagieren; fragen Sie Ihren Arzt oder Apotheker."
+  },
+  "labOrganizer": {
+    "banner": "Hier können Sie Ihre Ergebnisse speichern und organisieren. Die App interpretiert keine Ergebnisse und sagt Ihnen nicht, ob ein Wert normal ist. Bringen Sie sie zu Ihrem Arzt."
+  },
+  "usLegal": {
+    "global": "AuricRX MedCoach bietet allgemeine Gesundheitsinformationen und Erinnerungen. Es ist kein Medizinprodukt und diagnostiziert, behandelt, heilt oder verhindert keine Krankheit. Es ist kein Ersatz für Ratschläge Ihres Arztes oder Apothekers. Im Notfall rufen Sie den Notruf 112.",
+    "ai": "KI-Assistent, kein Arzt oder Mensch. Antworten können falsch sein. Konsultieren Sie Ihren Arzt oder Apotheker, bevor Sie ein Medikament ändern.",
+    "crisis": "Wenn Sie glauben, einen medizinischen Notfall zu haben, rufen Sie jetzt 112 an. Wenn Sie an Suizid denken oder sich in emotionaler Not befinden, rufen Sie die Telefonseelsorge 0800 111 0 111 oder 0800 111 0 222 an.",
+    "interactions": "Informationen von [DailyMed/NLM], zuletzt aktualisiert [Datum]. Keine vollständige Liste. Kein Ergebnis bedeutet nicht, dass eine Kombination sicher ist. Fragen Sie Ihren Apotheker.",
+    "herbs": "Kräuter und Nahrungsergänzungsmittel werden von der FDA nicht auf Sicherheit oder Wirksamkeit überprüft. Die Evidenz ist begrenzt. Informieren Sie Ihren Arzt oder Apotheker über jedes Nahrungsergänzungsmittel, das Sie einnehmen.",
+    "wearables": "Nur für allgemeines Wohlbefinden. Diese Zahlen sind keine medizinischen Messungen und werden nicht auf Probleme überprüft. Sprechen Sie mit einem Arzt über gesundheitliche Bedenken.",
+    "recalls": "Berichte über unerwünschte Ereignisse sind nicht verifiziert und beweisen nicht, dass ein Medikament ein Problem verursacht hat. Quelle: openFDA. Setzen Sie ein Medikament nicht ohne Rücksprache mit Ihrem Arzt ab.",
+    "prices": "Preise sind Schätzungen nur zur Information, können veraltet sein und stellen kein Angebot dar. Ihre tatsächlichen Kosten hängen von Ihrer Apotheke, Versicherung und Menge ab. Bestätigen Sie mit der Apotheke.",
+    "nadac": "NADAC ist der Durchschnittspreis, den Apotheken für den Kauf eines Medikaments zahlen, wöchentlich veröffentlicht von CMS (data.medicaid.gov). Es ist nicht das, was Sie in der Apotheke zahlen, und enthält keine Abgabegebühren oder Versicherung. CMS befürwortet diese App nicht. Daten Stand [Datum].",
+    "nlm": "Dieses Produkt verwendet öffentlich verfügbare Daten mit freundlicher Genehmigung der U.S. National Library of Medicine (NLM), National Institutes of Health, Department of Health and Human Services; NLM ist nicht für das Produkt verantwortlich und befürwortet oder empfiehlt dieses oder ein anderes Produkt nicht.",
+    "fda": "Daten bereitgestellt von der U.S. Food and Drug Administration (https://open.fda.gov). FDA befürwortet diese App nicht.",
+    "dailymed": "Kennzeichnungsinformationen von DailyMed (dailymed.nlm.nih.gov), U.S. National Library of Medicine. Zuletzt aktualisiert [Datum].",
+    "nppes": "Apothekenlisten aus dem CMS NPPES NPI Registry; Informationen werden von den Apotheken bereitgestellt und können veraltet sein.",
+    "costplus": "Cost Plus Drugs ist eine Marke seines Eigentümers; AuricRX ist nicht verbunden."
   }
 }

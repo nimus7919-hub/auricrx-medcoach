@@ -1529,5 +1529,21 @@
     "deleteCloudSuccess": "Todas as cópias na nuvem foram excluídas.",
     "deleteCloudNotImplemented": "Exclusão na nuvem ainda não implementada. Isto é uma TAREFA pendente para integração de backend.",
     "disclaimer": "Documentos locais sempre funcionam mesmo sem backup na nuvem. O backup na nuvem é opcional."
+  },
+  "usLegal": {
+    "global": "O AuricRX MedCoach fornece informações gerais de saúde e lembretes. Não é um dispositivo médico e não diagnostica, trata, cura ou previne nenhuma doença. Não substitui o conselho do seu médico ou farmacêutico. Em caso de emergência, ligue para 190.",
+    "ai": "Assistente de IA, não um médico ou humano. As respostas podem estar erradas. Consulte seu médico ou farmacêutico antes de alterar qualquer medicação.",
+    "crisis": "Se você acha que está tendo uma emergência médica, ligue para 192 agora. Se você está pensando em suicídio ou em sofrimento emocional, ligue para 188 (CVV). Para possível envenenamento ou overdose, ligue para o Centro de Informações Toxicológicas.",
+    "interactions": "Informações de [DailyMed/NLM], última atualização [data]. Não é uma lista completa. Nenhum resultado não significa que uma combinação é segura. Pergunte ao seu farmacêutico.",
+    "herbs": "Ervas e suplementos não são revisados pela FDA quanto à segurança ou eficácia. A evidência é limitada. Informe seu médico ou farmacêutico sobre cada suplemento que você toma.",
+    "wearables": "Apenas para bem-estar geral. Esses números não são medições médicas e não são verificados quanto a problemas. Fale com um médico sobre qualquer preocupação de saúde.",
+    "recalls": "Relatórios de eventos adversos não são verificados e não provam que um medicamento causou um problema. Fonte: openFDA. Não pare um medicamento sem falar com seu médico.",
+    "prices": "Os preços são estimativas apenas para informação, podem estar desatualizados e não são uma oferta. Seu custo real depende da sua farmácia, seguro e quantidade. Confirme com a farmácia.",
+    "nadac": "NADAC é o preço médio que as farmácias pagam para comprar um medicamento, publicado semanalmente pelo CMS (data.medicaid.gov). Não é o que você pagará na farmácia e não inclui taxas de dispensação ou seguro. CMS não endossa este aplicativo. Dados de [data].",
+    "nlm": "Este produto usa dados disponíveis publicamente cortesia da U.S. National Library of Medicine (NLM), National Institutes of Health, Department of Health and Human Services; NLM não é responsável pelo produto e não endossa ou recomenda este ou qualquer outro produto.",
+    "fda": "Dados fornecidos pela U.S. Food and Drug Administration (https://open.fda.gov). FDA não endossa este aplicativo.",
+    "dailymed": "Informações de bula do DailyMed (dailymed.nlm.nih.gov), U.S. National Library of Medicine. Última atualização [data].",
+    "nppes": "Listagens de farmácias do CMS NPPES NPI Registry; as informações são fornecidas pelas farmácias e podem estar desatualizadas.",
+    "costplus": "Cost Plus Drugs é uma marca registrada de seu proprietário; AuricRX não é afiliada."
   }
 }
