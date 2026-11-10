@@ -2153,6 +2153,39 @@
       "usSmart.inventoryBody",
       "usOnboarding.change",
       "usOnboarding.continue",
+      "cloudBackup.title",
+      "cloudBackup.premiumFeature",
+      "cloudBackup.premiumRequired",
+      "cloudBackup.optInTitle",
+      "cloudBackup.optInDescription",
+      "cloudBackup.whatStored",
+      "cloudBackup.whatStoredText",
+      "cloudBackup.howProtect",
+      "cloudBackup.howProtectText",
+      "cloudBackup.yourChoice",
+      "cloudBackup.yourChoiceText",
+      "cloudBackup.yourRights",
+      "cloudBackup.yourRightsText",
+      "cloudBackup.consentCheckbox",
+      "cloudBackup.enableButton",
+      "cloudBackup.enableButtonHelper",
+      "cloudBackup.notNow",
+      "cloudBackup.lawfulRiskNote",
+      "cloudBackup.disableTitle",
+      "cloudBackup.disableMessage",
+      "cloudBackup.deleteCloudCheckbox",
+      "cloudBackup.turnOff",
+      "cloudBackup.cancel",
+      "cloudBackup.reauthRequired",
+      "cloudBackup.reauthFailed",
+      "cloudBackup.consentGranted",
+      "cloudBackup.consentMessage",
+      "cloudBackup.deleteCloudDescription",
+      "cloudBackup.deleteCloudButton",
+      "cloudBackup.deleteCloudTitle",
+      "cloudBackup.deleteCloudSuccess",
+      "cloudBackup.deleteCloudNotImplemented",
+      "cloudBackup.disclaimer",
       "familyCircle.title",
       "familyCircle.freeTier",
       "familyCircle.upgradeToPro",
@@ -4450,6 +4483,39 @@
       "usSmart.inventoryBody",
       "usOnboarding.change",
       "usOnboarding.continue",
+      "cloudBackup.title",
+      "cloudBackup.premiumFeature",
+      "cloudBackup.premiumRequired",
+      "cloudBackup.optInTitle",
+      "cloudBackup.optInDescription",
+      "cloudBackup.whatStored",
+      "cloudBackup.whatStoredText",
+      "cloudBackup.howProtect",
+      "cloudBackup.howProtectText",
+      "cloudBackup.yourChoice",
+      "cloudBackup.yourChoiceText",
+      "cloudBackup.yourRights",
+      "cloudBackup.yourRightsText",
+      "cloudBackup.consentCheckbox",
+      "cloudBackup.enableButton",
+      "cloudBackup.enableButtonHelper",
+      "cloudBackup.notNow",
+      "cloudBackup.lawfulRiskNote",
+      "cloudBackup.disableTitle",
+      "cloudBackup.disableMessage",
+      "cloudBackup.deleteCloudCheckbox",
+      "cloudBackup.turnOff",
+      "cloudBackup.cancel",
+      "cloudBackup.reauthRequired",
+      "cloudBackup.reauthFailed",
+      "cloudBackup.consentGranted",
+      "cloudBackup.consentMessage",
+      "cloudBackup.deleteCloudDescription",
+      "cloudBackup.deleteCloudButton",
+      "cloudBackup.deleteCloudTitle",
+      "cloudBackup.deleteCloudSuccess",
+      "cloudBackup.deleteCloudNotImplemented",
+      "cloudBackup.disclaimer",
       "familyCircle.title",
       "familyCircle.freeTier",
       "familyCircle.upgradeToPro",
@@ -6750,6 +6816,39 @@
       "usSmart.inventoryBody",
       "usOnboarding.change",
       "usOnboarding.continue",
+      "cloudBackup.title",
+      "cloudBackup.premiumFeature",
+      "cloudBackup.premiumRequired",
+      "cloudBackup.optInTitle",
+      "cloudBackup.optInDescription",
+      "cloudBackup.whatStored",
+      "cloudBackup.whatStoredText",
+      "cloudBackup.howProtect",
+      "cloudBackup.howProtectText",
+      "cloudBackup.yourChoice",
+      "cloudBackup.yourChoiceText",
+      "cloudBackup.yourRights",
+      "cloudBackup.yourRightsText",
+      "cloudBackup.consentCheckbox",
+      "cloudBackup.enableButton",
+      "cloudBackup.enableButtonHelper",
+      "cloudBackup.notNow",
+      "cloudBackup.lawfulRiskNote",
+      "cloudBackup.disableTitle",
+      "cloudBackup.disableMessage",
+      "cloudBackup.deleteCloudCheckbox",
+      "cloudBackup.turnOff",
+      "cloudBackup.cancel",
+      "cloudBackup.reauthRequired",
+      "cloudBackup.reauthFailed",
+      "cloudBackup.consentGranted",
+      "cloudBackup.consentMessage",
+      "cloudBackup.deleteCloudDescription",
+      "cloudBackup.deleteCloudButton",
+      "cloudBackup.deleteCloudTitle",
+      "cloudBackup.deleteCloudSuccess",
+      "cloudBackup.deleteCloudNotImplemented",
+      "cloudBackup.disclaimer",
       "familyCircle.title",
       "familyCircle.freeTier",
       "familyCircle.upgradeToPro",
@@ -8362,6 +8461,39 @@
       "region.title",
       "region.mx",
       "region.us",
+      "cloudBackup.title",
+      "cloudBackup.premiumFeature",
+      "cloudBackup.premiumRequired",
+      "cloudBackup.optInTitle",
+      "cloudBackup.optInDescription",
+      "cloudBackup.whatStored",
+      "cloudBackup.whatStoredText",
+      "cloudBackup.howProtect",
+      "cloudBackup.howProtectText",
+      "cloudBackup.yourChoice",
+      "cloudBackup.yourChoiceText",
+      "cloudBackup.yourRights",
+      "cloudBackup.yourRightsText",
+      "cloudBackup.consentCheckbox",
+      "cloudBackup.enableButton",
+      "cloudBackup.enableButtonHelper",
+      "cloudBackup.notNow",
+      "cloudBackup.lawfulRiskNote",
+      "cloudBackup.disableTitle",
+      "cloudBackup.disableMessage",
+      "cloudBackup.deleteCloudCheckbox",
+      "cloudBackup.turnOff",
+      "cloudBackup.cancel",
+      "cloudBackup.reauthRequired",
+      "cloudBackup.reauthFailed",
+      "cloudBackup.consentGranted",
+      "cloudBackup.consentMessage",
+      "cloudBackup.deleteCloudDescription",
+      "cloudBackup.deleteCloudButton",
+      "cloudBackup.deleteCloudTitle",
+      "cloudBackup.deleteCloudSuccess",
+      "cloudBackup.deleteCloudNotImplemented",
+      "cloudBackup.disclaimer",
       "familyCircle.title",
       "familyCircle.freeTier",
       "familyCircle.upgradeToPro",
@@ -8518,38 +8650,7 @@
       "premiumUpgrade.lab.heroTitle",
       "premiumUpgrade.lab.heroSubtitle",
       "premiumUpgrade.general.heroTitle",
-      "premiumUpgrade.general.heroSubtitle",
-      "cloudBackup.title",
-      "cloudBackup.premiumFeature",
-      "cloudBackup.premiumRequired",
-      "cloudBackup.whatIsIt",
-      "cloudBackup.description",
-      "cloudBackup.enableTitle",
-      "cloudBackup.enableDescription",
-      "cloudBackup.consentTitle",
-      "cloudBackup.consentMessage",
-      "cloudBackup.enableBackup",
-      "cloudBackup.disableTitle",
-      "cloudBackup.disableMessage",
-      "cloudBackup.keepDisabled",
-      "cloudBackup.enabled",
-      "cloudBackup.enabledMessage",
-      "cloudBackup.status",
-      "cloudBackup.backupActive",
-      "cloudBackup.syncInfo",
-      "cloudBackup.howItWorks",
-      "cloudBackup.feature1",
-      "cloudBackup.feature2",
-      "cloudBackup.feature3",
-      "cloudBackup.feature4",
-      "cloudBackup.deleteCloud",
-      "cloudBackup.deleteCloudDescription",
-      "cloudBackup.deleteCloudButton",
-      "cloudBackup.deleteCloudTitle",
-      "cloudBackup.deleteCloudMessage",
-      "cloudBackup.deleteCloudSuccess",
-      "cloudBackup.deleteCloudNotImplemented",
-      "cloudBackup.disclaimer"
+      "premiumUpgrade.general.heroSubtitle"
     ],
     "fr": [
       "ai.possibleConditions",
@@ -8778,94 +8879,5 @@
       }
     ]
   },
-  "encodingIssues": {
-    "de": [
-      {
-        "key": "ai.multipleSymptomsDescription",
-        "value": "Mehrere Symptome â€“ verschiedene Ursachen möglich",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "ai.potentialMildInteraction",
-        "value": "Mögliche leichte Wechselwirkung â€“ Nebenwirkungen beobachten",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "settings.pollenMessage",
-        "value": "Hohe Pollenkonzentration â€“ Allergiemedikation erwägen",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "settings.temperatureMessage",
-        "value": "Extreme Temperaturen â€“ hydratisiert bleiben & passend kleiden",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "settings.humidityMessage",
-        "value": "Hohe Luftfeuchte â€“ bei Atemwegserkrankungen aufmerksam sein",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "settings.airQualityMessage",
-        "value": "Schlechte Luftqualität â€“ Outdoor-Aktivitäten reduzieren",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "settings.languages.es",
-        "value": "EspaÃ±ol",
-        "issues": [
-          "Mojibake detected: Ã±"
-        ]
-      },
-      {
-        "key": "common.noData",
-        "value": "â€”",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "common.noResponse",
-        "value": "Entschuldigung â€” keine Antwort.",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "common.appDescription",
-        "value": "AuricRx â€” MedCoach",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      }
-    ],
-    "zh": [
-      {
-        "key": "documentScanner.manualPhoto",
-        "value": "????? PDF",
-        "issues": [
-          "Possible corruption: unexpected ? in Chinese text"
-        ]
-      },
-      {
-        "key": "localized.SignInScreen.loginCopy.loading",
-        "value": "???...",
-        "issues": [
-          "Possible corruption: unexpected ? in Chinese text"
-        ]
-      }
-    ]
-  }
+  "encodingIssues": {}
 }
