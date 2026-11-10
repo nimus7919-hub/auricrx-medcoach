@@ -16,10 +16,10 @@
     "delete": "Supprimer"
   },
   "locationSearch": {
-    "disclosure": "Nous utilisons votre position uniquement pour rechercher des pharmacies ou laboratoires ? proximit?. Nous ne la conservons pas et ne l?utilisons pas pour vous suivre. Les recherches de pharmacies utilisent les donn?es INEGI DENUE/PROFECO via notre serveur ; les recherches de laboratoires et les distances routi?res facultatives utilisent Google Places/Maps.",
-    "reset": "R?initialiser le consentement de localisation",
-    "resetDone": "Consentement de localisation r?initialis?. Nous vous le redemanderons lors de votre prochaine recherche.",
-    "resetError": "Impossible de r?initialiser le consentement de localisation. R?essayez."
+    "disclosure": "Nous utilisons votre position uniquement pour rechercher des pharmacies ou laboratoires à proximité. Nous ne la conservons pas et ne l'utilisons pas pour vous suivre. Les recherches de pharmacies utilisent les données INEGI DENUE/PROFECO via notre serveur ; les recherches de laboratoires et les distances routières facultatives utilisent Google Places/Maps.",
+    "reset": "Réinitialiser le consentement de localisation",
+    "resetDone": "Consentement de localisation réinitialisé. Nous vous le redemanderons lors de votre prochaine recherche.",
+    "resetError": "Impossible de réinitialiser le consentement de localisation. Réessayez."
   },
   "documentScanner": {
     "scan": "Numériser",
@@ -3513,7 +3513,7 @@
     "recalls": "Les rapports d'événements indésirables ne sont pas vérifiés et ne prouvent pas qu'un médicament a causé un problème. Source : openFDA. N'arrêtez pas un médicament sans en parler à votre médecin.",
     "prices": "Les prix sont des estimations à titre informatif uniquement, peuvent être obsolètes et ne constituent pas une offre. Votre coût réel dépend de votre pharmacie, assurance et quantité. Confirmez avec la pharmacie.",
     "nadac": "NADAC est le prix moyen que les pharmacies paient pour acheter un médicament, publié chaque semaine par CMS (data.medicaid.gov). Ce n'est pas ce que vous paierez à la pharmacie et n'inclut pas les frais de dispensation ou l'assurance. CMS ne soutient pas cette application. Données au [date].",
-    "nlm": "Ce produit utilise des données publiques fournies par la Bibliothèque nationale de médecine des États-Unis (U.S. National Library of Medicine, NLM), les National Institutes of Health et le Department of Health and Human Services ; la NLM n'est pas responsable du produit et ne recommande ni n'approuve ce produit ou tout autre produit.",
+    "nlm": "Ce produit utilise des données accessibles au public fournies par la Bibliothèque nationale de médecine américaine (U.S. National Library of Medicine, NLM), dépendant des Instituts nationaux de la santé (National Institutes of Health) et du ministère américain de la Santé et des Services sociaux (Department of Health and Human Services). La NLM n'est pas responsable de ce produit et ne recommande ni n'approuve celui-ci ou tout autre produit.",
     "fda": "Données fournies par la U.S. Food and Drug Administration (https://open.fda.gov). FDA n'approuve pas cette application.",
     "dailymed": "Informations d'étiquetage de DailyMed (dailymed.nlm.nih.gov), U.S. National Library of Medicine. Dernière mise à jour [date].",
     "nppes": "Listes de pharmacies du CMS NPPES NPI Registry ; les informations sont fournies par les pharmacies et peuvent être obsolètes.",
