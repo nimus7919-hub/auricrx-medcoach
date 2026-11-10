@@ -243,7 +243,7 @@ export default function DocumentCloudBackupScreen({ onClose }: { onClose: () => 
               <DynamicText type="card" style={styles.description}>{t('cloudBackup.consentMessage')}</DynamicText>
               
               <TouchableOpacity
-                style={[styles.disableButton, { backgroundColor: '#ff6b6b', marginTop: 16 }]}
+                style={[styles.disableButton, { backgroundColor: '#C85A5A', marginTop: 16 }]}
                 onPress={handleDisableBackup}
               >
                 <DynamicText type="button" style={styles.buttonText}>{t('cloudBackup.turnOff')}</DynamicText>
@@ -254,7 +254,7 @@ export default function DocumentCloudBackupScreen({ onClose }: { onClose: () => 
               <DynamicText type="card" style={styles.sectionTitle}>{t('cloudBackup.deleteCloudButton')}</DynamicText>
               <DynamicText type="card" style={styles.description}>{t('cloudBackup.deleteCloudDescription')}</DynamicText>
               <TouchableOpacity
-                style={[styles.deleteButton, { backgroundColor: '#ff6b6b', marginTop: 12 }]}
+                style={[styles.deleteButton, { backgroundColor: '#C85A5A', marginTop: 12 }]}
                 onPress={handleDeleteCloudDocuments}
               >
                 <DynamicText type="button" style={styles.buttonText}>{t('cloudBackup.deleteCloudButton')}</DynamicText>

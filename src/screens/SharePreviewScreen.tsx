@@ -91,8 +91,8 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* F8: Block D preview warning */}
-        <View style={[styles.warningCard, { backgroundColor: 'rgba(255, 107, 107, 0.15)', borderColor: '#ff6b6b' }]}>
-          <DynamicText type="card" style={[styles.warningText, { color: '#ff6b6b' }]}>
+        <View style={[styles.warningCard, { backgroundColor: 'rgba(255, 107, 107, 0.15)', borderColor: getAccentColor() }]}>
+          <DynamicText type="card" style={[styles.warningText, { color: getAccentColor() }]}>
             ⚠️ {t('familyCircle.sharePreview', { names: getMemberNames() })}
           </DynamicText>
         </View>
@@ -108,7 +108,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
             </DynamicText>
           ) : (
             <ScrollView 
-              style={[styles.previewBox, { backgroundColor: '#10213A', borderColor: getCardBorderColor() }]}
+              style={[styles.previewBox, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}
               nestedScrollEnabled
             >
               <DynamicText type="card" style={[styles.summaryText, { color: getCardTextColor() }]}>
@@ -164,6 +164,6 @@ const styles = StyleSheet.create({
   noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
   shareButton: { borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 12 },
   cancelButton: { alignItems: 'center', paddingVertical: 12 },
-  buttonText: { fontSize: 16, fontWeight: '600', color: '#17130B' },
+  buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
   cancelButtonText: { fontSize: 14, opacity: 0.8 },
 });

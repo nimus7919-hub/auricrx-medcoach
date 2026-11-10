@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   freeText: { fontSize: 14, opacity: 0.85, lineHeight: 21 },
   startTrialButton: { borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
   startTrialButtonGradient: { paddingVertical: 18, paddingHorizontal: 24, alignItems: 'center' },
-  startTrialButtonText: { fontSize: 18, fontWeight: 'bold', color: '#17130B' },
+  startTrialButtonText: { fontSize: 18, fontWeight: 'bold', color: buttonTextColor },
   continueFreeButton: { alignItems: 'center', paddingVertical: 12, marginBottom: 16 },
   continueFreeButtonText: { fontSize: 16, opacity: 0.8 },
   noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
