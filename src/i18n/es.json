@@ -3989,5 +3989,15 @@
     "deleteCloudSuccess": "Todas las copias en la nube han sido eliminadas.",
     "deleteCloudNotImplemented": "La eliminación en la nube aún no está implementada. Esto es un TODO para la integración del backend.",
     "disclaimer": "Los documentos locales siempre funcionan incluso sin respaldo en la nube. El respaldo en la nube es opcional."
+  },
+  "plantBadges": {
+    "evidenceLimited": "Evidencia: limitada",
+    "evidenceInsufficient": "Evidencia: insuficiente",
+    "evidenceMixed": "Evidencia: mixta",
+    "fewHumanStudies": "Estudios en personas: pocos",
+    "footer": "Según {{source}}, consultado el {{date}}. La evidencia describe lo que se ha estudiado, no si te funcionará. Las plantas y suplementos pueden interactuar con medicamentos; consulta a tu médico o farmacéutico."
+  },
+  "labOrganizer": {
+    "banner": "Aquí puedes guardar y ordenar tus resultados. La app no interpreta resultados ni indica si un valor es normal. Llévalos a tu médico."
   }
 }

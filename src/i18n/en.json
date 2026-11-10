@@ -3997,5 +3997,15 @@
     "deleteFailed": "Failed to delete data. Please try again.",
     "deleting": "Deleting your data...",
     "disclaimer": "Note: This does not delete your account or data stored in cloud backups if you've enabled those features."
+  },
+  "plantBadges": {
+    "evidenceLimited": "Evidence: limited",
+    "evidenceInsufficient": "Evidence: insufficient",
+    "evidenceMixed": "Evidence: mixed",
+    "fewHumanStudies": "Few human studies",
+    "footer": "According to {{source}}, checked {{date}}. Evidence describes what has been studied, not whether it will work for you. Plants and supplements can interact with medicines; ask your doctor or pharmacist."
+  },
+  "labOrganizer": {
+    "banner": "Here you can store and organize your results. The app doesn't interpret results or tell you whether a value is normal. Take them to your doctor."
   }
 }

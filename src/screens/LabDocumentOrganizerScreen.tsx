@@ -295,6 +295,11 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
       </View>
 
       <ScrollView style={styles.content}>
+        {/* F14: Lab organizer guardrail banner - Block I */}
+        <View style={[styles.bannerCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
+          <DynamicText type="card" style={styles.bannerText}>⚠️ {t('labOrganizer.banner')}</DynamicText>
+        </View>
+
         {activeTab === 'documents' && renderDocuments()}
         {activeTab === 'labValues' && renderLabValues()}
         {activeTab === 'glossary' && renderGlossary()}
@@ -415,6 +420,8 @@ const styles = StyleSheet.create({
   tab: { flex: 1, padding: 12, alignItems: 'center' },
   tabText: { fontSize: 13, fontWeight: '600' },
   content: { flex: 1, padding: 16 },
+  bannerCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16, backgroundColor: 'rgba(219, 182, 92, 0.1)' },
+  bannerText: { fontSize: 14, lineHeight: 20, fontWeight: '500' },
   card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
   sectionDescription: { fontSize: 14, opacity: 0.8, marginBottom: 16, lineHeight: 20 },
