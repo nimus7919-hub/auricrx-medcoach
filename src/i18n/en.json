@@ -3904,7 +3904,7 @@
     "alertDisclaimer": "This alert is just a reminder. Confirm before giving any medication. If in doubt, call the primary caregiver.",
     "alertStopsWhen": "Alerts will stop when {{name}} leaves Family Circle or when the member who created the alert turns it off.",
     "sharePreview": "You're about to share a summary with health information from {{names}}. Use only with authorized people (family, caregivers). Continue?",
-    "shareMinimal": "Share via..."
+    "shareMinimal": "Share via...",
     "members": "Family Members",
     "membersDescription": "Add profiles for family members who may not use the app themselves.",
     "noMembers": "No family members added yet. Add your first member to start tracking.",
