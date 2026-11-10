@@ -3961,7 +3961,7 @@
     "grantConsent": "I Consent to Share"
   },
   "prevention": {
-    "title": "Prevention & Checkup Planner",
+    "title": "Checkup Reminders",
     "description": "Schedule yearly screenings, checkups, and vaccine reminders. These are reminders only and do not assess your individual risk.",
     "disclaimer": "Templates provide general guidance based on public health guidelines. They do not replace your doctor's recommendations or assess whether you personally need a test.",
     "fromTemplate": "From Template",

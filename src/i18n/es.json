@@ -3793,9 +3793,9 @@
     "grantConsent": "Acepto Compartir"
   },
   "prevention": {
-    "title": "Planificador de Prevención",
+    "title": "Recordatorios de Chequeos",
     "description": "Programa recordatorios anuales de revisiones, chequeos y vacunas. Estos son solo recordatorios y no evalúan tu riesgo individual.",
-    "disclaimer": "Las plantillas proporcionan orientación general basada en guías de salud pública. No reemplazan las recomendaciones de tu médico ni evalúan si necesitas personalmente una prueba.",
+    "disclaimer": "Las plantillas proporcionan orientación general basadas en guías de salud pública. No reemplazan las recomendaciones de tu médico ni evalúan si necesitas personalmente una prueba.",
     "fromTemplate": "Desde Plantilla",
     "addCustom": "Agregar Personalizado",
     "upcoming": "Próximos",
