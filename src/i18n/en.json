@@ -4007,5 +4007,23 @@
   },
   "labOrganizer": {
     "banner": "Here you can store and organize your results. The app doesn't interpret results or tell you whether a value is normal. Take them to your doctor."
+  },
+  "subscription": {
+    "proTitle": "AuricRX Pro",
+    "includes": "Includes: AI health-information assistant, Family Circle, pharmacy and lab search, Medicine Lookup, optional cloud backup and device sync.",
+    "trialPrice": "14 days free. Then {{price}} per month (MXN $79.00, VAT included).",
+    "autoCharge": "You're charged automatically every month starting {{date}}, to your {{store}} account, until you cancel.",
+    "reminderNotice": "We'll remind you at least 5 days before the first charge and before each renewal.",
+    "cancelAnytime": "Cancel anytime in {{cancelPath}} or in Settings > My plan in the app. If you cancel during the trial, you won't be charged.",
+    "freeForever": "Without Pro you still get, free: medication and health reminders, health tracker, plant library, documents stored on your phone, and you can always view, export and delete your data.",
+    "startTrial": "Start 14 days free",
+    "continueFree": "Continue with free plan",
+    "terms": "Terms",
+    "privacyNotice": "Privacy Notice",
+    "restorePurchases": "Restore purchases"
+  },
+  "renewalNotices": {
+    "trialEnding": "Your free Pro trial ends on {{date}}. That day you'll be charged {{price}} (VAT included) to your {{store}} account, then every month. If you don't want to continue, cancel before {{date}}: {{link}}.",
+    "renewal": "Your Pro plan renews on {{date}} for {{price}} (VAT included). You can cancel with no penalty: {{link}}."
   }
 }

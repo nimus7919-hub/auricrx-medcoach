@@ -3999,5 +3999,23 @@
   },
   "labOrganizer": {
     "banner": "Aquí puedes guardar y ordenar tus resultados. La app no interpreta resultados ni indica si un valor es normal. Llévalos a tu médico."
+  },
+  "subscription": {
+    "proTitle": "AuricRX Pro",
+    "includes": "Incluye: asistente de información de salud con IA, Family Circle, búsqueda de farmacias y laboratorios, Consulta de medicamentos, respaldo opcional en la nube y sincronización con dispositivos.",
+    "trialPrice": "14 días gratis. Después, {{price}} al mes (MXN $79.00, IVA incluido).",
+    "autoCharge": "El cobro es automático cada mes a partir del {{date}}, en tu cuenta de {{store}}, hasta que canceles.",
+    "reminderNotice": "Te avisaremos al menos 5 días antes del primer cobro y antes de cada renovación.",
+    "cancelAnytime": "Cancela cuando quieras en {{cancelPath}} o desde Ajustes > Mi plan en la app. Si cancelas durante la prueba, no se te cobra nada.",
+    "freeForever": "Sin Pro sigues teniendo gratis: recordatorios de medicamentos y de salud, registro de salud, biblioteca de plantas y documentos guardados en tu teléfono, y siempre puedes ver, exportar y borrar tus datos.",
+    "startTrial": "Empezar 14 días gratis",
+    "continueFree": "Seguir con el plan gratis",
+    "terms": "Términos",
+    "privacyNotice": "Aviso de Privacidad",
+    "restorePurchases": "Restaurar compras"
+  },
+  "renewalNotices": {
+    "trialEnding": "Tu prueba gratis de Pro termina el {{date}}. Ese día se cobrarán {{price}} (IVA incluido) a tu cuenta de {{store}} y luego cada mes. Si no quieres continuar, cancela antes del {{date}}: {{link}}.",
+    "renewal": "Tu plan Pro se renueva el {{date}} por {{price}} (IVA incluido). Puedes cancelar sin penalización: {{link}}."
   }
 }
