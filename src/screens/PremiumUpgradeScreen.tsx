@@ -120,19 +120,10 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
 
             <View style={styles.featureItem}>
               <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                📄
+                ☁️
               </DynamicText>
               <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.documents')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                🌿
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.herbs')}
+                {t('premiumUpgrade.features.cloudBackup')}
               </DynamicText>
             </View>
 
@@ -163,6 +154,20 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
           <DynamicText type="card" style={[styles.freeText, { color: getCardTextColor() }]}>
             {t('premiumUpgrade.alwaysFreeText')}
           </DynamicText>
+          <View style={styles.freeList}>
+            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
+              • {t('premiumUpgrade.freeItems.reminders')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
+              • {t('premiumUpgrade.freeItems.tracking')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
+              • {t('premiumUpgrade.freeItems.plants')}
+            </DynamicText>
+            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
+              • {t('premiumUpgrade.freeItems.documents')}
+            </DynamicText>
+          </View>
         </View>
 
         <View style={[styles.dataCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
@@ -223,7 +228,9 @@ const styles = StyleSheet.create({
   featureText: { flex: 1, fontSize: 14, lineHeight: 20 },
   freeCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
   freeTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  freeText: { fontSize: 14, opacity: 0.85, lineHeight: 20 },
+  freeText: { fontSize: 14, opacity: 0.85, lineHeight: 20, marginBottom: 12 },
+  freeList: { gap: 6 },
+  freeItem: { fontSize: 13, opacity: 0.8, lineHeight: 19 },
   dataCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 24 },
   dataTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
   dataText: { fontSize: 14, opacity: 0.85, lineHeight: 20 },

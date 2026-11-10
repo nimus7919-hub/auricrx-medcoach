@@ -8,6 +8,8 @@
  * 1. Health reminders (medication, supplements, checkup/screening reminders)
  * 2. Health tracker (daily habits manual logging, vitals/lab value logging)
  * 3. Creating/storing personal medication reminders
+ * 4. Plant library (herbal safety notes, evidence badges, interaction info)
+ * 5. Document scanning and LOCAL storage (organizer, tags, glossary, lab value trends)
  * 
  * PREMIUM (behind 14-day trial):
  * - AI Health assistant
@@ -15,10 +17,9 @@
  * - Find a Pharmacy (paid API: Google Places/Maps, INEGI DENUE/PROFECO)
  * - Find a Lab (paid API: Google Places/Maps)
  * - Medicine Lookup (if uses paid backend APIs)
- * - Document scanning/organizer and glossary
- * - Plant library and herbal safety notes
  * - Wearable sync (Health Connect/HealthKit)
  * - Data export/summaries sharing
+ * - Cloud backup for documents (opt-in: uploads documents to backend for sync/backup)
  * - Premium color themes (if implemented)
  * 
  * ALWAYS ACCESSIBLE (no paywall):
@@ -46,14 +47,8 @@ export const PREMIUM_FEATURES = {
   LAB_SEARCH: true,
   MEDICINE_LOOKUP: true, // If uses paid backend
   
-  // Document features
-  DOCUMENT_SCANNING: true,
-  DOCUMENT_ORGANIZER: true,
-  LAB_GLOSSARY: true,
-  
-  // Plant/herb library
-  HERBS_LIBRARY: true,
-  HERBAL_SAFETY_NOTES: true,
+  // Cloud features for documents
+  DOCUMENT_CLOUD_BACKUP: true, // Opt-in cloud backup/sync to backend
   
   // Wearable integration
   HEALTH_CONNECT_SYNC: true,
@@ -84,6 +79,19 @@ export const FREE_FEATURES = {
   // Basic medication management
   MEDICATIONS_LIST: true,
   SUPPLEMENTS_LIST: true,
+  
+  // Plant/herb library (free)
+  HERBS_LIBRARY: true,
+  HERBAL_SAFETY_NOTES: true,
+  EVIDENCE_BADGES: true,
+  
+  // Document features (local storage is free)
+  DOCUMENT_SCANNING: true,
+  DOCUMENT_LOCAL_STORAGE: true,
+  DOCUMENT_ORGANIZER: true,
+  DOCUMENT_TAGS: true,
+  LAB_GLOSSARY: true,
+  LAB_VALUE_TRENDS: true,
   
   // Always accessible
   SETTINGS: true,
