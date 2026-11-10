@@ -3825,6 +3825,23 @@
     "change": "Change",
     "continue": "Continue"
   },
+  "privacyNotice": {
+    "title": "Privacy Notice",
+    "controller": "Data Controller",
+    "controllerPlaceholder": "[RESPONSABLE – pending owner approval]\n\nThis privacy notice is pending final approval from the data controller.",
+    "dataCollected": "What Data We Collect",
+    "dataCollectedText": "We collect account information (email, password), health data you enter (medications, reminders, appointments, documents, symptoms), and optional data from Health Connect if you grant permission. We do not collect data for advertising purposes.",
+    "howWeUse": "How We Use Your Data",
+    "howWeUseText": "We use your data only to provide the services you requested: reminders, health tracking, AI information assistance, Family Circle features, and optional cloud backup. We do not sell your health data or use it for targeted advertising.",
+    "sharing": "Data Sharing",
+    "sharingText": "We share data only with service providers necessary to operate the app (Firebase for authentication, cloud hosting for optional backup, OpenAI for AI chat you choose to send). We do not share your health data for marketing or advertising. Optional Family Circle features let you share with family members you invite.",
+    "yourRights": "Your Rights (ARCO)",
+    "yourRightsText": "You have the right to Access, Rectify, Cancel, or Object to the use of your personal data. You can export and delete your data at any time in Settings > Privacy. You can withdraw consent for cloud backup, Health Connect, or Family Circle features at any time.",
+    "contact": "Contact for Privacy Questions",
+    "contactText": "[PRIVACY EMAIL – pending approval]\n\nFor questions about your privacy rights or to exercise them, please write to the email above.",
+    "viewFullPolicy": "View Full Privacy Policy",
+    "lastUpdated": "Last updated: November 2026"
+  },
   "cloudBackup": {
     "title": "Cloud Backup",
     "premiumFeature": "Premium Feature",

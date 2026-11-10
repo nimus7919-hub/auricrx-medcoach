@@ -4105,5 +4105,22 @@
   "usOnboarding": {
     "change": "Cambiar",
     "continue": "Continuar"
+  },
+  "privacyNotice": {
+    "title": "Aviso de Privacidad",
+    "controller": "Responsable",
+    "controllerPlaceholder": "[RESPONSABLE – pendiente de aprobación de la titular]\n\nEste aviso de privacidad está pendiente de aprobación final por parte del responsable.",
+    "dataCollected": "Qué Datos Recopilamos",
+    "dataCollectedText": "Recopilamos información de cuenta (correo, contraseña), datos de salud que ingreses (medicamentos, recordatorios, citas, documentos, síntomas), y datos opcionales de Health Connect si otorgas permiso. No recopilamos datos para publicidad.",
+    "howWeUse": "Cómo Usamos Tus Datos",
+    "howWeUseText": "Usamos tus datos solo para prestar los servicios que solicitaste: recordatorios, seguimiento de salud, asistente de información con IA, funciones de Family Circle, y respaldo opcional en la nube. No vendemos tus datos de salud ni los usamos para publicidad dirigida.",
+    "sharing": "Compartir Datos",
+    "sharingText": "Compartimos datos solo con proveedores de servicio necesarios para operar la app (Firebase para autenticación, alojamiento en la nube para respaldo opcional, OpenAI para chat con IA que elijas enviar). No compartimos tus datos de salud para mercadotecnia o publicidad. Las funciones opcionales de Family Circle te permiten compartir con miembros de familia que invites.",
+    "yourRights": "Tus Derechos (ARCO)",
+    "yourRightsText": "Tienes derecho a Acceder, Rectificar, Cancelar u Oponerte al uso de tus datos personales. Puedes exportar y borrar tus datos en cualquier momento en Ajustes > Privacidad. Puedes retirar el consentimiento para respaldo en la nube, Health Connect o funciones de Family Circle en cualquier momento.",
+    "contact": "Contacto para Preguntas de Privacidad",
+    "contactText": "[CORREO DE PRIVACIDAD – pendiente de aprobación]\n\nPara preguntas sobre tus derechos de privacidad o para ejercerlos, escribe al correo anterior.",
+    "viewFullPolicy": "Ver Aviso de Privacidad Completo",
+    "lastUpdated": "Última actualización: Noviembre 2026"
   }
 }
