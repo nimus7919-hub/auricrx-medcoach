@@ -667,12 +667,12 @@
     "missed": "manquées",
     "dayStreak": "jours consécutifs",
     "started": "Commencé",
-    "healthAnalytics": "Health Analytics",
+    "healthAnalytics": "Analyses de santé",
     "systolic": "Systolic",
     "diastolic": "Diastolic",
-    "enterSystolic": "e.g., 120",
-    "enterDiastolic": "e.g., 80",
-    "selectUnit": "Select Unit",
+    "enterSystolic": "Saisir la pression systolique",
+    "enterDiastolic": "Saisir la pression diastolique",
+    "selectUnit": "Sélectionner l'unité",
     "failedToExportMetrics": "Échec de l'exportation des métriques de santé",
     "healthMetrics": "Métriques de santé",
     "healthMetricsAdded": "Métriques de santé ajoutées",
@@ -798,8 +798,8 @@
       "refillSoon": "Réapprovisionner bientôt",
       "expired": "Expiré"
     },
-    "searchingPharmacies": "Searching for pharmacies...",
-    "singleComponent": "Single Component (e.g., Metformin only)"
+    "searchingPharmacies": "Recherche de pharmacies",
+    "singleComponent": "Composant unique"
   },
   "supplements": {
     "title": "Suppléments",
@@ -829,16 +829,16 @@
       "lowSupply": "Stock Faible",
       "expired": "Expiré"
     },
-    "priceVaries": "Price varies",
-    "distanceUnknown": "Distance unknown",
-    "pickupAvailable": "Pickup available",
-    "deliveryAvailable": "Delivery available",
-    "foundStores": "Found {count} stores selling {name}:",
-    "updateStatus": "Update Status",
+    "priceVaries": "Prix variable",
+    "distanceUnknown": "Distance inconnue",
+    "pickupAvailable": "Retrait disponible",
+    "deliveryAvailable": "Livraison disponible",
+    "foundStores": "Magasins trouvés",
+    "updateStatus": "Mettre à jour le statut",
     "left": "left",
     "took": "Took",
-    "searchSupplements": "Search supplements...",
-    "priceNotAvailable": "Price not available"
+    "searchSupplements": "Rechercher des suppléments",
+    "priceNotAvailable": "Prix non disponible"
   },
   "reminders": {
     "title": "Rappels",
@@ -877,8 +877,8 @@
       "units": "unités",
       "pills": "pilules"
     },
-    "componentType": "Component Type",
-    "selectDays": "Select Days",
+    "componentType": "Type de composant",
+    "selectDays": "Sélectionner les jours",
     "selected": "Selected",
     "monday": "Monday",
     "tuesday": "Tuesday",
@@ -1138,7 +1138,7 @@
     "stop": "Arrêter",
     "noData": "—",
     "noResponse": "Désolé—pas de réponse.",
-    "appDescription": "AuricRx — MedCoach",
+    "appDescription": "AuricRX MedCoach",
     "noTime": "--:--",
     "sort": "Trier",
     "sortBy": "Trier par",
@@ -1158,7 +1158,7 @@
     "mg": "mg",
     "mxn": "MXN",
     "usd": "USD",
-    "exchangeRate": "FX: 1 USD ← 1.0000 MXN",
+    "exchangeRate": "Taux de change",
     "deleteReminder": "Supprimer le Rappel",
     "deleteReminderConfirm": "Êtes-vous sûr de vouloir supprimer ce rappel de localisation ?",
     "deleteAlert": "Supprimer l'Alerte",
@@ -1232,7 +1232,7 @@
       "lastRefill": "Dernier réapprovisionnement",
       "refill": "Réapprovisionner"
     },
-    "pleaseWait": "Please wait",
+    "pleaseWait": "Veuillez patienter",
     "active": "Actif",
     "advanced": "Avancé",
     "afternoon": "Après-midi",
@@ -1766,14 +1766,14 @@
           }
         },
         "item6": {
-          "names": "Tagetes lucida",
+          "names": "Cúrcuma, Turmeric, Haldi",
           "details": {
             "origin": "Mexique central",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item7": {
-          "names": "Clinopodium mexicanum",
+          "names": "Jengibre, Ginger, Adrak",
           "details": {
             "origin": "Mexique",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
@@ -1794,7 +1794,7 @@
           }
         },
         "item10": {
-          "names": "Aloe Vera",
+          "names": "Canela, Cinnamon, Dalchini",
           "details": {
             "origin": "Afrique du Nord ; naturalisé au Mexique, aux États-Unis et en Chine",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
@@ -1857,7 +1857,7 @@
           }
         },
         "item19": {
-          "names": "Aristolochia odoratissima",
+          "names": "Romero, Rosemary",
           "details": {
             "origin": "Mexique",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
@@ -1871,7 +1871,7 @@
           }
         },
         "item21": {
-          "names": "Yerba Mansa",
+          "names": "Hinojo, Fennel, Saunf",
           "details": {
             "origin": "Sud-Ouest des États-Unis ; Mexique",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
@@ -1892,7 +1892,7 @@
           }
         },
         "item24": {
-          "names": "Heliopsis longipes",
+          "names": "Ortiga, Nettle, Bichu Buti",
           "details": {
             "origin": "Mexique",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
@@ -1927,7 +1927,7 @@
           }
         },
         "item29": {
-          "names": "Dong Quai",
+          "names": "Ashwagandha, Indian Ginseng",
           "details": {
             "origin": "Chine",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
@@ -2483,7 +2483,7 @@
     "shareFailed": "Échec du partage",
     "download": "Télécharger",
     "pdfSavedToValue": "PDF enregistré dans : {{value1}}",
-    "documentsMobile": "Documents (mobile)",
+    "documentsMobile": "Documents",
     "scanCamera": "Scanner (caméra)",
     "upload": "Téléverser",
     "sharePdf": "Partager PDF",
@@ -3031,7 +3031,7 @@
     "available_7c62a1": "Disponible",
     "signup": "Inscription",
     "apiError": "Erreur API",
-    "imssSeguroCredencial": "IMSS / Seguro (credencial)",
+    "imssSeguroCredencial": "Credential del Seguro",
     "insuranceMedicareCard": "Carte d'assurance / Medicare",
     "provincialHealthCard": "Carte santé provinciale",
     "susCard": "Carte SUS",
@@ -3745,7 +3745,29 @@
     "unitLabels.Serving": "unitLabels.Serving",
     "unitLabels.Servings": "unitLabels.Servings",
     "unitLabels.Dose": "unitLabels.Dose",
-    "unitLabels.Doses": "unitLabels.Doses"
+    "unitLabels.Doses": "unitLabels.Doses",
+    "unitLabels": {
+      "Piece": "Pièce",
+      "Pieces": "Pièces",
+      "Puff": "Bouffée",
+      "Puffs": "Bouffées",
+      "Pump": "Pompe",
+      "Pumps": "Pompes",
+      "Sachet": "Sachet",
+      "Sachets": "Sachets",
+      "Strip": "Bandelette",
+      "Strips": "Bandelettes",
+      "Mcg": "µg",
+      "Kg": "Kg",
+      "IU": "UI",
+      "Mcg DFE": "µg DFE",
+      "Mg NE": "Mg NE",
+      "Mg alpha-tocopherol": "Mg alpha-tocophérol",
+      "CFU": "UFC"
+    },
+    "medications": {
+      "quantityUnit": "Unité de quantité"
+    }
   },
   "countryLabels": {
     "JP": "🇯🇵 Japon",
