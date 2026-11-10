@@ -2077,6 +2077,17 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
       {/* OLD INTERACTION MODALS REMOVED FOR COFEPRIS COMPLIANCE */}
       {/* The following modals have been removed:
         - Drug Interaction Check Modal (user selection)
+        - Drug Interaction Loading Modal
+        - Drug Interaction Results Modal
+      These were replaced with the static MedicationReferenceScreen */}
+
+      {/* Symptom Analysis Result Modal */}
+      <Modal
+        visible={showSymptomResultModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSymptomResultModal(false)}
+      >
         <View style={dynamicStyles.modalOverlay}>
           <View style={[dynamicStyles.modalContent, { maxHeight: '80%' }]}>
             {currentSymptomAnalysis && (
