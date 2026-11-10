@@ -352,6 +352,44 @@ export default function createSettings(getScope) {
         
         <CollapsibleSection title={S.privacy} sectionKey="privacy" onToggle={toggleSection}>
           {Platform.OS === 'android' && HEALTH_CONNECT_ENABLED && <HealthConnectPrivacyControls userId={getScope().user?.uid} onConnect={() => setRoute('health-connect-consent')} />}
+          <TouchableOpacity 
+            onPress={() => setRoute('privacy-notice')}
+            style={[styles.settingsButton, {
+              backgroundColor: getCardBackgroundColor() + 'CC',
+              borderColor: getCardBorderColor(),
+              borderWidth: 2,
+              borderRadius: 12,
+              padding: 16,
+              marginHorizontal: 16,
+              marginBottom: 12
+            }]}
+          >
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>
+              {t('privacyNotice.title')}
+            </DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
+              View your privacy rights and data practices
+            </DynamicText>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => setRoute('cloud-backup')}
+            style={[styles.settingsButton, {
+              backgroundColor: getCardBackgroundColor() + 'CC',
+              borderColor: getCardBorderColor(),
+              borderWidth: 2,
+              borderRadius: 12,
+              padding: 16,
+              marginHorizontal: 16,
+              marginBottom: 12
+            }]}
+          >
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>
+              {t('cloudBackup.title')}
+            </DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
+              Optional cloud backup for documents (Premium)
+            </DynamicText>
+          </TouchableOpacity>
           <TouchableOpacity style={{ padding: 16 }} onPress={async () => {
             try {
               await resetSearchLocationConsent();

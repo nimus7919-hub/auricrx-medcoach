@@ -17,6 +17,14 @@ import Reminders from "./../../components/Reminders";
 import AdminProfileScreen from "./../screens/AdminProfileScreen";
 import WallpaperSettingsScreen from "./../screens/WallpaperSettingsScreen";
 import { HealthConnectConsentScreen, HealthConnectPrivacyScreen } from '../screens/ActivityHealthScreen';
+// F2, F9-F11, F13, F15, F4-F8 screens
+import PrivacyNoticeScreen from '../screens/PrivacyNoticeScreen';
+import DocumentCloudBackupScreen from '../screens/DocumentCloudBackupScreen';
+import PremiumUpgradeScreen from '../screens/PremiumUpgradeScreen';
+import InviteFamilyMemberScreen from '../screens/InviteFamilyMemberScreen';
+import AcceptInviteScreen from '../screens/AcceptInviteScreen';
+import AddFamilyMemberScreen from '../screens/AddFamilyMemberScreen';
+import SharePreviewScreen from '../screens/SharePreviewScreen';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
@@ -42,6 +50,13 @@ export default function createAppNavigator(getScope) {
         route === 'health-profile' ? <FastingProfileScreen onClose={() => setRoute('settings')} theme={theme} S={S} fastingProfile={fastingProfile} setFastingProfile={setFastingProfile} saveFastingProfileToDB={saveFastingProfileToDB} /> :
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
+    route === 'privacy-notice' ? <PrivacyNoticeScreen onClose={() => setRoute('settings')} /> :
+    route === 'cloud-backup' ? <DocumentCloudBackupScreen onClose={() => setRoute('settings')} /> :
+    route === 'premium-upgrade' ? <PremiumUpgradeScreen onClose={() => setRoute('dashboard')} entitlement={{ hasPremiumAccess: false, isInTrial: false, trialDaysRemaining: 14, isPremium: false }} /> :
+    route === 'invite-family-member' ? <InviteFamilyMemberScreen onClose={() => setRoute('dashboard')} memberId="temp-id" memberName="Family Member" /> :
+    route === 'accept-invite' ? <AcceptInviteScreen onClose={() => setRoute('dashboard')} onAccepted={() => {}} /> :
+    route === 'add-family-member' ? <AddFamilyMemberScreen onClose={() => setRoute('dashboard')} onAdded={() => {}} /> :
+    route === 'share-preview' ? <SharePreviewScreen onClose={() => setRoute('dashboard')} /> :
      <Dashboard />);
 };
 }
