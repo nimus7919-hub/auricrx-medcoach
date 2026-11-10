@@ -83,39 +83,11 @@ class AIHealthService {
   private healthMetrics: HealthMetricsService;
   private appointmentService: AppointmentService;
 
-  // Drug interaction database (simplified - in production, use a comprehensive medical database)
-  private drugInteractionDatabase: DrugInteraction[] = [
-    {
-      id: 'warfarin_aspirin',
-      drug1: 'Warfarin',
-      drug2: "Aspirin",
-      severity: 'major',
-      get description() { return uiI18n.t("ui.increasedRiskOfBleedingWhenTakenTogether"); },
-      get clinicalEffects() { return [uiI18n.t("ui.increasedBleedingRisk"), uiI18n.t("ui.prolongedBleedingTime"), uiI18n.t("ui.bruising")]; },
-      get management() { return uiI18n.t("ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl"); },
-      get references() { return [uiI18n.t("ai.drugInteractionDatabase"), uiI18n.t("ui.clinicalPharmacology")]; }
-    },
-    {
-      id: 'metformin_contrast',
-      drug1: "Metformin",
-      drug2: "Contrast Dye",
-      severity: 'major',
-      get description() { return uiI18n.t("ui.riskOfLacticAcidosisWithContrastMedia"); },
-      get clinicalEffects() { return [uiI18n.t("ui.lacticAcidosis"), uiI18n.t("ui.kidneyDamage"), uiI18n.t("ui.metabolicAcidosis")]; },
-      get management() { return uiI18n.t("ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl"); },
-      get references() { return [uiI18n.t("ui.radiologyGuidelines"), uiI18n.t("ui.diabetesManagement")]; }
-    },
-    {
-      id: 'statin_grapefruit',
-      drug1: "Statins",
-      drug2: "Grapefruit Juice",
-      severity: 'moderate',
-      get description() { return uiI18n.t("ui.grapefruitJuiceIncreasesStatinLevels"); },
-      get clinicalEffects() { return [uiI18n.t("ui.increasedStatinLevels"), uiI18n.t("ui.musclePain"), uiI18n.t("ui.liverToxicity")]; },
-      get management() { return uiI18n.t("ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl"); },
-      get references() { return [uiI18n.t("ui.foodDrugInteractions"), uiI18n.t("ui.cardiologyGuidelines")]; }
-    }
-  ];
+  // REMOVED: Drug interaction database with clinical management advice (COFEPRIS compliance)
+  // This data contained severity ratings, clinical effects, and management recommendations
+  // that could classify the app as a medical device requiring registration.
+  // Replaced with static reference data in MedicationReferenceService.ts
+  private drugInteractionDatabase: DrugInteraction[] = [];
 
   static getInstance(): AIHealthService {
     if (!AIHealthService.instance) {
