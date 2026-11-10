@@ -94,8 +94,14 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
               {herbImage(item)}
               <Text style={styles.name}>{nameOf(item)}</Text>
               {risk(item)}
+              {/* F13: Evidence badges */}
+              {!!item.evidence && (
+                <View style={styles.evidenceBadge}>
+                  <Text style={styles.evidenceText}>{t(`plantBadges.${item.evidence}`, { lng: language })}</Text>
+                </View>
+              )}
               {detailsOf(item) ? <Text style={styles.caption}>{detailsOf(item).uses}</Text> :
-                !!item.evidence && <Text style={styles.caption}>{tr(item.evidence)}</Text>}
+                !!item.summaryKey && <Text style={styles.caption}>{tr(item.summaryKey)}</Text>}
             </TouchableOpacity>
             {sourceLink(detailsOf(item)?.sources[0] || item.source)}
           </View>
@@ -114,6 +120,14 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 {herbImage(selected, true)}
                 <Text style={styles.label}>{tr('safety')}</Text>
                 {risk(selected)}
+                
+                {/* F13: Evidence badge in detail view */}
+                {!!selected.evidence && (
+                  <View style={styles.evidenceBadgeDetail}>
+                    <Text style={styles.evidenceTextDetail}>{t(`plantBadges.${selected.evidence}`, { lng: language })}</Text>
+                  </View>
+                )}
+                
                 {detailsOf(selected) ? <>
                   <Text style={styles.body}>{detailsOf(selected).uses}</Text>
                   <Text style={styles.label}>{getRegion() === 'US' ? 'What the evidence says' : 'Lo que dice la evidencia'}</Text>
@@ -124,7 +138,6 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                   <Text style={styles.body}>{detailsOf(selected).interactions}</Text>
                   {detailsOf(selected).sources.map(source => <View key={source.url}>{sourceLink(source)}</View>)}
                 </> : <>
-                {!!selected.evidence && <Text style={styles.body}>{tr(selected.evidence)}</Text>}
                 {!!summary(selected) && <Text style={styles.body}>{summary(selected)}</Text>}
                 {!selected.specificSource && selected.summaryKey !== 'notReviewed' && <Text style={styles.body}>{tr('notReviewed')}</Text>}
                 {sourceLink(selected.source)}
@@ -137,6 +150,15 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 {/* No guessed interactions and no affirmative empty-state verdict. */}
                 {selected.interactionKeys.map(key => <Text key={key} style={styles.body}>{tr(`class_${key}`)}</Text>)}
                 {!!selected.interactionKeys.length && sourceLink(selected.source)}
+                
+                {/* F13: Block H footer with source/date disclaimer */}
+                <Text style={styles.evidenceFooter}>
+                  {t('plantBadges.footer', { 
+                    source: selected.source.name, 
+                    date: selected.source.checked,
+                    lng: language 
+                  })}
+                </Text>
                 </>}
                 <Text style={styles.body}>{tr('generalPrecaution')}</Text>
                 {sourceLink(GENERAL_SOURCE)}
@@ -174,6 +196,11 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: 170, minHeight: 170, marginBottom: 8, backgroundColor: '#071426', borderRadius: 10 },
   name: { color: '#F4E3B1', fontSize: 16, fontWeight: '600', marginVertical: 6 },
   risk: { color: '#E2C57D', fontSize: 14, lineHeight: 20, marginVertical: 6 },
+  evidenceBadge: { backgroundColor: 'rgba(219, 182, 92, 0.15)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginVertical: 4, alignSelf: 'flex-start' },
+  evidenceText: { color: '#E2C57D', fontSize: 11, fontWeight: '600' },
+  evidenceBadgeDetail: { backgroundColor: 'rgba(219, 182, 92, 0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginVertical: 8, alignSelf: 'flex-start' },
+  evidenceTextDetail: { color: '#E2C57D', fontSize: 13, fontWeight: '600' },
+  evidenceFooter: { color: '#BAC5D5', fontSize: 13, lineHeight: 21, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderColor: '#9F8548', fontStyle: 'italic' },
   caption: { color: '#BAC5D5', fontSize: 12, lineHeight: 18 },
   photoLink: { textDecorationLine: 'underline' },
   sourceButton: { paddingVertical: 10 },
