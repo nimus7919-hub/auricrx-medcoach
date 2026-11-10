@@ -3,6 +3,7 @@ import { getSubscriptionStatus } from './trialService';
 import { PREMIUM_TRIAL_DAYS, isPremiumFeature } from '../config/premiumFeatures';
 import DeviceIdService from './deviceIdService';
 import PlayIntegrityService from './playIntegrityService';
+import RenewalReminderService from './renewalReminderService';
 import { API_BASE } from '../config/api';
 
 const STORAGE_KEYS = {
@@ -147,8 +148,21 @@ class PremiumEntitlementService {
       }
 
       // Start trial locally
-      await AsyncStorage.setItem(STORAGE_KEYS.PREMIUM_TRIAL_START, new Date().toISOString());
+      const trialStartDate = new Date();
+      await AsyncStorage.setItem(STORAGE_KEYS.PREMIUM_TRIAL_START, trialStartDate.toISOString());
       await AsyncStorage.setItem(STORAGE_KEYS.DEVICE_HASH, deviceHash);
+      
+      // F10: Schedule renewal reminder (5+ days before trial ends)
+      const renewalDate = new Date(trialStartDate);
+      renewalDate.setDate(renewalDate.getDate() + PREMIUM_TRIAL_DAYS);
+      
+      const reminderService = RenewalReminderService.getInstance();
+      await reminderService.scheduleRenewalReminder(
+        renewalDate,
+        true, // isTrialEnding
+        'MXN $79.00',
+        'Google Play' // TODO: Detect actual store
+      );
       
       // Report trial start to backend (fire and forget - logged for audit)
       this.reportTrialStartToBackend(deviceHash, userId).catch(err => 
@@ -161,7 +175,20 @@ class PremiumEntitlementService {
       
       // Graceful degradation: Network failures should not block legitimate users
       // Start trial locally and log for backend sync
-      await AsyncStorage.setItem(STORAGE_KEYS.PREMIUM_TRIAL_START, new Date().toISOString());
+      const trialStartDate = new Date();
+      await AsyncStorage.setItem(STORAGE_KEYS.PREMIUM_TRIAL_START, trialStartDate.toISOString());
+      
+      // F10: Schedule renewal reminder even in degraded mode
+      const renewalDate = new Date(trialStartDate);
+      renewalDate.setDate(renewalDate.getDate() + PREMIUM_TRIAL_DAYS);
+      
+      const reminderService = RenewalReminderService.getInstance();
+      await reminderService.scheduleRenewalReminder(
+        renewalDate,
+        true,
+        'MXN $79.00',
+        'Google Play'
+      ).catch(err => console.error('Failed to schedule reminder:', err));
       console.warn('Trial started locally due to network error - will sync with backend later');
       
       return { 
