@@ -46,7 +46,7 @@
     "tip": "💡 Dica: Toque em qualquer cartão para explorar seus recursos. O botão de IA flutuante no canto inferior direito oferece acesso instantâneo a conselhos de saúde de nossos assistentes médicos de IA."
   },
   "dashboard": {
-    "noUpcomingReminders": "Nenhum lembrete pr\u00f3ximo",
+    "noUpcomingReminders": "Nenhum lembrete próximo",
     "addReminderAction": "Adicionar",
     "title": "Painel",
     "healthJournal": "Diário de Saúde",
@@ -1389,7 +1389,7 @@
   },
   "ui": {
     "successWelcomeBack": "Bem-vindo de volta, {{name}}",
-    "sessionStarted": "Sess\u00e3o iniciada",
+    "sessionStarted": "Sessão iniciada",
     "reminderNotificationsOff": "As notificações estão desativadas. Você pode ativá-las nas configurações.",
     "openNotificationSettings": "Abrir configurações",
     "homeGreeting": "Olá, {{name}}"
@@ -1494,5 +1494,40 @@
   },
   "labOrganizer": {
     "banner": "Aqui você pode guardar e organizar seus resultados. O aplicativo não interpreta resultados nem indica se um valor é normal. Leve-os ao seu médico."
+  },
+  "cloudBackup": {
+    "title": "Backup na Nuvem",
+    "premiumFeature": "Recurso Premium",
+    "premiumRequired": "O backup na nuvem para documentos requer Premium. Faça upgrade para sincronizar seus documentos entre dispositivos.",
+    "optInTitle": "Backup na nuvem (opcional)",
+    "optInDescription": "Está desativado. Se você ativá-lo, armazenaremos uma cópia dos documentos que você escolher (por exemplo, receitas, resultados de laboratório e laudos de imagem), com suas etiquetas e notas, em servidores de um provedor de hospedagem na nuvem localizado [nos Estados Unidos], que trabalha em nome de [RESPONSABLE – pendiente de aprobación] e só pode usá-los para armazenar seu backup.",
+    "whatStored": "O que é armazenado:",
+    "whatStoredText": "apenas os documentos que você marcar para backup. Não fazemos backup dos seus dados do Health Connect ou Apple Saúde.",
+    "howProtect": "Como protegemos:",
+    "howProtectText": "os dados são criptografados quando são enviados e quando são armazenados, e só podem ser acessados da sua conta [e pelas pessoas do seu Family Circle com quem você optar por compartilhar]. Se ocorrer um incidente de segurança que afete você, informaremos imediatamente.",
+    "yourChoice": "Sua escolha:",
+    "yourChoiceText": "você pode desativar o backup a qualquer momento em Configurações > Backup. Quando desativar, você pode excluir as cópias na nuvem; nós as excluiremos em até [X] dias. Excluir suas cópias é grátis, mesmo se você não tiver mais o Pro.",
+    "yourRights": "Seus direitos:",
+    "yourRightsText": "você pode acessar, retificar, cancelar ou se opor ao uso dos seus dados (direitos ARCO) e retirar seu consentimento em Configurações > Privacidade ou escrevendo para [PRIVACY EMAIL – pending approval]. Consulte o Aviso de Privacidade: [URL].",
+    "consentCheckbox": "Consinto expressamente em armazenar uma cópia na nuvem dos documentos de saúde que eu escolher, nos termos acima.",
+    "enableButton": "Ativar backup",
+    "enableButtonHelper": "(ativado ao marcar a caixa e confirmar sua identidade)",
+    "notNow": "Agora não",
+    "lawfulRiskNote": "Armazenar documentos na internet tem riscos que não existem se você os armazena apenas no seu telefone. Continuamos responsáveis por protegê-los. Se preferir, mantenha o backup desativado: seus documentos permanecerão armazenados apenas neste telefone.",
+    "disableTitle": "Desativar backup?",
+    "disableMessage": "Não faremos mais upload de novos documentos.",
+    "deleteCloudCheckbox": "Também excluir as cópias que já estão na nuvem (excluídas em até [X] dias; cópias no seu telefone não são excluídas).",
+    "turnOff": "Desativar",
+    "cancel": "Cancelar",
+    "reauthRequired": "Confirme sua identidade para ativar o backup na nuvem",
+    "reauthFailed": "Falha na autenticação. Tente novamente.",
+    "consentGranted": "Backup na nuvem ativado",
+    "consentMessage": "Seus documentos de saúde agora serão copiados para a nuvem.",
+    "deleteCloudDescription": "Excluir todas as cópias na nuvem dos seus documentos. Suas cópias locais permanecerão neste dispositivo.",
+    "deleteCloudButton": "Excluir Todas as Cópias na Nuvem",
+    "deleteCloudTitle": "Excluir Documentos na Nuvem",
+    "deleteCloudSuccess": "Todas as cópias na nuvem foram excluídas.",
+    "deleteCloudNotImplemented": "Exclusão na nuvem ainda não implementada. Isto é uma TAREFA pendente para integração de backend.",
+    "disclaimer": "Documentos locais sempre funcionam mesmo sem backup na nuvem. O backup na nuvem é opcional."
   }
 }

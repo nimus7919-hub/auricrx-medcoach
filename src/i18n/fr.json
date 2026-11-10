@@ -46,7 +46,7 @@
     "tip": "💡 Astuce : Appuyez sur n'importe quelle carte pour explorer ses fonctionnalités. Le bouton IA flottant en bas à droite vous donne un accès instantané aux conseils de santé de nos assistants médicaux IA."
   },
   "dashboard": {
-    "noUpcomingReminders": "Aucun rappel \u00e0 venir",
+    "noUpcomingReminders": "Aucun rappel à venir",
     "addReminderAction": "Ajouter",
     "title": "Tableau de bord",
     "healthJournal": "Journal de Santé",
@@ -1395,7 +1395,7 @@
   },
   "ui": {
     "successWelcomeBack": "Bon retour, {{name}}",
-    "sessionStarted": "Connexion r\u00e9ussie",
+    "sessionStarted": "Connexion réussie",
     "reminderNotificationsOff": "Les notifications sont désactivées. Vous pouvez les activer dans les réglages.",
     "openNotificationSettings": "Ouvrir les réglages",
     "homeGreeting": "Bonjour, {{name}}"
@@ -1469,5 +1469,40 @@
     "class_wortDrugs": "Certains antidépresseurs, contraceptifs, ciclosporine, phénytoïne, carbamazépine, digoxine, ivabradine, indinavir, névirapine, irinotécan, imatinib, docétaxel, warfarine et simvastatine",
     "class_digoxin": "Glycosides cardiaques comme la digoxine (latex d’aloès oral)",
     "class_warfarin": "Warfarine"
+  },
+  "cloudBackup": {
+    "title": "Sauvegarde Cloud",
+    "premiumFeature": "Fonctionnalité Premium",
+    "premiumRequired": "La sauvegarde cloud des documents nécessite Premium. Passez à Premium pour synchroniser vos documents sur tous vos appareils.",
+    "optInTitle": "Sauvegarde cloud (optionnelle)",
+    "optInDescription": "Elle est désactivée. Si vous l'activez, nous stockerons une copie des documents que vous choisissez (par exemple ordonnances, résultats de laboratoire et comptes rendus d'imagerie), avec leurs étiquettes et notes, sur les serveurs d'un fournisseur d'hébergement cloud situé [aux États-Unis], qui travaille pour le compte de [RESPONSABLE – pendiente de aprobación] et ne peut les utiliser que pour stocker votre sauvegarde.",
+    "whatStored": "Ce qui est stocké :",
+    "whatStoredText": "uniquement les documents que vous marquez pour la sauvegarde. Nous ne sauvegardons pas vos données Health Connect ou Apple Santé.",
+    "howProtect": "Comment nous les protégeons :",
+    "howProtectText": "les données sont chiffrées lors de l'envoi et du stockage, et ne peuvent être consultées que depuis votre compte [et par les membres de votre Family Circle avec qui vous choisissez de les partager]. Si un incident de sécurité vous concerne, nous vous informerons immédiatement.",
+    "yourChoice": "Votre choix :",
+    "yourChoiceText": "vous pouvez désactiver la sauvegarde à tout moment dans Paramètres > Sauvegarde. Lorsque vous la désactivez, vous pouvez supprimer les copies cloud ; nous les supprimerons dans un délai de [X] jours. Supprimer vos copies est gratuit, même sans Pro.",
+    "yourRights": "Vos droits :",
+    "yourRightsText": "vous pouvez accéder, rectifier, supprimer ou vous opposer à l'utilisation de vos données (droits ARCO) et retirer votre consentement dans Paramètres > Confidentialité ou en écrivant à [PRIVACY EMAIL – pending approval]. Consultez l'Avis de confidentialité : [URL].",
+    "consentCheckbox": "Je consens expressément au stockage d'une copie cloud des documents de santé que je choisis, selon les conditions ci-dessus.",
+    "enableButton": "Activer la sauvegarde",
+    "enableButtonHelper": "(activée en cochant la case et en confirmant votre identité)",
+    "notNow": "Pas maintenant",
+    "lawfulRiskNote": "Stocker des documents sur internet comporte des risques qui n'existent pas si vous les stockez uniquement sur votre téléphone. Nous restons responsables de leur protection. Si vous préférez, laissez la sauvegarde désactivée : vos documents resteront stockés uniquement sur ce téléphone.",
+    "disableTitle": "Désactiver la sauvegarde ?",
+    "disableMessage": "Nous n'enverrons plus de nouveaux documents.",
+    "deleteCloudCheckbox": "Supprimer également les copies déjà dans le cloud (supprimées sous [X] jours ; les copies sur votre téléphone ne sont pas supprimées).",
+    "turnOff": "Désactiver",
+    "cancel": "Annuler",
+    "reauthRequired": "Veuillez confirmer votre identité pour activer la sauvegarde cloud",
+    "reauthFailed": "Échec de l'authentification. Veuillez réessayer.",
+    "consentGranted": "Sauvegarde cloud activée",
+    "consentMessage": "Vos documents de santé seront désormais sauvegardés dans le cloud.",
+    "deleteCloudDescription": "Supprimer toutes les copies cloud de vos documents. Vos copies locales resteront sur cet appareil.",
+    "deleteCloudButton": "Supprimer Toutes les Copies Cloud",
+    "deleteCloudTitle": "Supprimer les Documents Cloud",
+    "deleteCloudSuccess": "Toutes les copies cloud ont été supprimées.",
+    "deleteCloudNotImplemented": "Suppression cloud pas encore implémentée. Ceci est une TÂCHE en attente pour l'intégration backend.",
+    "disclaimer": "Les documents locaux fonctionnent toujours même sans sauvegarde cloud. La sauvegarde cloud est optionnelle."
   }
 }

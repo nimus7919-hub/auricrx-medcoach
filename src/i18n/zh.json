@@ -46,8 +46,8 @@
     "tip": "💡 提示：点击任何卡片以探索其功能。右下角的浮动AI按钮可让您即时访问我们医疗AI助手的健康建议。"
   },
   "dashboard": {
-    "noUpcomingReminders": "\u6682\u65e0\u5373\u5c06\u5230\u6765\u7684\u63d0\u9192",
-    "addReminderAction": "\u6dfb\u52a0",
+    "noUpcomingReminders": "暂无即将到来的提醒",
+    "addReminderAction": "添加",
     "title": "仪表板",
     "healthJournal": "健康日志",
     "nextReminder": "下一个提醒",
@@ -2076,8 +2076,8 @@
     }
   },
   "ui": {
-    "successWelcomeBack": "\u6b22\u8fce\u56de\u6765\uff0c{{name}}",
-    "sessionStarted": "\u767b\u5f55\u6210\u529f",
+    "successWelcomeBack": "欢迎回来，{{name}}",
+    "sessionStarted": "登录成功",
     "reminderNotificationsOff": "通知已关闭。你可以在设置中开启通知。",
     "openNotificationSettings": "打开设置",
     "homeGreeting": "你好，{{name}}"
@@ -2267,5 +2267,40 @@
   "usOnboarding": {
     "change": "更改",
     "continue": "继续"
+  },
+  "cloudBackup": {
+    "title": "云端备份",
+    "premiumFeature": "高级功能",
+    "premiumRequired": "文档的云端备份需要高级会员。升级以在设备间同步您的文档。",
+    "optInTitle": "云端备份（可选）",
+    "optInDescription": "当前处于关闭状态。如果您开启此功能，我们将在位于[美国]的云托管服务提供商的服务器上存储您选择的文档（例如处方、检验结果和影像报告）的副本及其标签和备注，该提供商代表 [RESPONSABLE – pendiente de aprobación] 工作，且仅可使用这些文档来存储您的备份。",
+    "whatStored": "存储的内容：",
+    "whatStoredText": "仅您标记为备份的文档。我们不会备份您的 Health Connect 或 Apple 健康数据。",
+    "howProtect": "我们如何保护：",
+    "howProtectText": "数据在传输和存储时均已加密，且仅能从您的账户访问[以及由您选择共享的 Family Circle 成员访问]。如果发生影响您的安全事件，我们将立即通知您。",
+    "yourChoice": "您的选择：",
+    "yourChoiceText": "您可以随时在「设置 > 备份」中关闭备份。关闭时您可以删除云端副本；我们将在 [X] 天内删除它们。删除副本是免费的，即使您不再拥有高级会员。",
+    "yourRights": "您的权利：",
+    "yourRightsText": "您可以在「设置 > 隐私」中访问、更正、取消或反对使用您的数据（ARCO 权利）并撤回同意，或通过写信至 [PRIVACY EMAIL – pending approval] 行使这些权利。请参阅隐私声明：[URL]。",
+    "consentCheckbox": "我明确同意按上述条款存储我选择的健康文档的云端副本。",
+    "enableButton": "启用备份",
+    "enableButtonHelper": "（勾选复选框并确认身份后启用）",
+    "notNow": "暂不启用",
+    "lawfulRiskNote": "在互联网上存储文档存在仅在手机上存储时不存在的风险。我们仍然负责保护这些文档。如果您愿意，可以关闭备份：您的文档将仅存储在此手机上。",
+    "disableTitle": "关闭备份？",
+    "disableMessage": "我们将不再上传新文档。",
+    "deleteCloudCheckbox": "同时删除已在云端的副本（将在 [X] 天内删除；不会删除手机上的副本）。",
+    "turnOff": "关闭",
+    "cancel": "取消",
+    "reauthRequired": "请确认您的身份以启用云端备份",
+    "reauthFailed": "身份验证失败。请重试。",
+    "consentGranted": "云端备份已启用",
+    "consentMessage": "您的健康文档现在将备份到云端。",
+    "deleteCloudDescription": "删除文档的所有云端副本。您的本地副本将保留在此设备上。",
+    "deleteCloudButton": "删除所有云端副本",
+    "deleteCloudTitle": "删除云端文档",
+    "deleteCloudSuccess": "所有云端副本已删除。",
+    "deleteCloudNotImplemented": "云端删除尚未实现。这是后端集成的待办事项。",
+    "disclaimer": "本地文档即使没有云端备份也始终可用。云端备份是可选的。"
   }
 }
