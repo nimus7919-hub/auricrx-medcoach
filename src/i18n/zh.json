@@ -16,7 +16,7 @@
     "delete": "删除"
   },
   "locationSearch": {
-    "disclosure": "我们仅使用您的位置来查找附近的药房或化验所。我们不会存储或用于追踪。药房搜索通过我们的服务器使用INEGI DENUE/PROFECO数据；化验所搜索和可选的驾驶距离使用Google Places/Maps。",
+    "disclosure": "我们仅使用您的位置来查找附近的药房或化验所。我们不会存储或用于追踪。药房搜索通过我们的服务器使用 INEGI DENUE/PROFECO 数据；化验所搜索和可选的驾驶距离使用 Google Places 和 Maps。",
     "reset": "重置位置同意",
     "resetDone": "位置同意已重置。下次搜索时我们会再次询问。",
     "resetError": "无法重置位置同意。请重试。"
@@ -371,7 +371,7 @@
     "summary": "摘要",
     "disclaimer": "AI 助手。我不是医生或医疗专业人员。仅提供一般信息。",
     "emergencyBanner": "可能是紧急情况：请立即拨打 911。",
-    "selfHarmBanner": "如果您有自我伤害倾向，请拨打911或生命热线（Línea de la Vida）：800 911 2000。",
+    "selfHarmBanner": "如果您有自我伤害倾向，请拨打 911 或生命热线 Línea de la Vida：800 911 2000。",
     "medicationWarning": "未经医生或药剂师同意，请勿更改或停用任何药物。",
     "recordSymptom": "记录症状",
     "insightsHelp": "关于洞察",
@@ -886,7 +886,7 @@
     "monthly": "每月",
     "custom": "自定义",
     "medicationDetails": "用药详情",
-    "medicationNamePlaceholder": "药品名称（例如：Galvus Met）",
+    "medicationNamePlaceholder": "药品名称（例如 Galvus Met）",
     "componentType": "成分类型",
     "selectDays": "选择日期",
     "selected": "已选",
@@ -2493,7 +2493,7 @@
         "text32": "启用定位服务以查找药房。",
         "text47": "无法加载药房。请重试。"
       },
-      "text128": "附近药房 - INEGI DENUE / PROFECO监测的商店"
+      "text128": "附近药房 - INEGI DENUE 和 PROFECO 监测的商店"
     },
     "Settings": {
       "text189": "隐私声明/消费者健康数据隐私政策"
@@ -2611,8 +2611,8 @@
     "ubicacionLocation": "位置",
     "cancelarCancel": "取消",
     "continuarContinue": "继续",
-    "mlKitNotProperlyImported": "ML Kit未正确导入",
-    "mlKitOcrNotAvailableOnThisDevice": "此设备不支持ML Kit OCR",
+    "mlKitNotProperlyImported": "ML Kit 未正确导入",
+    "mlKitOcrNotAvailableOnThisDevice": "此设备不支持 ML Kit OCR",
     "noTextDetectedInImage": "图像中未检测到文本",
     "textRecognitionFailedPleaseEnsureImageIsClearAndContainsReadableText": "文本识别失败 - 请确保图像清晰且包含可读文本",
     "noPagesOrTextProvidedForPdfGeneration": "未提供用于生成PDF的页面或文字",
@@ -2869,7 +2869,7 @@
     "noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite_781fca": "未找到{{value1}}的电话号码。请尝试直接致电或访问其网站。",
     "callPharmacy": "致电药房",
     "callValueValue_59a584": "拨打{{value1}}？\n{{value2}}",
-    "fuenteProfecoQuienEsQuienEnLosPreciosCcBy40": "来源：PROFECO，《Quién es Quién en los Precios》（CC-BY 4.0）",
+    "fuenteProfecoQuienEsQuienEnLosPreciosCcBy40": "来源：PROFECO《Quién es Quién en los Precios》(CC-BY 4.0)",
     "noPharmaciesLoadedYet": "尚未加载药房",
     "areYouSureYouWantToSignOut": "您确定要退出登录吗？",
     "accountDetails": "账户详情",
@@ -3412,11 +3412,11 @@
     "author": "Author:",
     "subject": "Subject:",
     "generated": "Generated:",
-    "generatedbyAuricRxMedCoach": "由AuricRx MedCoach生成",
-    "generatedbyAuricRXMedicalCoach": "由AuricRX Medical Coach生成",
+    "generatedbyAuricRxMedCoach": "由 AuricRx MedCoach 生成",
+    "generatedbyAuricRXMedicalCoach": "由 AuricRX Medical Coach 生成",
     "medicalIDDocument": "📋 医疗身份证件",
     "frontBackIDDocument": "🆔 正反面身份证件",
-    "generatedbyAuricRXMedicalCoachApp": "由AuricRX Medical Coach应用生成",
+    "generatedbyAuricRXMedicalCoachApp": "由 AuricRX Medical Coach 应用生成",
     "secureProfessionalReliable": "安全 • 专业 • 可靠",
     "medicalCoachApp": "医疗助手应用",
     "auricrxIDDocument": "AuricRX身份证件",
@@ -3424,8 +3424,8 @@
     "hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric_cab0e2": "您好{{value1}}医生，\n\n请查收附件中我的医疗文档：{{value2}}\n\n此文档通过AuricRX医疗助手安全分享。\n\n此致\n患者",
     "hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec": "您好{{value1}}医生，请查收附件中我的医疗文档：{{value2}}\n\n📄 查看文档：{{value3}}\n\n此文档通过AuricRX医疗助手安全分享。",
     "hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5": "您好{{value1}}医生，\n\n请查收附件中我的医疗文档：{{value2}}\n\n📄 查看文档：{{value3}}\n\n此文档通过AuricRX医疗助手安全分享。\n\n此致\n患者",
-    "connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta": "⏱️ 连接超时\n\nAI服务器未响应。请：\n\n1. 确保服务器正在运行：\n   cd server\n   npm start\n\n2. 检查端口4000是否可用\n\n3. 验证服务器环境已配置",
-    "networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP": "🌐 网络错误\n\n无法连接到AI服务器。请：\n\n1. 启动服务器：cd server; npm start\n2. 检查是否在端口4000上运行\n3. 确保防火墙允许该连接",
+    "connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta": "⏱️ 连接超时\n\nAI 服务器未响应。请：\n\n1. 确保服务器正在运行：\n   cd server\n   npm start\n\n2. 检查端口 4000 是否可用\n\n3. 验证服务器环境已配置",
+    "networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP": "🌐 网络错误\n\n无法连接至 AI 服务器。请：\n\n1. 启动服务器：cd server; npm start\n2. 检查是否在端口 4000 运行\n3. 确保防火墙允许该连接",
     "first50CharactersValue": "- 前50个字符：\"{{value1}}\""
   },
   "documentPdf": {
@@ -3577,12 +3577,12 @@
     "wearables": "仅供一般健康参考。这些数字不是医疗测量值，未经检查是否有问题。有任何健康顾虑请咨询医生。",
     "recalls": "不良事件报告未经核实，不能证明药物导致问题。来源：openFDA。未经医生同意不要停用药物。",
     "prices": "价格仅为估计信息，可能过时，不构成要约。实际费用取决于药房、保险和数量。请与药房确认。",
-    "nadac": "NADAC是药房购买药品的平均价格，由CMS每周发布（data.medicaid.gov）。它不是您在药房支付的价格，不包括配药费或保险。CMS不认可此应用。数据截至[日期]。",
+    "nadac": "NADAC 是药房购买药品的平均价格，由 CMS 每周发布 (data.medicaid.gov)。这不是您在药房支付的价格，不包括配药费或保险。CMS 不认可此应用。数据截至[日期]。",
     "nlm": "本产品使用由美国国家医学图书馆（NLM）、国家卫生研究院、卫生与公众服务部提供的公开数据；NLM不对产品负责，不认可或推荐此或任何其他产品。",
     "fda": "数据由美国食品药品监督管理局（https://open.fda.gov）提供。FDA不认可此应用。",
-    "dailymed": "标签信息来自DailyMed（dailymed.nlm.nih.gov），美国国家医学图书馆。最后更新[日期]。",
-    "nppes": "药房列表来自CMS NPPES NPI注册表；信息由药房提供，可能过时。",
-    "costplus": "Cost Plus Drugs是其所有者的商标；AuricRX不隶属于该品牌。"
+    "dailymed": "标签信息来自 DailyMed (dailymed.nlm.nih.gov)，美国国家医学图书馆。最后更新[日期]。",
+    "nppes": "药房列表来自 CMS NPPES NPI 注册表；信息由药房提供，可能过时。",
+    "costplus": "Cost Plus Drugs 是其所有者的商标；AuricRX 不隶属于该品牌。"
   },
   "usSmart": {
     "title": "智能提醒",
