@@ -1149,7 +1149,7 @@
     "lastUpdated": "Última atualização: Novembro de 2026"
   },
   "prevention": {
-    "title": "Prevenção e Planejador de Exames",
+    "title": "Prevenção",
     "description": "Descrição (opcional)",
     "disclaimer": "Os modelos fornecem orientação geral baseada em diretrizes de saúde pública. Eles não substituem as recomendações do seu médico ou avaliam se você precisa pessoalmente de um exame.",
     "fromTemplate": "Do Modelo",
@@ -1191,7 +1191,34 @@
       "dentalCheckupDesc": "Exame odontológico e limpeza de rotina.",
       "eyeExam": "Exame Oftalmológico",
       "eyeExamDesc": "Exame de visão e saúde ocular de rotina."
-    }
+    },
+    "subtitle": "Dicas de saúde preventiva",
+    "tips": "Dicas de Prevenção",
+    "guidelines": "Diretrizes",
+    "screening": "Exames de Rastreamento",
+    "vaccination": "Vacinação",
+    "lifestyle": "Estilo de Vida",
+    "nutrition": "Nutrição",
+    "exercise": "Exercício",
+    "sleepHygiene": "Higiene do Sono",
+    "stressManagement": "Gerenciamento de Estresse",
+    "substanceAvoidance": "Evitar Substâncias",
+    "regularCheckups": "Exames Regulares",
+    "earlyDetection": "Detecção Precoce",
+    "riskAssessment": "Avaliação de Risco",
+    "familyHistory": "Histórico Familiar",
+    "geneticTesting": "Testes Genéticos",
+    "personalizedPlan": "Plano Personalizado",
+    "healthGoals": "Metas de Saúde",
+    "trackProgress": "Acompanhar Progresso",
+    "resources": "Recursos",
+    "education": "Educação",
+    "support": "Suporte",
+    "community": "Comunidade",
+    "programs": "Programas",
+    "services": "Serviços",
+    "professionals": "Profissionais",
+    "specialists": "Especialistas"
   },
   "appointments": {
     "title": "Consultas",
@@ -2591,137 +2618,175 @@
     "herbs": {
       "HERBS": {
         "item0": {
-          "names": "Damiana",
+          "names": "Equinácea",
           "details": {
             "origin": "Mexico, Southwestern USA",
             "summary": "Flores de camomila secas com aroma suave e propriedades calmantes"
-          }
+          },
+          "primaryUse": "Suporte Imunológico",
+          "caution": "Pode interferir com medicamentos imunossupressores"
         },
         "item1": {
-          "names": "Epazote",
+          "names": "Erva de São João",
           "details": {
             "origin": "Nativa da Europa e Ásia, agora amplamente cultivada",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Suporte ao Humor",
+          "caution": "Interage com muitos medicamentos"
         },
         "item2": {
-          "names": "Dandelion",
+          "names": "Ginkgo Biloba",
           "details": {
             "origin": "Worldwide (used in Mexico, North America, China)",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Suporte à Memória e Cognição",
+          "caution": "Pode aumentar risco de sangramento"
         },
         "item3": {
-          "names": "Chamomile",
+          "names": "Alho",
           "details": {
             "origin": "Europe, Western Asia (widely used globally)",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde Cardiovascular",
+          "caution": "Pode aumentar risco de sangramento"
         },
         "item4": {
-          "names": "Garlic",
+          "names": "Ginseng",
           "details": {
             "origin": "Central Asia (widely cultivated worldwide)",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Energia e Vitalidade",
+          "caution": "Pode afetar açúcar no sangue e pressão arterial"
         },
         "item5": {
-          "names": "Selfheal",
+          "names": "Raiz de Valeriana",
           "details": {
             "origin": "North America; widely used in Traditional Chinese Medicine",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Auxílio ao Sono",
+          "caution": "Pode aumentar efeitos sedativos"
         },
         "item6": {
-          "names": "Tagetes lucida",
+          "names": "Gengibre",
           "details": {
             "origin": "Central Mexico",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde Digestiva e Náuseas",
+          "caution": "Pode aumentar risco de sangramento"
         },
         "item7": {
-          "names": "Clinopodium mexicanum",
+          "names": "Cúrcuma / Curcumina",
           "details": {
             "origin": "Mexico",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Suporte Anti-inflamatório",
+          "caution": "Pode aumentar risco de sangramento"
         },
         "item8": {
-          "names": "Mexican Bay Leaf",
+          "names": "Cranberry",
           "details": {
             "origin": "Mexico",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde do Trato Urinário",
+          "caution": "Pode interagir com anticoagulantes"
         },
         "item9": {
-          "names": "Sweet Wormwood",
+          "names": "Saw Palmetto",
           "details": {
             "origin": "China (Traditional Chinese Medicine)",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde da Próstata",
+          "caution": "Pode afetar hormônios"
         },
         "item10": {
-          "names": "Aloe Vera",
+          "names": "Cohosh Preto",
           "details": {
             "origin": "Nativa da Europa, agora cultivada globalmente",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Sintomas da Menopausa",
+          "caution": "Pode afetar fígado"
         },
         "item11": {
-          "names": "Ginger",
+          "names": "Ácidos Graxos Ômega-3",
           "details": {
             "origin": "Southeast Asia; widely used globally",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde Cardiovascular",
+          "caution": "Pode aumentar risco de sangramento"
         },
         "item12": {
-          "names": "Echinacea",
+          "names": "Glucosamina",
           "details": {
             "origin": "North America",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde das Articulações",
+          "caution": "Pode afetar açúcar no sangue"
         },
         "item13": {
-          "names": "Ginkgo",
+          "names": "Condroitina",
           "details": {
             "origin": "China; introduced to US",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde das Articulações",
+          "caution": "Pode aumentar risco de sangramento"
         },
         "item14": {
-          "names": "Notoginseng",
+          "names": "Probióticos",
           "details": {
             "origin": "China",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde Digestiva",
+          "caution": "Geralmente seguro"
         },
         "item15": {
-          "names": "Turmeric",
+          "names": "Melatonina",
           "details": {
             "origin": "Southeast Asia; used globally",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Regulação do Sono",
+          "caution": "Pode afetar medicamentos para pressão arterial"
         },
         "item16": {
-          "names": "Rosemary",
+          "names": "Coenzima Q10",
           "details": {
             "origin": "Nativa da Ásia e América do Norte",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Produção de Energia Celular",
+          "caution": "Pode interagir com anticoagulantes"
         },
         "item17": {
-          "names": "Parsley",
+          "names": "Cardo Mariano",
           "details": {
             "origin": "Mediterranean; used globally",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde do Fígado",
+          "caution": "Pode interagir com medicamentos"
         },
         "item18": {
-          "names": "Fennel",
+          "names": "Chá Verde / Extrato",
           "details": {
             "origin": "Mediterranean; adopted globally",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Antioxidante e Perda de Peso",
+          "caution": "Pode afetar fígado em altas doses"
         },
         "item19": {
           "names": "Aristolochia odoratissima",
@@ -2731,11 +2796,13 @@
           }
         },
         "item20": {
-          "names": "Mexican Oregano",
+          "names": "Espirulina",
           "details": {
             "origin": "Mexico",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Superalimento Rico em Nutrientes",
+          "caution": "Pode afetar sistema imunológico"
         },
         "item21": {
           "names": "Yerba Mansa",
@@ -2745,67 +2812,85 @@
           }
         },
         "item22": {
-          "names": "Gray Sarsaparilla",
+          "names": "Ashwagandha",
           "details": {
             "origin": "Mexico, Central America",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Redução de Estresse",
+          "caution": "Pode afetar hormônios da tireoide"
         },
         "item23": {
-          "names": "Mexican Marigold",
+          "names": "Feno-grego",
           "details": {
             "origin": "Mexico, Guatemala",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Açúcar no Sangue e Lactação",
+          "caution": "Pode afetar açúcar no sangue"
         },
         "item24": {
-          "names": "Heliopsis longipes",
+          "names": "Canela",
           "details": {
             "origin": "Mexico",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Açúcar no Sangue",
+          "caution": "Pode afetar açúcar no sangue"
         },
         "item25": {
-          "names": "Aztec Sweet Herb",
+          "names": "Raiz de Maca",
           "details": {
             "origin": "Southern Mexico",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Energia e Equilíbrio Hormonal",
+          "caution": "Pode afetar hormônios"
         },
         "item26": {
-          "names": "Korean Mint",
+          "names": "Rhodiola",
           "details": {
             "origin": "China, Korea",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Redução de Estresse e Fadiga",
+          "caution": "Pode afetar pressão arterial"
         },
         "item27": {
-          "names": "Astragalus",
+          "names": "Bacopa",
           "details": {
             "origin": "China",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Memória e Função Cognitiva",
+          "caution": "Pode causar efeitos gastrointestinais"
         },
         "item28": {
-          "names": "Licorice",
+          "names": "Passiflora",
           "details": {
             "origin": "China",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Ansiedade e Sono",
+          "caution": "Pode aumentar efeitos sedativos"
         },
         "item29": {
-          "names": "Dong Quai",
+          "names": "Alcaçuz",
           "details": {
             "origin": "China",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Saúde Digestiva",
+          "caution": "Pode aumentar pressão arterial"
         },
         "item30": {
-          "names": "Lingzhi Mushroom",
+          "names": "Urtiga",
           "details": {
             "origin": "China",
             "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
-          }
+          },
+          "primaryUse": "Alergias e Inflamação",
+          "caution": "Pode afetar açúcar no sangue e pressão arterial"
         },
         "item31": {
           "names": "Cinnamon",
