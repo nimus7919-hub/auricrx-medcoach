@@ -2,12 +2,14 @@ import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
 import { requestSearchLocationPermission } from "./../lib/locationPermission";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Alert, Linking, Platform } from "react-native";
 import * as Location from "expo-location";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
 import { styles } from "./appStyles";
+import { PremiumEntitlementService } from "../services/premiumEntitlementService";
+import PremiumUpgradeScreen from "./PremiumUpgradeScreen";
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createPharmacies(getScope) {
@@ -17,6 +19,28 @@ export default function createPharmacies(getScope) {
 
     const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [showUpgrade, setShowUpgrade] = useState(false);
+    const [entitlement, setEntitlement] = useState(null);
+    
+    useEffect(() => {
+      checkPremiumAccess();
+    }, []);
+    
+    const checkPremiumAccess = async () => {
+      const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+      setEntitlement(ent);
+      if (!ent.hasPremiumAccess) {
+        setShowUpgrade(true);
+      }
+    };
+    
+    if (showUpgrade && entitlement) {
+      return <PremiumUpgradeScreen 
+        onClose={() => setShowUpgrade(false)} 
+        entitlement={entitlement} 
+        feature="pharmacy" 
+      />;
+    }
 
     // Use pre-loaded data from main App component
     // No need for local state - using pharmacies, pharmaciesLoading, pharmaciesError from main component
@@ -24,6 +48,13 @@ export default function createPharmacies(getScope) {
     // Refresh function - reloads data if needed
     const refreshPharmacies = async () => {
       try {
+        const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+        if (!ent.hasPremiumAccess) {
+          setEntitlement(ent);
+          setShowUpgrade(true);
+          return;
+        }
+        
         setPharmaciesLoading(true);
         setPharmaciesError(null);
         

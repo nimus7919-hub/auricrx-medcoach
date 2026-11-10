@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { PremiumEntitlementService } from '../services/premiumEntitlementService';
+import PremiumUpgradeScreen from './PremiumUpgradeScreen';
 import { usReference, costPlusSearchUrl } from '../services/usReferenceService';
 import notices from '../legal/usDisclaimers.json';
 import { Image } from 'react-native';
@@ -13,10 +15,33 @@ const modes = { drugs: 'Drug search and labels', interactions: 'Interaction labe
 export default function USReferenceScreen({ onClose, initialMode = 'drugs', initialQuery = '', drugName = '' }) {
   const { getCardBackgroundColor, getCardBorderColor, getSubTextColor, getAccentColor } = useWallpaper();
   const cardBg = getCardBackgroundColor() + 'CC', border = getCardBorderColor(), sub = getSubTextColor(), accent = getAccentColor();
+  
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [entitlement, setEntitlement] = useState(null);
   const [mode, setMode] = useState(initialMode);
   const [query, setQuery] = useState(initialQuery);
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  
+  useEffect(() => {
+    checkPremiumAccess();
+  }, []);
+  
+  const checkPremiumAccess = async () => {
+    const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+    setEntitlement(ent);
+    if (!ent.hasPremiumAccess && (initialMode === 'pharmacies' || initialMode === 'drugs')) {
+      setShowUpgrade(true);
+    }
+  };
+  
+  if (showUpgrade && entitlement) {
+    return <PremiumUpgradeScreen 
+      onClose={onClose} 
+      entitlement={entitlement} 
+      feature={initialMode === 'pharmacies' ? 'pharmacy' : 'general'} 
+    />;
+  }
   const [data, setData] = useState(null);
   const [label, setLabel] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -24,6 +49,13 @@ export default function USReferenceScreen({ onClose, initialMode = 'drugs', init
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
   const load = async (kind, params) => {
+    const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+    if (!ent.hasPremiumAccess && (kind === 'pharmacies' || kind === 'drugs' || kind === 'nadac' || kind === 'recalls' || kind === 'interactions' || kind === 'fda-labels' || kind === 'labels' || kind === 'label')) {
+      setEntitlement(ent);
+      setShowUpgrade(true);
+      return;
+    }
+    
     request.current?.abort();
     const controller = new AbortController(); request.current = controller;
     setBusy(true); setError(''); setData(null); setLabel(null);

@@ -3,12 +3,14 @@ import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
 import { requestSearchLocationPermission } from "./../lib/locationPermission";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Alert, Linking, Platform } from 'react-native';
 import * as Location from "expo-location";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
 import { styles } from "./appStyles";
+import { PremiumEntitlementService } from "../services/premiumEntitlementService";
+import PremiumUpgradeScreen from "./PremiumUpgradeScreen";
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createLabs(getScope) {
@@ -20,6 +22,28 @@ export default function createLabs(getScope) {
     const [lastUpdated, setLastUpdated] = useState(null);
     const [selectedLab, setSelectedLab] = useState(null);
     const [showTestTypes, setShowTestTypes] = useState(false);
+    const [showUpgrade, setShowUpgrade] = useState(false);
+    const [entitlement, setEntitlement] = useState(null);
+    
+    useEffect(() => {
+      checkPremiumAccess();
+    }, []);
+    
+    const checkPremiumAccess = async () => {
+      const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+      setEntitlement(ent);
+      if (!ent.hasPremiumAccess) {
+        setShowUpgrade(true);
+      }
+    };
+    
+    if (showUpgrade && entitlement) {
+      return <PremiumUpgradeScreen 
+        onClose={() => setShowUpgrade(false)} 
+        entitlement={entitlement} 
+        feature="lab" 
+      />;
+    }
 
     // Use pre-loaded data from main App component
     // No need for local state - using labs, labsLoading, labsError from main component
@@ -27,6 +51,13 @@ export default function createLabs(getScope) {
     // Refresh function - reloads data if needed
     const refreshLabs = async () => {
       try {
+        const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+        if (!ent.hasPremiumAccess) {
+          setEntitlement(ent);
+          setShowUpgrade(true);
+          return;
+        }
+        
         setLabsLoading(true);
         setLabsError(null);
         

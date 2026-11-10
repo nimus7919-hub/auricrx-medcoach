@@ -18,7 +18,7 @@
  * - Find a Lab (paid API: Google Places/Maps)
  * - Medicine Lookup (if uses paid backend APIs)
  * - Wearable sync (Health Connect/HealthKit)
- * - Data export/summaries sharing
+ * - Summary sharing (WhatsApp family summaries, share sheet summaries)
  * - Cloud backup for documents (opt-in: uploads documents to backend for sync/backup)
  * - Premium color themes (if implemented)
  * 
@@ -26,6 +26,7 @@
  * - Settings
  * - Privacy notice
  * - Account deletion / delete-my-data
+ * - Data export (user's own data export as JSON/PDF)
  * - Read-only access to existing data (view documents/data already created)
  */
 
@@ -54,8 +55,7 @@ export const PREMIUM_FEATURES = {
   HEALTH_CONNECT_SYNC: true,
   HEALTHKIT_SYNC: true,
   
-  // Data export and sharing
-  DATA_EXPORT: true,
+  // Summary sharing (WhatsApp family summaries)
   SUMMARY_SHARING: true,
   
   // Premium themes
@@ -97,6 +97,7 @@ export const FREE_FEATURES = {
   SETTINGS: true,
   PRIVACY_NOTICE: true,
   ACCOUNT_DELETION: true,
+  DATA_EXPORT: true, // User's own data export (JSON/PDF)
   VIEW_EXISTING_DATA: true, // Read-only access to data already created
 };
 

@@ -9,6 +9,8 @@ import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Animated, StatusBar, Image, Platform, Vibration, Dimensions, TextInput, Share } from 'react-native';
+import { PremiumEntitlementService } from '../services/premiumEntitlementService';
+import PremiumUpgradeScreen from './PremiumUpgradeScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -67,6 +69,30 @@ interface DrugInteraction {
 function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivacy, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
+  
+  // Premium access state
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [entitlement, setEntitlement] = useState<any>(null);
+  
+  useEffect(() => {
+    checkPremiumAccess();
+  }, []);
+  
+  const checkPremiumAccess = async () => {
+    const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+    setEntitlement(ent);
+    if (!ent.hasPremiumAccess) {
+      setShowUpgrade(true);
+    }
+  };
+  
+  if (showUpgrade && entitlement) {
+    return <PremiumUpgradeScreen 
+      onClose={onClose} 
+      entitlement={entitlement} 
+      feature="general" 
+    />;
+  }
   
   // Use translation hook directly for AI Health
   const { t: i18nT, i18n } = useTranslation();
