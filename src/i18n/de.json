@@ -348,7 +348,7 @@
     "thinking": "KI denkt nach...",
     "send": "Senden",
     "fastingProfileRestricted": "Ihr Fastenprofil ist durch Datenschutzeinstellungen eingeschränkt. Die KI wird es nicht in die Analyse einbeziehen.",
-    "referencePriceNotice": "Preise dienen nur als Referenz und können veraltet sein. Ihre tatsächlichen Kosten hängen von Ihrer Apotheke und Versicherung ab.",
+    "referencePriceNotice": "Referenzpreis geprüft am {{date}}. Kann im Geschäft abweichen.",
     "aiHealthAssistant": "KI-Gesundheitsinformationsassistent",
     "intelligentHealthcareFeatures": "KI-Tools zur Organisation Ihrer Gesundheitsinformationen. Sie ersetzen nicht Ihren Arzt."
   },
@@ -1056,7 +1056,7 @@
     "daysUntilCancellation": "Tage Bis Zur Kündigung",
     "cancelMembership": "Abonnement Kündigen",
     "restartMembership": "Abonnement Reaktivieren",
-    "cancelMembershipConfirm": "Sind Sie sicher, dass Sie Ihr Abonnement kündigen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "cancelMembershipConfirm": "Abonnement kündigen. Sie behalten Pro bis {{date}}. Keine weiteren Kosten. Sie können jederzeit erneut abonnieren.",
     "restartMembershipConfirm": "Sind Sie sicher, dass Sie Ihr Abonnement reaktivieren möchten?",
     "confirmCancel": "Ja, Abonnement Kündigen",
     "confirmRestart": "Ja, Abonnement Reaktivieren",

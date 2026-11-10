@@ -348,7 +348,7 @@
     "thinking": "L'IA réfléchit...",
     "send": "Envoyer",
     "fastingProfileRestricted": "Votre profil de jeûne est restreint par les paramètres de confidentialité. L'IA ne l'inclura pas dans l'analyse.",
-    "referencePriceNotice": "Les prix sont à titre indicatif uniquement et peuvent être obsolètes. Votre coût réel dépend de votre pharmacie et de votre assurance.",
+    "referencePriceNotice": "Prix de référence vérifié le {{date}}. Peut varier en magasin.",
     "aiHealthAssistant": "Assistant IA d'informations santé",
     "intelligentHealthcareFeatures": "Outils IA pour organiser vos informations de santé. Ils ne remplacent pas votre médecin."
   },
@@ -1054,7 +1054,7 @@
     "daysUntilCancellation": "Jours Jusqu'à l'Annulation",
     "cancelMembership": "Annuler l'Abonnement",
     "restartMembership": "Réactiver l'Abonnement",
-    "cancelMembershipConfirm": "Êtes-vous sûr de vouloir annuler votre abonnement ? Cette action ne peut pas être annulée.",
+    "cancelMembershipConfirm": "Annuler l'abonnement. Vous gardez Pro jusqu'au {{date}}. Plus de frais. Vous pouvez vous réabonner à tout moment.",
     "restartMembershipConfirm": "Êtes-vous sûr de vouloir réactiver votre abonnement ?",
     "confirmCancel": "Oui, Annuler l'Abonnement",
     "confirmRestart": "Oui, Réactiver l'Abonnement",
