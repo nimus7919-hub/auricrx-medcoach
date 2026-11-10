@@ -25,6 +25,11 @@ import InviteFamilyMemberScreen from '../screens/InviteFamilyMemberScreen';
 import AcceptInviteScreen from '../screens/AcceptInviteScreen';
 import AddFamilyMemberScreen from '../screens/AddFamilyMemberScreen';
 import SharePreviewScreen from '../screens/SharePreviewScreen';
+// Home/Tools screens
+import PreventionPlannerScreen from '../screens/PreventionPlannerScreen';
+import LabDocumentOrganizerScreen from '../screens/LabDocumentOrganizerScreen';
+import DailyHabitsScreen from '../screens/DailyHabitsScreen';
+import FamilyCircleScreen from '../screens/FamilyCircleScreen';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
@@ -57,6 +62,10 @@ export default function createAppNavigator(getScope) {
     route === 'accept-invite' ? <AcceptInviteScreen onClose={() => setRoute('dashboard')} onAccepted={() => {}} /> :
     route === 'add-family-member' ? <AddFamilyMemberScreen onClose={() => setRoute('dashboard')} onAdded={() => {}} /> :
     route === 'share-preview' ? <SharePreviewScreen onClose={() => setRoute('dashboard')} /> :
+    route === 'prevention-planner' ? <PreventionPlannerScreen onClose={() => setRoute('dashboard')} /> :
+    route === 'lab-organizer' ? <LabDocumentOrganizerScreen onClose={() => setRoute('dashboard')} /> :
+    route === 'daily-habits' ? <DailyHabitsScreen onClose={() => setRoute('dashboard')} /> :
+    route === 'family-circle' ? <FamilyCircleScreen onClose={() => setRoute('dashboard')} /> :
      <Dashboard />);
 };
 }

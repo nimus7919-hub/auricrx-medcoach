@@ -87,6 +87,30 @@ export default function createDashboard(getScope) {
               onPress={() => setRoute('documents')}
               subtitle={uiI18n.t("ui.medicalDocumentsForDoctorVisits")}
             />
+            <Card 
+              title="Family Circle" 
+              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>👨‍👩‍👧‍👦</Text></View>} 
+              onPress={() => setRoute('family-circle')}
+              subtitle="Manage family health profiles and share information"
+            />
+            <Card 
+              title="Prevention Planner" 
+              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🛡️</Text></View>} 
+              onPress={() => setRoute('prevention-planner')}
+              subtitle="Track screenings and preventive care"
+            />
+            <Card 
+              title="Lab Organizer" 
+              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🔬</Text></View>} 
+              onPress={() => setRoute('lab-organizer')}
+              subtitle="Organize lab results and track trends"
+            />
+            <Card 
+              title="Daily Habits" 
+              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>📝</Text></View>} 
+              onPress={() => setRoute('daily-habits')}
+              subtitle="Track daily health habits and routines"
+            />
             {/* Medication Promotions - Hidden for now */}
             {/* <Card 
               title="Medication Promotions" 
