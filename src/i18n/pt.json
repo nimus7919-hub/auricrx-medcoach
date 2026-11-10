@@ -380,7 +380,7 @@
     "thinking": "IA está pensando...",
     "send": "Enviar",
     "fastingProfileRestricted": "Seu perfil de jejum está restrito pelas configurações de privacidade. A IA não o incluirá na análise.",
-    "referencePriceNotice": "Preços de referência baseados em {{source}}. Os preços reais podem variar.",
+    "referencePriceNotice": "Preço de referência verificado em {{date}}. Pode variar na loja.",
     "aiHealthAssistant": "Assistente de IA de informações de saúde",
     "intelligentHealthcareFeatures": "Ferramentas de IA para organizar suas informações de saúde. Elas não substituem seu médico."
   },
