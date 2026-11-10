@@ -13,13 +13,13 @@ interface AcceptInviteScreenProps {
 
 export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInviteScreenProps) {
   const { t } = useTranslation();
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   const [inviteCode, setInviteCode] = useState('');
   const [permissions, setPermissions] = useState({
     viewMeds: false,
     editDoses: false,
     receiveAlerts: false,
+    shareDocuments: false, // Family Documents: OFF by default
   });
   const [accepting, setAccepting] = useState(false);
 
@@ -85,7 +85,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
             style={[
               styles.codeInput,
               { 
-                backgroundColor: '#10213A',
+                backgroundColor: getCardBackgroundColor(),
                 borderColor: getCardBorderColor(),
                 color: getCardTextColor(),
               }
@@ -93,7 +93,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
             value={inviteCode}
             onChangeText={setInviteCode}
             placeholder="FC123456ABCD"
-            placeholderTextColor="#BAC5D5"
+            placeholderTextColor={getCardTextColor() + '80'}
             autoCapitalize="characters"
             autoCorrect={false}
             maxLength={20}
@@ -150,6 +150,20 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
               {t('familyCircle.permReceiveAlerts')}
             </DynamicText>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.permissionRow}
+            onPress={() => togglePermission('shareDocuments')}
+          >
+            <MaterialIcons
+              name={permissions.shareDocuments ? 'check-box' : 'check-box-outline-blank'}
+              size={24}
+              color={permissions.shareDocuments ? getAccentColor() : getCardTextColor()}
+            />
+            <DynamicText type="card" style={[styles.permissionLabel, { color: getCardTextColor() }]}>
+              {t('familyCircle.permShareDocuments')}
+            </DynamicText>
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.noteCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
@@ -172,21 +186,24 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
-  content: { flex: 1 },
-  contentContainer: { padding: 16, paddingBottom: 32 },
-  card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
-  codeInput: { borderRadius: 8, borderWidth: 1, padding: 14, fontSize: 18, fontWeight: '600', textAlign: 'center', letterSpacing: 1 },
-  permissionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  permissionLabel: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
-  helperText: { fontSize: 13, opacity: 0.7, lineHeight: 19 },
-  noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
-  noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
-  acceptButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
-  buttonText: { fontSize: 16, fontWeight: '600', color: '#17130B' },
-});
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
+  const buttonTextColor = '#17130B'; // Dark text for gold buttons
+  
+  const styles = StyleSheet.create({
+    container: { flex: 1 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
+    title: { fontSize: 24, fontWeight: 'bold' },
+    closeButton: { fontSize: 16, color: getAccentColor() },
+    content: { flex: 1 },
+    contentContainer: { padding: 16, paddingBottom: 32 },
+    card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+    codeInput: { borderRadius: 8, borderWidth: 1, padding: 14, fontSize: 18, fontWeight: '600', textAlign: 'center', letterSpacing: 1 },
+    permissionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+    permissionLabel: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
+    helperText: { fontSize: 13, opacity: 0.7, lineHeight: 19 },
+    noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
+    noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
+    acceptButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
+    buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
+  });

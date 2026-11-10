@@ -15,6 +15,7 @@ export interface FamilyMember {
     viewMeds: boolean;
     editDoses: boolean;
     receiveAlerts: boolean;
+    shareDocuments?: boolean; // Family Documents: OFF by default, grant to let this member see/add their folder
   };
   // F5: Device-only adult profiles
   deviceOnly?: boolean;

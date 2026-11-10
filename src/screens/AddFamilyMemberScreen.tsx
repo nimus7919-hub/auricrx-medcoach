@@ -16,7 +16,6 @@ type ProfileType = 'regular' | 'device-only-adult' | 'child';
 
 export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMemberScreenProps) {
   const { t } = useTranslation();
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
@@ -117,7 +116,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             style={[
               styles.input,
               { 
-                backgroundColor: '#10213A',
+                backgroundColor: getCardBackgroundColor(),
                 borderColor: getCardBorderColor(),
                 color: getCardTextColor(),
               }
@@ -125,7 +124,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             value={name}
             onChangeText={setName}
             placeholder="Enter name"
-            placeholderTextColor="#BAC5D5"
+            placeholderTextColor={getCardTextColor() + '80'}
           />
 
           <DynamicText type="card" style={[styles.label, { color: getCardTextColor() }]}>
@@ -135,7 +134,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             style={[
               styles.input,
               { 
-                backgroundColor: '#10213A',
+                backgroundColor: getCardBackgroundColor(),
                 borderColor: getCardBorderColor(),
                 color: getCardTextColor(),
               }
@@ -143,7 +142,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             value={relationship}
             onChangeText={setRelationship}
             placeholder="e.g., Mom, Dad, Son, Daughter"
-            placeholderTextColor="#BAC5D5"
+            placeholderTextColor={getCardTextColor() + '80'}
           />
 
           <DynamicText type="card" style={[styles.label, { color: getCardTextColor() }]}>
@@ -153,7 +152,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             style={[
               styles.input,
               { 
-                backgroundColor: '#10213A',
+                backgroundColor: getCardBackgroundColor(),
                 borderColor: getCardBorderColor(),
                 color: getCardTextColor(),
               }
@@ -161,7 +160,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             value={birthYear}
             onChangeText={setBirthYear}
             placeholder="e.g., 1980"
-            placeholderTextColor="#BAC5D5"
+            placeholderTextColor={getCardTextColor() + '80'}
             keyboardType="number-pad"
             maxLength={4}
           />
@@ -280,11 +279,14 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
+  const buttonTextColor = '#17130B';
+  
+  const styles = StyleSheet.create({
+    container: { flex: 1 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
+    title: { fontSize: 24, fontWeight: 'bold' },
+    closeButton: { fontSize: 16, color: getAccentColor() },
   content: { flex: 1 },
   contentContainer: { padding: 16, paddingBottom: 32 },
   card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
@@ -298,6 +300,6 @@ const styles = StyleSheet.create({
   typeDescription: { fontSize: 13, opacity: 0.75, lineHeight: 18 },
   attestationRow: { flexDirection: 'row', alignItems: 'flex-start' },
   attestationText: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
-  addButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
-  buttonText: { fontSize: 16, fontWeight: '600', color: '#17130B' },
-});
+    addButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
+    buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
+  });

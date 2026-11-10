@@ -3790,11 +3790,12 @@
     "weeklySummary": "Resumen Semanal",
     "shareConsentTitle": "Compartir Información de Salud",
     "shareConsentMessage": "Estás por compartir información de salud de un familiar. Este consentimiento es válido por 7 días.",
-    "grantConsent": "Acepto Compartir"
+    "grantConsent": "Acepto Compartir",
+    "permShareDocuments": "Ver y agregar documentos en su carpeta de Documentos Familiares"
   },
   "prevention": {
     "title": "Planificador de Prevención",
-    "description": "Programa recordatorios anuales de revisiones, chequeos y vacunas. Estos son solo recordatorios y no evalúan tu riesgo individual.",
+    "description": "Descripción (opcional)",
     "disclaimer": "Las plantillas proporcionan orientación general basada en guías de salud pública. No reemplazan las recomendaciones de tu médico ni evalúan si necesitas personalmente una prueba.",
     "fromTemplate": "Desde Plantilla",
     "addCustom": "Agregar Personalizado",
@@ -3804,7 +3805,6 @@
     "selectTemplate": "Selecciona una Plantilla",
     "scheduleCheckup": "Programar Chequeo",
     "checkupName": "Nombre del Chequeo",
-    "description": "Descripción (opcional)",
     "date": "Fecha",
     "enterName": "Por favor ingresa un nombre para el chequeo",
     "markCompleted": "Marcar como Completado",
@@ -3839,41 +3839,7 @@
     }
   },
   "labOrganizer": {
-    "title": "Organizador de Laboratorio",
-    "documents": "Documentos",
-    "documentsDescription": "Tus documentos médicos escaneados están aquí. Etiquétalos y organízalos por familiar.",
-    "noDocuments": "Aún no hay documentos. Usa la función Documentos para escanear o agregar archivos.",
-    "documentsInfo": "Nota: Los documentos agregados desde Documentos aparecerán aquí una vez que los etiquetes.",
-    "labValues": "Valores de Laboratorio",
-    "values": "Valores",
-    "labValuesDescription": "Ingresa manualmente resultados de laboratorio para ver tendencias.",
-    "noLabValues": "Aún no hay valores ingresados.",
-    "addLabValue": "Agregar Valor",
-    "testName": "Nombre de la Prueba (ej. Glucosa, Hemoglobina)",
-    "value": "Valor",
-    "unit": "Unidad (ej. mg/dL, g/dL)",
-    "date": "Fecha",
-    "enterTestAndValue": "Por favor ingresa nombre de prueba y valor",
-    "deleteLabValue": "¿Eliminar este valor?",
-    "noInterpretation": "⚠️ Esta app NO interpreta resultados de laboratorio, no marca valores anormales ni proporciona rangos de referencia. Comparte tus resultados con tu médico.",
-    "glossary": "Glosario de Laboratorio",
-    "glossaryDescription": "Explicaciones en lenguaje sencillo de pruebas comunes.",
-    "glossaryDisclaimer": "Solo con fines educativos. No interpreta tus resultados específicos.",
-    "doctorQuestions": "Preguntas para Mi Médico",
-    "questions": "Preguntas",
-    "doctorQuestionsDescription": "Mantén una lista de preguntas para tu próxima consulta.",
-    "noQuestions": "Aún no hay preguntas.",
-    "addQuestion": "Agregar Pregunta",
-    "questionPlaceholder": "¿Qué quieres preguntarle a tu médico?",
-    "enterQuestion": "Por favor ingresa una pregunta",
-    "deleteQuestion": "¿Eliminar esta pregunta?",
-    "types": {
-      "lab": "Laboratorio",
-      "prescription": "Receta",
-      "visit": "Consulta",
-      "imaging": "Imagen",
-      "other": "Otro"
-    }
+    "banner": "Aquí puedes guardar y ordenar tus resultados. La app no interpreta resultados ni indica si un valor es normal. Llévalos a tu médico."
   },
   "dailyHabits": {
     "title": "Hábitos Diarios",
@@ -4023,9 +3989,6 @@
     "fewHumanStudies": "Estudios en personas: pocos",
     "footer": "Según {{source}}, consultado el {{date}}. La evidencia describe lo que se ha estudiado, no si te funcionará. Las plantas y suplementos pueden interactuar con medicamentos; consulta a tu médico o farmacéutico."
   },
-  "labOrganizer": {
-    "banner": "Aquí puedes guardar y ordenar tus resultados. La app no interpreta resultados ni indica si un valor es normal. Llévalos a tu médico."
-  },
   "subscription": {
     "proTitle": "AuricRX Pro",
     "includes": "Incluye: asistente de información de salud con IA, Family Circle, búsqueda de farmacias y laboratorios, Consulta de medicamentos, respaldo opcional en la nube y sincronización con dispositivos.",
@@ -4146,5 +4109,33 @@
     "contactText": "[CORREO DE PRIVACIDAD – pendiente de aprobación]\n\nPara preguntas sobre tus derechos de privacidad o para ejercerlos, escribe al correo anterior.",
     "viewFullPolicy": "Ver Aviso de Privacidad Completo",
     "lastUpdated": "Última actualización: Noviembre 2026"
+  },
+  "familyDocuments": {
+    "title": "Documentos Familiares",
+    "description": "Cada miembro de la familia tiene su propia carpeta de documentos. Selecciona un miembro para ver o agregar documentos.",
+    "familyMembers": "Miembros de la Familia",
+    "noMembers": "Aún no hay miembros familiares. Primero agrega miembros en Círculo Familiar.",
+    "memberFolderDescription": "Documentos para este miembro de la familia. Escanea o fotografía recetas, resultados de laboratorio, vacunas, tarjetas de seguro y más.",
+    "documents": "Documentos",
+    "noDocuments": "Aún no hay documentos.",
+    "addDocument": "Agregar Documento",
+    "nameRequired": "Por favor ingresa un nombre de documento",
+    "photoPermissionRequired": "Se requiere permiso de fotos para agregar documentos",
+    "documentAdded": "Documento agregado",
+    "deleteDocument": "Eliminar Documento",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este documento?",
+    "export": "Exportar",
+    "exportSuccess": "Documentos Exportados",
+    "exportDetails": "Documentos exportados como JSON",
+    "premiumRequired": "Premium Requerido",
+    "addRequiresPremium": "Agregar o editar documentos requiere una suscripción Premium activa. Aún puedes ver, exportar y eliminar documentos existentes.",
+    "readOnlyAccess": "Premium expirado. Puedes ver, exportar y eliminar documentos, pero no agregar nuevos.",
+    "categories": {
+      "prescription": "Receta",
+      "lab_result": "Resultado de Laboratorio",
+      "vaccine": "Vacuna",
+      "insurance": "Seguro",
+      "other": "Otro"
+    }
   }
 }

@@ -1,482 +1,507 @@
-# Feature Implementation & Test Checklist
-PR #4 - Five Features + Premium + Compliance Review
+# Feature Test Checklist - Manual Phone Testing
 
-**Legend:**
-- ✅ **PASS** - Implemented and code-reviewed for correctness
-- 🔧 **FIXED** - Had issues, now corrected
-- 🏗️ **PARTIAL** - Code exists but incomplete (missing UI, backend, or compliance copy)
-- 🔒 **NEEDS BACKEND** - Client code ready, server endpoints TODO
-- ❌ **NOT IMPLEMENTED** - Feature not yet built
-- ⚠️ **CANNOT TEST** - Requires running app/emulator
-- 📱 **NEEDS DEVICE** - Requires actual device (permissions, notifications, etc.)
+## Prerequisites
+- Android/iOS device with app installed
+- Test user account
+- Premium trial available (reset trial data if needed)
+- Multiple devices for Family Circle testing
 
 ---
 
-## A. Core Existing Features (Regression Testing)
+## F2: Cloud Backup Consent Flow
 
-### Authentication & Account
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Sign in with email/password | ⚠️ CANNOT TEST | Requires Firebase, running app |
-| Sign in with Google | ⚠️ CANNOT TEST | Requires Google Sign-In, device |
-| Sign up new account | ⚠️ CANNOT TEST | Requires Firebase, device |
-| Password reset | ⚠️ CANNOT TEST | Requires Firebase email |
-| Account deletion | ✅ PASS | Code exists in Settings, FREE forever per F12 |
-| Profile settings | ✅ PASS | Code exists, uses theme correctly |
+### Test Steps:
+1. **Navigate to Settings**
+   - Open app → Settings → Privacy section
+   - Verify "Cloud Backup" button is visible
 
-### Medication Reminders (FREE)
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Add medication reminder | ⚠️ CANNOT TEST | Requires device, notifications |
-| Edit reminder | ⚠️ CANNOT TEST | Requires device |
-| Delete reminder | ⚠️ CANNOT TEST | Requires device |
-| Notification triggers | 📱 NEEDS DEVICE | expo-notifications, OS permissions |
-| Mark as taken | ⚠️ CANNOT TEST | Requires device |
-| Reminder list view | ✅ PASS | Code reviewed, uses theme |
+2. **Open Cloud Backup Screen**
+   - Tap "Cloud Backup"
+   - ✅ Screen opens with "Cloud backup (optional)" title
+   - ✅ Opt-in description visible (Block A copy)
+   - ✅ No backup is active by default
 
-### Health Tracker (FREE)
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Manual habits entry | 🏗️ PARTIAL | DailyHabitsScreen exists, needs testing |
-| View history | 🏗️ PARTIAL | Service methods exist |
-| Health Connect permission | 📱 NEEDS DEVICE | Native module, Android only |
-| Manual vitals/lab values | 🏗️ PARTIAL | LabDocumentService methods exist |
+3. **Enable Backup Flow**
+   - Tap "Enable backup" button
+   - ✅ Consent details screen appears (what stored, how protected, your choice, your rights)
+   - ✅ Checkbox is UNTICKED by default
+   - Tick the consent checkbox
+   - ✅ "Enable backup" button becomes active
+   - Tap "Enable backup"
+   - ✅ Biometric/authentication prompt appears
+   - Complete authentication
+   - ✅ Success message appears
+   - ✅ Consent logged with userId, timestamp, version, method
 
-### Documents (FREE local, PRO cloud)
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Scan document (camera) | ⚠️ CANNOT TEST | expo-image-picker, device camera |
-| Store locally | ✅ PASS | AsyncStorage, code reviewed |
-| Tag documents | 🏗️ PARTIAL | Service methods exist, UI TODO |
-| View document | ⚠️ CANNOT TEST | Requires device |
+4. **Verify Consent Logging**
+   - Check AsyncStorage: `documents:cloudBackup:consent:log`
+   - ✅ Entry contains: userId, timestamp, version='1.0', scope='documents', method
 
-### Plants/Herbs Library (FREE)
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Browse plants | ✅ PASS | HerbsScreen exists, data in herbs.ts |
-| Search plants | ✅ PASS | Code reviewed |
-| View plant details | ✅ PASS | Code reviewed |
-| Evidence badges | ❌ NOT IMPLEMENTED | F13 compliance - needs Block H copy |
-| Safety notes with sources | ❌ NOT IMPLEMENTED | F13 compliance |
+5. **Disable Backup**
+   - ✅ "Turn off" button visible when enabled
+   - Tap "Turn off"
+   - ✅ Confirmation dialog appears
+   - Confirm
+   - ✅ Backup disabled
 
-### Settings
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Language switching | ✅ PASS | i18n setup exists, but 4 locales incomplete |
-| Theme selection | ✅ PASS | WallpaperContext exists |
-| Wallpaper settings | ✅ PASS | WallpaperSettingsScreen exists |
-| Mexico vs US mode | ✅ PASS | RegionProvider exists |
+**Expected Result**: ✅ Explicit opt-in with re-auth, logged consent
 
 ---
 
-## B. New Features - Implementation Status
+## F9: Trial Disclosure Screen
 
-### 1. Family Circle
+### Test Steps:
+1. **Trigger Premium Upgrade Screen**
+   - Navigate to a Premium feature (Family Circle, Pharmacy Search, Lab Search, AI Chat)
+   - ✅ PremiumUpgradeScreen appears
 
-#### FREE Tier (1 member, device-only)
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Add 1st family member | ✅ PASS | FamilyCircleService.addMember(), limit check |
-| Block 2nd member (free) | ✅ PASS | canAddMember() checks limit, shows upgrade |
-| Shared dose log | ✅ PASS | recordDose() method exists |
-| View member profiles | ✅ PASS | FamilyCircleScreen.tsx exists |
-| Tier banner UI | ✅ PASS | Shows "FREE: 1/1 member" |
-| Delete member | ✅ PASS | deleteMember() exists |
+2. **Verify Disclosure Content**
+   - ✅ "AuricRX Pro" title
+   - ✅ "14 days free. Then MXN $79.00 per month (MXN $79.00, VAT included)"
+   - ✅ Auto-charge notice with specific date (today + 14 days)
+   - ✅ Store billing account notice (Google Play / App Store)
+   - ✅ "We'll remind you at least 5 days before..."
+   - ✅ Cancel path: "Cancel anytime in [Store] > Subscriptions or Settings > My plan"
+   - ✅ Free tier list: reminders, tracker, plants, local docs, export/delete
 
-#### PRO Tier Features
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Invite flow (Block B1) | ❌ NOT IMPLEMENTED | F4 compliance - needs invite link generation |
-| Accept screen (Block B2) | ❌ NOT IMPLEMENTED | F4 compliance - per-scope checkboxes |
-| Leave/revoke (Block B3) | ❌ NOT IMPLEMENTED | F4 compliance |
-| Managed adult profile (Block B4) | ❌ NOT IMPLEMENTED | F5 compliance |
-| Child profile (Block B5) | ❌ NOT IMPLEMENTED | F6 compliance |
-| Caregiver alerts | ❌ NOT IMPLEMENTED | F7 compliance - needs Block C copy |
-| WhatsApp summaries | 🏗️ PARTIAL | generateWeeklySummary() exists, needs Block D preview |
-| Cloud sync | 🔒 NEEDS BACKEND | Client toggle exists, server TODO |
+3. **Verify Buttons**
+   - ✅ "Start 14 days free" button (primary)
+   - ✅ "Continue with free plan" button (secondary)
+   - ✅ Store billing note: "Billing is handled through your [Store] account"
+   - ✅ Terms, Privacy Notice, Restore Purchases links
 
-**Design:** FamilyCircleScreen uses getCardBackgroundColor(), getCardBorderColor(), getAccentColor() ✅
+4. **Start Trial**
+   - Tap "Start 14 days free"
+   - ✅ In-app purchase flow initiates (or TODO notice appears)
 
-### 2. Prevention & Checkup Planner (FREE)
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| View templates | ✅ PASS | PreventionPlannerService templates exist |
-| Add from template | 🏗️ PARTIAL | Service methods exist, UI needs testing |
-| Custom checkup | 🏗️ PARTIAL | Service allows custom |
-| Schedule reminders | 🔒 NEEDS BACKEND | scheduleCheckupReminder() uses expo-notifications |
-| Mark complete | 🏗️ PARTIAL | Service method exists |
-| Link to guidelines | ✅ PASS | guidelineLinks in templates |
-| "Find a Lab" button | ✅ PASS | Should show upgrade screen for non-premium |
-| Screening guardrails (F16) | ❌ NOT IMPLEMENTED | No risk scores, cite sources |
-
-**Design:** PreventionPlannerScreen.tsx - needs review for theme consistency
-
-### 3. Lab & Document Organizer
-
-#### FREE Features
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Tag documents | 🏗️ PARTIAL | Service methods exist, UI TODO |
-| Organize by member/date | 🏗️ PARTIAL | Service filtering exists |
-| Manual lab value entry | ✅ PASS | addLabValue() exists |
-| View trends | 🏗️ PARTIAL | getLabValueTrend() exists, UI TODO |
-| Glossary | ✅ PASS | glossary array exists in service |
-| Questions for doctor | ✅ PASS | addDoctorQuestion() exists |
-| Lab banner (Block I) | ❌ NOT IMPLEMENTED | F14 compliance |
-
-#### PRO Features  
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Cloud backup opt-in | 🏗️ PARTIAL | DocumentCloudBackupScreen exists |
-| Consent flow (Block A) | ❌ NOT IMPLEMENTED | F2 compliance - needs checkbox + re-auth |
-| Upload to cloud | 🔒 NEEDS BACKEND | Service interface exists, endpoints TODO |
-| Delete cloud copies | 🔒 NEEDS BACKEND | Service interface exists |
-
-**Design:** LabDocumentOrganizerScreen.tsx - needs review
-**Compliance:** Must NOT interpret results, flag values, show ranges (F14)
-
-### 4. Daily Habits Tracker
-
-#### FREE Features
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Track water | ✅ PASS | trackHabit() exists |
-| Track sleep | ✅ PASS | trackHabit() exists |
-| Track steps (manual) | ✅ PASS | trackHabit() exists |
-| Track mood | ✅ PASS | trackHabit() exists |
-| Track sweet drinks | ✅ PASS | trackHabit() exists |
-| View weekly summary | 🏗️ PARTIAL | getWeeklySummary() exists |
-| Habit reminders | 🔒 NEEDS BACKEND | scheduleHabitReminder() uses expo-notifications |
-
-#### PRO Features
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Health Connect sync | ✅ PASS | Native module exists, plugin configured |
-| Health Connect permission | 📱 NEEDS DEVICE | HealthConnectConsentScreen exists |
-| Wearable data display | 🏗️ PARTIAL | Service methods exist |
-| Wellness disclaimer (Block J) | ❌ NOT IMPLEMENTED | F17 compliance |
-
-**Design:** DailyHabitsScreen.tsx - needs review
-**Note:** Requires new native build for Health Connect
-
-### 5. Herbal Safety & Privacy
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Evidence badges | ❌ NOT IMPLEMENTED | F13 - needs Block H labels |
-| Caution notes | ❌ NOT IMPLEMENTED | F13 - needs source citations |
-| Data export (JSON) | ✅ PASS | privacyExportService.exportData() |
-| Data export (Text) | ✅ PASS | Service supports both |
-| Delete all data | ✅ PASS | deleteAllData() exists |
-| Privacy notice | ❌ NOT IMPLEMENTED | F15 - needs in-app screen with [RESPONSABLE] |
-
-**Design:** PrivacyDataScreen uses theme correctly ✅
+**Expected Result**: ✅ LFPC art. 76 Bis VIII compliant disclosure
 
 ---
 
-## C. Premium System
+## F10: Renewal Reminder Notification
 
-### Trial & Subscription
+### Test Steps:
+1. **Start Premium Trial**
+   - Complete F9 flow to start trial
+   - ✅ Trial start date recorded in AsyncStorage
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| 14-day trial start | 🏗️ PARTIAL | startPremiumTrial() exists |
-| Device-ID anti-abuse | ✅ PASS | deviceIdService.ts, playIntegrityService.ts |
-| Trial expiry check | ✅ PASS | checkPremiumAccess() calculates days |
-| Backend trial verification | 🔒 NEEDS BACKEND | checkTrialEligibilityWithBackend() TODO |
-| Upgrade screen | ✅ PASS | PremiumUpgradeScreen.tsx exists |
-| Trial screen (Block E) | ❌ NOT IMPLEMENTED | F9 compliance - MXN price + IVA |
-| 5-day renewal notice | 🔒 NEEDS BACKEND | F10 compliance - needs server notifications |
-| Store billing only | ❌ NOT IMPLEMENTED | F11 - must remove StripeCheckoutModal |
+2. **Verify Reminder Scheduled**
+   - Check `renewal:reminder:scheduled` in AsyncStorage
+   - ✅ Entry exists with:
+     - renewalDate: today + 14 days
+     - notificationId: valid ID
+     - scheduledAt: now
+     - type: 'trial_ending'
 
-**Design:** PremiumUpgradeScreen uses LinearGradient, theme colors ✅
+3. **Check Notification Date**
+   - ✅ Notification scheduled for renewalDate - 5 days
+   - ✅ (i.e., 9 days from trial start)
 
-### Gating
+4. **Wait for Notification** (Long Test)
+   - Wait 9 days (or adjust device date)
+   - ✅ Notification appears with:
+     - Title: "AuricRX Pro trial ending soon"
+     - Body: Includes MXN $79.00, charge date, cancel path
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Family Circle (add 2nd member) | ✅ PASS | Shows upgrade screen |
-| Family Circle PRO features | ✅ PASS | Gated in service methods |
-| Find a Pharmacy | ✅ PASS | Premium check on mount and refresh |
-| Find a Lab | ✅ PASS | Premium check on mount and refresh |
-| AI Health assistant | ✅ PASS | Premium check on mount |
-| Medicine Lookup (US) | ✅ PASS | Premium check in load() |
-| Cloud backup | ✅ PASS | Premium check before enable |
-| Wearable sync | 🏗️ PARTIAL | Check exists but not fully tested |
+5. **Test Re-scheduling**
+   - Change renewal date (mock scenario)
+   - ✅ Old notification cancelled
+   - ✅ New notification scheduled 5 days before new date
 
-### Free Forever (F12)
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Export data | ✅ PASS | In FREE_FEATURES config |
-| Delete account | ✅ PASS | In FREE_FEATURES config |
-| View existing data | ✅ PASS | Read-only after trial |
-| Settings access | ✅ PASS | Always accessible |
-| Privacy notice access | ✅ PASS | Always accessible |
+**Expected Result**: ✅ 5+ day advance reminder, Block F compliant
 
 ---
 
-## D. Legal Compliance (F1-F28)
+## F11: Store Billing Verification
 
-### P0 Items (Must Complete Before Launch)
+### Test Steps:
+1. **Open Premium Upgrade Screen**
+   - Navigate to any Premium gate
+   - ✅ PremiumUpgradeScreen visible
 
-| Item | Status | Notes |
-|------|--------|-------|
-| F1: Remove "at your own risk" | ✅ PASS | Not found in codebase |
-| F2: Cloud backup consent | ❌ NOT IMPLEMENTED | Needs checkbox + re-auth + logging |
-| F3: Android Auto Backup exclusion | ❌ NOT IMPLEMENTED | Needs app.json update |
-| F4: Adult invite-accept flow | ❌ NOT IMPLEMENTED | Major feature |
-| F5: Device-only adult profiles | ❌ NOT IMPLEMENTED | Needs flag and consent flow |
-| F6: Child profiles | ❌ NOT IMPLEMENTED | Major feature |
-| F7: Caregiver alert wording | ❌ NOT IMPLEMENTED | Needs Block C copy |
-| F8: WhatsApp share preview | ❌ NOT IMPLEMENTED | Needs Block D screen |
-| F9: Trial screen | ❌ NOT IMPLEMENTED | Needs Block E with MXN price |
-| F10: 5-day renewal notices | 🔒 NEEDS BACKEND | Needs server notification handler |
-| F11: Store billing only | ❌ NOT IMPLEMENTED | Remove StripeCheckoutModal |
-| F12: Export/delete free | ✅ PASS | Already in FREE_FEATURES |
-| F13: Plant badges | ❌ NOT IMPLEMENTED | Needs Block H copy |
-| F14: Lab guardrails | ❌ NOT IMPLEMENTED | Needs Block I banner |
-| F15: Privacy notice | ❌ NOT IMPLEMENTED | Needs in-app screen |
+2. **Verify Store Billing Note**
+   - Scroll to bottom
+   - ✅ Note visible: "Billing is handled through your [Store] account. We do not process payments directly in the app."
 
-**Summary: 3/15 P0 items complete**
+3. **Search Codebase**
+   - ✅ No Stripe imports
+   - ✅ No direct payment API calls
+   - ✅ Only store billing (Google Play Billing / StoreKit)
 
-### P1 Items
-
-| Item | Status | Notes |
-|------|--------|-------|
-| F16: Screening planner | 🏗️ PARTIAL | Templates exist, needs source citations |
-| F17: Habits disclaimer | ❌ NOT IMPLEMENTED | Needs Block J copy |
-| F18: Google Play declarations | ❌ NOT IMPLEMENTED | Store console updates |
-| F19: Apple privacy label | ❌ NOT IMPLEMENTED | App Store Connect updates |
-| F20: Marketing guardrails | ✅ PASS | No fear-based copy found |
-| F21: Processor contracts | 🔒 NEEDS BACKEND | Legal/business task |
-| F22: Breach plan | 🔒 NEEDS BACKEND | Legal/business task |
-| F23: Retention policy | ❌ NOT IMPLEMENTED | Needs [X] days defined |
+**Expected Result**: ✅ Store-only billing confirmed
 
 ---
 
-## E. Design System Audit
+## F13: Plant Evidence Badges
 
-### Theme Consistency Review
+### Test Steps:
+1. **Navigate to Herbs Screen**
+   - Dashboard → "Herbs" card
+   - ✅ Herbs screen opens with grid of plants
 
-**Checked files for hard-coded colors vs. theme tokens:**
+2. **Verify Evidence Badges in Grid**
+   - ✅ Each plant card shows evidence badge
+   - ✅ Badge text: "Evidence: limited" / "insufficient" / "mixed" / "Few human studies"
+   - ✅ Badge styled with gold accent color
 
-| Screen/Component | Theme Usage | Issues Found |
-|------------------|-------------|--------------|
-| FamilyCircleScreen.tsx | ✅ GOOD | Uses getCardBackgroundColor(), getCardBorderColor(), getAccentColor() |
-| PremiumUpgradeScreen.tsx | ✅ GOOD | Uses LinearGradient, goldGradient, theme colors |
-| PreventionPlannerScreen.tsx | ⚠️ NEEDS REVIEW | Need to verify theme usage |
-| LabDocumentOrganizerScreen.tsx | ⚠️ NEEDS REVIEW | Need to verify theme usage |
-| DailyHabitsScreen.tsx | ⚠️ NEEDS REVIEW | Need to verify theme usage |
-| DocumentCloudBackupScreen.tsx | ✅ GOOD | Uses getCardBackgroundColor(), getCardBorderColor(), getAccentColor() |
-| PrivacyDataScreen.tsx | ✅ GOOD | Uses theme colors |
+3. **Open Plant Detail**
+   - Tap any plant card
+   - ✅ Detail modal opens
+   - ✅ Larger evidence badge visible
+   - ✅ Block H footer present:
+     - "According to [source], accessed on [date]"
+     - "Evidence describes what has been studied, not efficacy"
+     - "Plants can interact with medicines"
 
-### Typography & Spacing
+4. **Test in Multiple Themes**
+   - Settings → Wallpaper → Switch themes
+   - ✅ Navy-and-Gold: Gold badges
+   - ✅ Rose Gold: Rose accent badges
+   - ✅ Sea Glass: Teal accent badges
 
-**Existing app patterns:**
-- Font family: Inter (400, 600, 700, 800, 900)
-- Primary text: 24px bold
-- Card titles: 20px bold
-- Body text: 14-16px
-- Spacing: 16px padding, 12px card border radius
-
-**Need to verify all new screens follow these patterns** ⚠️
-
-### Icons & Navigation
-
-**Patterns:**
-- Gold health icons: GoldHealthIcon component
-- Back button: headerHomeButton style with home icon image
-- Close button: "X" or "Close" text in gold
-
-**Need to verify all new screens have consistent navigation** ⚠️
-
-### Responsive Design
-
-**Need to test (CANNOT without device):**
-- Small phones (iPhone SE, small Android)
-- Long German strings (compound words)
-- Long Spanish strings (verbose translations)
-- Chinese text rendering
-- Full-width punctuation in Chinese
+**Expected Result**: ✅ Evidence badges with disclaimers
 
 ---
 
-## F. Missing Backend Endpoints
+## F15: Privacy Notice Screen
 
-### Trial & Subscription
-- `POST /api/premium/check-trial-eligibility` - Device hash check
-- `POST /api/premium/trial-started` - Device hash registration
-- Play Integrity API token verification
+### Test Steps:
+1. **Navigate to Privacy Notice**
+   - Settings → Privacy → "Privacy Notice"
+   - ✅ PrivacyNoticeScreen opens
 
-### Cloud Backup
-- `POST /api/documents/upload` - Upload document
-- `DELETE /api/documents/:id` - Delete document
-- `DELETE /api/documents` - Bulk delete
-- `GET /api/documents` - Sync/list
+2. **Verify Content**
+   - ✅ Title: "Privacy Notice"
+   - ✅ Sections visible:
+     - Data Controller (with placeholder)
+     - What Data We Collect
+     - How We Use Your Data
+     - Data Sharing
+     - Your Rights (ARCO)
+     - Contact for Privacy Questions
+   - ✅ Placeholder: "[RESPONSABLE – pending owner approval]"
+   - ✅ "View Full Privacy Policy" link
 
-### Family Circle
-- `POST /api/family/invite` - Generate invite link
-- `POST /api/family/accept` - Accept invitation
-- `DELETE /api/family/member` - Remove member
-- Cloud sync for shared logs
+3. **Verify ARCO Rights**
+   - ✅ Access, Rectify, Cancel, Object rights explained
+   - ✅ Export/delete mentioned in Settings > Privacy
 
-### Notifications
-- App Store Server Notifications handler
-- Google Play RTDN handler
-- 5-day renewal reminder logic
-
----
-
-## G. Automated Testing
-
-### Current State
-- ❌ No test files found in repo
-- ❌ No `npm test` script
-- ❌ No Jest/testing-library setup
-
-### Recommended
-```json
-{
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  }
-}
-```
-
-### Test Coverage Needed
-- Unit tests for services (FamilyCircleService, PreventionPlannerService, etc.)
-- Integration tests for premium entitlement logic
-- Snapshot tests for new screens
-- i18n validation (already have validate-i18n.js ✅)
+**Expected Result**: ✅ In-app privacy notice accessible
 
 ---
 
-## H. Screenshots (Cannot Capture)
+## F4-F8: Family Circle Flows
 
-**Reason:** Cannot run Expo app without emulator/device access
+### F4: Adult Invite-and-Accept
 
-**Screens that need screenshots:**
-1. Family Circle (free tier with 1 member)
-2. Family Circle upgrade prompt
-3. Prevention Planner templates
-4. Lab Document Organizer (4 tabs)
-5. Daily Habits tracker
-6. Premium Upgrade Screen (for each feature)
-7. Cloud Backup opt-in
-8. Privacy & Data Export
-9. Each screen in navy-and-gold theme
-10. Each screen in other themes (Rose Gold, Sea Glass)
+#### Test Steps:
+1. **Open Family Circle**
+   - Dashboard → "Family Circle" card
+   - ✅ FamilyCircleScreen opens
 
-**Recommend:** Owner or QA team captures screenshots on actual device
+2. **Invite Adult Member**
+   - Tap "Invite Adult Member"
+   - ✅ InviteFamilyMemberScreen opens
+   - ✅ Three permission checkboxes visible (all OFF by default):
+     - View medications and reminders
+     - Mark doses as taken
+     - Receive caregiver alerts
+   - Check desired permissions
+   - Tap "Invite Adult"
+   - ✅ Invite code generated (format: FC + numbers + letters)
+   - ✅ Code displayed in prominent box
+   - ✅ Share button visible
+
+3. **Share Invite Code**
+   - Tap share button
+   - ✅ Native share sheet appears
+   - ✅ Message includes: invite code, app name, instructions
+   - Share via any app (WhatsApp, SMS, email)
+
+4. **Accept Invite (Second Device)**
+   - On another device, open app
+   - Navigate to Family Circle → "Accept Invite"
+   - ✅ AcceptInviteScreen opens
+   - Enter invite code
+   - ✅ Permission checkboxes visible (all OFF by default)
+   - Check desired permissions (invitee chooses their own)
+   - Tap "Join Family Circle"
+   - ✅ Success message
+   - ✅ Member added to first device's family list
+
+5. **Verify Leave Anytime**
+   - ✅ Leave notice visible on both screens
+   - ✅ "Alerts will stop when you leave" message
+
+**Expected Result**: ✅ Block B1-B3 compliant invite flow
+
+### F5: Device-Only Adult Profile
+
+#### Test Steps:
+1. **Add Family Member**
+   - Family Circle → "Add Member"
+   - ✅ AddFamilyMemberScreen opens
+
+2. **Select Device-Only Adult**
+   - Enter name, relationship
+   - ✅ Three profile type radio buttons:
+     - Regular Profile
+     - Device-Only Adult ← Select this
+     - Child Profile
+   - Select "Device-Only Adult"
+   - ✅ Attestation checkbox appears
+   - ✅ Text: "They asked me to manage this information on my phone, on their behalf"
+
+3. **Complete Attestation**
+   - Check attestation checkbox
+   - Tap "Add Family Member"
+   - ✅ Success
+   - ✅ Member added with deviceOnly: true flag
+
+4. **Verify No Separate Login**
+   - ✅ Device-only member has no login credentials
+   - ✅ Managed entirely from your device
+
+**Expected Result**: ✅ Block B4 compliant device-only profile
+
+### F6: Child Profile
+
+#### Test Steps:
+1. **Add Child Member**
+   - Family Circle → "Add Member"
+   - Enter child's name, relationship
+
+2. **Select Child Profile**
+   - Select "Child Profile" radio button
+   - ✅ Guardian attestation checkbox appears
+   - ✅ Text: "I am the parent or legal guardian of [name] and I consent to storing this health information on my device to manage their care"
+
+3. **Complete Guardian Attestation**
+   - Check attestation checkbox
+   - Tap "Add Family Member"
+   - ✅ Success
+   - ✅ Child added with:
+     - isChild: true
+     - guardianAttested: true
+     - excludeFromAI: true (default)
+     - excludeFromSummaries: true (default)
+
+4. **Verify Exclusions**
+   - ✅ Child has no login
+   - ✅ Child excluded from AI chat queries
+   - ✅ Child excluded from shared summaries
+   - ✅ Note: "Child profiles don't have login access and are excluded from AI by default"
+
+**Expected Result**: ✅ Block B5 compliant child profile
+
+### F7: Caregiver Alert Copy
+
+#### Test Steps:
+1. **Enable Caregiver Alerts**
+   - Set up medication reminder for family member
+   - Enable "Receive caregiver alerts" permission
+
+2. **Verify Lock Screen Notification**
+   - When reminder triggers:
+   - ✅ Lock screen shows: "[name] - recordatorio"
+   - ✅ Minimal text (privacy-preserving)
+
+3. **Open In-App Detail**
+   - Tap notification
+   - ✅ Detailed info visible:
+     - "La dosis de las [time] de [name] todavía no está marcada como tomada"
+   - ✅ Disclaimer present:
+     - "Este es un recordatorio automático, no una alerta médica"
+     - "Puede llegar tarde o no llegar"
+     - "Si crees que alguien necesita ayuda urgente, llama al 911"
+
+4. **Test Stop Notice**
+   - Remove family member
+   - ✅ Notice: "Alerts will stop when [name] leaves Family Circle or when the member who created the alert turns it off"
+
+**Expected Result**: ✅ Block C compliant alert copy
+
+### F8: Share Preview
+
+#### Test Steps:
+1. **Generate Summary**
+   - Family Circle → "Share Summary"
+   - ✅ SharePreviewScreen opens
+
+2. **Verify Preview Warning**
+   - ✅ Red warning card visible:
+     - "⚠️ You're about to share a summary with health information from [names]. Use only with authorized people (family, caregivers). Continue?"
+
+3. **Review Summary Content**
+   - ✅ Summary preview box shows:
+     - Weekly dose logs
+     - Medication names and counts
+     - Date range
+   - ✅ NO sensitive data (Health Connect, passwords, etc.)
+   - ✅ Children with excludeFromSummaries: true are NOT included
+
+4. **Share via Share Sheet**
+   - Tap "Share via..."
+   - ✅ Native share sheet opens
+   - ✅ Can share to any app (WhatsApp, SMS, email, etc.)
+   - ✅ NO direct WhatsApp API
+   - Share to WhatsApp
+   - ✅ Message contains minimal summary text
+
+5. **Cancel Option**
+   - ✅ "Cancel" button aborts share
+
+**Expected Result**: ✅ Block D compliant share preview
 
 ---
 
-## I. Summary & Recommendations
+## Family Documents (Pro-only)
 
-### Completion Status
+### Test Steps:
+1. **Access Family Documents**
+   - Navigate to Family Circle → Family Documents (or Dashboard → Family Documents if wired)
+   - ✅ FamilyDocumentsScreen opens
+   - ✅ Description: "Each family member has their own document folder"
 
-**What's DONE:**
-- ✅ Service layer architecture for all 5 features
-- ✅ Premium entitlement system with 14-day trial
-- ✅ Device-ID anti-abuse (client-side ready)
-- ✅ Free/PRO split configuration
-- ✅ i18n validation tool
-- ✅ German encoding fixes
-- ✅ Premium gating for existing screens
-- ✅ Family Circle FREE tier (1 member)
+2. **Select Family Member**
+   - ✅ List shows all family members
+   - Tap on a member
+   - ✅ Member's document folder opens
 
-**What's PARTIAL:**
-- 🏗️ UI screens exist but need testing
-- 🏗️ Many features need compliance copy (F1-F28)
-- 🏗️ Design polish needs verification
-- 🏗️ i18n incomplete (FR/DE/PT/ZH)
+3. **Add Document (with Premium)**
+   - Ensure Premium is active
+   - Ensure shareDocuments permission is granted (for invited adults)
+   - Tap "Add Document"
+   - ✅ Photo picker opens
+   - Select a photo
+   - ✅ Document added successfully
+   - ✅ Document appears in member's folder
 
-**What's MISSING:**
-- ❌ 12/15 P0 compliance items (F2-F11, F13-F15)
-- ❌ Adult invite/accept flow (F4)
-- ❌ Child profiles (F6)
-- ❌ Trial screen with proper disclosures (F9)
-- ❌ Evidence badges and safety notes (F13)
-- ❌ Privacy notice in-app (F15)
-- ❌ Automated tests
-- ❌ Screenshots
+4. **View Documents**
+   - ✅ Documents display with category icons (prescription, lab result, vaccine, insurance, other)
+   - ✅ Each document shows: name, category, date
+   - ✅ Theme colors applied (navy-and-gold, Rose Gold, Sea Glass)
 
-**What NEEDS BACKEND:**
-- 🔒 Trial device-hash verification
-- 🔒 Cloud document storage
-- 🔒 5-day renewal reminders
-- 🔒 Play Integrity verification
-- 🔒 Family invite system
+5. **Delete Document**
+   - Tap delete icon on any document
+   - ✅ Confirmation dialog appears
+   - Confirm
+   - ✅ Document deleted
 
-### Cannot Complete Without:
+6. **Export Documents**
+   - Tap "Export" button
+   - ✅ Success message
+   - ✅ Documents exported as JSON
 
-1. **Running the app** - Need emulator or device for:
-   - Visual design verification
-   - Responsive layout testing
-   - Notification testing
-   - Permission flows
-   - Screenshots
+7. **Permission Gating: shareDocuments OFF**
+   - Family member with shareDocuments = false
+   - Open their folder
+   - ✅ "Read-only access" notice visible
+   - ✅ "Add Document" button NOT visible
+   - ✅ Can still view, export, delete existing documents
 
-2. **Backend implementation** - Need server endpoints for:
-   - Trial enforcement
-   - Cloud backup
-   - Renewal reminders
-   - Family Circle invites
+8. **Read-Only After Trial Expires**
+   - Let trial expire (or mock expired state)
+   - Open any member's folder
+   - ✅ "Premium expired. You can view, export, and delete documents, but cannot add new ones."
+   - ✅ Cannot add new documents
+   - ✅ Can view, export, delete existing ones
 
-3. **Time & Scope** - Implementing F2-F11, F13-F15 is multiple days of work:
-   - Adult invite flow (major feature)
-   - Child profiles (major feature)
-   - Consent screens with Block A-J copy
-   - Trial screen with proper disclosures
-   - Evidence badges system
+9. **Child Documents**
+   - Add child profile member
+   - Open child's document folder
+   - ✅ Documents can be added (guardian manages)
+   - ✅ Child documents excluded from AI (per existing F6 rule)
+   - ✅ Child documents excluded from summaries (per existing F6 rule)
 
-### Recommended Path Forward
+10. **Device-Only Adult**
+    - Add device-only adult member
+    - ✅ Can add documents (covered by attestation)
+    - ✅ No shareDocuments permission required (managed by attestation)
 
-**Phase 1: Critical Fixes (This PR)**
-- Complete Spanish translations (77 keys)
-- Add trial screen with Block E copy
-- Add lab banner with Block I copy
-- Add habits disclaimer with Block J copy
-- Remove StripeCheckoutModal (F11)
+11. **Premium Gate**
+    - Access Family Documents without Premium
+    - ✅ PremiumUpgradeScreen appears
+    - ✅ Feature: "familyDocuments"
 
-**Phase 2: Compliance Must-Haves (Next PR)**
-- Implement F2-F8 (consent flows, invite system)
-- Add F13 plant badges
-- Create F15 privacy notice screen
-- Professional translation for legal copy
-
-**Phase 3: Testing & Polish (QA)**
-- Visual QA on device
-- Capture screenshots
-- Write automated tests
-- Fix any bugs found
-
-**Phase 4: Backend Integration**
-- Implement server endpoints
-- Connect client to backend
-- Test end-to-end flows
+**Expected Result**: ✅ Pro-only during trial, read-only after expiry, shareDocuments permission enforced
 
 ---
 
-## J. Decision Required
+## Free Tier Verification
 
-**Owner, please decide:**
+### Test Steps:
+1. **Verify Free Member Limit**
+   - Family Circle → Add Member
+   - Add 1st member
+   - ✅ Success
+   - Try to add 2nd member without Premium
+   - ✅ Upgrade prompt appears: "You've reached the free tier limit"
 
-1. **Launch readiness:** Is this PR ready to merge as-is (with known TODOs), or block until F1-F15 complete?
+2. **Verify Free Tier Features**
+   - ✅ Reminders: Accessible
+   - ✅ Tracker: Accessible
+   - ✅ Medications: Accessible
+   - ✅ Plants: Accessible
+   - ✅ On-device documents: Accessible
+   - ✅ Export/Delete: Accessible
 
-2. **Testing:** Should I focus on completing testable items, or document what needs device testing?
+3. **Verify Premium Gates**
+   - ✅ Family Circle (2+ members): Blocked
+   - ✅ Pharmacy Search: Blocked
+   - ✅ Lab Search: Blocked
+   - ✅ AI Chat: Blocked
+   - ✅ Cloud Backup: Blocked
 
-3. **Scope:** Continue with compliance implementation (F2-F15), or merge current state and do compliance in next PR?
+**Expected Result**: ✅ Exactly 1 free member, Premium gates functional
 
-4. **Translation:** AI-assist the 77 Spanish keys now, or defer all translation work?
+---
 
-**My recommendation:** 
-- Document current state (this checklist)
-- Fix what's fixable without running app (Spanish keys, add compliance copy to existing screens)
-- Note everything that needs device testing
-- Create separate PR for F2-F8 major features (invite flow, child profiles)
-- Professional translation for legal copy before launch
+## Theme Testing
+
+### Test Each Screen in All Themes:
+
+**Themes to Test**:
+1. Navy-and-Gold (v6) - Default
+2. Rose Gold
+3. Sea Glass
+
+**Screens to Verify**:
+- InviteFamilyMemberScreen
+- AcceptInviteScreen
+- AddFamilyMemberScreen
+- SharePreviewScreen
+- DocumentCloudBackupScreen
+- PremiumUpgradeScreen
+- PrivacyNoticeScreen
+
+**Verification Points**:
+- ✅ No hard-coded colors visible
+- ✅ Text readable in all themes
+- ✅ Accent colors match theme
+- ✅ Card backgrounds match theme
+- ✅ Button colors match theme
+
+**Expected Result**: ✅ All screens adapt to theme
+
+---
+
+## Test Summary Checklist
+
+- [ ] F2: Cloud backup consent with re-auth
+- [ ] F9: Trial disclosure (LFPC compliant)
+- [ ] F10: Renewal reminder (5+ days)
+- [ ] F11: Store billing only
+- [ ] F13: Evidence badges + disclaimers
+- [ ] F15: Privacy notice accessible
+- [ ] F4: Adult invite-and-accept
+- [ ] F5: Device-only adult profile
+- [ ] F6: Child profile with guardian attestation
+- [ ] F7: Caregiver alert copy
+- [ ] F8: Share preview with warning
+- [ ] Family Documents: Pro-only, read-only after trial, shareDocuments permission
+- [ ] Free tier: 1 member limit enforced
+- [ ] Premium gates: All features gated correctly
+- [ ] Themes: All screens adapt
+
+**Total Test Cases**: 15 major features × 3 themes = 45+ test scenarios
