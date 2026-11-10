@@ -4270,6 +4270,35 @@
     "weeklySummary": "Résumé hebdomadaire",
     "shareConsentTitle": "Partager les informations de santé",
     "shareConsentMessage": "Vous êtes sur le point de partager des informations de santé pour un membre de la famille. Ce consentement est valable 7 jours.",
-    "grantConsent": "Je consens à partager"
+    "grantConsent": "Je consens à partager",
+    "permShareDocuments": "Voir et ajouter des documents dans leur dossier Documents Familiaux"
+  },
+  "familyDocuments": {
+    "title": "Documents familiaux",
+    "description": "Chaque membre de la famille a son propre dossier de documents. Sélectionnez un membre pour voir ou ajouter des documents.",
+    "familyMembers": "Membres de la famille",
+    "noMembers": "Aucun membre de la famille pour le moment. Ajoutez d'abord des membres dans le Cercle Familial.",
+    "memberFolderDescription": "Documents pour ce membre de la famille. Scannez ou photographiez ordonnances, résultats de laboratoire, vaccins, cartes d'assurance et plus encore.",
+    "documents": "Documents",
+    "noDocuments": "Aucun document pour le moment.",
+    "addDocument": "Ajouter un document",
+    "nameRequired": "Veuillez saisir un nom de document",
+    "photoPermissionRequired": "Permission photo requise pour ajouter des documents",
+    "documentAdded": "Document ajouté",
+    "deleteDocument": "Supprimer le document",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce document ?",
+    "export": "Exporter",
+    "exportSuccess": "Documents exportés",
+    "exportDetails": "Documents exportés au format JSON",
+    "premiumRequired": "Abonnement Premium requis",
+    "addRequiresPremium": "L'ajout ou la modification de documents nécessite un abonnement Premium actif. Vous pouvez toujours consulter, exporter et supprimer les documents existants.",
+    "readOnlyAccess": "Abonnement Premium expiré. Vous pouvez consulter, exporter et supprimer des documents, mais ne pouvez pas en ajouter de nouveaux.",
+    "categories": {
+      "prescription": "Ordonnance",
+      "lab_result": "Résultat de laboratoire",
+      "vaccine": "Vaccin",
+      "insurance": "Assurance",
+      "other": "Autre"
+    }
   }
 }
