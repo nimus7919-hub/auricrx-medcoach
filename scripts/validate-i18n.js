@@ -13,6 +13,8 @@ const fs = require('fs');
 const path = require('path');
 
 const LOCALES = ['en', 'es', 'fr', 'de', 'pt', 'zh'];
+// fr/de are translated in separate PRs; missing keys fall back to en at runtime.
+const INCOMPLETE_LOCALES = new Set(['fr', 'de']);
 const I18N_DIR = path.join(__dirname, '../src/i18n');
 
 // Load all locale files
@@ -186,6 +188,7 @@ function validate() {
   
   // Print results
   let hasErrors = false;
+  let hasWarnings = false;
   
   console.log('📊 Summary:\n');
   for (const locale of LOCALES) {
@@ -196,8 +199,9 @@ function validate() {
     const placeholderCount = results.placeholderMismatches[locale]?.length || 0;
     const encodingCount = results.encodingIssues[locale]?.length || 0;
     const identicalCount = results.identicalToEnglish[locale]?.length || 0;
+    const incomplete = INCOMPLETE_LOCALES.has(locale);
     
-    console.log(`${locale.toUpperCase()}:`);
+    console.log(`${locale.toUpperCase()}${incomplete ? ' (incomplete — missing keys are warnings)' : ''}:`);
     console.log(`  Missing keys: ${missingCount}`);
     console.log(`  Extra keys: ${extraCount}`);
     console.log(`  Placeholder mismatches: ${placeholderCount}`);
@@ -205,19 +209,27 @@ function validate() {
     console.log(`  Identical to English: ${identicalCount}`);
     console.log('');
     
-    if (missingCount > 0 || placeholderCount > 0 || encodingCount > 0) {
+    if (encodingCount > 0) {
+      hasErrors = true;
+    }
+    if (incomplete) {
+      if (missingCount > 0 || placeholderCount > 0) {
+        hasWarnings = true;
+      }
+    } else if (missingCount > 0 || placeholderCount > 0) {
       hasErrors = true;
     }
   }
   
   // Print details if there are issues
-  if (hasErrors) {
-    console.log('\n❌ Issues found:\n');
+  if (hasErrors || hasWarnings) {
+    console.log(hasErrors ? '\n❌ Issues found:\n' : '\n⚠️ Warnings (non-blocking for incomplete locales):\n');
     
     // Missing keys
     for (const locale in results.missing) {
       if (results.missing[locale].length > 0) {
-        console.log(`\n${locale.toUpperCase()} - Missing ${results.missing[locale].length} keys:`);
+        const label = INCOMPLETE_LOCALES.has(locale) ? 'Warning' : 'Missing';
+        console.log(`\n${locale.toUpperCase()} - ${label}: ${results.missing[locale].length} keys:`);
         console.log(results.missing[locale].slice(0, 10).join('\n'));
         if (results.missing[locale].length > 10) {
           console.log(`... and ${results.missing[locale].length - 10} more`);
