@@ -1024,6 +1024,30 @@
     "whatsapp": "WhatsApp",
     "doctorEmailAddress": "医生电子邮件地址"
   },
+  "refillSheet": {
+    "noSupplementPrices": "此补充剂暂无价格",
+    "sortBy": "排序方式",
+    "sort": {
+      "distance": "距离",
+      "price": "价格",
+      "name": "名称"
+    },
+    "pricesFor": "{{name}}的价格",
+    "detailsUnavailable": "产品详情不可用",
+    "within": "{{radius}}公里范围内",
+    "expand": "扩大搜索范围",
+    "noPrices": "此药品暂无PROFECO价格",
+    "noNearby": "此范围内无已标价商店",
+    "state": "州",
+    "national": "全国",
+    "units": {
+      "tablets": "片",
+      "capsules": "粒",
+      "dragees": "糖衣片",
+      "ampoules": "安瓶",
+      "sachets": "小袋"
+    }
+  },
   "settings": {
     "title": "设置",
     "profile": "档案",

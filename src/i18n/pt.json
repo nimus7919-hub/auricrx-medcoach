@@ -1028,6 +1028,30 @@
     "whatsapp": "WhatsApp",
     "doctorEmailAddress": "Endereço de e-mail do médico"
   },
+  "refillSheet": {
+    "noSupplementPrices": "Nenhum preço disponível para este suplemento",
+    "sortBy": "Ordenar por",
+    "sort": {
+      "distance": "Distância",
+      "price": "Preço",
+      "name": "Nome"
+    },
+    "pricesFor": "Preços para: {{name}}",
+    "detailsUnavailable": "Detalhes do produto não disponíveis",
+    "within": "Dentro de {{radius}} km",
+    "expand": "Expandir busca",
+    "noPrices": "Nenhum preço PROFECO para este medicamento",
+    "noNearby": "Nenhuma loja com preços dentro deste raio",
+    "state": "Estado",
+    "national": "Nacional",
+    "units": {
+      "tablets": "comprimidos",
+      "capsules": "cápsulas",
+      "dragees": "drágeas",
+      "ampoules": "ampolas",
+      "sachets": "sachês"
+    }
+  },
   "settings": {
     "title": "Configurações",
     "profile": "Perfil",
