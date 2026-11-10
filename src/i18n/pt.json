@@ -2167,7 +2167,7 @@
         "specialist": "Specialist",
         "emergency": "Emergency",
         "appointmentManagement": "Appointment Management",
-        "appointmentManagementDesc": "Schedule appointments, manage Médico contacts, and track your healthcare visits",
+        "appointmentManagementDesc": "Agende consultas, gerencie contatos de médicos e rastreie suas visitas médicas",
         "schedule": "Schedule",
         "addDoctor": "Add Doctor",
         "refresh": "Refresh",
@@ -2185,10 +2185,10 @@
         "upcoming": "Upcoming",
         "doctors": "Doctors",
         "upcomingAppointments": "Upcoming Appointments",
-        "upcomingAppointmentsDesc": "Your scheduled appointments for the Próximo 30 days.",
+        "upcomingAppointmentsDesc": "Suas consultas agendadas para os próximos 30 dias.",
         "noUpcomingAppointments": "No upcoming appointments scheduled",
         "doctorContacts": "Doctor Contacts",
-        "doctorContactsDesc": "Your healthcare providers and their Contato Informação.",
+        "doctorContactsDesc": "Seus profissionais de saúde e suas informações de contato.",
         "pharmacy": "Pharmacy",
         "error": "Error",
         "success": "Success",
@@ -2238,7 +2238,7 @@
         "sleepHours": "Sleep Hours",
         "steps": "Steps",
         "aiHealthAssistant": "AI wellness assistant",
-        "intelligentHealthcareFeatures": "AI tools to organize your Saúde Informação. They do not replace your Médico.",
+        "intelligentHealthcareFeatures": "Ferramentas de IA para organizar suas informações de saúde. Elas não substituem seu médico.",
         "aiHealthFeatures": "AI tools",
         "healthInsights": "Health Insights",
         "symptomAnalyses": "Symptom Analyses",
@@ -2248,7 +2248,7 @@
         "checkInteractions": "Check Interactions",
         "voiceNote": "Voice Note",
         "recentAnalyses": "Recent Analyses",
-        "noHealthInsights": "No Saúde insights Disponível yet. Use the AI features to generate insights.",
+        "noHealthInsights": "Nenhum insight de saúde disponível ainda. Use os recursos de IA para gerar insights.",
         "noSymptomAnalyses": "No Sintoma analyses yet. Tentar analyzing your symptoms.",
         "describeSymptoms": "Descrever Sintomas",
         "enterSymptomsPlaceholder": "Descreva seus sintomas...",
@@ -2256,11 +2256,11 @@
         "enterMedicationsPlaceholder": "Liste seus medicamentos...",
         "fastingAnalytics": "Fasting Analytics",
         "fastingCompatibilityCheck": "Fasting Compatibility Check",
-        "fastingDescription": "Verificar if your current medications are compatible with intermittent fasting",
-        "fastingDisclaimer": "This recommendation is AI-generated and should not replace professional Médico advice.",
+        "fastingDescription": "Verifique se seus medicamentos atuais são compatíveis com o jejum intermitente",
+        "fastingDisclaimer": "Esta recomendação é gerada por IA e não deve substituir aconselhamento médico profissional.",
         "warnings": "Warnings",
         "fastingProfile": "Fasting Profile",
-        "fastingProfileDescription": "Definir Cima your Saúde Perfil for personalized fasting recommendations",
+        "fastingProfileDescription": "Configure seu perfil de saúde para recomendações personalizadas de jejum",
         "healthConditions": "Health Conditions",
         "nutritionalStatus": "Nutritional Status & Body Composition",
         "mentalHealth": "Mental Health & Cognitive Demands",
@@ -2321,7 +2321,7 @@
         "spiritual": "Spiritual/Religious",
         "medical": "Medical",
         "profileSaved": "Profile Saved",
-        "fastingProfileSavedMessage": "Your fasting Perfil has been saved and will be used for personalized recommendations.",
+        "fastingProfileSavedMessage": "Seu perfil de jejum foi salvo e será usado para recomendações personalizadas.",
         "saveProfile": "Save Profile",
         "noteType": "Note Type",
         "selectNoteType": "Select Note Type",
@@ -2343,9 +2343,9 @@
         "appointment": "Appointment",
         "sideEffect": "Side Effect",
         "symptom": "Symptom",
-        "aiGeneratedInsights": "AI-generated insights based on your Saúde data and patterns.",
+        "aiGeneratedInsights": "Insights gerados por IA com base em seus dados e padrões de saúde.",
         "medicalDocuments": "Medical Documents",
-        "organizeDocuments": "Keep your important Médico documents organized and ready for Médico visits",
+        "organizeDocuments": "Mantenha seus documentos médicos importantes organizados e prontos para consultas médicas",
         "addDocument": "Add Document",
         "takePhoto": "Take Photo",
         "uploadFromGallery": "Carregar from Gallery",
@@ -2358,11 +2358,11 @@
         "documentUploadedSuccessfully": "Document uploaded successfully!",
         "photoTakenSuccessfully": "Photo taken successfully!",
         "deleteDocument": "Delete Document",
-        "areYouSureDeleteDocument": "Are you sure you want to Excluir this Documento? This cannot be undone.",
+        "areYouSureDeleteDocument": "Tem certeza de que deseja excluir este documento? Isso não pode ser desfeito.",
         "delete": "Delete",
         "permissionRequired": "Permission Required",
-        "grantCameraRollAccess": "Por favor grant camera roll access to Carregar documents.",
-        "grantCameraAccess": "Por favor grant camera access to take photos.",
+        "grantCameraRollAccess": "Por favor, conceda acesso à galeria de fotos para enviar documentos.",
+        "grantCameraAccess": "Por favor, conceda acesso à câmera para tirar fotos.",
         "failedToUploadDocument": "Failed to upload document",
         "failedToTakePhoto": "Failed to take photo",
         "photoID": "Photo ID",
@@ -2379,24 +2379,24 @@
         "medicalHistoryReports": "Medical history, reports",
         "otherDocuments": "Other Documents",
         "anyOtherMedicalDocuments": "Any other medical documents",
-        "recentSymptomAnalyses": "Your recent Sintoma analyses and Saúde assessments.",
+        "recentSymptomAnalyses": "Suas análises de sintomas e avaliações de saúde recentes.",
         "symptomAnalysis": "Symptom Analysis",
         "drugInteractionCheck": "Drug Interaction Check",
         "smartServiceNotAvailable": "Smart notifications service not Disponível",
         "addLocationReminder": "Add Location Reminder",
-        "enterLocationName": "Enter the Nome of the Localização (e.g., \"CVS Farmácia\", \"Dr. Smith's Office\"):",
+        "enterLocationName": "Digite o nome do local (ex: \"Farmácia Drogasil\", \"Consultório Dr. Silva\"):",
         "reminderMessage": "Reminder Message",
-        "reminderMessagePrompt": "What should the reminder say when you're near this Localização?",
+        "reminderMessagePrompt": "O que o lembrete deve dizer quando você estiver perto deste local?",
         "locationReminderAdded": "Location reminder added!",
         "failedToAddLocationReminder": "Failed to add location reminder",
         "addWeatherAlert": "Add Weather Alert",
-        "chooseWeatherCondition": "Escolher the weather condition to monitor:",
+        "chooseWeatherCondition": "Escolha a condição climática para monitorar:",
         "highPollen": "High Pollen",
         "extremeTemperature": "Extreme Temperature",
         "highHumidity": "High Humidity",
         "poorAirQuality": "Poor Air Quality",
         "pollenMessage": "Consider taking allergy medication",
-        "temperatureMessage": "Verificar if you need temperature-sensitive medications",
+        "temperatureMessage": "Verifique se você precisa de medicamentos sensíveis à temperatura",
         "humidityMessage": "A umidade alta pode afetar seus sintomas",
         "airQualityMessage": "Consider wearing a mask or staying indoors",
         "weatherAlertAdded": "Weather alert added!",
@@ -2417,7 +2417,7 @@
         "dataCollection": "Data Collection",
         "analytics": "Analytics",
         "changeWallpaper": "Change Wallpaper",
-        "chooseWallpaperDescription": "Escolher from beautiful wallpapers or solid colors",
+        "chooseWallpaperDescription": "Escolha entre belos papéis de parede ou cores sólidas",
         "language": "Language",
         "colorSettings": "Color Settings",
         "dayNight": "Day / Night",
@@ -2496,7 +2496,7 @@
         "price": "Price",
         "name": "Name",
         "reserve": "Reserve (stub)",
-        "contributionDescription": "Ajuda us improve our Medicamento price database by sharing what you found:",
+        "contributionDescription": "Ajude-nos a melhorar nosso banco de dados de preços de medicamentos compartilhando o que você encontrou:",
         "medicationNamePlaceholder": "Enter medication name",
         "strengthPlaceholder": "e.g., 100mg, 50mg/500mg",
         "pricePlaceholder": "Enter price (e.g., 25.50)",
@@ -2504,10 +2504,10 @@
         "storeNamePlaceholder": "Enter store name",
         "storeAddressPlaceholder": "Enter store address",
         "contributionError": "Missing Information",
-        "contributionErrorText": "Por favor fill in Medicamento Nome, price, and store Nome.",
+        "contributionErrorText": "Por favor, preencha o nome do medicamento, preço e nome da loja.",
         "contributionSuccess": "Thank You!",
-        "contributionSuccessText": "Your price Informação has been saved and will Ajuda improve our database for everyone.",
-        "noPharmaciesMessage": "No pharmacies found in your area. Por favor Tentar again.",
+        "contributionSuccessText": "Suas informações de preço foram salvas e ajudarão a melhorar nosso banco de dados para todos.",
+        "noPharmaciesMessage": "Nenhuma farmácia encontrada em sua área. Por favor, tente novamente.",
         "retry": "Retry",
         "ok": "OK",
         "fxLabel": "FX",
@@ -2523,13 +2523,13 @@
         "noLocationReminders": "No location reminders set up yet",
         "weatherBasedAlerts": "Weather-Based Alerts",
         "noWeatherAlerts": "No weather alerts set up yet",
-        "trackHealthMetrics": "Track your Saúde metrics, Medicamento adherence, and side effects",
+        "trackHealthMetrics": "Rastreie suas métricas de saúde, adesão a medicamentos e efeitos colaterais",
         "healthOverview": "Health Overview",
         "metricsRecorded": "Metrics Recorded",
         "adherenceRate": "Adherence Rate",
         "sideEffects": "Side Effects",
         "recentHealthMetrics": "Recent Health Metrics",
-        "trackVitalSigns": "Track your vital signs and Saúde indicators over Hora",
+        "trackVitalSigns": "Rastreie seus sinais vitais e indicadores de saúde ao longo do tempo",
         "noHealthMetrics": "No health metrics recorded yet",
         "addHealthMetric": "Add Health Metric",
         "medicationAdherence": "Medication Adherence",
@@ -2539,13 +2539,13 @@
         "trackSideEffects": "Rastrear Efeitos Colaterais",
         "noSideEffectsRecorded": "No side effects recorded yet",
         "recordSideEffect": "Record Side Effect",
-        "intelligentHealthcareFeaturesDesc": "Intelligent healthcare features powered by AI to Ajuda you make informed Saúde decisions",
+        "intelligentHealthcareFeaturesDesc": "Recursos inteligentes de saúde alimentados por IA para ajudá-lo a tomar decisões de saúde informadas",
         "locationBasedRemindersDesc": "Obter reminded when you're near pharmacies, Médico offices, or other important locations",
-        "weatherBasedAlertsDesc": "Obter notified when weather conditions might affect your Saúde or medications",
-        "smartFeaturesDesc": "AI-powered features that learn from your Medicamento patterns and provide intelligent reminders",
-        "smartRefillPredictionsDesc": "Predict when you'll need Medicamento refills based on usage patterns",
-        "intelligentTimingDesc": "Learn your Medicamento schedule and suggest optimal reminder times",
-        "contextAwareRemindersDesc": "Consider your Localização, weather, and schedule when sending reminders",
+        "weatherBasedAlertsDesc": "Receba notificações quando as condições climáticas podem afetar sua saúde ou medicamentos",
+        "smartFeaturesDesc": "Recursos alimentados por IA que aprendem com seus padrões de medicamentos e fornecem orientação inteligente",
+        "smartRefillPredictionsDesc": "Preveja quando você precisará reabastecer medicamentos com base em padrões de uso",
+        "intelligentTimingDesc": "Aprenda sua programação de medicamentos e sugira horários ideais de lembrete",
+        "contextAwareRemindersDesc": "Considere sua localização, clima e programação ao enviar lembretes",
         "smartNotificationsDesc": "Notificações inteligentes baseadas em seu horário e localização",
         "initializing": "Initializing...",
         "active": "Active",
@@ -2576,7 +2576,7 @@
         "selectMetricType": "Select Metric Type",
         "healthReportGenerated": "Health Report Generated",
         "keyInsights": "Key Insights",
-        "yourHealthMetricsNormal": "Your Saúde metrics are within normal ranges",
+        "yourHealthMetricsNormal": "Suas métricas de saúde estão dentro das faixas normais",
         "considerMaintainingSchedule": "Consider maintaining consistent medication schedule",
         "monitorNewSideEffects": "Monitor any new side effects closely",
         "pleaseEnterValue": "Por favor enter a value",
@@ -2597,7 +2597,7 @@
         "locationDenied": "Location denied",
         "enableLocation": "Enable location to search nearby stores.",
         "noTimingSet": "No timing set",
-        "noSupplementsFound": "No supplements found. Adicionar your first supplement to Obter started.",
+        "noSupplementsFound": "Nenhum suplemento encontrado. Adicione seu primeiro suplemento para começar.",
         "cash": "Cash",
         "coupon": "Coupon",
         "delivery": "Delivery",
@@ -2630,7 +2630,7 @@
           "names": "Erva de São João",
           "details": {
             "origin": "Nativa da Europa e Ásia, agora amplamente cultivada",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Suporte ao Humor",
           "caution": "Interage com muitos medicamentos"
@@ -2639,7 +2639,7 @@
           "names": "Ginkgo Biloba",
           "details": {
             "origin": "Worldwide (used in Mexico, North America, China)",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Suporte à Memória e Cognição",
           "caution": "Pode aumentar risco de sangramento"
@@ -2648,7 +2648,7 @@
           "names": "Alho",
           "details": {
             "origin": "Europe, Western Asia (widely used globally)",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde Cardiovascular",
           "caution": "Pode aumentar risco de sangramento"
@@ -2657,7 +2657,7 @@
           "names": "Ginseng",
           "details": {
             "origin": "Central Asia (widely cultivated worldwide)",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Energia e Vitalidade",
           "caution": "Pode afetar açúcar no sangue e pressão arterial"
@@ -2666,7 +2666,7 @@
           "names": "Raiz de Valeriana",
           "details": {
             "origin": "North America; widely used in Traditional Chinese Medicine",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Auxílio ao Sono",
           "caution": "Pode aumentar efeitos sedativos"
@@ -2675,7 +2675,7 @@
           "names": "Gengibre",
           "details": {
             "origin": "Central Mexico",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde Digestiva e Náuseas",
           "caution": "Pode aumentar risco de sangramento"
@@ -2684,7 +2684,7 @@
           "names": "Cúrcuma / Curcumina",
           "details": {
             "origin": "Mexico",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Suporte Anti-inflamatório",
           "caution": "Pode aumentar risco de sangramento"
@@ -2693,7 +2693,7 @@
           "names": "Cranberry",
           "details": {
             "origin": "Mexico",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde do Trato Urinário",
           "caution": "Pode interagir com anticoagulantes"
@@ -2702,7 +2702,7 @@
           "names": "Saw Palmetto",
           "details": {
             "origin": "China (Traditional Chinese Medicine)",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde da Próstata",
           "caution": "Pode afetar hormônios"
@@ -2711,7 +2711,7 @@
           "names": "Cohosh Preto",
           "details": {
             "origin": "Nativa da Europa, agora cultivada globalmente",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Sintomas da Menopausa",
           "caution": "Pode afetar fígado"
@@ -2720,7 +2720,7 @@
           "names": "Ácidos Graxos Ômega-3",
           "details": {
             "origin": "Southeast Asia; widely used globally",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde Cardiovascular",
           "caution": "Pode aumentar risco de sangramento"
@@ -2729,7 +2729,7 @@
           "names": "Glucosamina",
           "details": {
             "origin": "North America",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde das Articulações",
           "caution": "Pode afetar açúcar no sangue"
@@ -2738,7 +2738,7 @@
           "names": "Condroitina",
           "details": {
             "origin": "China; introduced to US",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde das Articulações",
           "caution": "Pode aumentar risco de sangramento"
@@ -2747,7 +2747,7 @@
           "names": "Probióticos",
           "details": {
             "origin": "China",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde Digestiva",
           "caution": "Geralmente seguro"
@@ -2756,7 +2756,7 @@
           "names": "Melatonina",
           "details": {
             "origin": "Southeast Asia; used globally",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Regulação do Sono",
           "caution": "Pode afetar medicamentos para pressão arterial"
@@ -2765,7 +2765,7 @@
           "names": "Coenzima Q10",
           "details": {
             "origin": "Nativa da Ásia e América do Norte",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Produção de Energia Celular",
           "caution": "Pode interagir com anticoagulantes"
@@ -2774,7 +2774,7 @@
           "names": "Cardo Mariano",
           "details": {
             "origin": "Mediterranean; used globally",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Saúde do Fígado",
           "caution": "Pode interagir com medicamentos"
@@ -2783,7 +2783,7 @@
           "names": "Chá Verde / Extrato",
           "details": {
             "origin": "Mediterranean; adopted globally",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           },
           "primaryUse": "Antioxidante e Perda de Peso",
           "caution": "Pode afetar fígado em altas doses"
@@ -2792,7 +2792,7 @@
           "names": "Aristolochia odoratissima",
           "details": {
             "origin": "Mexico",
-            "summary": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement Informação, not an assessment of this species."
+            "summary": "Não temos uma ficha informativa revisada do NCCIH específica para esta planta. O link do NCCIH fornece informações gerais sobre produtos fitoterápicos."
           }
         },
         "item20": {
@@ -4544,7 +4544,7 @@
     "howProtect": "Como protegemos:",
     "howProtectText": "os dados são criptografados quando são enviados e quando são armazenados, e só podem ser acessados da sua conta [e pelas pessoas do seu Family Circle com quem você optar por compartilhar]. Se ocorrer um incidente de segurança que afete você, informaremos imediatamente.",
     "yourChoice": "Sua escolha:",
-    "yourChoiceText": "você pode desativar o backup a qualquer momento em Configurações > Backup. Quando desativar, você pode excluir as cópias na nuvem; nós as excluiremos em até [X] dias. Excluir suas cópias é grátis, mesmo se você não tiver mais o Pro.",
+    "yourChoiceText": "você pode desativar o backup a qualquer momento em Configurações > Backup. Quando você o desativa, você pode",
     "yourRights": "Seus direitos:",
     "yourRightsText": "você pode acessar, retificar, cancelar ou se opor ao uso dos seus dados (direitos ARCO) e retirar seu consentimento em Configurações > Privacidade ou escrevendo para [PRIVACY EMAIL – pending approval]. Consulte o Aviso de Privacidade: [URL].",
     "consentCheckbox": "Consinto expressamente em armazenar uma cópia na nuvem dos documentos de saúde que eu escolher, nos termos acima.",
@@ -4554,7 +4554,7 @@
     "lawfulRiskNote": "Armazenar documentos na internet tem riscos que não existem se você os armazena apenas no seu telefone. Continuamos responsáveis por protegê-los. Se preferir, mantenha o backup desativado: seus documentos permanecerão armazenados apenas neste telefone.",
     "disableTitle": "Desativar backup?",
     "disableMessage": "Não faremos mais upload de novos documentos.",
-    "deleteCloudCheckbox": "Também excluir as cópias que já estão na nuvem (excluídas em até [X] dias; cópias no seu telefone não são excluídas).",
+    "deleteCloudCheckbox": "Também excluir as cópias que já estão na nuvem (excluídas dentro de [X] dias; c",
     "turnOff": "Desativar",
     "cancel": "Cancelar",
     "reauthRequired": "Confirme sua identidade para ativar o backup na nuvem",
