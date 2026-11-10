@@ -7,6 +7,7 @@ import KeyboardForm from '../../components/KeyboardForm';
 import { authenticatedFetch } from '../services/authenticatedFetch';
 import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
+import MedicationReferenceScreen from './MedicationReferenceScreen';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Animated, StatusBar, Image, Platform, Vibration, Dimensions, TextInput, Share } from 'react-native';
 import { PremiumEntitlementService } from '../services/premiumEntitlementService';
@@ -689,12 +690,9 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
 
 
   const [showSymptomModal, setShowSymptomModal] = useState(false);
-  const [showDrugCheckModal, setShowDrugCheckModal] = useState(false);
+  const [showMedicationReferenceScreen, setShowMedicationReferenceScreen] = useState(false);
   const [showSymptomResultModal, setShowSymptomResultModal] = useState(false);
   const [showSymptomHistoryModal, setShowSymptomHistoryModal] = useState(false);
-  const [showInteractionResultModal, setShowInteractionResultModal] = useState(false);
-  const [showInteractionLoadingModal, setShowInteractionLoadingModal] = useState(false);
-  const [interactionResult, setInteractionResult] = useState<any>(null);
   const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
   const [currentSymptomAnalysis, setCurrentSymptomAnalysis] = useState<SymptomAnalysis | null>(null);
   const [symptomText, setSymptomText] = useState('');
@@ -824,239 +822,10 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
     }
   };
 
-  const checkDrugInteractions = async () => {
-    // Combine medications and supplements
-    const allItems = [
-      ...(medications || []).map((m: any) => ({
-        name: m.name,
-        strength: m.components && m.components.length > 0 
-          ? m.components.map((c: any) => `${c.strength}${c.unit}`).join('+')
-          : m.strengthValue ? `${m.strengthValue}${m.strengthUnit}` : '',
-        type: 'medication'
-      })),
-      ...(supplements || []).map((s: any) => ({
-        name: s.name,
-        strength: s.strengthValue ? `${s.strengthValue}${s.strengthUnit}` : '',
-        type: 'supplement'
-      }))
-    ];
-
-    if (allItems.length < 2) {
-      Alert.alert(
-        '❌ ' + (S?.error || uiI18n.t("adminProfile.error")), 
-        S?.needTwoItems || uiI18n.t("ai.needTwoItems")
-      );
-      return;
-    }
-
-    try {
-      setShowDrugCheckModal(false);
-      
-      // Show loading modal
-      setShowInteractionLoadingModal(true);
-
-      // Prepare the medication list for AI
-      const itemList = allItems.map(item => 
-        `${item.name}${item.strength ? ' (' + item.strength + ')' : ''} [${item.type}]`
-      ).join('\n');
-
-      // Call AI API - Use Render service (cloud)
-      const apiUrl = `${API_BASE}/api/ai/drug-interactions`;
-      
-      console.log('Calling AI API:', apiUrl);
-      console.log('Items to check:', allItems);
-
-      // Create a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error(uiI18n.t("ui.requestTimeoutAiServerMayNotBeRunning"))), 15000); // 15 second timeout
-      });
-
-      // Detect current language
-      const currentLanguage = i18n.language === 'es' ? 'Spanish' : 
-                             i18n.language === 'zh' ? 'Chinese' : 
-                             i18n.language === 'fr' ? 'French' : 
-                             i18n.language === 'de' ? 'German' : 
-                             i18n.language === 'pt' ? 'Portuguese' : uiI18n.t("settings.languages.en");
-
-      // Race between fetch and timeout
-      const fetchPromise = authenticatedFetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: allItems,
-          messages: [
-            {
-              role: 'user',
-              content: `Please provide general educational information about possible medication interactions. Do not suggest starting, stopping, or changing medicines or doses. 
-
-CRITICAL: You MUST respond ENTIRELY in ${currentLanguage}. Every single word, sentence, and phrase in your response must be written in ${currentLanguage}. This includes:
-- The medical disclaimer
-- All interaction descriptions
-- All clinical effects
-- All management recommendations
-- The summary
-- Everything else
-
-DO NOT use English or any other language. ONLY use ${currentLanguage}.
-
-Analyze drug and supplement interactions comprehensively.
-
-Always provide a medical disclaimer that this is for educational purposes only and users should consult their healthcare provider.
-
-For each interaction found, provide:
-1. The two interacting items (keep drug names as provided)
-2. Severity level: Minor, Moderate, Major, or Contraindicated (translate this to ${currentLanguage})
-3. Description of the interaction (in ${currentLanguage})
-4. Clinical effects (in ${currentLanguage})
-5. Encourage consulting a doctor or pharmacist without suggesting treatment changes (in ${currentLanguage})
-
-If no significant interactions are found, state that clearly in ${currentLanguage} but still recommend consulting a pharmacist or doctor.
-
-Format your response as JSON with this structure:
-{
-  "disclaimer": "Your medical disclaimer text IN ${currentLanguage}",
-  "interactions": [
-    {
-      "item1": "Drug A",
-      "item2": "Drug B",
-      "severity": "Severity level IN ${currentLanguage}",
-      "description": "Description of interaction IN ${currentLanguage}",
-      "clinicalEffects": ["Effect 1 IN ${currentLanguage}", "Effect 2 IN ${currentLanguage}"],
-      "management": "Management recommendations IN ${currentLanguage}",
-      "urgency": "immediate|monitor|routine"
-    }
-  ],
-  "overallRisk": "low|moderate|high",
-  "summary": "Brief overall summary IN ${currentLanguage}"
-}
-
-REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for drug names.`
-            },
-            {
-              role: 'user',
-              content: `Please analyze these medications and supplements for potential interactions. Remember to respond ENTIRELY in ${currentLanguage}:\n\n${itemList}`
-            }
-          ]
-        })
-      });
-
-      const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response:', errorText);
-        throw new Error(uiI18n.t("ui.serverRespondedWithValueValue", { value1: response.status, value2: errorText }));
-      }
-
-      const data = await response.json();
-      console.log('Received data:', data);
-      
-      // Parse AI response
-      let aiResult;
-      try {
-        aiResult = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
-      } catch {
-        aiResult = {
-          disclaimer: data.result || uiI18n.t("ui.unableToParseResponse"),
-          interactions: [],
-          overallRisk: 'unknown',
-          summary: data.result
-        };
-      }
-
-      // Save to AsyncStorage
-      const interactionCheck = {
-        id: `check_${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        items: allItems,
-        result: aiResult,
-        itemCount: allItems.length
-      };
-
-      const saved = await AsyncStorage.getItem('drug_interaction_checks');
-      const checks = saved ? JSON.parse(saved) : [];
-      checks.unshift(interactionCheck);
-      await AsyncStorage.setItem('drug_interaction_checks', JSON.stringify(checks.slice(0, 20))); // Keep last 20
-
-      triggerHaptic('medium');
-
-      // Hide loading, show results in modal
-      setShowInteractionLoadingModal(false);
-      setInteractionResult(aiResult);
-      setShowInteractionResultModal(true);
-
-    } catch (error: any) {
-      // Hide loading modal
-      setShowInteractionLoadingModal(false);
-      
-      console.error('Failed to check drug interactions:', error);
-      console.error('Error details:', error.message);
-      
-      let errorMessage = S?.failedToCheckInteractions || uiI18n.t("ui.failedToCheckInteractions");
-      
-      // Check for timeout
-      if (error.message?.includes('timeout')) {
-        errorMessage = uiI18n.t("ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta");
-      }
-      // Check for network errors
-      else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        errorMessage = uiI18n.t("ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP");
-      }
-      // Add error details for other errors
-      else if (error.message) {
-        errorMessage += uiI18n.t("ui.detailsValue", { value1: error.message });
-      }
-      
-      Alert.alert(
-        '❌ ' + (S?.error || uiI18n.t("adminProfile.error")), 
-        errorMessage
-      );
-    }
-  };
-
-  // Enhanced Fasting Compatibility Check Function with Profile
-  const checkFastingCompatibilityWithProfile = (medications: any[], profile: any) => {
-    const restricted = !!(profile?.diabetes || profile?.pregnancy || profile?.breastfeeding || profile?.eatingDisorders || profile?.eating_disorders);
-    return {
-      compatible: false,
-      warnings: [],
-      suggestedHours: restricted ? 0 : 12,
-      message: restricted ? i18nT('ai.fastingProfileRestricted') : i18nT('ai.fastingAppearsCompatible'),
-    };
-  };
-
-  // Original function for backward compatibility
-  const checkFastingCompatibility = (medications: any[]) => {
-    return checkFastingCompatibilityWithProfile(medications, null);
-  };
-
-  const analyzeFastingCompatibility = async () => {
-    try {
-      // Get medications from the app's medication data
-      // For now, we'll use a mock list - in a real app, this would come from the medication state
-      const mockMedications = [
-        { name: aiTranslations.metformin, strength: '500mg', times: ['08:00', '20:00'] },
-        { name: aiTranslations.aspirin, strength: '81mg', times: ['08:00'] },
-        { name: aiTranslations.vitaminD, strength: '1000 IU', times: ['08:00'] }
-      ];
-      
-      // Enhanced analysis using fasting profile
-      const analysis = checkFastingCompatibilityWithProfile(mockMedications, fastingProfile);
-      setFastingAnalysis(analysis);
-      setFastingResult(analysis.message);
-      setShowFastingModal(false);
-      
-      triggerHaptic('medium');
-      
-      // Analysis results are now displayed on screen via fastingResult state
-    } catch (error) {
-      console.error('Failed to analyze fasting compatibility:', error);
-      Alert.alert('❌ ' + aiTranslations.error, aiTranslations.failedToAnalyzeFastingCompatibility);
-    }
+  // REMOVED: AI-based drug interaction checker (COFEPRIS compliance)
+  // Replaced with static medication reference lookup in MedicationReferenceScreen
+  const openMedicationReference = () => {
+    setShowMedicationReferenceScreen(true);
   };
 
   // Helper function to translate stored values
@@ -1835,7 +1604,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         </TouchableOpacity>
         <TouchableOpacity
           style={dynamicStyles.quickActionButton}
-          onPress={() => setShowDrugCheckModal(true)}
+          onPress={openMedicationReference}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Image 
@@ -2287,143 +2056,27 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
         </View></KeyboardForm>
       </Modal>
 
-      {/* Drug Interaction Check Modal */}
+      {/* Medication Reference Screen Modal */}
       <Modal
-        visible={showDrugCheckModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowDrugCheckModal(false)}
+        visible={showMedicationReferenceScreen}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={() => setShowMedicationReferenceScreen(false)}
       >
-        <View style={dynamicStyles.modalOverlay}>
-          <View style={[dynamicStyles.modalContent, { maxHeight: '85%' }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image 
-                source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
-                style={{ width: 24, height: 24, marginRight: 8 }}
-              />
-              <DynamicText type="primary" style={dynamicStyles.modalTitle}>{S?.drugInteractionCheck || uiI18n.t("ai.drugInteractionCheck")}</DynamicText>
-            </View>
-            
-            {/* Medical Disclaimer */}
-            <View style={[dynamicStyles.doctorWarningCard, { marginBottom: 16 }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image 
-                  source={require('../../assets/dashboard Emojies/warning sign emoji.png')} 
-                  style={{ width: 18, height: 18, marginRight: 6 }}
-                />
-                <DynamicText type="card" style={dynamicStyles.doctorWarningTitle}>
-                  {S?.medicalDisclaimer || uiI18n.t("ai.medicalDisclaimer")}
-                </DynamicText>
-              </View>
-              <DynamicText type="card" style={dynamicStyles.doctorWarningText}>
-                {S?.interactionDisclaimerText || uiI18n.t("ai.interactionDisclaimerText")}
-              </DynamicText>
-            </View>
-
-            <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-              {/* Medications Section */}
-              {medications && medications.length > 0 && (
-                <View style={dynamicStyles.inputGroup}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image 
-                      source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
-                      style={{ width: 18, height: 18, marginRight: 6 }}
-                    />
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>
-                      {S?.yourMedications || uiI18n.t("ai.yourMedications")} ({medications.length})
-                    </DynamicText>
-                  </View>
-                  {medications.map((med: any, index: number) => (
-                    <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 8 }]}>
-                      <DynamicText type="card" style={{ fontWeight: '600', fontSize: 13 }}>
-                        {med.name}
-                      </DynamicText>
-                      {med.strengthValue && (
-                        <DynamicText type="card" style={{ fontSize: 12, marginTop: 2 }}>
-                          {med.strengthValue} {med.strengthUnit}
-                        </DynamicText>
-                      )}
-                      {med.components && med.components.length > 0 && (
-                        <DynamicText type="card" style={{ fontSize: 12, marginTop: 2 }}>
-                          {med.components.map((c: any) => `${c.strength} ${c.unit}`).join(' + ')}
-                        </DynamicText>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {/* Supplements Section */}
-              {supplements && supplements.length > 0 && (
-                <View style={dynamicStyles.inputGroup}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image 
-                      source={require('../../assets/dashboard Emojies/standard pill emoji.png')} 
-                      style={{ width: 18, height: 18, marginRight: 6 }}
-                    />
-                    <DynamicText type="card" style={dynamicStyles.inputLabel}>
-                      {S?.yourSupplements || uiI18n.t("ai.yourSupplements")} ({supplements.length})
-                    </DynamicText>
-                  </View>
-                  {supplements.map((sup: any, index: number) => (
-                    <View key={index} style={[dynamicStyles.insightCard, { marginBottom: 8 }]}>
-                      <DynamicText type="card" style={{ fontWeight: '600', fontSize: 13 }}>
-                        {sup.name}
-                      </DynamicText>
-                      {sup.strengthValue && (
-                        <DynamicText type="card" style={{ fontSize: 12, marginTop: 2 }}>
-                          {sup.strengthValue} {sup.strengthUnit}
-                        </DynamicText>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {/* Empty State */}
-              {(!medications || medications.length === 0) && (!supplements || supplements.length === 0) && (
-                <View style={{ padding: 20, alignItems: 'center' }}>
-                  <DynamicText type="secondary" style={{ textAlign: 'center', fontStyle: 'italic' }}>
-                    {S?.noMedicationsToCheck || uiI18n.t("ai.noMedicationsToCheck")}
-                  </DynamicText>
-                </View>
-              )}
-            </ScrollView>
-
-            <View style={dynamicStyles.modalButtons}>
-              <TouchableOpacity
-                style={[dynamicStyles.modalButton, dynamicStyles.modalButtonSecondary]}
-                onPress={() => setShowDrugCheckModal(false)}
-              >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextSecondary]}>
-                  {S?.cancel || uiI18n.t("healthAnalytics.cancel")}
-                </DynamicText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  dynamicStyles.modalButton, 
-                  dynamicStyles.modalButtonPrimary,
-                  ((medications?.length || 0) + (supplements?.length || 0) < 2) && { opacity: 0.5 }
-                ]}
-                onPress={checkDrugInteractions}
-                disabled={(medications?.length || 0) + (supplements?.length || 0) < 2}
-              >
-                <DynamicText type="card" style={[dynamicStyles.modalButtonText, dynamicStyles.modalButtonTextPrimary, { textAlign: 'center' }]}>
-                  {S?.checkInteractions || uiI18n.t("ai.checkInteractions")}
-                </DynamicText>
-              </TouchableOpacity>
-            </View>
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' }}>
+            <TouchableOpacity onPress={() => setShowMedicationReferenceScreen(false)} style={{ marginRight: 16 }}>
+              <DynamicText type="card" style={{ fontSize: 18 }}>←</DynamicText>
+            </TouchableOpacity>
+            <DynamicText type="card" style={{ fontSize: 18, fontWeight: 'bold' }}>{t("ai.checkInteractions")}</DynamicText>
           </View>
+          <MedicationReferenceScreen />
         </View>
       </Modal>
 
-      {/* Symptom Analysis Result Modal */}
-      <Modal
-        visible={showSymptomResultModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSymptomResultModal(false)}
-      >
+      {/* OLD INTERACTION MODALS REMOVED FOR COFEPRIS COMPLIANCE */}
+      {/* The following modals have been removed:
+        - Drug Interaction Check Modal (user selection)
         <View style={dynamicStyles.modalOverlay}>
           <View style={[dynamicStyles.modalContent, { maxHeight: '80%' }]}>
             {currentSymptomAnalysis && (
