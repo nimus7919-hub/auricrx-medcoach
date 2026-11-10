@@ -84,6 +84,15 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
           <View style={styles.featuresList}>
             <View style={styles.featureItem}>
               <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
+                🤖
+              </DynamicText>
+              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
+                {t('premiumUpgrade.features.aiHealth')}
+              </DynamicText>
+            </View>
+
+            <View style={styles.featureItem}>
+              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
                 👨‍👩‍👧‍👦
               </DynamicText>
               <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
@@ -111,13 +120,49 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
 
             <View style={styles.featureItem}>
               <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                📍
+                📄
               </DynamicText>
               <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.distances')}
+                {t('premiumUpgrade.features.documents')}
+              </DynamicText>
+            </View>
+
+            <View style={styles.featureItem}>
+              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
+                🌿
+              </DynamicText>
+              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
+                {t('premiumUpgrade.features.herbs')}
+              </DynamicText>
+            </View>
+
+            <View style={styles.featureItem}>
+              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
+                ⌚
+              </DynamicText>
+              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
+                {t('premiumUpgrade.features.wearableSync')}
+              </DynamicText>
+            </View>
+
+            <View style={styles.featureItem}>
+              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
+                📤
+              </DynamicText>
+              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
+                {t('premiumUpgrade.features.dataExport')}
               </DynamicText>
             </View>
           </View>
+        </View>
+
+        <View style={[styles.freeCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
+          <DynamicText type="card" style={[styles.freeTitle, { color: getCardTextColor() }]}>
+            💚 {t('premiumUpgrade.alwaysFreeTitle')}
+          </DynamicText>
+          <DynamicText type="card" style={[styles.freeText, { color: getCardTextColor() }]}>
+            {t('premiumUpgrade.alwaysFreeText')}
+          </DynamicText>
         </View>
 
         <View style={[styles.dataCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
@@ -172,10 +217,13 @@ const styles = StyleSheet.create({
   trialText: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
   featuresCard: { borderRadius: 12, borderWidth: 1, padding: 20, marginBottom: 20 },
   featuresTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16 },
-  featuresList: { gap: 16 },
+  featuresList: { gap: 14 },
   featureItem: { flexDirection: 'row', alignItems: 'flex-start' },
-  featureEmoji: { fontSize: 24, marginRight: 12, marginTop: 2 },
-  featureText: { flex: 1, fontSize: 15, lineHeight: 22 },
+  featureEmoji: { fontSize: 22, marginRight: 12, marginTop: 2 },
+  featureText: { flex: 1, fontSize: 14, lineHeight: 20 },
+  freeCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
+  freeTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+  freeText: { fontSize: 14, opacity: 0.85, lineHeight: 20 },
   dataCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 24 },
   dataTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
   dataText: { fontSize: 14, opacity: 0.85, lineHeight: 20 },
