@@ -4055,7 +4055,8 @@
     "continueFree": "Continue with free plan",
     "terms": "Terms",
     "privacyNotice": "Privacy Notice",
-    "restorePurchases": "Restore purchases"
+    "restorePurchases": "Restore purchases",
+    "storeBillingNote": "Billing is handled through your {{store}} account. We do not process payments directly in the app."
   },
   "renewalNotices": {
     "trialEnding": "Your free Pro trial ends on {{date}}. That day you'll be charged {{price}} (VAT included) to your {{store}} account, then every month. If you don't want to continue, cancel before {{date}}: {{link}}.",

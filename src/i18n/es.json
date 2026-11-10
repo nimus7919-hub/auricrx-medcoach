@@ -4014,7 +4014,8 @@
     "continueFree": "Seguir con el plan gratis",
     "terms": "Términos",
     "privacyNotice": "Aviso de Privacidad",
-    "restorePurchases": "Restaurar compras"
+    "restorePurchases": "Restaurar compras",
+    "storeBillingNote": "La facturación se maneja a través de tu cuenta de {{store}}. No procesamos pagos directamente en la app."
   },
   "renewalNotices": {
     "trialEnding": "Tu prueba gratis de Pro termina el {{date}}. Ese día se cobrarán {{price}} (IVA incluido) a tu cuenta de {{store}} y luego cada mes. Si no quieres continuar, cancela antes del {{date}}: {{link}}.",

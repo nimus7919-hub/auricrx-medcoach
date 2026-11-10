@@ -140,6 +140,12 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
           </DynamicText>
         </TouchableOpacity>
 
+        <View style={[styles.noteCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
+          <DynamicText type="card" style={[styles.noteText, { color: getCardTextColor() }]}>
+            ℹ️ {t('subscription.storeBillingNote', { store: getStore() })}
+          </DynamicText>
+        </View>
+
         <View style={styles.linksRow}>
           <TouchableOpacity>
             <DynamicText type="card" style={[styles.linkText, { color: getCardTextColor() }]}>
@@ -190,8 +196,10 @@ const styles = StyleSheet.create({
   startTrialButton: { borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
   startTrialButtonGradient: { paddingVertical: 18, paddingHorizontal: 24, alignItems: 'center' },
   startTrialButtonText: { fontSize: 18, fontWeight: 'bold', color: '#17130B' },
-  continueFreeButton: { alignItems: 'center', paddingVertical: 12, marginBottom: 24 },
+  continueFreeButton: { alignItems: 'center', paddingVertical: 12, marginBottom: 16 },
   continueFreeButtonText: { fontSize: 16, opacity: 0.8 },
+  noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
+  noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19, textAlign: 'center' },
   linksRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
   linkText: { fontSize: 13, opacity: 0.7 },
   linkSeparator: { fontSize: 13, opacity: 0.5, marginHorizontal: 4 },
