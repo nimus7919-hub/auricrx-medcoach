@@ -2756,5 +2756,27 @@
     "GE": "🇬🇪 Georgia",
     "KG": "🇰🇬 Kyrgyzstan",
     "UZ": "🇺🇿 Uzbekistan"
+  },
+  "googleAuth": {
+    "error": "Google 登录失败。请重试。",
+    "label": "使用 Google 继续",
+    "loading": "连接中…",
+    "or": "或"
+  },
+  "medicationAutocomplete": {
+    "empty": "无匹配结果。您可以输入新药品。",
+    "ingredient": "活性成分",
+    "loading": "搜索中…",
+    "unavailable": "搜索不可用。您仍可输入药品。"
+  },
+  "consentChoices": {
+    "health": "我同意 AuricRX 收集我的健康数据（药物、提醒等）。",
+    "privacy": "我已阅读隐私声明。",
+    "terms": "我同意服务条款。"
+  },
+  "region": {
+    "mx": "墨西哥",
+    "title": "地区",
+    "us": "美国"
   }
 }

@@ -1919,5 +1919,27 @@
     "GE": "🇬🇪 Georgia",
     "KG": "🇰🇬 Kyrgyzstan",
     "UZ": "🇺🇿 Uzbekistan"
+  },
+  "googleAuth": {
+    "error": "Google-Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "label": "Mit Google fortfahren",
+    "loading": "Verbinden...",
+    "or": "oder"
+  },
+  "medicationAutocomplete": {
+    "empty": "Keine Treffer. Sie können ein neues Medikament eingeben.",
+    "ingredient": "Wirkstoff",
+    "loading": "Suche...",
+    "unavailable": "Suche nicht verfügbar. Sie können trotzdem ein Medikament eingeben."
+  },
+  "consentChoices": {
+    "health": "Ich stimme zu, dass AuricRX meine Gesundheitsdaten (Medikamente, Erinnerungen usw.) erfasst.",
+    "privacy": "Ich habe die Datenschutzerklärung gelesen.",
+    "terms": "Ich stimme den Nutzungsbedingungen zu."
+  },
+  "region": {
+    "mx": "Mexiko",
+    "title": "Region",
+    "us": "Vereinigte Staaten"
   }
 }
