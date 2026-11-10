@@ -8,6 +8,22 @@ export interface FamilyMember {
   birthYear?: number;
   avatar?: string;
   createdAt: string;
+  // F4: Adult invite-and-accept
+  inviteCode?: string;
+  inviteAccepted?: boolean;
+  permissions?: {
+    viewMeds: boolean;
+    editDoses: boolean;
+    receiveAlerts: boolean;
+  };
+  // F5: Device-only adult profiles
+  deviceOnly?: boolean;
+  managedBy?: string; // User ID of manager
+  // F6: Child profiles
+  isChild?: boolean;
+  guardianAttested?: boolean;
+  excludeFromAI?: boolean;
+  excludeFromSummaries?: boolean;
 }
 
 export interface DoseLog {
@@ -186,6 +202,39 @@ class FamilyCircleService {
     
     summary += '\n---\nGenerado por AuricRX MedCoach';
     return summary;
+  }
+
+  // F4: Generate invite code for adult member
+  async generateInviteCode(memberId: string): Promise<string> {
+    const inviteCode = `FC${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    await this.updateMember(memberId, { inviteCode });
+    return inviteCode;
+  }
+
+  // F4: Accept invite with permissions
+  async acceptInvite(
+    inviteCode: string,
+    permissions: { viewMeds: boolean; editDoses: boolean; receiveAlerts: boolean }
+  ): Promise<FamilyMember | null> {
+    const members = await this.getMembers();
+    const member = members.find(m => m.inviteCode === inviteCode);
+    
+    if (!member) {
+      return null;
+    }
+
+    await this.updateMember(member.id, {
+      inviteAccepted: true,
+      permissions,
+    });
+
+    return { ...member, inviteAccepted: true, permissions };
+  }
+
+  // F4: Revoke member access (leave Family Circle)
+  async revokeMemberAccess(memberId: string): Promise<void> {
+    await this.deleteMember(memberId);
+    // Note: This will also stop alerts as member is removed
   }
 }
 
