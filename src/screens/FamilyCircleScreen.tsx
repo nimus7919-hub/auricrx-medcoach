@@ -7,6 +7,7 @@ import FamilyCircleService, { FamilyMember, DoseLog } from '../services/familyCi
 import PremiumEntitlementService, { PremiumEntitlement } from '../services/premiumEntitlementService';
 import PremiumUpgradeScreen from './PremiumUpgradeScreen';
 import * as Sharing from 'expo-sharing';
+import { FAMILY_CIRCLE_FREE_MEMBER_LIMIT } from '../config/premiumFeatures';
 
 export default function FamilyCircleScreen({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
@@ -34,17 +35,7 @@ export default function FamilyCircleScreen({ onClose }: { onClose: () => void })
   const checkAccessAndLoad = async () => {
     const ent = await premiumService.checkPremiumAccess();
     setEntitlement(ent);
-    
-    if (!ent.hasPremiumAccess && ent.trialStartDate) {
-      // Trial ended, show upgrade screen
-      setShowUpgrade(true);
-    } else {
-      // Has access (trial active or premium), start trial if needed
-      if (!ent.trialStartDate && !ent.isPremium) {
-        await premiumService.startPremiumTrial();
-      }
-      loadData();
-    }
+    loadData();
   };
 
   const loadData = async () => {
@@ -57,6 +48,14 @@ export default function FamilyCircleScreen({ onClose }: { onClose: () => void })
   const handleAddMember = async () => {
     if (!newMemberName.trim()) {
       Alert.alert(t('common.error'), t('familyCircle.enterName'));
+      return;
+    }
+
+    // Check if user can add more members
+    const canAdd = await service.canAddMember(entitlement?.hasPremiumAccess || false);
+    if (!canAdd.allowed) {
+      setShowAddMember(false);
+      setShowUpgrade(true);
       return;
     }
 
@@ -90,6 +89,12 @@ export default function FamilyCircleScreen({ onClose }: { onClose: () => void })
   };
 
   const handleShareSummary = async (memberId?: string) => {
+    // Check premium access for summary sharing (PRO feature)
+    if (!entitlement?.hasPremiumAccess) {
+      setShowUpgrade(true);
+      return;
+    }
+    
     const consent = memberId ? await service.getShareConsent(memberId) : null;
     
     if (memberId && !consent) {
@@ -141,6 +146,19 @@ export default function FamilyCircleScreen({ onClose }: { onClose: () => void })
       </View>
 
       <ScrollView style={styles.content}>
+        {!entitlement?.hasPremiumAccess && (
+          <View style={[styles.tierBanner, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
+            <DynamicText type="card" style={styles.tierText}>
+              {t('familyCircle.freeTier', { current: members.length, limit: FAMILY_CIRCLE_FREE_MEMBER_LIMIT })}
+            </DynamicText>
+            <TouchableOpacity onPress={() => setShowUpgrade(true)}>
+              <DynamicText type="card" style={[styles.tierUpgrade, { color: getAccentColor() }]}>
+                {t('familyCircle.upgradeToPro')}
+              </DynamicText>
+            </TouchableOpacity>
+          </View>
+        )}
+        
         <View style={[styles.card, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={styles.sectionTitle}>{t('familyCircle.members')}</DynamicText>
           <DynamicText type="card" style={styles.sectionDescription}>{t('familyCircle.membersDescription')}</DynamicText>
@@ -269,6 +287,9 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold' },
   closeButton: { fontSize: 16, color: '#DBB65C' },
   content: { flex: 1, padding: 16 },
+  tierBanner: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  tierText: { fontSize: 14, flex: 1 },
+  tierUpgrade: { fontSize: 14, fontWeight: '600' },
   card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
   sectionDescription: { fontSize: 14, opacity: 0.8, marginBottom: 16 },

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FAMILY_CIRCLE_FREE_MEMBER_LIMIT } from '../config/premiumFeatures';
 
 export interface FamilyMember {
   id: string;
@@ -51,6 +52,23 @@ class FamilyCircleService {
       console.error('Error loading family members:', error);
       return [];
     }
+  }
+
+  async canAddMember(hasPremiumAccess: boolean): Promise<{ allowed: boolean; reason?: string }> {
+    const members = await this.getMembers();
+    
+    if (hasPremiumAccess) {
+      return { allowed: true };
+    }
+    
+    if (members.length >= FAMILY_CIRCLE_FREE_MEMBER_LIMIT) {
+      return { 
+        allowed: false, 
+        reason: `free_limit_reached` // Free tier allows ${FAMILY_CIRCLE_FREE_MEMBER_LIMIT} member(s)
+      };
+    }
+    
+    return { allowed: true };
   }
 
   async addMember(member: Omit<FamilyMember, 'id' | 'createdAt'>): Promise<FamilyMember> {

@@ -10,10 +10,11 @@
  * 3. Creating/storing personal medication reminders
  * 4. Plant library (herbal safety notes, evidence badges, interaction info)
  * 5. Document scanning and LOCAL storage (organizer, tags, glossary, lab value trends)
+ * 6. Family Circle FREE tier: 1 family member (besides user), shared log, basic reminders, device-only storage
  * 
  * PREMIUM (behind 14-day trial):
  * - AI Health assistant
- * - Family Circle (family profiles, shared logs, caregiver alerts, summaries)
+ * - Family Circle PRO: unlimited members, caregiver alerts, multiple caregivers, summaries, cloud sync
  * - Find a Pharmacy (paid API: Google Places/Maps, INEGI DENUE/PROFECO)
  * - Find a Lab (paid API: Google Places/Maps)
  * - Medicine Lookup (if uses paid backend APIs)
@@ -32,16 +33,20 @@
 
 export const PREMIUM_TRIAL_DAYS = 14;
 
+// Family Circle limits
+export const FAMILY_CIRCLE_FREE_MEMBER_LIMIT = 1; // Max family members on free tier (besides the user)
+
 // Single source of truth for premium features
 export const PREMIUM_FEATURES = {
   // AI features
   AI_HEALTH_ASSISTANT: true,
   
-  // Family management
-  FAMILY_CIRCLE: true,
-  FAMILY_CIRCLE_ADD_MEMBER: true,
-  FAMILY_CIRCLE_LOG_DOSE: true,
-  FAMILY_CIRCLE_SHARE_SUMMARY: true,
+  // Family Circle PRO (beyond free limits)
+  FAMILY_CIRCLE_UNLIMITED_MEMBERS: true, // Beyond FREE_MEMBER_LIMIT
+  FAMILY_CIRCLE_CAREGIVER_ALERTS: true, // Missed-dose alerts to other caregivers
+  FAMILY_CIRCLE_MULTIPLE_CAREGIVERS: true, // Multiple caregivers sharing one member
+  FAMILY_CIRCLE_SHARE_SUMMARY: true, // WhatsApp/share-sheet summaries
+  FAMILY_CIRCLE_CLOUD_SYNC: true, // Cloud sync across devices
   
   // Location-based searches (paid APIs)
   PHARMACY_SEARCH: true,
@@ -70,6 +75,11 @@ export const FREE_FEATURES = {
   CHECKUP_REMINDERS: true,
   SCREENING_REMINDERS: true,
   PREVENTION_PLANNER: true, // Reminder creation is free
+  
+  // Family Circle FREE tier (limited)
+  FAMILY_CIRCLE_BASIC: true, // 1 member, shared log, basic reminders, device-only
+  FAMILY_CIRCLE_ADD_FIRST_MEMBER: true, // Add up to FREE_MEMBER_LIMIT members
+  FAMILY_CIRCLE_LOG_DOSE: true, // Shared 'taken' log for free member(s)
   
   // Health tracker (manual entry)
   DAILY_HABITS_MANUAL: true,
