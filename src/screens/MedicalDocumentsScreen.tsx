@@ -16,6 +16,7 @@ import * as FileSystem from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
+import { capturedDocumentFields } from '../lib/documentCapture';
 import { createDocumentPdf } from '../lib/documentPdf';
 import { scanDocumentPages } from '../lib/documentScanner';
 import { SecureSharing } from '../lib/SecureSharing';
@@ -751,13 +752,20 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           await FileSystem.copyAsync({ from: uri, to: saved });
           return { uri: saved, type };
         }));
-        const pdfUri = await createDocumentPdf(sources, type !== 'single');
+        // PDF branding can fail on Android release asset URIs; never drop the scan.
+        let pdfUri: string | undefined;
+        try {
+          pdfUri = await createDocumentPdf(sources, type !== 'single');
+        } catch (pdfError) {
+          console.error('Failed to create document PDF after scan:', pdfError);
+        }
+        const fields = capturedDocumentFields({ type, imageUri: sources[0].uri, pdfUri });
         const newDocument: DocumentItem = {
           id: `doc_${Date.now()}_${Math.random().toString(36).slice(2)}`,
           name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('medicalDocuments.pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-          uri: type === 'single' ? pdfUri : sources[0].uri,
-          pdfUri,
-          mimeType: type === 'single' ? 'application/pdf' : 'image/jpeg',
+          uri: fields.uri,
+          pdfUri: fields.pdfUri,
+          mimeType: fields.mimeType,
           type, category, createdAt: new Date().toISOString(),
         };
         await saveDocuments([...documents, newDocument]);
@@ -788,13 +796,26 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         const asset = result.assets[0];
         const savedImageUri = `${FileSystem.documentDirectory}photo_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
         await FileSystem.copyAsync({ from: asset.uri, to: savedImageUri });
-        const pdfUri = await createDocumentPdf([{ uri: savedImageUri, type }], type !== 'single');
+        // Keep the photo even when branded PDF generation fails (e.g. release logo URI).
+        let pdfUri: string | undefined;
+        try {
+          pdfUri = await createDocumentPdf([{ uri: savedImageUri, type }], type !== 'single');
+        } catch (pdfError) {
+          console.error('Failed to create document PDF after photo:', pdfError);
+        }
+        // Camera captures always keep the JPEG as the primary uri (PDF stays optional).
+        const fields = capturedDocumentFields({
+          type,
+          imageUri: savedImageUri,
+          pdfUri,
+          preferPdfForSingle: false,
+        });
         const newDocument: DocumentItem = {
           id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.document") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-          uri: savedImageUri,
-          pdfUri,
-          mimeType: 'image/jpeg',
+          uri: fields.uri,
+          pdfUri: fields.pdfUri,
+          mimeType: fields.mimeType,
           type,
           category,
           createdAt: new Date().toISOString(),
@@ -2910,10 +2931,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         {showUploadModal && selectedCategory && (
           <AddDocumentSheet title={DOCUMENT_CATEGORIES[selectedCategory].title} dualSided={DOCUMENT_CATEGORIES[selectedCategory].supportsDualSides}
             onClose={() => { setShowUploadModal(false); setSelectedCategory(null); triggerHaptic('light'); }}
-            onScan={(side) => { setShowUploadModal(false); takePhoto(selectedCategory, side, true); }}
-            onPhoto={(side) => { setShowUploadModal(false); takePhoto(selectedCategory, side); }}
-            onGallery={(side) => { setShowUploadModal(false); uploadDocument(selectedCategory, side); }}
-            onPDF={(side) => { setShowUploadModal(false); uploadPDF(selectedCategory, side); }} />
+            onScan={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); takePhoto(selectedCategory, side, true); }}
+            onPhoto={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); takePhoto(selectedCategory, side); }}
+            onGallery={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); uploadDocument(selectedCategory, side); }}
+            onPDF={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); uploadPDF(selectedCategory, side); }} />
         )}
 
         {/* View Document Modal */}
