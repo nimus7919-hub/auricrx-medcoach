@@ -1473,7 +1473,7 @@
     "close": "Fermer",
     "loadingDocument": "Chargement du document légal...",
     "ageRestriction": "Pour utiliser cette application, vous devez avoir 18 ans ou plus",
-    "age": "Âge",
+    "age": "âge",
     "enterAge": "Entrez votre âge",
     "ageRequired": "L'âge est requis",
     "ageRestrictionError": "Vous devez avoir au moins 18 ans pour utiliser cette application"
@@ -3513,7 +3513,7 @@
     "recalls": "Les rapports d'événements indésirables ne sont pas vérifiés et ne prouvent pas qu'un médicament a causé un problème. Source : openFDA. N'arrêtez pas un médicament sans en parler à votre médecin.",
     "prices": "Les prix sont des estimations à titre informatif uniquement, peuvent être obsolètes et ne constituent pas une offre. Votre coût réel dépend de votre pharmacie, assurance et quantité. Confirmez avec la pharmacie.",
     "nadac": "NADAC est le prix moyen que les pharmacies paient pour acheter un médicament, publié chaque semaine par CMS (data.medicaid.gov). Ce n'est pas ce que vous paierez à la pharmacie et n'inclut pas les frais de dispensation ou l'assurance. CMS ne soutient pas cette application. Données au [date].",
-    "nlm": "Ce produit utilise des données accessibles au public fournies par la Bibliothèque nationale de médecine américaine (U.S. National Library of Medicine, NLM), dépendant des Instituts nationaux de la santé (National Institutes of Health) et du ministère américain de la Santé et des Services sociaux (Department of Health and Human Services). La NLM n'est pas responsable de ce produit et ne recommande ni n'approuve celui-ci ou tout autre produit.",
+    "nlm": "Ce produit utilise des données accessibles au public grâce à la Bibliothèque nationale de médecine américaine (NLM), dépendant des Instituts nationaux de la santé du ministère américain de la Santé et des Services sociaux. La NLM n'est pas responsable de ce produit et ne le recommande ni ne l'approuve, ni aucun autre produit.",
     "fda": "Données fournies par la U.S. Food and Drug Administration (https://open.fda.gov). FDA n'approuve pas cette application.",
     "dailymed": "Informations d'étiquetage de DailyMed (dailymed.nlm.nih.gov), U.S. National Library of Medicine. Dernière mise à jour [date].",
     "nppes": "Listes de pharmacies du CMS NPPES NPI Registry ; les informations sont fournies par les pharmacies et peuvent être obsolètes.",
