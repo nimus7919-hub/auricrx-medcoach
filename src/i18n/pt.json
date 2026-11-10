@@ -1463,5 +1463,36 @@
     "class_wortDrugs": "Alguns antidepressivos, contraceptivos, ciclosporina, fenitoína, carbamazepina, digoxina, ivabradina, indinavir, nevirapina, irinotecano, imatinibe, docetaxel, varfarina e sinvastatina",
     "class_digoxin": "Glicosídeos cardíacos como digoxina (látex oral de aloe)",
     "class_warfarin": "Varfarina"
+  },
+  "navigation": {
+    "pressBackAgainToExit": "Pressione voltar novamente para sair"
+  },
+  "subscription": {
+    "proTitle": "AuricRX Pro",
+    "includes": "Inclui: assistente de informação de saúde com IA, Círculo Familiar, busca de farmácias e laboratórios, Consulta de Medicamentos, backup opcional na nuvem e sincronização entre dispositivos.",
+    "trialPrice": "14 dias grátis. Depois, {{price}} por mês (MXN $79,00, impostos incluídos).",
+    "autoCharge": "Você será cobrado automaticamente todos os meses a partir de {{date}}, na sua conta {{store}}, até cancelar.",
+    "reminderNotice": "Nós vamos lembrá-lo pelo menos 5 dias antes da primeira cobrança e antes de cada renovação.",
+    "cancelAnytime": "Cancele a qualquer momento em {{cancelPath}} ou em Configurações > Meu plano no aplicativo. Se cancelar durante o período de teste, não será cobrado.",
+    "freeForever": "Sem o Pro você ainda tem, grátis: lembretes de medicamentos e saúde, registro de saúde, biblioteca de plantas, documentos armazenados no seu telefone, e você sempre pode visualizar, exportar e excluir seus dados.",
+    "startTrial": "Iniciar 14 dias grátis",
+    "continueFree": "Continuar com o plano grátis",
+    "terms": "Termos",
+    "privacyNotice": "Aviso de Privacidade",
+    "restorePurchases": "Restaurar compras"
+  },
+  "renewalNotices": {
+    "trialEnding": "Seu teste grátis do Pro termina em {{date}}. Nesse dia você será cobrado {{price}} (impostos incluídos) na sua conta {{store}}, e depois todo mês. Se não quiser continuar, cancele antes de {{date}}: {{link}}.",
+    "renewal": "Seu plano Pro renova em {{date}} por {{price}} (impostos incluídos). Você pode cancelar sem penalidade: {{link}}."
+  },
+  "plantBadges": {
+    "evidenceLimited": "Evidência: limitada",
+    "evidenceInsufficient": "Evidência: insuficiente",
+    "evidenceMixed": "Evidência: mista",
+    "fewHumanStudies": "Poucos estudos em humanos",
+    "footer": "De acordo com {{source}}, consultado em {{date}}. A evidência descreve o que foi estudado, não se funcionará para você. Plantas e suplementos podem interagir com medicamentos; pergunte ao seu médico ou farmacêutico."
+  },
+  "labOrganizer": {
+    "banner": "Aqui você pode guardar e organizar seus resultados. O aplicativo não interpreta resultados nem indica se um valor é normal. Leve-os ao seu médico."
   }
 }

@@ -4595,7 +4595,6 @@
       "renewalNotices.renewal"
     ],
     "pt": [
-      "navigation.pressBackAgainToExit",
       "ai.recordSymptom",
       "ai.insightsHelp",
       "ai.insightsEmptyHelp",
@@ -6816,7 +6815,6 @@
       "prevention.templates.dentalCheckupDesc",
       "prevention.templates.eyeExam",
       "prevention.templates.eyeExamDesc",
-      "labOrganizer.banner",
       "dailyHabits.title",
       "dailyHabits.today",
       "dailyHabits.todayDescription",
@@ -6874,26 +6872,7 @@
       "privacy.deleteSuccess",
       "privacy.deleteFailed",
       "privacy.deleting",
-      "privacy.disclaimer",
-      "plantBadges.evidenceLimited",
-      "plantBadges.evidenceInsufficient",
-      "plantBadges.evidenceMixed",
-      "plantBadges.fewHumanStudies",
-      "plantBadges.footer",
-      "subscription.proTitle",
-      "subscription.includes",
-      "subscription.trialPrice",
-      "subscription.autoCharge",
-      "subscription.reminderNotice",
-      "subscription.cancelAnytime",
-      "subscription.freeForever",
-      "subscription.startTrial",
-      "subscription.continueFree",
-      "subscription.terms",
-      "subscription.privacyNotice",
-      "subscription.restorePurchases",
-      "renewalNotices.trialEnding",
-      "renewalNotices.renewal"
+      "privacy.disclaimer"
     ],
     "zh": [
       "ai.recordSymptom",
