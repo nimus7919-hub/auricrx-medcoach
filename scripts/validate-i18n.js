@@ -95,7 +95,18 @@ function validate() {
     extra: {},
     placeholderMismatches: {},
     encodingIssues: {},
+    identicalToEnglish: {},
   };
+  
+  // Helper to check if a string looks like untranslated English
+  function looksLikeEnglish(str) {
+    if (typeof str !== 'string' || str.length <= 12) return false;
+    
+    // Common English words
+    const englishWords = /\b(the|and|with|for|that|this|from|have|been|were|would|could|should|please|your|you|are|was|will|can|not|but)\b/i;
+    
+    return englishWords.test(str);
+  }
   
   // Check each non-English locale
   for (const locale of LOCALES) {
@@ -117,6 +128,7 @@ function validate() {
     const commonKeys = enKeys.filter(k => localeKeys.includes(k));
     const placeholderIssues = [];
     const encodingProblems = [];
+    const identicalValues = [];
     
     for (const key of commonKeys) {
       // Get values
@@ -144,6 +156,19 @@ function validate() {
           issues: encodingIssues,
         });
       }
+      
+      // Check if identical to English (skip brand names, URLs, emails)
+      if (typeof enValue === 'string' && typeof localeValue === 'string' && 
+          enValue === localeValue && 
+          looksLikeEnglish(enValue) &&
+          !key.includes('brand') && 
+          !enValue.includes('@') && 
+          !enValue.startsWith('http')) {
+        identicalValues.push({
+          key,
+          value: enValue,
+        });
+      }
     }
     
     if (placeholderIssues.length > 0) {
@@ -152,6 +177,10 @@ function validate() {
     
     if (encodingProblems.length > 0) {
       results.encodingIssues[locale] = encodingProblems;
+    }
+    
+    if (identicalValues.length > 0) {
+      results.identicalToEnglish[locale] = identicalValues;
     }
   }
   
@@ -166,12 +195,14 @@ function validate() {
     const extraCount = results.extra[locale]?.length || 0;
     const placeholderCount = results.placeholderMismatches[locale]?.length || 0;
     const encodingCount = results.encodingIssues[locale]?.length || 0;
+    const identicalCount = results.identicalToEnglish[locale]?.length || 0;
     
     console.log(`${locale.toUpperCase()}:`);
     console.log(`  Missing keys: ${missingCount}`);
     console.log(`  Extra keys: ${extraCount}`);
     console.log(`  Placeholder mismatches: ${placeholderCount}`);
     console.log(`  Encoding issues: ${encodingCount}`);
+    console.log(`  Identical to English: ${identicalCount}`);
     console.log('');
     
     if (missingCount > 0 || placeholderCount > 0 || encodingCount > 0) {
@@ -219,6 +250,19 @@ function validate() {
         });
         if (results.encodingIssues[locale].length > 5) {
           console.log(`  ... and ${results.encodingIssues[locale].length - 5} more`);
+        }
+      }
+    }
+    
+    // Identical to English
+    for (const locale in results.identicalToEnglish) {
+      if (results.identicalToEnglish[locale].length > 0) {
+        console.log(`\n${locale.toUpperCase()} - Identical to English (likely untranslated):`);
+        results.identicalToEnglish[locale].slice(0, 10).forEach(issue => {
+          console.log(`  ${issue.key}: "${issue.value.substring(0, 50)}..."`);
+        });
+        if (results.identicalToEnglish[locale].length > 10) {
+          console.log(`  ... and ${results.identicalToEnglish[locale].length - 10} more`);
         }
       }
     }

@@ -3745,120 +3745,10 @@
       "privacy.disclaimer"
     ],
     "pt": [
-      "unitLabels.unitLabels.Piece",
-      "unitLabels.unitLabels.Pieces",
-      "unitLabels.unitLabels.Puff",
-      "unitLabels.unitLabels.Puffs",
-      "unitLabels.unitLabels.Pump",
-      "unitLabels.unitLabels.Pumps",
-      "unitLabels.unitLabels.Sachet",
-      "unitLabels.unitLabels.Sachets",
-      "unitLabels.unitLabels.Strip",
-      "unitLabels.unitLabels.Strips",
-      "unitLabels.medications.quantityUnit",
-      "unitLabels.unitLabels.Mcg",
-      "unitLabels.unitLabels.Kg",
-      "unitLabels.unitLabels.IU",
-      "unitLabels.unitLabels.Mcg DFE",
-      "unitLabels.unitLabels.Mg NE",
-      "unitLabels.unitLabels.Mg alpha-tocopherol",
-      "unitLabels.unitLabels.CFU",
-      "unitLabels.unitLabels.Billion CFU",
-      "unitLabels.unitLabels.HUT",
-      "unitLabels.unitLabels.DU",
-      "unitLabels.unitLabels.FIP",
-      "unitLabels.unitLabels.ALU",
-      "unitLabels.unitLabels.GDU",
-      "unitLabels.unitLabels.FCC units",
-      "unitLabels.unitLabels.L",
-      "unitLabels.unitLabels.Mg/mL",
-      "unitLabels.unitLabels.Mcg/mL",
-      "unitLabels.unitLabels.Mg/5mL",
-      "unitLabels.unitLabels.% w/w",
-      "unitLabels.unitLabels.% w/v",
-      "unitLabels.unitLabels.% v/v",
-      "unitLabels.unitLabels.Tsp",
-      "unitLabels.unitLabels.Tbsp",
-      "unitLabels.unitLabels.Scoop",
-      "unitLabels.unitLabels.Caplet",
-      "unitLabels.unitLabels.Caplets",
-      "unitLabels.unitLabels.Lozenge",
-      "unitLabels.unitLabels.Lozenges",
-      "unitLabels.unitLabels.Gummy",
-      "unitLabels.unitLabels.Gummies",
-      "unitLabels.unitLabels.Chewable",
-      "unitLabels.unitLabels.Chewables",
-      "unitLabels.unitLabels.Spray",
-      "unitLabels.unitLabels.Sprays",
-      "unitLabels.unitLabels.Stick pack",
-      "unitLabels.unitLabels.Stick packs",
-      "unitLabels.unitLabels.Scoops",
-      "unitLabels.unitLabels.Jar",
-      "unitLabels.unitLabels.Jars",
-      "unitLabels.unitLabels.Container",
-      "unitLabels.unitLabels.Containers",
-      "unitLabels.unitLabels.Serving",
-      "unitLabels.unitLabels.Servings",
-      "unitLabels.unitLabels.Dose",
-      "unitLabels.unitLabels.Doses"
+      "unitLabels.medications.quantityUnit"
     ],
     "zh": [
-      "unitLabels.unitLabels.Piece",
-      "unitLabels.unitLabels.Pieces",
-      "unitLabels.unitLabels.Puff",
-      "unitLabels.unitLabels.Puffs",
-      "unitLabels.unitLabels.Pump",
-      "unitLabels.unitLabels.Pumps",
-      "unitLabels.unitLabels.Sachet",
-      "unitLabels.unitLabels.Sachets",
-      "unitLabels.unitLabels.Strip",
-      "unitLabels.unitLabels.Strips",
-      "unitLabels.medications.quantityUnit",
-      "unitLabels.unitLabels.Mcg",
-      "unitLabels.unitLabels.Kg",
-      "unitLabels.unitLabels.IU",
-      "unitLabels.unitLabels.Mcg DFE",
-      "unitLabels.unitLabels.Mg NE",
-      "unitLabels.unitLabels.Mg alpha-tocopherol",
-      "unitLabels.unitLabels.CFU",
-      "unitLabels.unitLabels.Billion CFU",
-      "unitLabels.unitLabels.HUT",
-      "unitLabels.unitLabels.DU",
-      "unitLabels.unitLabels.FIP",
-      "unitLabels.unitLabels.ALU",
-      "unitLabels.unitLabels.GDU",
-      "unitLabels.unitLabels.FCC units",
-      "unitLabels.unitLabels.L",
-      "unitLabels.unitLabels.Mg/mL",
-      "unitLabels.unitLabels.Mcg/mL",
-      "unitLabels.unitLabels.Mg/5mL",
-      "unitLabels.unitLabels.% w/w",
-      "unitLabels.unitLabels.% w/v",
-      "unitLabels.unitLabels.% v/v",
-      "unitLabels.unitLabels.Tsp",
-      "unitLabels.unitLabels.Tbsp",
-      "unitLabels.unitLabels.Scoop",
-      "unitLabels.unitLabels.Caplet",
-      "unitLabels.unitLabels.Caplets",
-      "unitLabels.unitLabels.Lozenge",
-      "unitLabels.unitLabels.Lozenges",
-      "unitLabels.unitLabels.Gummy",
-      "unitLabels.unitLabels.Gummies",
-      "unitLabels.unitLabels.Chewable",
-      "unitLabels.unitLabels.Chewables",
-      "unitLabels.unitLabels.Spray",
-      "unitLabels.unitLabels.Sprays",
-      "unitLabels.unitLabels.Stick pack",
-      "unitLabels.unitLabels.Stick packs",
-      "unitLabels.unitLabels.Scoops",
-      "unitLabels.unitLabels.Jar",
-      "unitLabels.unitLabels.Jars",
-      "unitLabels.unitLabels.Container",
-      "unitLabels.unitLabels.Containers",
-      "unitLabels.unitLabels.Serving",
-      "unitLabels.unitLabels.Servings",
-      "unitLabels.unitLabels.Dose",
-      "unitLabels.unitLabels.Doses"
+      "unitLabels.medications.quantityUnit"
     ]
   },
   "extra": {
@@ -4353,5 +4243,2723 @@
       }
     ]
   },
-  "encodingIssues": {}
+  "encodingIssues": {},
+  "identicalToEnglish": {
+    "fr": [
+      {
+        "key": "ai.errorPreparingData",
+        "value": "Error preparing your health data. Please try again."
+      },
+      {
+        "key": "ai.contributionDescription",
+        "value": "Help us improve our supplement price database by sharing what you found:"
+      },
+      {
+        "key": "ai.contributionErrorText",
+        "value": "Please fill in supplement name, price, and store name."
+      },
+      {
+        "key": "ai.contributionSuccessText",
+        "value": "Your price information has been saved and will help improve our database for everyone."
+      },
+      {
+        "key": "ai.fastingCompatibilityDescription",
+        "value": "Tap below to analyze your fasting compatibility based on your profile"
+      },
+      {
+        "key": "ai.consultHealthcareProviderDisclaimer",
+        "value": "Please consult with your healthcare provider before making any changes to your medication schedule or fasting routine."
+      },
+      {
+        "key": "ai.generateHealthReportDescription",
+        "value": "Generate a comprehensive health report including your medications and fasting profile for sharing with healthcare providers."
+      },
+      {
+        "key": "ai.fastingNotRecommended",
+        "value": "Fasting is NOT recommended for your current health profile."
+      },
+      {
+        "key": "ai.fastingRequiresSupervision",
+        "value": "Fasting requires medical supervision for your health profile."
+      },
+      {
+        "key": "ai.fastingMayBeSuitableWithCaution",
+        "value": "Fasting may be suitable with caution."
+      },
+      {
+        "key": "ai.considerShorterFastingPeriod",
+        "value": "Consider a shorter fasting period of {hours}:{remaining} hours and consult your healthcare provider."
+      },
+      {
+        "key": "ai.hourFastingWindowAppropriate",
+        "value": "A {hours}:{remaining} hour fasting window may be appropriate, but monitor your health closely."
+      },
+      {
+        "key": "ai.hourFastingWindowSuitable",
+        "value": "A {hours}:{remaining} hour fasting window may be suitable. Always listen to your body and consult your healthcare provider if you have concerns."
+      },
+      {
+        "key": "ai.pleaseConsultHealthcareProvider",
+        "value": "Please consult your healthcare provider before considering any fasting protocol."
+      },
+      {
+        "key": "ai.higherBMIRisk",
+        "value": "Higher BMI (Body Mass Index) may benefit from medical supervision during fasting."
+      },
+      {
+        "key": "ai.thisReportWasGenerated",
+        "value": "This report was generated by AuricRX Medical Coach"
+      },
+      {
+        "key": "ai.consultHealthcareProvider",
+        "value": "Please consult with your healthcare provider before making any changes to your medication or fasting routine."
+      },
+      {
+        "key": "ai.fastingDisclaimer",
+        "value": "This recommendation is AI-generated and should not replace professional medical advice."
+      },
+      {
+        "key": "ai.pleaseEnterSymptoms",
+        "value": "Please enter your symptoms"
+      },
+      {
+        "key": "ai.pleaseEnterMedications",
+        "value": "Please enter your medications"
+      },
+      {
+        "key": "ai.multipleSymptomsDescription",
+        "value": "Multiple symptoms that may indicate various conditions"
+      },
+      {
+        "key": "ai.maintainHydrationRest",
+        "value": "Maintain good hydration and rest"
+      },
+      {
+        "key": "ai.potentialMildInteraction",
+        "value": "Potential mild interaction - monitor for side effects"
+      },
+      {
+        "key": "ai.monitorUnusualSymptoms",
+        "value": "Monitor for any unusual symptoms"
+      },
+      {
+        "key": "ai.diabetesRequiresSupervision",
+        "value": "Diabetes or hypoglycemia requires medical supervision for fasting."
+      },
+      {
+        "key": "ai.pregnancyRequiresSupervision",
+        "value": "Pregnancy and breastfeeding require medical supervision for fasting."
+      },
+      {
+        "key": "ai.eatingDisordersRequireSupervision",
+        "value": "Eating disorders require medical supervision for fasting."
+      },
+      {
+        "key": "ai.heartKidneyLiverRequireSupervision",
+        "value": "Heart, kidney, or liver conditions require medical supervision for fasting."
+      },
+      {
+        "key": "ai.notSpecified",
+        "value": "Not specified"
+      },
+      {
+        "key": "ai.healthReportGenerated",
+        "value": "Your health report has been generated as a PDF and is ready for sharing."
+      },
+      {
+        "key": "ai.pleaseGoToSettings",
+        "value": "Please go to Settings > Health Profile to complete your profile setup."
+      },
+      {
+        "key": "ai.shouldBeTakenWithFood",
+        "value": "should be taken with food."
+      },
+      {
+        "key": "ai.tensionHeadacheWithDizziness",
+        "value": "Tension Headache with Dizziness"
+      },
+      {
+        "key": "ai.contactDoctorImmediately",
+        "value": "Contact your doctor immediately if symptoms worsen"
+      },
+      {
+        "key": "ai.exportSymptomReport",
+        "value": "Export your symptom report to share with your healthcare provider"
+      },
+      {
+        "key": "ai.confirmEmptySymptomsMessage",
+        "value": "Are you sure you want to delete all tracked symptoms? This cannot be undone."
+      },
+      {
+        "key": "ai.symptomReportGenerated",
+        "value": "Symptom report has been generated and saved."
+      },
+      {
+        "key": "ai.symptomReportFailed",
+        "value": "Failed to generate symptom report. Please try again."
+      },
+      {
+        "key": "ai.symptomTrackerDisclaimer",
+        "value": "This symptom tracker report is for personal health monitoring purposes only."
+      },
+      {
+        "key": "ai.symptomSaved",
+        "value": "Symptom has been saved to your records."
+      },
+      {
+        "key": "ai.noActiveSymptomsMessage",
+        "value": "There are no active symptoms to export."
+      },
+      {
+        "key": "ai.noSymptomsMessage",
+        "value": "There are no symptoms to export."
+      },
+      {
+        "key": "ai.interactionDisclaimerText",
+        "value": "This is AI-generated information for educational purposes only. Always consult your doctor or pharmacist before making any changes to your medications."
+      },
+      {
+        "key": "ai.yourMedications",
+        "value": "Your Medications"
+      },
+      {
+        "key": "ai.yourSupplements",
+        "value": "Your Supplements"
+      },
+      {
+        "key": "ai.noMedicationsToCheck",
+        "value": "No medications or supplements found. Please add them in the Medications or Supplements cards first."
+      },
+      {
+        "key": "ai.needTwoItems",
+        "value": "You need at least 2 medications or supplements to check for interactions."
+      },
+      {
+        "key": "ai.checkingInteractions",
+        "value": "Checking for drug interactions using AI..."
+      },
+      {
+        "key": "ai.failedToCheckInteractions",
+        "value": "Failed to check interactions. Please make sure the AI server is running and try again."
+      },
+      {
+        "key": "ai.noInteractionsMessage",
+        "value": "Based on current data, no significant interactions were detected. However, always consult your healthcare provider."
+      },
+      {
+        "key": "healthProfile.description",
+        "value": "Set up your health profile for personalized recommendations"
+      },
+      {
+        "key": "healthProfile.healthProfileSavedMessage",
+        "value": "Your health profile has been saved and will be used for personalized recommendations."
+      },
+      {
+        "key": "medications.searchingPharmacies",
+        "value": "Searching for pharmacies..."
+      },
+      {
+        "key": "supplements.priceNotAvailable",
+        "value": "Price not available"
+      },
+      {
+        "key": "countryLabels.ST",
+        "value": "🇸🇹 São Tomé and Príncipe"
+      },
+      {
+        "key": "countryLabels.CG",
+        "value": "🇨🇬 Republic of the Congo"
+      },
+      {
+        "key": "countryLabels.CD",
+        "value": "🇨🇩 Democratic Republic of the Congo"
+      },
+      {
+        "key": "countryLabels.BA",
+        "value": "🇧🇦 Bosnia and Herzegovina"
+      },
+      {
+        "key": "countryLabels.PM",
+        "value": "🇵🇲 Saint Pierre and Miquelon"
+      },
+      {
+        "key": "countryLabels.WF",
+        "value": "🇼🇫 Wallis and Futuna"
+      },
+      {
+        "key": "familyCircle.permShareDocuments",
+        "value": "See and add documents in their Family Documents folder"
+      },
+      {
+        "key": "familyDocuments.memberFolderDescription",
+        "value": "Documents for this family member. Scan or photo prescriptions, lab results, vaccines, insurance cards, and more."
+      },
+      {
+        "key": "familyDocuments.nameRequired",
+        "value": "Please enter a document name"
+      },
+      {
+        "key": "familyDocuments.deleteConfirm",
+        "value": "Are you sure you want to delete this document?"
+      },
+      {
+        "key": "familyDocuments.addRequiresPremium",
+        "value": "Adding or editing documents requires an active Premium subscription. You can still view, export, and delete existing documents."
+      },
+      {
+        "key": "familyDocuments.readOnlyAccess",
+        "value": "Premium expired. You can view, export, and delete documents, but cannot add new ones."
+      }
+    ],
+    "de": [
+      {
+        "key": "countryLabels.ST",
+        "value": "🇸🇹 São Tomé and Príncipe"
+      },
+      {
+        "key": "countryLabels.CG",
+        "value": "🇨🇬 Republic of the Congo"
+      },
+      {
+        "key": "countryLabels.CD",
+        "value": "🇨🇩 Democratic Republic of the Congo"
+      },
+      {
+        "key": "countryLabels.BA",
+        "value": "🇧🇦 Bosnia and Herzegovina"
+      },
+      {
+        "key": "countryLabels.PM",
+        "value": "🇵🇲 Saint Pierre and Miquelon"
+      },
+      {
+        "key": "countryLabels.WF",
+        "value": "🇼🇫 Wallis and Futuna"
+      },
+      {
+        "key": "familyCircle.permShareDocuments",
+        "value": "See and add documents in their Family Documents folder"
+      },
+      {
+        "key": "familyDocuments.memberFolderDescription",
+        "value": "Documents for this family member. Scan or photo prescriptions, lab results, vaccines, insurance cards, and more."
+      },
+      {
+        "key": "familyDocuments.nameRequired",
+        "value": "Please enter a document name"
+      },
+      {
+        "key": "familyDocuments.deleteConfirm",
+        "value": "Are you sure you want to delete this document?"
+      },
+      {
+        "key": "familyDocuments.addRequiresPremium",
+        "value": "Adding or editing documents requires an active Premium subscription. You can still view, export, and delete existing documents."
+      },
+      {
+        "key": "familyDocuments.readOnlyAccess",
+        "value": "Premium expired. You can view, export, and delete documents, but cannot add new ones."
+      }
+    ],
+    "pt": [
+      {
+        "key": "ui.chooseJpgPngOrAnExistingPdfForPhotosYouCanSelectMultiple",
+        "value": "Choose JPG/PNG or an existing PDF. For photos, you can select multiple."
+      },
+      {
+        "key": "ui.scanWithCameraPdf",
+        "value": "Scan with camera → PDF"
+      },
+      {
+        "key": "ui.useYourDeviceCameraToCaptureOneOrMorePagesAndExportToASinglePdf",
+        "value": "Use your device camera to capture one or more pages and export to a single PDF."
+      },
+      {
+        "key": "ui.tipOnMobileSafariChromeTheUploadInputAlsoOffersCameraThisScannerAddsMultiPageEnhancementPd",
+        "value": "Tip: On mobile Safari/Chrome, the Upload input also offers Camera. This scanner adds multi-page + enhancement + PDF."
+      },
+      {
+        "key": "ui.notAuthenticated",
+        "value": "Not authenticated"
+      },
+      {
+        "key": "ui.immuneSystemSupportAndColdPrevention",
+        "value": "Immune system support and cold prevention"
+      },
+      {
+        "key": "ui.digestiveAidAndNauseaRelief",
+        "value": "Digestive aid and nausea relief"
+      },
+      {
+        "key": "ui.antiInflammatoryAndAntioxidantProperties",
+        "value": "Anti-inflammatory and antioxidant properties"
+      },
+      {
+        "key": "ui.calmingAndSleepSupport",
+        "value": "Calming and sleep support"
+      },
+      {
+        "key": "ui.immuneSupportAndFluPrevention",
+        "value": "Immune support and flu prevention"
+      },
+      {
+        "key": "ui.doctorEmailNotAvailable",
+        "value": "Doctor email not available"
+      },
+      {
+        "key": "ui.shareMedicalDocumentWithDrValue",
+        "value": "Share Medical Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.doctorPhoneNumberNotAvailable",
+        "value": "Doctor phone number not available"
+      },
+      {
+        "key": "ui.shareMedicalDocumentWithDrValue_cd6195",
+        "value": "Share Medical Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.whatsappIsNowOpenToYourDoctorSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThe",
+        "value": "WhatsApp is now open to your doctor's chat. Please tap the attachment button (📎) and select \"Document\" to attach the PDF file."
+      },
+      {
+        "key": "ui.shareMedicalDocumentWithDrValueViaWhatsapp",
+        "value": "Share Medical Document with Dr. {{value1}} via WhatsApp"
+      },
+      {
+        "key": "ui.mlKitNotProperlyImported",
+        "value": "ML Kit not properly imported"
+      },
+      {
+        "key": "ui.mlKitOcrNotAvailableOnThisDevice",
+        "value": "ML Kit OCR not available on this device"
+      },
+      {
+        "key": "ui.noPagesOrTextProvidedForPdfGeneration",
+        "value": "No pages or text provided for PDF generation"
+      },
+      {
+        "key": "ui.invalidUriForPageValueValue",
+        "value": "Invalid URI for page {{value1}}: {{value2}}"
+      },
+      {
+        "key": "ui.noBase64DataReturnedForPageValue",
+        "value": "No base64 data returned for page {{value1}}"
+      },
+      {
+        "key": "ui.noValidImagesOrTextCouldBeProcessedForPdfGeneration",
+        "value": "No valid images or text could be processed for PDF generation"
+      },
+      {
+        "key": "ui.whatsappIsNowOpenToDrValueSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThePdf",
+        "value": "WhatsApp is now open to Dr. {{value1}}'s chat. Please tap the attachment button (📎) and select \"Document\" to attach the PDF file."
+      },
+      {
+        "key": "ui.gmailIsNowOpenToDrValueSEmailPleaseTapTheAttachmentButtonAndSelectThePdfFileToAttach",
+        "value": "Gmail is now open to Dr. {{value1}}'s email. Please tap the attachment button (📎) and select the PDF file to attach."
+      },
+      {
+        "key": "ui.whatsappOpenedToDrValueSChatWithThePdfLinkTheDoctorCanClickTheLinkToViewYourDocument",
+        "value": "WhatsApp opened to Dr. {{value1}}'s chat with the PDF link. The doctor can click the link to view your document."
+      },
+      {
+        "key": "ui.gmailOpenedToDrValueSEmailWithThePdfLinkTheDoctorCanClickTheLinkToViewYourDocument",
+        "value": "Gmail opened to Dr. {{value1}}'s email with the PDF link. The doctor can click the link to view your document."
+      },
+      {
+        "key": "ui.googleAuthenticationSessionIsUnavailablePleaseTryAgain",
+        "value": "Google authentication session is unavailable. Please try again."
+      },
+      {
+        "key": "ui.pleaseCheckYourEmailIncludingSpamFolderAndClickTheVerificationLinkThenReturnHereToSignIn",
+        "value": "Please check your email (including spam folder) and click the verification link. Then return here to sign in."
+      },
+      {
+        "key": "ui.serverReturnedAnInvalidResponsePleaseTryAgainLater",
+        "value": "Server returned an invalid response. Please try again later."
+      },
+      {
+        "key": "ui.couldNotGetAnAnswerRightNow",
+        "value": "Could not get an answer right now."
+      },
+      {
+        "key": "ui.couldNotOpenMaps",
+        "value": "Could not open maps."
+      },
+      {
+        "key": "ui.pleaseAllowCamera",
+        "value": "Please allow camera."
+      },
+      {
+        "key": "ui.restoringYourSession",
+        "value": "🔄 Restoring your session..."
+      },
+      {
+        "key": "ui.checkingIfYouReAlreadySignedIn",
+        "value": "Checking if you're already signed in"
+      },
+      {
+        "key": "ui.requestTimeoutAiServerMayNotBeRunning",
+        "value": "Request timeout - AI server may not be running"
+      },
+      {
+        "key": "ui.serverRespondedWithValueValue",
+        "value": "Server responded with {{value1}}: {{value2}}"
+      },
+      {
+        "key": "ui.setUpYourFastingProfileInSettingsToGetPersonalizedFastingRecommendationsBasedOnYourHealthC",
+        "value": "Set up your fasting profile in Settings to get personalized fasting recommendations based on your health conditions, medications, and lifestyle."
+      },
+      {
+        "key": "ui.pleaseFillInAllFields",
+        "value": "Please fill in all fields"
+      },
+      {
+        "key": "ui.phoneAuthenticationWillBeImplementedSoon",
+        "value": "Phone authentication will be implemented soon!"
+      },
+      {
+        "key": "ui.signedInWithGoogleSuccessfully",
+        "value": "Signed in with Google successfully!"
+      },
+      {
+        "key": "ui.bySigningInYouAgreeToOurTermsOfServiceAndPrivacyPolicy",
+        "value": "By signing in, you agree to our Terms of Service and Privacy Policy"
+      },
+      {
+        "key": "ui.pleaseEnterYourPhoneNumber",
+        "value": "Please enter your phone number"
+      },
+      {
+        "key": "ui.medicalDocumentsForDoctorVisits",
+        "value": "Medical documents for doctor visits"
+      },
+      {
+        "key": "ui.pleaseGrantCameraRollAccessToScanDocuments",
+        "value": "Please grant camera roll access to scan documents."
+      },
+      {
+        "key": "ui.whatWouldYouLikeToDoWithThisPhoto",
+        "value": "What would you like to do with this photo?"
+      },
+      {
+        "key": "ui.pleaseAddSomePagesBeforeRunningOcr",
+        "value": "Please add some pages before running OCR"
+      },
+      {
+        "key": "ui.pleaseAddSomePagesBeforeSaving",
+        "value": "Please add some pages before saving"
+      },
+      {
+        "key": "ui.pleaseAddSomePagesBeforeExporting",
+        "value": "Please add some pages before exporting"
+      },
+      {
+        "key": "ui.pleaseRunOcrFirstBeforeExportingText",
+        "value": "Please run OCR first before exporting text"
+      },
+      {
+        "key": "ui.thisWillClearCurrentPagesAndStartFreshContinue",
+        "value": "This will clear current pages and start fresh. Continue?"
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteValueThisCannotBeUndone",
+        "value": "Are you sure you want to delete \"{{value1}}\"? This cannot be undone."
+      },
+      {
+        "key": "ui.theseSettingsWillApplyToYourNextPdfExport",
+        "value": "💡 These settings will apply to your next PDF export"
+      },
+      {
+        "key": "ui.areYouSureYouWantToRemoveAllPagesThisCannotBeUndone",
+        "value": "Are you sure you want to remove all pages? This cannot be undone."
+      },
+      {
+        "key": "ui.editTheExtractedText",
+        "value": "Edit the extracted text..."
+      },
+      {
+        "key": "ui.chooseHowYouDLikeToAddPagesToYourNewScan",
+        "value": "Choose how you'd like to add pages to your new scan"
+      },
+      {
+        "key": "ui.selectFromPhotos",
+        "value": "Select from photos"
+      },
+      {
+        "key": "ui.phoneNotAvailable",
+        "value": "Phone Not Available"
+      },
+      {
+        "key": "ui.noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite",
+        "value": "No phone number found for {{value1}}. Please try calling them directly or visit their website."
+      },
+      {
+        "key": "ui.valueDoesnTHaveAnEmailAddressPleaseAddTheirEmailInTheAppointmentTracker",
+        "value": "{{value1}} doesn't have an email address. Please add their email in the Appointment Tracker."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document for your records."
+      },
+      {
+        "key": "ui.shareIdDocumentWithDrValue",
+        "value": "Share ID Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.idDocumentForDrValue",
+        "value": "ID Document for Dr. {{value1}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocument",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document."
+      },
+      {
+        "key": "ui.valueDoesnTHaveAPhoneNumberPleaseAddTheirPhoneNumberInTheAppointmentTracker",
+        "value": "{{value1}} doesn't have a phone number. Please add their phone number in the Appointment Tracker."
+      },
+      {
+        "key": "ui.shareMedicalIdDocumentWithDrValue",
+        "value": "Share Medical ID Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document for your records."
+      },
+      {
+        "key": "ui.shareIdDocumentWithDrValueViaWhatsapp",
+        "value": "Share ID Document with Dr. {{value1}} via WhatsApp"
+      },
+      {
+        "key": "ui.idDocumentForDrValue_8e0ccb",
+        "value": "ID Document for Dr. {{value1}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocument_7370a7",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document."
+      },
+      {
+        "key": "ui.shareValueWithDrValue",
+        "value": "Share {{value1}} with Dr. {{value2}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedValue",
+        "value": "Hi Dr. {{value1}}, please find attached: {{value2}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedValue_68e9e9",
+        "value": "Hi Dr. {{value1}}, please find attached: {{value2}}"
+      },
+      {
+        "key": "ui.shareValueWithDrValueViaWhatsapp",
+        "value": "Share {{value1}} with Dr. {{value2}} via WhatsApp"
+      },
+      {
+        "key": "ui.valueDoesnTHaveAnEmailAddressPleaseAddTheirEmailInTheAppointmentTrackerOrUseWhatsappSharin",
+        "value": "{{value1}} doesn't have an email address. Please add their email in the Appointment Tracker or use WhatsApp sharing."
+      },
+      {
+        "key": "ui.shareValueWithValue",
+        "value": "Share {{value1}} with {{value2}}"
+      },
+      {
+        "key": "ui.medicalDocumentValueForDrValue",
+        "value": "Medical Document: {{value1}} - For Dr. {{value2}}"
+      },
+      {
+        "key": "ui.sharedFirstDocumentValueMoreDocumentsAvailablePleaseShareThemIndividually",
+        "value": "Shared first document. {{value1}} more documents available. Please share them individually."
+      },
+      {
+        "key": "ui.unableToOpenPdfFilePleaseMakeSureYouHaveAPdfViewerAppInstalled",
+        "value": "Unable to open PDF file. Please make sure you have a PDF viewer app installed."
+      },
+      {
+        "key": "ui.pdfFileNotFoundPleaseTryUploadingAgain",
+        "value": "PDF file not found. Please try uploading again."
+      },
+      {
+        "key": "ui.theImageFileMayBeCorruptedOrInAnUnsupportedFormat",
+        "value": "The image file may be corrupted or in an unsupported format."
+      },
+      {
+        "key": "ui.notePdfPreviewNotAvailableUseOpenPdfButtonBelowToView",
+        "value": "Note: PDF preview not available. Use \"Open PDF\" button below to view."
+      },
+      {
+        "key": "ui.bothFrontAndBackImagesAreRequired",
+        "value": "Both front and back images are required"
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteValue",
+        "value": "Are you sure you want to delete \"{{value1}}\"?"
+      },
+      {
+        "key": "ui.sharingNotAvailableOnThisDevice",
+        "value": "Sharing not available on this device"
+      },
+      {
+        "key": "ui.shareWithAllApps",
+        "value": "Share with all apps"
+      },
+      {
+        "key": "ui.continueWithApple_8cfb44",
+        "value": "🍎  Continue with Apple"
+      },
+      {
+        "key": "ui.gContinueWithGoogle",
+        "value": "G   Continue with Google"
+      },
+      {
+        "key": "ui.noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite_781fca",
+        "value": "No phone number found for {{value1}}. Please try calling them directly or visit their website."
+      },
+      {
+        "key": "ui.unableToLoadLegalDocumentPleaseTryAgainLater",
+        "value": "Unable to load legal document. Please try again later."
+      },
+      {
+        "key": "ui.replaceWithYourRegistrationFlow",
+        "value": "Replace with your registration flow."
+      },
+      {
+        "key": "ui.riskOfLacticAcidosisWithContrastMedia",
+        "value": "Risk of lactic acidosis with contrast media"
+      },
+      {
+        "key": "ui.yourMedicationAdherenceRateIsValueWhichIsBelowTheRecommended80",
+        "value": "Your medication adherence rate is {{value1}}%, which is below the recommended 80%."
+      },
+      {
+        "key": "ui.youHaveNoUpcomingAppointmentsScheduledConsiderSchedulingARoutineCheckup",
+        "value": "You have no upcoming appointments scheduled. Consider scheduling a routine checkup."
+      },
+      {
+        "key": "ui.yourSymptomsRequireImmediateAttentionValue",
+        "value": "Your symptoms require immediate attention: {{value1}}"
+      },
+      {
+        "key": "ui.phoneVerificationWillBeAvailableAfterBuildingWithEas",
+        "value": "Phone verification will be available after building with EAS"
+      },
+      {
+        "key": "ui.pleaseSignInAgainIniciaSesionDeNuevo",
+        "value": "Please sign in again. / Inicia sesión de nuevo."
+      },
+      {
+        "key": "ui.deletionDidNotCompletePleaseRetryNoSeCompletoLaEliminacionIntentaDeNuevo",
+        "value": "Deletion did not complete. Please retry. / No se completó la eliminación. Intenta de nuevo."
+      },
+      {
+        "key": "ui.consentCouldNotBeSavedNoSePudoGuardarElConsentimiento",
+        "value": "Consent could not be saved. / No se pudo guardar el consentimiento."
+      },
+      {
+        "key": "ui.activaElCanalDeRecordatoriosEnAjustesEnableTheReminderChannelInSettings",
+        "value": "Turn on the reminder channel in Settings."
+      },
+      {
+        "key": "ui.proximityRemindersAreUnavailableLosRecordatoriosPorProximidadNoEstanDisponibles",
+        "value": "Proximity reminders are unavailable. / Los recordatorios por proximidad no están disponibles."
+      },
+      {
+        "key": "ui.continueWithApple_4db371",
+        "value": " Continue with Apple"
+      },
+      {
+        "key": "ui.continueWithGoogle_acdbaa",
+        "value": " Continue with Google"
+      },
+      {
+        "key": "ui.bySigningInYouAgreeToOur",
+        "value": "By signing in, you agree to our"
+      },
+      {
+        "key": "ui.useCameraToCapturePagesAndCreatePdf",
+        "value": "Use camera to capture pages and create PDF."
+      },
+      {
+        "key": "ui.pleaseAllowPopupsForThisSiteToViewDocuments",
+        "value": "Please allow popups for this site to view documents"
+      },
+      {
+        "key": "ui.officeDocumentsAreDownloadedForLocalViewing",
+        "value": "Office documents are downloaded for local viewing"
+      },
+      {
+        "key": "ui.pleaseTryDownloadingTheFileInstead",
+        "value": "Please try downloading the file instead"
+      },
+      {
+        "key": "ui.pleaseUseTheDownloadButtonInstead",
+        "value": "Please use the Download button instead"
+      },
+      {
+        "key": "ui.pleaseUseTheDownloadButtonToSaveAndOpenWithYourPreferredApp",
+        "value": "Please use the Download button to save and open with your preferred app"
+      },
+      {
+        "key": "ui.fileTypeNotSupportedForViewing",
+        "value": "File type not supported for viewing"
+      },
+      {
+        "key": "ui.mockDataAddGooglePlacesApiKeyForLivePharmacies",
+        "value": "Mock data (add GOOGLE_PLACES_API_KEY for live pharmacies)"
+      },
+      {
+        "key": "ui.consulteASuMedico",
+        "value": "Consult your doctor"
+      },
+      {
+        "key": "ui.pleaseEnableLocationServicesInYourDeviceSettingsToFindNearbyPharmacies",
+        "value": "Please enable location services in your device settings to find nearby pharmacies."
+      },
+      {
+        "key": "ui.thisAppNeedsLocationPermissionToFindNearbyPharmaciesPleaseGrantPermissionInSettings",
+        "value": "This app needs location permission to find nearby pharmacies. Please grant permission in settings."
+      },
+      {
+        "key": "ui.pleaseEnableLocationServicesInYourDeviceSettingsAndTryAgain",
+        "value": "Please enable location services in your device settings and try again."
+      },
+      {
+        "key": "ui.gettingYourLocationIsTakingTooLongPleaseCheckYourGpsSignalAndTryAgain",
+        "value": "Getting your location is taking too long. Please check your GPS signal and try again."
+      },
+      {
+        "key": "ui.unableToGetYourCurrentLocationPleaseCheckYourDeviceSettingsAndTryAgain",
+        "value": "Unable to get your current location. Please check your device settings and try again."
+      },
+      {
+        "key": "ui.couldNotReadDocumentImage",
+        "value": "Could not read document image"
+      },
+      {
+        "key": "ui.selectOnlyTheFrontAndBackOfOneId",
+        "value": "Select only the front and back of one ID"
+      },
+      {
+        "key": "ui.alreadyHaveAnAccountSignIn",
+        "value": "Already have an account? Sign In"
+      },
+      {
+        "key": "ui.donTHaveAnAccountSignUp",
+        "value": "Don't have an account? Sign Up"
+      },
+      {
+        "key": "ui.signInToYourAccount",
+        "value": "Sign in to your account"
+      },
+      {
+        "key": "ui.createYourAuricrxAccount",
+        "value": "Create your AuricRX account"
+      },
+      {
+        "key": "ui.verifyYourPhoneNumberToContinue",
+        "value": "Verify your phone number to continue"
+      },
+      {
+        "key": "ui.donTHaveAnAccountSignUp_e7eacd",
+        "value": "Don't have an account? Sign up"
+      },
+      {
+        "key": "ui.alreadyHaveAnAccountSignIn_6603c2",
+        "value": "Already have an account? Sign in"
+      },
+      {
+        "key": "ui.couldNotExportIdUseOneImageOrASinglePagePdfForEachSideAndTryAgain",
+        "value": "Could not export ID. Use one image or a single-page PDF for each side and try again."
+      },
+      {
+        "key": "ui.uriValueExistsValueSizeValueCheckConsoleForDetailedLogs",
+        "value": "URI: {{value1}}\nExists: {{value2}}\nSize: {{value3}}\n\nCheck console for detailed logs."
+      },
+      {
+        "key": "ui.nameValueUriValueSizeValueBytesExistsValueCheckConsoleForFullDetails",
+        "value": "Name: {{value1}}\nURI: {{value2}}\nSize: {{value3}} bytes\nExists: {{value4}}\n\nCheck console for full details."
+      },
+      {
+        "key": "ui.notAvailable",
+        "value": "Not available"
+      },
+      {
+        "key": "ui.cancelMembershipYouKeepProUntilTheEndOfThePaidPeriodNoMoreChargesYouCanResubscribeAnytime",
+        "value": "Cancel membership. You keep Pro until the end of the paid period. No more charges. You can resubscribe anytime."
+      },
+      {
+        "key": "ui.farmaciaNoDisponible",
+        "value": "Pharmacy not available"
+      },
+      {
+        "key": "ui.pharmacyNotAvailable",
+        "value": "Pharmacy not available"
+      },
+      {
+        "key": "ui.precioNoDisponible",
+        "value": "Price not available"
+      },
+      {
+        "key": "ui.helpUsImproveOurMedicationPriceDatabaseBySharingWhatYouFound",
+        "value": "Help us improve our medication price database by sharing what you found:"
+      },
+      {
+        "key": "ui.couldNotAccessCamera",
+        "value": "Could not access camera"
+      },
+      {
+        "key": "ui.hereIsTheDocumentValue",
+        "value": "Here is the document:\n{{value1}}"
+      },
+      {
+        "key": "ui.notRecommendedForAutoimmuneConditions",
+        "value": "Not recommended for autoimmune conditions"
+      },
+      {
+        "key": "ui.mayInteractWithBloodThinners",
+        "value": "May interact with blood thinners"
+      },
+      {
+        "key": "ui.5001000mgDailyWithBlackPepper",
+        "value": "500-1000mg daily with black pepper"
+      },
+      {
+        "key": "ui.notRecommendedDuringPregnancy",
+        "value": "Not recommended during pregnancy"
+      },
+      {
+        "key": "ui.couldNotDetectDocumentEdges",
+        "value": "Could not detect document edges"
+      },
+      {
+        "key": "ui.usamosTuUbicacionSoloParaEstaBusquedaDeFarmaciasOLaboratoriosSeEnviaAGooglePlacesParaRespo",
+        "value": "Usamos tu ubicación solo para esta búsqueda de farmacias o laboratorios. Se envía a Google Places para responder, no se guarda ni activa seguimiento o avisos por proximidad. / We use your location only for this pharmacy or lab search. It is sent to Google Places to answer, and is not stored or used for tracking or proximity alerts."
+      },
+      {
+        "key": "ui.notAuthenticatedPleaseSignInAgain",
+        "value": "Not authenticated. Please sign in again."
+      },
+      {
+        "key": "ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport",
+        "value": "Server error: Invalid response from server. Please try again later or contact support."
+      },
+      {
+        "key": "ui.iCouldNotFindAnAnswer",
+        "value": "I could not find an answer."
+      },
+      {
+        "key": "ui.howeverICanTellYouThatAspirinIsACommonOverTheCounterMedicationUsedToReducePainFeverAndInfl",
+        "value": "However, I can tell you that aspirin is a common over-the-counter medication used to reduce pain, fever, and inflammation. It's also used in low doses to help prevent heart attacks and strokes. Please consult with a healthcare provider for medical advice."
+      },
+      {
+        "key": "ui.pleaseTryAgainInAMomentOrConsultWithAHealthcareProviderForImmediateMedicalQuestions",
+        "value": "Please try again in a moment or consult with a healthcare provider for immediate medical questions."
+      },
+      {
+        "key": "ui.pleaseVerifyYourEmailBeforeSigningIn",
+        "value": "Please verify your email before signing in."
+      },
+      {
+        "key": "ui.galleryImagesProcessedWithEdgeDetection",
+        "value": "✅ Gallery images processed with edge detection"
+      },
+      {
+        "key": "ui.imagesAddedFromGallery",
+        "value": "📸 Images added from gallery"
+      },
+      {
+        "key": "ui.aiIsAnalyzingYourImages",
+        "value": "🤖 AI is analyzing your images..."
+      },
+      {
+        "key": "ui.thisAppearsToBeAMedicalDocumentContainingTextTheExtractedContentShowsValuevalue",
+        "value": "This appears to be a medical document containing text. The extracted content shows: \"{{value1}}{{value2}}\"\n\n"
+      },
+      {
+        "key": "ui.recommendationReviewTheExtractedTextAboveForAnyMedicalInformationPrescriptionsOrImportantD",
+        "value": "Recommendation: Review the extracted text above for any medical information, prescriptions, or important details."
+      },
+      {
+        "key": "ui.thisImageAppearsToBeAMedicalDocumentOrHealthRelatedContent",
+        "value": "This image appears to be a medical document or health-related content."
+      },
+      {
+        "key": "ui.commonElementsToLookForInMedicalDocuments",
+        "value": "Common elements to look for in medical documents:"
+      },
+      {
+        "key": "ui.patientInformationAndDemographics",
+        "value": "• Patient information and demographics"
+      },
+      {
+        "key": "ui.doctorSNotesAndRecommendations",
+        "value": "• Doctor's notes and recommendations"
+      },
+      {
+        "key": "ui.noteNoTextWasAutomaticallyExtractedFromThisImageYouMayNeedToReviewItManuallyOrTryTakingACl",
+        "value": "Note: No text was automatically extracted from this image. You may need to review it manually or try taking a clearer photo."
+      },
+      {
+        "key": "ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor",
+        "value": "This appears to be a medical document. Please review the image manually for:"
+      },
+      {
+        "key": "ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable",
+        "value": "Consider taking a clearer photo if the text is not easily readable."
+      },
+      {
+        "key": "ui.aiAnalysisSavedAsBothTextAndPdf",
+        "value": "📄 AI analysis saved as both text and PDF!"
+      },
+      {
+        "key": "ui.aiIsAnalyzingYourPhoto",
+        "value": "🤖 AI is analyzing your photo..."
+      },
+      {
+        "key": "ui.yourDocumentTextIsReadyForExport",
+        "value": "Your document text is ready for export!"
+      },
+      {
+        "key": "ui.tipsForBetterResults",
+        "value": "💡 Tips for better results:"
+      },
+      {
+        "key": "ui.ensureImagesAreWellLitAndClear",
+        "value": "• Ensure images are well-lit and clear"
+      },
+      {
+        "key": "ui.textShouldBeReadableAndNotBlurry",
+        "value": "• Text should be readable and not blurry"
+      },
+      {
+        "key": "ui.notProcessed",
+        "value": "Not processed"
+      },
+      {
+        "key": "ui.yourScanIsNowStoredAndAccessibleFromTheDocumentsTile",
+        "value": "Your scan is now stored and accessible from the Documents tile."
+      },
+      {
+        "key": "ui.makeSureYouHaveAtLeastOnePageScanned",
+        "value": "• Make sure you have at least one page scanned"
+      },
+      {
+        "key": "ui.checkThatImagesAreValidAndAccessible",
+        "value": "• Check that images are valid and accessible"
+      },
+      {
+        "key": "ui.tryScanningAgainWithBetterLighting",
+        "value": "• Try scanning again with better lighting"
+      },
+      {
+        "key": "ui.ocrTextExtractedFromValuePagevalue",
+        "value": "OCR text extracted from {{value1}} page{{value2}}.\n\n"
+      },
+      {
+        "key": "ui.textCopiedToClipboardAndShared",
+        "value": "✅ Text copied to clipboard and shared!"
+      },
+      {
+        "key": "ui.enterYourWeight",
+        "value": "Enter your weight"
+      },
+      {
+        "key": "ui.enterYourHeight",
+        "value": "Enter your height"
+      },
+      {
+        "key": "ui.thereAreNoHealthMetricsToExport",
+        "value": "There are no health metrics to export."
+      },
+      {
+        "key": "ui.pleaseConsultYourHealthcareProviderForMedicalAdvice",
+        "value": "Please consult your healthcare provider for medical advice."
+      },
+      {
+        "key": "ui.locationPermissionDeniedPleaseEnableLocationServices",
+        "value": "Location permission denied. Please enable location services."
+      },
+      {
+        "key": "ui.completeBloodCountMetabolicPanelsLipidProfilesThyroidFunctionDiabetesScreeningVitaminLevel",
+        "value": "Complete blood count, metabolic panels, lipid profiles, thyroid function, diabetes screening, vitamin levels, and more."
+      },
+      {
+        "key": "ui.xRaysMriCtScansUltrasoundsMammographyBoneDensityTestsAndOtherDiagnosticImaging",
+        "value": "X-rays, MRI, CT scans, ultrasounds, mammography, bone density tests, and other diagnostic imaging."
+      },
+      {
+        "key": "ui.ekgEcgStressTestsEchocardiogramsHolterMonitoringAndOtherHeartRelatedDiagnostics",
+        "value": "EKG/ECG, stress tests, echocardiograms, Holter monitoring, and other heart-related diagnostics."
+      },
+      {
+        "key": "ui.biopsiesCytologyHistologyCancerScreeningTumorMarkersAndGeneticTesting",
+        "value": "Biopsies, cytology, histology, cancer screening, tumor markers, and genetic testing."
+      },
+      {
+        "key": "ui.covid19TestingFluTestsStdScreeningHepatitisPanelsHivTestingAndTuberculosisTests",
+        "value": "COVID-19 testing, flu tests, STD screening, hepatitis panels, HIV testing, and tuberculosis tests."
+      },
+      {
+        "key": "ui.allergyTestingFoodAllergyPanelsEnvironmentalAllergyTestsPatchTestingAndRastTesting",
+        "value": "Allergy testing, food allergy panels, environmental allergy tests, patch testing, and RAST testing."
+      },
+      {
+        "key": "ui.sleepStudiesPulmonaryFunctionTestsNeurologicalTestingEndocrinologyRheumatologyAndDermatolo",
+        "value": "Sleep studies, pulmonary function tests, neurological testing, endocrinology, rheumatology, and dermatology tests."
+      },
+      {
+        "key": "ui.variousMedicalTestsAndDiagnosticsAvailable",
+        "value": "Various medical tests and diagnostics available."
+      },
+      {
+        "key": "ui.pleaseSelectAPdfFileTheSelectedFileIsNotAPdfDocument",
+        "value": "Please select a PDF file. The selected file is not a PDF document."
+      },
+      {
+        "key": "ui.pdfImportIsUnavailableInThisInstalledAppInstallANewNativeBuildWithExpoDocumentPickerYouCan",
+        "value": "PDF import is unavailable in this installed app. Install a new native build with expo-document-picker. You can use the camera or gallery to create a PDF."
+      },
+      {
+        "key": "ui.couldNotOpenOrReadThePdfTryAgainUsingTheFilesAppAndChooseAPdfSavedOnThisDeviceYouCanAlsoUs",
+        "value": "Could not open or read the PDF. Try again using the Files app and choose a PDF saved on this device. You can also use the camera or gallery to create a PDF."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedValueBestRegardsPatient",
+        "value": "Hi Dr. {{value1}},\n\nPlease find attached: {{value2}}\n\nBest regards,\nPatient"
+      },
+      {
+        "key": "ui.sharingValueDocumentsFromAuricrxMedicalCoach",
+        "value": "Sharing {{value1}} documents from AuricRX Medical Coach"
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteBothFrontAndBackIdDocuments",
+        "value": "Are you sure you want to delete both front and back ID documents?"
+      },
+      {
+        "key": "ui.pleaseEnterAValidEmailAddress",
+        "value": "Please enter a valid email address"
+      },
+      {
+        "key": "ui.invalidDomainExtensionDidYouMeanValueCom",
+        "value": "Invalid domain extension. Did you mean {{value1}}.com?"
+      },
+      {
+        "key": "ui.invalidDomainExtensionDidYouMeanValueValue",
+        "value": "Invalid domain extension. Did you mean {{value1}}.{{value2}}?"
+      },
+      {
+        "key": "ui.invalidDomainExtensionDidYouMeanValueValue_391084",
+        "value": "Invalid domain extension. Did you mean {{value1}}.{{value2}}?"
+      },
+      {
+        "key": "ui.invalidDomainExtensionValuePleaseUseAValidDomainExtensionLikeComNetOrgEtc",
+        "value": "Invalid domain extension (.{{value1}}). Please use a valid domain extension like .com, .net, .org, etc."
+      },
+      {
+        "key": "ui.pleaseEnterAValidPhoneNumber815Digits",
+        "value": "Please enter a valid phone number (8-15 digits)"
+      },
+      {
+        "key": "ui.phoneNumberMustBeValueDigitsForValue",
+        "value": "Phone number must be {{value1}} digits for {{value2}}"
+      },
+      {
+        "key": "ui.pleaseEnterAValidPhoneNumber",
+        "value": "Please enter a valid phone number"
+      },
+      {
+        "key": "ui.termsAndPrivacyAcknowledgmentAreRequired",
+        "value": "Terms and privacy acknowledgment are required."
+      },
+      {
+        "key": "ui.pleaseVerifyYourEmailAddressBeforeSigningInCheckYourInboxIncludingSpamFolderForAVerificati",
+        "value": "Please verify your email address before signing in. Check your inbox (including spam folder) for a verification email."
+      },
+      {
+        "key": "ui.googleSignInRequiresADevelopmentBuildOpenThisAppInYourInstalledDevBuild",
+        "value": "Google Sign-In requires a development build. Open this app in your installed dev build."
+      },
+      {
+        "key": "ui.googleSignInIsNotConfiguredPleaseAddYourGoogleWebClientId",
+        "value": "Google Sign-In is not configured. Please add your Google web client ID."
+      },
+      {
+        "key": "ui.googleSignInWasCancelled",
+        "value": "Google Sign-In was cancelled."
+      },
+      {
+        "key": "ui.googleSignInDidNotReturnAValidIdTokenPleaseTryAgain",
+        "value": "Google Sign-In did not return a valid ID token. Please try again."
+      },
+      {
+        "key": "ui.googleSignInIsNotConfiguredYetPleaseAddYourGoogleOauthClientIds",
+        "value": "Google Sign-In is not configured yet. Please add your Google OAuth client IDs."
+      },
+      {
+        "key": "ui.anAccountAlreadyExistsWithTheSameEmailAddressButADifferentSignInMethodPleaseSignInUsingYou",
+        "value": "An account already exists with the same email address but a different sign-in method. Please sign in using your original provider."
+      },
+      {
+        "key": "ui.theGoogleCredentialIsInvalidOrHasExpiredPleaseTryAgain",
+        "value": "The Google credential is invalid or has expired. Please try again."
+      },
+      {
+        "key": "ui.thisEmailIsAlreadyRegistered",
+        "value": "This email is already registered"
+      },
+      {
+        "key": "ui.passwordShouldBeAtLeast6Characters",
+        "value": "Password should be at least 6 characters"
+      },
+      {
+        "key": "ui.noAccountFoundWithThisEmail",
+        "value": "No account found with this email"
+      },
+      {
+        "key": "ui.tooManyAttemptsPleaseTryAgainLater",
+        "value": "Too many attempts. Please try again later"
+      },
+      {
+        "key": "ui.networkErrorPleaseCheckYourConnection",
+        "value": "Network error. Please check your connection"
+      },
+      {
+        "key": "ui.anErrorOccurredPleaseTryAgain",
+        "value": "An error occurred. Please try again"
+      },
+      {
+        "key": "ui.userDataNotFound",
+        "value": "User data not found"
+      },
+      {
+        "key": "ui.phoneVerificationRequiresNativeImplementationPleaseVerifyYourPhoneNumberLaterInSettings",
+        "value": "Phone verification requires native implementation. Please verify your phone number later in settings."
+      },
+      {
+        "key": "ui.noDataAvailableForAnalysis",
+        "value": "No data available for analysis"
+      },
+      {
+        "key": "ui.hereIsTheDocumentValue_38de19",
+        "value": "Here is the document:\n{{value1}}"
+      },
+      {
+        "key": "ui.searchingForNearbyStores",
+        "value": "Searching for nearby stores..."
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteThisSupplement",
+        "value": "Are you sure you want to delete this supplement?"
+      },
+      {
+        "key": "ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl",
+        "value": "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico."
+      },
+      {
+        "key": "ui.aceInhibitorFirstLineTreatmentForHypertension",
+        "value": "ACE inhibitor, first-line treatment for hypertension"
+      },
+      {
+        "key": "ui.firstLineTreatmentForType2Diabetes",
+        "value": "First-line treatment for type 2 diabetes"
+      },
+      {
+        "key": "ui.nsaidForPainAndInflammation",
+        "value": "NSAID for pain and inflammation"
+      },
+      {
+        "key": "ui.mayProvideReliefWithFewerSideEffects",
+        "value": "May provide relief with fewer side effects"
+      },
+      {
+        "key": "ui.mayNotBeAsEffective",
+        "value": "May not be as effective"
+      },
+      {
+        "key": "ui.notAlwaysSufficient",
+        "value": "Not always sufficient"
+      },
+      {
+        "key": "ui.stayHydratedWithWater",
+        "value": "Stay hydrated with water"
+      },
+      {
+        "key": "ui.regularFollowUpWithHealthcareProvider",
+        "value": "Regular follow-up with healthcare provider"
+      },
+      {
+        "key": "ui.monitorForMedicationSideEffects",
+        "value": "Monitor for medication side effects"
+      },
+      {
+        "key": "ui.discussWithHealthcareProvider",
+        "value": "Discuss with healthcare provider"
+      },
+      {
+        "key": "ui.bloodPressureIsElevatedConsiderConsultingYourDoctor",
+        "value": "⚠️ Blood pressure is elevated. Consider consulting your doctor."
+      },
+      {
+        "key": "ui.bloodPressureIsLowMonitorForSymptoms",
+        "value": "📉 Blood pressure is low. Monitor for symptoms."
+      },
+      {
+        "key": "ui.bloodSugarIsHighCheckMedicationTimingAndDiet",
+        "value": "🍯 Blood sugar is high. Check medication timing and diet."
+      },
+      {
+        "key": "ui.bloodSugarIsLowHaveASnackAndMonitor",
+        "value": "🍯 Blood sugar is low. Have a snack and monitor."
+      },
+      {
+        "key": "ui.moodScoresAreLowConsiderDiscussingWithYourDoctor",
+        "value": "😔 Mood scores are low. Consider discussing with your doctor."
+      },
+      {
+        "key": "ui.moodScoresArePositiveKeepUpTheGoodWork",
+        "value": "😊 Mood scores are positive. Keep up the good work!"
+      },
+      {
+        "key": "ui.youHaveSevereSideEffectsPleaseConsultYourDoctorImmediately",
+        "value": "⚠️ You have severe side effects. Please consult your doctor immediately."
+      },
+      {
+        "key": "ui.monitorSideEffectsAndDiscussWithYourDoctorAtNextVisit",
+        "value": "📝 Monitor side effects and discuss with your doctor at next visit."
+      },
+      {
+        "key": "ui.overallHealthMetricsLookGoodKeepUpTheGreatWork",
+        "value": "✅ Overall health metrics look good. Keep up the great work!"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric",
+        "value": "Hi Dr. {{value1}}, please find attached my medical document: {{value2}}\n\nThis document was shared securely through AuricRX Medical Coach."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric_cab0e2",
+        "value": "Hi Dr. {{value1}},\n\nPlease find attached my medical document: {{value2}}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec",
+        "value": "Hi Dr. {{value1}}, please find attached my medical document: {{value2}}\n\n📄 View Document: {{value3}}\n\nThis document was shared securely through AuricRX Medical Coach."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5",
+        "value": "Hi Dr. {{value1}},\n\nPlease find attached my medical document: {{value2}}\n\n📄 View Document: {{value3}}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient"
+      },
+      {
+        "key": "ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta",
+        "value": "⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   npm start\n\n2. Check that port 4000 is available\n\n3. Verify server environment is configured"
+      },
+      {
+        "key": "ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP",
+        "value": "🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: cd server; npm start\n2. Check if running on port 4000\n3. Make sure firewall allows the connection"
+      },
+      {
+        "key": "localized.herbs.HERBS.item0.details.summary",
+        "value": "Traditionally used in folk medicine for digestive and mood-related concerns."
+      },
+      {
+        "key": "localized.herbs.HERBS.item1.details.origin",
+        "value": "Mexico and Central America"
+      },
+      {
+        "key": "localized.herbs.HERBS.item1.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item2.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item3.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item4.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item5.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item6.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item7.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item8.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item9.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item10.details.origin",
+        "value": "North Africa; naturalized in Mexico, US, and China"
+      },
+      {
+        "key": "localized.herbs.HERBS.item10.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item11.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item12.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item13.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item14.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item15.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item16.details.origin",
+        "value": "Mediterranean; widely used in Mexico and US"
+      },
+      {
+        "key": "localized.herbs.HERBS.item16.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item17.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item18.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item19.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item20.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item21.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item22.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item23.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item24.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item25.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item26.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item27.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item28.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item29.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item30.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item31.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item32.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item33.details.origin",
+        "value": "Australia; used in US and globally"
+      },
+      {
+        "key": "localized.herbs.HERBS.item33.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item34.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item35.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item36.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item37.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item38.details.origin",
+        "value": "Tropical regions; used globally including Mexico and US"
+      },
+      {
+        "key": "localized.herbs.HERBS.item38.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.herbs.HERBS.item39.details.summary",
+        "value": "We do not have a reviewed NCCIH fact sheet specific to this plant. The NCCIH link provides general supplement information, not an assessment of this species."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.appointmentManagementDesc",
+        "value": "Schedule appointments, manage doctor contacts, and track your healthcare visits"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.upcomingAppointmentsDesc",
+        "value": "Your scheduled appointments for the next 30 days."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.doctorContactsDesc",
+        "value": "Your healthcare providers and their contact information."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.fillAllFields",
+        "value": "Please fill in all required fields"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.appointmentServiceNotAvailable",
+        "value": "Appointment service not available"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.intelligentHealthcareFeatures",
+        "value": "AI tools to organize your health information. They do not replace your doctor."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.noHealthInsights",
+        "value": "No health insights available yet. Use the AI features to generate insights."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.noSymptomAnalyses",
+        "value": "No symptom analyses yet. Try analyzing your symptoms."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.describeSymptoms",
+        "value": "Describe your symptoms"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterSymptomsPlaceholder",
+        "value": "Enter your symptoms separated by commas (e.g., fever, headache, fatigue)"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.listMedications",
+        "value": "List your medications"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterMedicationsPlaceholder",
+        "value": "Enter your medications separated by commas (e.g., Aspirin, Metformin, Lisinopril)"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.fastingDescription",
+        "value": "Check if your current medications are compatible with intermittent fasting"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.fastingDisclaimer",
+        "value": "This recommendation is AI-generated and should not replace professional medical advice."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.fastingProfileDescription",
+        "value": "Set up your health profile for personalized fasting recommendations"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.fastingProfileSavedMessage",
+        "value": "Your fasting profile has been saved and will be used for personalized recommendations."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterVoiceNotePlaceholder",
+        "value": "Enter your voice note transcription..."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterSymptoms",
+        "value": "Please enter your symptoms"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterMedications",
+        "value": "Please enter your medications"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterVoiceNote",
+        "value": "Please enter your voice note"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.noKnownInteractions",
+        "value": "No known drug interactions were detected between your medications."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.voiceNoteAdded",
+        "value": "Voice note added and processed!"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.aiGeneratedInsights",
+        "value": "AI-generated insights based on your health data and patterns."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.organizeDocuments",
+        "value": "Keep your important medical documents organized and ready for doctor visits"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.uploadFromGallery",
+        "value": "Upload from Gallery"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.areYouSureDeleteDocument",
+        "value": "Are you sure you want to delete this document? This cannot be undone."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.grantCameraRollAccess",
+        "value": "Please grant camera roll access to upload documents."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.grantCameraAccess",
+        "value": "Please grant camera access to take photos."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.currentAndPastPrescriptions",
+        "value": "Current and past prescriptions"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.recentSymptomAnalyses",
+        "value": "Your recent symptom analyses and health assessments."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.smartServiceNotAvailable",
+        "value": "Smart notifications service not available"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.enterLocationName",
+        "value": "Enter the name of the location (e.g., \"CVS Pharmacy\", \"Dr. Smith's Office\"):"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.reminderMessagePrompt",
+        "value": "What should the reminder say when you're near this location?"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.chooseWeatherCondition",
+        "value": "Choose the weather condition to monitor:"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.temperatureMessage",
+        "value": "Check if you need temperature-sensitive medications"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.humidityMessage",
+        "value": "High humidity may affect your condition"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.chooseWallpaperDescription",
+        "value": "Choose from beautiful wallpapers or solid colors"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.startServerInfo",
+        "value": "Start local dev server and connect"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.findNearbyPharmacies",
+        "value": "Find pharmacies near your location"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.findNearbyLabs",
+        "value": "Find medical labs near your location"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.errorLoadingPharmacies",
+        "value": "Failed to load nearby pharmacies. Please try again."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.errorLoadingLabs",
+        "value": "Failed to load nearby labs. Please try again."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.pawlmer",
+        "value": "Pawlmer, your reminder buddy"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.contributionDescription",
+        "value": "Help us improve our medication price database by sharing what you found:"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.contributionErrorText",
+        "value": "Please fill in medication name, price, and store name."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.contributionSuccessText",
+        "value": "Your price information has been saved and will help improve our database for everyone."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.noPharmaciesMessage",
+        "value": "No pharmacies found in your area. Please try again."
+      },
+      {
+        "key": "localized.appConstants.STRINGS.trackHealthMetrics",
+        "value": "Track your health metrics, medication adherence, and side effects"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.trackVitalSigns",
+        "value": "Track your vital signs and health indicators over time"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.trackMedicationSchedule",
+        "value": "Track how well you're following your medication schedule"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.trackSideEffects",
+        "value": "Track any side effects you experience from medications"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.intelligentHealthcareFeaturesDesc",
+        "value": "Intelligent healthcare features powered by AI to help you make informed health decisions"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.locationBasedRemindersDesc",
+        "value": "Get reminded when you're near pharmacies, doctor offices, or other important locations"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.weatherBasedAlertsDesc",
+        "value": "Get notified when weather conditions might affect your health or medications"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.smartFeaturesDesc",
+        "value": "AI-powered features that learn from your medication patterns and provide intelligent reminders"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.smartRefillPredictionsDesc",
+        "value": "Predict when you'll need medication refills based on usage patterns"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.intelligentTimingDesc",
+        "value": "Learn your medication schedule and suggest optimal reminder times"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.contextAwareRemindersDesc",
+        "value": "Consider your location, weather, and schedule when sending reminders"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.smartNotificationsDesc",
+        "value": "Intelligent reminders that adapt to your lifestyle and environment"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.yourHealthMetricsNormal",
+        "value": "Your health metrics are within normal ranges"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.pleaseEnterValue",
+        "value": "Please enter a value"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.pleaseEnterValidNumber",
+        "value": "Please enter a valid number"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.pleaseEnterSymptom",
+        "value": "Please enter a symptom"
+      },
+      {
+        "key": "localized.appConstants.STRINGS.noSupplementsFound",
+        "value": "No supplements found. Add your first supplement to get started."
+      }
+    ],
+    "zh": [
+      {
+        "key": "ui.chooseJpgPngOrAnExistingPdfForPhotosYouCanSelectMultiple",
+        "value": "Choose JPG/PNG or an existing PDF. For photos, you can select multiple."
+      },
+      {
+        "key": "ui.scanWithCameraPdf",
+        "value": "Scan with camera → PDF"
+      },
+      {
+        "key": "ui.useYourDeviceCameraToCaptureOneOrMorePagesAndExportToASinglePdf",
+        "value": "Use your device camera to capture one or more pages and export to a single PDF."
+      },
+      {
+        "key": "ui.tipOnMobileSafariChromeTheUploadInputAlsoOffersCameraThisScannerAddsMultiPageEnhancementPd",
+        "value": "Tip: On mobile Safari/Chrome, the Upload input also offers Camera. This scanner adds multi-page + enhancement + PDF."
+      },
+      {
+        "key": "ui.notAuthenticated",
+        "value": "Not authenticated"
+      },
+      {
+        "key": "ui.immuneSystemSupportAndColdPrevention",
+        "value": "Immune system support and cold prevention"
+      },
+      {
+        "key": "ui.digestiveAidAndNauseaRelief",
+        "value": "Digestive aid and nausea relief"
+      },
+      {
+        "key": "ui.antiInflammatoryAndAntioxidantProperties",
+        "value": "Anti-inflammatory and antioxidant properties"
+      },
+      {
+        "key": "ui.calmingAndSleepSupport",
+        "value": "Calming and sleep support"
+      },
+      {
+        "key": "ui.immuneSupportAndFluPrevention",
+        "value": "Immune support and flu prevention"
+      },
+      {
+        "key": "ui.doctorEmailNotAvailable",
+        "value": "Doctor email not available"
+      },
+      {
+        "key": "ui.shareMedicalDocumentWithDrValue",
+        "value": "Share Medical Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.doctorPhoneNumberNotAvailable",
+        "value": "Doctor phone number not available"
+      },
+      {
+        "key": "ui.shareMedicalDocumentWithDrValue_cd6195",
+        "value": "Share Medical Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.whatsappIsNowOpenToYourDoctorSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThe",
+        "value": "WhatsApp is now open to your doctor's chat. Please tap the attachment button (📎) and select \"Document\" to attach the PDF file."
+      },
+      {
+        "key": "ui.shareMedicalDocumentWithDrValueViaWhatsapp",
+        "value": "Share Medical Document with Dr. {{value1}} via WhatsApp"
+      },
+      {
+        "key": "ui.mlKitNotProperlyImported",
+        "value": "ML Kit not properly imported"
+      },
+      {
+        "key": "ui.mlKitOcrNotAvailableOnThisDevice",
+        "value": "ML Kit OCR not available on this device"
+      },
+      {
+        "key": "ui.noPagesOrTextProvidedForPdfGeneration",
+        "value": "No pages or text provided for PDF generation"
+      },
+      {
+        "key": "ui.invalidUriForPageValueValue",
+        "value": "Invalid URI for page {{value1}}: {{value2}}"
+      },
+      {
+        "key": "ui.noBase64DataReturnedForPageValue",
+        "value": "No base64 data returned for page {{value1}}"
+      },
+      {
+        "key": "ui.noValidImagesOrTextCouldBeProcessedForPdfGeneration",
+        "value": "No valid images or text could be processed for PDF generation"
+      },
+      {
+        "key": "ui.whatsappIsNowOpenToDrValueSChatPleaseTapTheAttachmentButtonAndSelectDocumentToAttachThePdf",
+        "value": "WhatsApp is now open to Dr. {{value1}}'s chat. Please tap the attachment button (📎) and select \"Document\" to attach the PDF file."
+      },
+      {
+        "key": "ui.gmailIsNowOpenToDrValueSEmailPleaseTapTheAttachmentButtonAndSelectThePdfFileToAttach",
+        "value": "Gmail is now open to Dr. {{value1}}'s email. Please tap the attachment button (📎) and select the PDF file to attach."
+      },
+      {
+        "key": "ui.whatsappOpenedToDrValueSChatWithThePdfLinkTheDoctorCanClickTheLinkToViewYourDocument",
+        "value": "WhatsApp opened to Dr. {{value1}}'s chat with the PDF link. The doctor can click the link to view your document."
+      },
+      {
+        "key": "ui.gmailOpenedToDrValueSEmailWithThePdfLinkTheDoctorCanClickTheLinkToViewYourDocument",
+        "value": "Gmail opened to Dr. {{value1}}'s email with the PDF link. The doctor can click the link to view your document."
+      },
+      {
+        "key": "ui.googleAuthenticationSessionIsUnavailablePleaseTryAgain",
+        "value": "Google authentication session is unavailable. Please try again."
+      },
+      {
+        "key": "ui.pleaseCheckYourEmailIncludingSpamFolderAndClickTheVerificationLinkThenReturnHereToSignIn",
+        "value": "Please check your email (including spam folder) and click the verification link. Then return here to sign in."
+      },
+      {
+        "key": "ui.serverReturnedAnInvalidResponsePleaseTryAgainLater",
+        "value": "Server returned an invalid response. Please try again later."
+      },
+      {
+        "key": "ui.couldNotGetAnAnswerRightNow",
+        "value": "Could not get an answer right now."
+      },
+      {
+        "key": "ui.couldNotOpenMaps",
+        "value": "Could not open maps."
+      },
+      {
+        "key": "ui.pleaseAllowCamera",
+        "value": "Please allow camera."
+      },
+      {
+        "key": "ui.restoringYourSession",
+        "value": "🔄 Restoring your session..."
+      },
+      {
+        "key": "ui.checkingIfYouReAlreadySignedIn",
+        "value": "Checking if you're already signed in"
+      },
+      {
+        "key": "ui.requestTimeoutAiServerMayNotBeRunning",
+        "value": "Request timeout - AI server may not be running"
+      },
+      {
+        "key": "ui.serverRespondedWithValueValue",
+        "value": "Server responded with {{value1}}: {{value2}}"
+      },
+      {
+        "key": "ui.setUpYourFastingProfileInSettingsToGetPersonalizedFastingRecommendationsBasedOnYourHealthC",
+        "value": "Set up your fasting profile in Settings to get personalized fasting recommendations based on your health conditions, medications, and lifestyle."
+      },
+      {
+        "key": "ui.pleaseFillInAllFields",
+        "value": "Please fill in all fields"
+      },
+      {
+        "key": "ui.phoneAuthenticationWillBeImplementedSoon",
+        "value": "Phone authentication will be implemented soon!"
+      },
+      {
+        "key": "ui.signedInWithGoogleSuccessfully",
+        "value": "Signed in with Google successfully!"
+      },
+      {
+        "key": "ui.bySigningInYouAgreeToOurTermsOfServiceAndPrivacyPolicy",
+        "value": "By signing in, you agree to our Terms of Service and Privacy Policy"
+      },
+      {
+        "key": "ui.pleaseEnterYourPhoneNumber",
+        "value": "Please enter your phone number"
+      },
+      {
+        "key": "ui.medicalDocumentsForDoctorVisits",
+        "value": "Medical documents for doctor visits"
+      },
+      {
+        "key": "ui.pleaseGrantCameraRollAccessToScanDocuments",
+        "value": "Please grant camera roll access to scan documents."
+      },
+      {
+        "key": "ui.whatWouldYouLikeToDoWithThisPhoto",
+        "value": "What would you like to do with this photo?"
+      },
+      {
+        "key": "ui.pleaseAddSomePagesBeforeRunningOcr",
+        "value": "Please add some pages before running OCR"
+      },
+      {
+        "key": "ui.pleaseAddSomePagesBeforeSaving",
+        "value": "Please add some pages before saving"
+      },
+      {
+        "key": "ui.pleaseAddSomePagesBeforeExporting",
+        "value": "Please add some pages before exporting"
+      },
+      {
+        "key": "ui.pleaseRunOcrFirstBeforeExportingText",
+        "value": "Please run OCR first before exporting text"
+      },
+      {
+        "key": "ui.thisWillClearCurrentPagesAndStartFreshContinue",
+        "value": "This will clear current pages and start fresh. Continue?"
+      },
+      {
+        "key": "ui.theseSettingsWillApplyToYourNextPdfExport",
+        "value": "💡 These settings will apply to your next PDF export"
+      },
+      {
+        "key": "ui.editTheExtractedText",
+        "value": "Edit the extracted text..."
+      },
+      {
+        "key": "ui.chooseHowYouDLikeToAddPagesToYourNewScan",
+        "value": "Choose how you'd like to add pages to your new scan"
+      },
+      {
+        "key": "ui.selectFromPhotos",
+        "value": "Select from photos"
+      },
+      {
+        "key": "ui.phoneNotAvailable",
+        "value": "Phone Not Available"
+      },
+      {
+        "key": "ui.noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite",
+        "value": "No phone number found for {{value1}}. Please try calling them directly or visit their website."
+      },
+      {
+        "key": "ui.valueDoesnTHaveAnEmailAddressPleaseAddTheirEmailInTheAppointmentTracker",
+        "value": "{{value1}} doesn't have an email address. Please add their email in the Appointment Tracker."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document for your records."
+      },
+      {
+        "key": "ui.shareIdDocumentWithDrValue",
+        "value": "Share ID Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.idDocumentForDrValue",
+        "value": "ID Document for Dr. {{value1}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocument",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document."
+      },
+      {
+        "key": "ui.valueDoesnTHaveAPhoneNumberPleaseAddTheirPhoneNumberInTheAppointmentTracker",
+        "value": "{{value1}} doesn't have a phone number. Please add their phone number in the Appointment Tracker."
+      },
+      {
+        "key": "ui.shareMedicalIdDocumentWithDrValue",
+        "value": "Share Medical ID Document with Dr. {{value1}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document for your records."
+      },
+      {
+        "key": "ui.shareIdDocumentWithDrValueViaWhatsapp",
+        "value": "Share ID Document with Dr. {{value1}} via WhatsApp"
+      },
+      {
+        "key": "ui.idDocumentForDrValue_8e0ccb",
+        "value": "ID Document for Dr. {{value1}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyIdDocument_7370a7",
+        "value": "Hi Dr. {{value1}}, please find attached my ID document."
+      },
+      {
+        "key": "ui.shareValueWithDrValue",
+        "value": "Share {{value1}} with Dr. {{value2}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedValue",
+        "value": "Hi Dr. {{value1}}, please find attached: {{value2}}"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedValue_68e9e9",
+        "value": "Hi Dr. {{value1}}, please find attached: {{value2}}"
+      },
+      {
+        "key": "ui.shareValueWithDrValueViaWhatsapp",
+        "value": "Share {{value1}} with Dr. {{value2}} via WhatsApp"
+      },
+      {
+        "key": "ui.valueDoesnTHaveAnEmailAddressPleaseAddTheirEmailInTheAppointmentTrackerOrUseWhatsappSharin",
+        "value": "{{value1}} doesn't have an email address. Please add their email in the Appointment Tracker or use WhatsApp sharing."
+      },
+      {
+        "key": "ui.shareValueWithValue",
+        "value": "Share {{value1}} with {{value2}}"
+      },
+      {
+        "key": "ui.medicalDocumentValueForDrValue",
+        "value": "Medical Document: {{value1}} - For Dr. {{value2}}"
+      },
+      {
+        "key": "ui.sharedFirstDocumentValueMoreDocumentsAvailablePleaseShareThemIndividually",
+        "value": "Shared first document. {{value1}} more documents available. Please share them individually."
+      },
+      {
+        "key": "ui.unableToOpenPdfFilePleaseMakeSureYouHaveAPdfViewerAppInstalled",
+        "value": "Unable to open PDF file. Please make sure you have a PDF viewer app installed."
+      },
+      {
+        "key": "ui.pdfFileNotFoundPleaseTryUploadingAgain",
+        "value": "PDF file not found. Please try uploading again."
+      },
+      {
+        "key": "ui.theImageFileMayBeCorruptedOrInAnUnsupportedFormat",
+        "value": "The image file may be corrupted or in an unsupported format."
+      },
+      {
+        "key": "ui.notePdfPreviewNotAvailableUseOpenPdfButtonBelowToView",
+        "value": "Note: PDF preview not available. Use \"Open PDF\" button below to view."
+      },
+      {
+        "key": "ui.bothFrontAndBackImagesAreRequired",
+        "value": "Both front and back images are required"
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteValue",
+        "value": "Are you sure you want to delete \"{{value1}}\"?"
+      },
+      {
+        "key": "ui.sharingNotAvailableOnThisDevice",
+        "value": "Sharing not available on this device"
+      },
+      {
+        "key": "ui.shareWithAllApps",
+        "value": "Share with all apps"
+      },
+      {
+        "key": "ui.continueWithApple_8cfb44",
+        "value": "🍎  Continue with Apple"
+      },
+      {
+        "key": "ui.gContinueWithGoogle",
+        "value": "G   Continue with Google"
+      },
+      {
+        "key": "ui.noPhoneNumberFoundForValuePleaseTryCallingThemDirectlyOrVisitTheirWebsite_781fca",
+        "value": "No phone number found for {{value1}}. Please try calling them directly or visit their website."
+      },
+      {
+        "key": "ui.unableToLoadLegalDocumentPleaseTryAgainLater",
+        "value": "Unable to load legal document. Please try again later."
+      },
+      {
+        "key": "ui.replaceWithYourRegistrationFlow",
+        "value": "Replace with your registration flow."
+      },
+      {
+        "key": "ui.riskOfLacticAcidosisWithContrastMedia",
+        "value": "Risk of lactic acidosis with contrast media"
+      },
+      {
+        "key": "ui.yourMedicationAdherenceRateIsValueWhichIsBelowTheRecommended80",
+        "value": "Your medication adherence rate is {{value1}}%, which is below the recommended 80%."
+      },
+      {
+        "key": "ui.youHaveNoUpcomingAppointmentsScheduledConsiderSchedulingARoutineCheckup",
+        "value": "You have no upcoming appointments scheduled. Consider scheduling a routine checkup."
+      },
+      {
+        "key": "ui.yourSymptomsRequireImmediateAttentionValue",
+        "value": "Your symptoms require immediate attention: {{value1}}"
+      },
+      {
+        "key": "ui.phoneVerificationWillBeAvailableAfterBuildingWithEas",
+        "value": "Phone verification will be available after building with EAS"
+      },
+      {
+        "key": "ui.pleaseSignInAgainIniciaSesionDeNuevo",
+        "value": "Please sign in again. / Inicia sesión de nuevo."
+      },
+      {
+        "key": "ui.deletionDidNotCompletePleaseRetryNoSeCompletoLaEliminacionIntentaDeNuevo",
+        "value": "Deletion did not complete. Please retry. / No se completó la eliminación. Intenta de nuevo."
+      },
+      {
+        "key": "ui.consentCouldNotBeSavedNoSePudoGuardarElConsentimiento",
+        "value": "Consent could not be saved. / No se pudo guardar el consentimiento."
+      },
+      {
+        "key": "ui.activaElCanalDeRecordatoriosEnAjustesEnableTheReminderChannelInSettings",
+        "value": "Turn on the reminder channel in Settings."
+      },
+      {
+        "key": "ui.proximityRemindersAreUnavailableLosRecordatoriosPorProximidadNoEstanDisponibles",
+        "value": "Proximity reminders are unavailable. / Los recordatorios por proximidad no están disponibles."
+      },
+      {
+        "key": "ui.continueWithApple_4db371",
+        "value": " Continue with Apple"
+      },
+      {
+        "key": "ui.continueWithGoogle_acdbaa",
+        "value": " Continue with Google"
+      },
+      {
+        "key": "ui.bySigningInYouAgreeToOur",
+        "value": "By signing in, you agree to our"
+      },
+      {
+        "key": "ui.useCameraToCapturePagesAndCreatePdf",
+        "value": "Use camera to capture pages and create PDF."
+      },
+      {
+        "key": "ui.pleaseAllowPopupsForThisSiteToViewDocuments",
+        "value": "Please allow popups for this site to view documents"
+      },
+      {
+        "key": "ui.officeDocumentsAreDownloadedForLocalViewing",
+        "value": "Office documents are downloaded for local viewing"
+      },
+      {
+        "key": "ui.pleaseTryDownloadingTheFileInstead",
+        "value": "Please try downloading the file instead"
+      },
+      {
+        "key": "ui.pleaseUseTheDownloadButtonInstead",
+        "value": "Please use the Download button instead"
+      },
+      {
+        "key": "ui.pleaseUseTheDownloadButtonToSaveAndOpenWithYourPreferredApp",
+        "value": "Please use the Download button to save and open with your preferred app"
+      },
+      {
+        "key": "ui.fileTypeNotSupportedForViewing",
+        "value": "File type not supported for viewing"
+      },
+      {
+        "key": "ui.mockDataAddGooglePlacesApiKeyForLivePharmacies",
+        "value": "Mock data (add GOOGLE_PLACES_API_KEY for live pharmacies)"
+      },
+      {
+        "key": "ui.consulteASuMedico",
+        "value": "Consult your doctor"
+      },
+      {
+        "key": "ui.pleaseEnableLocationServicesInYourDeviceSettingsToFindNearbyPharmacies",
+        "value": "Please enable location services in your device settings to find nearby pharmacies."
+      },
+      {
+        "key": "ui.thisAppNeedsLocationPermissionToFindNearbyPharmaciesPleaseGrantPermissionInSettings",
+        "value": "This app needs location permission to find nearby pharmacies. Please grant permission in settings."
+      },
+      {
+        "key": "ui.pleaseEnableLocationServicesInYourDeviceSettingsAndTryAgain",
+        "value": "Please enable location services in your device settings and try again."
+      },
+      {
+        "key": "ui.gettingYourLocationIsTakingTooLongPleaseCheckYourGpsSignalAndTryAgain",
+        "value": "Getting your location is taking too long. Please check your GPS signal and try again."
+      },
+      {
+        "key": "ui.unableToGetYourCurrentLocationPleaseCheckYourDeviceSettingsAndTryAgain",
+        "value": "Unable to get your current location. Please check your device settings and try again."
+      },
+      {
+        "key": "ui.couldNotReadDocumentImage",
+        "value": "Could not read document image"
+      },
+      {
+        "key": "ui.selectOnlyTheFrontAndBackOfOneId",
+        "value": "Select only the front and back of one ID"
+      },
+      {
+        "key": "ui.signInToYourAccount",
+        "value": "Sign in to your account"
+      },
+      {
+        "key": "ui.createYourAuricrxAccount",
+        "value": "Create your AuricRX account"
+      },
+      {
+        "key": "ui.verifyYourPhoneNumberToContinue",
+        "value": "Verify your phone number to continue"
+      },
+      {
+        "key": "ui.couldNotExportIdUseOneImageOrASinglePagePdfForEachSideAndTryAgain",
+        "value": "Could not export ID. Use one image or a single-page PDF for each side and try again."
+      },
+      {
+        "key": "ui.uriValueExistsValueSizeValueCheckConsoleForDetailedLogs",
+        "value": "URI: {{value1}}\nExists: {{value2}}\nSize: {{value3}}\n\nCheck console for detailed logs."
+      },
+      {
+        "key": "ui.nameValueUriValueSizeValueBytesExistsValueCheckConsoleForFullDetails",
+        "value": "Name: {{value1}}\nURI: {{value2}}\nSize: {{value3}} bytes\nExists: {{value4}}\n\nCheck console for full details."
+      },
+      {
+        "key": "ui.notAvailable",
+        "value": "Not available"
+      },
+      {
+        "key": "ui.cancelMembershipYouKeepProUntilTheEndOfThePaidPeriodNoMoreChargesYouCanResubscribeAnytime",
+        "value": "Cancel membership. You keep Pro until the end of the paid period. No more charges. You can resubscribe anytime."
+      },
+      {
+        "key": "ui.farmaciaNoDisponible",
+        "value": "Pharmacy not available"
+      },
+      {
+        "key": "ui.pharmacyNotAvailable",
+        "value": "Pharmacy not available"
+      },
+      {
+        "key": "ui.precioNoDisponible",
+        "value": "Price not available"
+      },
+      {
+        "key": "ui.helpUsImproveOurMedicationPriceDatabaseBySharingWhatYouFound",
+        "value": "Help us improve our medication price database by sharing what you found:"
+      },
+      {
+        "key": "ui.couldNotAccessCamera",
+        "value": "Could not access camera"
+      },
+      {
+        "key": "ui.hereIsTheDocumentValue",
+        "value": "Here is the document:\n{{value1}}"
+      },
+      {
+        "key": "ui.notRecommendedForAutoimmuneConditions",
+        "value": "Not recommended for autoimmune conditions"
+      },
+      {
+        "key": "ui.mayInteractWithBloodThinners",
+        "value": "May interact with blood thinners"
+      },
+      {
+        "key": "ui.5001000mgDailyWithBlackPepper",
+        "value": "500-1000mg daily with black pepper"
+      },
+      {
+        "key": "ui.notRecommendedDuringPregnancy",
+        "value": "Not recommended during pregnancy"
+      },
+      {
+        "key": "ui.couldNotDetectDocumentEdges",
+        "value": "Could not detect document edges"
+      },
+      {
+        "key": "ui.usamosTuUbicacionSoloParaEstaBusquedaDeFarmaciasOLaboratoriosSeEnviaAGooglePlacesParaRespo",
+        "value": "Usamos tu ubicación solo para esta búsqueda de farmacias o laboratorios. Se envía a Google Places para responder, no se guarda ni activa seguimiento o avisos por proximidad. / We use your location only for this pharmacy or lab search. It is sent to Google Places to answer, and is not stored or used for tracking or proximity alerts."
+      },
+      {
+        "key": "ui.notAuthenticatedPleaseSignInAgain",
+        "value": "Not authenticated. Please sign in again."
+      },
+      {
+        "key": "ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport",
+        "value": "Server error: Invalid response from server. Please try again later or contact support."
+      },
+      {
+        "key": "ui.iCouldNotFindAnAnswer",
+        "value": "I could not find an answer."
+      },
+      {
+        "key": "ui.howeverICanTellYouThatAspirinIsACommonOverTheCounterMedicationUsedToReducePainFeverAndInfl",
+        "value": "However, I can tell you that aspirin is a common over-the-counter medication used to reduce pain, fever, and inflammation. It's also used in low doses to help prevent heart attacks and strokes. Please consult with a healthcare provider for medical advice."
+      },
+      {
+        "key": "ui.pleaseTryAgainInAMomentOrConsultWithAHealthcareProviderForImmediateMedicalQuestions",
+        "value": "Please try again in a moment or consult with a healthcare provider for immediate medical questions."
+      },
+      {
+        "key": "ui.pleaseVerifyYourEmailBeforeSigningIn",
+        "value": "Please verify your email before signing in."
+      },
+      {
+        "key": "ui.galleryImagesProcessedWithEdgeDetection",
+        "value": "✅ Gallery images processed with edge detection"
+      },
+      {
+        "key": "ui.imagesAddedFromGallery",
+        "value": "📸 Images added from gallery"
+      },
+      {
+        "key": "ui.aiIsAnalyzingYourImages",
+        "value": "🤖 AI is analyzing your images..."
+      },
+      {
+        "key": "ui.thisAppearsToBeAMedicalDocumentContainingTextTheExtractedContentShowsValuevalue",
+        "value": "This appears to be a medical document containing text. The extracted content shows: \"{{value1}}{{value2}}\"\n\n"
+      },
+      {
+        "key": "ui.recommendationReviewTheExtractedTextAboveForAnyMedicalInformationPrescriptionsOrImportantD",
+        "value": "Recommendation: Review the extracted text above for any medical information, prescriptions, or important details."
+      },
+      {
+        "key": "ui.thisImageAppearsToBeAMedicalDocumentOrHealthRelatedContent",
+        "value": "This image appears to be a medical document or health-related content."
+      },
+      {
+        "key": "ui.commonElementsToLookForInMedicalDocuments",
+        "value": "Common elements to look for in medical documents:"
+      },
+      {
+        "key": "ui.patientInformationAndDemographics",
+        "value": "• Patient information and demographics"
+      },
+      {
+        "key": "ui.doctorSNotesAndRecommendations",
+        "value": "• Doctor's notes and recommendations"
+      },
+      {
+        "key": "ui.noteNoTextWasAutomaticallyExtractedFromThisImageYouMayNeedToReviewItManuallyOrTryTakingACl",
+        "value": "Note: No text was automatically extracted from this image. You may need to review it manually or try taking a clearer photo."
+      },
+      {
+        "key": "ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor",
+        "value": "This appears to be a medical document. Please review the image manually for:"
+      },
+      {
+        "key": "ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable",
+        "value": "Consider taking a clearer photo if the text is not easily readable."
+      },
+      {
+        "key": "ui.aiAnalysisSavedAsBothTextAndPdf",
+        "value": "📄 AI analysis saved as both text and PDF!"
+      },
+      {
+        "key": "ui.aiIsAnalyzingYourPhoto",
+        "value": "🤖 AI is analyzing your photo..."
+      },
+      {
+        "key": "ui.yourDocumentTextIsReadyForExport",
+        "value": "Your document text is ready for export!"
+      },
+      {
+        "key": "ui.tipsForBetterResults",
+        "value": "💡 Tips for better results:"
+      },
+      {
+        "key": "ui.ensureImagesAreWellLitAndClear",
+        "value": "• Ensure images are well-lit and clear"
+      },
+      {
+        "key": "ui.textShouldBeReadableAndNotBlurry",
+        "value": "• Text should be readable and not blurry"
+      },
+      {
+        "key": "ui.notProcessed",
+        "value": "Not processed"
+      },
+      {
+        "key": "ui.yourScanIsNowStoredAndAccessibleFromTheDocumentsTile",
+        "value": "Your scan is now stored and accessible from the Documents tile."
+      },
+      {
+        "key": "ui.makeSureYouHaveAtLeastOnePageScanned",
+        "value": "• Make sure you have at least one page scanned"
+      },
+      {
+        "key": "ui.checkThatImagesAreValidAndAccessible",
+        "value": "• Check that images are valid and accessible"
+      },
+      {
+        "key": "ui.tryScanningAgainWithBetterLighting",
+        "value": "• Try scanning again with better lighting"
+      },
+      {
+        "key": "ui.ocrTextExtractedFromValuePagevalue",
+        "value": "OCR text extracted from {{value1}} page{{value2}}.\n\n"
+      },
+      {
+        "key": "ui.textCopiedToClipboardAndShared",
+        "value": "✅ Text copied to clipboard and shared!"
+      },
+      {
+        "key": "ui.enterYourWeight",
+        "value": "Enter your weight"
+      },
+      {
+        "key": "ui.enterYourHeight",
+        "value": "Enter your height"
+      },
+      {
+        "key": "ui.thereAreNoHealthMetricsToExport",
+        "value": "There are no health metrics to export."
+      },
+      {
+        "key": "ui.pleaseConsultYourHealthcareProviderForMedicalAdvice",
+        "value": "Please consult your healthcare provider for medical advice."
+      },
+      {
+        "key": "ui.locationPermissionDeniedPleaseEnableLocationServices",
+        "value": "Location permission denied. Please enable location services."
+      },
+      {
+        "key": "ui.completeBloodCountMetabolicPanelsLipidProfilesThyroidFunctionDiabetesScreeningVitaminLevel",
+        "value": "Complete blood count, metabolic panels, lipid profiles, thyroid function, diabetes screening, vitamin levels, and more."
+      },
+      {
+        "key": "ui.xRaysMriCtScansUltrasoundsMammographyBoneDensityTestsAndOtherDiagnosticImaging",
+        "value": "X-rays, MRI, CT scans, ultrasounds, mammography, bone density tests, and other diagnostic imaging."
+      },
+      {
+        "key": "ui.ekgEcgStressTestsEchocardiogramsHolterMonitoringAndOtherHeartRelatedDiagnostics",
+        "value": "EKG/ECG, stress tests, echocardiograms, Holter monitoring, and other heart-related diagnostics."
+      },
+      {
+        "key": "ui.biopsiesCytologyHistologyCancerScreeningTumorMarkersAndGeneticTesting",
+        "value": "Biopsies, cytology, histology, cancer screening, tumor markers, and genetic testing."
+      },
+      {
+        "key": "ui.covid19TestingFluTestsStdScreeningHepatitisPanelsHivTestingAndTuberculosisTests",
+        "value": "COVID-19 testing, flu tests, STD screening, hepatitis panels, HIV testing, and tuberculosis tests."
+      },
+      {
+        "key": "ui.allergyTestingFoodAllergyPanelsEnvironmentalAllergyTestsPatchTestingAndRastTesting",
+        "value": "Allergy testing, food allergy panels, environmental allergy tests, patch testing, and RAST testing."
+      },
+      {
+        "key": "ui.sleepStudiesPulmonaryFunctionTestsNeurologicalTestingEndocrinologyRheumatologyAndDermatolo",
+        "value": "Sleep studies, pulmonary function tests, neurological testing, endocrinology, rheumatology, and dermatology tests."
+      },
+      {
+        "key": "ui.variousMedicalTestsAndDiagnosticsAvailable",
+        "value": "Various medical tests and diagnostics available."
+      },
+      {
+        "key": "ui.pleaseSelectAPdfFileTheSelectedFileIsNotAPdfDocument",
+        "value": "Please select a PDF file. The selected file is not a PDF document."
+      },
+      {
+        "key": "ui.pdfImportIsUnavailableInThisInstalledAppInstallANewNativeBuildWithExpoDocumentPickerYouCan",
+        "value": "PDF import is unavailable in this installed app. Install a new native build with expo-document-picker. You can use the camera or gallery to create a PDF."
+      },
+      {
+        "key": "ui.couldNotOpenOrReadThePdfTryAgainUsingTheFilesAppAndChooseAPdfSavedOnThisDeviceYouCanAlsoUs",
+        "value": "Could not open or read the PDF. Try again using the Files app and choose a PDF saved on this device. You can also use the camera or gallery to create a PDF."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedValueBestRegardsPatient",
+        "value": "Hi Dr. {{value1}},\n\nPlease find attached: {{value2}}\n\nBest regards,\nPatient"
+      },
+      {
+        "key": "ui.sharingValueDocumentsFromAuricrxMedicalCoach",
+        "value": "Sharing {{value1}} documents from AuricRX Medical Coach"
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteBothFrontAndBackIdDocuments",
+        "value": "Are you sure you want to delete both front and back ID documents?"
+      },
+      {
+        "key": "ui.pleaseEnterAValidEmailAddress",
+        "value": "Please enter a valid email address"
+      },
+      {
+        "key": "ui.invalidDomainExtensionDidYouMeanValueCom",
+        "value": "Invalid domain extension. Did you mean {{value1}}.com?"
+      },
+      {
+        "key": "ui.invalidDomainExtensionDidYouMeanValueValue",
+        "value": "Invalid domain extension. Did you mean {{value1}}.{{value2}}?"
+      },
+      {
+        "key": "ui.invalidDomainExtensionDidYouMeanValueValue_391084",
+        "value": "Invalid domain extension. Did you mean {{value1}}.{{value2}}?"
+      },
+      {
+        "key": "ui.invalidDomainExtensionValuePleaseUseAValidDomainExtensionLikeComNetOrgEtc",
+        "value": "Invalid domain extension (.{{value1}}). Please use a valid domain extension like .com, .net, .org, etc."
+      },
+      {
+        "key": "ui.pleaseEnterAValidPhoneNumber815Digits",
+        "value": "Please enter a valid phone number (8-15 digits)"
+      },
+      {
+        "key": "ui.phoneNumberMustBeValueDigitsForValue",
+        "value": "Phone number must be {{value1}} digits for {{value2}}"
+      },
+      {
+        "key": "ui.pleaseEnterAValidPhoneNumber",
+        "value": "Please enter a valid phone number"
+      },
+      {
+        "key": "ui.termsAndPrivacyAcknowledgmentAreRequired",
+        "value": "Terms and privacy acknowledgment are required."
+      },
+      {
+        "key": "ui.pleaseVerifyYourEmailAddressBeforeSigningInCheckYourInboxIncludingSpamFolderForAVerificati",
+        "value": "Please verify your email address before signing in. Check your inbox (including spam folder) for a verification email."
+      },
+      {
+        "key": "ui.googleSignInRequiresADevelopmentBuildOpenThisAppInYourInstalledDevBuild",
+        "value": "Google Sign-In requires a development build. Open this app in your installed dev build."
+      },
+      {
+        "key": "ui.googleSignInIsNotConfiguredPleaseAddYourGoogleWebClientId",
+        "value": "Google Sign-In is not configured. Please add your Google web client ID."
+      },
+      {
+        "key": "ui.googleSignInWasCancelled",
+        "value": "Google Sign-In was cancelled."
+      },
+      {
+        "key": "ui.googleSignInDidNotReturnAValidIdTokenPleaseTryAgain",
+        "value": "Google Sign-In did not return a valid ID token. Please try again."
+      },
+      {
+        "key": "ui.googleSignInIsNotConfiguredYetPleaseAddYourGoogleOauthClientIds",
+        "value": "Google Sign-In is not configured yet. Please add your Google OAuth client IDs."
+      },
+      {
+        "key": "ui.anAccountAlreadyExistsWithTheSameEmailAddressButADifferentSignInMethodPleaseSignInUsingYou",
+        "value": "An account already exists with the same email address but a different sign-in method. Please sign in using your original provider."
+      },
+      {
+        "key": "ui.theGoogleCredentialIsInvalidOrHasExpiredPleaseTryAgain",
+        "value": "The Google credential is invalid or has expired. Please try again."
+      },
+      {
+        "key": "ui.thisEmailIsAlreadyRegistered",
+        "value": "This email is already registered"
+      },
+      {
+        "key": "ui.passwordShouldBeAtLeast6Characters",
+        "value": "Password should be at least 6 characters"
+      },
+      {
+        "key": "ui.noAccountFoundWithThisEmail",
+        "value": "No account found with this email"
+      },
+      {
+        "key": "ui.tooManyAttemptsPleaseTryAgainLater",
+        "value": "Too many attempts. Please try again later"
+      },
+      {
+        "key": "ui.networkErrorPleaseCheckYourConnection",
+        "value": "Network error. Please check your connection"
+      },
+      {
+        "key": "ui.anErrorOccurredPleaseTryAgain",
+        "value": "An error occurred. Please try again"
+      },
+      {
+        "key": "ui.userDataNotFound",
+        "value": "User data not found"
+      },
+      {
+        "key": "ui.phoneVerificationRequiresNativeImplementationPleaseVerifyYourPhoneNumberLaterInSettings",
+        "value": "Phone verification requires native implementation. Please verify your phone number later in settings."
+      },
+      {
+        "key": "ui.noDataAvailableForAnalysis",
+        "value": "No data available for analysis"
+      },
+      {
+        "key": "ui.hereIsTheDocumentValue_38de19",
+        "value": "Here is the document:\n{{value1}}"
+      },
+      {
+        "key": "ui.searchingForNearbyStores",
+        "value": "Searching for nearby stores..."
+      },
+      {
+        "key": "ui.areYouSureYouWantToDeleteThisSupplement",
+        "value": "Are you sure you want to delete this supplement?"
+      },
+      {
+        "key": "ui.possibleInteractionDonTChangeOrStopAnyMedicineWithoutTalkingToYourDoctorOrPharmacistPosibl",
+        "value": "Possible interaction. Don't change or stop any medicine without talking to your doctor or pharmacist. / Posible interacción. No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico."
+      },
+      {
+        "key": "ui.aceInhibitorFirstLineTreatmentForHypertension",
+        "value": "ACE inhibitor, first-line treatment for hypertension"
+      },
+      {
+        "key": "ui.firstLineTreatmentForType2Diabetes",
+        "value": "First-line treatment for type 2 diabetes"
+      },
+      {
+        "key": "ui.nsaidForPainAndInflammation",
+        "value": "NSAID for pain and inflammation"
+      },
+      {
+        "key": "ui.mayProvideReliefWithFewerSideEffects",
+        "value": "May provide relief with fewer side effects"
+      },
+      {
+        "key": "ui.mayNotBeAsEffective",
+        "value": "May not be as effective"
+      },
+      {
+        "key": "ui.notAlwaysSufficient",
+        "value": "Not always sufficient"
+      },
+      {
+        "key": "ui.stayHydratedWithWater",
+        "value": "Stay hydrated with water"
+      },
+      {
+        "key": "ui.regularFollowUpWithHealthcareProvider",
+        "value": "Regular follow-up with healthcare provider"
+      },
+      {
+        "key": "ui.monitorForMedicationSideEffects",
+        "value": "Monitor for medication side effects"
+      },
+      {
+        "key": "ui.discussWithHealthcareProvider",
+        "value": "Discuss with healthcare provider"
+      },
+      {
+        "key": "ui.bloodPressureIsElevatedConsiderConsultingYourDoctor",
+        "value": "⚠️ Blood pressure is elevated. Consider consulting your doctor."
+      },
+      {
+        "key": "ui.bloodPressureIsLowMonitorForSymptoms",
+        "value": "📉 Blood pressure is low. Monitor for symptoms."
+      },
+      {
+        "key": "ui.bloodSugarIsHighCheckMedicationTimingAndDiet",
+        "value": "🍯 Blood sugar is high. Check medication timing and diet."
+      },
+      {
+        "key": "ui.bloodSugarIsLowHaveASnackAndMonitor",
+        "value": "🍯 Blood sugar is low. Have a snack and monitor."
+      },
+      {
+        "key": "ui.moodScoresAreLowConsiderDiscussingWithYourDoctor",
+        "value": "😔 Mood scores are low. Consider discussing with your doctor."
+      },
+      {
+        "key": "ui.moodScoresArePositiveKeepUpTheGoodWork",
+        "value": "😊 Mood scores are positive. Keep up the good work!"
+      },
+      {
+        "key": "ui.youHaveSevereSideEffectsPleaseConsultYourDoctorImmediately",
+        "value": "⚠️ You have severe side effects. Please consult your doctor immediately."
+      },
+      {
+        "key": "ui.monitorSideEffectsAndDiscussWithYourDoctorAtNextVisit",
+        "value": "📝 Monitor side effects and discuss with your doctor at next visit."
+      },
+      {
+        "key": "ui.overallHealthMetricsLookGoodKeepUpTheGreatWork",
+        "value": "✅ Overall health metrics look good. Keep up the great work!"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric",
+        "value": "Hi Dr. {{value1}}, please find attached my medical document: {{value2}}\n\nThis document was shared securely through AuricRX Medical Coach."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueThisDocumentWasSharedSecurelyThroughAuric_cab0e2",
+        "value": "Hi Dr. {{value1}},\n\nPlease find attached my medical document: {{value2}}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient"
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec",
+        "value": "Hi Dr. {{value1}}, please find attached my medical document: {{value2}}\n\n📄 View Document: {{value3}}\n\nThis document was shared securely through AuricRX Medical Coach."
+      },
+      {
+        "key": "ui.hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5",
+        "value": "Hi Dr. {{value1}},\n\nPlease find attached my medical document: {{value2}}\n\n📄 View Document: {{value3}}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient"
+      },
+      {
+        "key": "ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta",
+        "value": "⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   npm start\n\n2. Check that port 4000 is available\n\n3. Verify server environment is configured"
+      },
+      {
+        "key": "ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP",
+        "value": "🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: cd server; npm start\n2. Check if running on port 4000\n3. Make sure firewall allows the connection"
+      }
+    ]
+  }
 }

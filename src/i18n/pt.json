@@ -3892,7 +3892,8 @@
     "unitLabels.Serving": "unitLabels.Serving",
     "unitLabels.Servings": "unitLabels.Servings",
     "unitLabels.Dose": "unitLabels.Dose",
-    "unitLabels.Doses": "unitLabels.Doses"
+    "unitLabels.Doses": "unitLabels.Doses",
+    "medications.quantityUnit": "medications.quantityUnit"
   },
   "countryLabels": {
     "JP": "🇯🇵 Japão",
