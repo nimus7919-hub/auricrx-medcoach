@@ -39,7 +39,9 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
     return HERBS.filter(herb => !term || Object.values(herb.names).some(name => normalize(name).includes(term)) ||
       normalize(herb.key.replace(/_/g, ' ')).includes(term));
   }, [query]);
-  const matches = useMemo(() => selected ? findHerbInteractions(selected.key, medications) : [], [selected, medications]);
+  // REMOVED: Automatic herb-medication interaction checking (COFEPRIS compliance)
+  // Personalized checking replaced with static reference information
+  const matches = [];
   const missingIngredients = medications.some(med => med && !getMedicationIngredients(med).length);
 
   const openSource = url => { void Linking.openURL(url).catch(() => {}); };
@@ -162,7 +164,8 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 </>}
                 <Text style={styles.body}>{tr('generalPrecaution')}</Text>
                 {sourceLink(GENERAL_SOURCE)}
-                {getRegion() !== 'US' && <>
+                {/* REMOVED: Personalized herb-medication matching (COFEPRIS compliance) */}
+                {getRegion() !== 'US' && false && <>
                 <Text style={styles.label}>{tr('personal')}</Text>
                 {matches.length ? matches.map((match, index) => <View key={index} style={styles.alert}>
                   <Text style={styles.body}>{tr('alert', {
