@@ -437,7 +437,15 @@
     "failedToShareToEmail": "Échec du partage avec le médecin par email",
     "failedToShareToWhatsApp": "Échec du partage avec le médecin par WhatsApp",
     "failedToShareRegularDocumentEmail": "Échec du partage du document par email",
-    "failedToShareRegularDocumentWhatsApp": "Échec du partage du document par WhatsApp"
+    "failedToShareRegularDocumentWhatsApp": "Échec du partage du document par WhatsApp",
+    "areYouSureDeleteDocument": "Êtes-vous sûr de vouloir supprimer ce document ?",
+    "document": "Document",
+    "documentUploadedSuccessfully": "Document téléchargé avec succès",
+    "failedToUploadDocument": "Échec du téléchargement du document",
+    "failedToWhatsApp": "Échec du partage avec le médecin via WhatsApp",
+    "grantCameraAccess": "Veuillez autoriser l'accès à la caméra.",
+    "grantCameraRollAccess": "Veuillez autoriser l'accès à votre photothèque.",
+    "permissionRequired": "Autorisation requise"
   },
   "adminProfile": {
     "title": "Profil Administrateur",
@@ -468,7 +476,8 @@
     "confirmDeletionMessage": "Êtes-vous absolument sûr ? Cela supprimera votre compte et toutes les données associées.",
     "yesDeleteForever": "Oui, Supprimer Définitivement",
     "accountDeleted": "Compte Supprimé",
-    "accountDeletedMessage": "Votre compte a été supprimé."
+    "accountDeletedMessage": "Votre compte a été supprimé.",
+    "adminProfileTitle": "Profil du compte"
   },
   "wallpaper": {
     "title": "Paramètres de Fond d'Écran",
@@ -663,7 +672,14 @@
     "diastolic": "Diastolic",
     "enterSystolic": "e.g., 120",
     "enterDiastolic": "e.g., 80",
-    "selectUnit": "Select Unit"
+    "selectUnit": "Select Unit",
+    "failedToExportMetrics": "Échec de l'exportation des métriques de santé",
+    "healthMetrics": "Métriques de santé",
+    "healthMetricsAdded": "Métriques de santé ajoutées",
+    "noMetricsMessage": "Enregistrez des métriques de santé avant d'exporter un rapport.",
+    "noMetricsToExport": "Aucune métrique à exporter",
+    "pleaseEnterSymptom": "Veuillez saisir un symptôme",
+    "sideEffectsRecorded": "Effets secondaires enregistrés"
   },
   "documents": {
     "title": "Documents",
@@ -689,7 +705,9 @@
     "details": {
       "origin": "Pays d'origine",
       "summary": "Résumé"
-    }
+    },
+    "noHerbsFound": "Aucune plante trouvée",
+    "searchHerbs": "Rechercher des plantes"
   },
   "medications": {
     "title": "Médicaments",
@@ -875,7 +893,11 @@
     "thursdayShort": "T",
     "fridayShort": "F",
     "saturdayShort": "S",
-    "sundayShort": "S"
+    "sundayShort": "S",
+    "enterLocationName": "Saisir le nom du lieu",
+    "reminderMessage": "Message de rappel",
+    "reminderMessagePrompt": "Saisir un message de rappel",
+    "smartNotifications": "Notifications intelligentes"
   },
   "pharmacies": {
     "title": "Pharmacies",
@@ -1003,7 +1025,8 @@
     "refresh": "Actualiser",
     "pastAppts": "Rendez-vous Passés",
     "call": "Appeler",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "doctorEmailAddress": "Adresse e-mail du médecin"
   },
   "settings": {
     "title": "Paramètres",
@@ -1388,7 +1411,8 @@
     "medical": "Medical",
     "profileSaved": "Profile Saved",
     "healthProfileSavedMessage": "Your health profile has been saved and will be used for personalized recommendations.",
-    "saveProfile": "Save Profile"
+    "saveProfile": "Save Profile",
+    "others": "Autres"
   },
   "subscriptionPlans": {
     "month": "MXN $79 par mois",
@@ -1628,7 +1652,8 @@
     "continueFree": "Continuer avec le forfait gratuit",
     "terms": "Conditions",
     "privacyNotice": "Avis de confidentialité",
-    "restorePurchases": "Restaurer les achats"
+    "restorePurchases": "Restaurer les achats",
+    "storeBillingNote": "La facturation est gérée via votre compte {{store}}. Nous ne traitons pas les paiements directement."
   },
   "renewalNotices": {
     "trialEnding": "Votre essai gratuit Pro se termine le {{date}}. Ce jour-là, vous serez facturé {{price}} (TVA incluse) sur votre compte {{store}}, puis chaque mois. Si vous ne souhaitez pas continuer, annulez avant le {{date}} : {{link}}.",

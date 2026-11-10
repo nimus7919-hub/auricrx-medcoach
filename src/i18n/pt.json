@@ -437,7 +437,15 @@
     "failedToShareToEmail": "Falha ao compartilhar com o médico por email",
     "failedToShareToWhatsApp": "Falha ao compartilhar com o médico por WhatsApp",
     "failedToShareRegularDocumentEmail": "Falha ao compartilhar documento por email",
-    "failedToShareRegularDocumentWhatsApp": "Falha ao compartilhar documento por WhatsApp"
+    "failedToShareRegularDocumentWhatsApp": "Falha ao compartilhar documento por WhatsApp",
+    "areYouSureDeleteDocument": "Tem certeza de que deseja excluir este documento?",
+    "document": "Documento",
+    "documentUploadedSuccessfully": "Documento enviado com sucesso",
+    "failedToUploadDocument": "Falha ao enviar documento",
+    "failedToWhatsApp": "Falha ao compartilhar com o médico via WhatsApp",
+    "grantCameraAccess": "Por favor, permita o acesso à câmera.",
+    "grantCameraRollAccess": "Por favor, permita o acesso à sua biblioteca de fotos.",
+    "permissionRequired": "Permissão necessária"
   },
   "adminProfile": {
     "title": "Perfil de Administrador",
@@ -468,7 +476,8 @@
     "confirmDeletionMessage": "Tem certeza absoluta? Isso excluirá sua conta e todos os dados associados.",
     "yesDeleteForever": "Sim, Excluir Para Sempre",
     "accountDeleted": "Conta Excluída",
-    "accountDeletedMessage": "Sua conta foi excluída."
+    "accountDeletedMessage": "Sua conta foi excluída.",
+    "adminProfileTitle": "Perfil da conta"
   },
   "wallpaper": {
     "title": "Configurações de Papel de Parede",
@@ -663,7 +672,14 @@
     "diastolic": "Diastolic",
     "enterSystolic": "e.g., 120",
     "enterDiastolic": "e.g., 80",
-    "selectUnit": "Select Unit"
+    "selectUnit": "Select Unit",
+    "failedToExportMetrics": "Falha ao exportar métricas de saúde",
+    "healthMetrics": "Métricas de saúde",
+    "healthMetricsAdded": "Métricas de saúde adicionadas",
+    "noMetricsMessage": "Registre métricas de saúde antes de exportar um relatório.",
+    "noMetricsToExport": "Nenhuma métrica para exportar",
+    "pleaseEnterSymptom": "Por favor, insira um sintoma",
+    "sideEffectsRecorded": "Efeitos colaterais registrados"
   },
   "documents": {
     "title": "Documentos",
@@ -689,7 +705,9 @@
     "details": {
       "origin": "País de Origem",
       "summary": "Resumo"
-    }
+    },
+    "noHerbsFound": "Nenhuma erva encontrada",
+    "searchHerbs": "Pesquisar ervas"
   },
   "medications": {
     "title": "Medicamentos",
@@ -875,7 +893,11 @@
     "thursdayShort": "T",
     "fridayShort": "F",
     "saturdayShort": "S",
-    "sundayShort": "S"
+    "sundayShort": "S",
+    "enterLocationName": "Digite o nome do local",
+    "reminderMessage": "Mensagem de lembrete",
+    "reminderMessagePrompt": "Digite uma mensagem de lembrete",
+    "smartNotifications": "Notificações inteligentes"
   },
   "pharmacies": {
     "title": "Farmácias",
@@ -1003,7 +1025,8 @@
     "refresh": "Atualizar",
     "pastAppts": "Consultas Passadas",
     "call": "Ligar",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "doctorEmailAddress": "Endereço de e-mail do médico"
   },
   "settings": {
     "title": "Configurações",
@@ -1388,7 +1411,8 @@
     "medical": "Medical",
     "profileSaved": "Profile Saved",
     "healthProfileSavedMessage": "Your health profile has been saved and will be used for personalized recommendations.",
-    "saveProfile": "Save Profile"
+    "saveProfile": "Save Profile",
+    "others": "Outros"
   },
   "subscriptionPlans": {
     "month": "MXN $79 por mês",
@@ -1587,7 +1611,8 @@
     "continueFree": "Continuar com o plano grátis",
     "terms": "Termos",
     "privacyNotice": "Aviso de Privacidade",
-    "restorePurchases": "Restaurar compras"
+    "restorePurchases": "Restaurar compras",
+    "storeBillingNote": "O faturamento é processado através da sua conta {{store}}. Não processamos pagamentos diretamente."
   },
   "renewalNotices": {
     "trialEnding": "Seu teste grátis do Pro termina em {{date}}. Nesse dia você será cobrado {{price}} (impostos incluídos) na sua conta {{store}}, e depois todo mês. Se não quiser continuar, cancele antes de {{date}}: {{link}}.",

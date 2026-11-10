@@ -431,7 +431,8 @@
     "medical": "医疗",
     "profileSaved": "档案已保存",
     "healthProfileSavedMessage": "你的健康档案已保存，将用于个性化建议。",
-    "saveProfile": "保存档案"
+    "saveProfile": "保存档案",
+    "others": "其他"
   },
   "medicalDocuments": {
     "title": "医疗文件",
@@ -518,7 +519,15 @@
     "failedToShareToEmail": "通过 Email 分享给医生失败",
     "failedToShareToWhatsApp": "通过 WhatsApp 分享给医生失败",
     "failedToShareRegularDocumentEmail": "通过 Email 分享文件失败",
-    "failedToShareRegularDocumentWhatsApp": "通过 WhatsApp 分享文件失败"
+    "failedToShareRegularDocumentWhatsApp": "通过 WhatsApp 分享文件失败",
+    "areYouSureDeleteDocument": "确定要删除此文档吗？",
+    "document": "文档",
+    "documentUploadedSuccessfully": "文档上传成功",
+    "failedToUploadDocument": "文档上传失败",
+    "failedToWhatsApp": "通过 WhatsApp 分享给医生失败",
+    "grantCameraAccess": "请允许访问相机。",
+    "grantCameraRollAccess": "请允许访问您的照片库。",
+    "permissionRequired": "需要权限"
   },
   "adminProfile": {
     "title": "管理员档案",
@@ -549,7 +558,8 @@
     "confirmDeletionMessage": "你确定吗？这将删除你的账户及其所有数据。",
     "yesDeleteForever": "是的，永久删除",
     "accountDeleted": "账户已删除",
-    "accountDeletedMessage": "你的账户已被删除。"
+    "accountDeletedMessage": "你的账户已被删除。",
+    "adminProfileTitle": "账户资料"
   },
   "wallpaper": {
     "title": "壁纸设置",
@@ -658,7 +668,14 @@
     "taken": "已服用",
     "missed": "漏服",
     "dayStreak": "连续天数",
-    "started": "已开始"
+    "started": "已开始",
+    "failedToExportMetrics": "健康指标导出失败",
+    "healthMetrics": "健康指标",
+    "healthMetricsAdded": "健康指标已添加",
+    "noMetricsMessage": "导出报告前请先记录健康指标。",
+    "noMetricsToExport": "没有可导出的指标",
+    "pleaseEnterSymptom": "请输入症状",
+    "sideEffectsRecorded": "副作用已记录"
   },
   "documents": {
     "title": "文件",
@@ -684,7 +701,9 @@
     "details": {
       "origin": "原产国",
       "summary": "概要"
-    }
+    },
+    "noHerbsFound": "未找到草药",
+    "searchHerbs": "搜索草药"
   },
   "medications": {
     "title": "药品",
@@ -870,7 +889,11 @@
       "capsules": "粒",
       "units": "单位",
       "pills": "丸/片"
-    }
+    },
+    "enterLocationName": "输入位置名称",
+    "reminderMessage": "提醒消息",
+    "reminderMessagePrompt": "输入提醒消息",
+    "smartNotifications": "智能通知"
   },
   "pharmacies": {
     "title": "药房",
@@ -998,7 +1021,8 @@
     "refresh": "刷新",
     "pastAppts": "过往预约",
     "call": "拨打",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "doctorEmailAddress": "医生电子邮件地址"
   },
   "settings": {
     "title": "设置",
@@ -2275,7 +2299,8 @@
     "continueFree": "继续使用免费计划",
     "terms": "条款",
     "privacyNotice": "隐私声明",
-    "restorePurchases": "恢复购买"
+    "restorePurchases": "恢复购买",
+    "storeBillingNote": "账单通过您的 {{store}} 账户处理。我们不直接处理付款。"
   },
   "renewalNotices": {
     "trialEnding": "您的Pro免费试用将于{{date}}结束。当天将从您的{{store}}账户扣款{{price}}（含税），此后每月扣款。如不想继续，请在{{date}}前取消：{{link}}。",

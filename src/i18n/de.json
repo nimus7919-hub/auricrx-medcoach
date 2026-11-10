@@ -431,7 +431,8 @@
     "medical": "Medizinisch",
     "profileSaved": "Profil gespeichert",
     "healthProfileSavedMessage": "Dein Profil wurde gespeichert und für Empfehlungen verwendet.",
-    "saveProfile": "Profil speichern"
+    "saveProfile": "Profil speichern",
+    "others": "Andere"
   },
   "medicalDocuments": {
     "title": "Medizinische Dokumente",
@@ -518,7 +519,15 @@
     "failedToShareToEmail": "Teilen an Arzt per E-Mail fehlgeschlagen",
     "failedToShareToWhatsApp": "Teilen an Arzt per WhatsApp fehlgeschlagen",
     "failedToShareRegularDocumentEmail": "Teilen per E-Mail fehlgeschlagen",
-    "failedToShareRegularDocumentWhatsApp": "Teilen per WhatsApp fehlgeschlagen"
+    "failedToShareRegularDocumentWhatsApp": "Teilen per WhatsApp fehlgeschlagen",
+    "areYouSureDeleteDocument": "Möchten Sie dieses Dokument wirklich löschen?",
+    "document": "Dokument",
+    "documentUploadedSuccessfully": "Dokument erfolgreich hochgeladen",
+    "failedToUploadDocument": "Fehler beim Hochladen des Dokuments",
+    "failedToWhatsApp": "Fehler beim Teilen mit Arzt über WhatsApp",
+    "grantCameraAccess": "Bitte erlauben Sie den Kamerazugriff.",
+    "grantCameraRollAccess": "Bitte erlauben Sie den Zugriff auf Ihre Fotobibliothek.",
+    "permissionRequired": "Berechtigung erforderlich"
   },
   "adminProfile": {
     "title": "Admin-Profil",
@@ -549,7 +558,8 @@
     "confirmDeletionMessage": "Bist du sicher? Dies wird dein Konto und alle Daten löschen.",
     "yesDeleteForever": "Ja, dauerhaft löschen",
     "accountDeleted": "Konto gelöscht",
-    "accountDeletedMessage": "Dein Konto wurde gelöscht."
+    "accountDeletedMessage": "Dein Konto wurde gelöscht.",
+    "adminProfileTitle": "Kontoprofil"
   },
   "wallpaper": {
     "title": "Hintergrundbild",
@@ -658,7 +668,14 @@
     "taken": "Eingenommen",
     "missed": "Vergessen",
     "dayStreak": "Tage in Folge",
-    "started": "Gestartet"
+    "started": "Gestartet",
+    "failedToExportMetrics": "Fehler beim Export von Gesundheitsmetriken",
+    "healthMetrics": "Gesundheitsmetriken",
+    "healthMetricsAdded": "Gesundheitsmetriken hinzugefügt",
+    "noMetricsMessage": "Erfassen Sie Gesundheitsmetriken, bevor Sie einen Bericht exportieren.",
+    "noMetricsToExport": "Keine Metriken zum Exportieren",
+    "pleaseEnterSymptom": "Bitte geben Sie ein Symptom ein",
+    "sideEffectsRecorded": "Nebenwirkungen erfasst"
   },
   "documents": {
     "title": "Dokumente",
@@ -684,7 +701,9 @@
     "details": {
       "origin": "Herkunft",
       "summary": "Kurzinfo"
-    }
+    },
+    "noHerbsFound": "Keine Kräuter gefunden",
+    "searchHerbs": "Kräuter suchen"
   },
   "medications": {
     "title": "Medikamente",
@@ -870,7 +889,11 @@
       "capsules": "Kapseln",
       "units": "Einheiten",
       "pills": "Tabletten"
-    }
+    },
+    "enterLocationName": "Ortsnamen eingeben",
+    "reminderMessage": "Erinnerungsnachricht",
+    "reminderMessagePrompt": "Erinnerungsnachricht eingeben",
+    "smartNotifications": "Intelligente Benachrichtigungen"
   },
   "pharmacies": {
     "title": "Apotheken",
@@ -998,7 +1021,8 @@
     "refresh": "Aktualisieren",
     "pastAppts": "Vergangene",
     "call": "Anrufen",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "doctorEmailAddress": "E-Mail-Adresse des Arztes"
   },
   "settings": {
     "title": "Einstellungen",
@@ -1542,7 +1566,8 @@
     "continueFree": "Mit kostenlosem Plan fortfahren",
     "terms": "Bedingungen",
     "privacyNotice": "Datenschutzhinweis",
-    "restorePurchases": "Käufe wiederherstellen"
+    "restorePurchases": "Käufe wiederherstellen",
+    "storeBillingNote": "Die Abrechnung erfolgt über Ihr {{store}}-Konto. Wir verarbeiten keine Zahlungen direkt."
   },
   "renewalNotices": {
     "trialEnding": "Ihre kostenlose Pro-Testversion endet am {{date}}. An diesem Tag werden Ihnen {{price}} (MwSt. inbegriffen) auf Ihr {{store}}-Konto berechnet, dann jeden Monat. Wenn Sie nicht fortfahren möchten, kündigen Sie vor dem {{date}}: {{link}}.",
