@@ -47,6 +47,7 @@ export const PREMIUM_FEATURES = {
   FAMILY_CIRCLE_MULTIPLE_CAREGIVERS: true, // Multiple caregivers sharing one member
   FAMILY_CIRCLE_SHARE_SUMMARY: true, // WhatsApp/share-sheet summaries
   FAMILY_CIRCLE_CLOUD_SYNC: true, // Cloud sync across devices
+  FAMILY_DOCUMENTS: true, // Per-member document folders (read-only after trial expires)
   
   // Location-based searches (paid APIs)
   PHARMACY_SEARCH: true,

@@ -19,6 +19,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
     viewMeds: false,
     editDoses: false,
     receiveAlerts: false,
+    shareDocuments: false, // Family Documents: OFF by default
   });
   const [accepting, setAccepting] = useState(false);
 
@@ -147,6 +148,20 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
             />
             <DynamicText type="card" style={[styles.permissionLabel, { color: getCardTextColor() }]}>
               {t('familyCircle.permReceiveAlerts')}
+            </DynamicText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.permissionRow}
+            onPress={() => togglePermission('shareDocuments')}
+          >
+            <MaterialIcons
+              name={permissions.shareDocuments ? 'check-box' : 'check-box-outline-blank'}
+              size={24}
+              color={permissions.shareDocuments ? getAccentColor() : getCardTextColor()}
+            />
+            <DynamicText type="card" style={[styles.permissionLabel, { color: getCardTextColor() }]}>
+              {t('familyCircle.permShareDocuments')}
             </DynamicText>
           </TouchableOpacity>
         </View>

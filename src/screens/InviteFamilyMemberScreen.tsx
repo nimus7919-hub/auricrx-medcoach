@@ -25,6 +25,7 @@ export default function InviteFamilyMemberScreen({
     viewMeds: false,
     editDoses: false,
     receiveAlerts: false,
+    shareDocuments: false, // Family Documents: OFF by default
   });
   const [generating, setGenerating] = useState(false);
 
@@ -127,6 +128,20 @@ export default function InviteFamilyMemberScreen({
             </TouchableOpacity>
 
             <TouchableOpacity
+              style={styles.permissionRow}
+              onPress={() => togglePermission('shareDocuments')}
+            >
+              <MaterialIcons
+                name={permissions.shareDocuments ? 'check-box' : 'check-box-outline-blank'}
+                size={24}
+                color={permissions.shareDocuments ? getAccentColor() : getCardTextColor()}
+              />
+              <DynamicText type="card" style={[styles.permissionLabel, { color: getCardTextColor() }]}>
+                {t('familyCircle.permShareDocuments')}
+              </DynamicText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={[styles.generateButton, { backgroundColor: getAccentColor() }]}
               onPress={handleGenerateInvite}
               disabled={generating}
@@ -151,7 +166,7 @@ export default function InviteFamilyMemberScreen({
               </View>
 
               <DynamicText type="card" style={[styles.helperText, { color: getCardTextColor() }]}>
-                Permissions: {permissions.viewMeds ? '📋 ' : ''}{permissions.editDoses ? '✓ ' : ''}{permissions.receiveAlerts ? '🔔 ' : ''}
+                Permissions: {permissions.viewMeds ? '📋 ' : ''}{permissions.editDoses ? '✓ ' : ''}{permissions.receiveAlerts ? '🔔 ' : ''}{permissions.shareDocuments ? '📄 ' : ''}
               </DynamicText>
             </View>
 

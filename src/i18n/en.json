@@ -3927,11 +3927,12 @@
     "weeklySummary": "Weekly Summary",
     "shareConsentTitle": "Share Health Information",
     "shareConsentMessage": "You are about to share health information for a family member. This consent is valid for 7 days.",
-    "grantConsent": "I Consent to Share"
+    "grantConsent": "I Consent to Share",
+    "permShareDocuments": "See and add documents in their Family Documents folder"
   },
   "prevention": {
     "title": "Prevention & Checkup Planner",
-    "description": "Schedule yearly screenings, checkups, and vaccine reminders. These are reminders only and do not assess your individual risk.",
+    "description": "Description (optional)",
     "disclaimer": "Templates provide general guidance based on public health guidelines. They do not replace your doctor's recommendations or assess whether you personally need a test.",
     "fromTemplate": "From Template",
     "addCustom": "Add Custom",
@@ -3941,7 +3942,6 @@
     "selectTemplate": "Select a Template",
     "scheduleCheckup": "Schedule Checkup",
     "checkupName": "Checkup Name",
-    "description": "Description (optional)",
     "date": "Date",
     "enterName": "Please enter a checkup name",
     "markCompleted": "Mark as Completed",
@@ -3976,41 +3976,7 @@
     }
   },
   "labOrganizer": {
-    "title": "Lab & Document Organizer",
-    "documents": "Documents",
-    "documentsDescription": "Your scanned medical documents are here. Tag them and organize by family member.",
-    "noDocuments": "No documents added yet. Use the Documents feature to scan or add files.",
-    "documentsInfo": "Note: Documents added through the main Documents screen will appear here once you tag them.",
-    "labValues": "Lab Values",
-    "values": "Values",
-    "labValuesDescription": "Manually enter lab results to track trends over time.",
-    "noLabValues": "No lab values entered yet.",
-    "addLabValue": "Add Lab Value",
-    "testName": "Test Name (e.g., Glucose, Hemoglobin)",
-    "value": "Value",
-    "unit": "Unit (e.g., mg/dL, g/dL)",
-    "date": "Date",
-    "enterTestAndValue": "Please enter both test name and value",
-    "deleteLabValue": "Delete this lab value?",
-    "noInterpretation": "⚠️ This app does NOT interpret lab results, flag abnormal values, or provide reference ranges. Share your results with your doctor.",
-    "glossary": "Lab Glossary",
-    "glossaryDescription": "Plain-language explanations of common lab tests.",
-    "glossaryDisclaimer": "For educational purposes only. Does not interpret your specific results.",
-    "doctorQuestions": "Questions for My Doctor",
-    "questions": "Questions",
-    "doctorQuestionsDescription": "Keep a list of questions to ask during your next appointment.",
-    "noQuestions": "No questions added yet.",
-    "addQuestion": "Add Question",
-    "questionPlaceholder": "What do you want to ask your doctor?",
-    "enterQuestion": "Please enter a question",
-    "deleteQuestion": "Delete this question?",
-    "types": {
-      "lab": "Lab",
-      "prescription": "Prescription",
-      "visit": "Visit",
-      "imaging": "Imaging",
-      "other": "Other"
-    }
+    "banner": "Here you can store and organize your results. The app doesn't interpret results or tell you whether a value is normal. Take them to your doctor."
   },
   "dailyHabits": {
     "title": "Daily Habits",
@@ -4081,9 +4047,6 @@
     "fewHumanStudies": "Few human studies",
     "footer": "According to {{source}}, checked {{date}}. Evidence describes what has been studied, not whether it will work for you. Plants and supplements can interact with medicines; ask your doctor or pharmacist."
   },
-  "labOrganizer": {
-    "banner": "Here you can store and organize your results. The app doesn't interpret results or tell you whether a value is normal. Take them to your doctor."
-  },
   "subscription": {
     "proTitle": "AuricRX Pro",
     "includes": "Includes: AI health-information assistant, Family Circle, pharmacy and lab search, Medicine Lookup, optional cloud backup and device sync.",
@@ -4102,5 +4065,33 @@
   "renewalNotices": {
     "trialEnding": "Your free Pro trial ends on {{date}}. That day you'll be charged {{price}} (VAT included) to your {{store}} account, then every month. If you don't want to continue, cancel before {{date}}: {{link}}.",
     "renewal": "Your Pro plan renews on {{date}} for {{price}} (VAT included). You can cancel with no penalty: {{link}}."
+  },
+  "familyDocuments": {
+    "title": "Family Documents",
+    "description": "Each family member has their own document folder. Select a member to view or add documents.",
+    "familyMembers": "Family Members",
+    "noMembers": "No family members yet. Add members in Family Circle first.",
+    "memberFolderDescription": "Documents for this family member. Scan or photo prescriptions, lab results, vaccines, insurance cards, and more.",
+    "documents": "Documents",
+    "noDocuments": "No documents yet.",
+    "addDocument": "Add Document",
+    "nameRequired": "Please enter a document name",
+    "photoPermissionRequired": "Photo permission required to add documents",
+    "documentAdded": "Document added",
+    "deleteDocument": "Delete Document",
+    "deleteConfirm": "Are you sure you want to delete this document?",
+    "export": "Export",
+    "exportSuccess": "Documents Exported",
+    "exportDetails": "Documents exported as JSON",
+    "premiumRequired": "Premium Required",
+    "addRequiresPremium": "Adding or editing documents requires an active Premium subscription. You can still view, export, and delete existing documents.",
+    "readOnlyAccess": "Premium expired. You can view, export, and delete documents, but cannot add new ones.",
+    "categories": {
+      "prescription": "Prescription",
+      "lab_result": "Lab Result",
+      "vaccine": "Vaccine",
+      "insurance": "Insurance",
+      "other": "Other"
+    }
   }
 }

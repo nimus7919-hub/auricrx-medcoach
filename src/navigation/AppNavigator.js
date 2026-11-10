@@ -30,6 +30,7 @@ import PreventionPlannerScreen from '../screens/PreventionPlannerScreen';
 import LabDocumentOrganizerScreen from '../screens/LabDocumentOrganizerScreen';
 import DailyHabitsScreen from '../screens/DailyHabitsScreen';
 import FamilyCircleScreen from '../screens/FamilyCircleScreen';
+import FamilyDocumentsScreen from '../screens/FamilyDocumentsScreen';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
@@ -66,6 +67,7 @@ export default function createAppNavigator(getScope) {
     route === 'lab-organizer' ? <LabDocumentOrganizerScreen onClose={() => setRoute('dashboard')} /> :
     route === 'daily-habits' ? <DailyHabitsScreen onClose={() => setRoute('dashboard')} /> :
     route === 'family-circle' ? <FamilyCircleScreen onClose={() => setRoute('dashboard')} /> :
+    route === 'family-documents' ? <FamilyDocumentsScreen onClose={() => setRoute('dashboard')} /> :
      <Dashboard />);
 };
 }

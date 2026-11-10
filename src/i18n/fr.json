@@ -2052,5 +2052,36 @@
     "mx": "Mexique",
     "title": "Région",
     "us": "États-Unis"
+  },
+  "familyDocuments": {
+    "title": "Family Documents",
+    "description": "Each family member has their own document folder. Select a member to view or add documents.",
+    "familyMembers": "Family Members",
+    "noMembers": "No family members yet. Add members in Family Circle first.",
+    "memberFolderDescription": "Documents for this family member. Scan or photo prescriptions, lab results, vaccines, insurance cards, and more.",
+    "documents": "Documents",
+    "noDocuments": "No documents yet.",
+    "addDocument": "Add Document",
+    "nameRequired": "Please enter a document name",
+    "photoPermissionRequired": "Photo permission required to add documents",
+    "documentAdded": "Document added",
+    "deleteDocument": "Delete Document",
+    "deleteConfirm": "Are you sure you want to delete this document?",
+    "export": "Export",
+    "exportSuccess": "Documents Exported",
+    "exportDetails": "Documents exported as JSON",
+    "premiumRequired": "Premium Required",
+    "addRequiresPremium": "Adding or editing documents requires an active Premium subscription. You can still view, export, and delete existing documents.",
+    "readOnlyAccess": "Premium expired. You can view, export, and delete documents, but cannot add new ones.",
+    "categories": {
+      "prescription": "Prescription",
+      "lab_result": "Lab Result",
+      "vaccine": "Vaccine",
+      "insurance": "Insurance",
+      "other": "Other"
+    }
+  },
+  "familyCircle": {
+    "permShareDocuments": "See and add documents in their Family Documents folder"
   }
 }
