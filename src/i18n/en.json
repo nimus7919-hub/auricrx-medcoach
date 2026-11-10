@@ -1044,6 +1044,8 @@
     "useDeviceSetting": "Use device setting",
     "twelveHour": "12-hour (AM/PM)",
     "twentyFourHour": "24-hour",
+    "about": "About & Legal",
+    "disclaimerNote": "This app is for general information and reminders only. Always consult a licensed healthcare provider.",
     "preview": "Preview",
     "pushNotifications": "Push Notifications",
     "emailNotifications": "Email Notifications",

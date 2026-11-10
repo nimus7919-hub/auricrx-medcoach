@@ -194,6 +194,17 @@ export default function createSettings(getScope) {
         </CollapsibleSection>
         
         <TouchableOpacity onPress={() => setPrivacyOpen(true)} style={{ padding: 16 }}><Text style={{ color: theme.text }}>{uiI18n.t("localized.Settings.text189")}</Text></TouchableOpacity>
+        
+        <CollapsibleSection title={t('settings.about') || 'About'} sectionKey="about" onToggle={toggleSection}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+            <DynamicText type="card" style={{ fontSize: 13, lineHeight: 20, marginBottom: 12 }}>
+              {t('usLegal.global')}
+            </DynamicText>
+            <DynamicText type="card" style={{ fontSize: 11, color: theme?.muted || '#888', fontStyle: 'italic' }}>
+              {t('settings.disclaimerNote') || 'This app is for general information and reminders only. Always consult a licensed healthcare provider.'}
+            </DynamicText>
+          </View>
+        </CollapsibleSection>
         <CollapsibleSection title={S.wallpaper} sectionKey="wallpaper" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <TouchableOpacity 
