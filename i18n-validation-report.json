@@ -1,84 +1,5 @@
 {
   "missing": {
-    "es": [
-      "activityUS.text1",
-      "activityUS.text2",
-      "activityUS.text3",
-      "activityUS.text4",
-      "activityUS.text5",
-      "activityUS.text6",
-      "activityUS.text7",
-      "activityUS.text8",
-      "activityUS.text9",
-      "activityUS.text10",
-      "activityUS.text11",
-      "activityUS.text12",
-      "activityUS.text13",
-      "activityUS.text14",
-      "activityUS.text15",
-      "activityUS.text16",
-      "activityUS.text17",
-      "activityUS.text18",
-      "activityUS.text19",
-      "activityUS.text20",
-      "activityUS.text21",
-      "activityUS.text22",
-      "activityUS.text23",
-      "activityUS.text24",
-      "activityUS.text25",
-      "activityUS.text26",
-      "activityUS.text27",
-      "activityUS.text28",
-      "activityUS.text29",
-      "activityUS.text30",
-      "activityUS.text31",
-      "activityUS.text32",
-      "activityUS.text33",
-      "activityUS.text34",
-      "activityUS.text35",
-      "activityUS.text36",
-      "usLegal.global",
-      "usLegal.ai",
-      "usLegal.crisis",
-      "usLegal.interactions",
-      "usLegal.herbs",
-      "usLegal.wearables",
-      "usLegal.recalls",
-      "usLegal.prices",
-      "usLegal.nadac",
-      "usLegal.nlm",
-      "usLegal.fda",
-      "usLegal.dailymed",
-      "usLegal.nppes",
-      "usLegal.costplus",
-      "usSmart.title",
-      "usSmart.back",
-      "usSmart.loading",
-      "usSmart.error",
-      "usSmart.local",
-      "usSmart.refill",
-      "usSmart.refillDetail",
-      "usSmart.lead",
-      "usSmart.quantity",
-      "usSmart.units",
-      "usSmart.timing",
-      "usSmart.timingDetail",
-      "usSmart.suggestion",
-      "usSmart.accept",
-      "usSmart.dismiss",
-      "usSmart.quiet",
-      "usSmart.from",
-      "usSmart.until",
-      "usSmart.save",
-      "usSmart.invalidTime",
-      "usSmart.notifications",
-      "usSmart.permission",
-      "usSmart.denied",
-      "usSmart.inventoryTitle",
-      "usSmart.inventoryBody",
-      "usOnboarding.change",
-      "usOnboarding.continue"
-    ],
     "fr": [
       "navigation.pressBackAgainToExit",
       "ai.recordSymptom",
@@ -2297,39 +2218,7 @@
       "prevention.templates.dentalCheckupDesc",
       "prevention.templates.eyeExam",
       "prevention.templates.eyeExamDesc",
-      "labOrganizer.title",
-      "labOrganizer.documents",
-      "labOrganizer.documentsDescription",
-      "labOrganizer.noDocuments",
-      "labOrganizer.documentsInfo",
-      "labOrganizer.labValues",
-      "labOrganizer.values",
-      "labOrganizer.labValuesDescription",
-      "labOrganizer.noLabValues",
-      "labOrganizer.addLabValue",
-      "labOrganizer.testName",
-      "labOrganizer.value",
-      "labOrganizer.unit",
-      "labOrganizer.date",
-      "labOrganizer.enterTestAndValue",
-      "labOrganizer.deleteLabValue",
-      "labOrganizer.noInterpretation",
-      "labOrganizer.glossary",
-      "labOrganizer.glossaryDescription",
-      "labOrganizer.glossaryDisclaimer",
-      "labOrganizer.doctorQuestions",
-      "labOrganizer.questions",
-      "labOrganizer.doctorQuestionsDescription",
-      "labOrganizer.noQuestions",
-      "labOrganizer.addQuestion",
-      "labOrganizer.questionPlaceholder",
-      "labOrganizer.enterQuestion",
-      "labOrganizer.deleteQuestion",
-      "labOrganizer.types.lab",
-      "labOrganizer.types.prescription",
-      "labOrganizer.types.visit",
-      "labOrganizer.types.imaging",
-      "labOrganizer.types.other",
+      "labOrganizer.banner",
       "dailyHabits.title",
       "dailyHabits.today",
       "dailyHabits.todayDescription",
@@ -2387,7 +2276,26 @@
       "privacy.deleteSuccess",
       "privacy.deleteFailed",
       "privacy.deleting",
-      "privacy.disclaimer"
+      "privacy.disclaimer",
+      "plantBadges.evidenceLimited",
+      "plantBadges.evidenceInsufficient",
+      "plantBadges.evidenceMixed",
+      "plantBadges.fewHumanStudies",
+      "plantBadges.footer",
+      "subscription.proTitle",
+      "subscription.includes",
+      "subscription.trialPrice",
+      "subscription.autoCharge",
+      "subscription.reminderNotice",
+      "subscription.cancelAnytime",
+      "subscription.freeForever",
+      "subscription.startTrial",
+      "subscription.continueFree",
+      "subscription.terms",
+      "subscription.privacyNotice",
+      "subscription.restorePurchases",
+      "renewalNotices.trialEnding",
+      "renewalNotices.renewal"
     ],
     "de": [
       "navigation.pressBackAgainToExit",
@@ -4607,39 +4515,7 @@
       "prevention.templates.dentalCheckupDesc",
       "prevention.templates.eyeExam",
       "prevention.templates.eyeExamDesc",
-      "labOrganizer.title",
-      "labOrganizer.documents",
-      "labOrganizer.documentsDescription",
-      "labOrganizer.noDocuments",
-      "labOrganizer.documentsInfo",
-      "labOrganizer.labValues",
-      "labOrganizer.values",
-      "labOrganizer.labValuesDescription",
-      "labOrganizer.noLabValues",
-      "labOrganizer.addLabValue",
-      "labOrganizer.testName",
-      "labOrganizer.value",
-      "labOrganizer.unit",
-      "labOrganizer.date",
-      "labOrganizer.enterTestAndValue",
-      "labOrganizer.deleteLabValue",
-      "labOrganizer.noInterpretation",
-      "labOrganizer.glossary",
-      "labOrganizer.glossaryDescription",
-      "labOrganizer.glossaryDisclaimer",
-      "labOrganizer.doctorQuestions",
-      "labOrganizer.questions",
-      "labOrganizer.doctorQuestionsDescription",
-      "labOrganizer.noQuestions",
-      "labOrganizer.addQuestion",
-      "labOrganizer.questionPlaceholder",
-      "labOrganizer.enterQuestion",
-      "labOrganizer.deleteQuestion",
-      "labOrganizer.types.lab",
-      "labOrganizer.types.prescription",
-      "labOrganizer.types.visit",
-      "labOrganizer.types.imaging",
-      "labOrganizer.types.other",
+      "labOrganizer.banner",
       "dailyHabits.title",
       "dailyHabits.today",
       "dailyHabits.todayDescription",
@@ -4697,7 +4573,26 @@
       "privacy.deleteSuccess",
       "privacy.deleteFailed",
       "privacy.deleting",
-      "privacy.disclaimer"
+      "privacy.disclaimer",
+      "plantBadges.evidenceLimited",
+      "plantBadges.evidenceInsufficient",
+      "plantBadges.evidenceMixed",
+      "plantBadges.fewHumanStudies",
+      "plantBadges.footer",
+      "subscription.proTitle",
+      "subscription.includes",
+      "subscription.trialPrice",
+      "subscription.autoCharge",
+      "subscription.reminderNotice",
+      "subscription.cancelAnytime",
+      "subscription.freeForever",
+      "subscription.startTrial",
+      "subscription.continueFree",
+      "subscription.terms",
+      "subscription.privacyNotice",
+      "subscription.restorePurchases",
+      "renewalNotices.trialEnding",
+      "renewalNotices.renewal"
     ],
     "pt": [
       "navigation.pressBackAgainToExit",
@@ -6921,39 +6816,7 @@
       "prevention.templates.dentalCheckupDesc",
       "prevention.templates.eyeExam",
       "prevention.templates.eyeExamDesc",
-      "labOrganizer.title",
-      "labOrganizer.documents",
-      "labOrganizer.documentsDescription",
-      "labOrganizer.noDocuments",
-      "labOrganizer.documentsInfo",
-      "labOrganizer.labValues",
-      "labOrganizer.values",
-      "labOrganizer.labValuesDescription",
-      "labOrganizer.noLabValues",
-      "labOrganizer.addLabValue",
-      "labOrganizer.testName",
-      "labOrganizer.value",
-      "labOrganizer.unit",
-      "labOrganizer.date",
-      "labOrganizer.enterTestAndValue",
-      "labOrganizer.deleteLabValue",
-      "labOrganizer.noInterpretation",
-      "labOrganizer.glossary",
-      "labOrganizer.glossaryDescription",
-      "labOrganizer.glossaryDisclaimer",
-      "labOrganizer.doctorQuestions",
-      "labOrganizer.questions",
-      "labOrganizer.doctorQuestionsDescription",
-      "labOrganizer.noQuestions",
-      "labOrganizer.addQuestion",
-      "labOrganizer.questionPlaceholder",
-      "labOrganizer.enterQuestion",
-      "labOrganizer.deleteQuestion",
-      "labOrganizer.types.lab",
-      "labOrganizer.types.prescription",
-      "labOrganizer.types.visit",
-      "labOrganizer.types.imaging",
-      "labOrganizer.types.other",
+      "labOrganizer.banner",
       "dailyHabits.title",
       "dailyHabits.today",
       "dailyHabits.todayDescription",
@@ -7011,7 +6874,26 @@
       "privacy.deleteSuccess",
       "privacy.deleteFailed",
       "privacy.deleting",
-      "privacy.disclaimer"
+      "privacy.disclaimer",
+      "plantBadges.evidenceLimited",
+      "plantBadges.evidenceInsufficient",
+      "plantBadges.evidenceMixed",
+      "plantBadges.fewHumanStudies",
+      "plantBadges.footer",
+      "subscription.proTitle",
+      "subscription.includes",
+      "subscription.trialPrice",
+      "subscription.autoCharge",
+      "subscription.reminderNotice",
+      "subscription.cancelAnytime",
+      "subscription.freeForever",
+      "subscription.startTrial",
+      "subscription.continueFree",
+      "subscription.terms",
+      "subscription.privacyNotice",
+      "subscription.restorePurchases",
+      "renewalNotices.trialEnding",
+      "renewalNotices.renewal"
     ],
     "zh": [
       "navigation.pressBackAgainToExit",
@@ -8644,39 +8526,7 @@
       "prevention.templates.dentalCheckupDesc",
       "prevention.templates.eyeExam",
       "prevention.templates.eyeExamDesc",
-      "labOrganizer.title",
-      "labOrganizer.documents",
-      "labOrganizer.documentsDescription",
-      "labOrganizer.noDocuments",
-      "labOrganizer.documentsInfo",
-      "labOrganizer.labValues",
-      "labOrganizer.values",
-      "labOrganizer.labValuesDescription",
-      "labOrganizer.noLabValues",
-      "labOrganizer.addLabValue",
-      "labOrganizer.testName",
-      "labOrganizer.value",
-      "labOrganizer.unit",
-      "labOrganizer.date",
-      "labOrganizer.enterTestAndValue",
-      "labOrganizer.deleteLabValue",
-      "labOrganizer.noInterpretation",
-      "labOrganizer.glossary",
-      "labOrganizer.glossaryDescription",
-      "labOrganizer.glossaryDisclaimer",
-      "labOrganizer.doctorQuestions",
-      "labOrganizer.questions",
-      "labOrganizer.doctorQuestionsDescription",
-      "labOrganizer.noQuestions",
-      "labOrganizer.addQuestion",
-      "labOrganizer.questionPlaceholder",
-      "labOrganizer.enterQuestion",
-      "labOrganizer.deleteQuestion",
-      "labOrganizer.types.lab",
-      "labOrganizer.types.prescription",
-      "labOrganizer.types.visit",
-      "labOrganizer.types.imaging",
-      "labOrganizer.types.other",
+      "labOrganizer.banner",
       "dailyHabits.title",
       "dailyHabits.today",
       "dailyHabits.todayDescription",
@@ -8734,7 +8584,26 @@
       "privacy.deleteSuccess",
       "privacy.deleteFailed",
       "privacy.deleting",
-      "privacy.disclaimer"
+      "privacy.disclaimer",
+      "plantBadges.evidenceLimited",
+      "plantBadges.evidenceInsufficient",
+      "plantBadges.evidenceMixed",
+      "plantBadges.fewHumanStudies",
+      "plantBadges.footer",
+      "subscription.proTitle",
+      "subscription.includes",
+      "subscription.trialPrice",
+      "subscription.autoCharge",
+      "subscription.reminderNotice",
+      "subscription.cancelAnytime",
+      "subscription.freeForever",
+      "subscription.startTrial",
+      "subscription.continueFree",
+      "subscription.terms",
+      "subscription.privacyNotice",
+      "subscription.restorePurchases",
+      "renewalNotices.trialEnding",
+      "renewalNotices.renewal"
     ]
   },
   "extra": {
@@ -9031,113 +8900,22 @@
   "encodingIssues": {
     "de": [
       {
-        "key": "ai.placeholder",
-        "value": "Frage nach Medikamenten, Apothekenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "ai.aiThinking",
-        "value": "KI denkt nachâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
         "key": "ai.multipleSymptomsDescription",
-        "value": "Mehrere Symptome â€“ verschiedene Ursachen mÃ¶glich",
+        "value": "Mehrere Symptome â€“ verschiedene Ursachen möglich",
         "issues": [
           "Mojibake detected: â€"
         ]
       },
       {
         "key": "ai.potentialMildInteraction",
-        "value": "MÃ¶gliche leichte Wechselwirkung â€“ Nebenwirkungen beobachten",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "ai.checkingInteractions",
-        "value": "PrÃ¼fe Arzneimittel-Wechselwirkungen mit KIâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "medicalDocuments.uploading",
-        "value": "Wird hochgeladenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "adminProfile.processing",
-        "value": "Verarbeiteâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "wallpaper.loadingWallpapers",
-        "value": "HintergrÃ¼nde werden geladenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "documents.exporting",
-        "value": "Exportiertâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "herbs.search",
-        "value": "KrÃ¤uter suchenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "medications.searchingPharmacies",
-        "value": "Suche Apothekenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "supplements.searchSupplements",
-        "value": "Supplements suchenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "appointments.recording",
-        "value": "Aufnahme lÃ¤uftâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "appointments.searchPastAppointments",
-        "value": "Vergangene Termine suchenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "settings.initializing",
-        "value": "Initialisiereâ€¦",
+        "value": "Mögliche leichte Wechselwirkung â€“ Nebenwirkungen beobachten",
         "issues": [
           "Mojibake detected: â€"
         ]
       },
       {
         "key": "settings.pollenMessage",
-        "value": "Hohe Pollenkonzentration â€“ Allergiemedikation erwÃ¤gen",
+        "value": "Hohe Pollenkonzentration â€“ Allergiemedikation erwägen",
         "issues": [
           "Mojibake detected: â€"
         ]
@@ -9158,7 +8936,7 @@
       },
       {
         "key": "settings.airQualityMessage",
-        "value": "Schlechte LuftqualitÃ¤t â€“ Outdoor-AktivitÃ¤ten reduzieren",
+        "value": "Schlechte Luftqualität â€“ Outdoor-Aktivitäten reduzieren",
         "issues": [
           "Mojibake detected: â€"
         ]
@@ -9168,27 +8946,6 @@
         "value": "EspaÃ±ol",
         "issues": [
           "Mojibake detected: Ã±"
-        ]
-      },
-      {
-        "key": "common.loading",
-        "value": "Wird geladenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "common.loadingPharmacies",
-        "value": "Apotheken in der NÃ¤he werden geladenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
-        ]
-      },
-      {
-        "key": "common.loadingLabs",
-        "value": "Labore in der NÃ¤he werden geladenâ€¦",
-        "issues": [
-          "Mojibake detected: â€"
         ]
       },
       {
