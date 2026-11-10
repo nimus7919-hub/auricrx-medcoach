@@ -114,7 +114,7 @@
     "alfred": "Alfred, assistant IA en information de santé",
     "alfredIntro": "Je suis Alfred, votre chaleureux assistant IA en information de santé. Assistant IA. Je ne suis ni médecin ni professionnel de santé. Informations générales uniquement.",
     "mimi": "Mimi, guide bien-être avec IA",
-    "mimiIntro": "Je suis Mimi, votre guide bien-être IA pleine d’énergie ! Assistant IA. Je ne suis ni médecin ni professionnel de santé. Informations générales uniquement.",
+    "mimiIntro": "Je suis Mimi, votre guide bien-être IA pleine d'énergie ! Assistant IA. Je ne suis ni médecin ni professionnel de santé. Informations générales uniquement.",
     "pawlmer": "Pawlmer, ton compagnon de rappels",
     "pawlmerIntro": "Je suis Pawlmer, votre compagnon IA de rappels ! Une patte à la fois. Assistant IA. Je ne suis ni médecin ni professionnel de santé. Informations générales uniquement.",
     "aiThinking": "L'IA réfléchit...",
@@ -1133,7 +1133,7 @@
     "success": "Succès",
     "close": "Fermer",
     "back": "Retour",
-    "brand": "AuricRx",
+    "brand": "AuricRX",
     "send": "Envoyer",
     "stop": "Arrêter",
     "noData": "—",
@@ -1186,19 +1186,19 @@
     },
     "sanpablo": {
       "searchTitle": "Recherchez votre médicament",
-      "searchPlaceholder": "ex. aspirine 100 mg",
+      "searchPlaceholder": "ex. Aspirine 100 mg",
       "searchButton": "Rechercher",
       "sortBy": "Trier par",
       "price": "Prix",
       "distance": "Distance",
-      "sanpabloSection": "San pablo (avec prix)",
+      "sanpabloSection": "San Pablo (avec prix)",
       "nearbySection": "Pharmacies à proximité (toutes les chaînes)",
       "noResults": "Aucun résultat avec prix.",
       "noLocation": "Localisation indisponible ou aucun résultat.",
       "nearbyError": "Impossible de charger les pharmacies à proximité.",
       "productName": "Produit",
       "priceUnavailable": "Prix indisponible",
-      "chain": "Chaîne : pharmacie san pablo",
+      "chain": "Chaîne : Pharmacie San Pablo",
       "withPrice": "(avec prix)",
       "go": "Aller",
       "retry": "Réessayer"
@@ -1536,7 +1536,7 @@
       "text541": "Prix approximatif",
       "text544": "Aucun prix récent pour ce médicament.",
       "text546": "Référence nationale : aucune donnée pour votre état.",
-      "text550": "Impossible de charger les prix. veuillez réessayer."
+      "text550": "Impossible de charger les prix. Veuillez réessayer."
     },
     "SupplementRefillModal": {
       "localeMap": "fr-FR",
@@ -1680,7 +1680,7 @@
     "Pharmacies": {
       "refreshPharmacies": {
         "text32": "Activez les services de localisation pour trouver des pharmacies.",
-        "text47": "Impossible de charger les pharmacies. veuillez réessayer."
+        "text47": "Impossible de charger les pharmacies. Veuillez réessayer."
       },
       "text128": "Pharmacies à proximité - INEGI DENUE / magasins surveillés par PROFECO"
     },
@@ -1726,210 +1726,210 @@
         "item0": {
           "names": "Damiana",
           "details": {
-            "origin": "Mexique, sud-ouest des états-unis",
+            "origin": "Mexique, Sud-ouest des États-Unis",
             "summary": "Traditionnellement utilisée en médecine populaire pour les préoccupations digestives et liées à l'humeur."
           }
         },
         "item1": {
           "names": "Épazote",
           "details": {
-            "origin": "Mexique et amérique centrale",
+            "origin": "Mexique et Amérique Centrale",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item2": {
           "names": "Pissenlit",
           "details": {
-            "origin": "Mondial (utilisé au mexique, en amérique du nord, en chine)",
+            "origin": "Mondial (utilisé au Mexique, en Amérique du Nord, en Chine)",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item3": {
           "names": "Camomille",
           "details": {
-            "origin": "Europe, asie occidentale (largement utilisée dans le monde)",
+            "origin": "Mexique, Amérique Centrale",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item4": {
           "names": "Ail",
           "details": {
-            "origin": "Asie centrale (largement cultivé dans le monde)",
+            "origin": "Inde, Asie du Sud",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item5": {
           "names": "Brunelle commune",
           "details": {
-            "origin": "Amérique du Nord ; largement utilisée en médecine traditionnelle chinoise",
+            "origin": "Inde, Asie du Sud-Est",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item6": {
           "names": "Cúrcuma, turmeric, haldi",
           "details": {
-            "origin": "Mexique central",
+            "origin": "Inde, Asie du Sud",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item7": {
           "names": "Jengibre, ginger, adrak",
           "details": {
-            "origin": "Mexique",
+            "origin": "Asie du Sud-Est",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item8": {
           "names": "Feuille de laurier mexicain",
           "details": {
-            "origin": "Mexique",
+            "origin": "Asie de l'Est",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item9": {
           "names": "Armoise annuelle",
           "details": {
-            "origin": "Chine (médecine traditionnelle chinoise)",
+            "origin": "Régions tropicales du Monde",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item10": {
           "names": "Canela, cinnamon, dalchini",
           "details": {
-            "origin": "Afrique du Nord ; naturalisé au Mexique, aux États-Unis et en Chine",
+            "origin": "Sri Lanka",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item11": {
           "names": "Gingembre",
           "details": {
-            "origin": "Asie du sud-est ; largement utilisé dans le monde",
+            "origin": "Asie de l'Est",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item12": {
           "names": "Échinacée",
           "details": {
-            "origin": "Amérique du nord",
+            "origin": "Méditerranée",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item13": {
           "names": "Ginkgo",
           "details": {
-            "origin": "Chine ; introduit aux états-unis",
+            "origin": "Chine ; introduit aux États-Unis",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item14": {
           "names": "Notoginseng",
           "details": {
-            "origin": "Chine",
+            "origin": "Méditerranée",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item15": {
           "names": "Curcuma",
           "details": {
-            "origin": "Asie du sud-est ; utilisé dans le monde",
+            "origin": "Régions tempérées du Monde",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item16": {
           "names": "Romarin",
           "details": {
-            "origin": "Méditerranée ; largement utilisé au Mexique et aux États-Unis",
+            "origin": "Méditerranée",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item17": {
           "names": "Persil",
           "details": {
-            "origin": "Méditerranée ; utilisé dans le monde",
+            "origin": "Asie de l'Est",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item18": {
           "names": "Fenouil",
           "details": {
-            "origin": "Méditerranée ; adopté dans le monde",
+            "origin": "Europe, Afrique du Nord",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item19": {
           "names": "Romero, rosemary",
           "details": {
-            "origin": "Mexique",
+            "origin": "Méditerranée",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item20": {
           "names": "Origan mexicain",
           "details": {
-            "origin": "Mexique",
+            "origin": "Europe, Asie de l'Ouest",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item21": {
           "names": "Hinojo, fennel, saunf",
           "details": {
-            "origin": "Sud-ouest des états-unis ; mexique",
+            "origin": "Sud-ouest des États-Unis ; Mexique",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item22": {
           "names": "Salsepareille grise",
           "details": {
-            "origin": "Mexique, amérique centrale",
+            "origin": "Mexique, Amérique Centrale",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item23": {
           "names": "Souci mexicain",
           "details": {
-            "origin": "Mexique, guatemala",
+            "origin": "Asie du Sud-Est",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item24": {
           "names": "Ortiga, nettle, bichu buti",
           "details": {
-            "origin": "Mexique",
+            "origin": "Europe",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item25": {
           "names": "Herbe sucrée aztèque",
           "details": {
-            "origin": "Sud du mexique",
+            "origin": "Sud du Mexique",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item26": {
           "names": "Menthe coréenne",
           "details": {
-            "origin": "Chine, corée",
+            "origin": "Europe, Asie de l'Ouest",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item27": {
           "names": "Astragale",
           "details": {
-            "origin": "Chine",
+            "origin": "Amérique du Nord",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item28": {
           "names": "Réglisse",
           "details": {
-            "origin": "Chine",
+            "origin": "Europe",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
         "item29": {
           "names": "Ashwagandha, indian ginseng",
           "details": {
-            "origin": "Chine",
+            "origin": "Inde",
             "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
           }
         },
@@ -2057,7 +2057,7 @@
         "appointmentType": "Type de rendez-vous",
         "selectAppointmentType": "Sélectionner le type de rendez-vous",
         "doctorName": "Nom du médecin",
-        "doctorNamePlaceholder": "Par ex., dr. jean dupont",
+        "doctorNamePlaceholder": "Par ex., dr. Jean dupont",
         "specialty": "Spécialité",
         "specialtyPlaceholder": "Par ex., médecine générale, cardiologie",
         "phoneNumber": "Numéro de téléphone",
@@ -2074,7 +2074,7 @@
         "notesOptional": "Notes (facultatif)",
         "cancel": "Annuler",
         "titlePlaceholder": "Par ex., bilan annuel, prise de sang",
-        "locationPlaceholder": "Par ex., cabinet du dr. dupont, labcorp",
+        "locationPlaceholder": "Par ex., cabinet du dr. Dupont, labcorp",
         "datePlaceholder": "AAAA-MM-JJ",
         "timePlaceholder": "HH:MM (format 24 heures)",
         "notesPlaceholder": "Ajoutez des notes ou des instructions spéciales...",
@@ -2490,7 +2490,7 @@
     "noPagesYetScanOrUploadImages": "Aucune page — scannez ou téléversez des images.",
     "documentSaved": "Document enregistré",
     "saveFailed": "Échec de l'enregistrement",
-    "uploadOrScanToPdfAcceptedJpgPngPdf": "Téléverser ou scanner en PDF. accepté : JPG/PNG/PDF",
+    "uploadOrScanToPdfAcceptedJpgPngPdf": "Téléverser ou scanner en PDF. Accepté : JPG/PNG/PDF",
     "country": "Pays",
     "mexico": "Mexique",
     "unitedStates": "États-Unis",
@@ -2574,7 +2574,7 @@
     "pleaseCheckYourEmailIncludingSpamFolderAndClickTheVerificationLinkThenReturnHereToSignIn": "Veuillez vérifier votre e-mail (y compris le dossier spam) et cliquer sur le lien de vérification. Revenez ensuite ici pour vous connecter.",
     "backToSignIn": "Retour à la connexion",
     "continue": "Continuer",
-    "authenticationFailedPleaseTryAgain": "L'authentification a échoué. veuillez réessayer.",
+    "authenticationFailedPleaseTryAgain": "L'authentification a échoué. Veuillez réessayer.",
     "serverReturnedAnInvalidResponsePleaseTryAgainLater": "Le serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.",
     "aiError": "Erreur IA",
     "couldNotGetAnAnswerRightNow": "Impossible d'obtenir une réponse pour le moment.",
@@ -2770,7 +2770,7 @@
     "cannotOpenPdf": "❌ impossible d'ouvrir le PDF",
     "unableToOpenPdfFilePleaseMakeSureYouHaveAPdfViewerAppInstalled": "Impossible d'ouvrir le fichier PDF. Veuillez vous assurer d'avoir une application de visualisation PDF installée.",
     "pdfFileNotFoundPleaseTryUploadingAgain": "Fichier PDF introuvable. Veuillez essayer de le téléverser à nouveau.",
-    "failedToOpenPdfFilePleaseTryAgain": "Échec de l'ouverture du fichier PDF. veuillez réessayer.",
+    "failedToOpenPdfFilePleaseTryAgain": "Échec de l'ouverture du fichier PDF. Veuillez réessayer.",
     "openPdf": "📄 ouvrir PDF",
     "loadingImage": "📷 chargement de l'image...",
     "stopLoading": "⏰ arrêter le chargement",
@@ -2908,12 +2908,12 @@
     "privacyPolicy": "Politique de confidentialité",
     "uploadImagesPdfsOrScanDocumentsToPdfAcceptedJpgPngPdfMax10mb": "Téléversez images/PDF ou scannez documents vers PDF. Acceptés : JPG/PNG/PDF (max 10 Mo)",
     "unsupportedFileType": "Type de fichier non pris en charge",
-    "valueValueAcceptedJpgPngPdf": "{{value1}} ({{value2}}). acceptés : jpg, png, PDF",
+    "valueValueAcceptedJpgPngPdf": "{{value1}} ({{value2}}). Acceptés : jpg, png, PDF",
     "fileTooLarge": "Fichier trop volumineux",
-    "valueValuembMaxSize10mb": "{{value1}} ({{value2}} mo). taille max : 10 mo",
+    "valueValuembMaxSize10mb": "{{value1}} ({{value2}} mo). Taille max : 10 mo",
     "uploadImages": "Téléverser des images",
     "chooseJpgPngPhotos": "Choisir des photos jpg/png.",
-    "chooseExistingPdfDocumentsMax10mbPerFile": "Choisir des documents PDF existants. max 10 mo par fichier.",
+    "chooseExistingPdfDocumentsMax10mbPerFile": "Choisir des documents PDF existants. Max 10 mo par fichier.",
     "scanPdf": "Scanner → PDF",
     "useCameraToCapturePagesAndCreatePdf": "Utilisez la caméra pour capturer des pages et créer un PDF.",
     "popupBlocked": "Fenêtre contextuelle bloquée",
@@ -2960,8 +2960,8 @@
     "eachIdSideMustContainExactlyOnePage": "Chaque côté de la pièce d'identité doit contenir exactement une page",
     "actionItems": "Éléments d'action",
     "foundValueInteractionS": "{{value1}} interaction(s) trouvée(s) :",
-    "alreadyHaveAnAccountSignIn": "Vous avez déjà un compte ? se connecter",
-    "donTHaveAnAccountSignUp": "Vous n'avez pas de compte ? s'inscrire",
+    "alreadyHaveAnAccountSignIn": "Vous avez déjà un compte ? Se connecter",
+    "donTHaveAnAccountSignUp": "Vous n'avez pas de compte ? S'inscrire",
     "createAccount": "Créer un compte",
     "welcomeBack": "Bon retour",
     "phoneVerification": "Vérification téléphonique",
@@ -2971,7 +2971,7 @@
     "verifyYourPhoneNumberToContinue": "Vérifiez votre numéro de téléphone pour continuer",
     "sendingVerificationCode": "Envoi du code de vérification...",
     "authenticating": "Authentification...",
-    "donTHaveAnAccountSignUp_e7eacd": "Vous n'avez pas de compte ? inscrivez-vous",
+    "donTHaveAnAccountSignUp_e7eacd": "Vous n'avez pas de compte ? Inscrivez-vous",
     "alreadyHaveAnAccountSignIn_6603c2": "Vous avez déjà un compte ? Connectez-vous",
     "hide": "Masquer",
     "show": "Afficher",
@@ -2998,9 +2998,9 @@
     "pharmacyNotAvailable": "Pharmacie non disponible",
     "precioNoDisponible": "Prix non disponible",
     "precioAproximadoAl": "Prix approximatif au ",
-    "puedeVariarEnTienda": ". peut varier en magasin.",
+    "puedeVariarEnTienda": ". Peut varier en magasin.",
     "approximatePriceAsOf": "Prix approximatif au",
-    "mayVaryInStore": ". peut varier en magasin.",
+    "mayVaryInStore": ". Peut varier en magasin.",
     "sortByValue": "Trier par {{value1}}",
     "refreshPharmacies": "Actualiser les pharmacies",
     "helpUsImproveOurMedicationPriceDatabaseBySharingWhatYouFound": "Aidez-nous à améliorer notre base de données de prix des médicaments en partageant ce que vous avez trouvé :",
@@ -3008,7 +3008,7 @@
     "quantityPackageSize": "Quantité/Taille du paquet",
     "storeName": "Nom du magasin",
     "storeAddress": "Adresse du magasin",
-    "supplementNameEGVitaminD3": "Nom du complément (p. ex., vitamine d3)",
+    "supplementNameEGVitaminD3": "Nom du complément (p. Ex., vitamine d3)",
     "brandOptional": "Marque (facultatif)",
     "openDirectionsToValue_8b053a": "Ouvrir l'itinéraire vers {{value1}}",
     "sortByValue_3ebf1c": "Trier par {{value1}}",
@@ -3043,7 +3043,7 @@
     "couldNotAccessCamera": "Impossible d'accéder à la caméra",
     "sharingDocumentValue": "Partage du document : {{value1}}",
     "hereIsTheDocumentValue": "Voici le document :\n{{value1}}",
-    "failedToLoadPdfPleaseTryAgain": "Échec du chargement du PDF. veuillez réessayer.",
+    "failedToLoadPdfPleaseTryAgain": "Échec du chargement du PDF. Veuillez réessayer.",
     "failedToCreateCheckoutSession": "Échec de la création de la session de paiement",
     "boostsImmunity": "Renforce l'immunité",
     "reducesColdDuration": "Réduit la durée du rhume",
@@ -3075,7 +3075,7 @@
     "scannedDocument": "Document scanné",
     "failedToUploadPdf": "Échec du téléversement du PDF",
     "accountCreatedSuccessfully": "Compte créé avec succès !",
-    "notAuthenticatedPleaseSignInAgain": "Non authentifié. veuillez vous reconnecter.",
+    "notAuthenticatedPleaseSignInAgain": "Non authentifié. Veuillez vous reconnecter.",
     "serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport": "Erreur serveur : Réponse invalide du serveur. Veuillez réessayer plus tard ou contacter le support.",
     "iCouldNotFindAnAnswer": "Je n'ai pas pu trouver de réponse.",
     "failedToLoadPharmacies": "Échec du chargement des pharmacies",
@@ -3223,12 +3223,12 @@
     "passwordShouldBeAtLeast6Characters": "Le mot de passe doit comporter au moins 6 caractères",
     "noAccountFoundWithThisEmail": "Aucun compte trouvé avec cet e-mail",
     "incorrectPassword": "Mot de passe incorrect",
-    "tooManyAttemptsPleaseTryAgainLater": "Trop de tentatives. veuillez réessayer plus tard",
-    "networkErrorPleaseCheckYourConnection": "Erreur réseau. veuillez vérifier votre connexion",
+    "tooManyAttemptsPleaseTryAgainLater": "Trop de tentatives. Veuillez réessayer plus tard",
+    "networkErrorPleaseCheckYourConnection": "Erreur réseau. Veuillez vérifier votre connexion",
     "invalidPhoneNumberFormat": "Format de numéro de téléphone invalide",
     "invalidVerificationCode": "Code de vérification invalide",
     "verificationCodeHasExpired": "Le code de vérification a expiré",
-    "anErrorOccurredPleaseTryAgain": "Une erreur s'est produite. veuillez réessayer",
+    "anErrorOccurredPleaseTryAgain": "Une erreur s'est produite. Veuillez réessayer",
     "user": "Utilisateur",
     "userDataNotFound": "Données utilisateur introuvables",
     "phoneVerificationRequiresNativeImplementationPleaseVerifyYourPhoneNumberLaterInSettings": "La vérification téléphonique nécessite une implémentation native. Veuillez vérifier votre numéro de téléphone ultérieurement dans les paramètres.",
@@ -3329,20 +3329,20 @@
     "bloodPressureIsLowMonitorForSymptoms": "📉 La tension artérielle est basse. Surveillez les symptômes.",
     "bloodPressureIsWithinNormalRange": "✅ la tension artérielle est dans la plage normale.",
     "weightIsTrendingUpwardMonitorDietaryHabits": "📈 Le poids est en hausse. Surveillez vos habitudes alimentaires.",
-    "weightIsTrendingDownwardEnsureAdequateNutrition": "📉 le poids est en baisse. assurez une nutrition adéquate.",
-    "weightIsStableMaintainCurrentHabits": "⚖️ le poids est stable. maintenez vos habitudes actuelles.",
+    "weightIsTrendingDownwardEnsureAdequateNutrition": "📉 le poids est en baisse. Assurez une nutrition adéquate.",
+    "weightIsStableMaintainCurrentHabits": "⚖️ le poids est stable. Maintenez vos habitudes actuelles.",
     "bloodSugarIsHighCheckMedicationTimingAndDiet": "🍯 La glycémie est élevée. Vérifiez l'horaire des médicaments et le régime alimentaire.",
     "bloodSugarIsLowHaveASnackAndMonitor": "🍯 La glycémie est basse. Prenez une collation et surveillez.",
     "bloodSugarIsWellControlled": "✅ la glycémie est bien contrôlée.",
     "moodScoresAreLowConsiderDiscussingWithYourDoctor": "😔 Les scores d'humeur sont bas. Envisagez d'en parler à votre médecin.",
-    "moodScoresArePositiveKeepUpTheGoodWork": "😊 les scores d'humeur sont positifs. continuez comme ça !",
-    "moodIsStableContinueMonitoring": "😐 l'humeur est stable. continuez la surveillance.",
+    "moodScoresArePositiveKeepUpTheGoodWork": "😊 les scores d'humeur sont positifs. Continuez comme ça !",
+    "moodIsStableContinueMonitoring": "😐 l'humeur est stable. Continuez la surveillance.",
     "valueTrendValueValueChange": "📊 Tendance {{value1}} : {{value2}} ({{value3}} % de changement)",
     "medicationAdherenceIsBelow80ConsiderSettingMoreReminders": "💊 L'observance du traitement est inférieure à 80 %. Envisagez de configurer plus de rappels.",
     "youHaveSevereSideEffectsPleaseConsultYourDoctorImmediately": "⚠️ Vous avez des effets secondaires graves. Veuillez consulter votre médecin immédiatement.",
     "monitorSideEffectsAndDiscussWithYourDoctorAtNextVisit": "📝 Surveillez les effets secondaires et discutez-en avec votre médecin lors de la prochaine visite.",
     "bloodPressureIsImprovingContinueCurrentTreatmentPlan": "📈 La tension artérielle s'améliore. Continuez le plan de traitement actuel.",
-    "weightIsFluctuatingConsiderDietaryConsistency": "⚖️ le poids fluctue. envisagez une régularité alimentaire.",
+    "weightIsFluctuatingConsiderDietaryConsistency": "⚖️ le poids fluctue. Envisagez une régularité alimentaire.",
     "overallHealthMetricsLookGoodKeepUpTheGreatWork": "✅ Les métriques de santé globales sont bonnes. Continuez cet excellent travail !",
     "auricrxIDDocumentViewer": "Visionneuse de documents d'identité AuricRX",
     "loadingIDDocument": "Chargement du document d'identité...",
@@ -3461,7 +3461,7 @@
     "turnOff": "Désactiver",
     "cancel": "Annuler",
     "reauthRequired": "Veuillez confirmer votre identité pour activer la sauvegarde cloud",
-    "reauthFailed": "Échec de l'authentification. veuillez réessayer.",
+    "reauthFailed": "Échec de l'authentification. Veuillez réessayer.",
     "consentGranted": "Sauvegarde cloud activée",
     "consentMessage": "Vos documents de santé seront désormais sauvegardés dans le cloud.",
     "deleteCloudDescription": "Supprimer toutes les copies cloud de vos documents. Vos copies locales resteront sur cet appareil.",
@@ -3778,8 +3778,8 @@
       "% w/w": "% p/p",
       "% w/v": "% p/v",
       "% v/v": "% v/v",
-      "Tsp": "c. à thé",
-      "Tbsp": "c. à soupe",
+      "Tsp": "c. À thé",
+      "Tbsp": "c. À soupe",
       "Scoop": "Dosette",
       "Caplet": "Comprimé oblong",
       "Caplets": "Comprimés oblongs",
@@ -3925,7 +3925,7 @@
     "HT": "🇭🇹 Haiti",
     "GP": "🇬🇵 Guadeloupe",
     "GY": "🇬🇾 Guyana",
-    "GF": "Guyane française",
+    "GF": "Guyane Française",
     "MQ": "🇲🇶 Martinique",
     "SR": "🇸🇷 Suriname",
     "TL": "Timor-Leste",
@@ -3941,7 +3941,7 @@
     "WF": "Wallis-et-Futuna",
     "CK": "Îles Cook",
     "NU": "🇳🇺 Niue",
-    "AS": "Samoa américaines",
+    "AS": "Samoa Américaines",
     "WS": "🇼🇸 Samoa",
     "KI": "🇰🇮 Kiribati",
     "NC": "Nouvelle-Calédonie",
@@ -3982,7 +3982,7 @@
     "UZ": "🇺🇿 Uzbekistan"
   },
   "googleAuth": {
-    "error": "Échec de la connexion Google. veuillez réessayer.",
+    "error": "Échec de la connexion Google. Veuillez réessayer.",
     "label": "Continuer avec Google",
     "loading": "Connexion...",
     "or": "ou"
@@ -4168,7 +4168,7 @@
     "exportDataMessage": "Cela créera un fichier avec vos données de santé. Vous pouvez l'enregistrer ou le partager via WhatsApp ou d'autres applications.",
     "export": "Exporter",
     "exportSuccess": "Vos données ont été exportées avec succès.",
-    "exportFailed": "Échec de l'exportation des données. veuillez réessayer.",
+    "exportFailed": "Échec de l'exportation des données. Veuillez réessayer.",
     "exporting": "Export de vos données...",
     "deleteAllData": "Supprimer mes données",
     "deleteDescription": "Supprimer définitivement toutes vos données de santé de cet appareil. Cela ne peut pas être annulé.",
@@ -4178,7 +4178,7 @@
     "areYouSure": "Êtes-vous absolument sûr ?",
     "deleteAllDataFinal": "Cela effacera tout. Il n'y a aucun moyen de récupérer vos données après cela.",
     "deleteSuccess": "Toutes vos données ont été supprimées.",
-    "deleteFailed": "Échec de la suppression des données. veuillez réessayer.",
+    "deleteFailed": "Échec de la suppression des données. Veuillez réessayer.",
     "deleting": "Suppression de vos données...",
     "disclaimer": "Remarque : cela ne supprime pas votre compte ni les données stockées dans les sauvegardes cloud si vous avez activé ces fonctionnalités."
   },
