@@ -39,6 +39,7 @@
     "android": {
       "softwareKeyboardLayoutMode": "resize",
       "predictiveBackGestureEnabled": false,
+      "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-auric.png",
         "backgroundColor": "#0d1019"
