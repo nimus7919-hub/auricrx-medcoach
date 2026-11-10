@@ -343,55 +343,12 @@ class HealthMetricsService {
     };
   }
 
+  // REMOVED: generateInsights function (COFEPRIS compliance)
+  // This function generated clinical interpretations like "elevated", "low", "well controlled"
+  // and advice like "have a snack", "check medication timing"
+  // The tracker is now a neutral log for sharing with a doctor
   private generateInsights(metricType: string, trend: string, change: number, average: number, min: number, max: number): string[] {
-    const insights: string[] = [];
-
-    switch (metricType) {
-      case 'blood_pressure':
-        if (average > 140) {
-          insights.push(uiI18n.t("ui.bloodPressureIsElevatedConsiderConsultingYourDoctor"));
-        } else if (average < 90) {
-          insights.push(uiI18n.t("ui.bloodPressureIsLowMonitorForSymptoms"));
-        } else {
-          insights.push(uiI18n.t("ui.bloodPressureIsWithinNormalRange"));
-        }
-        break;
-
-      case 'weight':
-        if (trend === 'improving' && change > 5) {
-          insights.push(uiI18n.t("ui.weightIsTrendingUpwardMonitorDietaryHabits"));
-        } else if (trend === 'declining' && change < -5) {
-          insights.push(uiI18n.t("ui.weightIsTrendingDownwardEnsureAdequateNutrition"));
-        } else {
-          insights.push(uiI18n.t("ui.weightIsStableMaintainCurrentHabits"));
-        }
-        break;
-
-      case 'blood_sugar':
-        if (average > 180) {
-          insights.push(uiI18n.t("ui.bloodSugarIsHighCheckMedicationTimingAndDiet"));
-        } else if (average < 70) {
-          insights.push(uiI18n.t("ui.bloodSugarIsLowHaveASnackAndMonitor"));
-        } else {
-          insights.push(uiI18n.t("ui.bloodSugarIsWellControlled"));
-        }
-        break;
-
-      case 'mood':
-        if (average < 3) {
-          insights.push(uiI18n.t("ui.moodScoresAreLowConsiderDiscussingWithYourDoctor"));
-        } else if (average > 4) {
-          insights.push(uiI18n.t("ui.moodScoresArePositiveKeepUpTheGoodWork"));
-        } else {
-          insights.push(uiI18n.t("ui.moodIsStableContinueMonitoring"));
-        }
-        break;
-
-      default:
-        insights.push(uiI18n.t("ui.valueTrendValueValueChange", { value1: metricType, value2: trend, value3: change.toFixed(1) }));
-    }
-
-    return insights;
+    return []; // Return empty array - no clinical interpretations
   }
 
   // Health Reports
@@ -421,7 +378,7 @@ class HealthMetricsService {
           current: latest.value,
           average: trend.average,
           trend: trend.trend,
-          recommendation: trend.insights[0] || uiI18n.t("ui.continueMonitoring")
+          recommendation: '' // REMOVED: Clinical recommendations (COFEPRIS compliance)
         };
       }
     }
@@ -438,7 +395,7 @@ class HealthMetricsService {
         totalMetrics: recentMetrics.length,
         adherenceRate: overallAdherence,
         sideEffects: activeSideEffects.length,
-        keyInsights: Object.values(metrics).map(m => m.recommendation).filter(Boolean)
+        keyInsights: [] // REMOVED: Clinical insights (COFEPRIS compliance)
       },
       metrics,
       adherence: await this.getAdherence(),
@@ -449,35 +406,11 @@ class HealthMetricsService {
     return report;
   }
 
+  // REMOVED: generateRecommendations function (COFEPRIS compliance)
+  // This function generated clinical recommendations based on metrics
+  // The tracker is now a neutral log with no clinical advice
   private generateRecommendations(adherence: number, sideEffects: SideEffect[], metrics: any): string[] {
-    const recommendations: string[] = [];
-
-    if (adherence < 80) {
-      recommendations.push(uiI18n.t("ui.medicationAdherenceIsBelow80ConsiderSettingMoreReminders"));
-    }
-
-    if (sideEffects.length > 0) {
-      const severeSideEffects = sideEffects.filter(se => se.severity >= 4);
-      if (severeSideEffects.length > 0) {
-        recommendations.push(uiI18n.t("ui.youHaveSevereSideEffectsPleaseConsultYourDoctorImmediately"));
-      } else {
-        recommendations.push(uiI18n.t("ui.monitorSideEffectsAndDiscussWithYourDoctorAtNextVisit"));
-      }
-    }
-
-    if (metrics.blood_pressure && metrics.blood_pressure.trend === 'declining') {
-      recommendations.push(uiI18n.t("ui.bloodPressureIsImprovingContinueCurrentTreatmentPlan"));
-    }
-
-    if (metrics.weight && metrics.weight.trend === 'volatile') {
-      recommendations.push(uiI18n.t("ui.weightIsFluctuatingConsiderDietaryConsistency"));
-    }
-
-    if (recommendations.length === 0) {
-      recommendations.push(uiI18n.t("ui.overallHealthMetricsLookGoodKeepUpTheGreatWork"));
-    }
-
-    return recommendations;
+    return []; // Return empty array - no clinical recommendations
   }
 
   // Utility methods
