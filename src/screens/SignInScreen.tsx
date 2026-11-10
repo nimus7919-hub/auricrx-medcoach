@@ -93,6 +93,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
       }
       await onAuthSuccess({ provider: 'google', user: result.user });
     } catch (error) {
+      console.error('Google sign-in failed:', error);
       Alert.alert(uiI18n.t("adminProfile.error"), googleAuthText(selectedLanguage).error);
     } finally {
       setGoogleLoading(false);

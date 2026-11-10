@@ -1331,7 +1331,8 @@
     "september": "September",
     "october": "October",
     "november": "November",
-    "december": "December"
+    "december": "December",
+    "tryAgain": "Please try again."
   },
   "subscriptionPlans": {
     "month": "MXN $79 per month",
@@ -3928,7 +3929,15 @@
     "shareConsentTitle": "Share Health Information",
     "shareConsentMessage": "You are about to share health information for a family member. This consent is valid for 7 days.",
     "grantConsent": "I Consent to Share",
-    "permShareDocuments": "See and add documents in their Family Documents folder"
+    "permShareDocuments": "See and add documents in their Family Documents folder",
+    "generateInviteFailed": "Failed to generate invite code",
+    "invalidInviteCode": "Invalid or expired invite code",
+    "acceptInviteFailed": "Failed to accept invite. Please try again.",
+    "confirmDeviceOnlyAttestation": "Please confirm the device-only attestation",
+    "confirmGuardianAttestation": "Please confirm you are the parent/guardian",
+    "freeTierLimitReached": "You've reached the free tier limit. Upgrade to Pro to add more family members.",
+    "memberAdded": "{{name}} has been added to your Family Circle",
+    "addMemberFailed": "Failed to add family member. Please try again."
   },
   "prevention": {
     "title": "Prevention & Checkup Planner",

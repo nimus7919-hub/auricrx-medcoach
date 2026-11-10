@@ -1482,7 +1482,8 @@
     "school": "学校",
     "travel": "旅行",
     "vacation": "假期",
-    "weekday": "工作日"
+    "weekday": "工作日",
+    "tryAgain": "请重试。"
   },
   "subscriptionPlans": {
     "month": "每月 MXN $79",
@@ -4153,6 +4154,14 @@
     "shareConsentTitle": "分享健康信息",
     "shareConsentMessage": "您即将分享家庭成员的健康信息。此同意有效期为7天。",
     "grantConsent": "我同意分享",
-    "permShareDocuments": "查看并在其家庭文档文件夹中添加文档"
+    "permShareDocuments": "查看并在其家庭文档文件夹中添加文档",
+    "generateInviteFailed": "无法生成邀请码",
+    "invalidInviteCode": "邀请码无效或已过期",
+    "acceptInviteFailed": "无法接受邀请，请重试。",
+    "confirmDeviceOnlyAttestation": "请确认仅设备托管声明",
+    "confirmGuardianAttestation": "请确认你是家长或法定监护人",
+    "freeTierLimitReached": "已达到免费版人数上限。升级到 Pro 以添加更多成员。",
+    "memberAdded": "{{name}} 已加入你的家庭圈",
+    "addMemberFailed": "无法添加家庭成员，请重试。"
   }
 }

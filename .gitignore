@@ -130,3 +130,6 @@ package.backup.*
 Thumbs.db
 
 q6-export/
+
+# Local export artifacts
+dist-android-export/

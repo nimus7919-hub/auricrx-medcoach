@@ -38,7 +38,7 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
 
   const loadData = async () => {
     try {
-      const familyMembers = await familyService.getFamilyMembers();
+      const familyMembers = await familyService.getMembers();
       const premium = await premiumService.isPremiumUser();
       
       setMembers(familyMembers);
@@ -204,7 +204,7 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
           trialDaysRemaining: 14,
           isPremium: false,
         }}
-        feature="familyDocuments"
+        feature="familyCircle"
       />
     );
   }

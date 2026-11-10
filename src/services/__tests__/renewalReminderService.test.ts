@@ -34,7 +34,7 @@ describe('RenewalReminderService', () => {
       const expectedNotificationDate = new Date(renewalDate);
       expectedNotificationDate.setDate(expectedNotificationDate.getDate() - 5);
       
-      expect(call.trigger).toEqual(expectedNotificationDate);
+      expect(call.trigger).toEqual({ type: 'date', date: expectedNotificationDate });
       expect(call.content.data.type).toBe('renewal_reminder');
       expect(call.content.data.isTrialEnding).toBe(true);
       

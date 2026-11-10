@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
-import { goldGradient } from '../theme/colors';
-import { PremiumEntitlement } from '../services/premiumEntitlementService';
+import { goldGradient, darkColors } from '../theme/colors';
+import PremiumEntitlementService, { PremiumEntitlement } from '../services/premiumEntitlementService';
 
 interface PremiumUpgradeScreenProps {
   onClose: () => void;
@@ -17,13 +17,19 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
   const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
 
-  const handleStartTrial = () => {
-    // TODO: When implementing real payments, this should:
-    // 1. Launch the in-app purchase flow for 14-day trial
-    // 2. Present subscription via Google Play Billing / App Store
-    // 3. Validate receipt on backend
-    // 4. Grant trial access via premiumEntitlementService.startPremiumTrial()
-    console.log('TODO: Launch in-app purchase flow for 14-day trial');
+  const handleStartTrial = async () => {
+    try {
+      const result = await PremiumEntitlementService.getInstance().startPremiumTrial();
+      if (!result.success) {
+        console.error('Failed to start premium trial:', result.error);
+        Alert.alert(t('common.error'), result.error || t('ui.anErrorOccurredPleaseTryAgain'));
+        return;
+      }
+      onClose();
+    } catch (error) {
+      console.error('Failed to start premium trial:', error);
+      Alert.alert(t('common.error'), t('ui.anErrorOccurredPleaseTryAgain'));
+    }
   };
 
   const getStore = () => {
@@ -195,7 +201,7 @@ const styles = StyleSheet.create({
   freeText: { fontSize: 14, opacity: 0.85, lineHeight: 21 },
   startTrialButton: { borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
   startTrialButtonGradient: { paddingVertical: 18, paddingHorizontal: 24, alignItems: 'center' },
-  startTrialButtonText: { fontSize: 18, fontWeight: 'bold', color: buttonTextColor },
+  startTrialButtonText: { fontSize: 18, fontWeight: 'bold', color: darkColors.onAccent },
   continueFreeButton: { alignItems: 'center', paddingVertical: 12, marginBottom: 16 },
   continueFreeButtonText: { fontSize: 16, opacity: 0.8 },
   noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },

@@ -85,7 +85,7 @@ export default function DocumentCloudBackupScreen({ onClose }: { onClose: () => 
       Alert.alert(t('cloudBackup.consentGranted'), t('cloudBackup.consentMessage'));
     } catch (error) {
       console.error('Error enabling cloud backup:', error);
-      Alert.alert(t('common.error'), t('cloudBackup.reauthFailed'));
+      Alert.alert(t('common.error'), t('ui.anErrorOccurredPleaseTryAgain'));
     }
   };
 

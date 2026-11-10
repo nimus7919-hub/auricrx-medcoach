@@ -16,6 +16,7 @@ type ProfileType = 'regular' | 'device-only-adult' | 'child';
 
 export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMemberScreenProps) {
   const { t } = useTranslation();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
@@ -30,17 +31,17 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
 
   const handleAdd = async () => {
     if (!name.trim()) {
-      Alert.alert(t('common.error'), 'Please enter a name');
+      Alert.alert(t('common.error'), t('familyCircle.enterName'));
       return;
     }
 
     if (profileType === 'device-only-adult' && !deviceOnlyAttested) {
-      Alert.alert(t('common.error'), 'Please confirm the device-only attestation');
+      Alert.alert(t('common.error'), t('familyCircle.confirmDeviceOnlyAttestation'));
       return;
     }
 
     if (profileType === 'child' && !guardianAttested) {
-      Alert.alert(t('common.error'), 'Please confirm you are the parent/guardian');
+      Alert.alert(t('common.error'), t('familyCircle.confirmGuardianAttestation'));
       return;
     }
 
@@ -54,7 +55,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
       if (!canAdd.allowed) {
         Alert.alert(
           t('familyCircle.upgradeToPro'),
-          `You've reached the free tier limit. Upgrade to Pro to add more family members.`,
+          t('familyCircle.freeTierLimitReached'),
           [
             { text: t('common.cancel'), style: 'cancel' },
             { text: t('familyCircle.upgradeToPro'), onPress: () => { /* TODO: Open upgrade screen */ } },
@@ -79,7 +80,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
 
       Alert.alert(
         t('common.success'),
-        `${newMember.name} has been added to your Family Circle`,
+        t('familyCircle.memberAdded', { name: newMember.name }),
         [
           {
             text: t('common.ok'),
@@ -92,7 +93,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
       );
     } catch (error) {
       console.error('Error adding member:', error);
-      Alert.alert(t('common.error'), 'Failed to add family member. Please try again.');
+      Alert.alert(t('common.error'), t('familyCircle.addMemberFailed'));
     } finally {
       setAdding(false);
     }
@@ -279,14 +280,13 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
   );
 }
 
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
-  const buttonTextColor = '#17130B';
-  
-  const styles = StyleSheet.create({
-    container: { flex: 1 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-    title: { fontSize: 24, fontWeight: 'bold' },
-    closeButton: { fontSize: 16, color: getAccentColor() },
+const buttonTextColor = '#17130B';
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  closeButton: { fontSize: 16, color: '#DBB65C' },
   content: { flex: 1 },
   contentContainer: { padding: 16, paddingBottom: 32 },
   card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
@@ -300,6 +300,6 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
   typeDescription: { fontSize: 13, opacity: 0.75, lineHeight: 18 },
   attestationRow: { flexDirection: 'row', alignItems: 'flex-start' },
   attestationText: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
-    addButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
-    buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
-  });
+  addButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
+  buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
+});

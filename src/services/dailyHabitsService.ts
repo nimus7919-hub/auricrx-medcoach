@@ -125,10 +125,10 @@ class DailyHabitsService {
             priority: Notifications.AndroidNotificationPriority.DEFAULT,
           },
           trigger: {
+            type: 'daily',
             hour: hours,
             minute: minutes,
-            repeats: true,
-          },
+          } as Notifications.NotificationTriggerInput,
         });
         newReminder.notificationId = notificationId;
       } catch (error) {
@@ -169,10 +169,10 @@ class DailyHabitsService {
               priority: Notifications.AndroidNotificationPriority.DEFAULT,
             },
             trigger: {
+              type: 'daily',
               hour: hours,
               minute: minutes,
-              repeats: true,
-            },
+            } as Notifications.NotificationTriggerInput,
           });
           reminders[index].notificationId = notificationId;
         } catch (error) {

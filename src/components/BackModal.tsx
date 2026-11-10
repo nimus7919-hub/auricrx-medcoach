@@ -5,6 +5,8 @@ import { useBackDismiss } from '../navigation/useAndroidBackNavigation';
 // Keep native Modal presentation and topmost-window handling, including sheets.
 // Registration also clears the double-back exit window when an overlay changes.
 export default function BackModal(props: ModalProps) {
-  useBackDismiss(props.visible !== false, () => props.onRequestClose?.());
+  useBackDismiss(props.visible !== false, () => {
+    props.onRequestClose?.({} as any);
+  });
   return <Modal {...props} />;
 }

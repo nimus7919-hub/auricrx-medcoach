@@ -1331,7 +1331,8 @@
     "september": "Septiembre",
     "october": "Octubre",
     "november": "Noviembre",
-    "december": "Diciembre"
+    "december": "Diciembre",
+    "tryAgain": "Por favor, inténtalo de nuevo."
   },
   "subscriptionPlans": {
     "month": "MXN $79 al mes",
@@ -3791,7 +3792,15 @@
     "shareConsentTitle": "Compartir Información de Salud",
     "shareConsentMessage": "Estás por compartir información de salud de un familiar. Este consentimiento es válido por 7 días.",
     "grantConsent": "Acepto Compartir",
-    "permShareDocuments": "Ver y agregar documentos en su carpeta de Documentos Familiares"
+    "permShareDocuments": "Ver y agregar documentos en su carpeta de Documentos Familiares",
+    "generateInviteFailed": "No se pudo generar el código de invitación",
+    "invalidInviteCode": "Código de invitación inválido o vencido",
+    "acceptInviteFailed": "No se pudo aceptar la invitación. Inténtalo de nuevo.",
+    "confirmDeviceOnlyAttestation": "Confirma la declaración de perfil solo en el dispositivo",
+    "confirmGuardianAttestation": "Confirma que eres el padre/madre o tutor legal",
+    "freeTierLimitReached": "Alcanzaste el límite del plan gratuito. Mejora a Pro para agregar más miembros.",
+    "memberAdded": "{{name}} se agregó a tu Family Circle",
+    "addMemberFailed": "No se pudo agregar el miembro. Inténtalo de nuevo."
   },
   "prevention": {
     "title": "Planificador de Prevención",

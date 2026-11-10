@@ -24,7 +24,24 @@ import { ActivityHealthSection } from './ActivityHealthScreen';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { createAIHealthTranslations } from '../services/aiHealthTranslations';
 import { useTranslation } from 'react-i18next';
+import { resolveBundledImageFileUri } from '../lib/documentPdf';
 const { width: screenWidth } = Dimensions.get('window');
+const SIGN_IN_LOGO = require('../../assets/sign in logo.png');
+
+async function loadSignInLogoBase64(): Promise<string> {
+  try {
+    const logoUri = await resolveBundledImageFileUri(SIGN_IN_LOGO, 'sign-in-logo-pdf.png');
+    const compressedLogo = await ImageManipulator.manipulateAsync(
+      logoUri,
+      [{ resize: { width: 400 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.PNG, base64: true },
+    );
+    return compressedLogo.base64 || '';
+  } catch (error) {
+    console.error('Failed to load AI PDF logo:', error);
+    return '';
+  }
+}
 
 interface AIHealthScreenProps {
   onClose: () => void;
@@ -1103,36 +1120,8 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for PDF...');
-      
-      // Get AuricRX logo as base64 (using Image.resolveAssetSource for proper handling)
-      const logoSource = Image.resolveAssetSource(require('../../assets/sign in logo.png'));
-      console.log('🔍 Logo source:', logoSource);
-      
-      // Download the logo to local storage
-      const logoUri = await FileSystem.downloadAsync(
-        logoSource.uri,
-        FileSystem.documentDirectory + 'sign-in-logo.png'
-      );
-      console.log('🔍 Logo downloaded to:', logoUri.uri);
-      
-      // Compress the logo to reduce file size for PDF
-      console.log('📦 Compressing logo for PDF...');
-      const compressedLogo = await ImageManipulator.manipulateAsync(
-        logoUri.uri,
-        [{ resize: { width: 400 } }], // Resize to 400px width for PDF
-        { 
-          compress: 0.7, // 70% quality
-          format: ImageManipulator.SaveFormat.PNG,
-          base64: true 
-        }
-      );
-      
-      if (!compressedLogo.base64) {
-        throw new Error(uiI18n.t("ui.failedToCompressLogo"));
-      }
-      
-      const logoBase64 = compressedLogo.base64;
-      console.log('✅ Logo compressed successfully, base64 length:', logoBase64.length);
+      const logoBase64 = await loadSignInLogoBase64();
+      console.log('✅ Logo base64 length:', logoBase64.length);
       
       // Create HTML content for PDF (similar to DocumentsScreen)
       const medicationsHtml = medications && medications.length > 0 ? 
@@ -1439,40 +1428,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       console.log('📝 Creating HTML content for Active Symptoms PDF...');
       
-      // Try to load logo with better error handling
-      let logoBase64 = '';
-      try {
-        const logoAsset = require('../../assets/sign in logo.png');
-        const logoSource = Image.resolveAssetSource(logoAsset);
-        console.log('🔍 Logo source:', logoSource);
-        
-        // Try to download and convert to base64
-        const downloadPath = FileSystem.documentDirectory + 'temp-logo-active.png';
-        await FileSystem.downloadAsync(logoSource.uri, downloadPath);
-        
-        // Compress the logo for PDF to reduce file size
-        console.log('📦 Compressing logo for PDF...');
-        const compressedLogo = await ImageManipulator.manipulateAsync(
-          downloadPath,
-          [{ resize: { width: 400 } }],
-          { 
-            compress: 0.7,
-            format: ImageManipulator.SaveFormat.PNG,
-            base64: true 
-          }
-        );
-        
-        if (!compressedLogo.base64) {
-          throw new Error(uiI18n.t("ui.failedToCompressLogo"));
-        }
-        logoBase64 = compressedLogo.base64;
-        console.log('✅ Logo compressed, size:', logoBase64.length);
-        
-        // Clean up temp file
-        await FileSystem.deleteAsync(downloadPath, { idempotent: true });
-      } catch (error) {
-        console.warn('⚠️ Logo load failed, using text header:', error);
-      }
+      const logoBase64 = await loadSignInLogoBase64();
       
       // Create HTML content for ACTIVE symptoms only
       const symptomsHtml = symptomAnalyses.map((analysis, index) => `
@@ -1607,40 +1563,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       console.log('📝 Creating HTML content for Complete Symptom History PDF...');
       
-      // Try to load logo with better error handling
-      let logoBase64 = '';
-      try {
-        const logoAsset = require('../../assets/sign in logo.png');
-        const logoSource = Image.resolveAssetSource(logoAsset);
-        console.log('🔍 Logo source:', logoSource);
-        
-        // Try to download and convert to base64
-        const downloadPath = FileSystem.documentDirectory + 'temp-logo-all.png';
-        await FileSystem.downloadAsync(logoSource.uri, downloadPath);
-        
-        // Compress the logo for PDF to reduce file size
-        console.log('📦 Compressing logo for PDF...');
-        const compressedLogo = await ImageManipulator.manipulateAsync(
-          downloadPath,
-          [{ resize: { width: 400 } }],
-          { 
-            compress: 0.7,
-            format: ImageManipulator.SaveFormat.PNG,
-            base64: true 
-          }
-        );
-        
-        if (!compressedLogo.base64) {
-          throw new Error(uiI18n.t("ui.failedToCompressLogo"));
-        }
-        logoBase64 = compressedLogo.base64;
-        console.log('✅ Logo compressed, size:', logoBase64.length);
-        
-        // Clean up temp file
-        await FileSystem.deleteAsync(downloadPath, { idempotent: true });
-      } catch (error) {
-        console.warn('⚠️ Logo load failed, using text header:', error);
-      }
+      const logoBase64 = await loadSignInLogoBase64();
       
       // Sort all symptoms by date (newest first)
       const sortedSymptoms = allSymptoms.sort((a, b) => 

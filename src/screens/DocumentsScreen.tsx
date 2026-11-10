@@ -93,6 +93,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         setPages(prev => [...prev, newPage]);
       }
     } catch (error) {
+      console.error('Failed to capture document page:', error);
       Alert.alert(t('common.error'), t('documents.failedToCapture'));
     }
   };
@@ -117,6 +118,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         setPages(prev => [...prev, ...newPages]);
       }
     } catch (error) {
+      console.error('Failed to select document pages:', error);
       Alert.alert(t('common.error'), t('documents.failedToSelect'));
     }
   };

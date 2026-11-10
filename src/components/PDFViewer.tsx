@@ -210,7 +210,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <${uiI18n.t("ui.auricrxIDDocumentViewer")}Viewer</title>
+        <title>AuricRX ID Document Viewer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
           * {
@@ -448,7 +448,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <${uiI18n.t("ui.pdfViewer")}Viewer</title>
+        <title>PDF Viewer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
           * {

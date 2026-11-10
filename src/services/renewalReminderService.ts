@@ -97,7 +97,10 @@ class RenewalReminderService {
             isTrialEnding 
           },
         },
-        trigger: notificationDate,
+        trigger: {
+          type: 'date',
+          date: notificationDate,
+        } as Notifications.NotificationTriggerInput,
       });
 
       // Store reminder info

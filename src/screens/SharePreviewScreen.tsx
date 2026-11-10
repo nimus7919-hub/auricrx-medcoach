@@ -164,6 +164,6 @@ const styles = StyleSheet.create({
   noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
   shareButton: { borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 12 },
   cancelButton: { alignItems: 'center', paddingVertical: 12 },
-  buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
+  buttonText: { fontSize: 16, fontWeight: '600', color: '#17130B' },
   cancelButtonText: { fontSize: 14, opacity: 0.8 },
 });

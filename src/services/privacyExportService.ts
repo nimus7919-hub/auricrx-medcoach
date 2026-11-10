@@ -28,12 +28,13 @@ class PrivacyExportService {
     const data: { [key: string]: any } = {};
 
     for (const key of keys) {
+      const value = await AsyncStorage.getItem(key);
       try {
-        const value = await AsyncStorage.getItem(key);
         if (value) {
           data[key] = JSON.parse(value);
         }
       } catch (error) {
+        console.error('Failed to parse export value for key:', key, error);
         data[key] = value;
       }
     }
