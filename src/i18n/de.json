@@ -1577,6 +1577,290 @@
         "text1256": "Testerinnerung",
         "text1326": "Erinnerung konnte nicht geplant werden"
       }
+    },
+    "herbs": {
+      "HERBS": {
+        "item0": {
+          "names": "Damiana",
+          "details": {
+            "origin": "Mexiko, Südwesten der USA",
+            "summary": "Traditionell in der Volksmedizin bei Verdauungs- und stimmungsbezogenen Beschwerden verwendet."
+          }
+        },
+        "item1": {
+          "names": "Epazote",
+          "details": {
+            "origin": "Mexiko und Mittelamerika",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item2": {
+          "names": "Löwenzahn",
+          "details": {
+            "origin": "Weltweit (verwendet in Mexiko, Nordamerika, China)",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item3": {
+          "names": "Kamille",
+          "details": {
+            "origin": "Europa, Westasien (weltweit weit verbreitet)",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item4": {
+          "names": "Knoblauch",
+          "details": {
+            "origin": "Zentralasien (weltweit weit verbreitet angebaut)",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item5": {
+          "names": "Braunelle",
+          "details": {
+            "origin": "Nordamerika; weit verbreitet in der traditionellen chinesischen Medizin",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item6": {
+          "names": "Tagetes lucida",
+          "details": {
+            "origin": "Zentralmexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item7": {
+          "names": "Clinopodium mexicanum",
+          "details": {
+            "origin": "Mexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item8": {
+          "names": "Mexikanisches Lorbeerblatt",
+          "details": {
+            "origin": "Mexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item9": {
+          "names": "Einjähriger Beifuß",
+          "details": {
+            "origin": "China (Traditionelle chinesische Medizin)",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item10": {
+          "names": "Aloe Vera",
+          "details": {
+            "origin": "Nordafrika; eingebürgert in Mexiko, USA und China",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item11": {
+          "names": "Ingwer",
+          "details": {
+            "origin": "Südostasien; weltweit weit verbreitet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item12": {
+          "names": "Echinacea",
+          "details": {
+            "origin": "Nordamerika",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item13": {
+          "names": "Ginkgo",
+          "details": {
+            "origin": "China; eingeführt in die USA",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item14": {
+          "names": "Notoginseng",
+          "details": {
+            "origin": "China",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item15": {
+          "names": "Kurkuma",
+          "details": {
+            "origin": "Südostasien; weltweit verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item16": {
+          "names": "Rosmarin",
+          "details": {
+            "origin": "Mittelmeerraum; weit verbreitet in Mexiko und den USA",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item17": {
+          "names": "Petersilie",
+          "details": {
+            "origin": "Mittelmeerraum; weltweit verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item18": {
+          "names": "Fenchel",
+          "details": {
+            "origin": "Mittelmeerraum; weltweit übernommen",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item19": {
+          "names": "Aristolochia odoratissima",
+          "details": {
+            "origin": "Mexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item20": {
+          "names": "Mexikanischer Oregano",
+          "details": {
+            "origin": "Mexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item21": {
+          "names": "Yerba Mansa",
+          "details": {
+            "origin": "Südwesten der USA; Mexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item22": {
+          "names": "Graue Sarsaparille",
+          "details": {
+            "origin": "Mexiko, Mittelamerika",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item23": {
+          "names": "Mexikanische Ringelblume",
+          "details": {
+            "origin": "Mexiko, Guatemala",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item24": {
+          "names": "Heliopsis longipes",
+          "details": {
+            "origin": "Mexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item25": {
+          "names": "Aztekisches Süßkraut",
+          "details": {
+            "origin": "Südmexiko",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item26": {
+          "names": "Koreanische Minze",
+          "details": {
+            "origin": "China, Korea",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item27": {
+          "names": "Astragalus",
+          "details": {
+            "origin": "China",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item28": {
+          "names": "Süßholz",
+          "details": {
+            "origin": "China",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item29": {
+          "names": "Dong Quai",
+          "details": {
+            "origin": "China",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item30": {
+          "names": "Lingzhi-Pilz",
+          "details": {
+            "origin": "China",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item31": {
+          "names": "Zimt",
+          "details": {
+            "origin": "China, Südostasien; weltweit verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item32": {
+          "names": "Johanniskraut",
+          "details": {
+            "origin": "Europa; verwendet in der US-Kräuterkunde",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item33": {
+          "names": "Eukalyptus",
+          "details": {
+            "origin": "Australien; verwendet in den USA und weltweit",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item34": {
+          "names": "Pfefferminze",
+          "details": {
+            "origin": "Europa; weltweit einschließlich USA verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item35": {
+          "names": "Mariendistel",
+          "details": {
+            "origin": "Mittelmeerraum; verwendet in den USA",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item36": {
+          "names": "Lavendel",
+          "details": {
+            "origin": "Mittelmeerraum; weltweit verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item37": {
+          "names": "Heiliges Basilikum",
+          "details": {
+            "origin": "Indien; weltweit in der Kräuterkunde verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item38": {
+          "names": "Hibiskus",
+          "details": {
+            "origin": "Tropische Regionen; weltweit einschließlich Mexiko und USA verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        },
+        "item39": {
+          "names": "Koriander",
+          "details": {
+            "origin": "Mittelmeerraum; weltweit verwendet",
+            "summary": "Wir haben kein überprüftes NCCIH-Faktenblatt speziell für diese Pflanze. Der NCCIH-Link bietet allgemeine Informationen zu Nahrungsergänzungsmitteln, keine Bewertung dieser Art."
+          }
+        }
+      }
     }
   },
   "ui": {

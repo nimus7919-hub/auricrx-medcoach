@@ -1663,6 +1663,290 @@
         "text1256": "Rappel de test",
         "text1326": "Impossible de planifier le rappel"
       }
+    },
+    "herbs": {
+      "HERBS": {
+        "item0": {
+          "names": "Damiana",
+          "details": {
+            "origin": "Mexique, Sud-Ouest des États-Unis",
+            "summary": "Traditionnellement utilisée en médecine populaire pour les préoccupations digestives et liées à l'humeur."
+          }
+        },
+        "item1": {
+          "names": "Épazote",
+          "details": {
+            "origin": "Mexique et Amérique centrale",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item2": {
+          "names": "Pissenlit",
+          "details": {
+            "origin": "Mondial (utilisé au Mexique, en Amérique du Nord, en Chine)",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item3": {
+          "names": "Camomille",
+          "details": {
+            "origin": "Europe, Asie occidentale (largement utilisée dans le monde)",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item4": {
+          "names": "Ail",
+          "details": {
+            "origin": "Asie centrale (largement cultivé dans le monde)",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item5": {
+          "names": "Brunelle commune",
+          "details": {
+            "origin": "Amérique du Nord ; largement utilisée en médecine traditionnelle chinoise",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item6": {
+          "names": "Tagetes lucida",
+          "details": {
+            "origin": "Mexique central",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item7": {
+          "names": "Clinopodium mexicanum",
+          "details": {
+            "origin": "Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item8": {
+          "names": "Feuille de laurier mexicain",
+          "details": {
+            "origin": "Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item9": {
+          "names": "Armoise annuelle",
+          "details": {
+            "origin": "Chine (Médecine traditionnelle chinoise)",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item10": {
+          "names": "Aloe Vera",
+          "details": {
+            "origin": "Afrique du Nord ; naturalisé au Mexique, aux États-Unis et en Chine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item11": {
+          "names": "Gingembre",
+          "details": {
+            "origin": "Asie du Sud-Est ; largement utilisé dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item12": {
+          "names": "Échinacée",
+          "details": {
+            "origin": "Amérique du Nord",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item13": {
+          "names": "Ginkgo",
+          "details": {
+            "origin": "Chine ; introduit aux États-Unis",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item14": {
+          "names": "Notoginseng",
+          "details": {
+            "origin": "Chine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item15": {
+          "names": "Curcuma",
+          "details": {
+            "origin": "Asie du Sud-Est ; utilisé dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item16": {
+          "names": "Romarin",
+          "details": {
+            "origin": "Méditerranée ; largement utilisé au Mexique et aux États-Unis",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item17": {
+          "names": "Persil",
+          "details": {
+            "origin": "Méditerranée ; utilisé dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item18": {
+          "names": "Fenouil",
+          "details": {
+            "origin": "Méditerranée ; adopté dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item19": {
+          "names": "Aristolochia odoratissima",
+          "details": {
+            "origin": "Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item20": {
+          "names": "Origan mexicain",
+          "details": {
+            "origin": "Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item21": {
+          "names": "Yerba Mansa",
+          "details": {
+            "origin": "Sud-Ouest des États-Unis ; Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item22": {
+          "names": "Salsepareille grise",
+          "details": {
+            "origin": "Mexique, Amérique centrale",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item23": {
+          "names": "Souci mexicain",
+          "details": {
+            "origin": "Mexique, Guatemala",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item24": {
+          "names": "Heliopsis longipes",
+          "details": {
+            "origin": "Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item25": {
+          "names": "Herbe sucrée aztèque",
+          "details": {
+            "origin": "Sud du Mexique",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item26": {
+          "names": "Menthe coréenne",
+          "details": {
+            "origin": "Chine, Corée",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item27": {
+          "names": "Astragale",
+          "details": {
+            "origin": "Chine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item28": {
+          "names": "Réglisse",
+          "details": {
+            "origin": "Chine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item29": {
+          "names": "Dong Quai",
+          "details": {
+            "origin": "Chine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item30": {
+          "names": "Champignon Lingzhi",
+          "details": {
+            "origin": "Chine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item31": {
+          "names": "Cannelle",
+          "details": {
+            "origin": "Chine, Asie du Sud-Est ; utilisée dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item32": {
+          "names": "Millepertuis",
+          "details": {
+            "origin": "Europe ; utilisé dans l'herboristerie américaine",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item33": {
+          "names": "Eucalyptus",
+          "details": {
+            "origin": "Australie ; utilisé aux États-Unis et dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item34": {
+          "names": "Menthe poivrée",
+          "details": {
+            "origin": "Europe ; utilisée dans le monde y compris aux États-Unis",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item35": {
+          "names": "Chardon-Marie",
+          "details": {
+            "origin": "Méditerranée ; utilisé aux États-Unis",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item36": {
+          "names": "Lavande",
+          "details": {
+            "origin": "Méditerranée ; utilisée dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item37": {
+          "names": "Basilic sacré",
+          "details": {
+            "origin": "Inde ; utilisé dans le monde en herboristerie",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item38": {
+          "names": "Hibiscus",
+          "details": {
+            "origin": "Régions tropicales ; utilisé dans le monde y compris au Mexique et aux États-Unis",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        },
+        "item39": {
+          "names": "Coriandre",
+          "details": {
+            "origin": "Méditerranée ; utilisée dans le monde",
+            "summary": "Nous n'avons pas de fiche d'information NCCIH révisée spécifique à cette plante. Le lien NCCIH fournit des informations générales sur les suppléments, pas une évaluation de cette espèce."
+          }
+        }
+      }
     }
   },
   "ui": {
