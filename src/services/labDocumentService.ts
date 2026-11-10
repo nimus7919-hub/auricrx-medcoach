@@ -203,16 +203,16 @@ class LabDocumentService {
         en: 'HbA1c (Glycated Hemoglobin): Average blood glucose over 2-3 months. Important for diabetes monitoring.'
       },
       'alt': {
-        es: 'ALT (Alanina Aminotransferasa): Enzima del hígado. Niveles elevados pueden indicar daño hepático.',
-        en: 'ALT (Alanine Aminotransferase): Liver enzyme. Elevated levels may indicate liver damage.'
+        es: 'ALT (Alanina Aminotransferasa): Enzima del hígado.',
+        en: 'ALT (Alanine Aminotransferase): Liver enzyme.'
       },
       'ast': {
-        es: 'AST (Aspartato Aminotransferasa): Enzima presente en hígado, corazón y músculos. Niveles altos pueden indicar daño.',
-        en: 'AST (Aspartate Aminotransferase): Enzyme present in liver, heart and muscles. High levels may indicate damage.'
+        es: 'AST (Aspartato Aminotransferasa): Enzima presente en hígado, corazón y músculos.',
+        en: 'AST (Aspartate Aminotransferase): Enzyme present in liver, heart and muscles.'
       },
       'wbc': {
-        es: 'Leucocitos (WBC): Glóbulos blancos que combaten infecciones. Niveles alterados pueden indicar infección o problemas inmunes.',
-        en: 'White Blood Cells (WBC): Fight infections. Altered levels may indicate infection or immune problems.'
+        es: 'Leucocitos (WBC): Glóbulos blancos que combaten infecciones.',
+        en: 'White Blood Cells (WBC): Fight infections.'
       },
     };
   }
