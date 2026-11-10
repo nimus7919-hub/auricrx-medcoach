@@ -6,6 +6,7 @@ import { API_BASE } from '../config/api';
 const STORAGE_KEYS = {
   CLOUD_BACKUP_ENABLED: 'documents:cloudBackup:enabled',
   CLOUD_BACKUP_CONSENT: 'documents:cloudBackup:consent',
+  CLOUD_BACKUP_CONSENT_LOG: 'documents:cloudBackup:consent:log', // F2: Detailed consent logging
   UPLOADED_DOCUMENTS: 'documents:cloudBackup:uploaded',
 };
 
@@ -13,6 +14,11 @@ export interface CloudBackupConsent {
   granted: boolean;
   grantedAt?: string;
   revokedAt?: string;
+  // F2: Detailed consent logging
+  userId?: string;
+  version?: string; // Privacy notice version
+  scope?: string; // What was consented to
+  method?: string; // Authentication method used
 }
 
 export interface UploadedDocument {
@@ -55,16 +61,53 @@ class DocumentCloudBackupService {
     }
   }
 
-  async enableCloudBackup(): Promise<void> {
+  /**
+   * Enable cloud backup with detailed consent logging (F2 compliance)
+   * 
+   * @param userId - User ID granting consent
+   * @param version - Privacy notice version
+   * @param method - Authentication method ('checkbox_reauth', 'biometric', etc.)
+   */
+  async enableCloudBackup(userId?: string, version: string = '1.0', method: string = 'checkbox_reauth'): Promise<void> {
     const consent: CloudBackupConsent = {
       granted: true,
       grantedAt: new Date().toISOString(),
+      userId: userId || auth.currentUser?.uid || 'unknown',
+      version,
+      scope: 'cloud_backup_health_documents', // What user consented to
+      method,
     };
+    
+    // F2: Log consent event
+    await this.logConsentEvent(consent);
     
     await AsyncStorage.multiSet([
       [STORAGE_KEYS.CLOUD_BACKUP_ENABLED, 'true'],
       [STORAGE_KEYS.CLOUD_BACKUP_CONSENT, JSON.stringify(consent)],
     ]);
+  }
+  
+  /**
+   * Log consent event for audit trail (F2 compliance)
+   */
+  private async logConsentEvent(consent: CloudBackupConsent): Promise<void> {
+    try {
+      const existingLog = await AsyncStorage.getItem(STORAGE_KEYS.CLOUD_BACKUP_CONSENT_LOG);
+      const log = existingLog ? JSON.parse(existingLog) : [];
+      
+      log.push({
+        timestamp: consent.grantedAt || consent.revokedAt,
+        userId: consent.userId,
+        version: consent.version,
+        scope: consent.scope,
+        method: consent.method,
+        action: consent.granted ? 'granted' : 'revoked',
+      });
+      
+      await AsyncStorage.setItem(STORAGE_KEYS.CLOUD_BACKUP_CONSENT_LOG, JSON.stringify(log));
+    } catch (error) {
+      console.error('Error logging consent:', error);
+    }
   }
 
   async disableCloudBackup(): Promise<void> {
