@@ -348,7 +348,7 @@
     "thinking": "IA está pensando...",
     "send": "Enviar",
     "fastingProfileRestricted": "Seu perfil de jejum está restrito pelas configurações de privacidade. A IA não o incluirá na análise.",
-    "referencePriceNotice": "Preços são apenas para referência e podem estar desatualizados. Seu custo real depende da sua farmácia e seguro.",
+    "referencePriceNotice": "Preço de referência verificado em {{date}}. Pode variar na loja.",
     "aiHealthAssistant": "Assistente de IA de informações de saúde",
     "intelligentHealthcareFeatures": "Ferramentas de IA para organizar suas informações de saúde. Elas não substituem seu médico."
   },
@@ -1054,7 +1054,7 @@
     "daysUntilCancellation": "Dias Até o Cancelamento",
     "cancelMembership": "Cancelar Assinatura",
     "restartMembership": "Reativar Assinatura",
-    "cancelMembershipConfirm": "Tem certeza de que deseja cancelar sua assinatura? Esta ação não pode ser desfeita.",
+    "cancelMembershipConfirm": "Cancelar assinatura. Você mantém o Pro até {{date}}. Sem mais cobranças. Você pode reassinar a qualquer momento.",
     "restartMembershipConfirm": "Tem certeza de que deseja reativar sua assinatura?",
     "confirmCancel": "Sim, Cancelar Assinatura",
     "confirmRestart": "Sim, Reativar Assinatura",
@@ -1328,10 +1328,18 @@
     "updated": "Atualizado",
     "visible": "Visível",
     "weekend": "Fim de semana",
-    "work": "Trabalho",
-    "yes": "Sim",
-    "yesterday": "Ontem"
-  },
+  "work": "Trabalho",
+  "yes": "Sim",
+  "yesterday": "Ontem",
+  "warning": "Aviso",
+  "search": "Pesquisar",
+  "shared": "Compartilhado",
+  "professional": "Profissional",
+  "school": "Escola",
+  "travel": "Viagem",
+  "vacation": "Férias",
+  "weekday": "Dia da semana"
+},
   "healthProfile": {
     "title": "Health Profile",
     "settings": "Health Profile Settings",
@@ -1418,6 +1426,12 @@
     "month": "MXN $79 por mês",
     "year": "MXN $699 por ano",
     "disclosure": "IVA incluído. Renovação automática pelo período escolhido. Aviso 5 dias antes de cada cobrança. Cancele a qualquer momento em Configurações."
+  },
+  "subscriptionExpired": {
+    "title": "Assinatura Expirada",
+    "message": "30 dias após o término da sua assinatura, excluímos sua conta e todos os seus dados, exceto o que a lei nos obriga a manter, como faturas.",
+    "subscribeButton": "Assinar Agora",
+    "dismissButton": "Mais Tarde"
   },
   "authSignIn": {
     "email": "Email",
