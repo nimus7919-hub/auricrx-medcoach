@@ -17,14 +17,28 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
   const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
 
-  const handleUpgrade = () => {
+  const handleStartTrial = () => {
     // TODO: When implementing real payments, this should:
-    // 1. Launch the in-app purchase flow
-    // 2. Present subscription options (monthly/yearly)
-    // 3. Process payment via Google Play Billing / App Store
-    // 4. Validate receipt on backend
-    // 5. Grant premium access via premiumEntitlementService.grantPremiumAccess()
-    console.log('TODO: Launch in-app purchase flow for premium features');
+    // 1. Launch the in-app purchase flow for 14-day trial
+    // 2. Present subscription via Google Play Billing / App Store
+    // 3. Validate receipt on backend
+    // 4. Grant trial access via premiumEntitlementService.startPremiumTrial()
+    console.log('TODO: Launch in-app purchase flow for 14-day trial');
+  };
+
+  const getStore = () => {
+    // TODO: Detect platform
+    return 'Google Play'; // or 'App Store'
+  };
+
+  const getCancelPath = () => {
+    return 'Google Play > Subscriptions'; // or 'App Store > Subscriptions'
+  };
+
+  const getTrialEndDate = () => {
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 14);
+    return trialEnd.toLocaleDateString();
   };
 
   const getFeatureKey = () => {
@@ -53,10 +67,10 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
             ✨
           </DynamicText>
           <DynamicText type="card" style={[styles.heroTitle, { color: getCardTextColor() }]}>
-            {t(`premiumUpgrade.${featureKey}.heroTitle`)}
+            {t('subscription.proTitle')}
           </DynamicText>
           <DynamicText type="card" style={[styles.heroSubtitle, { color: getCardTextColor() }]}>
-            {t(`premiumUpgrade.${featureKey}.heroSubtitle`)}
+            {t('subscription.includes')}
           </DynamicText>
         </View>
 
@@ -76,132 +90,79 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
           </View>
         )}
 
-        <View style={[styles.featuresCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
-          <DynamicText type="card" style={[styles.featuresTitle, { color: getCardTextColor() }]}>
-            {t('premiumUpgrade.allFeaturesTitle')}
+        <View style={[styles.pricingCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
+          <DynamicText type="card" style={[styles.pricingTitle, { color: getCardTextColor() }]}>
+            {t('subscription.trialPrice', { price: 'MXN $79' })}
           </DynamicText>
-
-          <View style={styles.featuresList}>
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                🤖
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.aiHealth')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                👨‍👩‍👧‍👦
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.familyCircle')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                💊
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.pharmacySearch')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                🔬
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.labSearch')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                ☁️
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.cloudBackup')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                ⌚
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.wearableSync')}
-              </DynamicText>
-            </View>
-
-            <View style={styles.featureItem}>
-              <DynamicText type="card" style={[styles.featureEmoji, { color: getCardTextColor() }]}>
-                📤
-              </DynamicText>
-              <DynamicText type="card" style={[styles.featureText, { color: getCardTextColor() }]}>
-                {t('premiumUpgrade.features.dataExport')}
-              </DynamicText>
-            </View>
-          </View>
+          <DynamicText type="card" style={[styles.pricingText, { color: getCardTextColor() }]}>
+            {t('subscription.autoCharge', { date: getTrialEndDate(), store: getStore() })}
+          </DynamicText>
+          <DynamicText type="card" style={[styles.pricingText, { color: getCardTextColor() }]}>
+            {t('subscription.reminderNotice')}
+          </DynamicText>
+          <DynamicText type="card" style={[styles.pricingText, { color: getCardTextColor() }]}>
+            {t('subscription.cancelAnytime', { cancelPath: getCancelPath() })}
+          </DynamicText>
         </View>
 
         <View style={[styles.freeCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={[styles.freeTitle, { color: getCardTextColor() }]}>
-            💚 {t('premiumUpgrade.alwaysFreeTitle')}
+            💚 {t('subscription.continueFree')}
           </DynamicText>
           <DynamicText type="card" style={[styles.freeText, { color: getCardTextColor() }]}>
-            {t('premiumUpgrade.alwaysFreeText')}
-          </DynamicText>
-          <View style={styles.freeList}>
-            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
-              • {t('premiumUpgrade.freeItems.reminders')}
-            </DynamicText>
-            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
-              • {t('premiumUpgrade.freeItems.tracking')}
-            </DynamicText>
-            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
-              • {t('premiumUpgrade.freeItems.plants')}
-            </DynamicText>
-            <DynamicText type="card" style={[styles.freeItem, { color: getCardTextColor() }]}>
-              • {t('premiumUpgrade.freeItems.documents')}
-            </DynamicText>
-          </View>
-        </View>
-
-        <View style={[styles.dataCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
-          <DynamicText type="card" style={[styles.dataTitle, { color: getCardTextColor() }]}>
-            💾 {t('premiumUpgrade.dataTitle')}
-          </DynamicText>
-          <DynamicText type="card" style={[styles.dataText, { color: getCardTextColor() }]}>
-            {t('premiumUpgrade.dataText')}
+            {t('subscription.freeForever')}
           </DynamicText>
         </View>
 
         <TouchableOpacity
-          style={styles.upgradeButton}
-          onPress={handleUpgrade}
+          style={styles.startTrialButton}
+          onPress={handleStartTrial}
           activeOpacity={0.85}
         >
           <LinearGradient
             colors={goldGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.upgradeButtonGradient}
+            style={styles.startTrialButtonGradient}
           >
-            <DynamicText type="button" style={styles.upgradeButtonText}>
-              {t('premiumUpgrade.upgradeButton')}
-            </DynamicText>
-            <DynamicText type="button" style={styles.upgradeButtonSubtext}>
-              {t('premiumUpgrade.upgradeSubtext')}
+            <DynamicText type="button" style={styles.startTrialButtonText}>
+              {t('subscription.startTrial')}
             </DynamicText>
           </LinearGradient>
         </TouchableOpacity>
 
-        <DynamicText type="card" style={[styles.disclaimer, { color: getCardTextColor() }]}>
-          {t('premiumUpgrade.disclaimer')}
-        </DynamicText>
+        <TouchableOpacity
+          style={styles.continueFreeButton}
+          onPress={onClose}
+        >
+          <DynamicText type="card" style={[styles.continueFreeButtonText, { color: getCardTextColor() }]}>
+            {t('subscription.continueFree')}
+          </DynamicText>
+        </TouchableOpacity>
+
+        <View style={styles.linksRow}>
+          <TouchableOpacity>
+            <DynamicText type="card" style={[styles.linkText, { color: getCardTextColor() }]}>
+              {t('subscription.terms')}
+            </DynamicText>
+          </TouchableOpacity>
+          <DynamicText type="card" style={[styles.linkSeparator, { color: getCardTextColor() }]}>
+            •
+          </DynamicText>
+          <TouchableOpacity>
+            <DynamicText type="card" style={[styles.linkText, { color: getCardTextColor() }]}>
+              {t('subscription.privacyNotice')}
+            </DynamicText>
+          </TouchableOpacity>
+          <DynamicText type="card" style={[styles.linkSeparator, { color: getCardTextColor() }]}>
+            •
+          </DynamicText>
+          <TouchableOpacity>
+            <DynamicText type="card" style={[styles.linkText, { color: getCardTextColor() }]}>
+              {t('subscription.restorePurchases')}
+            </DynamicText>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -216,27 +177,22 @@ const styles = StyleSheet.create({
   contentContainer: { padding: 16, paddingBottom: 32 },
   heroSection: { alignItems: 'center', marginBottom: 24, paddingVertical: 20 },
   heroEmoji: { fontSize: 72, marginBottom: 16 },
-  heroTitle: { fontSize: 26, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
-  heroSubtitle: { fontSize: 16, opacity: 0.85, textAlign: 'center', lineHeight: 24 },
+  heroTitle: { fontSize: 26, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 },
+  heroSubtitle: { fontSize: 15, opacity: 0.85, textAlign: 'center', lineHeight: 22 },
   trialCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 20, alignItems: 'center' },
   trialText: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
-  featuresCard: { borderRadius: 12, borderWidth: 1, padding: 20, marginBottom: 20 },
-  featuresTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16 },
-  featuresList: { gap: 14 },
-  featureItem: { flexDirection: 'row', alignItems: 'flex-start' },
-  featureEmoji: { fontSize: 22, marginRight: 12, marginTop: 2 },
-  featureText: { flex: 1, fontSize: 14, lineHeight: 20 },
-  freeCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
+  pricingCard: { borderRadius: 12, borderWidth: 1, padding: 20, marginBottom: 20 },
+  pricingTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
+  pricingText: { fontSize: 14, opacity: 0.85, lineHeight: 21, marginBottom: 12 },
+  freeCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 24 },
   freeTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  freeText: { fontSize: 14, opacity: 0.85, lineHeight: 20, marginBottom: 12 },
-  freeList: { gap: 6 },
-  freeItem: { fontSize: 13, opacity: 0.8, lineHeight: 19 },
-  dataCard: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 24 },
-  dataTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  dataText: { fontSize: 14, opacity: 0.85, lineHeight: 20 },
-  upgradeButton: { borderRadius: 14, overflow: 'hidden', marginBottom: 16 },
-  upgradeButtonGradient: { paddingVertical: 20, paddingHorizontal: 24, alignItems: 'center' },
-  upgradeButtonText: { fontSize: 18, fontWeight: 'bold', color: '#17130B', marginBottom: 4 },
-  upgradeButtonSubtext: { fontSize: 13, color: '#17130B', opacity: 0.8 },
-  disclaimer: { fontSize: 12, opacity: 0.7, textAlign: 'center', fontStyle: 'italic', lineHeight: 18 },
+  freeText: { fontSize: 14, opacity: 0.85, lineHeight: 21 },
+  startTrialButton: { borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
+  startTrialButtonGradient: { paddingVertical: 18, paddingHorizontal: 24, alignItems: 'center' },
+  startTrialButtonText: { fontSize: 18, fontWeight: 'bold', color: '#17130B' },
+  continueFreeButton: { alignItems: 'center', paddingVertical: 12, marginBottom: 24 },
+  continueFreeButtonText: { fontSize: 16, opacity: 0.8 },
+  linksRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
+  linkText: { fontSize: 13, opacity: 0.7 },
+  linkSeparator: { fontSize: 13, opacity: 0.5, marginHorizontal: 4 },
 });
