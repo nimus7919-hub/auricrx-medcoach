@@ -44,6 +44,7 @@
         "backgroundColor": "#0d1019"
       },
       "package": "com.auricrx.medcoach",
+      "versionCode": 11,
       "googleServicesFile": "./android/app/google-services.json",
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
