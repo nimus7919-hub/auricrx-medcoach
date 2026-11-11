@@ -1330,7 +1330,8 @@
     "weekend": "Week-end",
     "work": "Travail",
     "yes": "Oui",
-    "yesterday": "Hier"
+    "yesterday": "Hier",
+    "tryAgain": "Veuillez réessayer."
   },
   "healthProfile": {
     "title": "Health Profile",
@@ -2082,6 +2083,14 @@
     }
   },
   "familyCircle": {
-    "permShareDocuments": "See and add documents in their Family Documents folder"
+    "permShareDocuments": "See and add documents in their Family Documents folder",
+    "generateInviteFailed": "Échec de la génération du code d'invitation",
+    "invalidInviteCode": "Code d'invitation invalide ou expiré",
+    "acceptInviteFailed": "Impossible d'accepter l'invitation. Réessayez.",
+    "confirmDeviceOnlyAttestation": "Veuillez confirmer l'attestation appareil uniquement",
+    "confirmGuardianAttestation": "Veuillez confirmer que vous êtes le parent/tuteur",
+    "freeTierLimitReached": "Vous avez atteint la limite du forfait gratuit. Passez à Pro pour ajouter plus de membres.",
+    "memberAdded": "{{name}} a été ajouté à votre Family Circle",
+    "addMemberFailed": "Impossible d'ajouter le membre. Réessayez."
   }
 }

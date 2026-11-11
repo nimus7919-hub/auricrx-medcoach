@@ -151,8 +151,9 @@ class PreventionPlannerService {
             priority: Notifications.AndroidNotificationPriority.HIGH,
           },
           trigger: {
+            type: 'date',
             date: scheduledDate,
-          },
+          } as Notifications.NotificationTriggerInput,
         });
         newCheckup.notificationId = notificationId;
       } catch (error) {
@@ -194,8 +195,9 @@ class PreventionPlannerService {
                 priority: Notifications.AndroidNotificationPriority.HIGH,
               },
               trigger: {
+                type: 'date',
                 date: scheduledDate,
-              },
+              } as Notifications.NotificationTriggerInput,
             });
             checkups[index].notificationId = notificationId;
           } catch (error) {

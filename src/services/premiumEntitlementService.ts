@@ -34,7 +34,11 @@ class PremiumEntitlementService {
     try {
       // Check if user has an active premium subscription from backend
       try {
-        const subStatus = await getSubscriptionStatus();
+        const subStatus = await getSubscriptionStatus() as {
+          active?: boolean;
+          isPremium?: boolean;
+          subscription?: { active?: boolean };
+        } | null;
         if (subStatus?.active || subStatus?.isPremium || subStatus?.subscription?.active) {
           return {
             hasPremiumAccess: true,
@@ -287,7 +291,11 @@ class PremiumEntitlementService {
 
   async isPremiumUser(): Promise<boolean> {
     try {
-      const subStatus = await getSubscriptionStatus();
+      const subStatus = await getSubscriptionStatus() as {
+        active?: boolean;
+        isPremium?: boolean;
+        subscription?: { active?: boolean };
+      } | null;
       if (subStatus?.active || subStatus?.isPremium || subStatus?.subscription?.active) {
         return true;
       }
@@ -302,6 +310,23 @@ class PremiumEntitlementService {
     }
     return false;
   }
+
+  /** Map UI/feature aliases used by screens and tests onto PREMIUM_FEATURES keys. */
+  requiresPremium(feature: string): boolean {
+    const featureMap: Record<string, keyof typeof import('../config/premiumFeatures').PREMIUM_FEATURES> = {
+      familyCircle: 'FAMILY_CIRCLE_UNLIMITED_MEMBERS',
+      familyDocuments: 'FAMILY_DOCUMENTS',
+      pharmacySearch: 'PHARMACY_SEARCH',
+      pharmacy: 'PHARMACY_SEARCH',
+      labSearch: 'LAB_SEARCH',
+      lab: 'LAB_SEARCH',
+      aiChat: 'AI_HEALTH_ASSISTANT',
+      cloudBackup: 'DOCUMENT_CLOUD_BACKUP',
+    };
+    const key = featureMap[feature];
+    return key ? isPremiumFeature(key) : false;
+  }
 }
 
+export { PremiumEntitlementService };
 export default PremiumEntitlementService;

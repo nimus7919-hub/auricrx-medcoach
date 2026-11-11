@@ -38,7 +38,7 @@ export default function InviteFamilyMemberScreen({
       setInviteCode(code);
     } catch (error) {
       console.error('Error generating invite:', error);
-      Alert.alert(t('common.error'), 'Failed to generate invite code');
+      Alert.alert(t('common.error'), t('familyCircle.generateInviteFailed'));
     } finally {
       setGenerating(false);
     }
@@ -192,27 +192,27 @@ export default function InviteFamilyMemberScreen({
   );
 }
 
-  const buttonTextColor = getCardBackgroundColor() === '#071426' ? '#17130B' : '#17130B'; // Dark text for gold buttons
-  
-  const styles = StyleSheet.create({
-    container: { flex: 1 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-    title: { fontSize: 24, fontWeight: 'bold' },
-    closeButton: { fontSize: 16, color: getAccentColor() },
-    content: { flex: 1 },
-    contentContainer: { padding: 16, paddingBottom: 32 },
-    card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
-    infoText: { fontSize: 14, opacity: 0.85, lineHeight: 21 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-    permissionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-    permissionLabel: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
-    generateButton: { borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 8 },
-    shareButton: { borderRadius: 8, padding: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginBottom: 16 },
-    buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
-    codeTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
-    codeBox: { borderRadius: 8, borderWidth: 2, padding: 16, alignItems: 'center', marginBottom: 12 },
-    codeText: { fontSize: 24, fontWeight: 'bold', letterSpacing: 2 },
-    helperText: { fontSize: 13, opacity: 0.7, textAlign: 'center' },
-    noteCard: { borderRadius: 12, borderWidth: 1, padding: 12 },
-    noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
-  });
+const buttonTextColor = '#17130B';
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  closeButton: { fontSize: 16, color: '#DBB65C' },
+  content: { flex: 1 },
+  contentContainer: { padding: 16, paddingBottom: 32 },
+  card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
+  infoText: { fontSize: 14, opacity: 0.85, lineHeight: 21 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  permissionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  permissionLabel: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
+  generateButton: { borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 8 },
+  shareButton: { borderRadius: 8, padding: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginBottom: 16 },
+  buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
+  codeTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  codeBox: { borderRadius: 8, borderWidth: 2, padding: 16, alignItems: 'center', marginBottom: 12 },
+  codeText: { fontSize: 24, fontWeight: 'bold', letterSpacing: 2 },
+  helperText: { fontSize: 13, opacity: 0.7, textAlign: 'center' },
+  noteCard: { borderRadius: 12, borderWidth: 1, padding: 12 },
+  noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
+});

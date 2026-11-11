@@ -71,7 +71,12 @@ try {
     .use(initReactI18next)
     .init({
       resources,
-      fallbackLng: 'es',
+      // Incomplete locales (fr/de) fall back to English, then Spanish for Mexico default.
+      fallbackLng: {
+        fr: ['en', 'es'],
+        de: ['en', 'es'],
+        default: ['es', 'en'],
+      },
       // Don't set lng here - let LANGUAGE_DETECTOR determine it
       debug: false, // Enable debug mode to see what's happening
       interpolation: {
@@ -90,7 +95,11 @@ try {
   // Fallback initialization
   i18n.init({
     resources,
-    fallbackLng: 'es',
+    fallbackLng: {
+      fr: ['en', 'es'],
+      de: ['en', 'es'],
+      default: ['es', 'en'],
+    },
     // Don't set lng in fallback either - let LANGUAGE_DETECTOR handle it
     interpolation: {
       escapeValue: false,

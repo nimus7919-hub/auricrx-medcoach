@@ -6,7 +6,7 @@ import GoldHealthIcon from '../components/GoldHealthIcon';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Line, Polyline, Rect, Text as SvgText } from 'react-native-svg';
-import { connectionStatus, connectHealth, disconnectHealth, openHealthSettings, openHealthStore, privacy, readHealth, statusText } from '../services/healthConnectService';
+import { connectionStatus, connectHealth, disconnectHealth, openHealthSettings, openHealthStore, privacy, readHealth, statusText } from '../services/auricHealthConnect';
 
 const C = { navy: '#020D1B', card: '#0F1D2A', gold: '#E8BF80', text: '#F6F5F2', gray: '#AAA6A0' };
 export function HealthButton({ title, onPress, disabled }) {

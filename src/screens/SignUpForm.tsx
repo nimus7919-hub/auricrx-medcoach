@@ -461,6 +461,7 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       }
       await onGoogleSuccess({ provider: 'google', user: result.user });
     } catch (error) {
+      console.error('Google sign-in failed:', error);
       Alert.alert(uiI18n.t("adminProfile.error"), googleAuthText(currentLanguage).error);
     } finally {
       setGoogleLoading(false);

@@ -1486,7 +1486,8 @@
     "school": "Escola",
     "travel": "Viagem",
     "vacation": "Férias",
-    "weekday": "Dia da semana"
+    "weekday": "Dia da semana",
+    "tryAgain": "Por favor, tenta novamente."
   },
   "healthProfile": {
     "title": "Perfil de saúde",
@@ -4170,7 +4171,15 @@
     "shareConsentTitle": "Compartilhar Informações de Saúde",
     "shareConsentMessage": "Você está prestes a compartilhar informações de saúde de um membro da família. Este consentimento é válido por 7 dias.",
     "grantConsent": "Eu Consinto em Compartilhar",
-    "permShareDocuments": "Ver e adicionar documentos na pasta de Documentos Familiares deles"
+    "permShareDocuments": "Ver e adicionar documentos na pasta de Documentos Familiares deles",
+    "generateInviteFailed": "Falha ao gerar o código de convite",
+    "invalidInviteCode": "Código de convite inválido ou expirado",
+    "acceptInviteFailed": "Falha ao aceitar o convite. Tenta novamente.",
+    "confirmDeviceOnlyAttestation": "Confirma a declaração de perfil apenas no dispositivo",
+    "confirmGuardianAttestation": "Confirma que és o pai/mãe ou tutor legal",
+    "freeTierLimitReached": "Atingiste o limite do plano gratuito. Faz upgrade para Pro para adicionar mais membros.",
+    "memberAdded": "{{name}} foi adicionado ao teu Family Circle",
+    "addMemberFailed": "Falha ao adicionar o membro. Tenta novamente."
   },
   "activityUS": {
     "text1": "Conectar ao Health Connect",

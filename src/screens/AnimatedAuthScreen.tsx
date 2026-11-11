@@ -112,6 +112,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
         Alert.alert(uiI18n.t("adminProfile.error"), result.error);
       }
     } catch (error) {
+      console.error('Google sign-in failed:', error);
       Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.googleAuthenticationFailed"));
     } finally {
       setLoading(false);

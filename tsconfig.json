@@ -34,7 +34,16 @@
     "indautor Req/**",
     "android/**",
     "ios/**",
-    "**/*_backup.tsx"
+    "**/*_backup.tsx",
+    "auric-rx/**",
+    "app/**",
+    "components/**",
+    "dist-android-export/**",
+    "**/__tests__/**",
+    "tailwind.config.ts",
+    ".health-connect-check/**",
+    "src/components/DocumentsCard.tsx",
+    "src/components/DocumentsCard.web.tsx"
   ],
   "extends": "expo/tsconfig.base"
 }

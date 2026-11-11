@@ -1326,7 +1326,8 @@
     "weekend": "Wochenende",
     "work": "Arbeit",
     "yes": "Ja",
-    "yesterday": "Gestern"
+    "yesterday": "Gestern",
+    "tryAgain": "Bitte versuche es erneut."
   },
   "subscriptionPlans": {
     "month": "MXN $79 pro Monat",
@@ -1996,6 +1997,14 @@
     }
   },
   "familyCircle": {
-    "permShareDocuments": "See and add documents in their Family Documents folder"
+    "permShareDocuments": "See and add documents in their Family Documents folder",
+    "generateInviteFailed": "Einladungscode konnte nicht erstellt werden",
+    "invalidInviteCode": "Ungültiger oder abgelaufener Einladungscode",
+    "acceptInviteFailed": "Einladung konnte nicht angenommen werden. Bitte erneut versuchen.",
+    "confirmDeviceOnlyAttestation": "Bitte bestätige die Nur-Gerät-Erklärung",
+    "confirmGuardianAttestation": "Bitte bestätige, dass du Elternteil/Erziehungsberechtigter bist",
+    "freeTierLimitReached": "Du hast das Limit des kostenlosen Plans erreicht. Upgrade auf Pro, um weitere Mitglieder hinzuzufügen.",
+    "memberAdded": "{{name}} wurde zu deinem Family Circle hinzugefügt",
+    "addMemberFailed": "Mitglied konnte nicht hinzugefügt werden. Bitte erneut versuchen."
   }
 }

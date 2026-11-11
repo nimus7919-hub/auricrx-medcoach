@@ -387,7 +387,7 @@ export default function createSettings(getScope) {
               {t('cloudBackup.title')}
             </DynamicText>
             <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
-              Optional cloud backup for documents (Premium)
+              {t('cloudBackup.premiumFeature')}
             </DynamicText>
           </TouchableOpacity>
           <TouchableOpacity style={{ padding: 16 }} onPress={async () => {

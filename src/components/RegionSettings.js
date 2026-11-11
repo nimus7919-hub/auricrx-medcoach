@@ -1,5 +1,5 @@
 import { auth } from '../config/firebase';
-import { disconnectHealth } from '../services/healthConnectService';
+import { disconnectHealth } from '../services/auricHealthConnect';
 import React, { useState } from 'react';
 import { Alert, Linking, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';

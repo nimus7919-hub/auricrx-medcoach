@@ -901,7 +901,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
   const saveAIAnalysisAsDocument = async (content: string) => {
     try {
       const timestamp = new Date().toISOString();
-      const fileName = `AI_Analysis_${timestamp.split(uiI18n.t("reminders.tuesdayShort"))[0]}.txt`;
+      const fileName = `AI_Analysis_${timestamp.split('T')[0]}.txt`;
       
       // Save to document directory
       const documentPath = `${FileSystem.documentDirectory}${fileName}`;
@@ -939,7 +939,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       // Create a simple text-only PDF first to test
       const timestamp = new Date().toISOString();
-      const fileName = `AI_Analysis_${timestamp.split(uiI18n.t("reminders.tuesdayShort"))[0]}.txt`;
+      const fileName = `AI_Analysis_${timestamp.split('T')[0]}.txt`;
       
       // Save as text file first
       const documentPath = `${FileSystem.documentDirectory}${fileName}`;

@@ -13,6 +13,7 @@ interface AcceptInviteScreenProps {
 
 export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInviteScreenProps) {
   const { t } = useTranslation();
+  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
   
   const [inviteCode, setInviteCode] = useState('');
   const [permissions, setPermissions] = useState({
@@ -31,7 +32,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
 
   const handleAcceptInvite = async () => {
     if (!inviteCode.trim()) {
-      Alert.alert(t('common.error'), 'Please enter an invite code');
+      Alert.alert(t('common.error'), t('familyCircle.enterInviteCode'));
       return;
     }
 
@@ -41,7 +42,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
       const member = await familyService.acceptInvite(inviteCode.trim(), permissions);
       
       if (!member) {
-        Alert.alert(t('common.error'), 'Invalid or expired invite code');
+        Alert.alert(t('common.error'), t('familyCircle.invalidInviteCode'));
         return;
       }
 
@@ -60,7 +61,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
       );
     } catch (error) {
       console.error('Error accepting invite:', error);
-      Alert.alert(t('common.error'), 'Failed to accept invite. Please try again.');
+      Alert.alert(t('common.error'), t('familyCircle.acceptInviteFailed'));
     } finally {
       setAccepting(false);
     }
@@ -186,24 +187,23 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
   );
 }
 
-  const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
-  const buttonTextColor = '#17130B'; // Dark text for gold buttons
-  
-  const styles = StyleSheet.create({
-    container: { flex: 1 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-    title: { fontSize: 24, fontWeight: 'bold' },
-    closeButton: { fontSize: 16, color: getAccentColor() },
-    content: { flex: 1 },
-    contentContainer: { padding: 16, paddingBottom: 32 },
-    card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
-    codeInput: { borderRadius: 8, borderWidth: 1, padding: 14, fontSize: 18, fontWeight: '600', textAlign: 'center', letterSpacing: 1 },
-    permissionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-    permissionLabel: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
-    helperText: { fontSize: 13, opacity: 0.7, lineHeight: 19 },
-    noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
-    noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
-    acceptButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
-    buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
-  });
+const buttonTextColor = '#17130B';
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  closeButton: { fontSize: 16, color: '#DBB65C' },
+  content: { flex: 1 },
+  contentContainer: { padding: 16, paddingBottom: 32 },
+  card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  codeInput: { borderRadius: 8, borderWidth: 1, padding: 14, fontSize: 18, fontWeight: '600', textAlign: 'center', letterSpacing: 1 },
+  permissionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  permissionLabel: { flex: 1, fontSize: 14, marginLeft: 12, lineHeight: 20 },
+  helperText: { fontSize: 13, opacity: 0.7, lineHeight: 19 },
+  noteCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
+  noteText: { fontSize: 13, opacity: 0.75, lineHeight: 19 },
+  acceptButton: { borderRadius: 8, padding: 14, alignItems: 'center' },
+  buttonText: { fontSize: 16, fontWeight: '600', color: buttonTextColor },
+});
