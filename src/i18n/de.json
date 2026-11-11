@@ -1075,7 +1075,7 @@
       "teal": "Türkis"
     },
     "emailUs": "Schreib uns",
-    "emailAddress": "Auricrx.ltd@gmail.com",
+    "emailAddress": "support@auricrx.com.mx",
     "signOut": "Abmelden",
     "smartNotificationsDesc": "Intelligente Erinnerungen, die sich an deinen Alltag anpassen",
     "smartNotificationsActive": "Smarte Benachrichtigungen aktiviert",
@@ -1530,7 +1530,7 @@
     "yourChoice": "Ihre Wahl:",
     "yourChoiceText": "Sie können das Backup jederzeit unter Einstellungen > Backup deaktivieren. Wenn Sie es deaktivieren, können Sie die Cloud-Kopien löschen; wir werden sie innerhalb von [X] Tagen löschen. Das Löschen Ihrer Kopien ist kostenlos, auch ohne Pro.",
     "yourRights": "Ihre Rechte:",
-    "yourRightsText": "Sie können auf Ihre Daten zugreifen, sie berichtigen, löschen oder deren Verwendung widersprechen (ARCO-Rechte) und Ihre Einwilligung unter Einstellungen > Datenschutz widerrufen oder indem Sie an [PRIVACY EMAIL – pending approval] schreiben. Siehe Datenschutzhinweis: [URL].",
+    "yourRightsText": "Sie können auf Ihre Daten zugreifen, sie berichtigen, löschen oder deren Verwendung widersprechen (ARCO-Rechte) und Ihre Einwilligung unter Einstellungen > Datenschutz widerrufen oder indem Sie an support@auricrx.com.mx schreiben. Siehe Datenschutzhinweis: [URL].",
     "consentCheckbox": "Ich willige ausdrücklich ein, eine Cloud-Kopie der von mir ausgewählten Gesundheitsdokumente gemäß den obigen Bedingungen zu speichern.",
     "enableButton": "Backup aktivieren",
     "enableButtonHelper": "(aktiviert durch Ankreuzen des Kästchens und Bestätigung Ihrer Identität)",

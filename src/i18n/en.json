@@ -1076,7 +1076,7 @@
       "teal": "Teal"
     },
     "emailUs": "Email us",
-    "emailAddress": "Auricrx.ltd@gmail.com",
+    "emailAddress": "support@auricrx.com.mx",
     "signOut": "Sign Out",
     "smartNotificationsDesc": "Intelligent reminders that adapt to your lifestyle and environment",
     "smartNotificationsActive": "Smart Notifications Active",
@@ -3839,7 +3839,7 @@
     "yourRights": "Your Rights (ARCO)",
     "yourRightsText": "You have the right to Access, Rectify, Cancel, or Object to the use of your personal data. You can export and delete your data at any time in Settings > Privacy. You can withdraw consent for cloud backup, Health Connect, or Family Circle features at any time.",
     "contact": "Contact for Privacy Questions",
-    "contactText": "[PRIVACY EMAIL – pending approval]\n\nFor questions about your privacy rights or to exercise them, please write to the email above.",
+    "contactText": "support@auricrx.com.mx\n\nFor questions about your privacy rights or to exercise them, please write to the email above.",
     "viewFullPolicy": "View Full Privacy Policy",
     "lastUpdated": "Last updated: November 2026"
   },
@@ -3856,7 +3856,7 @@
     "yourChoice": "Your choice:",
     "yourChoiceText": "you can turn off backup anytime in Settings > Backup. When you turn it off you can delete the cloud copies; we'll delete them within [X] days. Deleting your copies is free, even if you no longer have Pro.",
     "yourRights": "Your rights:",
-    "yourRightsText": "you can access, rectify, cancel or object to the use of your data (ARCO rights) and withdraw your consent in Settings > Privacy or by writing to [PRIVACY EMAIL – pending approval]. See the Privacy Notice: [URL].",
+    "yourRightsText": "you can access, rectify, cancel or object to the use of your data (ARCO rights) and withdraw your consent in Settings > Privacy or by writing to support@auricrx.com.mx. See the Privacy Notice: [URL].",
     "consentCheckbox": "I expressly consent to storing a cloud copy of the health documents I choose, under the terms above.",
     "enableButton": "Enable backup",
     "enableButtonHelper": "(enabled by checking the box and confirming your identity)",
