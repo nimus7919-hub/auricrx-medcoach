@@ -1,4 +1,5 @@
 import {
+  BUSINESS_EMAIL,
   SUPPORT_EMAIL_DEFAULT,
   SUPPORT_EMAIL_ES,
   SUPPORT_EMAIL_ZH,
@@ -36,6 +37,16 @@ describe('applySupportEmail', () => {
     );
     expect(applySupportEmail(source, 'zh')).toBe(
       `Write to ${SUPPORT_EMAIL_ZH} or ${SUPPORT_EMAIL_ZH}`,
+    );
+  });
+});
+
+describe('BUSINESS_EMAIL', () => {
+  it('is the admin@ business contact and is not swapped by applySupportEmail', () => {
+    expect(BUSINESS_EMAIL).toBe('admin@auricrx.com.mx');
+    const source = `Support: support@auricrx.com.mx — Business: ${BUSINESS_EMAIL}`;
+    expect(applySupportEmail(source, 'es')).toBe(
+      `Support: ${SUPPORT_EMAIL_ES} — Business: ${BUSINESS_EMAIL}`,
     );
   });
 });

@@ -3,7 +3,7 @@ import RegionSettings from '../components/RegionSettings';
 import { resetSearchLocationConsent } from "../lib/locationPermission";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Linking } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import { useTimeFormat } from "./../hooks/useTimeFormat";
 import { formatTime } from "./../utils/time";
@@ -13,6 +13,7 @@ import { styles } from "./appStyles";
 import { Platform } from 'react-native';
 import { HealthConnectPrivacyControls } from './ActivityHealthScreen';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
+import { BUSINESS_EMAIL } from '../lib/supportEmail';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createSettings(getScope) {
@@ -452,7 +453,21 @@ export default function createSettings(getScope) {
         <CollapsibleSection title={S.help} sectionKey="help" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.emailUs}</DynamicText>
-            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{S.emailAddress}</DynamicText>
+            <TouchableOpacity
+              accessibilityRole="link"
+              accessibilityLabel={S.emailAddress}
+              onPress={() => Linking.openURL(`mailto:${S.emailAddress}`).catch(() => {})}
+            >
+              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{S.emailAddress}</DynamicText>
+            </TouchableOpacity>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginTop: 16, marginBottom: 12, opacity: 0.7 }}>{S.forBusiness}</DynamicText>
+            <TouchableOpacity
+              accessibilityRole="link"
+              accessibilityLabel={`${S.forBusiness}: ${BUSINESS_EMAIL}`}
+              onPress={() => Linking.openURL(`mailto:${BUSINESS_EMAIL}`).catch(() => {})}
+            >
+              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{BUSINESS_EMAIL}</DynamicText>
+            </TouchableOpacity>
           </View>
         </CollapsibleSection>
         

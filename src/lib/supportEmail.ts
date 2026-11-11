@@ -5,6 +5,8 @@
 export const SUPPORT_EMAIL_ES = 'soporte@auricrx.com.mx';
 export const SUPPORT_EMAIL_ZH = 'zhichi@auricrx.com.mx';
 export const SUPPORT_EMAIL_DEFAULT = 'support@auricrx.com.mx';
+/** Business / partnerships contact. Shown on the Help screen in every language. */
+export const BUSINESS_EMAIL = 'admin@auricrx.com.mx';
 
 const KNOWN_SUPPORT_EMAILS = [
   SUPPORT_EMAIL_ES,
