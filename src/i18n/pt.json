@@ -1008,7 +1008,7 @@
     "yourRights": "Seus Direitos (ARCO)",
     "yourRightsText": "Você tem o direito de Acessar, Retificar, Cancelar ou Objetar ao uso de seus dados pessoais. Você pode exportar e excluir seus dados a qualquer momento em Configurações > Privacidade. Você pode retirar o consentimento para backup na nuvem, Health Connect ou recursos do Círculo Familiar a qualquer momento.",
     "contact": "Contato para Questões de Privacidade",
-    "contactText": "[E-MAIL DE PRIVACIDADE – pendente de aprovação]\n\nPara perguntas sobre seus direitos de privacidade ou para exercê-los, escreva para o e-mail acima.",
+    "contactText": "support@auricrx.com.mx\n\nPara perguntas sobre seus direitos de privacidade ou para exercê-los, escreva para o e-mail acima.",
     "viewFullPolicy": "Ver Política de Privacidade Completa",
     "lastUpdated": "Última atualização: Novembro de 2026"
   },
@@ -1221,7 +1221,8 @@
       "teal": "Verde-azulado"
     },
     "emailUs": "Envie-nos um email",
-    "emailAddress": "Endereço de e-mail",
+    "emailAddress": "support@auricrx.com.mx",
+    "forBusiness": "Para empresas",
     "signOut": "Sair",
     "smartNotificationsDesc": "Lembretes inteligentes que se adaptam ao seu estilo de vida e ambiente",
     "smartNotificationsActive": "Notificações Inteligentes Ativas",
@@ -3630,7 +3631,7 @@
     "yourChoice": "Sua escolha:",
     "yourChoiceText": "você pode desativar o backup a qualquer momento em Configurações > Backup. Quando desativar, você pode excluir as cópias na nuvem; nós as excluiremos em até [X] dias. Excluir suas cópias é grátis, mesmo se você não tiver mais o Pro.",
     "yourRights": "Seus direitos:",
-    "yourRightsText": "você pode acessar, retificar, cancelar ou se opor ao uso dos seus dados (direitos ARCO) e retirar seu consentimento em Configurações > Privacidade ou escrevendo para [PRIVACY EMAIL – pending approval]. Consulte o Aviso de Privacidade: [URL].",
+    "yourRightsText": "você pode acessar, retificar, cancelar ou se opor ao uso dos seus dados (direitos ARCO) e retirar seu consentimento em Configurações > Privacidade ou escrevendo para support@auricrx.com.mx. Consulte o Aviso de Privacidade: [URL].",
     "consentCheckbox": "Consinto expressamente em armazenar uma cópia na nuvem dos documentos de saúde que eu escolher, nos termos acima.",
     "enableButton": "Ativar backup",
     "enableButtonHelper": "(ativado ao marcar a caixa e confirmar sua identidade)",

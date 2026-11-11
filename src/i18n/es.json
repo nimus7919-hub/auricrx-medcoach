@@ -1076,7 +1076,8 @@
       "teal": "Verde azulado"
     },
     "emailUs": "Escríbenos",
-    "emailAddress": "Auricrx.ltd@gmail.com",
+    "emailAddress": "soporte@auricrx.com.mx",
+    "forBusiness": "Para empresas",
     "signOut": "Cerrar Sesión",
     "smartNotificationsDesc": "Recordatorios inteligentes que se adaptan a tu estilo de vida y entorno",
     "smartNotificationsActive": "Notificaciones Inteligentes Activas",
@@ -3969,7 +3970,7 @@
     "yourChoice": "Tú decides:",
     "yourChoiceText": "puedes apagar el respaldo cuando quieras en Ajustes > Respaldo. Al apagarlo puedes borrar las copias en la nube; las eliminaremos en un máximo de [X] días. Borrar tus copias es gratis, aunque ya no tengas Pro.",
     "yourRights": "Tus derechos:",
-    "yourRightsText": "puedes acceder, rectificar, cancelar u oponerte al uso de tus datos (derechos ARCO) y retirar tu consentimiento en Ajustes > Privacidad o escribiendo a [CORREO DE PRIVACIDAD – pendiente de aprobación]. Consulta el Aviso de Privacidad: [URL].",
+    "yourRightsText": "puedes acceder, rectificar, cancelar u oponerte al uso de tus datos (derechos ARCO) y retirar tu consentimiento en Ajustes > Privacidad o escribiendo a soporte@auricrx.com.mx. Consulta el Aviso de Privacidad: [URL].",
     "consentCheckbox": "Doy mi consentimiento expreso para que se guarde en la nube una copia de los documentos de salud que yo elija, en los términos anteriores.",
     "enableButton": "Activar respaldo",
     "enableButtonHelper": "(se habilita al marcar la casilla y confirmar tu identidad)",
@@ -4115,7 +4116,7 @@
     "yourRights": "Tus Derechos (ARCO)",
     "yourRightsText": "Tienes derecho a Acceder, Rectificar, Cancelar u Oponerte al uso de tus datos personales. Puedes exportar y borrar tus datos en cualquier momento en Ajustes > Privacidad. Puedes retirar el consentimiento para respaldo en la nube, Health Connect o funciones de Family Circle en cualquier momento.",
     "contact": "Contacto para Preguntas de Privacidad",
-    "contactText": "[CORREO DE PRIVACIDAD – pendiente de aprobación]\n\nPara preguntas sobre tus derechos de privacidad o para ejercerlos, escribe al correo anterior.",
+    "contactText": "soporte@auricrx.com.mx\n\nPara preguntas sobre tus derechos de privacidad o para ejercerlos, escribe al correo anterior.",
     "viewFullPolicy": "Ver Aviso de Privacidad Completo",
     "lastUpdated": "Última actualización: Noviembre 2026"
   },

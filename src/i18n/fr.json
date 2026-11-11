@@ -1073,7 +1073,8 @@
       "teal": "Sarcelle"
     },
     "emailUs": "Nous envoyer un email",
-    "emailAddress": "Auricrx.ltd@gmail.com",
+    "emailAddress": "support@auricrx.com.mx",
+    "forBusiness": "Pour les entreprises",
     "signOut": "Se déconnecter",
     "smartNotificationsDesc": "Rappels intelligents qui s'adaptent à votre mode de vie et à votre environnement",
     "smartNotificationsActive": "Notifications Intelligentes Actives",
@@ -1616,7 +1617,7 @@
     "yourChoice": "Votre choix :",
     "yourChoiceText": "vous pouvez désactiver la sauvegarde à tout moment dans Paramètres > Sauvegarde. Lorsque vous la désactivez, vous pouvez supprimer les copies cloud ; nous les supprimerons dans un délai de [X] jours. Supprimer vos copies est gratuit, même sans Pro.",
     "yourRights": "Vos droits :",
-    "yourRightsText": "vous pouvez accéder, rectifier, supprimer ou vous opposer à l'utilisation de vos données (droits ARCO) et retirer votre consentement dans Paramètres > Confidentialité ou en écrivant à [PRIVACY EMAIL – pending approval]. Consultez l'Avis de confidentialité : [URL].",
+    "yourRightsText": "vous pouvez accéder, rectifier, supprimer ou vous opposer à l'utilisation de vos données (droits ARCO) et retirer votre consentement dans Paramètres > Confidentialité ou en écrivant à support@auricrx.com.mx. Consultez l'Avis de confidentialité : [URL].",
     "consentCheckbox": "Je consens expressément au stockage d'une copie cloud des documents de santé que je choisis, selon les conditions ci-dessus.",
     "enableButton": "Activer la sauvegarde",
     "enableButtonHelper": "(activée en cochant la case et en confirmant votre identité)",

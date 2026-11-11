@@ -889,6 +889,7 @@ export default function App() {
     chooseWallpaperDescription: t('settings.chooseWallpaperDescription'),
     emailUs: t('settings.emailUs'),
     emailAddress: t('settings.emailAddress'),
+    forBusiness: t('settings.forBusiness'),
     signOut: t('settings.signOut'),
     subscription: t('settings.subscription'),
     currentPlan: t('settings.currentPlan'),
