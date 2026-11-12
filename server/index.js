@@ -2311,7 +2311,7 @@ app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
 // ========================================
 
 // Import utilities
-const { hash, normalizeEmail, normalizePhone, verifyToken } = require('./auth-utils');
+const { hash, normalizeEmail, normalizePhone, verifyToken, isAuthError, AuthError } = require('./auth-utils');
 const { neonClient } = require('./neon');
 
 // Reuse the Excel-derived catalog used by the app's pharmacy search.
@@ -2758,14 +2758,12 @@ app.post('/api/subscription/resubscribe', async (req, res) => {
 });
 
 // Get subscription status
-app.get('/api/me/subscription', async (req, res) => {
+// Auth is requireMeAuth (401 for missing/invalid/expired tokens); do not use
+// verifyUser here — expired/trial users must still be able to read status.
+app.get('/api/me/subscription', requireMeAuth, async (req, res) => {
   console.log('🔍 SERVER: /api/me/subscription called');
   try {
-    // Verify auth token
-    const token = req.headers.authorization?.split(' ')[1];
-    console.log('🔍 SERVER: Token received:', token ? 'YES' : 'NO');
-    const decoded = await verifyToken(token);
-    const uid = decoded.uid;
+    const uid = req.userId;
     console.log('🔍 SERVER: User ID:', uid);
 
     // Start the trial for trial-plan users who never got trial dates (14 days, same as trial start endpoint)
@@ -2818,6 +2816,10 @@ app.get('/api/me/subscription', async (req, res) => {
       ...status
     });
   } catch (error) {
+    // Auth failures are handled by requireMeAuth (401). Keep 500 for real failures only.
+    if (isAuthError(error)) {
+      return res.status(401).json({ error: 'unauthorized' });
+    }
     console.error('❌ Subscription status check failed:', error);
     res.status(500).json({
       ok: false,
@@ -3446,6 +3448,27 @@ app.get('/success', async (req, res) => {
 // ========================================
 // MIDDLEWARE: PLAN ENFORCEMENT
 // ========================================
+
+/**
+ * Lightweight auth for /api/me/* routes: verify Firebase token only.
+ * Does not create profiles or enforce plan/subscription gates (unlike verifyUser).
+ * Missing, invalid, or expired tokens → 401 { error: 'unauthorized' }.
+ */
+async function requireMeAuth(req, res, next) {
+  try {
+    const token = /^Bearer ([^\s]+)$/i.exec(req.headers.authorization || '')?.[1];
+    console.log('🔍 SERVER: Token received:', token ? 'YES' : 'NO');
+    const decoded = await verifyToken(token);
+    const uid = decoded.uid;
+    if (typeof uid !== 'string' || !uid) throw new AuthError('Invalid token identity');
+    req.userId = uid;
+    req.decodedToken = decoded;
+    next();
+  } catch (error) {
+    console.error('❌ /api/me auth failed:', error.message);
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+}
 
 /**
  * Middleware to verify user and enforce plan restrictions
