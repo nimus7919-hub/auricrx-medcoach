@@ -53,23 +53,46 @@ function normalizePhone(phone) {
 }
 
 /**
+ * Auth failures (missing / invalid / expired tokens). Callers that map these
+ * to HTTP should use 401, not 500.
+ */
+class AuthError extends Error {
+  constructor(message = 'unauthorized') {
+    super(message);
+    this.name = 'AuthError';
+    this.code = 'unauthorized';
+  }
+}
+
+function isAuthError(error) {
+  return (
+    error instanceof AuthError ||
+    error?.name === 'AuthError' ||
+    error?.code === 'unauthorized' ||
+    /^(No token provided|Invalid token|Invalid token identity)$/.test(error?.message || '')
+  );
+}
+
+/**
  * Verify Firebase JWT token
  * @param {string} token - JWT token from Authorization header
  * @returns {Promise<Object>} - Decoded token with uid, email, etc.
+ * @throws {AuthError} when the token is missing, invalid, or expired
  */
 async function verifyToken(token) {
-  const admin = require('./firebase-admin');
-  
+  // Reject missing tokens before loading Firebase so unit tests and
+  // unauthenticated callers do not depend on admin credentials being present.
   if (!token) {
-    throw new Error('No token provided');
+    throw new AuthError('No token provided');
   }
-  
+
+  const admin = require('./firebase-admin');
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     return decoded;
   } catch (error) {
     console.error('❌ Token verification failed:', error.message);
-    throw new Error('Invalid token');
+    throw new AuthError('Invalid token');
   }
 }
 
@@ -77,6 +100,8 @@ module.exports = {
   hash,
   normalizeEmail,
   normalizePhone,
+  AuthError,
+  isAuthError,
   verifyToken,
 };
 
