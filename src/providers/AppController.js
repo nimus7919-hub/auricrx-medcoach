@@ -20,6 +20,7 @@ import { useMedicalStream } from "./../hooks/useMedicalStream";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView, Alert, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from 'react-native';
 import TypingEffect from "./../components/TypingEffect";
+import MarkdownText from "./../components/MarkdownText";
 import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
 
@@ -2987,8 +2988,10 @@ const handleAskMedicalAI = async () => {
                   style={{ color: '#FFF3DC', fontFamily: 'Inter_400Regular' }}
                   showCursor={true}
                 />
+              ) : m.role === 'assistant' ? (
+              <MarkdownText text={m.text} style={{ color: '#FFF3DC', fontFamily: 'Inter_400Regular' }} />
               ) : (
-              <Text style={{ color: m.role === 'user' ? theme.text : '#FFF3DC', fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
+              <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
               )}
             </View>
           ))}

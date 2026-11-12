@@ -41,7 +41,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
 
       // Generate summary (minimal data only)
       if (membersToShare.length === 0) {
-        setSummary('No hay información disponible para compartir.');
+        setSummary(t('familyCircle.shareEmpty'));
       } else if (membersToShare.length === 1) {
         const summaryText = await familyService.generateWeeklySummary(membersToShare[0].id);
         setSummary(summaryText);
@@ -54,7 +54,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
       }
     } catch (error) {
       console.error('Error loading summary:', error);
-      setSummary('Error al generar el resumen.');
+      setSummary(t('familyCircle.shareError'));
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
       // F8: Share-sheet only (no direct WhatsApp API)
       await Share.share({
         message: summary,
-        title: 'Family Circle - Resumen Semanal',
+        title: t('familyCircle.shareWeeklySubject'),
       });
       
       onClose();
@@ -83,7 +83,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
   return (
     <View style={styles.container}>
       <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>Compartir Resumen</DynamicText>
+        <DynamicText type="card" style={styles.title}>{t('familyCircle.shareSummaryButton')}</DynamicText>
         <TouchableOpacity onPress={onClose}>
           <DynamicText type="card" style={styles.closeButton}>{t('common.close')}</DynamicText>
         </TouchableOpacity>
@@ -99,7 +99,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
 
         <View style={[styles.card, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={[styles.sectionTitle, { color: getCardTextColor() }]}>
-            Vista Previa del Resumen
+            {t('familyCircle.sharePreviewTitle')}
           </DynamicText>
           
           {loading ? (
@@ -120,7 +120,7 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
 
         <View style={[styles.noteCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={[styles.noteText, { color: getCardTextColor() }]}>
-            ℹ️ Este resumen contiene solo información básica de dosis registradas. No incluye datos de Health Connect ni información sensible.
+            ℹ️ {t('familyCircle.shareDisclaimer')}
           </DynamicText>
         </View>
 

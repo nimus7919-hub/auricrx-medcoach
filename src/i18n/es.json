@@ -41,7 +41,7 @@
       "herbs": "Explora remedios herbales y suplementos naturales. Aprende sobre beneficios, dosis e interacciones potenciales con tus medicamentos.",
       "supplements": "Gestiona tus vitaminas y suplementos. Rastrea la ingesta diaria, establece recordatorios y asegúrate de obtener los nutrientes correctos.",
       "smartAlerts": "Notificaciones inteligentes que se adaptan a tu rutina. Recibe recordatorios basados en ubicación, alertas meteorológicas y consejos de salud personalizados.",
-      "healthAnalytics": "Rastrea tus métricas de salud con el tiempo. Monitorea la adherencia a medicamentos, efectos secundarios y tendencias de salud con gráficos detallados e información.",
+      "healthAnalytics": "Ve gráficas de recordatorios cumplidos y notas que registras. Es una vista de organización, no un análisis médico ni un diagnóstico.",
       "appointmentLog": "Programa y gestiona citas médicas. Almacena contactos de doctores, rastrea historial de visitas y nunca pierdas una cita médica importante.",
       "aiHealth": "Consulta información general sobre síntomas, salud y medicamentos con asistentes de IA. No son médicos ni ofrecen consejos médicos.",
       "documents": "Almacena y organiza tus documentos médicos. Mantén tarjetas de seguro, resultados de laboratorio, recetas y tarjetas de identificación en un lugar seguro para fácil acceso durante las visitas al médico."
@@ -67,14 +67,19 @@
     "herbs": "Hierbas",
     "supplements": "Suplementos",
     "smartAlerts": "Notificaciones Inteligentes",
-    "healthAnalytics": "Análisis de Salud",
-    "aiHealth": "Salud IA"
+    "healthAnalytics": "Mi Resumen de Salud",
+    "aiHealth": "Salud IA",
+    "familyCircle": "Círculo Familiar",
+    "preventionPlanner": "Plan de Prevención",
+    "labOrganizer": "Organizador de Laboratorios",
+    "dailyHabits": "Hábitos Diarios",
+    "medicineLookup": "Consulta de medicamentos"
   },
   "ai": {
     "recordSymptom": "Registrar síntoma",
     "insightsHelp": "Cómo obtener perspectivas",
     "insightsEmptyHelp": "Las perspectivas disponibles aparecerán aquí. Puedes comenzar registrando tus síntomas desde el rastreador.",
-    "unavailable": "Alfred no esta disponible en este momento. Intenta mas tarde.",
+    "unavailable": "Alfred no está disponible en este momento. Intenta más tarde.",
     "thinking": "IA está pensando...",
     "send": "Enviar",
     "consultant": "Consultor IA",
@@ -593,12 +598,12 @@
     "whiteGoldDr": "Blanco Dorado Dr."
   },
   "healthAnalytics": {
-    "healthAnalytics": "Análisis de Salud",
+    "healthAnalytics": "Mi Resumen de Salud",
     "healthOverview": "Resumen de Salud",
     "recentHealthMetrics": "Métricas de Salud Recientes",
     "medicationAdherence": "Adherencia a Medicamentos",
     "sideEffectsMonitoring": "Monitoreo de Efectos Secundarios",
-    "trackHealthMetrics": "Rastrea tus métricas de salud y adherencia a medicamentos",
+    "trackHealthMetrics": "Sigue tus métricas registradas y la adherencia",
     "trackVitalSigns": "Rastrea tus signos vitales e indicadores de salud",
     "trackMedicationSchedule": "Monitorea tu horario de medicamentos y adherencia",
     "trackSideEffects": "Monitorea y registra efectos secundarios de medicamentos",
@@ -704,7 +709,10 @@
       "summary": "Resumen"
     },
     "searchHerbs": "Buscar hierbas",
-    "noHerbsFound": "No se encontraron hierbas"
+    "noHerbsFound": "No se encontraron hierbas",
+    "photo": "Foto",
+    "cropSuffix": " · Recorte",
+    "whatEvidenceSays": "Lo que dice la evidencia"
   },
   "medications": {
     "title": "Medicamentos",
@@ -894,7 +902,8 @@
     "enterLocationName": "Ingresa el nombre del lugar",
     "reminderMessage": "Mensaje del recordatorio",
     "reminderMessagePrompt": "Ingresa un mensaje para el recordatorio",
-    "smartNotifications": "Notificaciones inteligentes"
+    "smartNotifications": "Notificaciones inteligentes",
+    "supplement": "Suplemento"
   },
   "pharmacies": {
     "title": "Farmacias",
@@ -1333,7 +1342,8 @@
     "october": "Octubre",
     "november": "Noviembre",
     "december": "Diciembre",
-    "tryAgain": "Por favor, inténtalo de nuevo."
+    "tryAgain": "Por favor, inténtalo de nuevo.",
+    "confirmDelete": "Confirmar eliminación"
   },
   "subscriptionPlans": {
     "month": "MXN $79 al mes",
@@ -1510,8 +1520,8 @@
     "sendVerificationCode": "Enviar código de verificación",
     "phone_77064d": "Teléfono",
     "intelligentRemindersNotifications": "Recordatorios y notificaciones inteligentes",
-    "trackMetricsAdherenceInsights": "Sigue tus métricas, adherencia e información de salud",
-    "intelligentHealthInsightsAnalysis": "Información y análisis inteligentes de salud",
+    "trackMetricsAdherenceInsights": "Seguimiento de salud, adherencia e información",
+    "intelligentHealthInsightsAnalysis": "Información general de salud con IA",
     "medicalDocumentsForDoctorVisits": "Documentos médicos para tus consultas",
     "permissionRequired_54aab6": "📱 Permiso requerido",
     "pleaseGrantCameraRollAccessToScanDocuments": "Permite el acceso a la galería para escanear documentos.",
@@ -2249,7 +2259,12 @@
     "hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5": "Hola Dr. {{value1}},\n\nAdjunto mi documento médico: {{value2}}\n\n📄 Ver documento: {{value3}}\n\nEste documento se compartió de forma segura mediante AuricRX Medical Coach.\n\nSaludos,\nPaciente",
     "connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta": "⏱️ Tiempo de espera agotado\n\nEl servidor de IA no responde. Inténtalo de nuevo más tarde.",
     "networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP": "🌐 Error de red\n\nNo se pudo conectar con el servidor de IA. Revisa tu conexión e inténtalo de nuevo.",
-    "first50CharactersValue": "- Primeros 50 caracteres: «{{value1}}»"
+    "first50CharactersValue": "- Primeros 50 caracteres: «{{value1}}»",
+    "familyCircleSubtitle": "Administra perfiles familiares y comparte información",
+    "preventionPlannerSubtitle": "Lleva el control de chequeos y cuidados preventivos",
+    "labOrganizerSubtitle": "Organiza resultados de laboratorio para tus consultas",
+    "dailyHabitsSubtitle": "Registra hábitos diarios y rutinas de salud",
+    "medicineLookupSubtitle": "Información, retiros, precios y farmacias"
   },
   "consentChoices": {
     "terms": "Acepto los Términos de Servicio.",
@@ -3238,7 +3253,7 @@
     },
     "Reminders": {
       "Reminders": {
-        "text1253": "Llegara en 10 segundos.",
+        "text1253": "Llegará en 10 segundos.",
         "text1254": "Error de recordatorio",
         "text1256": "Probar recordatorio",
         "text1326": "No se pudo programar"
@@ -3294,6 +3309,16 @@
         }
       },
       "localeMap": "es-MX"
+    },
+    "dateTimePicker": {
+      "localeMap": {
+        "es": "es-MX",
+        "en": "en-US",
+        "fr": "fr-FR",
+        "de": "de-DE",
+        "pt": "pt-BR",
+        "zh": "zh-CN"
+      }
     }
   },
   "unitLabels": {
@@ -3800,11 +3825,37 @@
     "confirmDeviceOnlyAttestation": "Confirma la declaración de perfil solo en el dispositivo",
     "confirmGuardianAttestation": "Confirma que eres el padre/madre o tutor legal",
     "freeTierLimitReached": "Alcanzaste el límite del plan gratuito. Mejora a Pro para agregar más miembros.",
-    "memberAdded": "{{name}} se agregó a tu Family Circle",
-    "addMemberFailed": "No se pudo agregar el miembro. Inténtalo de nuevo."
+    "memberAdded": "{{name}} se agregó a tu Círculo Familiar",
+    "addMemberFailed": "No se pudo agregar el miembro. Inténtalo de nuevo.",
+    "tileSubtitle": "Administra perfiles familiares y comparte información",
+    "inviteShareMessage": "{{name}} te invitó a su Círculo Familiar en AuricRX MedCoach. Código: {{code}}",
+    "permissionsLabel": "Permisos",
+    "acceptAllOffNote": "Todos los permisos están DESACTIVADOS por defecto. Puedes cambiarlos después.",
+    "leaveAnytime": "Puedes salir del Círculo Familiar en cualquier momento. Las alertas y el acceso compartido se detendrán.",
+    "namePlaceholder": "Ingresa el nombre",
+    "relationshipPlaceholder": "p. ej., Mamá, Papá, Hijo, Hija",
+    "birthYearOptional": "Año de nacimiento (opcional)",
+    "birthYearPlaceholder": "p. ej., 1980",
+    "profileType": "Tipo de perfil",
+    "regularProfile": "Perfil regular",
+    "regularProfileDesc": "Para familiares que usan la app",
+    "deviceOnlyDesc": "Para adultos sin teléfono (se administra en tu dispositivo)",
+    "sharePreviewTitle": "Vista previa del resumen",
+    "shareWeeklySubject": "Círculo Familiar - Resumen semanal",
+    "shareSummaryButton": "Compartir resumen",
+    "shareEmpty": "No hay información disponible para compartir.",
+    "shareError": "No se pudo generar el resumen.",
+    "shareDisclaimer": "Este resumen solo contiene información básica que elegiste incluir. No es consejo médico.",
+    "summaryFamily": "Familia",
+    "summaryPeriod": "Período",
+    "summaryNoDoses": "No se registraron dosis en este período.",
+    "summaryByMed": "Por medicamento",
+    "summaryGeneratedBy": "Generado por AuricRX MedCoach",
+    "caregiverAlertTitle": "Círculo Familiar: recordatorio para {{name}}",
+    "caregiverAlertBody": "Recordatorio: {{detail}}. Confirma antes de dar cualquier medicamento."
   },
   "prevention": {
-    "title": "Planificador de Prevención",
+    "title": "Plan de Prevención",
     "description": "Descripción (opcional)",
     "disclaimer": "Las plantillas proporcionan orientación general basada en guías de salud pública. No reemplazan las recomendaciones de tu médico ni evalúan si necesitas personalmente una prueba.",
     "fromTemplate": "Desde Plantilla",
@@ -3846,10 +3897,48 @@
       "dentalCheckupDesc": "Examen dental rutinario y limpieza.",
       "eyeExam": "Examen de Vista",
       "eyeExamDesc": "Examen rutinario de visión y salud ocular."
-    }
+    },
+    "screenBlurb": "Planifica chequeos y revisiones. Las plantillas son orientación general — no una evaluación personal.",
+    "reminderTitle": "Recordatorio de prevención",
+    "reminderBody": "Es hora de tu cita o revisión preventiva programada"
   },
   "labOrganizer": {
-    "banner": "Aquí puedes guardar y ordenar tus resultados. La app no interpreta resultados ni indica si un valor es normal. Llévalos a tu médico."
+    "banner": "Aquí puedes guardar y ordenar tus resultados. La app no interpreta resultados ni indica si un valor es normal. Llévalos a tu médico.",
+    "title": "Organizador de Laboratorios",
+    "documents": "Documentos",
+    "documentsDescription": "Reportes de laboratorio e imágenes que guardas en la app.",
+    "documentsInfo": "Abre Documentos para agregar PDFs y fotos de laboratorio. Nada aquí es interpretado por la app.",
+    "noDocuments": "Aún no hay documentos de laboratorio. Agrégalos desde Documentos.",
+    "values": "Valores",
+    "labValues": "Valores de laboratorio",
+    "labValuesDescription": "Guarda números de tus reportes para llevarlos a tu médico.",
+    "noLabValues": "Aún no hay valores guardados.",
+    "addLabValue": "Agregar valor",
+    "testName": "Nombre del estudio",
+    "value": "Valor",
+    "unit": "Unidad",
+    "date": "Fecha",
+    "enterTestAndValue": "Ingresa el nombre del estudio y el valor.",
+    "deleteLabValue": "¿Eliminar este valor de laboratorio?",
+    "glossary": "Glosario",
+    "glossaryDescription": "Significados generales de términos comunes. No es un diagnóstico.",
+    "glossaryDisclaimer": "Estas definiciones son solo información general. No interpretan tus resultados.",
+    "noInterpretation": "La app no interpreta valores de laboratorio.",
+    "questions": "Preguntas",
+    "doctorQuestions": "Preguntas para tu médico",
+    "doctorQuestionsDescription": "Anota preguntas para tu próxima consulta.",
+    "noQuestions": "Aún no hay preguntas.",
+    "addQuestion": "Agregar pregunta",
+    "questionPlaceholder": "¿Qué quieres preguntar?",
+    "enterQuestion": "Ingresa una pregunta.",
+    "deleteQuestion": "¿Eliminar esta pregunta?",
+    "types": {
+      "lab": "Laboratorio",
+      "prescription": "Receta",
+      "visit": "Consulta",
+      "imaging": "Imagen",
+      "other": "Otro"
+    }
   },
   "dailyHabits": {
     "title": "Hábitos Diarios",
@@ -3881,7 +3970,8 @@
     "healthConnectDenied": "No se concedió acceso a Health Connect. Puedes habilitarlo más tarde en Ajustes.",
     "healthConnectError": "No se pudo conectar con Health Connect. Por favor intenta de nuevo.",
     "sweetDrinksInfo": "Sobre Bebidas Azucaradas",
-    "sweetDrinksDescription": "Las bebidas azucaradas (refrescos, jugos endulzados, bebidas energéticas) son relevantes en México por las etiquetas de advertencia y campañas de salud pública. Regístralas para estar consciente de tu consumo."
+    "sweetDrinksDescription": "Las bebidas azucaradas (refrescos, jugos endulzados, bebidas energéticas) son relevantes en México por las etiquetas de advertencia y campañas de salud pública. Regístralas para estar consciente de tu consumo.",
+    "reminderTitle": "Recordatorio de hábito"
   },
   "privacy": {
     "title": "Privacidad y Tus Datos",
@@ -3911,7 +4001,8 @@
     "deleteSuccess": "Todos tus datos han sido eliminados.",
     "deleteFailed": "Error al eliminar datos. Por favor intenta de nuevo.",
     "deleting": "Eliminando tus datos...",
-    "disclaimer": "Nota: Esto no elimina tu cuenta ni los datos almacenados en respaldos en la nube si has habilitado esas funciones."
+    "disclaimer": "Nota: Esto no elimina tu cuenta ni los datos almacenados en respaldos en la nube si has habilitado esas funciones.",
+    "success": "Éxito"
   },
   "premiumUpgrade": {
     "title": "Funciones Premium",
@@ -4147,5 +4238,74 @@
       "insurance": "Seguro",
       "other": "Otro"
     }
+  },
+  "familyCircleUpgrade": {
+    "title": "Círculo Familiar Pro",
+    "heroTitle": "Organicen el cuidado juntos",
+    "heroSubtitle": "Invita a la familia, comparte registros seleccionados y mantengan la coordinación — sin consejos médicos.",
+    "trialRemaining": "Quedan {{days}} días de tu prueba",
+    "trialEnded": "Tu prueba terminó. Mejora a Pro para conservar las funciones del Círculo Familiar.",
+    "featuresTitle": "Qué incluye",
+    "feature1": "Más perfiles de familiares",
+    "feature2": "Registros de dosis y resúmenes compartidos",
+    "feature3": "Alertas de recordatorio para cuidadores",
+    "feature4": "Carpetas opcionales para compartir documentos",
+    "dataTitle": "Tus datos son tuyos",
+    "dataText": "El Círculo Familiar te ayuda a organizar y compartir lo que elijas. No diagnostica, no interpreta laboratorios ni reemplaza a tu médico.",
+    "upgradeButton": "Mejorar a Pro",
+    "upgradeSubtext": "Desbloquea Círculo Familiar Pro",
+    "disclaimer": "AuricRX MedCoach es un organizador. No es un dispositivo médico y no ofrece consejos médicos."
+  },
+  "dashboardHelp": {
+    "guideLabel": "GUÍA DEL INICIO",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Listo",
+    "close": "Cerrar",
+    "welcomeTitle": "Bienvenido a tu Inicio",
+    "welcomeSub": "Un recorrido rápido por todo lo que hay en la app.",
+    "healthJournalTitle": "Diario de salud",
+    "healthJournalDesc": "Muestra tu próximo recordatorio. Toca \"Agregar recordatorio\" si aún no tienes.",
+    "bottomTabsTitle": "Pestañas inferiores",
+    "bottomTabsDesc": "Inicio, Medicamentos, Recordatorios y Ajustes siempre a un toque.",
+    "thisGuideTitle": "Esta guía",
+    "thisGuideDesc": "Ábrela cuando quieras con el botón de ayuda arriba en Inicio.",
+    "dailyCareTitle": "Cuidado diario",
+    "dailyCareSub": "Mantén tu rutina organizada.",
+    "remindersDesc": "Crea alertas para tomas, resurtidos y citas.",
+    "medicationsDesc": "Guarda tu lista de medicamentos, dosis y horarios.",
+    "herbsDesc": "Guarda productos herbales que usas y lee información general.",
+    "supplementsDesc": "Registra vitaminas y suplementos con recordatorios opcionales.",
+    "smartSub": "Recordatorios que se adaptan a tu día. Todo es opcional.",
+    "refillTitle": "Estimación de resurtido",
+    "refillDesc": "Estima cuándo podrías quedarte sin medicamento, según lo que registraste.",
+    "timingTitle": "Sugerencias de horario",
+    "timingDesc": "Sugiere horarios según cuándo sueles responder.",
+    "locationTitle": "Ubicación y clima",
+    "locationDesc": "Avisos opcionales cerca de lugares o con cambios de clima, solo con tu permiso.",
+    "quietTitle": "Horas de silencio",
+    "quietDesc": "Pausa avisos no urgentes mientras descansas.",
+    "trackTitle": "Registra y organiza",
+    "trackSub": "Tus registros en un solo lugar.",
+    "healthSummaryDesc": "Ve gráficas de recordatorios cumplidos y notas que registras. Vista de organización — no es un análisis médico.",
+    "healthConnectDesc": "Importa pasos y actividad de tu reloj, si quieres. Puedes desconectarlo cuando quieras.",
+    "appointmentsDesc": "Guarda citas, contactos de doctores e historial de visitas.",
+    "documentsDesc": "Ten a mano credenciales, resultados y recetas.",
+    "findTitle": "Encuentra información",
+    "findSub": "Solo información general, no es consejo médico.",
+    "pharmacyDesc": "Encuentra farmacias cercanas con distancia y ruta.",
+    "labsDesc": "Encuentra laboratorios y centros de análisis cercanos.",
+    "aiAssistantTitle": "Asistente IA",
+    "aiAssistantDesc": "El avatar flotante abre un asistente de información general. No es un doctor.",
+    "settingsTitle": "Ajustes y privacidad",
+    "settingsSub": "Tú tienes el control.",
+    "regionTitle": "Región",
+    "regionDesc": "Cambia entre modo Estados Unidos y México en Ajustes.",
+    "consentsTitle": "Consentimientos y legal",
+    "consentsDesc": "Revisa o retira consentimientos y lee Legal y Privacidad cuando quieras.",
+    "subscriptionTitle": "Suscripción",
+    "subscriptionDesc": "Consulta tu prueba o plan desde Ajustes.",
+    "emergencyTitle": "Emergencia",
+    "emergencyDesc": "En una emergencia, llama al 911."
   }
 }

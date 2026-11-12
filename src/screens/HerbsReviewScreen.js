@@ -57,12 +57,12 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
       <HerbImage key={`${herb.key}-${large}`} herb={herb} label={nameOf(herb)} large={large} fallbackLabel={tr('imagePending')} />
       {!herb.imageVerified && <Text style={styles.caption}>{tr('imagePending')}</Text>}
       {large && herb.imageAttribution && <Text style={styles.caption}>
-        {language === 'en' ? 'Photo' : 'Foto'}: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
+        {t('herbs.photo', { lng: language })}: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
           onPress={() => openSource('https://creativecommons.org/licenses/' +
             (herb.imageAttribution.license.includes('BY-SA') ? 'by-sa/' : 'by/') +
             herb.imageAttribution.license.split(' ').pop() + '/')}>{herb.imageAttribution.license}</Text>, <Text
           accessibilityRole="link" style={styles.photoLink} onPress={() => openSource(herb.imageAttribution.url)}>Wikimedia Commons</Text>
-        {herb.imageAttribution.modification ? ' · Recorte' : ''}
+        {herb.imageAttribution.modification ? t('herbs.cropSuffix', { lng: language }) : ''}
       </Text>}
     </View>
   );
@@ -130,7 +130,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 
                 {detailsOf(selected) ? <>
                   <Text style={styles.body}>{detailsOf(selected).uses}</Text>
-                  <Text style={styles.label}>{getRegion() === 'US' ? 'What the evidence says' : 'Lo que dice la evidencia'}</Text>
+                  <Text style={styles.label}>{t('herbs.whatEvidenceSays', { lng: language })}</Text>
                   <Text style={styles.body}>{detailsOf(selected).evidence}</Text>
                   <Text style={styles.label}>{tr('precautions')}</Text>
                   <Text style={styles.body}>{detailsOf(selected).precautions}</Text>

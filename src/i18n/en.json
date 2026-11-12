@@ -49,7 +49,7 @@
       "herbs": "Explore herbal remedies and natural supplements. Learn about benefits, dosages, and potential interactions with your medications.",
       "supplements": "Manage your vitamins and supplements. Track daily intake, set reminders, and ensure you're getting the right nutrients.",
       "smartAlerts": "Intelligent notifications that adapt to your routine. Get location-based reminders, weather alerts, and personalized health tips.",
-      "healthAnalytics": "Track your health metrics over time. Monitor medication adherence, side effects, and health trends with detailed charts and insights.",
+      "healthAnalytics": "See charts of reminders taken and notes you log. This is an organizer view, not a medical analysis or diagnosis.",
       "appointmentLog": "Schedule and manage doctor appointments. Store doctor contacts, track visit history, and never miss an important healthcare appointment.",
       "aiHealth": "Explore general symptom, health and medication information with AI assistants. They are not doctors and do not provide medical advice.",
       "documents": "Store and organize your medical documents. Keep insurance cards, lab results, prescriptions, and ID cards in one secure place for easy access during doctor visits."
@@ -67,8 +67,13 @@
     "herbs": "Herbs",
     "supplements": "Supplements",
     "smartAlerts": "Smart Notifications",
-    "healthAnalytics": "Health Analytics",
-    "aiHealth": "AI Health"
+    "healthAnalytics": "My Health Summary",
+    "aiHealth": "AI Health",
+    "familyCircle": "Family Circle",
+    "preventionPlanner": "Prevention Planner",
+    "labOrganizer": "Lab Organizer",
+    "dailyHabits": "Daily Habits",
+    "medicineLookup": "Medicine Lookup"
   },
   "ai": {
     "recordSymptom": "Log symptom",
@@ -593,12 +598,12 @@
     "whiteGoldDr": "White Gold Dr."
   },
   "healthAnalytics": {
-    "healthAnalytics": "Health Analytics",
+    "healthAnalytics": "My Health Summary",
     "healthOverview": "Health Overview",
     "recentHealthMetrics": "Recent Health Metrics",
     "medicationAdherence": "Medication Adherence",
     "sideEffectsMonitoring": "Side Effects Monitoring",
-    "trackHealthMetrics": "Track your health metrics and medication adherence",
+    "trackHealthMetrics": "Follow your logged metrics and adherence info",
     "trackVitalSigns": "Track your vital signs and health indicators",
     "trackMedicationSchedule": "Monitor your medication schedule and adherence",
     "trackSideEffects": "Monitor and record medication side effects",
@@ -704,7 +709,10 @@
       "summary": "Summary"
     },
     "searchHerbs": "Search herbs",
-    "noHerbsFound": "No herbs found"
+    "noHerbsFound": "No herbs found",
+    "photo": "Photo",
+    "cropSuffix": " · Crop",
+    "whatEvidenceSays": "What the evidence says"
   },
   "medications": {
     "title": "Medications",
@@ -894,7 +902,8 @@
     "enterLocationName": "Enter location name",
     "reminderMessage": "Reminder message",
     "reminderMessagePrompt": "Enter a reminder message",
-    "smartNotifications": "Smart notifications"
+    "smartNotifications": "Smart notifications",
+    "supplement": "Supplement"
   },
   "pharmacies": {
     "title": "Pharmacy Locations",
@@ -1333,7 +1342,8 @@
     "october": "October",
     "november": "November",
     "december": "December",
-    "tryAgain": "Please try again."
+    "tryAgain": "Please try again.",
+    "confirmDelete": "Confirm delete"
   },
   "subscriptionPlans": {
     "month": "MXN $79 per month",
@@ -1510,8 +1520,8 @@
     "sendVerificationCode": "Send Verification Code",
     "phone_77064d": "Phone",
     "intelligentRemindersNotifications": "Intelligent reminders & notifications",
-    "trackMetricsAdherenceInsights": "Track metrics, adherence & insights",
-    "intelligentHealthInsightsAnalysis": "Intelligent health insights & analysis",
+    "trackMetricsAdherenceInsights": "Track health metrics, adherence and info",
+    "intelligentHealthInsightsAnalysis": "General health information with AI",
     "medicalDocumentsForDoctorVisits": "Medical documents for doctor visits",
     "permissionRequired_54aab6": "📱 Permission Required",
     "pleaseGrantCameraRollAccessToScanDocuments": "Please grant camera roll access to scan documents.",
@@ -2249,7 +2259,12 @@
     "hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5": "Hi Dr. {{value1}},\n\nPlease find attached my medical document: {{value2}}\n\n📄 View Document: {{value3}}\n\nThis document was shared securely through AuricRX Medical Coach.\n\nBest regards,\nPatient",
     "connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta": "⏱️ Connection Timeout\n\nThe AI server is not responding. Please:\n\n1. Make sure the server is running:\n   cd server\n   npm start\n\n2. Check that port 4000 is available\n\n3. Verify server environment is configured",
     "networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP": "🌐 Network Error\n\nCannot connect to AI server. Please:\n\n1. Start the server: cd server; npm start\n2. Check if running on port 4000\n3. Make sure firewall allows the connection",
-    "first50CharactersValue": "- First 50 characters: \"{{value1}}\"\n\n"
+    "first50CharactersValue": "- First 50 characters: \"{{value1}}\"\n\n",
+    "familyCircleSubtitle": "Manage family health profiles and share information",
+    "preventionPlannerSubtitle": "Track screenings and preventive care",
+    "labOrganizerSubtitle": "Organize lab results for your doctor visits",
+    "dailyHabitsSubtitle": "Track daily health habits and routines",
+    "medicineLookupSubtitle": "Medicine info, recalls, prices and pharmacies"
   },
   "consentChoices": {
     "terms": "I agree to the Terms of Service.",
@@ -3294,6 +3309,16 @@
         }
       },
       "localeMap": "en-US"
+    },
+    "dateTimePicker": {
+      "localeMap": {
+        "es": "es-MX",
+        "en": "en-US",
+        "fr": "fr-FR",
+        "de": "de-DE",
+        "pt": "pt-BR",
+        "zh": "zh-CN"
+      }
     }
   },
   "unitLabels": {
@@ -3938,10 +3963,36 @@
     "confirmGuardianAttestation": "Please confirm you are the parent/guardian",
     "freeTierLimitReached": "You've reached the free tier limit. Upgrade to Pro to add more family members.",
     "memberAdded": "{{name}} has been added to your Family Circle",
-    "addMemberFailed": "Failed to add family member. Please try again."
+    "addMemberFailed": "Failed to add family member. Please try again.",
+    "tileSubtitle": "Manage family health profiles and share information",
+    "inviteShareMessage": "{{name}} invited you to their Family Circle on AuricRX MedCoach. Enter code: {{code}}",
+    "permissionsLabel": "Permissions",
+    "acceptAllOffNote": "All permissions are OFF by default. You can change them later.",
+    "leaveAnytime": "You can leave the Family Circle at any time. Alerts and shared access will stop.",
+    "namePlaceholder": "Enter name",
+    "relationshipPlaceholder": "e.g., Mom, Dad, Son, Daughter",
+    "birthYearOptional": "Birth Year (optional)",
+    "birthYearPlaceholder": "e.g., 1980",
+    "profileType": "Profile Type",
+    "regularProfile": "Regular Profile",
+    "regularProfileDesc": "For family members who use the app",
+    "deviceOnlyDesc": "For adults without phones (managed on your device)",
+    "sharePreviewTitle": "Summary preview",
+    "shareWeeklySubject": "Family Circle - Weekly Summary",
+    "shareSummaryButton": "Share Summary",
+    "shareEmpty": "No information available to share.",
+    "shareError": "Could not generate the summary.",
+    "shareDisclaimer": "This summary contains only basic information you chose to include. It is not medical advice.",
+    "summaryFamily": "Family",
+    "summaryPeriod": "Period",
+    "summaryNoDoses": "No doses were logged in this period.",
+    "summaryByMed": "By medication",
+    "summaryGeneratedBy": "Generated by AuricRX MedCoach",
+    "caregiverAlertTitle": "Family Circle: reminder for {{name}}",
+    "caregiverAlertBody": "Reminder: {{detail}}. Confirm before giving any medication."
   },
   "prevention": {
-    "title": "Prevention & Checkup Planner",
+    "title": "Prevention Planner",
     "description": "Description (optional)",
     "disclaimer": "Templates provide general guidance based on public health guidelines. They do not replace your doctor's recommendations or assess whether you personally need a test.",
     "fromTemplate": "From Template",
@@ -3983,10 +4034,48 @@
       "dentalCheckupDesc": "Routine dental exam and cleaning.",
       "eyeExam": "Eye Exam",
       "eyeExamDesc": "Routine vision and eye health exam."
-    }
+    },
+    "screenBlurb": "Plan screenings and checkups. Templates are general guidance only — not a personal assessment.",
+    "reminderTitle": "Prevention reminder",
+    "reminderBody": "Time for your scheduled preventive checkup or visit"
   },
   "labOrganizer": {
-    "banner": "Here you can store and organize your results. The app doesn't interpret results or tell you whether a value is normal. Take them to your doctor."
+    "banner": "Here you can store and organize your results. The app doesn't interpret results or tell you whether a value is normal. Take them to your doctor.",
+    "title": "Lab Organizer",
+    "documents": "Documents",
+    "documentsDescription": "Lab reports and imaging results you save in the app.",
+    "documentsInfo": "Open Documents to add lab PDFs and photos. Nothing here is interpreted by the app.",
+    "noDocuments": "No lab documents yet. Add them from Documents.",
+    "values": "Values",
+    "labValues": "Lab values",
+    "labValuesDescription": "Save numbers from your reports to bring to your doctor.",
+    "noLabValues": "No lab values saved yet.",
+    "addLabValue": "Add lab value",
+    "testName": "Test name",
+    "value": "Value",
+    "unit": "Unit",
+    "date": "Date",
+    "enterTestAndValue": "Enter a test name and value.",
+    "deleteLabValue": "Delete this lab value?",
+    "glossary": "Glossary",
+    "glossaryDescription": "General meanings of common lab terms. Not a diagnosis.",
+    "glossaryDisclaimer": "These definitions are general information only. They do not interpret your results.",
+    "noInterpretation": "The app does not interpret lab values.",
+    "questions": "Questions",
+    "doctorQuestions": "Questions for your doctor",
+    "doctorQuestionsDescription": "Write questions to ask at your next visit.",
+    "noQuestions": "No questions yet.",
+    "addQuestion": "Add question",
+    "questionPlaceholder": "What do you want to ask?",
+    "enterQuestion": "Enter a question.",
+    "deleteQuestion": "Delete this question?",
+    "types": {
+      "lab": "Lab",
+      "prescription": "Prescription",
+      "visit": "Visit",
+      "imaging": "Imaging",
+      "other": "Other"
+    }
   },
   "dailyHabits": {
     "title": "Daily Habits",
@@ -4018,7 +4107,8 @@
     "healthConnectDenied": "Health Connect access was not granted. You can enable it later in Settings.",
     "healthConnectError": "Unable to connect to Health Connect. Please try again.",
     "sweetDrinksInfo": "About Sweet Drinks",
-    "sweetDrinksDescription": "Sugary drinks (sodas, sweetened juices, energy drinks) are relevant in Mexico due to food warning labels and public health campaigns. Track them to be aware of your intake."
+    "sweetDrinksDescription": "Sugary drinks (sodas, sweetened juices, energy drinks) are relevant in Mexico due to food warning labels and public health campaigns. Track them to be aware of your intake.",
+    "reminderTitle": "Habit reminder"
   },
   "privacy": {
     "title": "Privacy & Your Data",
@@ -4048,7 +4138,8 @@
     "deleteSuccess": "All your data has been deleted.",
     "deleteFailed": "Failed to delete data. Please try again.",
     "deleting": "Deleting your data...",
-    "disclaimer": "Note: This does not delete your account or data stored in cloud backups if you've enabled those features."
+    "disclaimer": "Note: This does not delete your account or data stored in cloud backups if you've enabled those features.",
+    "success": "Success"
   },
   "plantBadges": {
     "evidenceLimited": "Evidence: limited",
@@ -4102,6 +4193,119 @@
       "vaccine": "Vaccine",
       "insurance": "Insurance",
       "other": "Other"
+    }
+  },
+  "familyCircleUpgrade": {
+    "title": "Family Circle Pro",
+    "heroTitle": "Organize care together",
+    "heroSubtitle": "Invite family, share selected records, and keep everyone coordinated — without giving medical advice.",
+    "trialRemaining": "{{days}} days left in your trial",
+    "trialEnded": "Your trial has ended. Upgrade to keep Pro Family Circle features.",
+    "featuresTitle": "What you get",
+    "feature1": "More family member profiles",
+    "feature2": "Shared dose logs and summaries",
+    "feature3": "Caregiver reminder alerts",
+    "feature4": "Optional document sharing folders",
+    "dataTitle": "Your data stays yours",
+    "dataText": "Family Circle helps you organize and share what you choose. It does not diagnose, analyze lab results, or replace your doctor.",
+    "upgradeButton": "Upgrade to Pro",
+    "upgradeSubtext": "Unlock Family Circle Pro",
+    "disclaimer": "AuricRX MedCoach is an organizer. It is not a medical device and does not provide medical advice."
+  },
+  "dashboardHelp": {
+    "guideLabel": "DASHBOARD GUIDE",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "close": "Close",
+    "welcomeTitle": "Welcome to your Home",
+    "welcomeSub": "A quick tour of everything in the app.",
+    "healthJournalTitle": "Health Journal",
+    "healthJournalDesc": "Shows your next reminder. Tap \"Add reminder\" if you have none yet.",
+    "bottomTabsTitle": "Bottom tabs",
+    "bottomTabsDesc": "Home, Medications, Reminders and Settings are always one tap away.",
+    "thisGuideTitle": "This guide",
+    "thisGuideDesc": "Open it anytime from the help button at the top of Home.",
+    "dailyCareTitle": "Daily care",
+    "dailyCareSub": "Keep your routine organized.",
+    "remindersDesc": "Set alerts for doses, refills and appointments.",
+    "medicationsDesc": "Keep a list of your medicines, doses and schedules.",
+    "herbsDesc": "Save herbal products you use and read general information.",
+    "supplementsDesc": "Track vitamins and supplements with optional reminders.",
+    "smartSub": "Reminders that fit your day. All optional.",
+    "refillTitle": "Refill estimates",
+    "refillDesc": "Estimates when you may run low, based on what you entered.",
+    "timingTitle": "Timing suggestions",
+    "timingDesc": "Suggests reminder times based on when you usually respond.",
+    "locationTitle": "Location and weather",
+    "locationDesc": "Optional reminders near places or on weather changes, only with your permission.",
+    "quietTitle": "Quiet hours",
+    "quietDesc": "Pause non-urgent notifications while you rest.",
+    "trackTitle": "Track and organize",
+    "trackSub": "Your records in one place.",
+    "healthSummaryDesc": "See charts of reminders taken and notes you log. An organizer view — not a medical analysis.",
+    "healthConnectDesc": "Optionally import steps and activity from your wearable. You can disconnect anytime.",
+    "appointmentsDesc": "Save visits, doctor contacts and past appointments.",
+    "documentsDesc": "Keep insurance cards, lab results and prescriptions handy.",
+    "findTitle": "Find information",
+    "findSub": "General information only, not medical advice.",
+    "pharmacyDesc": "Find nearby pharmacies with distance and directions.",
+    "labsDesc": "Find nearby labs and testing centers.",
+    "aiAssistantTitle": "AI assistant",
+    "aiAssistantDesc": "The floating avatar opens a general information assistant. It is not a doctor.",
+    "settingsTitle": "Settings and privacy",
+    "settingsSub": "You stay in control.",
+    "regionTitle": "Region",
+    "regionDesc": "Switch between United States and Mexico modes in Settings.",
+    "consentsTitle": "Consents and legal",
+    "consentsDesc": "Review or withdraw consents and read Legal & Privacy anytime.",
+    "subscriptionTitle": "Subscription",
+    "subscriptionDesc": "See your trial or plan status from Settings.",
+    "emergencyTitle": "Emergency",
+    "emergencyDesc": "In an emergency, call 911."
+  },
+  "premiumUpgrade": {
+    "title": "Premium Features",
+    "trialRemaining": "{{days}} days left in your free trial",
+    "trialEnded": "Your free trial has ended",
+    "allFeaturesTitle": "With Premium you get:",
+    "features": {
+      "aiHealth": "AI assistant for general health information",
+      "familyCircle": "Family Circle with profiles, shared logs and alerts",
+      "pharmacySearch": "Nearby pharmacy search with real-time distances",
+      "labSearch": "Nearby lab search with directions",
+      "cloudBackup": "Cloud backup for documents (sync across devices)",
+      "wearableSync": "Wearable sync (Health Connect / HealthKit)",
+      "dataExport": "Data export and share summaries"
+    },
+    "alwaysFreeTitle": "Always Free",
+    "alwaysFreeText": "The essentials stay free forever:",
+    "freeItems": {
+      "reminders": "Health reminders (medications, checkups, reviews)",
+      "tracking": "Health tracking (manual habits, vitals, lab values you enter)",
+      "plants": "Plant library (herbal safety notes, evidence)",
+      "documents": "Document scan and local storage (organizer, tags, glossary)"
+    },
+    "dataTitle": "Your data stays safe",
+    "dataText": "Even after your trial ends, all reminders, medications and tracking data remain on your phone. You can always view existing data. Upgrade to unlock premium features again.",
+    "upgradeButton": "Upgrade to Premium",
+    "upgradeSubtext": "Unlock all features",
+    "disclaimer": "Payments processed by Google Play or App Store. Cancel anytime. Your existing data stays visible.",
+    "familyCircle": {
+      "heroTitle": "Family Circle",
+      "heroSubtitle": "Organize family health profiles in one place"
+    },
+    "pharmacy": {
+      "heroTitle": "Find Nearby Pharmacies",
+      "heroSubtitle": "Locate pharmacies near you with real-time distances and directions"
+    },
+    "lab": {
+      "heroTitle": "Find Nearby Labs",
+      "heroSubtitle": "Locate medical labs with directions and contact details"
+    },
+    "general": {
+      "heroTitle": "Unlock Everything",
+      "heroSubtitle": "Access all AuricRX MedCoach premium features"
     }
   }
 }

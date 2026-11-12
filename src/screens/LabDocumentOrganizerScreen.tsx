@@ -6,11 +6,12 @@ import { useWallpaper } from '../contexts/WallpaperContext';
 import LabDocumentService, { Document, LabValue, DoctorQuestion } from '../services/labDocumentService';
 import FamilyCircleService, { FamilyMember } from '../services/familyCircleService';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 
 type Tab = 'documents' | 'labValues' | 'glossary' | 'questions';
 
 export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { onClose: () => void; openFindLab?: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getAccentColor } = useWallpaper();
   
   const [activeTab, setActiveTab] = useState<Tab>('documents');
@@ -182,7 +183,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
             {value.value} {value.unit}
           </DynamicText>
           <DynamicText type="card" style={styles.itemDate}>
-            📅 {new Date(value.date).toLocaleDateString()}
+            📅 {new Date(value.date).toLocaleDateString(getDateTimePickerLocale())}
           </DynamicText>
           {value.memberName && (
             <DynamicText type="card" style={styles.itemMember}>👤 {value.memberName}</DynamicText>
@@ -202,7 +203,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
       <DynamicText type="card" style={styles.sectionDescription}>{t('labOrganizer.glossaryDescription')}</DynamicText>
       
       {Object.entries(glossary).map(([key, definitions]) => {
-        const text = t('i18n.language') === 'es' ? definitions.es : definitions.en;
+        const text = (i18n.language || '').startsWith('es') ? definitions.es : definitions.en;
         return (
           <View key={key} style={[styles.glossaryItem, { borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={styles.glossaryText}>{text}</DynamicText>
@@ -342,7 +343,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
               style={[styles.dateButton, { borderColor: getCardBorderColor() }]}
               onPress={() => setShowDatePicker(true)}
             >
-              <DynamicText type="card">{t('labOrganizer.date')}: {newLabDate.toLocaleDateString()}</DynamicText>
+              <DynamicText type="card">{t('labOrganizer.date')}: {newLabDate.toLocaleDateString(getDateTimePickerLocale())}</DynamicText>
             </TouchableOpacity>
 
             {showDatePicker && (
@@ -350,6 +351,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
                 value={newLabDate}
                 mode="date"
                 display="default"
+                locale={getDateTimePickerLocale()}
                 onChange={(event, date) => {
                   setShowDatePicker(false);
                   if (date) setNewLabDate(date);

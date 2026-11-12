@@ -21,6 +21,7 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getDateTimePickerLocale } from '../src/utils/dateTimeLocale';
 
 // Reminders component moved outside App to prevent remounting
 const Reminders = ({ 
@@ -584,7 +585,15 @@ const Reminders = ({
                     {S.reminderType || uiI18n.t("reminders.type")}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {['medication', 'supplement', 'appointment', 'exercise', 'other'].map((type) => (
+                    {['medication', 'supplement', 'appointment', 'exercise', 'other'].map((type) => {
+                      const typeLabels = {
+                        medication: S.medication || uiI18n.t('reminders.medication'),
+                        supplement: uiI18n.t('reminders.supplement'),
+                        appointment: S.appointment || uiI18n.t('reminders.appointment'),
+                        exercise: S.exercise || uiI18n.t('reminders.exercise'),
+                        other: S.other || uiI18n.t('reminders.other'),
+                      };
+                      return (
                       <TouchableOpacity
                         key={type}
                         onPress={() => handleTypeChange(type)}
@@ -607,14 +616,11 @@ const Reminders = ({
                             textAlign: 'center'
                           }}
                         >
-                          {type === uiI18n.t("reminders.medication") ? (S.medication || uiI18n.t("reminders.medication")) :
-                           type === uiI18n.t("reminders.appointment") ? (S.appointment || uiI18n.t("reminders.appointment")) :
-                           type === uiI18n.t("reminders.exercise") ? (S.exercise || uiI18n.t("reminders.exercise")) :
-                           type === uiI18n.t("reminders.other") ? (S.other || uiI18n.t("reminders.other")) :
-                           type.charAt(0).toUpperCase() + type.slice(1)}
+                          {typeLabels[type]}
                         </DynamicText>
                       </TouchableOpacity>
-                    ))}
+                      );
+                    })}
                   </View>
                 </View>
 
@@ -624,7 +630,14 @@ const Reminders = ({
                     {S.frequency || uiI18n.t("reminders.frequency")}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {['daily', 'weekly', 'monthly', 'custom'].map((freq) => (
+                    {['daily', 'weekly', 'monthly', 'custom'].map((freq) => {
+                      const freqLabels = {
+                        daily: S.daily || uiI18n.t('healthProfile.daily'),
+                        weekly: S.weekly || uiI18n.t('healthProfile.weekly'),
+                        monthly: S.monthly || uiI18n.t('ai.monthly'),
+                        custom: S.custom || uiI18n.t('healthProfile.custom'),
+                      };
+                      return (
                       <TouchableOpacity
                         key={freq}
                         onPress={() => setAddForm(prev => ({ ...prev, frequency: freq }))}
@@ -647,19 +660,16 @@ const Reminders = ({
                             textAlign: 'center'
                           }}
                         >
-                          {freq === uiI18n.t("healthProfile.daily") ? (S.daily || uiI18n.t("healthProfile.daily")) :
-                           freq === uiI18n.t("healthProfile.weekly") ? (S.weekly || uiI18n.t("healthProfile.weekly")) :
-                           freq === uiI18n.t("ai.monthly") ? (S.monthly || uiI18n.t("ai.monthly")) :
-                           freq === uiI18n.t("healthProfile.custom") ? (S.custom || uiI18n.t("healthProfile.custom")) :
-                           freq.charAt(0).toUpperCase() + freq.slice(1)}
+                          {freqLabels[freq]}
                         </DynamicText>
                       </TouchableOpacity>
-                    ))}
+                      );
+                    })}
                   </View>
                 </View>
 
                 {/* Custom Days Selection (only show when frequency is 'custom') */}
-                {addForm.frequency === uiI18n.t("healthProfile.custom") && (
+                {addForm.frequency === 'custom' && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
                       {S.selectDays || uiI18n.t("reminders.selectDays")}
@@ -1369,7 +1379,8 @@ const Reminders = ({
           <DateTimePicker 
             value={new Date()} 
             mode="date" 
-            display="default" 
+            display="default"
+            locale={getDateTimePickerLocale()}
             onChange={onDatePick} 
           />
         )}
@@ -1380,7 +1391,8 @@ const Reminders = ({
             value={new Date()} 
             mode="time" 
             is24Hour={timeFormat === '24h'} 
-            display="default" 
+            display="default"
+            locale={getDateTimePickerLocale()}
             onChange={onPick} 
           />
         )}

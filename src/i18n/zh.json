@@ -38,9 +38,9 @@
       "herbs": "探索草药和天然补充剂。了解益处、剂量以及与您药物的潜在相互作用。",
       "supplements": "管理您的维生素和补充剂。跟踪每日摄入量、设置提醒并确保您获得正确的营养。",
       "smartAlerts": "适应您日常生活的智能通知。接收基于位置的提醒、天气警报和个性化健康提示。",
-      "healthAnalytics": "随时间跟踪您的健康指标。通过详细的图表和见解监控药物依从性、副作用和健康趋势。",
+      "healthAnalytics": "查看已完成提醒与记录笔记的图表。这是整理视图，不是医疗分析或诊断。",
       "appointmentLog": "安排和管理医生预约。存储医生联系方式、跟踪就诊历史，永远不错过重要的医疗预约。",
-      "aiHealth": "获得AI驱动的健康见解。分析症状、检查药物相互作用，并从我们的医疗AI助手获得个性化健康建议。",
+      "aiHealth": "通过 AI 助手查阅症状、健康与药品的一般信息。它们不是医生，也不提供医疗建议。",
       "documents": "存储和组织您的医疗文件。将保险卡、实验室结果、处方和身份证保存在一个安全的地方，方便在就诊时访问。"
     },
     "tip": "💡 提示：点击任何卡片以探索其功能。右下角的浮动AI按钮可让您即时访问我们医疗AI助手的健康建议。"
@@ -83,7 +83,8 @@
     "healthConnectDenied": "Health Connect访问未授予。您可以稍后在设置中启用。",
     "healthConnectError": "无法连接到Health Connect。请重试。",
     "sweetDrinksInfo": "关于含糖饮料",
-    "sweetDrinksDescription": "含糖饮料（汽水、加糖果汁、能量饮料）在墨西哥因食品警告标签和公共卫生运动而受到关注。追踪它们以了解您的摄入量。"
+    "sweetDrinksDescription": "含糖饮料（汽水、加糖果汁、能量饮料）在墨西哥因食品警告标签和公共卫生运动而受到关注。追踪它们以了解您的摄入量。",
+    "reminderTitle": "习惯提醒"
   },
   "tiles": {
     "reminders": "提醒",
@@ -96,8 +97,13 @@
     "herbs": "草药",
     "supplements": "补充剂",
     "smartAlerts": "智能通知",
-    "healthAnalytics": "健康分析",
-    "aiHealth": "AI 健康"
+    "healthAnalytics": "我的健康摘要",
+    "aiHealth": "AI 健康",
+    "familyCircle": "家庭圈",
+    "preventionPlanner": "预防计划",
+    "labOrganizer": "化验整理",
+    "dailyHabits": "每日习惯",
+    "medicineLookup": "药品查询"
   },
   "ai": {
     "consultant": "AI 顾问",
@@ -624,7 +630,7 @@
     "whiteGoldDr": "白金 Dr."
   },
   "healthAnalytics": {
-    "healthAnalytics": "健康分析",
+    "healthAnalytics": "我的健康摘要",
     "healthOverview": "健康概览",
     "recentHealthMetrics": "近期健康指标",
     "medicationAdherence": "用药依从性",
@@ -735,7 +741,10 @@
       "summary": "概要"
     },
     "noHerbsFound": "未找到草药",
-    "searchHerbs": "搜索草药"
+    "searchHerbs": "搜索草药",
+    "photo": "照片",
+    "cropSuffix": " · 裁剪",
+    "whatEvidenceSays": "证据怎么说"
   },
   "medications": {
     "title": "药品",
@@ -925,7 +934,8 @@
     "enterLocationName": "输入位置名称",
     "reminderMessage": "提醒消息",
     "reminderMessagePrompt": "输入提醒消息",
-    "smartNotifications": "智能通知"
+    "smartNotifications": "智能通知",
+    "supplement": "补充剂"
   },
   "pharmacies": {
     "title": "药房",
@@ -989,7 +999,8 @@
     "deleteSuccess": "您的所有数据已被删除。",
     "deleteFailed": "删除数据失败。请重试。",
     "deleting": "正在删除您的数据…",
-    "disclaimer": "注意：如果您已启用云备份功能，这不会删除您的账户或云备份中存储的数据。"
+    "disclaimer": "注意：如果您已启用云备份功能，这不会删除您的账户或云备份中存储的数据。",
+    "success": "成功"
   },
   "privacyNotice": {
     "title": "隐私声明",
@@ -1009,7 +1020,7 @@
     "lastUpdated": "最后更新：2026年11月"
   },
   "prevention": {
-    "title": "预防与体检规划",
+    "title": "预防计划",
     "description": "说明（可选）",
     "disclaimer": "模板基于公共卫生指南提供一般指导。它们不能替代您医生的建议，也不评估您个人是否需要某项检查。",
     "fromTemplate": "来自模板",
@@ -1051,7 +1062,10 @@
       "dentalCheckupDesc": "常规牙科检查和清洁。",
       "eyeExam": "眼科检查",
       "eyeExamDesc": "常规视力和眼健康检查。"
-    }
+    },
+    "screenBlurb": "规划筛查与体检。模板仅为一般指导——不是个人评估。",
+    "reminderTitle": "预防提醒",
+    "reminderBody": "该进行已安排的预防检查或就诊了"
   },
   "appointments": {
     "title": "标题",
@@ -1484,7 +1498,8 @@
     "travel": "旅行",
     "vacation": "假期",
     "weekday": "工作日",
-    "tryAgain": "请重试。"
+    "tryAgain": "请重试。",
+    "confirmDelete": "确认删除"
   },
   "subscriptionPlans": {
     "month": "每月 MXN $79",
@@ -2523,6 +2538,16 @@
         "text1256": "测试提醒",
         "text1326": "无法安排提醒"
       }
+    },
+    "dateTimePicker": {
+      "localeMap": {
+        "es": "es-MX",
+        "en": "en-US",
+        "fr": "fr-FR",
+        "de": "de-DE",
+        "pt": "pt-BR",
+        "zh": "zh-CN"
+      }
     }
   },
   "ui": {
@@ -2688,10 +2713,10 @@
     "phoneNumberEG1234567890": "电话号码（例如：1234567890）",
     "sendVerificationCode": "发送验证码",
     "phone_77064d": "Phone",
-    "intelligentRemindersNotifications": "Intelligent reminders & notifications",
-    "trackMetricsAdherenceInsights": "Track metrics, adherence & insights",
-    "intelligentHealthInsightsAnalysis": "Intelligent health insights & analysis",
-    "medicalDocumentsForDoctorVisits": "医疗 documents for 医生 visits",
+    "intelligentRemindersNotifications": "智能提醒与通知",
+    "trackMetricsAdherenceInsights": "跟踪健康指标、依从性与信息",
+    "intelligentHealthInsightsAnalysis": "AI 提供的一般健康信息",
+    "medicalDocumentsForDoctorVisits": "就诊用的医疗文档",
     "permissionRequired_54aab6": "📱 Permission Required",
     "pleaseGrantCameraRollAccessToScanDocuments": "请 grant camera roll access to 扫描 documents.",
     "failedToAddImagesFromGallery": "失败 to add images from gallery",
@@ -3428,7 +3453,12 @@
     "hiDrValuePleaseFindAttachedMyMedicalDocumentValueViewDocumentValueThisDocumentWasSharedSec_98a1d5": "Hi Dr. {{value1}},\n\n请 find attached my 医疗 文件: {{value2}}\n\n📄 查看 文件: {{value3}}\n\nThis 文件 was shared securely through AuricRX 医疗 Coach.\n\nBest regards,\n患者",
     "connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta": "⏱️ Connection Timeout\n\nThe AI server is not responding. 请:\n\n1. Make sure the server is running:\n   cd server\n   npm start\n\n2. 检查 that port 4000 is 可用\n\n3. 验证 server environment is configured",
     "networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP": "🌐 Network 错误\n\nCannot connect to AI server. 请:\n\n1. Start the server: cd server; npm start\n2. 检查 if running on port 4000\n3. Make sure firewall allows the connection",
-    "first50CharactersValue": "- First 50 characters: \"{{value1}}\"\n\n"
+    "first50CharactersValue": "- First 50 characters: \"{{value1}}\"\n\n",
+    "familyCircleSubtitle": "管理家庭健康资料并分享信息",
+    "preventionPlannerSubtitle": "跟踪筛查与预防保健",
+    "labOrganizerSubtitle": "整理化验结果以便就诊",
+    "dailyHabitsSubtitle": "记录每日健康习惯与作息",
+    "medicineLookupSubtitle": "药品信息、召回、价格与药店"
   },
   "documentPdf": {
     "brand": "AuricRX",
@@ -3530,7 +3560,42 @@
     "footer": "据{{source}}，查阅于{{date}}。证据描述已研究内容，不代表对您有效。植物和补充剂可能与药物相互作用；请咨询医生或药师。"
   },
   "labOrganizer": {
-    "banner": "您可以在此保存和整理您的结果。应用不会解释结果或告知数值是否正常。请带给您的医生查看。"
+    "banner": "您可以在此保存和整理结果。应用不会解读结果，也不会判断数值是否正常。请带给医生查看。",
+    "title": "化验整理",
+    "documents": "文档",
+    "documentsDescription": "您保存在应用中的化验报告和影像。",
+    "documentsInfo": "打开“文档”添加化验 PDF 和照片。应用不会解读此处内容。",
+    "noDocuments": "暂无化验文档。请从“文档”添加。",
+    "values": "数值",
+    "labValues": "化验数值",
+    "labValuesDescription": "保存报告中的数字，以便带给医生。",
+    "noLabValues": "尚未保存化验数值。",
+    "addLabValue": "添加数值",
+    "testName": "检查名称",
+    "value": "数值",
+    "unit": "单位",
+    "date": "日期",
+    "enterTestAndValue": "请输入检查名称和数值。",
+    "deleteLabValue": "删除此化验数值？",
+    "glossary": "术语",
+    "glossaryDescription": "常见化验术语的一般含义。不是诊断。",
+    "glossaryDisclaimer": "这些定义为一般信息，不会解读您的结果。",
+    "noInterpretation": "应用不会解读化验数值。",
+    "questions": "问题",
+    "doctorQuestions": "给医生的问题",
+    "doctorQuestionsDescription": "记下下次就诊想问的问题。",
+    "noQuestions": "暂无问题。",
+    "addQuestion": "添加问题",
+    "questionPlaceholder": "您想问什么？",
+    "enterQuestion": "请输入问题。",
+    "deleteQuestion": "删除此问题？",
+    "types": {
+      "lab": "化验",
+      "prescription": "处方",
+      "visit": "就诊",
+      "imaging": "影像",
+      "other": "其他"
+    }
   },
   "activityUS": {
     "text1": "连接Health Connect",
@@ -4162,7 +4227,146 @@
     "confirmDeviceOnlyAttestation": "请确认仅设备托管声明",
     "confirmGuardianAttestation": "请确认你是家长或法定监护人",
     "freeTierLimitReached": "已达到免费版人数上限。升级到 Pro 以添加更多成员。",
-    "memberAdded": "{{name}} 已加入你的家庭圈",
-    "addMemberFailed": "无法添加家庭成员，请重试。"
+    "memberAdded": "{{name}} 已加入您的家庭圈",
+    "addMemberFailed": "无法添加家庭成员，请重试。",
+    "inviteShareMessage": "{{name}} 邀请您加入 AuricRX MedCoach 家庭圈。邀请码：{{code}}",
+    "permissionsLabel": "权限",
+    "acceptAllOffNote": "所有权限默认关闭。您之后可以更改。",
+    "leaveAnytime": "您可以随时退出家庭圈。提醒与共享访问将停止。",
+    "namePlaceholder": "输入姓名",
+    "relationshipPlaceholder": "例如：妈妈、爸爸、儿子、女儿",
+    "birthYearOptional": "出生年份（可选）",
+    "birthYearPlaceholder": "例如：1980",
+    "profileType": "资料类型",
+    "regularProfile": "常规资料",
+    "regularProfileDesc": "适用于使用本应用的家庭成员",
+    "deviceOnlyDesc": "适用于没有手机的成人（在您的设备上管理）",
+    "sharePreviewTitle": "摘要预览",
+    "shareWeeklySubject": "家庭圈 - 每周摘要",
+    "shareSummaryButton": "分享摘要",
+    "shareEmpty": "没有可分享的信息。",
+    "shareError": "无法生成摘要。",
+    "shareDisclaimer": "此摘要仅包含您选择纳入的基本信息。不是医疗建议。",
+    "summaryFamily": "家庭",
+    "summaryPeriod": "时段",
+    "summaryNoDoses": "此时段未记录服药。",
+    "summaryByMed": "按药品",
+    "summaryGeneratedBy": "由 AuricRX MedCoach 生成",
+    "caregiverAlertTitle": "家庭圈：{{name}} 的提醒",
+    "caregiverAlertBody": "提醒：{{detail}}。给药前请确认。",
+    "tileSubtitle": "管理家庭健康资料并分享信息"
+  },
+  "familyCircleUpgrade": {
+    "title": "家庭圈 Pro",
+    "heroTitle": "一起整理照护",
+    "heroSubtitle": "邀请家人、分享选定记录并保持协调——不提供医疗建议。",
+    "trialRemaining": "试用还剩 {{days}} 天",
+    "trialEnded": "试用已结束。升级 Pro 以保留家庭圈功能。",
+    "featuresTitle": "包含内容",
+    "feature1": "更多家庭成员资料",
+    "feature2": "共享服药记录与摘要",
+    "feature3": "照护者提醒通知",
+    "feature4": "可选的文档共享文件夹",
+    "dataTitle": "您的数据归您所有",
+    "dataText": "家庭圈帮助您整理并分享您选择的内容。它不做诊断、不解读化验，也不替代医生。",
+    "upgradeButton": "升级到 Pro",
+    "upgradeSubtext": "解锁家庭圈 Pro",
+    "disclaimer": "AuricRX MedCoach 是整理工具，不是医疗器械，也不提供医疗建议。"
+  },
+  "dashboardHelp": {
+    "guideLabel": "主页指南",
+    "back": "返回",
+    "next": "下一步",
+    "done": "完成",
+    "close": "关闭",
+    "welcomeTitle": "欢迎来到主页",
+    "welcomeSub": "快速了解应用中的功能。",
+    "healthJournalTitle": "健康日记",
+    "healthJournalDesc": "显示下一个提醒。若还没有，可点“添加提醒”。",
+    "bottomTabsTitle": "底部标签",
+    "bottomTabsDesc": "主页、药品、提醒和设置始终一键可达。",
+    "thisGuideTitle": "本指南",
+    "thisGuideDesc": "随时通过主页顶部的帮助按钮打开。",
+    "dailyCareTitle": "日常照护",
+    "dailyCareSub": "保持日常安排有序。",
+    "remindersDesc": "为服药、续方和预约设置提醒。",
+    "medicationsDesc": "保存药品、剂量与时间表清单。",
+    "herbsDesc": "保存您使用的草本产品并阅读一般信息。",
+    "supplementsDesc": "记录维生素和补充剂，可选用提醒。",
+    "smartSub": "适应您日程的提醒。全部可选。",
+    "refillTitle": "续方估算",
+    "refillDesc": "根据您录入的信息估算何时可能用完。",
+    "timingTitle": "时间建议",
+    "timingDesc": "根据您通常响应的时间建议提醒时刻。",
+    "locationTitle": "位置与天气",
+    "locationDesc": "仅在您授权时，在地点附近或天气变化时可选提醒。",
+    "quietTitle": "免打扰时段",
+    "quietDesc": "休息时暂停非紧急通知。",
+    "trackTitle": "记录与整理",
+    "trackSub": "您的记录集中一处。",
+    "healthSummaryDesc": "查看已完成提醒与笔记图表。这是整理视图——不是医疗分析。",
+    "healthConnectDesc": "可选从手表导入步数与活动。可随时断开。",
+    "appointmentsDesc": "保存就诊、医生联系方式与历史。",
+    "documentsDesc": "方便存放保险卡、化验单与处方。",
+    "findTitle": "查找信息",
+    "findSub": "仅一般信息，不是医疗建议。",
+    "pharmacyDesc": "查找附近药店并显示距离与路线。",
+    "labsDesc": "查找附近实验室与检测中心。",
+    "aiAssistantTitle": "AI 助手",
+    "aiAssistantDesc": "浮动头像打开一般信息助手。它不是医生。",
+    "settingsTitle": "设置与隐私",
+    "settingsSub": "由您掌控。",
+    "regionTitle": "地区",
+    "regionDesc": "在设置中切换美国与墨西哥模式。",
+    "consentsTitle": "同意与法律",
+    "consentsDesc": "随时查看或撤回同意并阅读隐私说明。",
+    "subscriptionTitle": "订阅",
+    "subscriptionDesc": "在设置中查看试用或方案状态。",
+    "emergencyTitle": "紧急情况",
+    "emergencyDesc": "紧急情况下请拨打 911。"
+  },
+  "premiumUpgrade": {
+    "title": "高级功能",
+    "trialRemaining": "免费试用还剩 {{days}} 天",
+    "trialEnded": "免费试用已结束",
+    "allFeaturesTitle": "升级高级版可获得：",
+    "features": {
+      "aiHealth": "提供一般健康信息的 AI 助手",
+      "familyCircle": "家庭圈：资料、共享记录与提醒",
+      "pharmacySearch": "附近药店搜索与实时距离",
+      "labSearch": "附近实验室搜索与路线",
+      "cloudBackup": "文档云备份（跨设备同步）",
+      "wearableSync": "可穿戴同步（Health Connect / HealthKit）",
+      "dataExport": "数据导出与分享摘要"
+    },
+    "alwaysFreeTitle": "永久免费",
+    "alwaysFreeText": "核心功能永久免费：",
+    "freeItems": {
+      "reminders": "健康提醒（药品、检查、复查）",
+      "tracking": "健康跟踪（手动习惯、生命体征、化验数值）",
+      "plants": "植物库（草本安全说明、证据）",
+      "documents": "文档扫描与本地存储（整理、标签、术语）"
+    },
+    "dataTitle": "您的数据很安全",
+    "dataText": "试用结束后，提醒、药品与跟踪数据仍保存在手机上。您始终可查看已有数据。升级可再次解锁高级功能。",
+    "upgradeButton": "升级到高级版",
+    "upgradeSubtext": "解锁全部功能",
+    "disclaimer": "付款由 Google Play 或 App Store 处理。可随时取消。现有数据仍可见。",
+    "familyCircle": {
+      "heroTitle": "家庭圈",
+      "heroSubtitle": "在一处整理家庭健康资料"
+    },
+    "pharmacy": {
+      "heroTitle": "查找附近药店",
+      "heroSubtitle": "定位附近药店并显示实时距离与路线"
+    },
+    "lab": {
+      "heroTitle": "查找附近实验室",
+      "heroSubtitle": "定位实验室并显示路线与联系方式"
+    },
+    "general": {
+      "heroTitle": "解锁全部",
+      "heroSubtitle": "使用 AuricRX MedCoach 全部高级功能"
+    }
   }
 }

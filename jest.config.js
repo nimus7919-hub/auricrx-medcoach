@@ -11,11 +11,12 @@ module.exports = {
     '/auric-rx/',
     '/scripts/',
     '/server/',
-    '/components/',
   ],
   testMatch: [
     '**/src/services/__tests__/**/*.test.{ts,tsx,js,jsx}',
     '**/src/lib/__tests__/**/*.test.{ts,tsx,js,jsx}',
+    '**/src/utils/__tests__/**/*.test.{ts,tsx,js,jsx}',
+    '**/src/components/__tests__/**/*.test.{js,jsx,ts,tsx}',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

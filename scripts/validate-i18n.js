@@ -13,8 +13,8 @@ const fs = require('fs');
 const path = require('path');
 
 const LOCALES = ['en', 'es', 'fr', 'de', 'pt', 'zh'];
-// fr/de are translated in separate PRs; missing keys fall back to en at runtime.
-const INCOMPLETE_LOCALES = new Set(['fr', 'de']);
+// All registered locales must contain every base (en) key.
+const INCOMPLETE_LOCALES = new Set();
 const I18N_DIR = path.join(__dirname, '../src/i18n');
 
 // Load all locale files
