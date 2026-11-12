@@ -6,6 +6,7 @@ import { useTranslation as useUILanguage } from "react-i18next";
 import { View, Text } from "react-native";
 import HerbsScreen from "./../screens/HerbsScreen";
 import MedicalDocumentsScreen from "./../screens/MedicalDocumentsScreen";
+import DocumentsSecurityGate from "./../components/DocumentsSecurityGate";
 import SmartNotificationsScreen from "./../screens/SmartNotificationsScreen";
 import HealthAnalyticsScreen from "./../screens/HealthAnalyticsScreen";
 import AppointmentManagementScreen from "./../screens/AppointmentManagementScreen";
@@ -52,7 +53,11 @@ export default function createAppNavigator(getScope) {
      route === 'medications' ? <Medications theme={theme} meds={meds} setMeds={setMeds} S={S} themeKey={themeKey} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
      route === 'herbs' ? <HerbsScreen onClose={() => setRoute('dashboard')} theme={theme} S={S} currentLang={lang} medications={meds} /> :
      route === 'supplements' ? <Supplements supplements={supplements} setSupplements={setSupplements} S={S} theme={theme} lang={lang} userCountry={userCountry} user={user} onNavigateToDashboard={() => setRoute('dashboard')} preloadedPharmacies={refillPharmacies} preloadedCoords={refillCoords} preloadedCurrency={refillCurrency} preloadedFxMeta={refillFxMeta} reminders={reminders} setReminders={setReminders} /> :
-     route === 'documents' ? <MedicalDocumentsScreen requestAutoDocumentScan={requestAutoDocumentScan} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
+     route === 'documents' ? (
+       <DocumentsSecurityGate onClose={() => setRoute('dashboard')}>
+         <MedicalDocumentsScreen requestAutoDocumentScan={requestAutoDocumentScan} onClose={() => setRoute('dashboard')} theme={theme} S={S} />
+       </DocumentsSecurityGate>
+     ) :
     route === 'smart-notifications' ? <SmartNotificationsScreen meds={meds} setMeds={setMeds} reminders={reminders} setReminders={setReminders} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :
     route === 'health-analytics' && getRegion() === 'US' ? <ActivityHealthScreen userId={user?.uid} onClose={() => setRoute('dashboard')} onConnect={() => setRoute('health-connect-consent')} onPrivacy={() => setRoute('health-connect-privacy')} /> :
     route === 'health-analytics' ? <HealthAnalyticsScreen key={user?.uid} userId={user?.uid} onConnectHealth={() => setRoute('health-connect-consent')} onHealthPrivacy={() => setRoute('health-connect-privacy')} onClose={() => setRoute('dashboard')} theme={theme} S={S} /> :

@@ -14,6 +14,8 @@ import { Platform } from 'react-native';
 import { HealthConnectPrivacyControls } from './ActivityHealthScreen';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import { BUSINESS_EMAIL } from '../lib/supportEmail';
+import { useEffect, useState } from 'react';
+import DocumentsSecurityService from '../services/documentsSecurityService';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createSettings(getScope) {
@@ -22,6 +24,21 @@ export default function createSettings(getScope) {
     const { setRoute, setPrivacyOpen, handleSignOut, handleCancelMembership, handleRestartMembership, lang, notificationsEnabled, setNotificationsEnabled, emailNotifications, setEmailNotifications, smsNotifications, setSmsNotifications, selectedAIDoctor, setSelectedAIDoctor, dataCollection, setDataCollection, analytics, setAnalytics, subscriptionStatus, t, currentLanguage, handleLanguageChange, S, theme, setExpandedSections, CollapsibleSection, Header, RowSwitch, SwitchRow } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    const [documentsLockEnabled, setDocumentsLockEnabled] = useState(true);
+
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        const init = await DocumentsSecurityService.getInstance().initializeLockPreference();
+        if (!cancelled) setDocumentsLockEnabled(init.enabled);
+      })();
+      return () => { cancelled = true; };
+    }, []);
+
+    const handleDocumentsLockToggle = async (value) => {
+      await DocumentsSecurityService.getInstance().setLockEnabled(value);
+      setDocumentsLockEnabled(value);
+    };
     const { timeFormat, setTimeFormat, getTimeFormatOptions, getTimeFormatLabel } = useTimeFormat({
       translations: {
         useDeviceSetting: t('settings.useDeviceSetting'),
@@ -328,6 +345,14 @@ export default function createSettings(getScope) {
         
         <CollapsibleSection title={S.security} sectionKey="security" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+            <RowSwitch
+              label={t('documentsSecurity.lockToggle')}
+              value={documentsLockEnabled}
+              onValueChange={handleDocumentsLockToggle}
+            />
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 12, opacity: 0.7, marginBottom: 12, paddingHorizontal: 4 }}>
+              {t('documentsSecurity.lockToggleHint')}
+            </DynamicText>
             <TouchableOpacity 
               onPress={() => setRoute('admin-profile')}
               style={[styles.settingsButton, {

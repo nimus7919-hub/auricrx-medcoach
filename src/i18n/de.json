@@ -4369,5 +4369,22 @@
       "heroTitle": "Alles freischalten",
       "heroSubtitle": "Zugriff auf alle AuricRX MedCoach Premium-Funktionen"
     }
+  },
+  "documentsSecurity": {
+    "lockToggle": "Dokumente sperren",
+    "lockToggleHint": "Fingerabdruck, Face ID oder Geräte-PIN erforderlich, um Dokumente zu öffnen. Biometrische Daten bleiben auf Ihrem Gerät.",
+    "enableTitle": "Dokumente schützen?",
+    "enableMessage": "Sperren Sie Dokumente mit Fingerabdruck, Face ID oder Geräte-PIN. Wir speichern keine biometrischen Daten und erstellen kein neues App-Passwort.",
+    "enableCta": "Sperre aktivieren",
+    "notNow": "Nicht jetzt",
+    "lockedTitle": "Dokumente gesperrt",
+    "lockedMessage": "Mit Fingerabdruck, Face ID oder Geräte-PIN entsperren, um Ihre Dokumente zu sehen.",
+    "unlockPrompt": "Dokumente entsperren",
+    "unlockCta": "Entsperren",
+    "noCredentialsMessage": "Dieses Gerät hat keine Biometrie oder Bildschirmsperre. Sie können fortfahren oder in den Systemeinstellungen eine Sperre einrichten.",
+    "continueAnyway": "Ohne Sperre fortfahren",
+    "setupScreenLockHint": "Tipp: Richten Sie in den Geräteeinstellungen eine Bildschirmsperre ein, um Dokumente beim nächsten Mal zu schützen.",
+    "authError": "Identität konnte nicht bestätigt werden. Bitte erneut versuchen.",
+    "privacyCover": "AuricRX Dokumente"
   }
 }

@@ -4376,5 +4376,22 @@
       "heroTitle": "解锁全部",
       "heroSubtitle": "使用 AuricRX MedCoach 全部高级功能"
     }
+  },
+  "documentsSecurity": {
+    "lockToggle": "锁定文档",
+    "lockToggleHint": "打开文档时需要指纹、Face ID 或设备 PIN。生物识别数据仅保留在您的设备上。",
+    "enableTitle": "保护您的文档？",
+    "enableMessage": "使用指纹、Face ID 或设备 PIN 锁定文档。我们不会存储生物识别数据，也不会创建新的应用密码。",
+    "enableCta": "启用锁定",
+    "notNow": "暂时不要",
+    "lockedTitle": "文档已锁定",
+    "lockedMessage": "使用指纹、Face ID 或设备 PIN 解锁以查看您的文档。",
+    "unlockPrompt": "解锁文档",
+    "unlockCta": "解锁",
+    "noCredentialsMessage": "此设备未设置生物识别或屏幕锁定。您可以继续，或在系统设置中设置屏幕锁定以获得更好保护。",
+    "continueAnyway": "不锁定并继续",
+    "setupScreenLockHint": "提示：在设备设置中设置屏幕锁定，以便下次保护文档。",
+    "authError": "无法验证您的身份。请重试。",
+    "privacyCover": "AuricRX 文档"
   }
 }
