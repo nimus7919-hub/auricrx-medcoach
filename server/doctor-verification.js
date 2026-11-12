@@ -12,7 +12,7 @@
 const { verifyToken } = require('./auth-utils');
 const { getDoctorFirestore } = require('./doctor-firestore');
 
-function now verifyDoctorAuth(req, res, next) {
+async function verifyDoctorAuth(req, res, next) {
   try {
     const token = /^Bearer ([^\s]+)$/i.exec(req.headers.authorization || '')?.[1];
     const decoded = await verifyToken(token);
