@@ -101,8 +101,8 @@ export class SecureSharing {
       
       // Show error alert
       Alert.alert(
-        uiI18n.t("adminProfile.error"),
-        uiI18n.t("ui.failedToOpenWhatsappValue", { value1: error instanceof Error ? error.message : 'Unknown error' }),
+        uiI18n.t("errors.title"),
+        uiI18n.t("errors.generic"),
         [
           {
             text: uiI18n.t("adminProfile.ok"),
@@ -194,8 +194,8 @@ export class SecureSharing {
       
       // Show error alert
       Alert.alert(
-        uiI18n.t("adminProfile.error"),
-        uiI18n.t("ui.failedToOpenGmailValue", { value1: error instanceof Error ? error.message : 'Unknown error' }),
+        uiI18n.t("errors.title"),
+        uiI18n.t("errors.generic"),
         [
           {
             text: uiI18n.t("adminProfile.ok"),

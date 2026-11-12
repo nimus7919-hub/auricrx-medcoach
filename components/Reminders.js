@@ -1289,7 +1289,10 @@ const Reminders = ({
                     const notificationId = await testReminderNotification();
                     if (!notificationId) return;
                     Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1253"), uiI18n.t("localized.Reminders.Reminders.text1253"));
-                  } catch (error) { Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), error.message); }
+                  } catch (error) {
+                    console.error('[Reminders] test notification failed', error);
+                    Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), uiI18n.t("errors.generic"));
+                  }
                 }} style={{
                   alignSelf: 'center',
                   maxWidth: '100%',
@@ -1373,7 +1376,7 @@ const Reminders = ({
                     setEditingReminderId(null);
                     } catch (error) {
                       console.error('[Reminders] save failed', error);
-                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), error.message);
+                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), uiI18n.t("errors.generic"));
                     } finally { setSaving(false); }
                   }}
                 >

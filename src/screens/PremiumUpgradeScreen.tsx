@@ -22,7 +22,7 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
       const result = await PremiumEntitlementService.getInstance().startPremiumTrial();
       if (!result.success) {
         console.error('Failed to start premium trial:', result.error);
-        Alert.alert(t('common.error'), result.error || t('ui.anErrorOccurredPleaseTryAgain'));
+        Alert.alert(t('errors.title'), t('errors.generic'));
         return;
       }
       onClose();

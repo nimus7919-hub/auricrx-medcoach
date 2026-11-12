@@ -2,6 +2,8 @@ const {
   normalizeRemindersPayload,
   mergeReminders,
   shouldPushReminders,
+  addReminderTombstones,
+  pruneReminderTombstones,
   upsertMedicationFromReminder,
 } = require('../reminderPersistence');
 
@@ -36,6 +38,26 @@ describe('reminderPersistence', () => {
       expect(merged.find(r => r.id === '2').name).toBe('Shared remote');
       expect(merged.find(r => r.id === '3').name).toBe('Remote only');
     });
+
+    it('does not resurrect tombstoned reminders from remote', () => {
+      const local = [{ id: 'keep', name: 'Keep me', time: '08:00' }];
+      const remote = [
+        { id: 'keep', name: 'Keep me', time: '08:00' },
+        { id: 'gone', name: 'Deleted offline', time: '09:00' },
+      ];
+      const tombstones = addReminderTombstones({}, ['gone']);
+      const merged = mergeReminders(local, remote, { tombstones });
+      expect(merged.find(r => r.id === 'keep')).toBeTruthy();
+      expect(merged.find(r => r.id === 'gone')).toBeFalsy();
+    });
+  });
+
+  describe('tombstones', () => {
+    it('prunes tombstones after a successful push that no longer includes deleted ids', () => {
+      const tombs = addReminderTombstones({}, ['a', 'b']);
+      const pruned = pruneReminderTombstones(tombs, [{ id: 'c', name: 'Still here' }]);
+      expect(pruned).toEqual({});
+    });
   });
 
   describe('shouldPushReminders', () => {
@@ -45,6 +67,12 @@ describe('reminderPersistence', () => {
       expect(shouldPushReminders({ cloudReady: true, reminders: [], remoteHadData: true })).toBe(false);
       expect(shouldPushReminders({ cloudReady: true, reminders: [], remoteHadData: true, allowEmptyPush: true })).toBe(true);
       expect(shouldPushReminders({ cloudReady: true, reminders: [], remoteHadData: false })).toBe(false);
+      expect(shouldPushReminders({
+        cloudReady: true,
+        reminders: [],
+        remoteHadData: true,
+        hasPendingDeletes: true,
+      })).toBe(true);
     });
   });
 

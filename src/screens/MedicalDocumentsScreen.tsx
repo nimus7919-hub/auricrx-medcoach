@@ -1051,7 +1051,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               }
             } catch (shareError) {
               console.error('❌ ID PDF sharing failed:', shareError);
-              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToSharePdfValue", { value1: (shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error' }));
+              console.error('❌ Share PDF failed:', shareError);
+              Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToSharePdfValue"));
             }
             
           } catch (pdfError) {
@@ -1081,7 +1082,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               }
             } catch (fallbackError) {
               console.error('❌ Fallback sharing failed:', fallbackError);
-              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue", { value1: (fallbackError instanceof Error ? fallbackError.message : String(fallbackError)) || 'Unknown error' }));
+              Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToShareDocumentValue"));
             }
           }
         } else {
@@ -1109,7 +1110,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             }
           } catch (regularError) {
             console.error('❌ Regular sharing failed:', regularError);
-            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue_8669f8", { value1: (regularError instanceof Error ? regularError.message : String(regularError)) || 'Unknown error' }));
+            Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToShareDocumentValue_8669f8"));
           }
         }
       } else {
@@ -1136,7 +1137,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           }
         } catch (nonIdError) {
           console.error('❌ Non-ID sharing failed:', nonIdError);
-          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue_8669f8", { value1: (nonIdError instanceof Error ? nonIdError.message : String(nonIdError)) || 'Unknown error' }));
+          Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToShareDocumentValue_8669f8"));
         }
       }
       
@@ -2517,7 +2518,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         uri: document.uri,
         type: document.type
       });
-      Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToOpenDocumentValue", { value1: (error instanceof Error ? error.message : String(error)) || 'Unknown error' }));
+      console.error('❌ Open document failed:', error);
+      Alert.alert(t("errors.title"), uiI18n.t("errors.generic"));
     }
   };
 
@@ -3033,7 +3035,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                             );
                           } catch (error) {
                             console.error('Debug failed:', error);
-                            Alert.alert(uiI18n.t("ui.debugError"), (error instanceof Error ? error.message : String(error)));
+                            console.error('Debug error:', error);
+                            Alert.alert(uiI18n.t("errors.title"), uiI18n.t("errors.generic"));
                           }
                         }}
                       >
@@ -3854,7 +3857,8 @@ startxref
                         
                       } catch (error) {
                         console.error('❌ Error creating/sharing PDF:', error);
-                        Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreateOrSharePdf") + (error instanceof Error ? error.message : String(error)));
+                        console.error('Create/share PDF failed:', error);
+                        Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToCreateOrSharePdf"));
                       }
                     }}
                   >

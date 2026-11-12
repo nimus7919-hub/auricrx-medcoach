@@ -145,9 +145,11 @@ class PremiumEntitlementService {
       const backendCheck = await this.checkTrialEligibilityWithBackend(deviceHash, userId);
       
       if (!backendCheck.eligible) {
+        const uiI18n = require('../i18n').default;
+        console.warn('Trial not eligible:', backendCheck.reason);
         return {
           success: false,
-          error: backendCheck.reason || 'Trial already used on this device',
+          error: uiI18n.t('errors.generic'),
         };
       }
 
@@ -195,9 +197,8 @@ class PremiumEntitlementService {
       ).catch(err => console.error('Failed to schedule reminder:', err));
       console.warn('Trial started locally due to network error - will sync with backend later');
       
-      return { 
+      return {
         success: true,
-        error: 'Trial started offline - verification pending',
       };
     }
   }

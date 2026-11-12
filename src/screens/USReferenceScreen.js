@@ -63,7 +63,10 @@ export default function USReferenceScreen({ onClose, initialMode = 'drugs', init
       const result = await usReference(kind, params, controller.signal);
       if (controller.signal.aborted) return;
       if (kind === 'label') setLabel(result); else setData(result);
-    } catch (e) { if (!controller.signal.aborted) setError(e.message); }
+    } catch (e) {
+      console.warn('USReference load failed:', e?.message || e);
+      if (!controller.signal.aborted) setError(require('../i18n').default.t('errors.generic'));
+    }
     finally { if (!controller.signal.aborted) setBusy(false); }
   };
   const search = () => load(mode === 'interactions' ? 'drugs' : mode, mode === 'pharmacies' ? { zip: query.trim(), city: city.trim(), state: state.toUpperCase().trim() } : mode === 'nadac' ? { ndc: query.trim() } : { name: query.trim() });
