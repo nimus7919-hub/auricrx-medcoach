@@ -24,10 +24,67 @@ import {
   type DoctorAlertLimit,
   type AlertReadingType,
   type AlertComparator,
+  type MorningDigestItem,
+  type PreVisitOnePager,
+  type AppointmentRequest,
+  type CalendarAgendaResult,
   canDoctorReadCategory,
+  formatInTimeZone,
+  DEFAULT_OFFICE_HOURS,
+  formatDescriptiveAlertMessage,
+  normalizeOfficeHours,
+  hhMmFromMinutes,
+  minutesFromHhMm,
+  type DoctorPatientMessage,
+  type DoctorQuickAction,
 } from '@auricrx/doctor-core';
 
-type Screen = 'auth' | 'home' | 'profile' | 'patients' | 'patient' | 'link';
+type Screen =
+  | 'auth'
+  | 'home'
+  | 'profile'
+  | 'patients'
+  | 'patient'
+  | 'link'
+  | 'digest'
+  | 'agenda'
+  | 'officeHours'
+  | 'preVisit'
+  | 'appointment'
+  | 'inbox';
+
+const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon→Sun for editor
+
+function windowsToEditorText(hours: ReturnType<typeof normalizeOfficeHours>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const d of WEEKDAY_ORDER) {
+    const wins = hours.windowsByDay[String(d)] || [];
+    out[String(d)] = wins
+      .map((w) => `${hhMmFromMinutes(w.startMinutes)}-${hhMmFromMinutes(w.endMinutes)}`)
+      .join(', ');
+  }
+  return out;
+}
+
+function editorTextToWindows(dayTexts: Record<string, string>): Record<string, Array<{ startMinutes: number; endMinutes: number }>> {
+  const windowsByDay: Record<string, Array<{ startMinutes: number; endMinutes: number }>> = {};
+  for (const [day, text] of Object.entries(dayTexts)) {
+    const parts = String(text || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const windows = [];
+    for (const part of parts) {
+      const [a, b] = part.split('-').map((s) => s.trim());
+      const start = minutesFromHhMm(a || '');
+      const end = minutesFromHhMm(b || '');
+      if (start == null || end == null || end <= start) continue;
+      windows.push({ startMinutes: start, endMinutes: end });
+    }
+    if (windows.length) windowsByDay[day] = windows;
+  }
+  return windowsByDay;
+}
 
 export default function App() {
   const { t, i18n } = useTranslation();
@@ -57,6 +114,20 @@ export default function App() {
   const [limitCmp, setLimitCmp] = useState<AlertComparator>('gt');
   const [limitValue, setLimitValue] = useState('150');
 
+  const [digest, setDigest] = useState<MorningDigestItem[]>([]);
+  const [agenda, setAgenda] = useState<CalendarAgendaResult | null>(null);
+  const [preVisit, setPreVisit] = useState<PreVisitOnePager | null>(null);
+  const [apptDraft, setApptDraft] = useState<AppointmentRequest | null>(null);
+  const [apptMessage, setApptMessage] = useState('');
+  const [apptSlot1, setApptSlot1] = useState('');
+  const [officeTz, setOfficeTz] = useState(DEFAULT_OFFICE_HOURS.timeZone);
+  const [officePaused, setOfficePaused] = useState(false);
+  const [officeDayTexts, setOfficeDayTexts] = useState<Record<string, string>>(() =>
+    windowsToEditorText(DEFAULT_OFFICE_HOURS)
+  );
+  const [inbox, setInbox] = useState<DoctorPatientMessage[]>([]);
+  const [replyText, setReplyText] = useState('');
+
   useEffect(() => {
     const unsub = service.watchAuth(async (user) => {
       setUserEmail(user?.email || null);
@@ -72,6 +143,10 @@ export default function App() {
         setDisplayName(p.displayName);
         setSpecialty(p.specialty);
         setCedula(p.cedulaNumber);
+        const normalized = normalizeOfficeHours(p.officeHours || undefined);
+        setOfficeTz(normalized.timeZone || p.timeZone || DEFAULT_OFFICE_HOURS.timeZone);
+        setOfficePaused(normalized.messagingPaused);
+        setOfficeDayTexts(windowsToEditorText(normalized));
       }
       setScreen('home');
       setReady(true);
@@ -227,6 +302,129 @@ export default function App() {
     }
   };
 
+  const openDigest = async () => {
+    if (!isDoctorEntitled(profile)) {
+      Alert.alert(t('doctorMode.gate.title'), t('doctorMode.gate.needVerifiedPlan'));
+      return;
+    }
+    setBusy(true);
+    setScreen('digest');
+    try {
+      setDigest(await service.buildExceptionDigest());
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openAgenda = () => {
+    setAgenda(service.getTodayAgendaStub(profile?.timeZone || officeTz));
+    setScreen('agenda');
+  };
+
+  const openPreVisit = async () => {
+    if (!selected) return;
+    setBusy(true);
+    setScreen('preVisit');
+    try {
+      setPreVisit(await service.buildPreVisit(selected));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openAppointment = () => {
+    if (!selected) return;
+    setApptDraft(null);
+    setApptMessage('');
+    setApptSlot1('');
+    setScreen('appointment');
+  };
+
+  const handleSaveOfficeHours = async () => {
+    setBusy(true);
+    try {
+      const p = await service.saveOfficeHours(
+        {
+          timeZone: officeTz,
+          messagingPaused: officePaused,
+          windowsByDay: editorTextToWindows(officeDayTexts),
+        },
+        officeTz
+      );
+      setProfile(p);
+      Alert.alert(t('common.success'), t('doctorMode.officeHours.saved'));
+    } catch (e: any) {
+      Alert.alert(t('common.error'), e?.message || 'office_hours_failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openInbox = async () => {
+    if (!isDoctorEntitled(profile)) {
+      Alert.alert(t('doctorMode.gate.title'), t('doctorMode.gate.needVerifiedPlan'));
+      return;
+    }
+    setBusy(true);
+    setScreen('inbox');
+    try {
+      setInbox(await service.listNeedsActionInbox());
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleQuickReply = async (messageId: string, action: DoctorQuickAction) => {
+    setBusy(true);
+    try {
+      await service.replyToMessage(
+        messageId,
+        action,
+        action === 'text_reply' ? replyText : undefined,
+        i18n.language?.startsWith('en') ? 'en' : 'es'
+      );
+      setReplyText('');
+      setInbox(await service.listNeedsActionInbox());
+      Alert.alert(t('common.success'), t('doctorMode.messaging.replied'));
+    } catch (e: any) {
+      Alert.alert(t('common.error'), e?.message || t('doctorMode.messaging.replyFailed'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleExportMessages = async () => {
+    if (!selected) return;
+    setBusy(true);
+    try {
+      const exported = await service.exportMessageSummaryForPatient(
+        selected.patientId,
+        i18n.language?.startsWith('en') ? 'en' : 'es'
+      );
+      Alert.alert(t('doctorMode.messaging.exportTitle'), exported.lines.slice(0, 12).join('\n'));
+    } catch (e: any) {
+      Alert.alert(t('common.error'), e?.message || t('doctorMode.messaging.exportFailed'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleAiWaitlist = async () => {
+    setBusy(true);
+    try {
+      const p = await service.joinAiInsightsWaitlist();
+      setProfile(p);
+      Alert.alert(t('doctorMode.aiInsights.title'), t('doctorMode.aiInsights.waitlisted'));
+    } catch (e: any) {
+      Alert.alert(t('common.error'), e?.message || 'waitlist_failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const limitFor = (readingType: AlertReadingType) =>
+    limits.find((l) => l.enabled && l.readingType === readingType)?.value;
+
   if (!ready) {
     return (
       <View style={styles.center}>
@@ -307,6 +505,32 @@ export default function App() {
             {!!inviteCode && <Text style={styles.code}>{inviteCode}</Text>}
             <GoldButton label={t('doctorMode.linking.enterPatientCode')} onPress={() => setScreen('link')} />
           </Card>
+          <Card>
+            <Text style={styles.cardTitle}>{t('doctorMode.digest.title')}</Text>
+            <Text style={styles.sub}>{t('doctorMode.digest.subtitle')}</Text>
+            <GoldButton label={t('doctorMode.digest.open')} onPress={openDigest} disabled={busy} />
+            <GoldButton label={t('doctorMode.messaging.needsAction')} onPress={openInbox} disabled={busy} />
+            <GoldButton label={t('doctorMode.calendar.open')} onPress={openAgenda} />
+            <GoldButton
+              label={t('doctorMode.officeHours.title')}
+              onPress={() => setScreen('officeHours')}
+            />
+          </Card>
+          <Card>
+            <Text style={styles.cardTitle}>{t('doctorMode.aiInsights.title')}</Text>
+            <Text style={styles.meta}>{t('doctorMode.aiInsights.comingSoon')}</Text>
+            <Text style={styles.sub}>{t('doctorMode.aiInsights.body')}</Text>
+            <GoldButton
+              label={
+                profile?.aiInsightsWaitlisted
+                  ? t('doctorMode.aiInsights.waitlisted')
+                  : t('doctorMode.aiInsights.waitlist')
+              }
+              onPress={handleAiWaitlist}
+              disabled={busy || !!profile?.aiInsightsWaitlisted}
+            />
+          </Card>
+          <Text style={styles.disclaimer}>{t('doctorMode.compliance.disclaimer')}</Text>
           <GoldButton label={t('common.signOut')} onPress={() => service.signOut()} />
         </ScrollView>
       )}
@@ -354,10 +578,20 @@ export default function App() {
           <Card>
             <Text style={styles.cardTitle}>{selected.patientDisplayName || selected.patientId.slice(0, 10)}</Text>
             <Text style={styles.sub}>{t('doctorMode.doctor.rawOnly')}</Text>
+            <Text style={styles.disclaimer}>{t('doctorMode.compliance.disclaimerShort')}</Text>
+            <GoldButton label={t('doctorMode.preVisit.generate')} onPress={openPreVisit} disabled={busy} />
+            <GoldButton label={t('doctorMode.appointmentRequest.title')} onPress={openAppointment} />
+            <GoldButton label={t('doctorMode.messaging.exportTitle')} onPress={handleExportMessages} disabled={busy} />
             {busy && <ActivityIndicator color={colors.accent} />}
             <RawChart
               title={t('doctorMode.bitacora.systolic')}
               unit="mmHg"
+              doctorLimit={limitFor('systolic')}
+              limitLabel={
+                limitFor('systolic') != null
+                  ? `${t('doctorMode.alerts.types.systolic')}: ${limitFor('systolic')}`
+                  : undefined
+              }
               points={entries
                 .filter((e) => e.type === 'blood_pressure' && e.systolic != null)
                 .slice(0, 20)
@@ -367,6 +601,12 @@ export default function App() {
             <RawChart
               title={t('doctorMode.bitacora.glucose')}
               unit="mg/dL"
+              doctorLimit={limitFor('glucose')}
+              limitLabel={
+                limitFor('glucose') != null
+                  ? `${t('doctorMode.alerts.types.glucose')}: ${limitFor('glucose')}`
+                  : undefined
+              }
               points={entries
                 .filter((e) => e.type === 'glucose' && e.glucoseMgDl != null)
                 .slice(0, 20)
@@ -376,6 +616,12 @@ export default function App() {
             <RawChart
               title={t('doctorMode.bitacora.weight')}
               unit="kg"
+              doctorLimit={limitFor('weight')}
+              limitLabel={
+                limitFor('weight') != null
+                  ? `${t('doctorMode.alerts.types.weight')}: ${limitFor('weight')}`
+                  : undefined
+              }
               points={entries
                 .filter((e) => e.type === 'weight' && e.weightKg != null)
                 .slice(0, 20)
@@ -396,6 +642,29 @@ export default function App() {
                         ? `${e.weightKg} kg`
                         : e.symptomsText}
                 </Text>
+                {e.type === 'blood_pressure' &&
+                  e.systolic != null &&
+                  limits
+                    .filter((l) => l.enabled && l.readingType === 'systolic')
+                    .map((l) => {
+                      const crossed =
+                        (l.comparator === 'gt' && e.systolic! > l.value) ||
+                        (l.comparator === 'gte' && e.systolic! >= l.value) ||
+                        (l.comparator === 'lt' && e.systolic! < l.value) ||
+                        (l.comparator === 'lte' && e.systolic! <= l.value);
+                      if (!crossed) return null;
+                      return (
+                        <Text key={l.id} style={styles.meta}>
+                          {formatDescriptiveAlertMessage({
+                            readingType: 'systolic',
+                            observedValue: e.systolic!,
+                            observedSecondary: e.diastolic,
+                            limit: l,
+                            locale: i18n.language?.startsWith('en') ? 'en' : 'es',
+                          })}
+                        </Text>
+                      );
+                    })}
               </View>
             ))}
           </Card>
@@ -455,6 +724,271 @@ export default function App() {
                 {l.value}
               </Text>
             ))}
+          </Card>
+        </ScrollView>
+      )}
+
+      {screen === 'digest' && (
+        <ScrollView style={styles.content}>
+          {header(t('doctorMode.digest.title'), () => setScreen('home'))}
+          <Text style={styles.sub}>{t('doctorMode.digest.subtitle')}</Text>
+          <Text style={styles.disclaimer}>{t('doctorMode.compliance.disclaimerShort')}</Text>
+          {busy && <ActivityIndicator color={colors.accent} />}
+          {!busy && digest.length === 0 && <Text style={styles.sub}>{t('doctorMode.digest.empty')}</Text>}
+          {digest.map((item) => (
+            <TouchableOpacity
+              key={item.patientId}
+              style={styles.patientRow}
+              onPress={() => {
+                const link = patients.find((p) => p.patientId === item.patientId);
+                if (link) void openPatient(link);
+              }}
+            >
+              <Text style={styles.patientName}>{item.patientLabel || item.patientId.slice(0, 10)}</Text>
+              <Text style={styles.meta}>{new Date(item.latestAt).toLocaleString()}</Text>
+              {item.kinds.map((k) => (
+                <Text key={k} style={styles.text}>
+                  {t(`doctorMode.digest.kinds.${k}`)}
+                </Text>
+              ))}
+              {item.events.slice(0, 3).map((ev, idx) => (
+                <Text key={`${ev.at}-${idx}`} style={styles.meta}>
+                  {ev.detail || t(`doctorMode.digest.kinds.${ev.kind}`)}
+                </Text>
+              ))}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+
+      {screen === 'agenda' && (
+        <ScrollView style={styles.content}>
+          {header(t('doctorMode.calendar.title'), () => setScreen('home'))}
+          <Text style={styles.sub}>{t('doctorMode.calendar.subtitle')}</Text>
+          {agenda?.warning === 'oauth_stub' && (
+            <Text style={styles.warn}>{t('doctorMode.calendar.stubHint')}</Text>
+          )}
+          {agenda?.warning === 'stale_sync' && (
+            <Text style={styles.warn}>{t('doctorMode.calendar.stale')}</Text>
+          )}
+          {agenda?.warning === 'unavailable' && (
+            <Text style={styles.warn}>{t('doctorMode.calendar.unavailable')}</Text>
+          )}
+          {agenda?.lastSyncedAt && (
+            <Text style={styles.meta}>
+              {t('doctorMode.calendar.lastSync')}:{' '}
+              {formatInTimeZone(agenda.lastSyncedAt, agenda.timeZone, i18n.language?.startsWith('en') ? 'en-US' : 'es-MX')}
+            </Text>
+          )}
+          {agenda?.ok && agenda.appointments.length === 0 && (
+            <Text style={styles.sub}>{t('doctorMode.calendar.empty')}</Text>
+          )}
+          {agenda?.ok &&
+            agenda.appointments.map((a) => (
+              <View key={a.id} style={styles.patientRow}>
+                <Text style={styles.patientName}>{a.title}</Text>
+                <Text style={styles.meta}>
+                  {formatInTimeZone(a.startIso, agenda.timeZone, i18n.language?.startsWith('en') ? 'en-US' : 'es-MX')}
+                  {' — '}
+                  {formatInTimeZone(a.endIso, agenda.timeZone, i18n.language?.startsWith('en') ? 'en-US' : 'es-MX')}
+                </Text>
+              </View>
+            ))}
+          {!!agenda?.overlaps?.length && (
+            <Text style={styles.warn}>{t('doctorMode.calendar.overlap')}</Text>
+          )}
+        </ScrollView>
+      )}
+
+      {screen === 'officeHours' && (
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          {header(t('doctorMode.officeHours.title'), () => setScreen('home'))}
+          <Card>
+            <Text style={styles.sub}>{t('doctorMode.officeHours.subtitle')}</Text>
+            <Text style={styles.disclaimer}>{t('doctorMode.compliance.notForEmergencies')}</Text>
+            <Field label={t('doctorMode.officeHours.timezone')} value={officeTz} onChangeText={setOfficeTz} autoCapitalize="none" />
+            <GoldButton
+              label={
+                officePaused
+                  ? t('doctorMode.officeHours.resumeMessaging')
+                  : t('doctorMode.officeHours.pauseMessaging')
+              }
+              onPress={() => setOfficePaused((v) => !v)}
+            />
+            {officePaused && <Text style={styles.warn}>{t('doctorMode.officeHours.pausedHint')}</Text>}
+            <Text style={styles.meta}>{t('doctorMode.officeHours.windowsHint')}</Text>
+            {WEEKDAY_ORDER.map((d) => (
+              <Field
+                key={d}
+                label={t(`doctorMode.officeHours.weekdays.${d}`)}
+                value={officeDayTexts[String(d)] || ''}
+                onChangeText={(v) => setOfficeDayTexts((prev) => ({ ...prev, [String(d)]: v }))}
+                autoCapitalize="none"
+              />
+            ))}
+            <GoldButton label={t('common.save')} onPress={handleSaveOfficeHours} disabled={busy} />
+          </Card>
+        </ScrollView>
+      )}
+
+      {screen === 'inbox' && (
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          {header(t('doctorMode.messaging.needsAction'), () => setScreen('home'))}
+          <Text style={styles.sub}>{t('doctorMode.messaging.needsActionHint')}</Text>
+          <Text style={styles.disclaimer}>{t('doctorMode.compliance.notForEmergencies')}</Text>
+          {profile?.officeHours?.messagingPaused && (
+            <Text style={styles.warn}>{t('doctorMode.officeHours.pausedHint')}</Text>
+          )}
+          <Field label={t('doctorMode.messaging.optionalReply')} value={replyText} onChangeText={setReplyText} />
+          {busy && <ActivityIndicator color={colors.accent} />}
+          {!busy && inbox.length === 0 && <Text style={styles.sub}>{t('doctorMode.messaging.emptyInbox')}</Text>}
+          {inbox.map((m) => (
+            <View key={m.id} style={styles.patientRow}>
+              <Text style={styles.patientName}>
+                {t(`doctorMode.messaging.requestTypes.${m.requestType || 'general'}`)}
+              </Text>
+              <Text style={styles.meta}>{m.patientId.slice(0, 10)} · {new Date(m.createdAt).toLocaleString()}</Text>
+              <Text style={styles.text}>{m.body}</Text>
+              <GoldButton
+                label={t('doctorMode.messaging.actions.approve_refill')}
+                onPress={() => handleQuickReply(m.id, 'approve_refill')}
+                disabled={busy}
+              />
+              <GoldButton
+                label={t('doctorMode.messaging.actions.book_visit')}
+                onPress={() => handleQuickReply(m.id, 'book_visit')}
+                disabled={busy}
+              />
+              <GoldButton
+                label={t('doctorMode.messaging.actions.seen')}
+                onPress={() => handleQuickReply(m.id, 'seen')}
+                disabled={busy}
+              />
+              <GoldButton
+                label={t('doctorMode.messaging.actions.text_reply')}
+                onPress={() => handleQuickReply(m.id, 'text_reply')}
+                disabled={busy || !replyText.trim()}
+              />
+            </View>
+          ))}
+        </ScrollView>
+      )}
+
+      {screen === 'preVisit' && (
+        <ScrollView style={styles.content}>
+          {header(t('doctorMode.preVisit.title'), () => setScreen('patient'))}
+          <Text style={styles.sub}>{t('doctorMode.preVisit.subtitle')}</Text>
+          <Text style={styles.disclaimer}>{t('doctorMode.compliance.disclaimerShort')}</Text>
+          {busy && <ActivityIndicator color={colors.accent} />}
+          {preVisit && (
+            <Card>
+              <Text style={styles.cardTitle}>{preVisit.patientLabel}</Text>
+              <Text style={styles.meta}>{preVisit.generatedAt}</Text>
+              <Text style={styles.cardTitle}>{t('doctorMode.preVisit.readings')}</Text>
+              {preVisit.readings.map((r) => (
+                <Text key={r.type} style={styles.text}>
+                  {t(`doctorMode.bitacora.types.${r.type}`)}: {r.count}
+                  {r.lastDisplay ? ` · ${r.lastDisplay}` : ''}
+                  {r.lastAt ? ` · ${new Date(r.lastAt).toLocaleString()}` : ''}
+                </Text>
+              ))}
+              <Text style={styles.cardTitle}>{t('doctorMode.preVisit.doseLogs')}</Text>
+              {preVisit.doseLogs.length === 0 && <Text style={styles.meta}>—</Text>}
+              {preVisit.doseLogs.map((d, i) => (
+                <Text key={i} style={styles.text}>
+                  {d.name}: {t('doctorMode.preVisit.ofLogged', { logged: d.logged, expected: d.expected })}
+                </Text>
+              ))}
+              <Text style={styles.cardTitle}>{t('doctorMode.preVisit.symptoms')}</Text>
+              {preVisit.symptomTexts.length === 0 && <Text style={styles.meta}>—</Text>}
+              {preVisit.symptomTexts.map((s, i) => (
+                <Text key={i} style={styles.text}>
+                  {s}
+                </Text>
+              ))}
+              <Text style={styles.cardTitle}>{t('doctorMode.preVisit.questions')}</Text>
+              {preVisit.patientQuestions.length === 0 && <Text style={styles.meta}>—</Text>}
+              <Text style={styles.cardTitle}>{t('doctorMode.preVisit.documents')}</Text>
+              {preVisit.documents.length === 0 && <Text style={styles.meta}>—</Text>}
+            </Card>
+          )}
+        </ScrollView>
+      )}
+
+      {screen === 'appointment' && selected && (
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          {header(t('doctorMode.appointmentRequest.title'), () => setScreen('patient'))}
+          <Card>
+            <Text style={styles.sub}>{t('doctorMode.appointmentRequest.subtitle')}</Text>
+            <Field
+              label={t('doctorMode.appointmentRequest.message')}
+              value={apptMessage}
+              onChangeText={setApptMessage}
+            />
+            <Field
+              label={t('doctorMode.appointmentRequest.proposedTimes')}
+              value={apptSlot1}
+              onChangeText={setApptSlot1}
+              autoCapitalize="none"
+            />
+            <GoldButton
+              label={t('doctorMode.appointmentRequest.draft')}
+              disabled={busy}
+              onPress={async () => {
+                setBusy(true);
+                try {
+                  const draft = await service.saveAppointmentRequestDraft({
+                    patientId: selected.patientId,
+                    message: apptMessage || undefined,
+                    proposedSlotsIso: apptSlot1 ? [apptSlot1] : [],
+                    locale: i18n.language?.startsWith('en') ? 'en' : 'es',
+                  });
+                  setApptDraft(draft);
+                  setApptMessage(draft.message);
+                } catch (e: any) {
+                  Alert.alert(t('common.error'), e?.message || 'draft_failed');
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            />
+            <GoldButton
+              label={t('doctorMode.appointmentRequest.review')}
+              disabled={busy || !apptDraft}
+              onPress={async () => {
+                if (!apptDraft) return;
+                setBusy(true);
+                try {
+                  setApptDraft(await service.reviewAppointmentRequest(apptDraft.id));
+                } catch (e: any) {
+                  Alert.alert(t('common.error'), e?.message || t('doctorMode.appointmentRequest.needsReview'));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            />
+            <GoldButton
+              label={t('doctorMode.appointmentRequest.send')}
+              disabled={busy || !apptDraft || apptDraft.status !== 'pending_doctor_review'}
+              onPress={async () => {
+                if (!apptDraft) return;
+                setBusy(true);
+                try {
+                  const sent = await service.sendAppointmentRequest(apptDraft.id);
+                  setApptDraft(sent);
+                  Alert.alert(t('common.success'), t('doctorMode.appointmentRequest.sent'));
+                } catch (e: any) {
+                  Alert.alert(t('common.error'), e?.message || t('doctorMode.appointmentRequest.needsReview'));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            />
+            {apptDraft && (
+              <Text style={styles.meta}>
+                {apptDraft.status} · {apptDraft.id}
+              </Text>
+            )}
           </Card>
         </ScrollView>
       )}
@@ -589,4 +1123,5 @@ const styles = StyleSheet.create({
   langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 20 },
   langChip: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   langText: { color: colors.sub, fontSize: 11 },
+  disclaimer: { color: colors.sub, fontSize: 12, lineHeight: 17, marginBottom: 12, fontStyle: 'italic' },
 });

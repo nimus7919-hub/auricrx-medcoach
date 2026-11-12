@@ -13,6 +13,7 @@
     "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1",
     "validate:i18n": "node scripts/validate-i18n.js",
     "lint:i18n": "node scripts/validate-i18n.js",
+    "check:compliance-terms": "node scripts/check-compliance-terms.js",
     "start:doctor": "npm --prefix apps/doctor start",
     "test:doctor-core": "jest --testPathPattern=doctor",
     "test:firestore-rules": "npx -y firebase-tools@latest emulators:exec --only firestore --project demo-auricrx-rules --config firebase.json 'npm --prefix tests/firestore-rules test'"

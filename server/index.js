@@ -3745,6 +3745,10 @@ app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
 // Doctor Mode Phase 1 — threshold alert evaluation (Firebase Admin + Expo push)
 require('./doctor-alerts').mountDoctorAlertRoutes(app, { verifyUser });
 require('./doctor-verification').mountDoctorVerificationRoutes(app);
+// Descriptive-only AI summary (banned-term filter + template fallback)
+require('./doctor-ai-summary').mountDoctorAiSummaryRoutes(app, { verifyUser });
+// Secure messaging notify (generic push; pluggable channels)
+require('./doctor-messaging').mountDoctorMessagingRoutes(app, { verifyUser });
 
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
@@ -3756,4 +3760,6 @@ app.listen(port, () => {
   console.log('   POST /api/doctor/alerts/evaluate');
   console.log('   POST /api/doctor/verification/submit');
   console.log('   POST /api/doctor/plan/mock-grant');
+  console.log('   POST /api/doctor/summary/descriptive');
+  console.log('   POST /api/doctor/messages/notify');
 });

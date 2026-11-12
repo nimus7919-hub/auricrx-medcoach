@@ -46,6 +46,13 @@ import {
 import { generateInviteCode, inviteExpiresDate, isInviteExpired, normalizeInviteCode } from '../doctor/invites';
 import { canDoctorReadCategory, canDoctorSeePatientData, isDoctorEntitled } from '../doctor/accessRules';
 import { evaluateThresholdCrossings } from '../doctor/thresholds';
+import {
+  createPatientStructuredRequest,
+  formatOfficeHoursForPatient,
+  type PatientRequestType,
+  type DoctorPatientMessage,
+  normalizeOfficeHours,
+} from '../doctor';
 import { API_BASE } from '../config/api';
 import { authenticatedFetch } from './authenticatedFetch';
 
@@ -592,12 +599,90 @@ class DoctorModeService {
 
   async registerPushToken(expoPushToken: string, platform?: string): Promise<void> {
     const uid = uidOrThrow();
-    await setDoc(doc(db, 'doctorPushTokens', uid), {
+    // Patient tokens for doctor→patient message notify
+    await setDoc(doc(db, 'patientPushTokens', uid), {
       uid,
       expoPushToken,
       platform: platform || undefined,
       updatedAt: nowIso(),
     });
+  }
+
+  // ─── Structured messaging ────────────────────────────────────────
+
+  async getDoctorOfficeHoursForLink(link: PatientDoctorLink) {
+    const snap = await getDoc(doc(db, 'doctorProfiles', link.doctorId));
+    if (!snap.exists()) return normalizeOfficeHours(null);
+    const profile = snap.data() as DoctorProfile;
+    return normalizeOfficeHours(profile.officeHours || { timeZone: profile.timeZone });
+  }
+
+  async getDoctorOfficeHoursDisplay(link: PatientDoctorLink, locale: 'en' | 'es' = 'es'): Promise<string[]> {
+    const hours = await this.getDoctorOfficeHoursForLink(link);
+    return formatOfficeHoursForPatient(hours, locale);
+  }
+
+  async sendStructuredRequest(input: {
+    link: PatientDoctorLink;
+    requestType: PatientRequestType;
+    body: string;
+    language?: string;
+  }): Promise<DoctorPatientMessage> {
+    const patientId = uidOrThrow();
+    if (input.link.patientId !== patientId) throw new Error('forbidden');
+    if (input.link.status !== 'active') throw new Error('link_inactive');
+    const officeHours = await this.getDoctorOfficeHoursForLink(input.link);
+    const id = newId('msg');
+    const message = createPatientStructuredRequest({
+      id,
+      linkId: input.link.id,
+      doctorId: input.link.doctorId,
+      patientId,
+      requestType: input.requestType,
+      body: input.body,
+      officeHours,
+    });
+    await setDoc(doc(db, 'doctorPatientMessages', id), stripUndefined(message as unknown as Record<string, unknown>));
+    await this.writeAudit({
+      actorId: patientId,
+      actorRole: 'patient',
+      action: 'message_sent',
+      patientId,
+      doctorId: input.link.doctorId,
+      linkId: input.link.id,
+      detail: input.requestType,
+    });
+    try {
+      await authenticatedFetch(`${API_BASE}/api/doctor/messages/notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toUserId: input.link.doctorId,
+          role: 'doctor',
+          language: input.language || 'es',
+          messageId: id,
+          channel: 'push',
+        }),
+      });
+    } catch {
+      /* notify best-effort */
+    }
+    return message;
+  }
+
+  async listMessagesForPatientLink(link: PatientDoctorLink): Promise<DoctorPatientMessage[]> {
+    const patientId = uidOrThrow();
+    if (link.patientId !== patientId) return [];
+    const snap = await getDocs(
+      query(
+        collection(db, 'doctorPatientMessages'),
+        where('patientId', '==', patientId),
+        where('doctorId', '==', link.doctorId),
+        orderBy('createdAt', 'desc'),
+        limit(50)
+      )
+    );
+    return snap.docs.map((d) => d.data() as DoctorPatientMessage);
   }
 
   // ─── Audit ───────────────────────────────────────────────────────
