@@ -16,7 +16,8 @@ export default function createCard(getScope) {
         onPress={onPress}
         activeOpacity={0.8}
       >
-        <View style={styles.cardIcon}>{icon}</View>
+        {/* Icon slot: no fixed height — avoids clipping emoji/vector glyphs on Android */}
+        <View style={styles.cardIconSlot}>{icon}</View>
         <DynamicText type="card" style={[styles.cardText, { fontFamily: 'Inter_700Bold' }]}>{title}</DynamicText>
         {subtitle && (
           typeof subtitle === 'string' ? (
