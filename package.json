@@ -14,7 +14,8 @@
     "validate:i18n": "node scripts/validate-i18n.js",
     "lint:i18n": "node scripts/validate-i18n.js",
     "start:doctor": "npm --prefix apps/doctor start",
-    "test:doctor-core": "jest --testPathPattern=doctor"
+    "test:doctor-core": "jest --testPathPattern=doctor",
+    "test:firestore-rules": "npx -y firebase-tools@latest emulators:exec --only firestore --project demo-auricrx-rules --config firebase.json 'npm --prefix tests/firestore-rules test'"
   },
   "engines": {
     "node": ">=20"

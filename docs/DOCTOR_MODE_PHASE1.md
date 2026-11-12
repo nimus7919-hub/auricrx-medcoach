@@ -42,10 +42,35 @@ npm run start:doctor
 
 ## Firebase setup
 
-1. Same project: `auricrx-medcoach`
-2. Register a **separate** Firebase iOS/Android/Web app for `com.auricrx.doctors`
-3. Update `apps/doctor/src/config/firebase.ts` with the new app ids when ready
-4. Deploy rules + indexes: `firebase deploy --only firestore:rules,firestore:indexes`
+Same project: `auricrx-medcoach`. There is **no** `(default)` Firestore database;
+clients and the Admin SDK must use the named database `auricrxmedcoach`.
+
+Registered apps for `com.auricrx.doctors` (do not create a new project):
+
+| Platform | App ID | Config file |
+|---|---|---|
+| Android | `1:1043512593259:android:cde5adeddd3a20645eda2e` | `apps/doctor/google-services.json` |
+| iOS | `1:1043512593259:ios:f114ca954345cc4e5eda2e` | `apps/doctor/GoogleService-Info.plist` |
+| Web | `1:1043512593259:web:05b28cb46c3286dc5eda2e` | `apps/doctor/src/config/firebase.ts` |
+
+Deploy rules + indexes (named database is set in `firebase.json`):
+
+```bash
+npx -y firebase-tools@latest deploy --only firestore:rules,firestore:indexes --project auricrx-medcoach
+```
+
+Rules tests (emulator, must pass before deploy):
+
+```bash
+npm run test:firestore-rules
+```
+
+### Remaining Render env / security
+
+- Deploy the Render service so `POST /api/doctor/verification/submit` and `POST /api/doctor/plan/mock-grant` exist. Those routes write `verificationStatus` and `doctorPlan` with the Admin SDK; clients cannot set them.
+- For Phase 1 testing only, set `DOCTOR_MOCK_GRANTS=true` on Render. Leave it off once real doctor billing exists.
+- App Check is not enforced (turning it on now would break the live patient app). Recommended later: Play Integrity + App Attest in monitoring mode, then enforce.
+- Storage rules are drafted in `storage.rules` for Phase 2 document sharing and are **not** deployed.
 
 ## Data model / alerts / rules
 

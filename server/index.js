@@ -3744,6 +3744,7 @@ app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
 
 // Doctor Mode Phase 1 — threshold alert evaluation (Firebase Admin + Expo push)
 require('./doctor-alerts').mountDoctorAlertRoutes(app, { verifyUser });
+require('./doctor-verification').mountDoctorVerificationRoutes(app);
 
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
@@ -3753,4 +3754,6 @@ app.listen(port, () => {
   console.log('   POST /api/subscription/resubscribe');
   console.log('   GET  /api/me/subscription');
   console.log('   POST /api/doctor/alerts/evaluate');
+  console.log('   POST /api/doctor/verification/submit');
+  console.log('   POST /api/doctor/plan/mock-grant');
 });

@@ -14,6 +14,7 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  Timestamp,
   type Unsubscribe,
 } from 'firebase/firestore';
 import {
@@ -32,19 +33,19 @@ import {
   type AlertReadingType,
   type AlertComparator,
   type AuditLogEntry,
-  getCedulaVerificationProvider,
   setLocalDoctorPlan,
   type DoctorPlanSource,
   isDoctorEntitled,
   canDoctorSeePatientData,
   canDoctorReadCategory,
   generateInviteCode,
-  inviteExpiresAt,
+  inviteExpiresDate,
   isInviteExpired,
   normalizeInviteCode,
   defaultConsent,
 } from '@auricrx/doctor-core';
 import { auth, db } from '../config/firebase';
+import { API_BASE } from '../config/api';
 
 function uidOrThrow(): string {
   const uid = auth.currentUser?.uid;
@@ -65,6 +66,30 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
   for (const [k, v] of Object.entries(obj)) if (v !== undefined) out[k] = v;
   return out as T;
 }
+
+
+async function doctorApi<T = any>(path: string, body: Record<string, unknown> = {}): Promise<T> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('not_authenticated');
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || `request_failed_${res.status}`);
+  }
+  return data as T;
+}
+
+const BITACORA_TYPES: Array<{ type: BitacoraEntry['type']; category: 'bloodPressure' | 'glucose' | 'weight' | 'symptoms' }> = [
+  { type: 'blood_pressure', category: 'bloodPressure' },
+  { type: 'glucose', category: 'glucose' },
+  { type: 'weight', category: 'weight' },
+  { type: 'symptoms', category: 'symptoms' },
+];
 
 class DoctorAppService {
   private static instance: DoctorAppService;
@@ -131,61 +156,15 @@ class DoctorAppService {
       verificationUpdatedAt: nowIso(),
       updatedAt: nowIso(),
     });
-    const result = await getCedulaVerificationProvider().submit({
-      fullName: profile.displayName,
-      cedulaNumber: profile.cedulaNumber,
-      specialty: profile.specialty,
-      country: 'MX',
-    });
-    const updated = {
-      verificationStatus: result.status,
-      verificationUpdatedAt: result.checkedAt,
-      verificationMessage: result.message,
-      updatedAt: nowIso(),
-    };
-    await updateDoc(doc(db, 'doctorProfiles', uid), updated);
-    await this.writeAudit({
-      actorId: uid,
-      actorRole: 'doctor',
-      action: 'verification_updated',
-      doctorId: uid,
-      detail: `${result.status}:${result.referenceId || ''}`,
-    });
-    return { ...profile, ...updated } as DoctorProfile;
+    const data = await doctorApi<{ profile: DoctorProfile }>('/api/doctor/verification/submit');
+    return (data.profile as DoctorProfile) || (await this.getDoctorProfile(uid))!;
   }
 
   async setDoctorPlan(enabled: boolean, source: DoctorPlanSource = 'mock'): Promise<DoctorProfile> {
     const uid = uidOrThrow();
-    const local = await setLocalDoctorPlan(enabled, source);
-    const profile = await this.getDoctorProfile(uid);
-    const patch = {
-      doctorPlan: enabled,
-      doctorPlanSource: source,
-      doctorPlanUpdatedAt: local.updatedAt,
-      updatedAt: nowIso(),
-    };
-    if (!profile) {
-      const stub: DoctorProfile = {
-        uid,
-        displayName: '',
-        specialty: '',
-        cedulaNumber: '',
-        verificationStatus: 'unverified',
-        createdAt: nowIso(),
-        ...patch,
-      };
-      await setDoc(doc(db, 'doctorProfiles', uid), stub, { merge: true });
-      return stub;
-    }
-    await updateDoc(doc(db, 'doctorProfiles', uid), patch);
-    await this.writeAudit({
-      actorId: uid,
-      actorRole: 'doctor',
-      action: 'doctor_plan_updated',
-      doctorId: uid,
-      detail: `${enabled}:${source}`,
-    });
-    return { ...profile, ...patch };
+    await setLocalDoctorPlan(enabled, source);
+    const data = await doctorApi<{ profile: DoctorProfile }>('/api/doctor/plan/mock-grant', { enabled, source });
+    return (data.profile as DoctorProfile) || (await this.getDoctorProfile(uid))!;
   }
 
   async createDoctorInvite(): Promise<DoctorInvite> {
@@ -197,7 +176,7 @@ class DoctorAppService {
       code,
       createdBy,
       role: 'doctor',
-      expiresAt: inviteExpiresAt(30),
+      expiresAt: Timestamp.fromDate(inviteExpiresDate(30)),
       createdAt: nowIso(),
       consumed: false,
     };
@@ -246,7 +225,7 @@ class DoctorAppService {
     await updateDoc(doc(db, 'doctorInvites', invite.code), {
       consumed: true,
       consumedBy: doctorId,
-      consumedAt: ts,
+      consumedAt: Timestamp.now(),
     });
     await this.writeAudit({
       actorId: doctorId,
@@ -275,20 +254,23 @@ class DoctorAppService {
     const uid = uidOrThrow();
     const profile = await this.getDoctorProfile(uid);
     if (!canDoctorSeePatientData(profile, link)) return [];
-    const q = query(
-      collection(db, 'bitacora', link.patientId, 'entries'),
-      orderBy('timestamp', 'desc'),
-      limit(200)
+    const allowed = BITACORA_TYPES.filter((row) => canDoctorReadCategory(profile, link, row.category));
+    const chunks = await Promise.all(
+      allowed.map(async (row) => {
+        const q = query(
+          collection(db, 'bitacora', link.patientId, 'entries'),
+          where('type', '==', row.type),
+          orderBy('timestamp', 'desc'),
+          limit(200)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map((d) => d.data() as BitacoraEntry);
+      })
     );
-    const snap = await getDocs(q);
-    const entries = snap.docs.map((d) => d.data() as BitacoraEntry);
-    const filtered = entries.filter((e) => {
-      if (e.type === 'blood_pressure') return canDoctorReadCategory(profile, link, 'bloodPressure');
-      if (e.type === 'glucose') return canDoctorReadCategory(profile, link, 'glucose');
-      if (e.type === 'weight') return canDoctorReadCategory(profile, link, 'weight');
-      if (e.type === 'symptoms') return canDoctorReadCategory(profile, link, 'symptoms');
-      return false;
-    });
+    const filtered = chunks
+      .flat()
+      .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)))
+      .slice(0, 200);
     await this.writeAudit({
       actorId: uid,
       actorRole: 'doctor',
@@ -302,20 +284,45 @@ class DoctorAppService {
   }
 
   subscribeBitacora(
-    patientId: string,
+    link: PatientDoctorLink,
     onData: (entries: BitacoraEntry[]) => void,
     onError?: (e: Error) => void
   ): Unsubscribe {
-    const q = query(
-      collection(db, 'bitacora', patientId, 'entries'),
-      orderBy('timestamp', 'desc'),
-      limit(200)
-    );
-    return onSnapshot(
-      q,
-      (snap) => onData(snap.docs.map((d) => d.data() as BitacoraEntry)),
-      (err) => onError?.(err as Error)
-    );
+    const profilePromise = this.getDoctorProfile();
+    const allowedTypes = BITACORA_TYPES;
+    const buckets = new Map<string, BitacoraEntry[]>();
+    const unsubs: Unsubscribe[] = [];
+    const emit = async () => {
+      const profile = await profilePromise;
+      const merged = Array.from(buckets.values())
+        .flat()
+        .filter((e) => {
+          const row = BITACORA_TYPES.find((r) => r.type === e.type);
+          return !!row && canDoctorReadCategory(profile, link, row.category);
+        })
+        .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)))
+        .slice(0, 200);
+      onData(merged);
+    };
+    for (const row of allowedTypes) {
+      const q = query(
+        collection(db, 'bitacora', link.patientId, 'entries'),
+        where('type', '==', row.type),
+        orderBy('timestamp', 'desc'),
+        limit(200)
+      );
+      unsubs.push(
+        onSnapshot(
+          q,
+          (snap) => {
+            buckets.set(row.type, snap.docs.map((d) => d.data() as BitacoraEntry));
+            void emit();
+          },
+          (err) => onError?.(err as Error)
+        )
+      );
+    }
+    return () => unsubs.forEach((u) => u());
   }
 
   async setAlertLimit(input: {

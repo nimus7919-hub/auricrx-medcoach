@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "AuricRX Médicos",
+    "name": "AuricRX M\u00e9dicos",
     "slug": "auricrx-doctors",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,7 +23,8 @@
       "bundleIdentifier": "com.auricrx.doctors",
       "runtimeVersion": {
         "policy": "appVersion"
-      }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,7 +33,8 @@
       },
       "package": "com.auricrx.doctors",
       "versionCode": 1,
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro"
@@ -41,7 +43,7 @@
       "eas": {
         "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
       },
-      "firebaseNote": "Register a separate Firebase iOS/Android/Web app under the same auricrx-medcoach project for com.auricrx.doctors"
+      "firebaseNote": "Same Firebase project auricrx-medcoach, named database auricrxmedcoach. Apps registered for com.auricrx.doctors."
     },
     "owner": "auricrx"
   }

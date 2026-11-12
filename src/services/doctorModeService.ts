@@ -38,13 +38,12 @@ import {
   defaultConsent,
   CONSENT_CATEGORIES,
 } from '../doctor/types';
-import { getCedulaVerificationProvider } from '../doctor/verification/MockCedulaProvider';
 import {
   getLocalDoctorPlan,
   setLocalDoctorPlan,
   type DoctorPlanSource,
 } from '../doctor/entitlements/doctorPlanEntitlement';
-import { generateInviteCode, inviteExpiresAt, isInviteExpired, normalizeInviteCode } from '../doctor/invites';
+import { generateInviteCode, inviteExpiresDate, isInviteExpired, normalizeInviteCode } from '../doctor/invites';
 import { canDoctorReadCategory, canDoctorSeePatientData, isDoctorEntitled } from '../doctor/accessRules';
 import { evaluateThresholdCrossings } from '../doctor/thresholds';
 import { API_BASE } from '../config/api';
@@ -138,38 +137,23 @@ class DoctorModeService {
     const profile = await this.getDoctorProfile(uid);
     if (!profile) throw new Error('doctor_profile_required');
 
-    const provider = getCedulaVerificationProvider();
-    // Mark pending immediately
+    // Mark pending immediately (clients may not set verified).
     await updateDoc(doc(db, 'doctorProfiles', uid), {
       verificationStatus: 'pending',
       verificationUpdatedAt: nowIso(),
       verificationMessage: 'Submitted',
       updatedAt: nowIso(),
     });
-
-    const result = await provider.submit({
-      fullName: profile.displayName,
-      cedulaNumber: profile.cedulaNumber,
-      specialty: profile.specialty,
-      country: 'MX',
+    const res = await authenticatedFetch(`${API_BASE}/api/doctor/verification/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
     });
-
-    const updated: Partial<DoctorProfile> = {
-      verificationStatus: result.status,
-      verificationUpdatedAt: result.checkedAt,
-      verificationMessage: result.message,
-      updatedAt: nowIso(),
-    };
-    await updateDoc(doc(db, 'doctorProfiles', uid), updated);
-    await this.writeAudit({
-      actorId: uid,
-      actorRole: 'doctor',
-      action: 'verification_updated',
-      doctorId: uid,
-      detail: `${result.status}:${result.referenceId || ''}`,
-    });
-
-    return { ...profile, ...updated } as DoctorProfile;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'verification_failed');
+    }
+    return (data.profile as DoctorProfile) || (await this.getDoctorProfile(uid))!;
   }
 
   /**
@@ -177,40 +161,17 @@ class DoctorModeService {
    */
   async setDoctorPlan(enabled: boolean, source: DoctorPlanSource = 'mock'): Promise<DoctorProfile> {
     const uid = uidOrThrow();
-    const local = await setLocalDoctorPlan(enabled, source);
-    const profile = await this.getDoctorProfile(uid);
-    if (!profile) {
-      // Allow setting plan before full profile — store stub
-      const stub: DoctorProfile = {
-        uid,
-        displayName: '',
-        specialty: '',
-        cedulaNumber: '',
-        verificationStatus: 'unverified',
-        doctorPlan: enabled,
-        doctorPlanSource: source,
-        doctorPlanUpdatedAt: local.updatedAt,
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
-      };
-      await setDoc(doc(db, 'doctorProfiles', uid), stub, { merge: true });
-      return stub;
-    }
-    const updated = {
-      doctorPlan: enabled,
-      doctorPlanSource: source,
-      doctorPlanUpdatedAt: local.updatedAt,
-      updatedAt: nowIso(),
-    };
-    await updateDoc(doc(db, 'doctorProfiles', uid), updated);
-    await this.writeAudit({
-      actorId: uid,
-      actorRole: 'doctor',
-      action: 'doctor_plan_updated',
-      doctorId: uid,
-      detail: `${enabled}:${source}`,
+    await setLocalDoctorPlan(enabled, source);
+    const res = await authenticatedFetch(`${API_BASE}/api/doctor/plan/mock-grant`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled, source }),
     });
-    return { ...profile, ...updated };
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'plan_update_failed');
+    }
+    return (data.profile as DoctorProfile) || (await this.getDoctorProfile(uid))!;
   }
 
   async isDoctorReady(): Promise<boolean> {
@@ -227,7 +188,7 @@ class DoctorModeService {
       code,
       createdBy,
       role,
-      expiresAt: inviteExpiresAt(INVITE_TTL_MINUTES),
+      expiresAt: Timestamp.fromDate(inviteExpiresDate(INVITE_TTL_MINUTES)),
       createdAt: nowIso(),
       consumed: false,
     };
@@ -300,7 +261,7 @@ class DoctorModeService {
     await updateDoc(doc(db, 'doctorInvites', invite.code), {
       consumed: true,
       consumedBy: uid,
-      consumedAt: ts,
+      consumedAt: Timestamp.now(),
     });
     await this.writeAudit({
       actorId: uid,
@@ -527,14 +488,29 @@ class DoctorModeService {
     const profile = await this.getDoctorProfile(uid);
     if (!canDoctorSeePatientData(profile, link) || !link) return [];
 
-    const entries = await this.listBitacoraEntries(link.patientId);
-    const filtered = entries.filter((e) => {
-      if (e.type === 'blood_pressure') return canDoctorReadCategory(profile, link, 'bloodPressure');
-      if (e.type === 'glucose') return canDoctorReadCategory(profile, link, 'glucose');
-      if (e.type === 'weight') return canDoctorReadCategory(profile, link, 'weight');
-      if (e.type === 'symptoms') return canDoctorReadCategory(profile, link, 'symptoms');
-      return false;
-    });
+    const typeMap: Array<{ type: BitacoraEntry['type']; category: 'bloodPressure' | 'glucose' | 'weight' | 'symptoms' }> = [
+      { type: 'blood_pressure', category: 'bloodPressure' },
+      { type: 'glucose', category: 'glucose' },
+      { type: 'weight', category: 'weight' },
+      { type: 'symptoms', category: 'symptoms' },
+    ];
+    const allowed = typeMap.filter((row) => canDoctorReadCategory(profile, link, row.category));
+    const chunks = await Promise.all(
+      allowed.map(async (row) => {
+        const q = query(
+          collection(db, 'bitacora', link.patientId, 'entries'),
+          where('type', '==', row.type),
+          orderBy('timestamp', 'desc'),
+          limit(200)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map((d) => d.data() as BitacoraEntry);
+      })
+    );
+    const filtered = chunks
+      .flat()
+      .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)))
+      .slice(0, 200);
 
     await this.writeAudit({
       actorId: uid,

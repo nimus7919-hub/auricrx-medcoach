@@ -4,18 +4,20 @@ import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
- * Same Firebase project as the patient app.
- * Setup: register a separate iOS/Android/Web app for com.auricrx.doctors
- * in Firebase Console; until then this shares the existing web config.
+ * Same Firebase project as the patient app (auricrx-medcoach).
+ * Uses the named Firestore database `auricrxmedcoach` (there is no (default) DB).
+ * Native config files: ./google-services.json and ./GoogleService-Info.plist
+ * (Android app 1:1043512593259:android:cde5adeddd3a20645eda2e,
+ *  iOS app 1:1043512593259:ios:f114ca954345cc4e5eda2e).
  */
 const firebaseConfig = {
-  apiKey: 'AIzaSyB0SzS0Q7FpKienp-7Y8SnLHRmvrNq4PXE',
-  authDomain: 'auricrx-medcoach.firebaseapp.com',
-  projectId: 'auricrx-medcoach',
-  storageBucket: 'auricrx-medcoach.firebasestorage.app',
-  messagingSenderId: '1043512593259',
-  appId: '1:1043512593259:web:30be3d99b6cead6e5eda2e',
-  measurementId: 'G-SW89Y658XF',
+  apiKey: "AIzaSyAjNipp2vjNDuYt1A6CjXr_0YSf-rN8lnc",
+  authDomain: "auricrx-medcoach.firebaseapp.com",
+  projectId: "auricrx-medcoach",
+  storageBucket: "auricrx-medcoach.firebasestorage.app",
+  messagingSenderId: "1043512593259",
+  appId: "1:1043512593259:web:05b28cb46c3286dc5eda2e",
+  measurementId: "G-R4HRCBGXQ3",
 };
 
 const app = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
@@ -43,5 +45,5 @@ function createAuth(): Auth {
 }
 
 export const auth: Auth = createAuth();
-export const db = getFirestore(app);
+export const db = getFirestore(app, 'auricrxmedcoach');
 export { app };

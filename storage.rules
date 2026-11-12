@@ -1,0 +1,41 @@
+// Phase 2 draft — NOT deployed. Do not add this file to firebase.json until
+// Firebase Storage is enabled and the document-sharing feature ships.
+// Deny by default. Patients write only under their uid. Doctors read a
+// patient file only when an active consented doctorPatientAccess doc exists
+// for a documents (or equivalent) category.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(patientId) {
+      return signedIn() && request.auth.uid == patientId;
+    }
+    function doctorMayReadDocuments(patientId) {
+      let accessId = request.auth.uid + '_' + patientId;
+      let accessPath = /databases/(default)/documents/doctorPatientAccess/$(accessId);
+      // When Storage is enabled, point this get() at the auricrxmedcoach
+      // Firestore database (see firebase.json) and add a consent category
+      // such as "documents". Until then this file is documentation only.
+      return signedIn()
+        && firestore.exists(accessPath)
+        && firestore.get(accessPath).data.status == 'active'
+        && firestore.get(accessPath).data.doctorId == request.auth.uid
+        && firestore.get(accessPath).data.patientId == patientId
+        && firestore.get(accessPath).data.consent.documents == true;
+    }
+
+    match /patients/{patientId}/documents/{documentId} {
+      allow read: if isOwner(patientId) || doctorMayReadDocuments(patientId);
+      allow create, update: if isOwner(patientId)
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('application/pdf|image/jpeg|image/png|image/webp');
+      allow delete: if isOwner(patientId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

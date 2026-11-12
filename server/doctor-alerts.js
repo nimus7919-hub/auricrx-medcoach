@@ -107,7 +107,8 @@ async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, send
   if (!admin.apps.length) {
     return { ok: false, error: 'firebase_admin_unavailable' };
   }
-  const db = admin.firestore();
+  const { getDoctorFirestore } = require('./doctor-firestore');
+  const db = getDoctorFirestore();
   const entryRef = db.collection('bitacora').doc(patientId).collection('entries').doc(entryId);
   const entrySnap = await entryRef.get();
   if (!entrySnap.exists) return { ok: false, error: 'entry_not_found' };
