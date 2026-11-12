@@ -3,7 +3,16 @@
  * Kept framework-agnostic so the same model can power a future web portal.
  */
 
-export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+export type VerificationStatus =
+  | 'unverified'
+  | 'pending'
+  | 'pending_review'
+  | 'verified'
+  | 'rejected'
+  | 'suspended'
+  | 'expired';
+
+export type DoctorCountryCode = 'MX' | 'US';
 
 export type ConsentCategory =
   | 'bloodPressure'
@@ -63,11 +72,30 @@ export interface DoctorOfficeHours {
 export interface DoctorProfile {
   uid: string;
   displayName: string;
+  /** Legal name used for registry / ID matching (may match displayName). */
+  legalFullName?: string;
   specialty: string;
+  /** MX cédula profesional (general). Empty string allowed for US profiles. */
   cedulaNumber: string;
+  /** MX specialty cédula when a specialty is claimed. */
+  specialtyCedulaNumber?: string;
+  country?: DoctorCountryCode;
+  /** US National Provider Identifier. */
+  npiNumber?: string;
+  /** US state license number (manual board verification). */
+  licenseNumber?: string;
+  licenseState?: string;
   verificationStatus: VerificationStatus;
   verificationUpdatedAt?: string;
   verificationMessage?: string;
+  verificationRejectionReason?: string;
+  /** Set only by admin approve — never by clients. */
+  verifiedAt?: string;
+  /** verifiedAt + 12 months — access lapses when past. */
+  expiresAt?: string;
+  identityProvider?: string;
+  identitySessionId?: string;
+  identityStatus?: string;
   /** Entitlement flag — seam for future IAP/Stripe doctor plan. */
   doctorPlan: boolean;
   doctorPlanSource?: 'mock' | 'iap' | 'stripe' | 'admin';
@@ -153,7 +181,7 @@ export interface DoctorAlertLimit {
 export interface AuditLogEntry {
   id: string;
   actorId: string;
-  actorRole: 'patient' | 'doctor' | 'system';
+  actorRole: 'patient' | 'doctor' | 'system' | 'admin';
   action:
     | 'link_created'
     | 'link_confirmed'
@@ -163,6 +191,11 @@ export interface AuditLogEntry {
     | 'alert_triggered'
     | 'verification_submitted'
     | 'verification_updated'
+    | 'verification_approved'
+    | 'verification_rejected'
+    | 'verification_suspended'
+    | 'verification_revoked'
+    | 'verification_expired'
     | 'doctor_plan_updated'
     | 'appointment_request_sent'
     | 'office_hours_updated'
@@ -170,12 +203,16 @@ export interface AuditLogEntry {
     | 'consent_revoked'
     | 'message_sent'
     | 'message_replied'
-    | 'message_export';
+    | 'message_export'
+    | 'mfa_enrolled'
+    | 'mfa_recovery_generated'
+    | 'mfa_recovery_redeemed';
   patientId?: string;
   doctorId?: string;
   linkId?: string;
   category?: ConsentCategory | AlertReadingType | string;
   detail?: string;
+  reason?: string;
   createdAt: string;
 }
 

@@ -18,7 +18,15 @@
       "required": "Name, Fachrichtung und Cédula sind erforderlich.",
       "save": "Profil speichern",
       "saved": "Arztprofil gespeichert.",
-      "saveFailed": "Arztprofil konnte nicht gespeichert werden."
+      "saveFailed": "Arztprofil konnte nicht gespeichert werden.",
+      "legalName": "Vollständiger Name",
+      "country": "Country",
+      "countryMx": "Mexico",
+      "countryUs": "United States",
+      "specialtyCedula": "Specialty cédula",
+      "npi": "NPI",
+      "licenseNumber": "License number",
+      "licenseState": "License state"
     },
     "verification": {
       "title": "Cédula-Verifizierung",
@@ -29,8 +37,12 @@
         "unverified": "Nicht verifiziert",
         "pending": "Ausstehend",
         "verified": "Verifiziert",
-        "rejected": "Abgelehnt"
-      }
+        "rejected": "Abgelehnt",
+        "pending_review": "In Prüfung",
+        "suspended": "Suspended",
+        "expired": "Expired"
+      },
+      "queued": "Verifizierung konnte nicht abgeschlossen werden."
     },
     "plan": {
       "label": "Arztplan",

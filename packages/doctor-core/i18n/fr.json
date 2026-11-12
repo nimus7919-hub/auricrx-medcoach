@@ -18,7 +18,15 @@
       "required": "Le nom, la spécialité et la cédula sont obligatoires.",
       "save": "Enregistrer le profil",
       "saved": "Profil médecin enregistré.",
-      "saveFailed": "Impossible d’enregistrer le profil médecin."
+      "saveFailed": "Impossible d’enregistrer le profil médecin.",
+      "legalName": "Nom complet",
+      "country": "Country",
+      "countryMx": "Mexico",
+      "countryUs": "United States",
+      "specialtyCedula": "Specialty cédula",
+      "npi": "NPI",
+      "licenseNumber": "License number",
+      "licenseState": "License state"
     },
     "verification": {
       "title": "Vérification de cédula",
@@ -29,8 +37,12 @@
         "unverified": "Non vérifiée",
         "pending": "En attente",
         "verified": "Vérifiée",
-        "rejected": "Refusée"
-      }
+        "rejected": "Refusée",
+        "pending_review": "En revue",
+        "suspended": "Suspended",
+        "expired": "Expired"
+      },
+      "queued": "La vérification n’a pas pu être terminée."
     },
     "plan": {
       "label": "Forfait médecin",

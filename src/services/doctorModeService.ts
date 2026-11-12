@@ -154,7 +154,16 @@ class DoctorModeService {
     const res = await authenticatedFetch(`${API_BASE}/api/doctor/verification/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        country: profile.country || 'MX',
+        legalFullName: profile.legalFullName || profile.displayName,
+        specialty: profile.specialty,
+        cedulaNumber: profile.cedulaNumber,
+        specialtyCedulaNumber: profile.specialtyCedulaNumber,
+        npiNumber: profile.npiNumber,
+        licenseNumber: profile.licenseNumber,
+        licenseState: profile.licenseState,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.ok === false) {

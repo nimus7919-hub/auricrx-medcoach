@@ -11,46 +11,62 @@ import type {
   VerificationStatus,
 } from './types';
 import { ENTRY_TYPE_TO_CONSENT, type BitacoraEntryType } from './types';
+import { isVerificationExpired } from './verification/verificationExpiry';
 
-export function isDoctorEntitled(profile: Pick<DoctorProfile, 'doctorPlan' | 'verificationStatus'> | null | undefined): boolean {
+export type DoctorEntitlementProfile = Pick<
+  DoctorProfile,
+  'doctorPlan' | 'verificationStatus' | 'expiresAt'
+>;
+
+export function isDoctorEntitled(
+  profile: DoctorEntitlementProfile | null | undefined,
+  now: Date = new Date()
+): boolean {
   if (!profile) return false;
-  return profile.doctorPlan === true && profile.verificationStatus === 'verified';
+  if (profile.doctorPlan !== true) return false;
+  if (profile.verificationStatus !== 'verified') return false;
+  if (isVerificationExpired(profile, now)) return false;
+  return true;
 }
 
 export function canDoctorSeePatientData(
-  profile: Pick<DoctorProfile, 'doctorPlan' | 'verificationStatus'> | null | undefined,
-  link: PatientDoctorLink | null | undefined
+  profile: DoctorEntitlementProfile | null | undefined,
+  link: PatientDoctorLink | null | undefined,
+  now: Date = new Date()
 ): boolean {
-  if (!isDoctorEntitled(profile)) return false;
+  if (!isDoctorEntitled(profile, now)) return false;
   if (!link || link.status !== 'active') return false;
   return true;
 }
 
 export function canDoctorReadCategory(
-  profile: Pick<DoctorProfile, 'doctorPlan' | 'verificationStatus'> | null | undefined,
+  profile: DoctorEntitlementProfile | null | undefined,
   link: PatientDoctorLink | null | undefined,
-  category: ConsentCategory
+  category: ConsentCategory,
+  now: Date = new Date()
 ): boolean {
-  if (!canDoctorSeePatientData(profile, link)) return false;
+  if (!canDoctorSeePatientData(profile, link, now)) return false;
   return link!.consent?.[category] === true;
 }
 
 export function canDoctorReadEntryType(
-  profile: Pick<DoctorProfile, 'doctorPlan' | 'verificationStatus'> | null | undefined,
+  profile: DoctorEntitlementProfile | null | undefined,
   link: PatientDoctorLink | null | undefined,
-  entryType: BitacoraEntryType
+  entryType: BitacoraEntryType,
+  now: Date = new Date()
 ): boolean {
   const category = ENTRY_TYPE_TO_CONSENT[entryType];
-  return canDoctorReadCategory(profile, link, category);
+  return canDoctorReadCategory(profile, link, category, now);
 }
 
 export function filterConsentedEntries<T extends { type: BitacoraEntryType }>(
-  profile: Pick<DoctorProfile, 'doctorPlan' | 'verificationStatus'> | null | undefined,
+  profile: DoctorEntitlementProfile | null | undefined,
   link: PatientDoctorLink | null | undefined,
-  entries: T[]
+  entries: T[],
+  now: Date = new Date()
 ): T[] {
-  if (!canDoctorSeePatientData(profile, link)) return [];
-  return entries.filter((e) => canDoctorReadEntryType(profile, link, e.type));
+  if (!canDoctorSeePatientData(profile, link, now)) return [];
+  return entries.filter((e) => canDoctorReadEntryType(profile, link, e.type, now));
 }
 
 export function patientOwnsLink(uid: string, link: PatientDoctorLink): boolean {
@@ -74,6 +90,16 @@ export function mergeConsent(base: ConsentMap, updates: Partial<ConsentMap>): Co
   return { ...base, ...updates };
 }
 
+const VERIFICATION_STATUSES: VerificationStatus[] = [
+  'unverified',
+  'pending',
+  'pending_review',
+  'verified',
+  'rejected',
+  'suspended',
+  'expired',
+];
+
 export function isVerificationStatus(value: string): value is VerificationStatus {
-  return value === 'unverified' || value === 'pending' || value === 'verified' || value === 'rejected';
+  return (VERIFICATION_STATUSES as string[]).includes(value);
 }

@@ -5,31 +5,47 @@
     "subtitle": "Registra tus lecturas, vincúlate con un médico cuando tú lo decidas y comparte solo las categorías que autorices. La app nunca etiqueta valores como altos, bajos o peligrosos.",
     "gate": {
       "title": "Se requiere acceso de médico",
-      "needVerifiedPlan": "Los datos del paciente en Modo médico solo están disponibles con un plan de médico activo y una cédula verificada. Los médicos no verificados no pueden ver datos del paciente."
+      "needVerifiedPlan": "Los datos del paciente solo están disponibles con un plan de médico activo y una credencial profesional verificada por un humano que no haya vencido. Los médicos no verificados no pueden ver datos del paciente."
     },
     "onboarding": {
       "title": "Perfil médico",
       "enable": "Activar Modo médico",
       "edit": "Editar perfil médico",
-      "hint": "Ingresa tus datos profesionales. La verificación usa una revisión automatizada de cédula (proveedor simulado en la Fase 1).",
-      "name": "Nombre completo",
+      "hint": "Ingresa tu nombre legal y credenciales profesionales. La consulta al registro se envía a revisión humana: nada se aprueba automáticamente.",
+      "name": "Nombre para mostrar",
+      "legalName": "Nombre legal completo",
       "specialty": "Especialidad",
+      "country": "País",
+      "countryMx": "México",
+      "countryUs": "Estados Unidos",
       "cedula": "Número de cédula profesional",
-      "required": "Nombre, especialidad y cédula son obligatorios.",
+      "specialtyCedula": "Cédula de especialidad (si aplica)",
+      "npi": "Número NPI",
+      "licenseNumber": "Número de licencia estatal",
+      "licenseState": "Estado de la licencia (p. ej. TX)",
+      "required": "Nombre legal, especialidad y los campos de credencial de tu país son obligatorios.",
       "save": "Guardar perfil",
       "saved": "Perfil médico guardado.",
       "saveFailed": "No se pudo guardar el perfil médico."
     },
     "verification": {
-      "title": "Verificación de cédula",
+      "title": "Verificación profesional",
       "label": "Verificación",
-      "submit": "Enviar cédula para verificación",
-      "failed": "No se pudo completar la verificación.",
+      "submit": "Enviar para verificación",
+      "failed": "No se pudo enviar la verificación.",
+      "queued": "Enviado a revisión manual. Verás la decisión aquí cuando un administrador termine la revisión.",
+      "expires": "Vigente hasta {{date}}",
+      "expiredHint": "Tu verificación venció. Vuelve a enviarla para revisión.",
+      "identityHint": "La verificación de identidad (INE/pasaporte + prueba de vida) se abre en el flujo del proveedor cuando esté configurado. No almacenamos imágenes de identificación.",
+      "startIdentity": "Continuar verificación de identidad",
       "status": {
         "unverified": "Sin verificar",
         "pending": "Pendiente",
+        "pending_review": "En revisión",
         "verified": "Verificada",
-        "rejected": "Rechazada"
+        "rejected": "Rechazada",
+        "suspended": "Suspendida",
+        "expired": "Vencida"
       }
     },
     "plan": {

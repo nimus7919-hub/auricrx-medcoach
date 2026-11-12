@@ -206,8 +206,31 @@ describe('self-promotion and access-mirror writes', () => {
       })
     );
     await assertFails(updateDoc(doc(db, 'doctorProfiles', 'doc'), { verificationStatus: 'verified' }));
+    await assertFails(updateDoc(doc(db, 'doctorProfiles', 'doc'), { verificationStatus: 'pending_review' }));
+    await assertFails(updateDoc(doc(db, 'doctorProfiles', 'doc'), { verifiedAt: iso(), expiresAt: iso('02') }));
     await assertFails(updateDoc(doc(db, 'doctorProfiles', 'doc'), { doctorPlan: true }));
     await assertSucceeds(updateDoc(doc(db, 'doctorProfiles', 'doc'), { verificationStatus: 'pending', updatedAt: iso('03') }));
+  });
+
+  it('verification evidence is not readable by doctors or patients', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorVerificationEvidence', 'doc'), {
+        doctorId: 'doc',
+        registry: { outcome: 'match' },
+        identity: { status: 'not_configured' },
+      });
+    });
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'doctorVerificationEvidence', 'doc')));
+    await assertFails(getDoc(doc(authed('pat'), 'doctorVerificationEvidence', 'doc')));
+    await assertFails(
+      setDoc(doc(doctorAuthed('doc'), 'doctorVerificationEvidence', 'doc'), { doctorId: 'doc' })
+    );
+    // Admin claim + MFA can read evidence
+    const adminDb = testEnv.authenticatedContext('admin1', {
+      firebase: { sign_in_second_factor: 'totp' },
+      admin: true,
+    }).firestore();
+    await assertSucceeds(getDoc(doc(adminDb, 'doctorVerificationEvidence', 'doc')));
   });
 
   it('a doctor cannot grant themselves consent through the access mirror', async () => {
