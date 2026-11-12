@@ -64,15 +64,22 @@ export interface DoctorProfile {
   updatedAt: string;
 }
 
+/** ISO string or Firestore Timestamp-like (kept SDK-agnostic). */
+export type FirestoreTime =
+  | string
+  | Date
+  | { toDate: () => Date; seconds?: number }
+  | { seconds: number; nanoseconds?: number };
+
 export interface DoctorInvite {
   code: string;
   createdBy: string;
   role: InviteRole;
-  expiresAt: string;
+  expiresAt: FirestoreTime;
   createdAt: string;
   consumed?: boolean;
   consumedBy?: string;
-  consumedAt?: string;
+  consumedAt?: FirestoreTime;
 }
 
 export interface PatientDoctorLink {
