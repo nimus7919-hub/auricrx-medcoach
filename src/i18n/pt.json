@@ -19,7 +19,11 @@
     "disclosure": "Usamos sua localiza??o apenas para buscar farm?cias ou laborat?rios pr?ximos. N?o a armazenamos nem a usamos para rastreamento. As buscas de farm?cias usam dados do INEGI DENUE/PROFECO pelo nosso servidor; as buscas de laborat?rios e as dist?ncias opcionais de carro usam Google Places/Maps.",
     "reset": "Redefinir consentimento de localiza??o",
     "resetDone": "Consentimento de localiza??o redefinido. Perguntaremos novamente na pr?xima busca.",
-    "resetError": "N?o foi poss?vel redefinir o consentimento de localiza??o. Tente novamente."
+    "resetError": "N?o foi poss?vel redefinir o consentimento de localiza??o. Tente novamente.",
+    "locationOffTitle": "Location is off",
+    "locationOffMessage": "Pharmacies can't be searched because location is off or unavailable. Turn on location and grant permission, then try again.",
+    "openSettings": "Open Settings",
+    "retry": "Try again"
   },
   "documentScanner": {
     "scan": "Digitalizar",
@@ -840,7 +844,9 @@
       "expired": "Expirado"
     },
     "searchingPharmacies": "Pesquisando farmácias...",
-    "singleComponent": "Componente único"
+    "singleComponent": "Componente único",
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Suplementos",
@@ -939,7 +945,9 @@
     "reminderMessage": "Mensagem de lembrete",
     "reminderMessagePrompt": "Digite uma mensagem de lembrete",
     "smartNotifications": "Notificações inteligentes",
-    "supplement": "Suplemento"
+    "supplement": "Suplemento",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Farmácias",

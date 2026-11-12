@@ -19,7 +19,11 @@
     "disclosure": "Nous utilisons votre position uniquement pour rechercher des pharmacies ou laboratoires ? proximit?. Nous ne la conservons pas et ne l?utilisons pas pour vous suivre. Les recherches de pharmacies utilisent les donn?es INEGI DENUE/PROFECO via notre serveur ; les recherches de laboratoires et les distances routi?res facultatives utilisent Google Places/Maps.",
     "reset": "R?initialiser le consentement de localisation",
     "resetDone": "Consentement de localisation r?initialis?. Nous vous le redemanderons lors de votre prochaine recherche.",
-    "resetError": "Impossible de r?initialiser le consentement de localisation. R?essayez."
+    "resetError": "Impossible de r?initialiser le consentement de localisation. R?essayez.",
+    "locationOffTitle": "Location is off",
+    "locationOffMessage": "Pharmacies can't be searched because location is off or unavailable. Turn on location and grant permission, then try again.",
+    "openSettings": "Open Settings",
+    "retry": "Try again"
   },
   "documentScanner": {
     "scan": "Numériser",
@@ -807,7 +811,9 @@
       "expired": "Expiré"
     },
     "searchingPharmacies": "Searching for pharmacies...",
-    "singleComponent": "Single Component (e.g., Metformin only)"
+    "singleComponent": "Single Component (e.g., Metformin only)",
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Suppléments",
@@ -906,7 +912,9 @@
     "reminderMessage": "Message de rappel",
     "reminderMessagePrompt": "Saisir un message de rappel",
     "smartNotifications": "Notifications intelligentes",
-    "supplement": "Complément"
+    "supplement": "Complément",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Pharmacies",

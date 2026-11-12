@@ -38,6 +38,8 @@ import * as Location from "expo-location";
 import { Audio } from "expo-audio";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { mergeReminders, shouldPushReminders } from "../utils/reminderPersistence";
+import { resolveSearchLocation } from "../utils/resolveSearchLocation";
 
 import { askMedicalAI } from "./../api/api.medical-ai";
 
@@ -137,6 +139,12 @@ export default function App() {
   const openAddReminder = () => { setOpenReminderOnEntry(true); setRoute('reminders'); };
   const [route, setRoute] = useAndroidBackNavigation(!showAuth && !isRestoringAuth && !isLoading);
   const [resetAuthToSignIn, setResetAuthToSignIn] = useState(0); // Counter to trigger reset
+  // Reminder cloud-sync guards (declared early for sign-out / auth handlers)
+  const remindersCloudReadyRef = useRef(false);
+  const remoteRemindersHadDataRef = useRef(false);
+  const allowEmptyRemindersPushRef = useRef(false);
+  const remindersRef = useRef([]);
+  const clearRemindersStateRef = useRef(() => {});
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
@@ -262,7 +270,20 @@ export default function App() {
 
   const handleSignOut = async () => {
     try {
+      // Push reminders before clearing local storage so re-login can restore them.
+      try {
+        const pending = remindersRef.current || [];
+        if (pending.length) {
+          await cloudSyncService.syncReminders(pending);
+        }
+      } catch (syncError) {
+        console.warn('⚠️ Failed to sync reminders before sign-out:', syncError);
+      }
       await authService.signOut();
+      remindersCloudReadyRef.current = false;
+      remoteRemindersHadDataRef.current = false;
+      allowEmptyRemindersPushRef.current = false;
+      clearRemindersStateRef.current();
       setUser(null);
       setUserData(null);
       setShowAuth(true);
@@ -1681,49 +1702,13 @@ export default function App() {
     return sObject;
   }, [t, isReady, uiI18n.resolvedLanguage]);
 
-  // meds/reminders (light placeholder list)
+  // meds/reminders — empty until AsyncStorage / Neon restore (no demo placeholders)
   const [reminders, setReminders] = useState([]);
   const [remindersLoaded, setRemindersLoaded] = useState(false);
-  const [meds, setMeds] = useState([
-    {
-      id: '1',
-      name: 'Metformina',
-      strength: '500mg',
-      strengthValue: '500',
-      strengthUnit: uiI18n.t("reminders.units.mg"),
-      status: 'taking',
-      times: ['08:00', '20:00'],
-      startDate: '2024-01-15',
-      endDate: '',
-      notes: '',
-      dosesLeft: '0',
-      quantity: '0 tablet',
-      quantityValue: '0',
-      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
-      remainingQuantity: '0',
-      lastRefill: null,
-      isSingleComponent: true
-    },
-    {
-      id: '2',
-      name: 'Aspirina',
-      strength: '100Mg',
-      strengthValue: '100',
-      strengthUnit: uiI18n.t("reminders.units.mg"),
-      status: 'taking',
-      times: ['17:30'],
-      startDate: '2024-01-01',
-      endDate: '',
-      notes: '',
-      dosesLeft: '30',
-      quantity: '30 tablet',
-      quantityValue: '30',
-      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
-      remainingQuantity: '30',
-      lastRefill: null,
-      isSingleComponent: true
-    }
-  ]); // lifted medications state
+  const [meds, setMeds] = useState([]);
+  const [medsLoaded, setMedsLoaded] = useState(false);
+  remindersRef.current = reminders;
+  clearRemindersStateRef.current = () => { setReminders([]); setMeds([]); };
   const [supplements, setSupplements] = useState([
     {
       id: '1',
@@ -1812,34 +1797,40 @@ useEffect(() => {
   const loadLocationData = async () => {
     if (getRegion() === 'US') return;
     try {
-      // Request location permission
+      // Never invent a default city — skip search when location is off/denied
       const { status } = await requestSearchLocationPermission();
-      if (status !== 'granted') {
-        console.log('📍 Location permission denied - skipping auto-load');
-        return;
+      let coords = null;
+      let positionError = null;
+
+      if (status === 'granted') {
+        try {
+          const position = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+            timeout: 10000, // 10 second timeout
+            maximumAge: 300000 // 5 minutes
+          });
+          coords = position.coords;
+          console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
+        } catch (locationError) {
+          positionError = locationError;
+          console.warn('⚠️ Location request failed — skipping pharmacy/lab auto-load:', locationError?.message || locationError);
+        }
+      } else {
+        console.log('📍 Location permission denied — skipping pharmacy/lab auto-load');
       }
 
-      // Get current position with error handling for Google Play Services issues
-      let coords;
-      try {
-        const position = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-          timeout: 10000, // 10 second timeout
-          maximumAge: 300000 // 5 minutes
-        });
-        coords = position.coords;
-        console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
-      } catch (locationError) {
-        // Handle Google Play Services disconnection or other location errors
-        const errorMessage = locationError?.message || locationError?.toString() || '';
-        if (errorMessage.includes('Google Play services') || errorMessage.includes('service disconnection')) {
-          console.warn('⚠️ Google Play Services unavailable - skipping auto-load location data');
-          return;
-        }
-        // For other errors, log but don't crash
-        console.warn('⚠️ Location request failed - skipping auto-load:', errorMessage);
+      const resolved = resolveSearchLocation({ permissionStatus: status, coords, positionError });
+      if (!resolved.ok) {
+        const message = uiI18n.t('locationSearch.locationOffMessage');
+        setPharmacies([]);
+        setPharmaciesError(message);
+        setPharmaciesLoading(false);
+        setLabs([]);
+        setLabsError(message);
+        setLabsLoading(false);
         return;
       }
+      coords = resolved.coords;
 
       // Load pharmacies
       setPharmaciesLoading(true);
@@ -1847,6 +1838,7 @@ useEffect(() => {
         const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         setPharmacies(nearbyPharmacies);
+        setPharmaciesError(null);
         console.log('🏪 Auto-loaded pharmacies:', nearbyPharmacies.length);
         
         // Debug: Log first pharmacy data to see what we're getting
@@ -1873,6 +1865,7 @@ useEffect(() => {
         const { findNearbyLabs } = await import('../../services/labSearch');
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
         setLabs(nearbyLabs);
+        setLabsError(null);
         console.log('🧪 Auto-loaded labs:', nearbyLabs.length);
         
         // Debug: Log first lab data to see what we're getting
@@ -2267,8 +2260,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (MD) { 
           try { 
             const parsedMeds = JSON.parse(MD);
-            // Only set meds if they exist, otherwise keep defaults
-            if (parsedMeds && parsedMeds.length > 0) {
+            if (Array.isArray(parsedMeds)) {
               setMeds(parsedMeds);
             }
           } catch {} 
@@ -2276,7 +2268,10 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (SD) { try { setSelectedAIDoctor(SD); } catch {} }
       } catch {
         // ignore corrupt storage on boot
-      } finally { setRemindersLoaded(true); }
+      } finally {
+        setRemindersLoaded(true);
+        setMedsLoaded(true);
+      }
     })();
   }, []);
 
@@ -2314,8 +2309,35 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   useEffect(() => { if (remindersLoaded) AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(reminders)); }, [reminders, remindersLoaded]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.rxPhotos, JSON.stringify(rxPhotos)); }, [rxPhotos]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.voiceNotes, JSON.stringify(voiceNotes)); }, [voiceNotes]);
-  useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);
+  useEffect(() => { if (medsLoaded) AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds, medsLoaded]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.selectedAIDoctor, selectedAIDoctor); }, [selectedAIDoctor]);
+
+  // Allow pushing [] after the user deletes the last reminder (not during initial hydrate).
+  const prevRemindersCountRef = useRef(0);
+  useEffect(() => {
+    if (remindersCloudReadyRef.current && prevRemindersCountRef.current > 0 && reminders.length === 0) {
+      allowEmptyRemindersPushRef.current = true;
+    }
+    prevRemindersCountRef.current = reminders.length;
+  }, [reminders]);
+
+  // Push reminders to Neon after local+cloud hydration so they survive logout/reinstall/reboot.
+  useEffect(() => {
+    if (!remindersLoaded || !user || showAuth) return;
+    const forceClear = allowEmptyRemindersPushRef.current && reminders.length === 0;
+    if (!shouldPushReminders({
+      cloudReady: remindersCloudReadyRef.current,
+      reminders,
+      remoteHadData: remoteRemindersHadDataRef.current,
+      allowEmptyPush: forceClear,
+    })) return;
+    allowEmptyRemindersPushRef.current = false;
+    if (reminders.length > 0) remoteRemindersHadDataRef.current = true;
+    else if (forceClear) remoteRemindersHadDataRef.current = false;
+    cloudSyncService.syncReminders(reminders, forceClear ? { forceClear: true } : {}).catch(error => {
+      console.warn('⚠️ Reminder cloud sync failed:', error);
+    });
+  }, [reminders, remindersLoaded, user?.uid, showAuth]);
 
   // Authentication state listener and restoration
   useEffect(() => {
@@ -2448,40 +2470,6 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     return () => unsubscribe();
   }, []);
 
-  // migrate from reminders if meds empty
-  useEffect(() => {
-    if (meds.length === 0 && reminders.length) {
-      const converted = reminders.map(r => ({
-        id: r.id,
-        name: r.name,
-        times: r.time ? [r.time] : (Array.isArray(r.times) ? r.times : []),
-        status: 'taking',
-        startDate: null,
-        endDate: null,
-        notes: '',
-      }));
-      setMeds(converted);
-    }
-  }, [reminders, meds.length]);
-
-  // keep meds in sync when new reminders added
-  useEffect(() => {
-    if (!reminders.length) return;
-    setMeds(prev => {
-      const existing = new Set(prev.map(m => m.id));
-      const additions = reminders.filter(r => !existing.has(r.id)).map(r => ({
-        id: r.id,
-        name: r.name,
-        times: r.time ? [r.time] : (Array.isArray(r.times) ? r.times : []),
-        status: 'taking',
-        startDate: null,
-        endDate: null,
-        notes: '',
-      }));
-      return additions.length ? [...prev, ...additions] : prev;
-    });
-  }, [reminders]);
-
   // Load subscription status and cloud sync when user is authenticated
   useEffect(() => {
     if (user && !showAuth) {
@@ -2585,22 +2573,44 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
               console.error('❌ Error fetching medications from database:', medsError);
             }
             
-            // Merge reminders - cloudData.reminders is the payload array directly
-            if (cloudData.reminders && Array.isArray(cloudData.reminders)) {
-              const cloudReminders = cloudData.reminders;
-              console.log('⏰ Merging reminders from cloud:', cloudReminders.length, 'items');
-              setReminders(prev => {
-                const merged = [...prev];
-                cloudReminders.forEach(cloudRem => {
-                  const existingIndex = merged.findIndex(r => r.id === cloudRem.id);
-                  if (existingIndex >= 0) {
-                    merged[existingIndex] = cloudRem;
-                  } else {
-                    merged.push(cloudRem);
-                  }
+            // Merge reminders - restore from Neon after logout/reinstall; never leave local empty when cloud has data
+            if (cloudData.reminders != null) {
+              const cloudReminders = Array.isArray(cloudData.reminders)
+                ? cloudData.reminders
+                : (typeof cloudData.reminders === 'string'
+                  ? (() => { try { return JSON.parse(cloudData.reminders); } catch { return []; } })()
+                  : []);
+              if (Array.isArray(cloudReminders)) {
+                remoteRemindersHadDataRef.current = cloudReminders.length > 0;
+                console.log('⏰ Merging reminders from cloud:', cloudReminders.length, 'items');
+                setReminders(prev => {
+                  const merged = mergeReminders(prev, cloudReminders);
+                  AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(merged)).catch(() => {});
+                  return merged;
                 });
-                return merged;
-              });
+              }
+            }
+
+            // Also pull reminders endpoint as backup if pull-all omitted them
+            try {
+              const pulled = await cloudSyncService.pullReminders();
+              if (pulled.success && pulled.hasData && pulled.payload != null) {
+                const payload = Array.isArray(pulled.payload)
+                  ? pulled.payload
+                  : (typeof pulled.payload === 'string'
+                    ? (() => { try { return JSON.parse(pulled.payload); } catch { return []; } })()
+                    : []);
+                if (Array.isArray(payload) && payload.length) {
+                  remoteRemindersHadDataRef.current = true;
+                  setReminders(prev => {
+                    const merged = mergeReminders(prev, payload);
+                    AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(merged)).catch(() => {});
+                    return merged;
+                  });
+                }
+              }
+            } catch (pullReminderError) {
+              console.warn('⚠️ Dedicated reminder pull failed:', pullReminderError);
             }
             
             // Merge appointments
@@ -2628,8 +2638,22 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           }
         } catch (error) {
           console.error('❌ Cloud sync error:', error);
+        } finally {
+          // Allow local→cloud pushes only after the pull attempt finishes (success or fail).
+          remindersCloudReadyRef.current = true;
+          // If local still has reminders and remote was empty, push them now.
+          const local = remindersRef.current || [];
+          if (local.length && shouldPushReminders({
+            cloudReady: true,
+            reminders: local,
+            remoteHadData: remoteRemindersHadDataRef.current,
+          })) {
+            cloudSyncService.syncReminders(local).catch(err => console.warn('⚠️ Initial reminder push failed:', err));
+          }
         }
       })();
+    } else if (!user || showAuth) {
+      remindersCloudReadyRef.current = false;
     }
   }, [user, showAuth]);
 

@@ -19,7 +19,11 @@
     "disclosure": "我们仅使用您的位置来查找附近的药房或检验所。我们不会存储或用于追踪。药房搜索通过我们的服务器使用 INEGI DENUE/PROFECO 数据；检验所搜索和可选的驾驶距离使用 Google Places/Maps。",
     "reset": "重置位置同意",
     "resetDone": "位置同意已重置。下次搜索时我们会再次询问。",
-    "resetError": "无法重置位置同意。请重试。"
+    "resetError": "无法重置位置同意。请重试。",
+    "locationOffTitle": "Location is off",
+    "locationOffMessage": "Pharmacies can't be searched because location is off or unavailable. Turn on location and grant permission, then try again.",
+    "openSettings": "Open Settings",
+    "retry": "Try again"
   },
   "documentScanner": {
     "scan": "扫描",
@@ -836,7 +840,9 @@
     "utility": {
       "refillSoon": "即将补取",
       "expired": "已过期"
-    }
+    },
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "补充剂",
@@ -935,7 +941,9 @@
     "reminderMessage": "提醒消息",
     "reminderMessagePrompt": "输入提醒消息",
     "smartNotifications": "智能通知",
-    "supplement": "补充剂"
+    "supplement": "补充剂",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "药房",

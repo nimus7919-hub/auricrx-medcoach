@@ -16,11 +16,12 @@ const US_ZONES = new Set([
 
 function detectRegion({ locales = [], calendars = [], timeZone, savedRegion } = {}) {
   if (savedRegion === 'MX' || savedRegion === 'US') return savedRegion;
-  const country = locales?.[0]?.regionCode?.toUpperCase();
-  if (country === 'MX' || country === 'US') return country;
+  // Timezone reflects physical location better than locale regionCode (en-US on a Mexico City phone).
   const zone = calendars?.[0]?.timeZone || timeZone;
   if (MEXICO_ZONES.has(zone)) return 'MX';
   if (US_ZONES.has(zone) || /^America\/(Indiana|Kentucky|North_Dakota)\//.test(zone || '')) return 'US';
+  const country = locales?.[0]?.regionCode?.toUpperCase();
+  if (country === 'MX' || country === 'US') return country;
   // Spanish and all ambiguous/missing signals default to Mexico.
   return 'MX';
 }

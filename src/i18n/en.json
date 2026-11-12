@@ -19,7 +19,11 @@
     "disclosure": "We use your location only to find nearby pharmacies or laboratories. We do not store it or use it for tracking. Pharmacy searches use INEGI DENUE/PROFECO data through our server; laboratory searches and optional driving distances use Google Places/Maps.",
     "reset": "Reset location consent",
     "resetDone": "Location consent reset. We will ask again on your next search.",
-    "resetError": "Could not reset location consent. Please try again."
+    "resetError": "Could not reset location consent. Please try again.",
+    "locationOffTitle": "Location is off",
+    "locationOffMessage": "Pharmacies can't be searched because location is off or unavailable. Turn on location and grant permission, then try again.",
+    "openSettings": "Open Settings",
+    "retry": "Try again"
   },
   "documentScanner": {
     "scan": "Scan",
@@ -804,7 +808,9 @@
     "utility": {
       "refillSoon": "Refill soon",
       "expired": "Expired"
-    }
+    },
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Supplements",
@@ -903,7 +909,9 @@
     "reminderMessage": "Reminder message",
     "reminderMessagePrompt": "Enter a reminder message",
     "smartNotifications": "Smart notifications",
-    "supplement": "Supplement"
+    "supplement": "Supplement",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Pharmacy Locations",
