@@ -47,9 +47,18 @@ card: {
     alignItems: 'center',
     minHeight: 120,
   },
-  cardIcon: { marginBottom: 12, width: 32, height: 32 },
-  cardIconLarge: { marginBottom: 12, width: 40, height: 40 },
-  cardIconExtraLarge: { marginBottom: 12, width: 48, height: 48 },
+  // Slot wraps whatever icon the card provides — never clips with a fixed box.
+  cardIconSlot: {
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+    minHeight: 32,
+  },
+  // Sizing for Image-based icons (labs / pharmacy / meds / etc.)
+  cardIcon: { width: 32, height: 32 },
+  cardIconLarge: { width: 40, height: 40 },
+  cardIconExtraLarge: { width: 48, height: 48 },
   quickScanButton: {
     backgroundColor: '#d4af37',
     width: 32,

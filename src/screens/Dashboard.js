@@ -1,5 +1,6 @@
 import { getRegion } from '../services/region';
 import ReminderPermissionBanner from '../components/ReminderPermissionBanner';
+import DashboardFeatureIcon from '../components/DashboardFeatureIcon';
 import { Text } from 'react-native';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import uiI18n from "../i18n";
@@ -59,55 +60,55 @@ export default function createDashboard(getScope) {
             <Card title={S.supplements} icon={<Image source={require('../../assets/dashboard Emojies/supplements.png')} style={styles.cardIcon} resizeMode="contain" />} onPress={() => setRoute('supplements')} />
             <Card 
               title={S.smartAlerts} 
-              icon={<Image source={require('../../assets/dashboard Emojies/Smart Alerts.png')} style={styles.cardIconLarge} resizeMode="contain" />} 
+              icon={<DashboardFeatureIcon name="smartAlerts" />} 
               onPress={() => setRoute('smart-notifications')}
               subtitle={uiI18n.t("ui.intelligentRemindersNotifications")}
             />
             <Card 
               title={S.healthAnalytics} 
-              icon={<Image source={require('../../assets/dashboard Emojies/Health Analytics.png')} style={styles.cardIconLarge} resizeMode="contain" />} 
+              icon={<DashboardFeatureIcon name="healthAnalytics" />} 
               onPress={() => setRoute('health-analytics')}
               subtitle={uiI18n.t("ui.trackMetricsAdherenceInsights")}
             />
             <Card 
               title={S.appointmentLog} 
-              icon={<Image source={require('../../assets/dashboard Emojies/Appointment Tracker.png')} style={styles.cardIcon} resizeMode="contain" />} 
+              icon={<DashboardFeatureIcon name="appointments" />} 
               onPress={() => setRoute('appointments')}
               subtitle={S.appointmentSubtitle}
             />
             <Card 
               title={getRegion() === 'US' ? uiI18n.t('tiles.medicineLookup') : S.aiHealth} 
-              icon={<Image source={require('../../assets/dashboard Emojies/AI Health.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
+              icon={<DashboardFeatureIcon name="aiHealth" />} 
               onPress={() => setRoute('ai-health')}
               subtitle={getRegion() === 'US' ? uiI18n.t('ui.medicineLookupSubtitle') : uiI18n.t("ui.intelligentHealthInsightsAnalysis")}
             />
             <Card 
               title={S.documents} 
-              icon={<Image source={require('../../assets/dashboard Emojies/Documents.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
+              icon={<DashboardFeatureIcon name="documents" />} 
               onPress={() => setRoute('documents')}
               subtitle={uiI18n.t("ui.medicalDocumentsForDoctorVisits")}
             />
             <Card 
               title={uiI18n.t('tiles.familyCircle')} 
-              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>👨‍👩‍👧‍👦</Text></View>} 
+              icon={<DashboardFeatureIcon name="familyCircle" />} 
               onPress={() => setRoute('family-circle')}
               subtitle={uiI18n.t('ui.familyCircleSubtitle')}
             />
             <Card 
               title={uiI18n.t('tiles.preventionPlanner')} 
-              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🛡️</Text></View>} 
+              icon={<DashboardFeatureIcon name="preventionPlanner" />} 
               onPress={() => setRoute('prevention-planner')}
               subtitle={uiI18n.t('ui.preventionPlannerSubtitle')}
             />
             <Card 
               title={uiI18n.t('tiles.labOrganizer')} 
-              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🔬</Text></View>} 
+              icon={<DashboardFeatureIcon name="labOrganizer" />} 
               onPress={() => setRoute('lab-organizer')}
               subtitle={uiI18n.t('ui.labOrganizerSubtitle')}
             />
             <Card 
               title={uiI18n.t('tiles.dailyHabits')} 
-              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>📝</Text></View>} 
+              icon={<DashboardFeatureIcon name="dailyHabits" />} 
               onPress={() => setRoute('daily-habits')}
               subtitle={uiI18n.t('ui.dailyHabitsSubtitle')}
             />
