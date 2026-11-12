@@ -12,7 +12,9 @@
     "test:coverage": "jest --coverage",
     "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1",
     "validate:i18n": "node scripts/validate-i18n.js",
-    "lint:i18n": "node scripts/validate-i18n.js"
+    "lint:i18n": "node scripts/validate-i18n.js",
+    "start:doctor": "npm --prefix apps/doctor start",
+    "test:doctor-core": "jest --testPathPattern=doctor"
   },
   "engines": {
     "node": ">=20"
@@ -66,6 +68,7 @@
     "expo-updates": "~0.28.18",
     "expo-video": "^2.2.2",
     "expo-web-browser": "~14.2.0",
+    "firebase": "^12.10.0",
     "html2canvas": "^1.4.1",
     "i18next": "^25.6.0",
     "jspdf": "^3.0.3",
@@ -80,7 +83,8 @@
     "react-native-svg": "15.11.2",
     "react-native-webview": "13.13.5",
     "xlsx": "^0.18.5",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "@auricrx/doctor-core": "file:packages/doctor-core"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

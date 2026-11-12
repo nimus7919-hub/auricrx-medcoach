@@ -37,6 +37,7 @@
     "**/*_backup.tsx",
     "auric-rx/**",
     "app/**",
+    "apps/doctor/**",
     "components/**",
     "dist-android-export/**",
     "**/__tests__/**",

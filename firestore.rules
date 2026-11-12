@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function doctorProfile() {
+      return get(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid)).data;
+    }
+    function doctorIsReady() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid))
+        && doctorProfile().doctorPlan == true
+        && doctorProfile().verificationStatus == 'verified';
+    }
+
+    match /doctorProfiles/{uid} {
+      allow read: if isSelf(uid) || doctorIsReady();
+      allow create, update: if isSelf(uid);
+      allow delete: if false;
+    }
+
+    match /doctorInvites/{code} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if signedIn()
+        && (resource.data.createdBy == request.auth.uid
+            || request.resource.data.consumedBy == request.auth.uid);
+      allow delete: if false;
+    }
+
+    match /doctorLinks/{linkId} {
+      allow read: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || (resource.data.doctorId == request.auth.uid && doctorIsReady()));
+      allow create: if signedIn()
+        && (request.resource.data.patientId == request.auth.uid
+            || request.resource.data.doctorId == request.auth.uid);
+      // Patient owns consent updates & revocation; doctor may revoke their side
+      allow update: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid);
+      allow delete: if false;
+    }
+
+    match /bitacora/{patientId}/entries/{entryId} {
+      allow read: if isSelf(patientId) || doctorMayReadEntry(patientId);
+      allow create, update, delete: if isSelf(patientId);
+
+      function doctorMayReadEntry(patientId) {
+        return doctorIsReady()
+          && patientHasActiveConsent(patientId, entryCategory());
+      }
+
+      function entryCategory() {
+        return resource.data.type == 'blood_pressure' ? 'bloodPressure'
+          : resource.data.type == 'glucose' ? 'glucose'
+          : resource.data.type == 'weight' ? 'weight'
+          : resource.data.type == 'symptoms' ? 'symptoms'
+          : 'none';
+      }
+
+      // Query-friendly check via collection group would need denormalized link index.
+      // Client queries doctorLinks first; rules re-check via get() on known link ids is limited.
+      // We allow read when a matching active link with consent exists using a denormalized
+      // mirror doc: doctorPatientAccess/{doctorId}_{patientId}
+      function patientHasActiveConsent(patientId, category) {
+        let accessId = request.auth.uid + '_' + patientId;
+        return exists(/databases/$(database)/documents/doctorPatientAccess/$(accessId))
+          && get(/databases/$(database)/documents/doctorPatientAccess/$(accessId)).data.status == 'active'
+          && get(/databases/$(database)/documents/doctorPatientAccess/$(accessId)).data.consent[category] == true;
+      }
+    }
+
+    // Denormalized access mirror maintained by client on link/consent changes
+    // so Firestore rules can efficiently authorize doctor reads.
+    match /doctorPatientAccess/{accessId} {
+      allow read: if signedIn()
+        && (resource.data.doctorId == request.auth.uid
+            || resource.data.patientId == request.auth.uid);
+      allow create, update: if signedIn()
+        && (request.resource.data.patientId == request.auth.uid
+            || request.resource.data.doctorId == request.auth.uid);
+      allow delete: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid);
+    }
+
+    match /doctorAlertLimits/{limitId} {
+      allow read: if signedIn()
+        && (resource.data.doctorId == request.auth.uid && doctorIsReady());
+      allow create, update: if signedIn()
+        && request.resource.data.doctorId == request.auth.uid
+        && doctorIsReady();
+      allow delete: if signedIn()
+        && resource.data.doctorId == request.auth.uid;
+    }
+
+    match /doctorPushTokens/{uid} {
+      allow read, write: if isSelf(uid);
+    }
+
+    match /doctorAuditLogs/{logId} {
+      allow read: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid);
+      // Clients may append their own audit events; system writes use Admin SDK
+      allow create: if signedIn()
+        && request.resource.data.actorId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Patient-published read-only shares (meds / adherence) for entitled doctors
+    match /patientSharedMeds/{patientId} {
+      allow write: if isSelf(patientId);
+      allow read: if isSelf(patientId) || doctorIsReady();
+    }
+    match /patientSharedAdherence/{patientId} {
+      allow write: if isSelf(patientId);
+      allow read: if isSelf(patientId) || doctorIsReady();
+    }
+  }
+}

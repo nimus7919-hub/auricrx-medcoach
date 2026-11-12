@@ -4147,5 +4147,176 @@
       "insurance": "Seguro",
       "other": "Otro"
     }
+  },
+  "doctorMode": {
+    "title": "Modo médico",
+    "dashboardSubtitle": "Bitácora, vínculo con médico y lecturas compartidas",
+    "subtitle": "Registra tus lecturas, vincúlate con un médico cuando tú lo decidas y comparte solo las categorías que autorices. La app nunca etiqueta valores como altos, bajos o peligrosos.",
+    "gate": {
+      "title": "Se requiere acceso de médico",
+      "needVerifiedPlan": "Los datos del paciente en Modo médico solo están disponibles con un plan de médico activo y una cédula verificada. Los médicos no verificados no pueden ver datos del paciente."
+    },
+    "onboarding": {
+      "title": "Perfil médico",
+      "enable": "Activar Modo médico",
+      "edit": "Editar perfil médico",
+      "hint": "Ingresa tus datos profesionales. La verificación usa una revisión automatizada de cédula (proveedor simulado en la Fase 1).",
+      "name": "Nombre completo",
+      "specialty": "Especialidad",
+      "cedula": "Número de cédula profesional",
+      "required": "Nombre, especialidad y cédula son obligatorios.",
+      "save": "Guardar perfil",
+      "saved": "Perfil médico guardado.",
+      "saveFailed": "No se pudo guardar el perfil médico."
+    },
+    "verification": {
+      "title": "Verificación de cédula",
+      "label": "Verificación",
+      "submit": "Enviar cédula para verificación",
+      "failed": "No se pudo completar la verificación.",
+      "status": {
+        "unverified": "Sin verificar",
+        "pending": "Pendiente",
+        "verified": "Verificada",
+        "rejected": "Rechazada"
+      }
+    },
+    "plan": {
+      "label": "Plan de médico",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "mockEnable": "Activar plan de médico (simulado)",
+      "mockDisable": "Desactivar plan de médico (simulado)"
+    },
+    "linking": {
+      "title": "Vínculo paciente ↔ médico",
+      "hubHint": "Crea un código de invitación de corta duración o ingresa uno. Tú confirmas el vínculo y controlas cada consentimiento (todos desactivados por defecto).",
+      "createPatientInvite": "Crear mi código de paciente",
+      "createDoctorInvite": "Crear mi código de médico",
+      "enterDoctorCode": "Ingresar código del médico",
+      "enterPatientCode": "Ingresar código del paciente",
+      "manageLinks": "Administrar médicos vinculados y consentimientos",
+      "myDoctors": "Médicos vinculados",
+      "inviteCreated": "Invitación creada",
+      "inviteShare": "Comparte este código (vence en {{minutes}} min): {{code}}",
+      "inviteFailed": "No se pudo crear la invitación.",
+      "enterCode": "Ingresar código de invitación",
+      "enterDoctorHint": "Ingresa el código que te compartió tu médico. Confirmarás antes de compartir cualquier dato.",
+      "enterPatientHint": "Ingresa el código que compartió tu paciente. Debes estar verificado y con plan activo.",
+      "code": "Código de invitación",
+      "confirm": "Confirmar vínculo",
+      "linked": "Vínculo confirmado. Las categorías de consentimiento inician en OFF.",
+      "expired": "Esta invitación ha vencido.",
+      "invalid": "Código inválido o ya utilizado.",
+      "doctorNotReady": "El médico debe tener cédula verificada y un plan de médico activo.",
+      "linkFailed": "No se pudo completar el vínculo.",
+      "consentHint": "Cada categoría está en OFF por defecto. Activa solo lo que quieras que vea este médico. Revocar corta el acceso de inmediato.",
+      "consentFailed": "No se pudo actualizar el consentimiento.",
+      "noLinks": "Aún no hay médicos vinculados.",
+      "doctorLabel": "Médico",
+      "status": "Estado",
+      "statuses": {
+        "pending": "Pendiente",
+        "active": "Activo",
+        "revoked": "Revocado"
+      },
+      "revokeTitle": "Revocar acceso",
+      "revokeMessage": "Este médico perderá de inmediato el acceso a tus datos compartidos.",
+      "revoke": "Revocar acceso",
+      "revokeFailed": "No se pudo revocar el acceso."
+    },
+    "consent": {
+      "bloodPressure": "Presión arterial",
+      "glucose": "Glucosa",
+      "weight": "Peso",
+      "symptoms": "Síntomas",
+      "medicationList": "Lista de medicamentos",
+      "reminderAdherence": "Adherencia a recordatorios"
+    },
+    "bitacora": {
+      "title": "Bitácora",
+      "hubHint": "Registro rápido de presión arterial, glucosa, peso y síntomas — solo valores crudos.",
+      "open": "Abrir Bitácora",
+      "disclaimer": "Los valores se guardan tal como los ingresas. La app no los interpreta como normales, altos, bajos o peligrosos.",
+      "bp": "Presión",
+      "glucose": "Glucosa",
+      "weight": "Peso",
+      "symptoms": "Síntomas",
+      "systolic": "Sistólica",
+      "diastolic": "Diastólica",
+      "pulse": "Pulso (opcional)",
+      "glucoseMgDl": "Glucosa (mg/dL)",
+      "weightKg": "Peso (kg)",
+      "symptomsText": "Síntomas",
+      "noteOptional": "Nota (opcional)",
+      "save": "Guardar registro",
+      "saveFailed": "No se pudo guardar el registro.",
+      "bpRequired": "Ingresa sistólica y diastólica.",
+      "glucoseRequired": "Ingresa un valor de glucosa.",
+      "weightRequired": "Ingresa un valor de peso.",
+      "symptomsRequired": "Describe los síntomas.",
+      "charts": "Gráficas (valores crudos)",
+      "chartsHint": "Gráficas simples de tus números — sin bandas de referencia ni colores de riesgo.",
+      "history": "Historial",
+      "empty": "Aún no hay registros.",
+      "timing": {
+        "fasting": "En ayunas",
+        "after_meal": "Después de comer",
+        "other": "Otro"
+      },
+      "types": {
+        "blood_pressure": "Presión arterial",
+        "glucose": "Glucosa",
+        "weight": "Peso",
+        "symptoms": "Síntomas"
+      }
+    },
+    "doctor": {
+      "section": "Para médicos",
+      "hubHint": "Requiere plan de médico + cédula verificada. Los médicos no verificados no pueden ver datos del paciente.",
+      "patients": "Mis pacientes",
+      "patientDetail": "Paciente",
+      "noPatients": "Aún no hay pacientes vinculados con consentimiento activo.",
+      "tapToOpen": "Abrir bitácora compartida",
+      "rawOnly": "Lecturas compartidas solo como valores crudos — sin etiquetas clínicas.",
+      "medsSharedHint": "La lista de medicamentos está compartida (solo lectura).",
+      "adherenceSharedHint": "La adherencia a recordatorios se comparte cuando está disponible."
+    },
+    "alerts": {
+      "title": "Límites de alerta",
+      "hint": "Avísame solo cuando una lectura nueva cruce un límite que yo configuré. Las alertas nunca dicen que un valor es alto, bajo o peligroso.",
+      "readingType": "Lectura",
+      "comparator": "Cuando el valor sea",
+      "value": "Valor límite",
+      "valueRequired": "Ingresa un límite numérico.",
+      "save": "Guardar límite",
+      "saved": "Límite de alerta guardado.",
+      "saveFailed": "No se pudo guardar el límite.",
+      "pushTitle": "AuricRX Modo médico",
+      "pushBody": "Una lectura cruzó un límite que usted configuró. Abra la app para ver el detalle.",
+      "crossedLimitDetail": "Una lectura cruzó un límite que usted configuró.",
+      "types": {
+        "systolic": "Sistólica",
+        "diastolic": "Diastólica",
+        "pulse": "Pulso",
+        "glucose": "Glucosa",
+        "weight": "Peso"
+      },
+      "comparators": {
+        "gt": "mayor que",
+        "gte": "mayor o igual",
+        "lt": "menor que",
+        "lte": "menor o igual"
+      }
+    },
+    "patientHub": {
+      "title": "Bitácora y médicos",
+      "dashboardSubtitle": "Registra lecturas y controla lo que ve tu médico",
+      "subtitle": "Registra tus lecturas y vincúlate con un médico cuando tú lo decidas. Los médicos usan la app aparte AuricRX Médicos.",
+      "audit": "Registro de acceso",
+      "auditHint": "Eventos recientes de vínculo, consentimiento y lecturas del médico.",
+      "auditEmpty": "Aún no hay eventos de auditoría.",
+      "doctorAppNote": "Tu médico ve los datos compartidos en AuricRX Médicos (com.auricrx.doctors), no dentro de esta app de paciente."
+    }
   }
 }

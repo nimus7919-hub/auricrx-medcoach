@@ -3742,6 +3742,9 @@ app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
   }
 });
 
+// Doctor Mode Phase 1 — threshold alert evaluation (Firebase Admin + Expo push)
+require('./doctor-alerts').mountDoctorAlertRoutes(app, { verifyUser });
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
   console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');
@@ -3749,4 +3752,5 @@ app.listen(port, () => {
   console.log('   POST /api/subscription/cancel');
   console.log('   POST /api/subscription/resubscribe');
   console.log('   GET  /api/me/subscription');
+  console.log('   POST /api/doctor/alerts/evaluate');
 });

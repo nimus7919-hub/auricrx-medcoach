@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "AuricRX Médicos",
+    "slug": "auricrx-doctors",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080E1B"
+    },
+    "scheme": [
+      "auricrx-doctors",
+      "com.auricrx.doctors"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.auricrx.doctors",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#080E1B"
+      },
+      "package": "com.auricrx.doctors",
+      "versionCode": 1,
+      "runtimeVersion": "1.0.0"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      },
+      "firebaseNote": "Register a separate Firebase iOS/Android/Web app under the same auricrx-medcoach project for com.auricrx.doctors"
+    },
+    "owner": "auricrx"
+  }
+}

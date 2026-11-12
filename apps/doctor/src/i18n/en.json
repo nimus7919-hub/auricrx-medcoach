@@ -1,0 +1,28 @@
+{
+  "appName": "AuricRX for Doctors",
+  "common": {
+    "close": "Close",
+    "back": "Back",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "save": "Save"
+  },
+  "auth": {
+    "title": "Sign in",
+    "hint": "Use your AuricRX doctor account.",
+    "needAccount": "Ask your admin to create a doctor account, or register with email.",
+    "register": "Create account",
+    "registerOk": "Account created. Complete your doctor profile."
+  },
+  "nav": {
+    "patients": "Patients",
+    "profile": "Profile",
+    "alerts": "Alerts"
+  }
+}

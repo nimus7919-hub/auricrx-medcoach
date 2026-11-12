@@ -4250,5 +4250,176 @@
   "usOnboarding": {
     "change": "Alterar",
     "continue": "Continuar"
+  },
+  "doctorMode": {
+    "title": "Modo médico",
+    "dashboardSubtitle": "Bitácora, vínculo com médico e leituras compartilhadas",
+    "subtitle": "Registre suas leituras, vincule-se a um médico quando quiser e compartilhe apenas as categorias que autorizar. O app nunca rotula valores como altos, baixos ou perigosos.",
+    "gate": {
+      "title": "Acesso médico necessário",
+      "needVerifiedPlan": "Os dados do paciente no Modo médico só ficam disponíveis com um plano médico ativo e cédula verificada. Médicos não verificados não podem ver dados do paciente."
+    },
+    "onboarding": {
+      "title": "Perfil médico",
+      "enable": "Ativar Modo médico",
+      "edit": "Editar perfil médico",
+      "hint": "Informe seus dados profissionais. A verificação usa checagem automatizada de cédula (provedor simulado na Fase 1).",
+      "name": "Nome completo",
+      "specialty": "Especialidade",
+      "cedula": "Número da cédula profissional",
+      "required": "Nome, especialidade e cédula são obrigatórios.",
+      "save": "Salvar perfil",
+      "saved": "Perfil médico salvo.",
+      "saveFailed": "Não foi possível salvar o perfil médico."
+    },
+    "verification": {
+      "title": "Verificação de cédula",
+      "label": "Verificação",
+      "submit": "Enviar cédula para verificação",
+      "failed": "Não foi possível concluir a verificação.",
+      "status": {
+        "unverified": "Não verificada",
+        "pending": "Pendente",
+        "verified": "Verificada",
+        "rejected": "Rejeitada"
+      }
+    },
+    "plan": {
+      "label": "Plano médico",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "mockEnable": "Ativar plano médico (simulado)",
+      "mockDisable": "Desativar plano médico (simulado)"
+    },
+    "linking": {
+      "title": "Vínculo paciente ↔ médico",
+      "hubHint": "Crie um convite de curta duração ou digite um código. Você confirma o vínculo e controla cada consentimento (todos desligados por padrão).",
+      "createPatientInvite": "Criar meu código de paciente",
+      "createDoctorInvite": "Criar meu código de médico",
+      "enterDoctorCode": "Digitar código do médico",
+      "enterPatientCode": "Digitar código do paciente",
+      "manageLinks": "Gerenciar médicos vinculados e consentimentos",
+      "myDoctors": "Médicos vinculados",
+      "inviteCreated": "Convite criado",
+      "inviteShare": "Compartilhe este código (expira em {{minutes}} min): {{code}}",
+      "inviteFailed": "Não foi possível criar o convite.",
+      "enterCode": "Digitar código de convite",
+      "enterDoctorHint": "Digite o código que seu médico compartilhou. Você confirmará antes de compartilhar qualquer dado.",
+      "enterPatientHint": "Digite o código que seu paciente compartilhou. Você deve estar verificado e com plano ativo.",
+      "code": "Código de convite",
+      "confirm": "Confirmar vínculo",
+      "linked": "Vínculo confirmado. As categorias de consentimento começam DESLIGADAS.",
+      "expired": "Este convite expirou.",
+      "invalid": "Código inválido ou já usado.",
+      "doctorNotReady": "O médico precisa de cédula verificada e plano médico ativo.",
+      "linkFailed": "Não foi possível concluir o vínculo.",
+      "consentHint": "Cada categoria começa DESLIGADA. Ative apenas o que deseja que este médico veja. Revogar corta o acesso imediatamente.",
+      "consentFailed": "Não foi possível atualizar o consentimento.",
+      "noLinks": "Ainda não há médicos vinculados.",
+      "doctorLabel": "Médico",
+      "status": "Status",
+      "statuses": {
+        "pending": "Pendente",
+        "active": "Ativo",
+        "revoked": "Revogado"
+      },
+      "revokeTitle": "Revogar acesso",
+      "revokeMessage": "Este médico perderá imediatamente o acesso aos seus dados compartilhados.",
+      "revoke": "Revogar acesso",
+      "revokeFailed": "Não foi possível revogar o acesso."
+    },
+    "consent": {
+      "bloodPressure": "Pressão arterial",
+      "glucose": "Glicose",
+      "weight": "Peso",
+      "symptoms": "Sintomas",
+      "medicationList": "Lista de medicamentos",
+      "reminderAdherence": "Adesão aos lembretes"
+    },
+    "bitacora": {
+      "title": "Bitácora",
+      "hubHint": "Registro rápido de pressão, glicose, peso e sintomas — apenas valores brutos.",
+      "open": "Abrir Bitácora",
+      "disclaimer": "Os valores são salvos como digitados. O app não os interpreta como normais, altos, baixos ou perigosos.",
+      "bp": "Pressão",
+      "glucose": "Glicose",
+      "weight": "Peso",
+      "symptoms": "Sintomas",
+      "systolic": "Sistólica",
+      "diastolic": "Diastólica",
+      "pulse": "Pulso (opcional)",
+      "glucoseMgDl": "Glicose (mg/dL)",
+      "weightKg": "Peso (kg)",
+      "symptomsText": "Sintomas",
+      "noteOptional": "Nota (opcional)",
+      "save": "Salvar registro",
+      "saveFailed": "Não foi possível salvar o registro.",
+      "bpRequired": "Informe sistólica e diastólica.",
+      "glucoseRequired": "Informe um valor de glicose.",
+      "weightRequired": "Informe um valor de peso.",
+      "symptomsRequired": "Descreva os sintomas.",
+      "charts": "Gráficos (valores brutos)",
+      "chartsHint": "Gráficos simples dos seus números — sem faixas de referência nem cores de risco.",
+      "history": "Histórico",
+      "empty": "Ainda não há registros.",
+      "timing": {
+        "fasting": "Em jejum",
+        "after_meal": "Após refeição",
+        "other": "Outro"
+      },
+      "types": {
+        "blood_pressure": "Pressão arterial",
+        "glucose": "Glicose",
+        "weight": "Peso",
+        "symptoms": "Sintomas"
+      }
+    },
+    "doctor": {
+      "section": "Para médicos",
+      "hubHint": "Requer plano médico + cédula verificada. Médicos não verificados não podem ver dados do paciente.",
+      "patients": "Meus pacientes",
+      "patientDetail": "Paciente",
+      "noPatients": "Ainda não há pacientes vinculados com consentimento ativo.",
+      "tapToOpen": "Abrir bitácora compartilhada",
+      "rawOnly": "Leituras compartilhadas apenas como valores brutos — sem rótulos clínicos.",
+      "medsSharedHint": "A lista de medicamentos está compartilhada (somente leitura).",
+      "adherenceSharedHint": "A adesão aos lembretes é compartilhada quando disponível."
+    },
+    "alerts": {
+      "title": "Limites de alerta",
+      "hint": "Avise-me apenas quando uma nova leitura cruzar um limite que eu defini. Os alertas nunca dizem que um valor é alto, baixo ou perigoso.",
+      "readingType": "Leitura",
+      "comparator": "Quando o valor for",
+      "value": "Valor limite",
+      "valueRequired": "Informe um limite numérico.",
+      "save": "Salvar limite",
+      "saved": "Limite de alerta salvo.",
+      "saveFailed": "Não foi possível salvar o limite.",
+      "pushTitle": "AuricRX Modo médico",
+      "pushBody": "Uma leitura cruzou um limite que você definiu. Abra o app para ver os detalhes.",
+      "crossedLimitDetail": "Uma leitura cruzou um limite que você definiu.",
+      "types": {
+        "systolic": "Sistólica",
+        "diastolic": "Diastólica",
+        "pulse": "Pulso",
+        "glucose": "Glicose",
+        "weight": "Peso"
+      },
+      "comparators": {
+        "gt": "maior que",
+        "gte": "maior ou igual",
+        "lt": "menor que",
+        "lte": "menor ou igual"
+      }
+    },
+    "patientHub": {
+      "title": "Bitácora e médicos",
+      "dashboardSubtitle": "Registre leituras e controle o que seu médico vê",
+      "subtitle": "Registre suas leituras e vincule-se a um médico quando quiser. Os médicos usam o app separado AuricRX Médicos.",
+      "audit": "Registro de acesso",
+      "auditHint": "Eventos recentes de vínculo, consentimento e leituras do médico.",
+      "auditEmpty": "Ainda não há eventos de auditoria.",
+      "doctorAppNote": "Seu médico vê os dados compartilhados no AuricRX Médicos (com.auricrx.doctors), não neste app do paciente."
+    }
   }
 }
