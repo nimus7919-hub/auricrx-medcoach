@@ -279,7 +279,8 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
           buttonText: t("adminProfile.ok"),
         });
         } catch (error: any) {
-          showAlert({ title: t("adminProfile.error"), message: error.message, buttonText: t("adminProfile.ok") });
+          console.error('AdminProfile action failed:', error);
+          showAlert({ title: t("errors.title"), message: t("errors.generic"), buttonText: t("adminProfile.ok") });
         } finally { setLoading(false); }
       },
     });

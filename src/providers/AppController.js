@@ -38,7 +38,15 @@ import * as Location from "expo-location";
 import { Audio } from "expo-audio";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { mergeReminders, shouldPushReminders } from "../utils/reminderPersistence";
+import {
+  TOMBSTONE_STORAGE_KEY,
+  addReminderTombstones,
+  mergeReminders,
+  normalizeTombstones,
+  pruneReminderTombstones,
+  shouldPushReminders,
+} from "../utils/reminderPersistence";
+import { toUserFacingError, logTechnicalError } from "../utils/userFacingError";
 import { resolveSearchLocation } from "../utils/resolveSearchLocation";
 
 import { askMedicalAI } from "./../api/api.medical-ai";
@@ -144,7 +152,10 @@ export default function App() {
   const remoteRemindersHadDataRef = useRef(false);
   const allowEmptyRemindersPushRef = useRef(false);
   const remindersRef = useRef([]);
+  const reminderTombstonesRef = useRef({});
+  const skipReminderTombstoneRef = useRef(false);
   const clearRemindersStateRef = useRef(() => {});
+  const promptSessionExpiredRef = useRef(() => {});
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
@@ -249,15 +260,15 @@ export default function App() {
         });
       } else {
         showAlert({
-          title: uiI18n.t("adminProfile.error"),
-          message: result.error,
+          title: uiI18n.t("errors.title"),
+          message: toUserFacingError(result.error, 'errors.generic'),
           buttonText: uiI18n.t("adminProfile.ok"),
         });
       }
     } catch (error) {
       console.error('Auth error:', error);
       showAlert({
-        title: uiI18n.t("adminProfile.error"),
+        title: uiI18n.t("errors.title"),
         message: uiI18n.t("ui.authenticationFailedPleaseTryAgain"),
         buttonText: uiI18n.t("adminProfile.ok"),
       });
@@ -270,11 +281,25 @@ export default function App() {
 
   const handleSignOut = async () => {
     try {
-      // Push reminders before clearing local storage so re-login can restore them.
+      // Push reminders (including offline deletes via filtered/empty payload) before clearing.
       try {
         const pending = remindersRef.current || [];
-        if (pending.length) {
-          await cloudSyncService.syncReminders(pending);
+        const tombstones = reminderTombstonesRef.current || {};
+        const hasPendingDeletes = Object.keys(tombstones).length > 0;
+        if (pending.length || hasPendingDeletes) {
+          const result = await cloudSyncService.syncReminders(
+            pending,
+            (!pending.length && hasPendingDeletes) || allowEmptyRemindersPushRef.current
+              ? { forceClear: true }
+              : {}
+          );
+          if (result?.success) {
+            reminderTombstonesRef.current = pruneReminderTombstones(tombstones, pending);
+            await AsyncStorage.setItem(
+              TOMBSTONE_STORAGE_KEY,
+              JSON.stringify(reminderTombstonesRef.current)
+            ).catch(() => {});
+          }
         }
       } catch (syncError) {
         console.warn('⚠️ Failed to sync reminders before sign-out:', syncError);
@@ -283,7 +308,11 @@ export default function App() {
       remindersCloudReadyRef.current = false;
       remoteRemindersHadDataRef.current = false;
       allowEmptyRemindersPushRef.current = false;
+      skipReminderTombstoneRef.current = true;
+      reminderTombstonesRef.current = {};
+      AsyncStorage.removeItem(TOMBSTONE_STORAGE_KEY).catch(() => {});
       clearRemindersStateRef.current();
+      skipReminderTombstoneRef.current = false;
       setUser(null);
       setUserData(null);
       setShowAuth(true);
@@ -342,34 +371,26 @@ export default function App() {
           message: S.membershipCancelled || uiI18n.t("settings.membershipCancelled")
         });
         setShowMembershipResultModal(true);
-        // Refresh subscription status
+        // Refresh subscription status (soft-fail keeps last known state)
         if (user?.firebaseUser) {
           const status = await getSubscriptionStatus(user.firebaseUser);
-          setSubscriptionStatus(status);
+          if (status?.ok) setSubscriptionStatus(status);
         }
       } else {
+        logTechnicalError('cancelMembership/api', result);
         setMembershipResult({
           type: 'error',
-          title: S.error || uiI18n.t("adminProfile.error"),
-          message: result.message || result.error || S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed")
+          title: S.error || uiI18n.t("errors.title"),
+          message: S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed"),
         });
         setShowMembershipResultModal(true);
       }
     } catch (error) {
-      console.error('Cancel membership error:', error);
-      let errorMessage = S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed");
-      
-      // Provide more specific error messages
-      if (error.message && error.message.includes('JSON Parse error')) {
-        errorMessage = uiI18n.t("ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport");
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+      logTechnicalError('cancelMembership', error);
       setMembershipResult({
         type: 'error',
-        title: S.error || uiI18n.t("adminProfile.error"),
-        message: errorMessage
+        title: S.error || uiI18n.t("errors.title"),
+        message: toUserFacingError(error, 'settings.cancelMembershipFailed'),
       });
       setShowMembershipResultModal(true);
     }
@@ -418,33 +439,25 @@ export default function App() {
           message: S.membershipRestarted || uiI18n.t("settings.membershipRestarted")
         });
         setShowMembershipResultModal(true);
-        // Refresh subscription status
         if (user?.firebaseUser) {
           const status = await getSubscriptionStatus(user.firebaseUser);
-          setSubscriptionStatus(status);
+          if (status?.ok) setSubscriptionStatus(status);
         }
       } else {
+        logTechnicalError('restartMembership/api', result);
         setMembershipResult({
           type: 'error',
-          title: S.error || uiI18n.t("adminProfile.error"),
-          message: result.message || result.error || S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed")
+          title: S.error || uiI18n.t("errors.title"),
+          message: S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed"),
         });
         setShowMembershipResultModal(true);
       }
     } catch (error) {
-      console.error('Restart membership error:', error);
-      let errorMessage = S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed");
-      
-      if (error.message && error.message.includes('JSON Parse error')) {
-        errorMessage = uiI18n.t("ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport");
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+      logTechnicalError('restartMembership', error);
       setMembershipResult({
         type: 'error',
-        title: S.error || uiI18n.t("adminProfile.error"),
-        message: errorMessage
+        title: S.error || uiI18n.t("errors.title"),
+        message: toUserFacingError(error, 'settings.restartMembershipFailed'),
       });
       setShowMembershipResultModal(true);
     }
@@ -1703,12 +1716,78 @@ export default function App() {
   }, [t, isReady, uiI18n.resolvedLanguage]);
 
   // meds/reminders — empty until AsyncStorage / Neon restore (no demo placeholders)
-  const [reminders, setReminders] = useState([]);
+  const [reminders, setRemindersState] = useState([]);
   const [remindersLoaded, setRemindersLoaded] = useState(false);
   const [meds, setMeds] = useState([]);
   const [medsLoaded, setMedsLoaded] = useState(false);
+
+  // Wrap reminder updates so offline deletes become durable tombstones.
+  // options.skipTombstone must be captured in-closure — setState updaters run later.
+  const setReminders = (updater, options = {}) => {
+    const skipTombstone = !!(options.skipTombstone || skipReminderTombstoneRef.current);
+    setRemindersState((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const nextList = Array.isArray(next) ? next : [];
+      const prevList = Array.isArray(prev) ? prev : [];
+      if (!skipTombstone && prevList.length) {
+        const nextIds = new Set(nextList.map((r) => String(r?.id)));
+        const removedIds = prevList
+          .filter((r) => r && r.id != null && !nextIds.has(String(r.id)))
+          .map((r) => r.id);
+        if (removedIds.length) {
+          reminderTombstonesRef.current = addReminderTombstones(
+            reminderTombstonesRef.current,
+            removedIds
+          );
+          AsyncStorage.setItem(
+            TOMBSTONE_STORAGE_KEY,
+            JSON.stringify(reminderTombstonesRef.current)
+          ).catch(() => {});
+          // Ensure the filtered list is pushed even if it becomes empty.
+          if (nextList.length === 0) {
+            allowEmptyRemindersPushRef.current = true;
+          }
+        }
+      }
+      return nextList;
+    });
+  };
+
   remindersRef.current = reminders;
-  clearRemindersStateRef.current = () => { setReminders([]); setMeds([]); };
+  clearRemindersStateRef.current = () => {
+    setReminders([], { skipTombstone: true });
+    setMeds([]);
+  };
+
+  promptSessionExpiredRef.current = async () => {
+    // Only prompt after getSubscriptionStatus confirmed expiry post-refresh.
+    // Double-check Firebase still cannot mint a token so a race cannot wipe a valid session.
+    const live = authService.getCurrentUser();
+    if (live) {
+      try {
+        await live.getIdToken(true);
+        console.warn('⚠️ Skipping session-expired prompt — Firebase session still valid after refresh');
+        return;
+      } catch (tokenError) {
+        const code = String(tokenError?.code || '');
+        const definitive = /auth\/(user-token-expired|invalid-user-token|user-disabled|user-not-found|invalid-refresh-token|id-token-expired|id-token-revoked)/i.test(
+          code || String(tokenError?.message || '')
+        );
+        if (!definitive) {
+          console.warn('⚠️ Skipping session-expired prompt — token refresh failed transiently', tokenError);
+          return;
+        }
+      }
+    }
+    showAlert({
+      title: uiI18n.t("errors.title"),
+      message: uiI18n.t("errors.sessionExpired"),
+      buttonText: uiI18n.t("adminProfile.ok"),
+      onPress: () => {
+        handleSignOut();
+      },
+    });
+  };
   const [supplements, setSupplements] = useState([
     {
       id: '1',
@@ -2254,7 +2333,22 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (N) setNight(N === '1');
         if (M) setMoodShift(M === '1');
 
-        if (R) { try { setReminders(JSON.parse(R)); } catch {} }
+        try {
+          const tombRaw = await AsyncStorage.getItem(TOMBSTONE_STORAGE_KEY);
+          reminderTombstonesRef.current = normalizeTombstones(tombRaw);
+        } catch {
+          reminderTombstonesRef.current = {};
+        }
+        if (R) {
+          try {
+            const parsed = JSON.parse(R);
+            const filtered = mergeReminders(parsed, [], {
+              tombstones: reminderTombstonesRef.current,
+            });
+            setReminders(filtered, { skipTombstone: true });
+          } catch {
+          }
+        }
         if (P) { try { setRxPhotos(JSON.parse(P)); } catch {} }
   if (V) { try { setVoiceNotes(JSON.parse(V)); } catch {} }
         if (MD) { 
@@ -2322,19 +2416,34 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   }, [reminders]);
 
   // Push reminders to Neon after local+cloud hydration so they survive logout/reinstall/reboot.
+  // Pending tombstones force a push (including empty) so offline deletes reach the server.
   useEffect(() => {
     if (!remindersLoaded || !user || showAuth) return;
-    const forceClear = allowEmptyRemindersPushRef.current && reminders.length === 0;
+    const hasPendingDeletes = Object.keys(reminderTombstonesRef.current || {}).length > 0;
+    const forceClear =
+      (allowEmptyRemindersPushRef.current || hasPendingDeletes) && reminders.length === 0;
     if (!shouldPushReminders({
       cloudReady: remindersCloudReadyRef.current,
       reminders,
       remoteHadData: remoteRemindersHadDataRef.current,
       allowEmptyPush: forceClear,
+      hasPendingDeletes,
     })) return;
     allowEmptyRemindersPushRef.current = false;
     if (reminders.length > 0) remoteRemindersHadDataRef.current = true;
     else if (forceClear) remoteRemindersHadDataRef.current = false;
-    cloudSyncService.syncReminders(reminders, forceClear ? { forceClear: true } : {}).catch(error => {
+    cloudSyncService.syncReminders(reminders, forceClear ? { forceClear: true } : {}).then((result) => {
+      if (result?.success) {
+        reminderTombstonesRef.current = pruneReminderTombstones(
+          reminderTombstonesRef.current,
+          reminders
+        );
+        AsyncStorage.setItem(
+          TOMBSTONE_STORAGE_KEY,
+          JSON.stringify(reminderTombstonesRef.current)
+        ).catch(() => {});
+      }
+    }).catch(error => {
       console.warn('⚠️ Reminder cloud sync failed:', error);
     });
   }, [reminders, remindersLoaded, user?.uid, showAuth]);
@@ -2422,7 +2531,11 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         
         if (restoreResult.success) {
           console.log('✅ Auth state restored successfully - user will stay signed in');
-          setUser(restoreResult.user);
+          const liveUser = restoreResult.user?.firebaseUser || authService.getCurrentUser();
+          setUser({
+            ...restoreResult.user,
+            firebaseUser: liveUser || restoreResult.user?.firebaseUser || null,
+          });
           setShowAuth(false);
           setRoute('dashboard'); // Navigate to dashboard after auth restoration
           
@@ -2476,25 +2589,32 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
       (async () => {
         try {
           console.log('📊 Loading subscription status...');
-          const status = await getSubscriptionStatus(user.firebaseUser || null);
-          if (status.ok) {
-            console.log('✅ Subscription status loaded:', status);
-            setSubscriptionStatus(status);
-            
-            // Check if subscription has expired (0 days left)
-            const daysLeft = status.daysLeft || 0;
-            const isExpired = status.status === 'expired';
-            
-            if (isExpired && status.plan !== 'pro') {
-              console.log('⚠️ Subscription expired - showing modal');
-              setShowSubscriptionExpiredModal(true);
-              // Note: User will be logged out when they dismiss the modal
-            }
+          const liveFirebaseUser = user.firebaseUser || authService.getCurrentUser();
+          if (!liveFirebaseUser) {
+            console.warn('⚠️ Skipping subscription fetch — auth not ready');
           } else {
-            console.log('⚠️ Failed to load subscription status:', status);
+            const status = await getSubscriptionStatus(liveFirebaseUser);
+            if (status?.ok) {
+              console.log('✅ Subscription status loaded:', status);
+              setSubscriptionStatus(status);
+
+              const isExpired = status.status === 'expired';
+              if (isExpired && status.plan !== 'pro') {
+                console.log('⚠️ Subscription expired - showing modal');
+                setShowSubscriptionExpiredModal(true);
+              }
+            } else if (status?.sessionExpired && status?.confirmedAfterRefresh) {
+              // Only after refresh+retry confirmed an invalid session — never on one 401/network/500.
+              console.warn('⚠️ Confirmed session expiry during subscription check');
+              await promptSessionExpiredRef.current?.();
+            } else {
+              // Soft-fail: keep last known subscription state; log only.
+              logTechnicalError('subscriptionStatus/softFail', status);
+            }
           }
         } catch (error) {
-          console.error('❌ Error loading subscription status:', error);
+          // Soft-fail: never surface subscription fetch failures to the user.
+          logTechnicalError('subscriptionStatus', error);
         }
 
         // Cloud sync - pull all active data from cloud
@@ -2573,7 +2693,8 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
               console.error('❌ Error fetching medications from database:', medsError);
             }
             
-            // Merge reminders - restore from Neon after logout/reinstall; never leave local empty when cloud has data
+            // Merge reminders - restore from Neon after logout/reinstall; never leave local empty when cloud has data.
+            // Tombstones prevent offline-deleted items from being resurrected by pull.
             if (cloudData.reminders != null) {
               const cloudReminders = Array.isArray(cloudData.reminders)
                 ? cloudData.reminders
@@ -2584,10 +2705,12 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
                 remoteRemindersHadDataRef.current = cloudReminders.length > 0;
                 console.log('⏰ Merging reminders from cloud:', cloudReminders.length, 'items');
                 setReminders(prev => {
-                  const merged = mergeReminders(prev, cloudReminders);
+                  const merged = mergeReminders(prev, cloudReminders, {
+                    tombstones: reminderTombstonesRef.current,
+                  });
                   AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(merged)).catch(() => {});
                   return merged;
-                });
+                }, { skipTombstone: true });
               }
             }
 
@@ -2603,10 +2726,12 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
                 if (Array.isArray(payload) && payload.length) {
                   remoteRemindersHadDataRef.current = true;
                   setReminders(prev => {
-                    const merged = mergeReminders(prev, payload);
+                    const merged = mergeReminders(prev, payload, {
+                      tombstones: reminderTombstonesRef.current,
+                    });
                     AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(merged)).catch(() => {});
                     return merged;
-                  });
+                  }, { skipTombstone: true });
                 }
               }
             } catch (pullReminderError) {
@@ -2641,14 +2766,31 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         } finally {
           // Allow local→cloud pushes only after the pull attempt finishes (success or fail).
           remindersCloudReadyRef.current = true;
-          // If local still has reminders and remote was empty, push them now.
+          // If local still has reminders (or pending deletes) push them now.
           const local = remindersRef.current || [];
-          if (local.length && shouldPushReminders({
+          const hasPendingDeletes = Object.keys(reminderTombstonesRef.current || {}).length > 0;
+          if (shouldPushReminders({
             cloudReady: true,
             reminders: local,
             remoteHadData: remoteRemindersHadDataRef.current,
+            allowEmptyPush: hasPendingDeletes && local.length === 0,
+            hasPendingDeletes,
           })) {
-            cloudSyncService.syncReminders(local).catch(err => console.warn('⚠️ Initial reminder push failed:', err));
+            cloudSyncService
+              .syncReminders(local, hasPendingDeletes && local.length === 0 ? { forceClear: true } : {})
+              .then((result) => {
+                if (result?.success) {
+                  reminderTombstonesRef.current = pruneReminderTombstones(
+                    reminderTombstonesRef.current,
+                    local
+                  );
+                  AsyncStorage.setItem(
+                    TOMBSTONE_STORAGE_KEY,
+                    JSON.stringify(reminderTombstonesRef.current)
+                  ).catch(() => {});
+                }
+              })
+              .catch(err => console.warn('⚠️ Initial reminder push failed:', err));
           }
         }
       })();

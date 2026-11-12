@@ -1015,24 +1015,18 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       console.error('Failed to check drug interactions:', error);
       console.error('Error details:', error.message);
-      
+
       let errorMessage = S?.failedToCheckInteractions || uiI18n.t("ui.failedToCheckInteractions");
-      
-      // Check for timeout
       if (error.message?.includes('timeout')) {
         errorMessage = uiI18n.t("ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta");
-      }
-      // Check for network errors
-      else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
+      } else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
         errorMessage = uiI18n.t("ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP");
+      } else {
+        errorMessage = uiI18n.t("errors.generic");
       }
-      // Add error details for other errors
-      else if (error.message) {
-        errorMessage += uiI18n.t("ui.detailsValue", { value1: error.message });
-      }
-      
+
       Alert.alert(
-        '❌ ' + (S?.error || uiI18n.t("adminProfile.error")), 
+        S?.error || uiI18n.t("errors.title"),
         errorMessage
       );
     }

@@ -5,6 +5,7 @@ import DeviceIdService from './deviceIdService';
 import PlayIntegrityService from './playIntegrityService';
 import RenewalReminderService from './renewalReminderService';
 import { API_BASE } from '../config/api';
+import uiI18n from '../i18n';
 
 const STORAGE_KEYS = {
   PREMIUM_TRIAL_START: 'premium:trial:start',
@@ -145,9 +146,11 @@ class PremiumEntitlementService {
       const backendCheck = await this.checkTrialEligibilityWithBackend(deviceHash, userId);
       
       if (!backendCheck.eligible) {
+        // Keep server reason in logs only — never show raw backend text to users.
+        console.warn('Trial not eligible:', backendCheck.reason);
         return {
           success: false,
-          error: backendCheck.reason || 'Trial already used on this device',
+          error: uiI18n.t('errors.generic'),
         };
       }
 
@@ -195,9 +198,8 @@ class PremiumEntitlementService {
       ).catch(err => console.error('Failed to schedule reminder:', err));
       console.warn('Trial started locally due to network error - will sync with backend later');
       
-      return { 
+      return {
         success: true,
-        error: 'Trial started offline - verification pending',
       };
     }
   }

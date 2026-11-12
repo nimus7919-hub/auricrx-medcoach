@@ -363,7 +363,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
             
           }).catch(function(error) {
             console.error('PDF loading error:', error);
-            document.getElementById('pdf-content').innerHTML = '<div class="error">Failed to load ID Document: ' + error.message + '</div>';
+            console.error('Failed to load ID Document:', error);
+            document.getElementById('pdf-content').innerHTML = '<div class="error">Something went wrong. Please try again.</div>';
           });
           
           async function extractImagesAndCreateFormattedView(pdf, container) {
@@ -431,7 +432,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
               
             } catch (error) {
               console.error('Error creating formatted view:', error);
-              container.innerHTML = '<div class="error">Failed to create formatted view: ' + error.message + '</div>';
+              console.error('Failed to create formatted view:', error);
+              container.innerHTML = '<div class="error">Something went wrong. Please try again.</div>';
             }
           }
         </script>
@@ -571,7 +573,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
           }).catch(function(error) {
             console.error('PDF loading error:', error);
             console.error('Error details:', error.message, error.stack);
-            document.getElementById('pdf-viewer').innerHTML = '<div class="error">Failed to load PDF: ' + error.message + '</div>';
+            document.getElementById('pdf-viewer').innerHTML = '<div class="error">Something went wrong. Please try again.</div>';
           });
         </script>
       </body>

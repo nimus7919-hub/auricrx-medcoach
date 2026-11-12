@@ -1,6 +1,7 @@
 import { getRegion } from '../services/region';
 import USSmartNotificationsScreen from './USSmartNotificationsScreen';
-﻿import React, { useEffect, useState } from 'react';
+import uiI18n from '../i18n';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TextInput, Switch, TouchableOpacity, Alert, Linking, AppState, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { readSmart, updateSmart, nativeCapabilities, reconcileSmart, smartStatus, currentCoordinates, addressCoordinates, backgroundPermission, suggestions } from '../services/smartNotificationEngine';
@@ -19,7 +20,17 @@ function MexicoSmartNotificationsScreen({ onClose, theme, meds = [], reminders =
   const color = theme?.text || '#eee';
   const refresh = async () => { setState(await readSmart()); setStatus(await smartStatus()); };
   useEffect(() => { refresh().catch(report); const sub = AppState.addEventListener('change', s => { if (s === 'active') refresh().catch(report); }); return () => sub.remove(); }, [meds, reminders]);
-  function report(e: any) { Alert.alert('Notificaciones inteligentes', e.message || 'No se pudo completar la operación.', [{ text: 'Cerrar' }, { text: 'Abrir Ajustes', onPress: () => Linking.openSettings() }]); }
+  function report(e: any) {
+    console.warn('[SmartNotifications]', e?.message || e);
+    Alert.alert(
+      uiI18n.t('errors.title'),
+      uiI18n.t('errors.generic'),
+      [
+        { text: uiI18n.t('adminProfile.ok') },
+        { text: uiI18n.t('locationSearch.openSettings'), onPress: () => Linking.openSettings() },
+      ]
+    );
+  }
   async function run(fn: any) { setBusy(true); try { await fn(); await refresh(); } catch (e) { report(e); } finally { setBusy(false); } }
   async function save(patch: any) { await updateSmart(patch); await reconcileSmart(meds, reminders); await reconcileReminderNotifications(reminders); }
   const button = (title: string, fn: any) => <TouchableOpacity disabled={busy} accessibilityRole="button" onPress={() => run(fn)} style={styles.button}><Text style={{ color: '#D4AF37' }}>{title}</Text></TouchableOpacity>;
