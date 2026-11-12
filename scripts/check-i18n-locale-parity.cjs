@@ -69,7 +69,21 @@ if (Object.keys(missing).length) {
   assert.equal(locales.en['tiles.healthAnalytics'], 'My Health Summary');
   assert.equal(locales.es['localized.Reminders.Reminders.text1253'], 'Llegará en 10 segundos.');
   assert.ok(locales.es['labOrganizer.title']);
+  assert.equal(locales.es['labOrganizer.title'], 'Organizador de Laboratorios');
+  assert.equal(locales.en['labOrganizer.documents'], 'Documents');
+  assert.equal(locales.es['labOrganizer.documents'], 'Documentos');
+  assert.equal(locales.es['labOrganizer.values'], 'Valores');
+  assert.equal(locales.es['labOrganizer.glossary'], 'Glosario');
+  assert.equal(locales.es['labOrganizer.questions'], 'Preguntas');
+  assert.ok(locales.es['labOrganizer.documentsDescription']);
+  assert.ok(locales.es['labOrganizer.noDocuments']);
+  assert.ok(locales.es['labOrganizer.documentsInfo']);
+  assert.ok(locales.es['labOrganizer.glossaryTerms.glucose']);
+  assert.ok(locales.en['labOrganizer.glossaryTerms.glucose']);
+  assert.notEqual(locales.es['labOrganizer.title'], 'labOrganizer.title');
   assert.ok(locales.es['familyCircleUpgrade.title']);
+  assert.equal(locales.es['dailyHabits.title'], 'Hábitos Diarios');
+  assert.equal(locales.es['dailyHabits.sweetDrinksInfo'], 'Sobre Bebidas Azucaradas');
   assert.equal(locales.es['localized.dateTimePicker.localeMap.es'], 'es-MX');
   console.log(`PASS: locale parity — ${baseKeys.length} keys present in ${LOCALES.join(', ')}`);
 }

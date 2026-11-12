@@ -3946,6 +3946,18 @@
       "visit": "Consulta",
       "imaging": "Imagen",
       "other": "Otro"
+    },
+    "glossaryTerms": {
+      "glucose": "Glucosa: Azúcar en la sangre. Mide el nivel de energía disponible. Niveles alterados pueden indicar diabetes o prediabetes.",
+      "hemoglobin": "Hemoglobina: Proteína que transporta oxígeno en la sangre. Niveles bajos pueden indicar anemia.",
+      "cholesterol": "Colesterol: Grasa en la sangre. El colesterol total, HDL (bueno) y LDL (malo) ayudan a evaluar riesgo cardiovascular.",
+      "creatinine": "Creatinina: Producto de desecho muscular. Indica qué tan bien funcionan los riñones.",
+      "triglycerides": "Triglicéridos: Tipo de grasa en la sangre. Niveles altos aumentan riesgo de enfermedad cardíaca.",
+      "tsh": "TSH (Hormona Estimulante de la Tiroides): Controla la producción de hormonas tiroideas. Indica función tiroidea.",
+      "hba1c": "HbA1c (Hemoglobina Glicosilada): Promedio de glucosa en sangre durante 2-3 meses. Importante para monitoreo de diabetes.",
+      "alt": "ALT (Alanina Aminotransferasa): Enzima del hígado. Niveles elevados pueden indicar daño hepático.",
+      "ast": "AST (Aspartato Aminotransferasa): Enzima presente en hígado, corazón y músculos. Niveles altos pueden indicar daño.",
+      "wbc": "Leucocitos (WBC): Glóbulos blancos que combaten infecciones. Niveles alterados pueden indicar infección o problemas inmunes."
     }
   },
   "dailyHabits": {

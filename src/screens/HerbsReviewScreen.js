@@ -3,7 +3,9 @@ import { getRegion } from '../services/region';
 import usNotices from '../legal/usDisclaimers.json';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import Modal from '../components/BackModal';
 import { HERBS, HERB_IMAGE_PLACEHOLDER } from '../data/herbCatalog.js';
 import { findHerbInteractions, getMedicationIngredients } from '../data/herbInteractions.js';
@@ -28,6 +30,7 @@ function HerbImage({ herb, label, large, fallbackLabel }) {
 export default function HerbsReviewScreen({ onClose, currentLang, medications = [] }) {
   // Hooks always run at component level, including while the modal is closed.
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const requestedLanguage = (currentLang || i18n.resolvedLanguage || i18n.language || 'es').split('-')[0];
@@ -75,7 +78,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 0) + 12 }]}>
         <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel={tr('close')}>
           <Image source={require('../../assets/AuricRX_home_button_across_screens.png')} style={styles.home} resizeMode="contain" />
         </TouchableOpacity>
@@ -85,7 +88,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
         placeholder={t('herbs.search', { lng: language })} placeholderTextColor="#BAC5D5"
         accessibilityLabel={t('herbs.search', { lng: language })} />
       <FlatList data={filtered} keyExtractor={herb => herb.id} numColumns={2}
-        contentContainerStyle={styles.list} columnWrapperStyle={styles.row} keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.list, { paddingBottom: FAB_SCROLL_PADDING }]} columnWrapperStyle={styles.row} keyboardShouldPersistTaps="handled"
         ListEmptyComponent={<Text style={styles.body}>{t('herbs.noResults', { lng: language })}</Text>}
         ListFooterComponent={footer}
         renderItem={({ item }) => (

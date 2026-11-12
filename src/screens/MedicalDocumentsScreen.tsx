@@ -24,6 +24,8 @@ import DynamicText from '../components/DynamicText';
 import PDFViewer from '../components/PDFViewer';
 import type { DoctorContact } from '../services/appointmentService';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -54,6 +56,7 @@ interface DocumentItem {
 export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoDocumentScan }: MedicalDocumentsScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -2875,7 +2878,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -2883,6 +2886,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }

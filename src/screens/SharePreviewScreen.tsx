@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet, Share, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DynamicText from '../components/DynamicText';
+import ModalScreenHeader from '../components/ModalScreenHeader';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import FamilyCircleService, { FamilyMember } from '../services/familyCircleService';
 
@@ -82,14 +84,17 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>{t('familyCircle.shareSummaryButton')}</DynamicText>
-        <TouchableOpacity onPress={onClose}>
-          <DynamicText type="card" style={styles.closeButton}>{t('common.close')}</DynamicText>
-        </TouchableOpacity>
-      </View>
+      <ModalScreenHeader
+        title={t('familyCircle.shareSummaryButton')}
+        onClose={onClose}
+        backgroundColor={getCardBackgroundColor()}
+        borderBottomColor={getCardBorderColor()}
+      />
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: FAB_SCROLL_PADDING }]}
+      >
         {/* F8: Block D preview warning */}
         <View style={[styles.warningCard, { backgroundColor: 'rgba(255, 107, 107, 0.15)', borderColor: getAccentColor() }]}>
           <DynamicText type="card" style={[styles.warningText, { color: getAccentColor() }]}>
@@ -149,9 +154,6 @@ export default function SharePreviewScreen({ onClose, selectedMemberIds }: Share
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
   content: { flex: 1 },
   contentContainer: { padding: 16, paddingBottom: 32 },
   warningCard: { borderRadius: 12, borderWidth: 2, padding: 16, marginBottom: 16 },

@@ -22,6 +22,8 @@ import DynamicText from '../components/DynamicText';
 import authService from '../services/authService';
 import CustomAlert from '../components/CustomAlert';
 import { useCustomAlert } from '../hooks/useCustomAlert';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 interface AdminProfileScreenProps {
   onClose: () => void;
@@ -35,6 +37,7 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
   const { alert, showAlert, handlePress } = useCustomAlert();
+  const insets = useSafeAreaInsets();
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -60,7 +63,6 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 30,
-      paddingTop: 20,
     },
     closeButton: {
       width: 40,
@@ -286,8 +288,8 @@ export default function AdminProfileScreen({ onClose, currentUser, theme, S, onN
 
   return (
     <KeyboardForm><View style={dynamicStyles.container}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[dynamicStyles.scrollContent, { paddingBottom: 24 }]}>
-        <View style={dynamicStyles.header}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[dynamicStyles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]}>
+        <View style={[dynamicStyles.header, { paddingTop: Math.max(insets.top, 0) + 12 }]}>
           <TouchableOpacity style={dynamicStyles.closeButton} onPress={onNavigateToSettings || onClose}>
             <View style={dynamicStyles.circleContainer}>
               <Text style={dynamicStyles.circleEmoji}>✕</Text>

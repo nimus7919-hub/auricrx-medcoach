@@ -21,6 +21,7 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../src/layout/fabLayout';
 import { getDateTimePickerLocale } from '../src/utils/dateTimeLocale';
 
 // Reminders component moved outside App to prevent remounting
@@ -366,6 +367,7 @@ const Reminders = ({
         justifyContent: 'space-between', 
         paddingHorizontal: 20,
         paddingVertical: 16,
+        paddingTop: Math.max(insets.top, 0) + 12,
         borderBottomWidth: 1,
         borderBottomColor: theme.chip
       }}>
@@ -401,7 +403,7 @@ const Reminders = ({
 
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: 24 }]}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: FAB_SCROLL_PADDING }]}>
         <ReminderPermissionBanner />
         {/* Add Reminder Button */}
           <PremiumButton

@@ -3,6 +3,8 @@ import { View, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-nat
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import DynamicText from '../components/DynamicText';
+import ModalScreenHeader from '../components/ModalScreenHeader';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { goldGradient, darkColors } from '../theme/colors';
 import PremiumEntitlementService, { PremiumEntitlement } from '../services/premiumEntitlementService';
@@ -60,14 +62,17 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>{t('premiumUpgrade.title')}</DynamicText>
-        <TouchableOpacity onPress={onClose}>
-          <DynamicText type="card" style={styles.closeButton}>{t('common.close')}</DynamicText>
-        </TouchableOpacity>
-      </View>
+      <ModalScreenHeader
+        title={t('premiumUpgrade.title')}
+        onClose={onClose}
+        backgroundColor={getCardBackgroundColor()}
+        borderBottomColor={getCardBorderColor()}
+      />
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: FAB_SCROLL_PADDING }]}
+      >
         <View style={styles.heroSection}>
           <DynamicText type="card" style={[styles.heroEmoji, { color: getCardTextColor() }]}>
             ✨
@@ -182,9 +187,6 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
   content: { flex: 1 },
   contentContainer: { padding: 16, paddingBottom: 32 },
   heroSection: { alignItems: 'center', marginBottom: 24, paddingVertical: 20 },

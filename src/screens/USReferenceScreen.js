@@ -10,9 +10,12 @@ import GoldHealthIcon from '../components/GoldHealthIcon';
 import PremiumButton from '../components/PremiumButton';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { styles as app } from './appStyles';
 const modes = { drugs: 'Drug search and labels', interactions: 'Interaction label text', recalls: 'FDA recalls', 'fda-labels': 'FDA labels', nadac: 'Acquisition cost', pharmacies: 'US pharmacies' };
 export default function USReferenceScreen({ onClose, initialMode = 'drugs', initialQuery = '', drugName = '' }) {
+  const insets = useSafeAreaInsets();
   const { getCardBackgroundColor, getCardBorderColor, getSubTextColor, getAccentColor } = useWallpaper();
   const cardBg = getCardBackgroundColor() + 'CC', border = getCardBorderColor(), sub = getSubTextColor(), accent = getAccentColor();
   
@@ -76,7 +79,7 @@ export default function USReferenceScreen({ onClose, initialMode = 'drugs', init
   const tool = TOOLS.find(t => t.key === mode || (t.key === 'drugs' && isMedicine)) || TOOLS[0];
   const placeholder = mode === 'pharmacies' ? 'ZIP code' : mode === 'nadac' ? '11-digit NDC from the package' : mode === 'interactions' ? 'First medicine name' : 'Medicine name, e.g. ibuprofen';
   const hint = mode === 'nadac' ? 'Typical pharmacy acquisition cost - pharmacy acquisition cost, not your price. Enter the exact 11-digit NDC from the package; do not guess a match.' : mode === 'pharmacies' ? 'Search by ZIP, or leave ZIP blank and enter city and state. Registry entries are not a recommendation.' : mode === 'recalls' ? 'Type a medicine name to see FDA safety recalls.' : mode === 'interactions' ? 'Search one medicine, pick the exact product, then read what its official label says about other medicines.' : 'Search a medicine, pick the exact one, then read its official label (uses, warnings, side effects).';
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+  return <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 0) + 12, paddingBottom: FAB_SCROLL_PADDING }]} keyboardShouldPersistTaps="handled">
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" onPress={onClose} style={app.headerHomeButton}><Image source={require('../../assets/AuricRX_home_button_across_screens.png')} style={app.headerHomeIcon} resizeMode="contain" /></TouchableOpacity>
     <DynamicText type="primary" style={[styles.h1, { fontFamily: 'Inter_700Bold' }]}>Look up a medicine</DynamicText>
     <Text style={[styles.intro, { color: sub, fontFamily: 'Inter_400Regular' }]}>Official US information about medicines, recalls, prices and pharmacies.</Text>

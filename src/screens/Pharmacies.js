@@ -9,6 +9,7 @@ import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
 import LocationRequiredPanel from "./../components/LocationRequiredPanel";
 import { styles } from "./appStyles";
+import { FAB_SCROLL_PADDING } from "../layout/fabLayout";
 import { PremiumEntitlementService } from "../services/premiumEntitlementService";
 import PremiumUpgradeScreen from "./PremiumUpgradeScreen";
 import { resolveSearchLocation } from "../utils/resolveSearchLocation";
@@ -169,7 +170,7 @@ export default function createPharmacies(getScope) {
     };
 
     return (
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: FAB_SCROLL_PADDING }}>
         <Header title={S.pharmacyLocations} />
         <View style={{ backgroundColor: '#10243A', borderColor: '#C9A962', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 12 }}>
           <Text style={{ color: '#C9A962', fontSize: 12 }}>{uiI18n.t("localized.Pharmacies.text128")}</Text>

@@ -25,6 +25,8 @@ import { useWallpaper } from '../contexts/WallpaperContext';
 import { createAIHealthTranslations } from '../services/aiHealthTranslations';
 import { useTranslation } from 'react-i18next';
 import { resolveBundledImageFileUri } from '../lib/documentPdf';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 const { width: screenWidth } = Dimensions.get('window');
 const SIGN_IN_LOGO = require('../../assets/sign in logo.png');
 
@@ -86,6 +88,7 @@ interface DrugInteraction {
 function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivacy, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Premium access state
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -2070,7 +2073,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -2078,6 +2081,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }
