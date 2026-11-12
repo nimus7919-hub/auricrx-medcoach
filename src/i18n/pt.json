@@ -840,7 +840,9 @@
       "expired": "Expirado"
     },
     "searchingPharmacies": "Pesquisando farmácias...",
-    "singleComponent": "Componente único"
+    "singleComponent": "Componente único",
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Suplementos",
@@ -939,7 +941,9 @@
     "reminderMessage": "Mensagem de lembrete",
     "reminderMessagePrompt": "Digite uma mensagem de lembrete",
     "smartNotifications": "Notificações inteligentes",
-    "supplement": "Suplemento"
+    "supplement": "Suplemento",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Farmácias",

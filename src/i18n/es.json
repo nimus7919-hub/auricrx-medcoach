@@ -804,7 +804,9 @@
     "utility": {
       "refillSoon": "Recargar pronto",
       "expired": "Vencido"
-    }
+    },
+    "deleteTitle": "Eliminar medicamento",
+    "deleteMessage": "¿Seguro que deseas eliminar «{{name}}»? Esta acción no se puede deshacer."
   },
   "supplements": {
     "title": "Suplementos",
@@ -903,7 +905,9 @@
     "reminderMessage": "Mensaje del recordatorio",
     "reminderMessagePrompt": "Ingresa un mensaje para el recordatorio",
     "smartNotifications": "Notificaciones inteligentes",
-    "supplement": "Suplemento"
+    "supplement": "Suplemento",
+    "deleteTitle": "Eliminar recordatorio",
+    "deleteMessage": "¿Seguro que deseas eliminar «{{name}}»? Esta acción no se puede deshacer."
   },
   "pharmacies": {
     "title": "Farmacias",

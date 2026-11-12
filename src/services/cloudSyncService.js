@@ -59,11 +59,13 @@ async function getAuthToken() {
 /**
  * Push data to cloud
  */
-async function pushToCloud(dataType, payload) {
+async function pushToCloud(dataType, payload, options = {}) {
   try {
+    const body = { dataType, payload };
+    if (options.forceClear) body.forceClear = true;
     const data = await requestSync('/api/sync/push', {
       method: 'POST',
-      body: JSON.stringify({ dataType, payload }),
+      body: JSON.stringify(body),
     });
 
     return { success: true, data };
@@ -123,8 +125,8 @@ class CloudSyncService {
   /**
    * Sync reminders to cloud
    */
-  async syncReminders(reminders) {
-    return await pushToCloud('reminders', reminders);
+  async syncReminders(reminders, options = {}) {
+    return await pushToCloud('reminders', reminders, options);
   }
   
   /**

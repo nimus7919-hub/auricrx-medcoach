@@ -807,7 +807,9 @@
       "expired": "Expiré"
     },
     "searchingPharmacies": "Searching for pharmacies...",
-    "singleComponent": "Single Component (e.g., Metformin only)"
+    "singleComponent": "Single Component (e.g., Metformin only)",
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Suppléments",
@@ -906,7 +908,9 @@
     "reminderMessage": "Message de rappel",
     "reminderMessagePrompt": "Saisir un message de rappel",
     "smartNotifications": "Notifications intelligentes",
-    "supplement": "Complément"
+    "supplement": "Complément",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Pharmacies",

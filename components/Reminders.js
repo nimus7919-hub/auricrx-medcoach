@@ -220,38 +220,43 @@ const Reminders = ({
   const routeReminderToCard = async (reminderData) => {
     try {
       if (reminderData.type === 'medication') {
-        // Route to medications card
+        // Only medication reminders may create/update a med — never appointment/exercise/other.
+        // Upsert by reminderId/name so we never attach a stray duplicate entry.
         console.log('📋 Routing medication reminder to medications card:', reminderData);
-        
-        // Create medication object for medications card
+        const medName = reminderData.medicationName || reminderData.name;
+        const existing = (meds || []).find(med =>
+          med?.reminderId === reminderData.id ||
+          med?.id === reminderData.id ||
+          (medName && String(med.name || '').trim().toLowerCase() === String(medName).trim().toLowerCase())
+        );
+
         const medicationData = {
-          id: reminderData.id,
-          name: reminderData.medicationName || reminderData.name,
+          id: existing?.id || reminderData.id,
+          name: medName,
           components: reminderData.components,
           strength: reminderData.components ? 
             reminderData.components.map(comp => `${comp.strength}${comp.unit}`).join('/') : 
-            '500mg',
+            (existing?.strength || '500mg'),
           strengthValue: reminderData.components ? 
             reminderData.components.map(comp => comp.strength).join('/') : 
-            '500',
+            (existing?.strengthValue || '500'),
           strengthUnit: reminderData.components ? 
             reminderData.components[0]?.unit || 'mg' : 
-            'mg',
-          quantity: reminderData.quantity ? `${reminderData.quantity} ${reminderData.quantityUnit}` : '30 tablets',
-          quantityValue: reminderData.quantity || '30',
-          quantityUnit: reminderData.quantityUnit || 'tablets',
+            (existing?.strengthUnit || 'mg'),
+          quantity: reminderData.quantity ? `${reminderData.quantity} ${reminderData.quantityUnit}` : (existing?.quantity || '30 tablets'),
+          quantityValue: reminderData.quantity || existing?.quantityValue || '30',
+          quantityUnit: reminderData.quantityUnit || existing?.quantityUnit || 'tablets',
           isSingleComponent: reminderData.isSingleComponent !== undefined ? reminderData.isSingleComponent : true,
           times: [reminderData.time],
-          status: 'taking',
-          startDate: reminderData.startDate || formatReminderDate(new Date()),
-          endDate: reminderData.endDate || '',
-          notes: reminderData.notes || '',
-          // Add reminder reference
+          status: existing?.status || 'taking',
+          startDate: reminderData.startDate || existing?.startDate || formatReminderDate(new Date()),
+          endDate: reminderData.endDate || existing?.endDate || '',
+          notes: reminderData.notes || existing?.notes || '',
           reminderId: reminderData.id,
-          fromReminder: true
+          fromReminder: true,
+          dbId: existing?.dbId,
         };
 
-        // Call parent function to add to medications
         if (onAddMedicationFromReminder) {
           await onAddMedicationFromReminder(medicationData);
         }
@@ -326,23 +331,30 @@ const Reminders = ({
 
   // Delete reminder and corresponding medication/appointment
   const handleDeleteReminder = (reminderId) => {
-    // Find the reminder to check its type
     const reminderToDelete = reminders.find(r => r.id === reminderId);
-    
-    // Delete the reminder
-    setReminders(prev => prev.filter(r => r.id !== reminderId));
-    
-    // If this reminder created a medication, also delete the medication
-    if (reminderToDelete?.type === 'medication' && setMeds && meds) {
-      const correspondingMed = meds.find(med => med.reminderId === reminderId);
-      if (correspondingMed) {
-        console.log('🗑️ Also deleting corresponding medication:', correspondingMed.id);
-        setMeds(prev => prev.filter(med => med.reminderId !== reminderId));
-      }
-    }
-    
-    // Note: For appointments, we would do the same if we had access to appointments state
-    // This can be added when appointments functionality is fully integrated
+    const label = reminderToDelete?.name || reminderToDelete?.medicationName || '';
+    Alert.alert(
+      t('reminders.deleteTitle'),
+      t('reminders.deleteMessage', { name: label }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            setReminders(prev => prev.filter(r => r.id !== reminderId));
+            // Only remove a med that was created from this reminder — never unrelated meds
+            if (reminderToDelete?.type === 'medication' && setMeds && meds) {
+              const correspondingMed = meds.find(med => med.reminderId === reminderId);
+              if (correspondingMed) {
+                console.log('🗑️ Also deleting corresponding medication:', correspondingMed.id);
+                setMeds(prev => prev.filter(med => med.reminderId !== reminderId));
+              }
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (

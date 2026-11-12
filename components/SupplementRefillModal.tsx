@@ -14,6 +14,7 @@ import { findNearbySupplementStores, getSupplementPrices, StorePrice } from "../
 // ENABLED: EnhancedSupplementSearch for database integration
 const EnhancedSupplementSearch = require("../services/enhancedSupplementSearch");
 import supplementDataCollector from "../services/supplementDataCollector";
+const { getDefaultSearchCoords } = require("../src/utils/locationDefaults");
 
 interface SupplementInfo { name: string; brand?: string; dosage?: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
 interface Props { 
@@ -75,8 +76,9 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
     try {
       setLoading(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      let coords = { latitude: 37.7749, longitude: -122.4194 }; // fallback (SF)
-      let determinedCurrency: string = uiI18n.t("common.usd");
+      // Mexico City by default (SF was wrong for this MX-first app); US region gets a US city.
+      let coords = getDefaultSearchCoords(getRegion());
+      let determinedCurrency: string = getRegion() === 'US' ? uiI18n.t("common.usd") : uiI18n.t("common.mxn");
       if (status === "granted") {
         try {
           const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
@@ -85,7 +87,7 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
           AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
         } catch {}
       } else {
-        // attempt cached last location
+        // attempt cached last location, else keep region default (Mexico City for MX)
         try {
           const cached = await AsyncStorage.getItem(LAST_LOC_KEY);
           if (cached) {

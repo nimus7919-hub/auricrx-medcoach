@@ -836,7 +836,9 @@
     "utility": {
       "refillSoon": "即将补取",
       "expired": "已过期"
-    }
+    },
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "补充剂",
@@ -935,7 +937,9 @@
     "reminderMessage": "提醒消息",
     "reminderMessagePrompt": "输入提醒消息",
     "smartNotifications": "智能通知",
-    "supplement": "补充剂"
+    "supplement": "补充剂",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "药房",

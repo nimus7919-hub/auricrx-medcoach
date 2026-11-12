@@ -31,13 +31,18 @@ import LabDocumentOrganizerScreen from '../screens/LabDocumentOrganizerScreen';
 import DailyHabitsScreen from '../screens/DailyHabitsScreen';
 import FamilyCircleScreen from '../screens/FamilyCircleScreen';
 import FamilyDocumentsScreen from '../screens/FamilyDocumentsScreen';
+import { upsertMedicationFromReminder } from '../utils/reminderPersistence';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createAppNavigator(getScope) {
   return () => {
   const { openReminderOnEntry, setOpenReminderOnEntry, route, setRoute, user, lang, themeKey, fastingProfile, setFastingProfile, saveFastingProfileToDB, refillPharmacies, refillCoords, refillCurrency, refillFxMeta, isReady, S, reminders, setReminders, meds, setMeds, supplements, setSupplements, theme, userCountry, Dashboard, Pharmacies, Labs, Prescription, Settings, requestAutoDocumentScan } = getScope();
   return (route === 'dashboard' ? <Dashboard /> :
-     route === 'reminders' ? <Reminders openAddOnEntry={openReminderOnEntry} onAddEntryConsumed={() => setOpenReminderOnEntry(false)} theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => [...prev, medData])} onAddSupplementFromReminder={(suppData) => setSupplements(prev => [...prev, suppData])} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
+     route === 'reminders' ? <Reminders openAddOnEntry={openReminderOnEntry} onAddEntryConsumed={() => setOpenReminderOnEntry(false)} theme={theme} reminders={reminders} setReminders={setReminders} S={S} themeKey={themeKey} onNavigateToDashboard={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} meds={meds} setMeds={setMeds} onAddMedicationFromReminder={(medData) => setMeds(prev => upsertMedicationFromReminder(prev, medData))} onAddSupplementFromReminder={(suppData) => setSupplements(prev => {
+       const idx = prev.findIndex(s => s.id === suppData.id || s.reminderId === suppData.reminderId || (s.name && suppData.name && String(s.name).toLowerCase() === String(suppData.name).toLowerCase()));
+       if (idx >= 0) { const next = prev.slice(); next[idx] = { ...next[idx], ...suppData, id: next[idx].id }; return next; }
+       return [...prev, suppData];
+     })} onAddAppointmentFromReminder={(apptData) => console.log('Add appointment:', apptData)} /> :
      route === 'pharmacies' ? (getRegion() === 'US' ? <USReferenceScreen initialMode="pharmacies" onClose={() => setRoute('dashboard')} /> : <Pharmacies />) :
      route === 'labs' ? <Labs /> :
      route === 'prescription' ? <Prescription /> :

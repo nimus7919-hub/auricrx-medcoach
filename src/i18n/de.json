@@ -803,7 +803,9 @@
     "utility": {
       "refillSoon": "Bald nachfüllen",
       "expired": "Abgelaufen"
-    }
+    },
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Nahrungsergänzung",
@@ -902,7 +904,9 @@
     "reminderMessage": "Erinnerungsnachricht",
     "reminderMessagePrompt": "Erinnerungsnachricht eingeben",
     "smartNotifications": "Intelligente Benachrichtigungen",
-    "supplement": "Nahrungsergänzung"
+    "supplement": "Nahrungsergänzung",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Apotheken",

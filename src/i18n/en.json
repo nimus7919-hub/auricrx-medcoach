@@ -804,7 +804,9 @@
     "utility": {
       "refillSoon": "Refill soon",
       "expired": "Expired"
-    }
+    },
+    "deleteTitle": "Delete medication",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "supplements": {
     "title": "Supplements",
@@ -903,7 +905,9 @@
     "reminderMessage": "Reminder message",
     "reminderMessagePrompt": "Enter a reminder message",
     "smartNotifications": "Smart notifications",
-    "supplement": "Supplement"
+    "supplement": "Supplement",
+    "deleteTitle": "Delete reminder",
+    "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone."
   },
   "pharmacies": {
     "title": "Pharmacy Locations",

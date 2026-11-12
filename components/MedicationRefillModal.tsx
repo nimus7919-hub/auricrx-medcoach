@@ -17,6 +17,7 @@ import { findNearbyPharmacies, getMedicationPrices, StorePrice, QQPQuote, format
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 import medicationDataCollector from "../services/medicationDataCollector";
+const { getDefaultSearchCoords } = require("../src/utils/locationDefaults");
 
 interface MedicationInfo { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
 interface Props { 
@@ -98,8 +99,8 @@ function MexicoMedicationRefillModal({ visible, onClose, medication, strings, la
       
       // Use pre-loaded data if available for faster loading
       let hasCoords = !!preloadedCoords;
-      let coords = preloadedCoords || { latitude: 0, longitude: 0 };
-      let determinedCurrency: string = preloadedCurrency || uiI18n.t("common.usd");
+      let coords = preloadedCoords || getDefaultSearchCoords(getRegion());
+      let determinedCurrency: string = preloadedCurrency || (getRegion() === 'US' ? uiI18n.t("common.usd") : uiI18n.t("common.mxn"));
       let near = preloadedPharmacies || [];
       
       // If no pre-loaded data, load it manually (fallback)
@@ -112,9 +113,12 @@ function MexicoMedicationRefillModal({ visible, onClose, medication, strings, la
             hasCoords = true;
             // cache it
             AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
-          } catch {}
+          } catch {
+            // GPS failed — keep region default (Mexico City for MX)
+            hasCoords = true;
+          }
         } else {
-          // attempt cached last location
+          // attempt cached last location, else Mexico City (or US default)
           try {
             const cached = await AsyncStorage.getItem(LAST_LOC_KEY);
             if (cached) {
@@ -125,6 +129,10 @@ function MexicoMedicationRefillModal({ visible, onClose, medication, strings, la
               }
             }
           } catch {}
+          if (!hasCoords) {
+            coords = getDefaultSearchCoords(getRegion());
+            hasCoords = true;
+          }
         }
         setCoordsUsed(hasCoords ? { lat: coords.latitude, lon: coords.longitude } : null);
         
