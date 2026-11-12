@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, Alert, StyleSheet, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DynamicText from '../components/DynamicText';
+import ModalScreenHeader from '../components/ModalScreenHeader';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import FamilyCircleService, { FamilyMember } from '../services/familyCircleService';
@@ -171,9 +173,6 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
 
   const styles = StyleSheet.create({
     container: { flex: 1 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-    title: { fontSize: 24, fontWeight: 'bold' },
-    closeButton: { fontSize: 16 },
     content: { flex: 1 },
     contentContainer: { padding: 16, paddingBottom: 32 },
     infoCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 16 },
@@ -212,12 +211,13 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
   if (loading) {
     return (
       <View style={styles.container}>
-        <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-          <DynamicText type="card" style={styles.title}>{t('familyDocuments.title')}</DynamicText>
-          <TouchableOpacity onPress={onClose}>
-            <DynamicText type="card" style={[styles.closeButton, { color: getAccentColor() }]}>{t('common.close')}</DynamicText>
-          </TouchableOpacity>
-        </View>
+        <ModalScreenHeader
+          title={t('familyDocuments.title')}
+          onClose={onClose}
+          backgroundColor={getCardBackgroundColor()}
+          borderBottomColor={getCardBorderColor()}
+          closeColor={getAccentColor()}
+        />
         <View style={styles.content}>
           <DynamicText type="card" style={{ textAlign: 'center', marginTop: 32 }}>{t('common.loading')}</DynamicText>
         </View>
@@ -231,14 +231,19 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
 
     return (
       <View style={styles.container}>
-        <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-          <DynamicText type="card" style={styles.title}>{selectedMember.name}</DynamicText>
-          <TouchableOpacity onPress={() => setSelectedMember(null)}>
-            <DynamicText type="card" style={[styles.closeButton, { color: getAccentColor() }]}>{t('common.back')}</DynamicText>
-          </TouchableOpacity>
-        </View>
+        <ModalScreenHeader
+          title={selectedMember.name}
+          onClose={() => setSelectedMember(null)}
+          backgroundColor={getCardBackgroundColor()}
+          borderBottomColor={getCardBorderColor()}
+          closeColor={getAccentColor()}
+          closeLabel={t('common.back')}
+        />
 
-        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={[styles.contentContainer, { paddingBottom: FAB_SCROLL_PADDING }]}
+        >
           <View style={[styles.infoCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
             <DynamicText type="card" style={styles.infoText}>
               {t('familyDocuments.memberFolderDescription')}
@@ -302,14 +307,18 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
   // Member list view
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>{t('familyDocuments.title')}</DynamicText>
-        <TouchableOpacity onPress={onClose}>
-          <DynamicText type="card" style={[styles.closeButton, { color: getAccentColor() }]}>{t('common.close')}</DynamicText>
-        </TouchableOpacity>
-      </View>
+      <ModalScreenHeader
+        title={t('familyDocuments.title')}
+        onClose={onClose}
+        backgroundColor={getCardBackgroundColor()}
+        borderBottomColor={getCardBorderColor()}
+        closeColor={getAccentColor()}
+      />
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: FAB_SCROLL_PADDING }]}
+      >
         <View style={[styles.infoCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={styles.infoText}>
             {t('familyDocuments.description')}

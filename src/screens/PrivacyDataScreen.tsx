@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DynamicText from '../components/DynamicText';
+import ModalScreenHeader from '../components/ModalScreenHeader';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import PrivacyExportService from '../services/privacyExportService';
 
@@ -96,14 +98,14 @@ export default function PrivacyDataScreen({ onClose }: { onClose: () => void }) 
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>{t('privacy.title')}</DynamicText>
-        <TouchableOpacity onPress={onClose}>
-          <DynamicText type="card" style={styles.closeButton}>{t('common.close')}</DynamicText>
-        </TouchableOpacity>
-      </View>
+      <ModalScreenHeader
+        title={t('privacy.title')}
+        onClose={onClose}
+        backgroundColor={getCardBackgroundColor()}
+        borderBottomColor={getCardBorderColor()}
+      />
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: FAB_SCROLL_PADDING }}>
         <View style={[styles.card, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={styles.promiseTitle}>🔒 {t('privacy.promiseTitle')}</DynamicText>
           <DynamicText type="card" style={styles.promiseText}>{t('privacy.promiseText')}</DynamicText>
@@ -173,9 +175,6 @@ export default function PrivacyDataScreen({ onClose }: { onClose: () => void }) 
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
   content: { flex: 1, padding: 16 },
   card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
   promiseTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },

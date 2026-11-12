@@ -34,6 +34,7 @@ function walk(directory) {
 walk(path.join(root, 'src'));
 walk(path.join(root, 'components'));
 let calls = 0;
+const unresolvedStatic = [];
 for (const filename of files) {
   const source = fs.readFileSync(filename, 'utf8');
   const ast = parser.parse(source, { sourceType: 'unambiguous', plugins: ['jsx', 'typescript'] });
@@ -47,16 +48,67 @@ for (const filename of files) {
       for (const language of ['en', 'es']) {
         const value = get(resources[language].translation, key);
         assert.notEqual(value, undefined, `${path.relative(root, filename)}: missing ${language} key ${key}`);
-        if (!returnsObject) assert.equal(typeof value, 'string', `Object rendered as a label: ${key}`);
+        if (!returnsObject) {
+          assert.equal(typeof value, 'string', `Object rendered as a label: ${key}`);
+          // A key rendered as-is means the translation is missing/unresolved at runtime.
+          if (value === key) unresolvedStatic.push(`${language}:${key} (${path.relative(root, filename)})`);
+        }
       }
       calls++;
     }
   });
 }
+assert.equal(unresolvedStatic.length, 0, `Unresolved keys equal to their path:\n${unresolvedStatic.join('\n')}`);
+
+// Dynamic / critical keys that must resolve (founder-reported Lab Organizer + Habits)
+const CRITICAL_KEYS = [
+  'labOrganizer.title',
+  'labOrganizer.documents',
+  'labOrganizer.values',
+  'labOrganizer.glossary',
+  'labOrganizer.questions',
+  'labOrganizer.documentsDescription',
+  'labOrganizer.noDocuments',
+  'labOrganizer.documentsInfo',
+  'labOrganizer.banner',
+  'dailyHabits.title',
+  'dailyHabits.sweetDrinksInfo',
+  'dailyHabits.sweetDrinksDescription',
+  'common.close',
+  'common.cancel',
+  'common.error',
+  'common.save',
+  ...['glucose', 'hemoglobin', 'cholesterol', 'creatinine', 'triglycerides', 'tsh', 'hba1c', 'alt', 'ast', 'wbc']
+    .map((id) => `labOrganizer.glossaryTerms.${id}`),
+];
+
 async function checkSwitching() {
   const instance = i18next.createInstance();
-  await instance.init({ resources, lng: 'en', fallbackLng: false, initImmediate: false, interpolation: { escapeValue: false } });
+  await instance.init({
+    resources,
+    lng: 'en',
+    fallbackLng: false,
+    initImmediate: false,
+    interpolation: { escapeValue: false },
+    // Match app behavior: missing keys render as the key path
+    parseMissingKeyHandler: (key) => key,
+  });
+
+  // Prove the failure mode we guard against
+  assert.equal(instance.t('this.key.does.not.exist'), 'this.key.does.not.exist');
+
+  for (const language of ['en', 'es']) {
+    await instance.changeLanguage(language);
+    for (const key of CRITICAL_KEYS) {
+      const value = instance.t(key);
+      assert.notEqual(value, key, `Unresolved ${language} key rendered as-is: ${key}`);
+      assert.equal(typeof value, 'string');
+      assert.ok(value.trim().length > 0, `Empty ${language} translation: ${key}`);
+    }
+  }
+
   const subtitles = ['Intelligent reminders & notifications', 'Track health metrics, adherence and info', 'General health information with AI', 'Medical documents for doctor visits', 'Manage family health profiles and share information', 'Track screenings and preventive care', 'Organize lab results for your doctor visits', 'Track daily health habits and routines'];
+  await instance.changeLanguage('en');
   for (const text of subtitles) {
     const key = Object.keys(english).find(key => english[key] === text);
     assert.ok(key, `Missing home subtitle: ${text}`);
@@ -69,11 +121,14 @@ async function checkSwitching() {
   await instance.changeLanguage('es');
   assert.equal(instance.t('medicalDocuments.labResults'), 'Resultados de Laboratorio');
   assert.equal(instance.t('medicalDocuments.document'), 'Documento');
+  assert.equal(instance.t('labOrganizer.title'), 'Organizador de Laboratorios');
+  assert.equal(instance.t('dailyHabits.title'), 'Hábitos Diarios');
+  assert.equal(instance.t('dailyHabits.sweetDrinksInfo'), 'Sobre Bebidas Azucaradas');
   for (const [key, text] of Object.entries(english)) {
     if (!key.startsWith('ui.') || !placeholders(text).length) continue;
     const values = Object.fromEntries(placeholders(text).map(name => [name, 'CHECK']));
     assert.ok(!instance.t(key, values).includes('{{'), `Unresolved interpolation: ${key}`);
   }
-  console.log(`PASS: ${files.length} source files parse; ${calls} static translation calls; ${Object.keys(english).length} bilingual keys; runtime en/es switching and interpolation.`);
+  console.log(`PASS: ${files.length} source files parse; ${calls} static translation calls; ${Object.keys(english).length} bilingual keys; runtime en/es switching, critical keys, and interpolation.`);
 }
 checkSwitching().catch(error => { console.error(error.message); process.exitCode = 1; });

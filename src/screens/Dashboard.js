@@ -9,6 +9,7 @@ import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
 
 import { styles } from "./appStyles";
+import { FAB_SCROLL_PADDING } from "../layout/fabLayout";
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createDashboard(getScope) {
@@ -22,7 +23,7 @@ export default function createDashboard(getScope) {
     <>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: FAB_SCROLL_PADDING }}
       >
           <TopBar />
 

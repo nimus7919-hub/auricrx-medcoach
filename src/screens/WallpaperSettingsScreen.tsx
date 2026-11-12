@@ -14,6 +14,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import WallpaperSelector from '../components/WallpaperSelector';
 import DynamicText from '../components/DynamicText';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -26,6 +28,7 @@ interface WallpaperSettingsScreenProps {
 
 export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateToSettings }: WallpaperSettingsScreenProps) {
   const { currentWallpaper, setWallpaper, getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   const [showSelector, setShowSelector] = useState(false);
   
   // Use S object for translations, fallback to key if not available
@@ -75,7 +78,7 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
       
       <View style={styles.container}>
         {/* Header */}
-        <View style={[styles.header, { borderColor: theme?.chip || '#e8e3d8' }]}>
+        <View style={[styles.header, { borderColor: theme?.chip || '#e8e3d8', paddingTop: Math.max(insets.top, 0) + 12 }]}>
         <TouchableOpacity style={[styles.homeButton, { elevation: 5, backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onNavigateToSettings || onClose}>
           <Image 
             source={require('../../assets/dashboard Emojies/close Window.png')} 
@@ -97,7 +100,7 @@ export default function WallpaperSettingsScreen({ onClose, theme, S, onNavigateT
         </View>
 
         {/* Content */}
-        <View style={[styles.content, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]}>
+        <View style={[styles.content, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2, paddingBottom: FAB_SCROLL_PADDING }]}>
           <View style={styles.section}>
             <DynamicText type="card" style={styles.sectionTitle}>
               {t("wallpaper.currentWallpaper")}
@@ -156,7 +159,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 30,
     paddingBottom: 20,
   },
   homeButton: {
