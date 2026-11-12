@@ -9,23 +9,8 @@
  * for testing. That flag must be off once real doctor billing exists.
  */
 
-const { verifyToken } = require('./auth-utils');
 const { getDoctorFirestore } = require('./doctor-firestore');
-
-async function verifyDoctorAuth(req, res, next) {
-  try {
-    const token = /^Bearer ([^\s]+)$/i.exec(req.headers.authorization || '')?.[1];
-    const decoded = await verifyToken(token);
-    if (typeof decoded.uid !== 'string' || !decoded.uid) {
-      throw new Error('Invalid token identity');
-    }
-    req.userId = decoded.uid;
-    req.decodedToken = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ ok: false, error: 'INVALID_TOKEN' });
-  }
-}
+const { verifyDoctorAuth } = require('./doctor-mfa');
 
 /**
  * Deterministic Phase 1 mock — keep in sync with

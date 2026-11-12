@@ -84,8 +84,8 @@ async function notifyMessageRecipient({
   return { ok: true, channel: 'push', result };
 }
 
-function mountDoctorMessagingRoutes(app, { verifyUser }) {
-  app.post('/api/doctor/messages/notify', verifyUser, async (req, res) => {
+function mountDoctorMessagingRoutes(app, { verifyDoctorAuth }) {
+  app.post('/api/doctor/messages/notify', verifyDoctorAuth, async (req, res) => {
     try {
       const uid = req.userId || req.user?.uid;
       const { toUserId, role, language, messageId, channel } = req.body || {};

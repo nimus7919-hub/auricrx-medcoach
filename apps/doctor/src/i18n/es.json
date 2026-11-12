@@ -18,7 +18,7 @@
     "hint": "Usa tu cuenta de médico AuricRX.",
     "needAccount": "Pide a tu administrador crear una cuenta, o regístrate con correo.",
     "register": "Crear cuenta",
-    "registerOk": "Cuenta creada. Completa tu perfil médico."
+    "registerOk": "Cuenta creada. Ahora configura la autenticación en dos pasos."
   },
   "nav": {
     "patients": "Pacientes",
@@ -28,5 +28,63 @@
     "agenda": "Agenda",
     "officeHours": "Horario",
     "inbox": "Bandeja"
+  },
+  "mfa": {
+    "auth": {
+      "requiredNotice": "La autenticación en dos pasos es obligatoria para cada cuenta de médico. Los datos de pacientes permanecen bloqueados hasta completar la configuración.",
+      "needSecondFactor": "Vuelve a iniciar sesión e ingresa el código de tu app autenticadora.",
+      "afterEnroll": "Autenticador guardado. Inicia sesión con correo, contraseña y el código de tu app.",
+      "sessionExpired": "Por seguridad, vuelve a iniciar sesión con autenticación en dos pasos."
+    },
+    "enroll": {
+      "title": "Configura la autenticación en dos pasos",
+      "subtitle": "Usa una app autenticadora como Google Authenticator. Es obligatorio antes de ver información de pacientes.",
+      "verifyEmailTitle": "Verifica tu correo",
+      "verifyEmailBody": "Enviamos un enlace de verificación. Ábrelo y regresa aquí. La configuración en dos pasos requiere un correo verificado.",
+      "resendEmail": "Reenviar correo de verificación",
+      "iVerified": "Ya verifiqué mi correo",
+      "scanTitle": "Escanea este código QR",
+      "scanBody": "Abre tu app autenticadora y escanea el código, o ingresa la clave manualmente.",
+      "manualKey": "Clave manual",
+      "codeLabel": "Código de 6 dígitos de tu app",
+      "confirm": "Confirmar y continuar"
+    },
+    "challenge": {
+      "title": "Verificación en dos pasos",
+      "subtitle": "Ingresa el código de tu app autenticadora para continuar.",
+      "totp": "App autenticadora",
+      "sms": "Respaldo SMS",
+      "codeLabel": "Código de autenticación",
+      "verify": "Verificar",
+      "useRecovery": "Usar un código de recuperación",
+      "smsNativeHint": "El inicio con SMS requiere MFA telefónico (reCAPTCHA / nativo). Usa tu app autenticadora o un código de recuperación.",
+      "smsPreferTotp": "La app autenticadora es el método principal."
+    },
+    "recovery": {
+      "title": "Código de recuperación",
+      "subtitle": "Ingresa un código de recuperación no usado. Esto te deja entrar una vez y quita el autenticador para que lo configures de nuevo.",
+      "codeLabel": "Código de recuperación",
+      "submit": "Continuar con código de recuperación",
+      "reenrollHint": "Código aceptado. Inicia sesión y vuelve a configurar tu autenticador."
+    },
+    "codes": {
+      "title": "Guarda tus códigos de recuperación",
+      "subtitle": "Guárdalos fuera de línea. Cada código funciona una sola vez. No se mostrarán de nuevo.",
+      "onceWarning": "Si pierdes tu autenticador y estos códigos, necesitarás ayuda de un administrador para recuperar el acceso.",
+      "savedContinue": "Ya guardé estos códigos — continuar"
+    },
+    "biometric": {
+      "title": "Desbloquear AuricRX Médicos",
+      "subtitle": "Usa biometría o el PIN del dispositivo. Se pedirá autenticación en dos pasos completa cada 30 días, en un dispositivo nuevo o tras cerrar sesión.",
+      "prompt": "Desbloquear AuricRX Médicos",
+      "fallback": "Usar PIN del dispositivo",
+      "unlock": "Desbloquear",
+      "usePassword": "Entrar con contraseña y 2FA",
+      "failed": "No se pudo desbloquear. Intenta de nuevo o entra con contraseña."
+    },
+    "home": {
+      "protected": "Cuenta protegida con autenticación en dos pasos.",
+      "smsBackupHint": "Puedes añadir respaldo SMS cuando el MFA telefónico esté habilitado en Firebase (ver guía). La app autenticadora sigue siendo obligatoria."
+    }
   }
 }

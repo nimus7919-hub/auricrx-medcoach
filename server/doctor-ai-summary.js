@@ -71,8 +71,8 @@ async function buildDoctorDescriptiveSummary({
   };
 }
 
-function mountDoctorAiSummaryRoutes(app, { verifyUser }) {
-  app.post('/api/doctor/summary/descriptive', verifyUser, async (req, res) => {
+function mountDoctorAiSummaryRoutes(app, { verifyDoctorAuth }) {
+  app.post('/api/doctor/summary/descriptive', verifyDoctorAuth, async (req, res) => {
     try {
       const uid = req.userId || req.user?.uid;
       if (!uid) return res.status(401).json({ ok: false, error: 'unauthorized' });
