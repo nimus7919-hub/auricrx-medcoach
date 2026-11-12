@@ -76,10 +76,10 @@ export default function createDashboard(getScope) {
               subtitle={S.appointmentSubtitle}
             />
             <Card 
-              title={getRegion() === 'US' ? 'Medicine Lookup' : S.aiHealth} 
+              title={getRegion() === 'US' ? uiI18n.t('tiles.medicineLookup') : S.aiHealth} 
               icon={<Image source={require('../../assets/dashboard Emojies/AI Health.png')} style={styles.cardIconExtraLarge} resizeMode="contain" />} 
               onPress={() => setRoute('ai-health')}
-              subtitle={getRegion() === 'US' ? 'Medicine info, recalls, prices and pharmacies' : uiI18n.t("ui.intelligentHealthInsightsAnalysis")}
+              subtitle={getRegion() === 'US' ? uiI18n.t('ui.medicineLookupSubtitle') : uiI18n.t("ui.intelligentHealthInsightsAnalysis")}
             />
             <Card 
               title={S.documents} 
@@ -88,28 +88,28 @@ export default function createDashboard(getScope) {
               subtitle={uiI18n.t("ui.medicalDocumentsForDoctorVisits")}
             />
             <Card 
-              title="Family Circle" 
+              title={uiI18n.t('tiles.familyCircle')} 
               icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>👨‍👩‍👧‍👦</Text></View>} 
               onPress={() => setRoute('family-circle')}
-              subtitle="Manage family health profiles and share information"
+              subtitle={uiI18n.t('ui.familyCircleSubtitle')}
             />
             <Card 
-              title="Prevention Planner" 
+              title={uiI18n.t('tiles.preventionPlanner')} 
               icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🛡️</Text></View>} 
               onPress={() => setRoute('prevention-planner')}
-              subtitle="Track screenings and preventive care"
+              subtitle={uiI18n.t('ui.preventionPlannerSubtitle')}
             />
             <Card 
-              title="Lab Organizer" 
+              title={uiI18n.t('tiles.labOrganizer')} 
               icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🔬</Text></View>} 
               onPress={() => setRoute('lab-organizer')}
-              subtitle="Organize lab results and track trends"
+              subtitle={uiI18n.t('ui.labOrganizerSubtitle')}
             />
             <Card 
-              title="Daily Habits" 
+              title={uiI18n.t('tiles.dailyHabits')} 
               icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>📝</Text></View>} 
               onPress={() => setRoute('daily-habits')}
-              subtitle="Track daily health habits and routines"
+              subtitle={uiI18n.t('ui.dailyHabitsSubtitle')}
             />
             {/* Medication Promotions - Hidden for now */}
             {/* <Card 

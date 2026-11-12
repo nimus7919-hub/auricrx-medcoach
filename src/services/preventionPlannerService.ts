@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
+import uiI18n from '../i18n';
 
 export interface CheckupTemplate {
   id: string;
@@ -145,8 +146,8 @@ class PreventionPlannerService {
       try {
         const notificationId = await Notifications.scheduleNotificationAsync({
           content: {
-            title: '🩺 Recordatorio de Prevención',
-            body: `${checkup.name} - Es hora de tu cita o revisión preventiva`,
+            title: `🩺 ${uiI18n.t('prevention.reminderTitle')}`,
+            body: `${checkup.name} - ${uiI18n.t('prevention.reminderBody')}`,
             sound: true,
             priority: Notifications.AndroidNotificationPriority.HIGH,
           },
@@ -189,8 +190,8 @@ class PreventionPlannerService {
           try {
             const notificationId = await Notifications.scheduleNotificationAsync({
               content: {
-                title: '🩺 Recordatorio de Prevención',
-                body: `${checkups[index].name} - Es hora de tu cita o revisión preventiva`,
+                title: `🩺 ${uiI18n.t('prevention.reminderTitle')}`,
+                body: `${checkups[index].name} - ${uiI18n.t('prevention.reminderBody')}`,
                 sound: true,
                 priority: Notifications.AndroidNotificationPriority.HIGH,
               },

@@ -107,7 +107,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
           </DynamicText>
           
           <DynamicText type="card" style={[styles.helperText, { color: getCardTextColor(), marginBottom: 16 }]}>
-            All permissions are OFF by default. Choose what you want to allow:
+            {t('familyCircle.acceptAllOffNote')}
           </DynamicText>
 
           <TouchableOpacity
@@ -169,7 +169,7 @@ export default function AcceptInviteScreen({ onClose, onAccepted }: AcceptInvite
 
         <View style={[styles.noteCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={[styles.noteText, { color: getCardTextColor() }]}>
-            ℹ️ You can leave the Family Circle at any time. Alerts will stop when you leave.
+            ℹ️ {t('familyCircle.leaveAnytime')}
           </DynamicText>
         </View>
 

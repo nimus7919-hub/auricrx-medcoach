@@ -7,12 +7,15 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest --passWithNoTests",
+    "test": "jest --passWithNoTests && npm run test:i18n",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1",
     "validate:i18n": "node scripts/validate-i18n.js",
-    "lint:i18n": "node scripts/validate-i18n.js"
+    "lint:i18n": "node scripts/validate-i18n.js",
+    "test:i18n": "node scripts/check-i18n-locale-parity.cjs && node scripts/check-hardcoded-jsx-strings.cjs && node scripts/check-i18n.cjs",
+    "test:i18n:parity": "node scripts/check-i18n-locale-parity.cjs",
+    "test:i18n:hardcoded": "node scripts/check-hardcoded-jsx-strings.cjs"
   },
   "engines": {
     "node": ">=20"

@@ -124,7 +124,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             ]}
             value={name}
             onChangeText={setName}
-            placeholder="Enter name"
+            placeholder={t('familyCircle.namePlaceholder')}
             placeholderTextColor={getCardTextColor() + '80'}
           />
 
@@ -142,12 +142,12 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             ]}
             value={relationship}
             onChangeText={setRelationship}
-            placeholder="e.g., Mom, Dad, Son, Daughter"
+            placeholder={t('familyCircle.relationshipPlaceholder')}
             placeholderTextColor={getCardTextColor() + '80'}
           />
 
           <DynamicText type="card" style={[styles.label, { color: getCardTextColor() }]}>
-            Birth Year (optional)
+            {t('familyCircle.birthYearOptional')}
           </DynamicText>
           <TextInput
             style={[
@@ -160,7 +160,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             ]}
             value={birthYear}
             onChangeText={setBirthYear}
-            placeholder="e.g., 1980"
+            placeholder={t('familyCircle.birthYearPlaceholder')}
             placeholderTextColor={getCardTextColor() + '80'}
             keyboardType="number-pad"
             maxLength={4}
@@ -169,7 +169,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
 
         <View style={[styles.card, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={[styles.sectionTitle, { color: getCardTextColor() }]}>
-            Profile Type
+            {t('familyCircle.profileType')}
           </DynamicText>
 
           <TouchableOpacity
@@ -183,10 +183,10 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
             />
             <View style={styles.typeTextContainer}>
               <DynamicText type="card" style={[styles.typeTitle, { color: getCardTextColor() }]}>
-                Regular Profile
+                {t('familyCircle.regularProfile')}
               </DynamicText>
               <DynamicText type="card" style={[styles.typeDescription, { color: getCardTextColor() }]}>
-                For family members who use the app
+                {t('familyCircle.regularProfileDesc')}
               </DynamicText>
             </View>
           </TouchableOpacity>
@@ -205,7 +205,7 @@ export default function AddFamilyMemberScreen({ onClose, onAdded }: AddFamilyMem
                 {t('familyCircle.deviceOnlyProfile')}
               </DynamicText>
               <DynamicText type="card" style={[styles.typeDescription, { color: getCardTextColor() }]}>
-                For adults without phones (managed on your device)
+                {t('familyCircle.deviceOnlyDesc')}
               </DynamicText>
             </View>
           </TouchableOpacity>

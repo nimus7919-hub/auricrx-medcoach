@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
+import uiI18n from '../i18n';
 
 export interface HabitEntry {
   id: string;
@@ -119,7 +120,7 @@ class DailyHabitsService {
 
         const notificationId = await Notifications.scheduleNotificationAsync({
           content: {
-            title: '🌟 Recordatorio de Hábito',
+            title: `🌟 ${uiI18n.t('dailyHabits.reminderTitle')}`,
             body: reminder.message,
             sound: true,
             priority: Notifications.AndroidNotificationPriority.DEFAULT,
@@ -163,7 +164,7 @@ class DailyHabitsService {
           const [hours, minutes] = updates.time.split(':').map(Number);
           const notificationId = await Notifications.scheduleNotificationAsync({
             content: {
-              title: '🌟 Recordatorio de Hábito',
+              title: `🌟 ${uiI18n.t('dailyHabits.reminderTitle')}`,
               body: reminders[index].message,
               sound: true,
               priority: Notifications.AndroidNotificationPriority.DEFAULT,

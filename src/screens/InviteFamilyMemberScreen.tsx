@@ -47,7 +47,7 @@ export default function InviteFamilyMemberScreen({
   const handleShareInvite = async () => {
     if (!inviteCode) return;
 
-    const message = `${memberName} invited you to their Family Circle on AuricRX MedCoach!\n\nInvite code: ${inviteCode}\n\nDownload the app and enter this code to join.`;
+    const message = t('familyCircle.inviteShareMessage', { name: memberName, code: inviteCode });
 
     try {
       await Share.share({
@@ -166,7 +166,7 @@ export default function InviteFamilyMemberScreen({
               </View>
 
               <DynamicText type="card" style={[styles.helperText, { color: getCardTextColor() }]}>
-                Permissions: {permissions.viewMeds ? '📋 ' : ''}{permissions.editDoses ? '✓ ' : ''}{permissions.receiveAlerts ? '🔔 ' : ''}{permissions.shareDocuments ? '📄 ' : ''}
+                {t('familyCircle.permissionsLabel')}: {permissions.viewMeds ? '📋 ' : ''}{permissions.editDoses ? '✓ ' : ''}{permissions.receiveAlerts ? '🔔 ' : ''}{permissions.shareDocuments ? '📄 ' : ''}
               </DynamicText>
             </View>
 

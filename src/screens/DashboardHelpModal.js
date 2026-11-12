@@ -12,45 +12,48 @@ import { getRegion } from '../services/region';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import { styles } from "./appStyles";
 
-// Mode-aware guide content. General information only; no medical claims.
-function buildSteps(es, us) {
-  const L = (en, sp) => (es ? sp : en);
+// Mode-aware guide content via i18n. General information only; no medical claims.
+function buildSteps(t, us) {
   return [
-    { title: L('Welcome to your Home', 'Bienvenido a tu Inicio'), sub: L('A quick tour of everything in the app.', 'Un recorrido rápido por todo lo que hay en la app.'), items: [
-      ['book-outline', L('Health Journal', 'Diario de salud'), L('Shows your next reminder. Tap "Add reminder" if you have none yet.', 'Muestra tu próximo recordatorio. Toca "Agregar recordatorio" si aún no tienes.')],
-      ['grid-outline', L('Bottom tabs', 'Pestañas inferiores'), L('Home, Medications, Reminders and Settings are always one tap away.', 'Inicio, Medicamentos, Recordatorios y Ajustes siempre a un toque.')],
-      ['help-circle-outline', L('This guide', 'Esta guía'), L('Open it anytime from the help button at the top of Home.', 'Ábrela cuando quieras con el botón de ayuda arriba en Inicio.')],
+    { title: t('dashboardHelp.welcomeTitle'), sub: t('dashboardHelp.welcomeSub'), items: [
+      ['book-outline', t('dashboardHelp.healthJournalTitle'), t('dashboardHelp.healthJournalDesc')],
+      ['grid-outline', t('dashboardHelp.bottomTabsTitle'), t('dashboardHelp.bottomTabsDesc')],
+      ['help-circle-outline', t('dashboardHelp.thisGuideTitle'), t('dashboardHelp.thisGuideDesc')],
     ] },
-    { title: L('Daily care', 'Cuidado diario'), sub: L('Keep your routine organized.', 'Mantén tu rutina organizada.'), items: [
-      ['alarm-outline', L('Reminders', 'Recordatorios'), L('Set alerts for doses, refills and appointments.', 'Crea alertas para tomas, resurtidos y citas.')],
-      ['medkit-outline', L('Medications', 'Medicamentos'), L('Keep a list of your medicines, doses and schedules.', 'Guarda tu lista de medicamentos, dosis y horarios.')],
-      ['leaf-outline', L('Herbs', 'Hierbas'), L('Save herbal products you use and read general information.', 'Guarda productos herbales que usas y lee información general.')],
-      ['nutrition-outline', L('Supplements', 'Suplementos'), L('Track vitamins and supplements with optional reminders.', 'Registra vitaminas y suplementos con recordatorios opcionales.')],
+    { title: t('dashboardHelp.dailyCareTitle'), sub: t('dashboardHelp.dailyCareSub'), items: [
+      ['alarm-outline', t('tiles.reminders'), t('dashboardHelp.remindersDesc')],
+      ['medkit-outline', t('tiles.medications'), t('dashboardHelp.medicationsDesc')],
+      ['leaf-outline', t('tiles.herbs'), t('dashboardHelp.herbsDesc')],
+      ['nutrition-outline', t('tiles.supplements'), t('dashboardHelp.supplementsDesc')],
     ] },
-    { title: L('Smart Notifications', 'Notificaciones inteligentes'), sub: L('Reminders that fit your day. All optional.', 'Recordatorios que se adaptan a tu día. Todo es opcional.'), items: [
-      ['repeat-outline', L('Refill estimates', 'Estimación de resurtido'), L('Estimates when you may run low, based on what you entered.', 'Estima cuándo podrías quedarte sin medicamento, según lo que registraste.')],
-      ['time-outline', L('Timing suggestions', 'Sugerencias de horario'), L('Suggests reminder times based on when you usually respond.', 'Sugiere horarios según cuándo sueles responder.')],
-      ['location-outline', L('Location and weather', 'Ubicación y clima'), L('Optional reminders near places or on weather changes, only with your permission.', 'Avisos opcionales cerca de lugares o con cambios de clima, solo con tu permiso.')],
-      ['moon-outline', L('Quiet hours', 'Horas de silencio'), L('Pause non-urgent notifications while you rest.', 'Pausa avisos no urgentes mientras descansas.')],
+    { title: t('tiles.smartAlerts'), sub: t('dashboardHelp.smartSub'), items: [
+      ['repeat-outline', t('dashboardHelp.refillTitle'), t('dashboardHelp.refillDesc')],
+      ['time-outline', t('dashboardHelp.timingTitle'), t('dashboardHelp.timingDesc')],
+      ['location-outline', t('dashboardHelp.locationTitle'), t('dashboardHelp.locationDesc')],
+      ['moon-outline', t('dashboardHelp.quietTitle'), t('dashboardHelp.quietDesc')],
     ] },
-    { title: L('Track and organize', 'Registra y organiza'), sub: L('Your records in one place.', 'Tus registros en un solo lugar.'), items: [
-      ['stats-chart-outline', L('Health Analytics', 'Análisis de salud'), L('See charts of reminders taken and notes you log.', 'Ve gráficas de recordatorios cumplidos y notas que registras.')],
-      ...(HEALTH_CONNECT_ENABLED ? [['watch-outline', L('Health Connect', 'Health Connect'), L('Optionally import steps and activity from your wearable. You can disconnect anytime.', 'Importa pasos y actividad de tu reloj, si quieres. Puedes desconectarlo cuando quieras.')]] : []),
-      ['calendar-outline', L('Appointment Log', 'Registro de citas'), L('Save visits, doctor contacts and past appointments.', 'Guarda citas, contactos de doctores e historial de visitas.')],
-      ['document-text-outline', L('Documents', 'Documentos'), L('Keep insurance cards, lab results and prescriptions handy.', 'Ten a mano credenciales, resultados y recetas.')],
+    { title: t('dashboardHelp.trackTitle'), sub: t('dashboardHelp.trackSub'), items: [
+      ['stats-chart-outline', t('tiles.healthAnalytics'), t('dashboardHelp.healthSummaryDesc')],
+      ...(HEALTH_CONNECT_ENABLED ? [['watch-outline', 'Health Connect', t('dashboardHelp.healthConnectDesc')]] : []),
+      ['calendar-outline', t('tiles.appointmentLog'), t('dashboardHelp.appointmentsDesc')],
+      ['document-text-outline', t('tiles.documents'), t('dashboardHelp.documentsDesc')],
+      ['people-outline', t('tiles.familyCircle'), t('ui.familyCircleSubtitle')],
+      ['shield-outline', t('tiles.preventionPlanner'), t('ui.preventionPlannerSubtitle')],
+      ['flask-outline', t('tiles.labOrganizer'), t('ui.labOrganizerSubtitle')],
+      ['checkbox-outline', t('tiles.dailyHabits'), t('ui.dailyHabitsSubtitle')],
     ] },
-    { title: L('Find information', 'Encuentra información'), sub: L('General information only, not medical advice.', 'Solo información general, no es consejo médico.'), items: [
-      us ? ['search-outline', L('Medicine Lookup', 'Consulta de medicamentos'), L('Medicine info, interactions, recalls, prices and pharmacies from public sources.', 'Información, interacciones, retiros, precios y farmacias de fuentes públicas.')]
-         : ['sparkles-outline', L('AI Health', 'Salud IA'), L('Chat with AI assistants about general health topics. They are not doctors.', 'Conversa con asistentes de IA sobre temas generales de salud. No son doctores.')],
-      ['storefront-outline', L('Pharmacy Locations', 'Farmacias cercanas'), L('Find nearby pharmacies with distance and directions.', 'Encuentra farmacias cercanas con distancia y ruta.')],
-      ['flask-outline', L('Labs Locations', 'Laboratorios cercanos'), L('Find nearby labs and testing centers.', 'Encuentra laboratorios y centros de análisis cercanos.')],
-      ['chatbubble-ellipses-outline', L('AI assistant', 'Asistente IA'), L('The floating avatar opens a general information assistant. It is not a doctor.', 'El avatar flotante abre un asistente de información general. No es un doctor.')],
+    { title: t('dashboardHelp.findTitle'), sub: t('dashboardHelp.findSub'), items: [
+      us ? ['search-outline', t('tiles.medicineLookup'), t('ui.medicineLookupSubtitle')]
+         : ['sparkles-outline', t('tiles.aiHealth'), t('ui.intelligentHealthInsightsAnalysis')],
+      ['storefront-outline', t('tiles.pharmacyLocations'), t('dashboardHelp.pharmacyDesc')],
+      ['flask-outline', t('tiles.labsLocations'), t('dashboardHelp.labsDesc')],
+      ['chatbubble-ellipses-outline', t('dashboardHelp.aiAssistantTitle'), t('dashboardHelp.aiAssistantDesc')],
     ] },
-    { title: L('Settings and privacy', 'Ajustes y privacidad'), sub: L('You stay in control.', 'Tú tienes el control.'), items: [
-      ['globe-outline', L('Region', 'Región'), L('Switch between United States and Mexico modes in Settings.', 'Cambia entre modo Estados Unidos y México en Ajustes.')],
-      ['shield-checkmark-outline', L('Consents and legal', 'Consentimientos y legal'), L('Review or withdraw consents and read Legal & Privacy anytime.', 'Revisa o retira consentimientos y lee Legal y Privacidad cuando quieras.')],
-      ['diamond-outline', L('Subscription', 'Suscripción'), L('See your trial or plan status from Settings.', 'Consulta tu prueba o plan desde Ajustes.')],
-      ['call-outline', L('Emergency', 'Emergencia'), us ? L('In an emergency, call 911.', 'En una emergencia, llama al 911.') : L('In an emergency, call 911.', 'En una emergencia, llama al 911.')],
+    { title: t('dashboardHelp.settingsTitle'), sub: t('dashboardHelp.settingsSub'), items: [
+      ['globe-outline', t('dashboardHelp.regionTitle'), t('dashboardHelp.regionDesc')],
+      ['shield-checkmark-outline', t('dashboardHelp.consentsTitle'), t('dashboardHelp.consentsDesc')],
+      ['diamond-outline', t('dashboardHelp.subscriptionTitle'), t('dashboardHelp.subscriptionDesc')],
+      ['call-outline', t('dashboardHelp.emergencyTitle'), t('dashboardHelp.emergencyDesc')],
     ] },
   ];
 }
@@ -61,8 +64,8 @@ export default function createDashboardHelpModal(getScope) {
     const { showHelpModal, setShowHelpModal } = getScope();
     const { getCardBackgroundColor, getCardBorderColor, getSubTextColor, getAccentColor } = useWallpaper();
     const [step, setStep] = useState(0);
-    const es = (uiI18n.resolvedLanguage || uiI18n.language || 'en').startsWith('es');
-    const steps = buildSteps(es, getRegion() === 'US');
+    const t = uiI18n.t.bind(uiI18n);
+    const steps = buildSteps(t, getRegion() === 'US');
     const last = steps.length - 1;
     const cur = steps[Math.min(step, last)];
     const card = getCardBackgroundColor(), border = getCardBorderColor(), sub = getSubTextColor(), accent = getAccentColor();
@@ -79,8 +82,8 @@ export default function createDashboardHelpModal(getScope) {
         <View style={styles.modalBackdrop}>
           <View style={[styles.helpModalContainer, { backgroundColor: card + 'F5', borderColor: border, borderWidth: 2, borderRadius: 22 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 16, paddingBottom: 10 }}>
-              <Text style={{ flex: 1, color: sub, fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 1 }}>{(es ? 'GUÍA DEL INICIO' : 'DASHBOARD GUIDE') + `  ·  ${step + 1}/${steps.length}`}</Text>
-              <TouchableOpacity accessibilityRole="button" accessibilityLabel={es ? 'Cerrar' : 'Close'} onPress={close} hitSlop={12} style={{ padding: 4 }}>
+              <Text style={{ flex: 1, color: sub, fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 1 }}>{t('dashboardHelp.guideLabel') + `  ·  ${step + 1}/${steps.length}`}</Text>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={t('dashboardHelp.close')} onPress={close} hitSlop={12} style={{ padding: 4 }}>
                 <Ionicons name="close" size={24} color={accent} />
               </TouchableOpacity>
             </View>
@@ -108,10 +111,10 @@ export default function createDashboardHelpModal(getScope) {
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingBottom: 18, gap: 12 }}>
               <TouchableOpacity accessibilityRole="button" disabled={step === 0} onPress={() => go(step - 1)} style={{ paddingVertical: 14, paddingHorizontal: 8, opacity: step === 0 ? 0.35 : 1 }}>
-                <Text style={{ color: accent, fontSize: 15, fontFamily: 'Inter_600SemiBold' }}>{es ? 'Atrás' : 'Back'}</Text>
+                <Text style={{ color: accent, fontSize: 15, fontFamily: 'Inter_600SemiBold' }}>{t('dashboardHelp.back')}</Text>
               </TouchableOpacity>
               <PremiumButton onPress={() => (step === last ? close() : go(step + 1))} style={{ flex: 1, paddingVertical: 14, alignItems: 'center' }}>
-                <Text style={{ fontSize: 15, fontFamily: 'Inter_700Bold' }}>{step === last ? (es ? 'Listo' : 'Done') : (es ? 'Siguiente' : 'Next')}</Text>
+                <Text style={{ fontSize: 15, fontFamily: 'Inter_700Bold' }}>{step === last ? t('dashboardHelp.done') : t('dashboardHelp.next')}</Text>
               </PremiumButton>
             </View>
           </View>

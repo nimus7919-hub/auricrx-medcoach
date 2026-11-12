@@ -56,7 +56,7 @@ for (const filename of files) {
 async function checkSwitching() {
   const instance = i18next.createInstance();
   await instance.init({ resources, lng: 'en', fallbackLng: false, initImmediate: false, interpolation: { escapeValue: false } });
-  const subtitles = ['Intelligent reminders & notifications', 'Track metrics, adherence & insights', 'Intelligent health insights & analysis', 'Medical documents for doctor visits'];
+  const subtitles = ['Intelligent reminders & notifications', 'Track health metrics, adherence and info', 'General health information with AI', 'Medical documents for doctor visits', 'Manage family health profiles and share information', 'Track screenings and preventive care', 'Organize lab results for your doctor visits', 'Track daily health habits and routines'];
   for (const text of subtitles) {
     const key = Object.keys(english).find(key => english[key] === text);
     assert.ok(key, `Missing home subtitle: ${text}`);

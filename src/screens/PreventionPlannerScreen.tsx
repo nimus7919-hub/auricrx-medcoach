@@ -6,6 +6,7 @@ import { useWallpaper } from '../contexts/WallpaperContext';
 import PreventionPlannerService, { CheckupTemplate, ScheduledCheckup } from '../services/preventionPlannerService';
 import { getRegion } from '../services/region';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 
 export default function PreventionPlannerScreen({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
@@ -127,7 +128,7 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
 
       <ScrollView style={styles.content}>
         <View style={[styles.card, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
-          <DynamicText type="card" style={styles.description}>{t('prevention.description')}</DynamicText>
+          <DynamicText type="card" style={styles.description}>{t('prevention.screenBlurb')}</DynamicText>
           <DynamicText type="card" style={styles.disclaimer}>{t('prevention.disclaimer')}</DynamicText>
           
           <View style={styles.buttonRow}>
@@ -163,7 +164,7 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
                 </DynamicText>
               </View>
               <DynamicText type="card" style={styles.checkupDate}>
-                📅 {new Date(checkup.scheduledDate).toLocaleDateString()}
+                📅 {new Date(checkup.scheduledDate).toLocaleDateString(getDateTimePickerLocale())}
               </DynamicText>
               {checkup.description && (
                 <DynamicText type="card" style={styles.checkupDescription}>{checkup.description}</DynamicText>
@@ -196,7 +197,7 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
               <View key={checkup.id} style={[styles.checkupCard, { borderColor: getCardBorderColor(), opacity: 0.7 }]}>
                 <DynamicText type="card" style={styles.checkupName}>✓ {checkup.name}</DynamicText>
                 <DynamicText type="card" style={styles.checkupDate}>
-                  {t('prevention.completedOn')} {checkup.completedDate ? new Date(checkup.completedDate).toLocaleDateString() : ''}
+                  {t('prevention.completedOn')} {checkup.completedDate ? new Date(checkup.completedDate).toLocaleDateString(getDateTimePickerLocale()) : ''}
                 </DynamicText>
               </View>
             ))}
@@ -258,7 +259,7 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
               style={[styles.dateButton, { borderColor: getCardBorderColor() }]}
               onPress={() => setShowDatePicker(true)}
             >
-              <DynamicText type="card">{t('prevention.date')}: {selectedDate.toLocaleDateString()}</DynamicText>
+              <DynamicText type="card">{t('prevention.date')}: {selectedDate.toLocaleDateString(getDateTimePickerLocale())}</DynamicText>
             </TouchableOpacity>
 
             {showDatePicker && (
@@ -266,6 +267,7 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
                 value={selectedDate}
                 mode="date"
                 display="default"
+                locale={getDateTimePickerLocale()}
                 onChange={(event, date) => {
                   setShowDatePicker(false);
                   if (date) setSelectedDate(date);

@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FAMILY_CIRCLE_FREE_MEMBER_LIMIT } from '../config/premiumFeatures';
+import uiI18n from '../i18n';
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 
 export interface FamilyMember {
   id: string;
@@ -180,28 +182,31 @@ class FamilyCircleService {
     const weekLogs = logs.filter(log => new Date(log.timestamp) >= weekAgo);
     
     const members = await this.getMembers();
-    const memberName = memberId ? members.find(m => m.id === memberId)?.name : 'Familia';
+    const locale = getDateTimePickerLocale();
+    const memberName = memberId
+      ? members.find(m => m.id === memberId)?.name
+      : uiI18n.t('familyCircle.summaryFamily');
     
-    let summary = `Resumen Semanal - ${memberName}\n`;
-    summary += `Período: ${weekAgo.toLocaleDateString()} - ${new Date().toLocaleDateString()}\n\n`;
+    let summary = `${uiI18n.t('familyCircle.weeklySummary')} - ${memberName}\n`;
+    summary += `${uiI18n.t('familyCircle.summaryPeriod')}: ${weekAgo.toLocaleDateString(locale)} - ${new Date().toLocaleDateString(locale)}\n\n`;
     
     if (weekLogs.length === 0) {
-      summary += 'No se registraron dosis en este período.\n';
+      summary += `${uiI18n.t('familyCircle.summaryNoDoses')}\n`;
     } else {
-      summary += `Total de dosis registradas: ${weekLogs.length}\n\n`;
+      summary += `${weekLogs.length}\n\n`;
       
       const byMed = new Map<string, number>();
       weekLogs.forEach(log => {
         byMed.set(log.medicationName, (byMed.get(log.medicationName) || 0) + 1);
       });
       
-      summary += 'Por medicamento:\n';
+      summary += `${uiI18n.t('familyCircle.summaryByMed')}:\n`;
       byMed.forEach((count, med) => {
-        summary += `- ${med}: ${count} dosis\n`;
+        summary += `- ${med}: ${count}\n`;
       });
     }
     
-    summary += '\n---\nGenerado por AuricRX MedCoach';
+    summary += `\n---\n${uiI18n.t('familyCircle.summaryGeneratedBy')}`;
     return summary;
   }
 
@@ -248,12 +253,12 @@ class FamilyCircleService {
     // TODO: Integrate with expo-notifications
     // F7 Block C: Minimal lock screen, detailed in-app
     
-    const lockScreenTitle = `Family Circle: recordatorio sobre ${memberName}`;
-    const lockScreenBody = `${memberName} - recordatorio`;
+    const lockScreenTitle = uiI18n.t('familyCircle.caregiverAlertTitle', { name: memberName });
+    const lockScreenBody = uiI18n.t('familyCircle.caregiverAlertBody', { detail: doseTime });
     
-    const inAppTitle = `Family Circle: recordatorio sobre ${memberName}`;
-    const inAppBody = `La dosis de las ${doseTime} de ${memberName} todavía no está marcada como tomada.`;
-    const inAppFooter = `Este es un recordatorio automático de la app, no una alerta médica. Puede llegar tarde o no llegar (por ejemplo, sin internet o con las notificaciones apagadas). Si crees que alguien necesita ayuda urgente, llama al 911.`;
+    const inAppTitle = uiI18n.t('familyCircle.caregiverAlertTitle', { name: memberName });
+    const inAppBody = uiI18n.t('familyCircle.caregiverAlertBody', { detail: `${doseTime} — ${medicationName}` });
+    const inAppFooter = uiI18n.t('familyCircle.alertDisclaimer');
     
     console.log('F7 Caregiver alert scheduled:', {
       lockScreenTitle,
