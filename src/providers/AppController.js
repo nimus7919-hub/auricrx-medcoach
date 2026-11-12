@@ -696,7 +696,6 @@ export default function App() {
     previous: t('common.previous'),
     done: t('common.done'),
     loading: t('common.loading'),
-    error: t('common.error'),
     success: t('common.success'),
     warning: t('common.warning'),
     info: t('common.info'),
