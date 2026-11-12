@@ -6,6 +6,7 @@ import {
   fetchWithAuth,
   getFreshIdToken,
   getLiveFirebaseUser,
+  isDefinitiveAuthInvalidation,
   looksLikeAuthFailure,
 } from './authToken';
 import {
@@ -23,6 +24,16 @@ const API_BASE_URL = 'https://auricrx-medcoach.onrender.com';
  */
 async function getAuthToken(user = null, { forceRefresh = false, requireAuth = true } = {}) {
   return getFreshIdToken({ user, forceRefresh, requireAuth });
+}
+
+function softFail(reason, category = ERROR_CATEGORY.GENERIC, extra = {}) {
+  return {
+    ok: false,
+    softFail: true,
+    reason,
+    userMessage: toUserFacingError({ category }),
+    ...extra,
+  };
 }
 
 /**
@@ -46,7 +57,7 @@ export async function checkTrialEligibility(email, phoneE164) {
     return data;
   } catch (error) {
     logTechnicalError('checkTrialEligibility', error);
-    throw createUserFacingError(categorizeOrKeep(error), error);
+    throw createUserFacingError(error?.category || ERROR_CATEGORY.GENERIC, error);
   }
 }
 
@@ -75,33 +86,28 @@ export async function startTrial(phoneE164, user = null) {
     return data;
   } catch (error) {
     logTechnicalError('startTrial', error);
-    throw createUserFacingError(categorizeOrKeep(error), error);
+    throw createUserFacingError(error?.category || ERROR_CATEGORY.GENERIC, error);
   }
-}
-
-function categorizeOrKeep(error) {
-  if (error?.category) return error.category;
-  if (error?.isSessionExpired) return ERROR_CATEGORY.SESSION_EXPIRED;
-  if (error?.isAuthRequired) return ERROR_CATEGORY.NOT_SIGNED_IN;
-  return ERROR_CATEGORY.GENERIC;
 }
 
 /**
  * Get current subscription status.
  * Soft-fails for callers: returns { ok:false, softFail:true } instead of throwing
  * on network/server issues so UI can keep the last known state.
- * On a real expired session returns { ok:false, softFail:true, sessionExpired:true }.
+ *
+ * sessionExpired is set ONLY when:
+ *   1) first response looked like an auth failure, AND
+ *   2) ID token force-refresh succeeded, AND
+ *   3) retry still looked like an auth failure
+ * OR Firebase itself reports a definitive auth invalidation while refreshing.
+ * One transient 401, network error, or plain 500 never marks the session expired.
  */
 export async function getSubscriptionStatus(user = null) {
   const live = getLiveFirebaseUser(user);
   if (!live) {
     logTechnicalError('getSubscriptionStatus', 'no live Firebase user — skipping request');
-    return {
-      ok: false,
-      softFail: true,
-      reason: 'not_authenticated',
-      userMessage: toUserFacingError({ category: ERROR_CATEGORY.NOT_SIGNED_IN }),
-    };
+    // Do not treat "auth not ready / briefly null" as expiry — keep local session.
+    return softFail('not_authenticated', ERROR_CATEGORY.NOT_SIGNED_IN);
   }
 
   const attempt = async (forceRefresh) => {
@@ -114,7 +120,24 @@ export async function getSubscriptionStatus(user = null) {
 
   try {
     console.log('🔍 Loading subscription status…');
-    let response = await attempt(false);
+    let response;
+    try {
+      response = await attempt(false);
+    } catch (firstError) {
+      logTechnicalError('getSubscriptionStatus/first', firstError);
+      if (firstError?.isSessionExpired || isDefinitiveAuthInvalidation(firstError)) {
+        return softFail('session_expired', ERROR_CATEGORY.SESSION_EXPIRED, {
+          sessionExpired: true,
+          confirmedAfterRefresh: true,
+        });
+      }
+      // Network / transient token failure — keep last known subscription state.
+      return softFail(
+        firstError?.category === ERROR_CATEGORY.NO_CONNECTION ? 'no_connection' : 'unavailable',
+        firstError?.category || ERROR_CATEGORY.NO_CONNECTION
+      );
+    }
+
     let bodyText = '';
 
     if (!response.ok) {
@@ -127,7 +150,11 @@ export async function getSubscriptionStatus(user = null) {
       // Production subscription route may return 500 "Invalid token" instead of 401.
       if (looksLikeAuthFailure(response, bodyText)) {
         console.warn('⚠️ Subscription auth failure — refreshing ID token and retrying once');
+        let refreshed = false;
         try {
+          // Force-refresh must succeed before we can confirm expiry.
+          await getAuthToken(live, { forceRefresh: true, requireAuth: true });
+          refreshed = true;
           response = await attempt(true);
           bodyText = '';
           if (!response.ok) {
@@ -139,33 +166,31 @@ export async function getSubscriptionStatus(user = null) {
           }
         } catch (retryError) {
           logTechnicalError('getSubscriptionStatus/retry-throw', retryError);
-          return {
-            ok: false,
-            softFail: true,
-            sessionExpired: true,
-            reason: 'session_expired',
-            userMessage: toUserFacingError({ category: ERROR_CATEGORY.SESSION_EXPIRED }),
-          };
+          if (retryError?.isSessionExpired || isDefinitiveAuthInvalidation(retryError)) {
+            return softFail('session_expired', ERROR_CATEGORY.SESSION_EXPIRED, {
+              sessionExpired: true,
+              confirmedAfterRefresh: true,
+            });
+          }
+          // Refresh or retry failed transiently (network, timeout, plain server error).
+          // Keep the user signed in and preserve last known subscription state.
+          return softFail(
+            retryError?.category === ERROR_CATEGORY.NO_CONNECTION ? 'no_connection' : 'unavailable',
+            retryError?.category || ERROR_CATEGORY.NO_CONNECTION
+          );
         }
 
-        if (!response.ok && looksLikeAuthFailure(response, bodyText)) {
-          return {
-            ok: false,
-            softFail: true,
+        if (refreshed && !response.ok && looksLikeAuthFailure(response, bodyText)) {
+          // Confirmed: refreshed token still rejected as invalid/unauthorized.
+          return softFail('session_expired', ERROR_CATEGORY.SESSION_EXPIRED, {
             sessionExpired: true,
-            reason: 'session_expired',
-            userMessage: toUserFacingError({ category: ERROR_CATEGORY.SESSION_EXPIRED }),
-          };
+            confirmedAfterRefresh: true,
+          });
         }
       }
 
       if (!response.ok) {
-        return {
-          ok: false,
-          softFail: true,
-          reason: 'server_unavailable',
-          userMessage: toUserFacingError({ category: ERROR_CATEGORY.SERVER_UNAVAILABLE }),
-        };
+        return softFail('server_unavailable', ERROR_CATEGORY.SERVER_UNAVAILABLE);
       }
     }
 
@@ -173,12 +198,7 @@ export async function getSubscriptionStatus(user = null) {
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text().catch(() => '');
       logTechnicalError('getSubscriptionStatus/non-json', text.slice(0, 300));
-      return {
-        ok: false,
-        softFail: true,
-        reason: 'server_unavailable',
-        userMessage: toUserFacingError({ category: ERROR_CATEGORY.SERVER_UNAVAILABLE }),
-      };
+      return softFail('server_unavailable', ERROR_CATEGORY.SERVER_UNAVAILABLE);
     }
 
     const data = await response.json();
@@ -186,28 +206,18 @@ export async function getSubscriptionStatus(user = null) {
     return data;
   } catch (error) {
     logTechnicalError('getSubscriptionStatus', error);
-    if (error?.isSessionExpired || error?.category === ERROR_CATEGORY.SESSION_EXPIRED) {
-      return {
-        ok: false,
-        softFail: true,
+    if (
+      (error?.isSessionExpired || error?.category === ERROR_CATEGORY.SESSION_EXPIRED) &&
+      (error?.confirmedAfterRefresh || isDefinitiveAuthInvalidation(error))
+    ) {
+      return softFail('session_expired', ERROR_CATEGORY.SESSION_EXPIRED, {
         sessionExpired: true,
-        reason: 'session_expired',
-        userMessage: toUserFacingError(error),
-      };
+        confirmedAfterRefresh: true,
+      });
     }
     if (error?.isAuthRequired || error?.category === ERROR_CATEGORY.NOT_SIGNED_IN) {
-      return {
-        ok: false,
-        softFail: true,
-        reason: 'not_authenticated',
-        userMessage: toUserFacingError(error),
-      };
+      return softFail('not_authenticated', ERROR_CATEGORY.NOT_SIGNED_IN);
     }
-    return {
-      ok: false,
-      softFail: true,
-      reason: 'unavailable',
-      userMessage: toUserFacingError(error),
-    };
+    return softFail('unavailable', error?.category || ERROR_CATEGORY.GENERIC);
   }
 }

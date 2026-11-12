@@ -1759,7 +1759,26 @@ export default function App() {
     setMeds([]);
   };
 
-  promptSessionExpiredRef.current = () => {
+  promptSessionExpiredRef.current = async () => {
+    // Only prompt after getSubscriptionStatus confirmed expiry post-refresh.
+    // Double-check Firebase still cannot mint a token so a race cannot wipe a valid session.
+    const live = authService.getCurrentUser();
+    if (live) {
+      try {
+        await live.getIdToken(true);
+        console.warn('⚠️ Skipping session-expired prompt — Firebase session still valid after refresh');
+        return;
+      } catch (tokenError) {
+        const code = String(tokenError?.code || '');
+        const definitive = /auth\/(user-token-expired|invalid-user-token|user-disabled|user-not-found|invalid-refresh-token|id-token-expired|id-token-revoked)/i.test(
+          code || String(tokenError?.message || '')
+        );
+        if (!definitive) {
+          console.warn('⚠️ Skipping session-expired prompt — token refresh failed transiently', tokenError);
+          return;
+        }
+      }
+    }
     showAlert({
       title: uiI18n.t("errors.title"),
       message: uiI18n.t("errors.sessionExpired"),
@@ -2584,10 +2603,10 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
                 console.log('⚠️ Subscription expired - showing modal');
                 setShowSubscriptionExpiredModal(true);
               }
-            } else if (status?.sessionExpired) {
-              // Real expired session — prompt clean re-sign-in (no technical error).
-              console.warn('⚠️ Session expired during subscription check');
-              promptSessionExpiredRef.current?.();
+            } else if (status?.sessionExpired && status?.confirmedAfterRefresh) {
+              // Only after refresh+retry confirmed an invalid session — never on one 401/network/500.
+              console.warn('⚠️ Confirmed session expiry during subscription check');
+              await promptSessionExpiredRef.current?.();
             } else {
               // Soft-fail: keep last known subscription state; log only.
               logTechnicalError('subscriptionStatus/softFail', status);

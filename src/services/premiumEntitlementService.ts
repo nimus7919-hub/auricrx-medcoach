@@ -5,6 +5,7 @@ import DeviceIdService from './deviceIdService';
 import PlayIntegrityService from './playIntegrityService';
 import RenewalReminderService from './renewalReminderService';
 import { API_BASE } from '../config/api';
+import uiI18n from '../i18n';
 
 const STORAGE_KEYS = {
   PREMIUM_TRIAL_START: 'premium:trial:start',
@@ -145,7 +146,7 @@ class PremiumEntitlementService {
       const backendCheck = await this.checkTrialEligibilityWithBackend(deviceHash, userId);
       
       if (!backendCheck.eligible) {
-        const uiI18n = require('../i18n').default;
+        // Keep server reason in logs only — never show raw backend text to users.
         console.warn('Trial not eligible:', backendCheck.reason);
         return {
           success: false,
