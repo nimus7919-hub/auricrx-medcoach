@@ -39,7 +39,7 @@ import { Audio } from "expo-audio";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { mergeReminders, shouldPushReminders } from "../utils/reminderPersistence";
-import { getDefaultSearchCoords } from "../utils/locationDefaults";
+import { resolveSearchLocation } from "../utils/resolveSearchLocation";
 
 import { askMedicalAI } from "./../api/api.medical-ai";
 
@@ -1797,15 +1797,12 @@ useEffect(() => {
   const loadLocationData = async () => {
     if (getRegion() === 'US') return;
     try {
-      // Request location permission; fall back to Mexico City when denied/unavailable
+      // Never invent a default city — skip search when location is off/denied
       const { status } = await requestSearchLocationPermission();
-      const fallback = getDefaultSearchCoords(getRegion());
-      let coords;
+      let coords = null;
+      let positionError = null;
 
-      if (status !== 'granted') {
-        console.log('📍 Location permission denied - using Mexico default for pharmacy search');
-        coords = fallback;
-      } else {
+      if (status === 'granted') {
         try {
           const position = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.Balanced,
@@ -1815,11 +1812,25 @@ useEffect(() => {
           coords = position.coords;
           console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
         } catch (locationError) {
-          const errorMessage = locationError?.message || locationError?.toString() || '';
-          console.warn('⚠️ Location request failed - using Mexico default:', errorMessage);
-          coords = fallback;
+          positionError = locationError;
+          console.warn('⚠️ Location request failed — skipping pharmacy/lab auto-load:', locationError?.message || locationError);
         }
+      } else {
+        console.log('📍 Location permission denied — skipping pharmacy/lab auto-load');
       }
+
+      const resolved = resolveSearchLocation({ permissionStatus: status, coords, positionError });
+      if (!resolved.ok) {
+        const message = uiI18n.t('locationSearch.locationOffMessage');
+        setPharmacies([]);
+        setPharmaciesError(message);
+        setPharmaciesLoading(false);
+        setLabs([]);
+        setLabsError(message);
+        setLabsLoading(false);
+        return;
+      }
+      coords = resolved.coords;
 
       // Load pharmacies
       setPharmaciesLoading(true);
@@ -1827,6 +1838,7 @@ useEffect(() => {
         const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         setPharmacies(nearbyPharmacies);
+        setPharmaciesError(null);
         console.log('🏪 Auto-loaded pharmacies:', nearbyPharmacies.length);
         
         // Debug: Log first pharmacy data to see what we're getting
@@ -1853,6 +1865,7 @@ useEffect(() => {
         const { findNearbyLabs } = await import('../../services/labSearch');
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
         setLabs(nearbyLabs);
+        setLabsError(null);
         console.log('🧪 Auto-loaded labs:', nearbyLabs.length);
         
         // Debug: Log first lab data to see what we're getting

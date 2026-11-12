@@ -19,7 +19,11 @@
     "disclosure": "Wir verwenden Ihren Standort nur, um Apotheken oder Labore in der N?he zu suchen. Wir speichern ihn nicht und nutzen ihn nicht zur Nachverfolgung. Apothekensuchen verwenden INEGI DENUE/PROFECO-Daten ?ber unseren Server; Laborsuchen und optionale Fahrstrecken verwenden Google Places/Maps.",
     "reset": "Standortzustimmung zur?cksetzen",
     "resetDone": "Standortzustimmung zur?ckgesetzt. Bei der n?chsten Suche fragen wir erneut.",
-    "resetError": "Die Standortzustimmung konnte nicht zur?ckgesetzt werden. Bitte versuchen Sie es erneut."
+    "resetError": "Die Standortzustimmung konnte nicht zur?ckgesetzt werden. Bitte versuchen Sie es erneut.",
+    "locationOffTitle": "Location is off",
+    "locationOffMessage": "Pharmacies can't be searched because location is off or unavailable. Turn on location and grant permission, then try again.",
+    "openSettings": "Open Settings",
+    "retry": "Try again"
   },
   "documentScanner": {
     "scan": "Scannen",

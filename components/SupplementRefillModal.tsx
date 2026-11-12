@@ -14,7 +14,8 @@ import { findNearbySupplementStores, getSupplementPrices, StorePrice } from "../
 // ENABLED: EnhancedSupplementSearch for database integration
 const EnhancedSupplementSearch = require("../services/enhancedSupplementSearch");
 import supplementDataCollector from "../services/supplementDataCollector";
-const { getDefaultSearchCoords } = require("../src/utils/locationDefaults");
+import LocationRequiredPanel from "../src/components/LocationRequiredPanel";
+const { resolveSearchLocation } = require("../src/utils/resolveSearchLocation");
 
 interface SupplementInfo { name: string; brand?: string; dosage?: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
 interface Props { 
@@ -47,6 +48,7 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
   const [showAll, setShowAll] = useState(false);
   const [currency, setCurrency] = useState<string>(uiI18n.t("common.usd"));
   const [coordsUsed, setCoordsUsed] = useState<{lat:number; lon:number}|null>(null);
+  const [locationBlocked, setLocationBlocked] = useState(false);
   const LAST_LOC_KEY = 'AURIC_LAST_LOC';
 
   // Price contribution modal state
@@ -75,29 +77,29 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
   async function load() {
     try {
       setLoading(true);
+      setLocationBlocked(false);
+      setResults([]);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      // Mexico City by default (SF was wrong for this MX-first app); US region gets a US city.
-      let coords = getDefaultSearchCoords(getRegion());
+      let coords: { latitude: number; longitude: number } | null = null;
+      let positionError: unknown = null;
       let determinedCurrency: string = getRegion() === 'US' ? uiI18n.t("common.usd") : uiI18n.t("common.mxn");
       if (status === "granted") {
         try {
           const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
           coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-          // cache it
           AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
-        } catch {}
-      } else {
-        // attempt cached last location, else keep region default (Mexico City for MX)
-        try {
-          const cached = await AsyncStorage.getItem(LAST_LOC_KEY);
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed && typeof parsed.latitude==='number' && typeof parsed.longitude==='number') {
-              coords = { latitude: parsed.latitude, longitude: parsed.longitude };
-            }
-          }
-        } catch {}
+        } catch (error) {
+          positionError = error;
+        }
       }
+      const resolved = resolveSearchLocation({ permissionStatus: status, coords, positionError });
+      if (!resolved.ok) {
+        setLocationBlocked(true);
+        setCoordsUsed(null);
+        setLoading(false);
+        return;
+      }
+      coords = resolved.coords;
       setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
       // Determine currency from country (reverse geocode); fall back to language mapping then USD
       try {
@@ -535,7 +537,9 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
 
           {/* List */}
       <View style={{ marginTop: spacing.lg, maxHeight: 360 }}>
-            {loading ? (
+            {locationBlocked ? (
+              <LocationRequiredPanel onRetry={() => load()} />
+            ) : loading ? (
               <ActivityIndicator color="#FFD700" />
             ) : (
               <FlatList

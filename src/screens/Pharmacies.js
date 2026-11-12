@@ -7,9 +7,11 @@ import { View, Text, ScrollView, Alert, Linking, Platform } from "react-native";
 import * as Location from "expo-location";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import DynamicText from "./../components/DynamicText";
+import LocationRequiredPanel from "./../components/LocationRequiredPanel";
 import { styles } from "./appStyles";
 import { PremiumEntitlementService } from "../services/premiumEntitlementService";
 import PremiumUpgradeScreen from "./PremiumUpgradeScreen";
+import { resolveSearchLocation } from "../utils/resolveSearchLocation";
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createPharmacies(getScope) {
@@ -21,6 +23,7 @@ export default function createPharmacies(getScope) {
     const [lastUpdated, setLastUpdated] = useState(null);
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [entitlement, setEntitlement] = useState(null);
+    const [locationBlocked, setLocationBlocked] = useState(false);
     
     useEffect(() => {
       checkPremiumAccess();
@@ -57,25 +60,37 @@ export default function createPharmacies(getScope) {
         
         setPharmaciesLoading(true);
         setPharmaciesError(null);
+        setLocationBlocked(false);
+        setPharmacies([]);
         
         const { status } = await requestSearchLocationPermission();
-        if (status !== 'granted') {
-          setPharmaciesError(uiI18n.t("localized.Pharmacies.refreshPharmacies.text32"));
+        let coords = null;
+        let positionError = null;
+        if (status === 'granted') {
+          try {
+            const position = await Location.getCurrentPositionAsync({});
+            coords = position.coords;
+          } catch (error) {
+            positionError = error;
+          }
+        }
+        const resolved = resolveSearchLocation({ permissionStatus: status, coords, positionError });
+        if (!resolved.ok) {
+          setLocationBlocked(true);
+          setPharmaciesError(uiI18n.t('locationSearch.locationOffMessage'));
           return;
         }
         
-        setPharmaciesLoading(true);
-        const { coords } = await Location.getCurrentPositionAsync({});
-        
-        // Import the pharmacy search function
         const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
-        const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
+        const nearbyPharmacies = await findNearbyPharmacies(resolved.coords.latitude, resolved.coords.longitude, lang, { noCache: true });
         
         setPharmacies(nearbyPharmacies);
+        setLocationBlocked(false);
         setLastUpdated(new Date());
         console.log('🏪 Refreshed pharmacies:', nearbyPharmacies.length);
       } catch (e) {
         console.error('Error refreshing pharmacies:', e);
+        setLocationBlocked(false);
         setPharmaciesError(uiI18n.t("localized.Pharmacies.refreshPharmacies.text47"));
       } finally {
         setPharmaciesLoading(false);
@@ -180,12 +195,23 @@ export default function createPharmacies(getScope) {
             </PremiumButton>
           </View>
 
-          {/* Error message */}
-          {pharmaciesError && (
+          {/* Location required / error */}
+          {(locationBlocked || pharmaciesError === uiI18n.t('locationSearch.locationOffMessage')) ? (
+            <LocationRequiredPanel onRetry={refreshPharmacies} style={{ marginBottom: 16 }} />
+          ) : pharmaciesError ? (
             <View style={{ backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2, padding: 12, borderRadius: 18, marginBottom: 16 }}>
               <DynamicText type="card" style={{ color: '#c62828', fontFamily: 'Inter_600SemiBold' }}>{pharmaciesError}</DynamicText>
-          </View>
-          )}
+              <PremiumButton
+                style={[styles.btn, { backgroundColor: theme.accent, paddingHorizontal: 16, paddingVertical: 8, marginTop: 10, alignSelf: 'flex-start' }]}
+                onPress={refreshPharmacies}
+                disabled={pharmaciesLoading}
+              >
+                <DynamicText type="card" style={[styles.btnText, { fontFamily: 'Inter_600SemiBold', fontSize: 14 }]}>
+                  {uiI18n.t('locationSearch.retry')}
+                </DynamicText>
+              </PremiumButton>
+            </View>
+          ) : null}
 
           {/* Last updated */}
           {lastUpdated && (
