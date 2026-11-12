@@ -11,6 +11,7 @@ import DynamicText from "./../components/DynamicText";
 import { styles } from "./appStyles";
 import { PremiumEntitlementService } from "../services/premiumEntitlementService";
 import PremiumUpgradeScreen from "./PremiumUpgradeScreen";
+import { FAB_SCROLL_PADDING } from "../layout/fabLayout";
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createLabs(getScope) {
@@ -212,7 +213,7 @@ export default function createLabs(getScope) {
 
     return (
       <>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: FAB_SCROLL_PADDING }}>
         <Header title={S.labsLocations} />
           
           {/* Header with refresh button */}

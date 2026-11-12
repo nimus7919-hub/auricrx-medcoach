@@ -1,10 +1,11 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   topbar: { 
     borderBottomWidth: 1, 
     paddingBottom: 12, 
-    paddingTop: Platform.OS === 'ios' ? 44 : 24,
+    // Top inset applied at runtime via useSafeAreaInsets in TopBar.js
+    paddingTop: 12,
     backgroundColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
@@ -37,6 +38,7 @@ export const styles = StyleSheet.create({
   widgetSub: { fontSize: 12, marginBottom: 4 },
   widgetBig: { fontSize: 20, marginBottom: 4 },
 
+  // Clears floating assistant FAB (see src/layout/fabLayout.js)
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingBottom: 100 },
 card: {
     width: '46%',
@@ -72,7 +74,8 @@ card: {
     alignItems: 'center',
     marginBottom: 16,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 44 : 24,
+    // Top inset applied at runtime via useSafeAreaInsets in Header.js
+    paddingTop: 8,
     paddingBottom: 8,
     justifyContent: 'space-between',
   },
@@ -102,6 +105,7 @@ card: {
   fab: {
     position: 'absolute',
     right: 16,
+    // bottom overridden at runtime with safe-area + FAB_BOTTOM_OFFSET
     bottom: 100,
     width: 60,
     height: 60,

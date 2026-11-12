@@ -14,6 +14,7 @@ import { Platform } from 'react-native';
 import { HealthConnectPrivacyControls } from './ActivityHealthScreen';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import { BUSINESS_EMAIL } from '../lib/supportEmail';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createSettings(getScope) {
@@ -40,7 +41,7 @@ export default function createSettings(getScope) {
     return (
       <ScrollView 
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: FAB_SCROLL_PADDING }}
         keyboardShouldPersistTaps="handled"
         scrollsToTop={false}
         showsVerticalScrollIndicator={true}

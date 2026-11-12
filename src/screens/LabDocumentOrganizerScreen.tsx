@@ -13,7 +13,7 @@ import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 type Tab = 'documents' | 'labValues' | 'glossary' | 'questions';
 
 export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { onClose: () => void; openFindLab?: () => void }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getAccentColor } = useWallpaper();
   
   const [activeTab, setActiveTab] = useState<Tab>('documents');
@@ -35,7 +35,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
   
   const labService = LabDocumentService.getInstance();
   const familyService = FamilyCircleService.getInstance();
-  const glossary = labService.getLabGlossary();
+  const glossaryKeys = labService.getLabGlossaryKeys();
 
   useEffect(() => {
     loadData();
@@ -204,14 +204,13 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
       <DynamicText type="card" style={styles.sectionTitle}>{t('labOrganizer.glossary')}</DynamicText>
       <DynamicText type="card" style={styles.sectionDescription}>{t('labOrganizer.glossaryDescription')}</DynamicText>
       
-      {Object.entries(glossary).map(([key, definitions]) => {
-        const text = (i18n.language || '').startsWith('es') ? definitions.es : definitions.en;
-        return (
+      {glossaryKeys.map((key) => (
           <View key={key} style={[styles.glossaryItem, { borderColor: getCardBorderColor() }]}>
-            <DynamicText type="card" style={styles.glossaryText}>{text}</DynamicText>
+            <DynamicText type="card" style={styles.glossaryText}>
+              {t(`labOrganizer.glossaryTerms.${key}`)}
+            </DynamicText>
           </View>
-        );
-      })}
+        ))}
 
       <DynamicText type="card" style={styles.disclaimer}>{t('labOrganizer.glossaryDisclaimer')}</DynamicText>
     </View>

@@ -172,49 +172,31 @@ class LabDocumentService {
     await AsyncStorage.setItem(STORAGE_KEYS.DOCTOR_QUESTIONS, JSON.stringify(filtered));
   }
 
+  /** Glossary entry ids — copy lives in i18n `labOrganizer.glossaryTerms.*`. */
+  getLabGlossaryKeys(): string[] {
+    return [
+      'glucose',
+      'hemoglobin',
+      'cholesterol',
+      'creatinine',
+      'triglycerides',
+      'tsh',
+      'hba1c',
+      'alt',
+      'ast',
+      'wbc',
+    ];
+  }
+
+  /** @deprecated Prefer getLabGlossaryKeys() + t('labOrganizer.glossaryTerms.<id>') */
   getLabGlossary(): { [key: string]: { en: string; es: string } } {
-    return {
-      'glucose': {
-        es: 'Glucosa: Azúcar en la sangre. Mide el nivel de energía disponible. Niveles alterados pueden indicar diabetes o prediabetes.',
-        en: 'Glucose: Sugar in the blood. Measures available energy level. Altered levels may indicate diabetes or prediabetes.'
-      },
-      'hemoglobin': {
-        es: 'Hemoglobina: Proteína que transporta oxígeno en la sangre. Niveles bajos pueden indicar anemia.',
-        en: 'Hemoglobin: Protein that carries oxygen in the blood. Low levels may indicate anemia.'
-      },
-      'cholesterol': {
-        es: 'Colesterol: Grasa en la sangre. El colesterol total, HDL (bueno) y LDL (malo) ayudan a evaluar riesgo cardiovascular.',
-        en: 'Cholesterol: Fat in the blood. Total cholesterol, HDL (good) and LDL (bad) help assess cardiovascular risk.'
-      },
-      'creatinine': {
-        es: 'Creatinina: Producto de desecho muscular. Indica qué tan bien funcionan los riñones.',
-        en: 'Creatinine: Muscle waste product. Indicates how well the kidneys are working.'
-      },
-      'triglycerides': {
-        es: 'Triglicéridos: Tipo de grasa en la sangre. Niveles altos aumentan riesgo de enfermedad cardíaca.',
-        en: 'Triglycerides: Type of fat in the blood. High levels increase risk of heart disease.'
-      },
-      'tsh': {
-        es: 'TSH (Hormona Estimulante de la Tiroides): Controla la producción de hormonas tiroideas. Indica función tiroidea.',
-        en: 'TSH (Thyroid Stimulating Hormone): Controls thyroid hormone production. Indicates thyroid function.'
-      },
-      'hba1c': {
-        es: 'HbA1c (Hemoglobina Glicosilada): Promedio de glucosa en sangre durante 2-3 meses. Importante para monitoreo de diabetes.',
-        en: 'HbA1c (Glycated Hemoglobin): Average blood glucose over 2-3 months. Important for diabetes monitoring.'
-      },
-      'alt': {
-        es: 'ALT (Alanina Aminotransferasa): Enzima del hígado. Niveles elevados pueden indicar daño hepático.',
-        en: 'ALT (Alanine Aminotransferase): Liver enzyme. Elevated levels may indicate liver damage.'
-      },
-      'ast': {
-        es: 'AST (Aspartato Aminotransferasa): Enzima presente en hígado, corazón y músculos. Niveles altos pueden indicar daño.',
-        en: 'AST (Aspartate Aminotransferase): Enzyme present in liver, heart and muscles. High levels may indicate damage.'
-      },
-      'wbc': {
-        es: 'Leucocitos (WBC): Glóbulos blancos que combaten infecciones. Niveles alterados pueden indicar infección o problemas inmunes.',
-        en: 'White Blood Cells (WBC): Fight infections. Altered levels may indicate infection or immune problems.'
-      },
-    };
+    // Kept for any legacy callers; UI should use i18n so language settings apply.
+    const keys = this.getLabGlossaryKeys();
+    const out: { [key: string]: { en: string; es: string } } = {};
+    for (const key of keys) {
+      out[key] = { en: key, es: key };
+    }
+    return out;
   }
 }
 
