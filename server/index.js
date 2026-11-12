@@ -3560,7 +3560,7 @@ app.post('/api/sync/push', verifyUser, async (req, res) => {
     
     const { dataType, payload } = req.body;
     
-    if (!dataType || !payload) {
+    if (!dataType || payload === undefined || payload === null) {
       return res.status(400).json({
         ok: false,
         error: 'MISSING_FIELDS',
@@ -3570,10 +3570,32 @@ app.post('/api/sync/push', verifyUser, async (req, res) => {
     
     // Check if exists
     const existing = await neonClient`
-      SELECT id, sync_version FROM health_data 
+      SELECT id, sync_version, payload FROM health_data 
       WHERE user_id = ${uid} AND data_type = ${dataType} AND is_deleted = false
       LIMIT 1
     `;
+
+    // Guard: do not wipe non-empty reminder payloads with an accidental empty array
+    // unless the client explicitly opts in (forceClear).
+    if (
+      dataType === 'reminders' &&
+      Array.isArray(payload) &&
+      payload.length === 0 &&
+      !req.body?.forceClear &&
+      existing.length > 0
+    ) {
+      let prior = existing[0].payload;
+      if (typeof prior === 'string') {
+        try { prior = JSON.parse(prior); } catch { prior = []; }
+      }
+      if (Array.isArray(prior) && prior.length > 0) {
+        return res.status(409).json({
+          ok: false,
+          error: 'EMPTY_OVERWRITE_BLOCKED',
+          message: 'Refusing to overwrite non-empty reminders with an empty list'
+        });
+      }
+    }
     
     let result;
     if (existing.length > 0) {
