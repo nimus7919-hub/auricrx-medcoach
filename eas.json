@@ -42,7 +42,11 @@
       },
       "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
       "developmentClient": false,
-      "channel": "production"
+      "channel": "production",
+      "ios": {
+        "image": "macos-sequoia-15.6-xcode-26.0",
+        "prebuildCommand": "prebuild --no-install"
+      }
     },
     "us-internal": {
       "extends": "production",
@@ -57,7 +61,15 @@
     }
   },
   "submit": {
-    "production": {},
+    "production": {
+      "ios": {
+        "ascAppId": "6833712012",
+        "appleTeamId": "S99U7MRVB3",
+        "ascApiKeyPath": "$EXPO_ASC_API_KEY_PATH",
+        "ascApiKeyIssuerId": "$EXPO_ASC_ISSUER_ID",
+        "ascApiKeyId": "$EXPO_ASC_KEY_ID"
+      }
+    },
     "us-internal": {
       "android": {
         "track": "internal"
