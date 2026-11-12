@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, TextInput, Modal, Alert, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DynamicText from '../components/DynamicText';
+import ModalScreenHeader from '../components/ModalScreenHeader';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import LabDocumentService, { Document, LabValue, DoctorQuestion } from '../services/labDocumentService';
 import FamilyCircleService, { FamilyMember } from '../services/familyCircleService';
@@ -250,12 +252,12 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>{t('labOrganizer.title')}</DynamicText>
-        <TouchableOpacity onPress={onClose}>
-          <DynamicText type="card" style={styles.closeButton}>{t('common.close')}</DynamicText>
-        </TouchableOpacity>
-      </View>
+      <ModalScreenHeader
+        title={t('labOrganizer.title')}
+        onClose={onClose}
+        backgroundColor={getCardBackgroundColor()}
+        borderBottomColor={getCardBorderColor()}
+      />
 
       <View style={[styles.tabs, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
         <TouchableOpacity
@@ -295,7 +297,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: FAB_SCROLL_PADDING }}>
         {/* F14: Lab organizer guardrail banner - Block I */}
         <View style={[styles.bannerCard, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={styles.bannerText}>⚠️ {t('labOrganizer.banner')}</DynamicText>
@@ -415,9 +417,6 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
   tabs: { flexDirection: 'row', borderBottomWidth: 1 },
   tab: { flex: 1, padding: 12, alignItems: 'center' },
   tabText: { fontSize: 13, fontWeight: '600' },
