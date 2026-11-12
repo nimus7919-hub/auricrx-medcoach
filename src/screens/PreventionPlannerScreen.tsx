@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, TextInput, Modal, Alert, StyleSheet, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DynamicText from '../components/DynamicText';
+import ModalScreenHeader from '../components/ModalScreenHeader';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import PreventionPlannerService, { CheckupTemplate, ScheduledCheckup } from '../services/preventionPlannerService';
 import { getRegion } from '../services/region';
@@ -119,14 +121,14 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor(), borderBottomColor: getCardBorderColor() }]}>
-        <DynamicText type="card" style={styles.title}>{t('prevention.title')}</DynamicText>
-        <TouchableOpacity onPress={onClose}>
-          <DynamicText type="card" style={styles.closeButton}>{t('common.close')}</DynamicText>
-        </TouchableOpacity>
-      </View>
+      <ModalScreenHeader
+        title={t('prevention.title')}
+        onClose={onClose}
+        backgroundColor={getCardBackgroundColor()}
+        borderBottomColor={getCardBorderColor()}
+      />
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: FAB_SCROLL_PADDING }}>
         <View style={[styles.card, { backgroundColor: getCardBackgroundColor(), borderColor: getCardBorderColor() }]}>
           <DynamicText type="card" style={styles.description}>{t('prevention.screenBlurb')}</DynamicText>
           <DynamicText type="card" style={styles.disclaimer}>{t('prevention.disclaimer')}</DynamicText>
@@ -299,9 +301,6 @@ export default function PreventionPlannerScreen({ onClose }: { onClose: () => vo
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1 },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  closeButton: { fontSize: 16, color: '#DBB65C' },
   content: { flex: 1, padding: 16 },
   card: { borderRadius: 12, borderWidth: 1, padding: 16, marginBottom: 16 },
   description: { fontSize: 14, marginBottom: 12, lineHeight: 20 },
