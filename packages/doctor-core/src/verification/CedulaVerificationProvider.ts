@@ -1,6 +1,6 @@
 /**
- * Provider interface for paid automated cédula profesional verification.
- * Swap MockCedulaProvider for a real vendor implementation when ready.
+ * Legacy provider interface kept for Phase-1 call sites / tests.
+ * Real verification uses RegistryLookupProvider + admin review — never auto-approve.
  */
 
 import type { VerificationStatus } from '../types';
@@ -14,6 +14,7 @@ export interface CedulaVerificationRequest {
 }
 
 export interface CedulaVerificationResult {
+  /** Never 'verified' from automated providers — only pending_review / rejected / pending. */
   status: VerificationStatus;
   /** Vendor reference / job id */
   referenceId?: string;

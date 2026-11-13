@@ -4178,8 +4178,12 @@
         "unverified": "Sin verificar",
         "pending": "Pendiente",
         "verified": "Verificada",
-        "rejected": "Rechazada"
-      }
+        "rejected": "Rechazada",
+        "pending_review": "En revisión",
+        "suspended": "Suspendida",
+        "expired": "Vencida"
+      },
+      "queued": "Enviado a revisión manual. Verás la decisión aquí cuando un administrador termine la revisión."
     },
     "plan": {
       "label": "Plan de médico",

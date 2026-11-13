@@ -32,11 +32,19 @@ const link = (over: Partial<PatientDoctorLink> = {}): PatientDoctorLink => ({
 });
 
 describe('doctor access rules', () => {
-  it('requires doctorPlan + verified for entitlement', () => {
+  it('requires doctorPlan + verified + unexpired for entitlement', () => {
     expect(isDoctorEntitled(profile())).toBe(true);
     expect(isDoctorEntitled(profile({ doctorPlan: false }))).toBe(false);
     expect(isDoctorEntitled(profile({ verificationStatus: 'pending' }))).toBe(false);
+    expect(isDoctorEntitled(profile({ verificationStatus: 'pending_review' }))).toBe(false);
     expect(isDoctorEntitled(profile({ verificationStatus: 'rejected' }))).toBe(false);
+    expect(isDoctorEntitled(profile({ verificationStatus: 'suspended' }))).toBe(false);
+    expect(
+      isDoctorEntitled(
+        profile({ expiresAt: '2020-01-01T00:00:00.000Z' }),
+        new Date('2026-01-01T00:00:00.000Z')
+      )
+    ).toBe(false);
     expect(isDoctorEntitled(null)).toBe(false);
   });
 

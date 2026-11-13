@@ -30,14 +30,14 @@ describe('doctor linking & consent helpers', () => {
     expect(isInviteExpired(new Date(Date.now() - 1000).toISOString())).toBe(true);
   });
 
-  it('mock cédula provider returns pending/verified/rejected', async () => {
+  it('mock cédula provider never auto-verifies (pending_review only)', async () => {
     const provider = new MockCedulaProvider();
-    const verified = await provider.submit({ fullName: 'Ana', cedulaNumber: '12345678' });
-    expect(verified.status).toBe('verified');
+    const queued = await provider.submit({ fullName: 'Ana', cedulaNumber: '12345678' });
+    expect(queued.status).toBe('pending_review');
     const pending = await provider.submit({ fullName: 'Ana', cedulaNumber: 'PEND9999' });
-    expect(pending.status).toBe('pending');
-    const rejected = await provider.submit({ fullName: 'Ana', cedulaNumber: 'FAIL9999' });
-    expect(rejected.status).toBe('rejected');
+    expect(pending.status).toBe('pending_review');
+    const mismatch = await provider.submit({ fullName: 'Ana', cedulaNumber: 'FAIL9999' });
+    expect(mismatch.status).toBe('pending_review');
     const short = await provider.submit({ fullName: 'Ana', cedulaNumber: '12' });
     expect(short.status).toBe('rejected');
   });

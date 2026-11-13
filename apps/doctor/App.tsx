@@ -10,6 +10,7 @@ import {
   Alert,
   StatusBar,
   SafeAreaView,
+  Linking,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { MultiFactorResolver } from 'firebase/auth';
@@ -77,7 +78,8 @@ type Screen =
   | 'officeHours'
   | 'preVisit'
   | 'appointment'
-  | 'inbox';
+  | 'inbox'
+  | 'adminReview';
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon→Sun for editor
 
@@ -125,8 +127,16 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [legalFullName, setLegalFullName] = useState('');
   const [specialty, setSpecialty] = useState('');
+  const [country, setCountry] = useState<'MX' | 'US'>('MX');
   const [cedula, setCedula] = useState('');
+  const [specialtyCedula, setSpecialtyCedula] = useState('');
+  const [npiNumber, setNpiNumber] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [licenseState, setLicenseState] = useState('');
+  const [identityLaunchUrl, setIdentityLaunchUrl] = useState<string | null>(null);
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   const [patients, setPatients] = useState<PatientDoctorLink[]>([]);
   const [selected, setSelected] = useState<PatientDoctorLink | null>(null);
@@ -208,10 +218,22 @@ export default function App() {
 
       const p = await service.getDoctorProfile().catch(() => null);
       setProfile(p);
+      try {
+        const token = await user.getIdTokenResult();
+        setIsAdminUser(token.claims?.admin === true);
+      } catch {
+        setIsAdminUser(false);
+      }
       if (p) {
         setDisplayName(p.displayName);
+        setLegalFullName(p.legalFullName || p.displayName || '');
         setSpecialty(p.specialty);
-        setCedula(p.cedulaNumber);
+        setCountry(p.country === 'US' ? 'US' : 'MX');
+        setCedula(p.cedulaNumber || '');
+        setSpecialtyCedula(p.specialtyCedulaNumber || '');
+        setNpiNumber(p.npiNumber || '');
+        setLicenseNumber(p.licenseNumber || '');
+        setLicenseState(p.licenseState || '');
         const normalized = normalizeOfficeHours(p.officeHours || undefined);
         setOfficeTz(normalized.timeZone || p.timeZone || DEFAULT_OFFICE_HOURS.timeZone);
         setOfficePaused(normalized.messagingPaused);
@@ -271,13 +293,32 @@ export default function App() {
   };
 
   const handleSaveProfile = async () => {
-    if (!displayName.trim() || !specialty.trim() || !cedula.trim()) {
+    const legal = legalFullName.trim() || displayName.trim();
+    if (!legal || !specialty.trim()) {
+      Alert.alert(t('common.error'), t('doctorMode.onboarding.required'));
+      return;
+    }
+    if (country === 'MX' && !cedula.trim()) {
+      Alert.alert(t('common.error'), t('doctorMode.onboarding.required'));
+      return;
+    }
+    if (country === 'US' && (!npiNumber.trim() || !licenseNumber.trim() || !licenseState.trim())) {
       Alert.alert(t('common.error'), t('doctorMode.onboarding.required'));
       return;
     }
     setBusy(true);
     try {
-      const p = await service.saveDoctorProfile({ displayName, specialty, cedulaNumber: cedula });
+      const p = await service.saveDoctorProfile({
+        displayName: displayName.trim() || legal,
+        legalFullName: legal,
+        specialty,
+        country,
+        cedulaNumber: cedula,
+        specialtyCedulaNumber: specialtyCedula,
+        npiNumber,
+        licenseNumber,
+        licenseState,
+      });
       setProfile(p);
       Alert.alert(t('common.success'), t('doctorMode.onboarding.saved'));
       setScreen('home');
@@ -291,9 +332,16 @@ export default function App() {
   const handleVerify = async () => {
     setBusy(true);
     try {
-      const p = await service.submitCedulaVerification();
+      const { profile: p, result } = await service.submitCedulaVerification();
       setProfile(p);
-      Alert.alert(t('doctorMode.verification.title'), t(`doctorMode.verification.status.${p.verificationStatus}`));
+      const launch = result?.identity?.launchUrl || null;
+      setIdentityLaunchUrl(launch);
+      Alert.alert(
+        t('doctorMode.verification.title'),
+        t('doctorMode.verification.queued') +
+          '\n' +
+          t(`doctorMode.verification.status.${p.verificationStatus}`)
+      );
     } catch (e: any) {
       Alert.alert(t('common.error'), e?.message || t('doctorMode.verification.failed'));
     } finally {
@@ -619,8 +667,14 @@ export default function App() {
             setProfile(p);
             if (p) {
               setDisplayName(p.displayName);
+              setLegalFullName(p.legalFullName || p.displayName || '');
               setSpecialty(p.specialty);
-              setCedula(p.cedulaNumber);
+              setCountry(p.country === 'US' ? 'US' : 'MX');
+              setCedula(p.cedulaNumber || '');
+              setSpecialtyCedula(p.specialtyCedulaNumber || '');
+              setNpiNumber(p.npiNumber || '');
+              setLicenseNumber(p.licenseNumber || '');
+              setLicenseState(p.licenseState || '');
             }
             setScreen('home');
           }}
@@ -638,6 +692,9 @@ export default function App() {
           {!isDoctorEntitled(profile) && (
             <Text style={styles.warn}>{t('doctorMode.gate.needVerifiedPlan')}</Text>
           )}
+          {profile?.verificationStatus === 'expired' && (
+            <Text style={styles.warn}>{t('doctorMode.verification.expiredHint')}</Text>
+          )}
           <Card>
             <Text style={styles.cardTitle}>{t('doctorMode.onboarding.title')}</Text>
             <Text style={styles.meta}>
@@ -647,17 +704,39 @@ export default function App() {
               {t('doctorMode.verification.label')}:{' '}
               {t(`doctorMode.verification.status.${profile?.verificationStatus || 'unverified'}`)}
             </Text>
+            {!!profile?.expiresAt && profile.verificationStatus === 'verified' && (
+              <Text style={styles.meta}>
+                {t('doctorMode.verification.expires', {
+                  date: String(profile.expiresAt).slice(0, 10),
+                })}
+              </Text>
+            )}
+            {!!profile?.verificationMessage && (
+              <Text style={styles.sub}>{profile.verificationMessage}</Text>
+            )}
             <Text style={styles.meta}>
               {t('doctorMode.plan.label')}:{' '}
               {profile?.doctorPlan ? t('doctorMode.plan.active') : t('doctorMode.plan.inactive')}
             </Text>
+            <Text style={styles.sub}>{t('doctorMode.verification.identityHint')}</Text>
             <GoldButton label={t('doctorMode.onboarding.edit')} onPress={() => setScreen('profile')} />
             <GoldButton label={t('doctorMode.verification.submit')} onPress={handleVerify} disabled={busy} />
+            {!!identityLaunchUrl && (
+              <GoldButton
+                label={t('doctorMode.verification.startIdentity')}
+                onPress={() => {
+                  void Linking.openURL(identityLaunchUrl);
+                }}
+              />
+            )}
             <GoldButton
               label={profile?.doctorPlan ? t('doctorMode.plan.mockDisable') : t('doctorMode.plan.mockEnable')}
               onPress={handlePlan}
               disabled={busy}
             />
+            {isAdminUser && (
+              <GoldButton label="Admin review" onPress={() => setScreen('adminReview')} />
+            )}
           </Card>
           <Card>
             <Text style={styles.cardTitle}>{t('nav.patients')}</Text>
@@ -708,10 +787,79 @@ export default function App() {
         <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
           {header(t('doctorMode.onboarding.title'), () => setScreen('home'))}
           <Card>
+            <Text style={styles.sub}>{t('doctorMode.onboarding.hint')}</Text>
             <Field label={t('doctorMode.onboarding.name')} value={displayName} onChangeText={setDisplayName} />
+            <Field
+              label={t('doctorMode.onboarding.legalName')}
+              value={legalFullName}
+              onChangeText={setLegalFullName}
+            />
             <Field label={t('doctorMode.onboarding.specialty')} value={specialty} onChangeText={setSpecialty} />
-            <Field label={t('doctorMode.onboarding.cedula')} value={cedula} onChangeText={setCedula} />
+            <Text style={styles.meta}>{t('doctorMode.onboarding.country')}</Text>
+            <View style={styles.countryRow}>
+              <TouchableOpacity
+                style={[styles.countryChip, country === 'MX' && styles.countryChipOn]}
+                onPress={() => setCountry('MX')}
+              >
+                <Text style={styles.countryChipText}>{t('doctorMode.onboarding.countryMx')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.countryChip, country === 'US' && styles.countryChipOn]}
+                onPress={() => setCountry('US')}
+              >
+                <Text style={styles.countryChipText}>{t('doctorMode.onboarding.countryUs')}</Text>
+              </TouchableOpacity>
+            </View>
+            {country === 'MX' ? (
+              <>
+                <Field label={t('doctorMode.onboarding.cedula')} value={cedula} onChangeText={setCedula} />
+                <Field
+                  label={t('doctorMode.onboarding.specialtyCedula')}
+                  value={specialtyCedula}
+                  onChangeText={setSpecialtyCedula}
+                />
+              </>
+            ) : (
+              <>
+                <Field label={t('doctorMode.onboarding.npi')} value={npiNumber} onChangeText={setNpiNumber} />
+                <Field
+                  label={t('doctorMode.onboarding.licenseNumber')}
+                  value={licenseNumber}
+                  onChangeText={setLicenseNumber}
+                />
+                <Field
+                  label={t('doctorMode.onboarding.licenseState')}
+                  value={licenseState}
+                  onChangeText={setLicenseState}
+                  autoCapitalize="characters"
+                />
+              </>
+            )}
             <GoldButton label={t('doctorMode.onboarding.save')} onPress={handleSaveProfile} disabled={busy} />
+          </Card>
+        </ScrollView>
+      )}
+
+      {screen === 'adminReview' && (
+        <ScrollView style={styles.content}>
+          {header('Admin review', () => setScreen('home'))}
+          <Card>
+            <Text style={styles.cardTitle}>AuricRX Médicos</Text>
+            <Text style={styles.sub}>
+              Open the web review queue on the API host (requires admin claim + MFA token):
+            </Text>
+            <Text style={styles.code}>/doctor-admin</Text>
+            <Text style={styles.sub}>
+              Approve / reject / suspend / revoke with a reason. Evidence (registry + identity) is never
+              readable by patients or other doctors.
+            </Text>
+            <GoldButton
+              label="Open doctor-admin"
+              onPress={() => {
+                const base = (require('./src/config/api') as { API_BASE: string }).API_BASE;
+                void Linking.openURL(`${base.replace(/\/$/, '')}/doctor-admin`);
+              }}
+            />
           </Card>
         </ScrollView>
       )}
@@ -1292,5 +1440,9 @@ const styles = StyleSheet.create({
   langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 20 },
   langChip: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   langText: { color: colors.sub, fontSize: 11 },
+  countryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
+  countryChip: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
+  countryChipOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  countryChipText: { color: colors.text, fontSize: 13, fontWeight: '600' },
   disclaimer: { color: colors.sub, fontSize: 12, lineHeight: 17, marginBottom: 12, fontStyle: 'italic' },
 });

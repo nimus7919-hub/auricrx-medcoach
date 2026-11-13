@@ -5,31 +5,47 @@
     "subtitle": "Log your readings, link with a doctor when you choose, and share only the categories you allow. The app never labels values as high, low, or dangerous.",
     "gate": {
       "title": "Doctor access required",
-      "needVerifiedPlan": "Doctor Mode patient data is available only with an active doctor plan and a verified cédula. Unverified doctors cannot see patient data."
+      "needVerifiedPlan": "Patient data is available only with an active doctor plan and a human-verified professional credential that has not expired. Unverified doctors cannot see patient data."
     },
     "onboarding": {
       "title": "Doctor profile",
       "enable": "Enable Doctor Mode",
       "edit": "Edit doctor profile",
-      "hint": "Enter your professional details. Verification uses an automated cédula check (mock provider in Phase 1).",
-      "name": "Full name",
+      "hint": "Enter your legal name and professional credentials. A registry check is queued for human review — nothing is auto-approved.",
+      "name": "Display name",
+      "legalName": "Full legal name",
       "specialty": "Specialty",
+      "country": "Country",
+      "countryMx": "Mexico",
+      "countryUs": "United States",
       "cedula": "Cédula profesional number",
-      "required": "Name, specialty, and cédula are required.",
+      "specialtyCedula": "Specialty cédula (if applicable)",
+      "npi": "NPI number",
+      "licenseNumber": "State license number",
+      "licenseState": "License state (e.g. TX)",
+      "required": "Legal name, specialty, and credential fields for your country are required.",
       "save": "Save profile",
       "saved": "Doctor profile saved.",
       "saveFailed": "Could not save doctor profile."
     },
     "verification": {
-      "title": "Cédula verification",
+      "title": "Professional verification",
       "label": "Verification",
-      "submit": "Submit cédula for verification",
-      "failed": "Verification could not be completed.",
+      "submit": "Submit for verification",
+      "failed": "Verification could not be submitted.",
+      "queued": "Submitted for manual review. You will see the decision here when an admin finishes reviewing.",
+      "expires": "Valid until {{date}}",
+      "expiredHint": "Your verification has expired. Please submit again for review.",
+      "identityHint": "Identity check (INE/passport + liveness) opens in the vendor flow when configured. We do not store ID images.",
+      "startIdentity": "Continue identity check",
       "status": {
         "unverified": "Unverified",
         "pending": "Pending",
+        "pending_review": "In review",
         "verified": "Verified",
-        "rejected": "Rejected"
+        "rejected": "Rejected",
+        "suspended": "Suspended",
+        "expired": "Expired"
       }
     },
     "plan": {
