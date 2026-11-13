@@ -145,20 +145,38 @@ class DoctorAppService {
 
   async saveDoctorProfile(input: {
     displayName: string;
+    legalFullName: string;
     specialty: string;
-    cedulaNumber: string;
+    country: 'MX' | 'US';
+    cedulaNumber?: string;
+    specialtyCedulaNumber?: string;
+    npiNumber?: string;
+    licenseNumber?: string;
+    licenseState?: string;
   }): Promise<DoctorProfile> {
     const uid = uidOrThrow();
     const existing = await this.getDoctorProfile(uid);
     const ts = nowIso();
+    // Clients never write verified / evidence / expiry — preserve server fields.
     const profile: DoctorProfile = {
       uid,
       displayName: input.displayName.trim(),
+      legalFullName: input.legalFullName.trim(),
       specialty: input.specialty.trim(),
-      cedulaNumber: input.cedulaNumber.trim(),
+      country: input.country,
+      cedulaNumber: (input.cedulaNumber || '').trim(),
+      specialtyCedulaNumber: (input.specialtyCedulaNumber || '').trim() || undefined,
+      npiNumber: (input.npiNumber || '').replace(/\D/g, '') || undefined,
+      licenseNumber: (input.licenseNumber || '').trim() || undefined,
+      licenseState: (input.licenseState || '').trim().toUpperCase() || undefined,
       verificationStatus: existing?.verificationStatus || 'unverified',
       verificationUpdatedAt: existing?.verificationUpdatedAt,
       verificationMessage: existing?.verificationMessage,
+      verifiedAt: existing?.verifiedAt,
+      expiresAt: existing?.expiresAt,
+      identityProvider: existing?.identityProvider,
+      identitySessionId: existing?.identitySessionId,
+      identityStatus: existing?.identityStatus,
       doctorPlan: existing?.doctorPlan || false,
       doctorPlanSource: existing?.doctorPlanSource,
       doctorPlanUpdatedAt: existing?.doctorPlanUpdatedAt,
@@ -169,17 +187,44 @@ class DoctorAppService {
     return profile;
   }
 
-  async submitCedulaVerification(): Promise<DoctorProfile> {
+  async submitCedulaVerification(): Promise<{
+    profile: DoctorProfile;
+    result?: {
+      status: string;
+      identity?: { launchUrl?: string; status?: string; message?: string };
+      message?: string;
+    };
+  }> {
     const uid = uidOrThrow();
     const profile = await this.getDoctorProfile(uid);
     if (!profile) throw new Error('doctor_profile_required');
+    // Mark pending locally; server sets pending_review after registry + identity.
     await updateDoc(doc(db, 'doctorProfiles', uid), {
       verificationStatus: 'pending',
       verificationUpdatedAt: nowIso(),
       updatedAt: nowIso(),
     });
-    const data = await doctorApi<{ profile: DoctorProfile }>('/api/doctor/verification/submit');
-    return (data.profile as DoctorProfile) || (await this.getDoctorProfile(uid))!;
+    const data = await doctorApi<{
+      profile: DoctorProfile;
+      result?: {
+        status: string;
+        identity?: { launchUrl?: string; status?: string; message?: string };
+        message?: string;
+      };
+    }>('/api/doctor/verification/submit', {
+      country: profile.country || 'MX',
+      legalFullName: profile.legalFullName || profile.displayName,
+      specialty: profile.specialty,
+      cedulaNumber: profile.cedulaNumber,
+      specialtyCedulaNumber: profile.specialtyCedulaNumber,
+      npiNumber: profile.npiNumber,
+      licenseNumber: profile.licenseNumber,
+      licenseState: profile.licenseState,
+    });
+    return {
+      profile: (data.profile as DoctorProfile) || (await this.getDoctorProfile(uid))!,
+      result: data.result,
+    };
   }
 
   async setDoctorPlan(enabled: boolean, source: DoctorPlanSource = 'mock'): Promise<DoctorProfile> {

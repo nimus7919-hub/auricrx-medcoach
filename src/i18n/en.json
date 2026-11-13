@@ -4366,8 +4366,12 @@
         "unverified": "Unverified",
         "pending": "Pending",
         "verified": "Verified",
-        "rejected": "Rejected"
-      }
+        "rejected": "Rejected",
+        "pending_review": "In review",
+        "suspended": "Suspended",
+        "expired": "Expired"
+      },
+      "queued": "Submitted for manual review. You will see the decision here when an admin finishes reviewing."
     },
     "plan": {
       "label": "Doctor plan",

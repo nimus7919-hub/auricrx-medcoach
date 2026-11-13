@@ -18,7 +18,15 @@
       "required": "Nome, especialidade e cédula são obrigatórios.",
       "save": "Salvar perfil",
       "saved": "Perfil médico salvo.",
-      "saveFailed": "Não foi possível salvar o perfil médico."
+      "saveFailed": "Não foi possível salvar o perfil médico.",
+      "legalName": "Nome completo",
+      "country": "Country",
+      "countryMx": "Mexico",
+      "countryUs": "United States",
+      "specialtyCedula": "Specialty cédula",
+      "npi": "NPI",
+      "licenseNumber": "License number",
+      "licenseState": "License state"
     },
     "verification": {
       "title": "Verificação de cédula",
@@ -29,8 +37,12 @@
         "unverified": "Não verificada",
         "pending": "Pendente",
         "verified": "Verificada",
-        "rejected": "Rejeitada"
-      }
+        "rejected": "Rejeitada",
+        "pending_review": "Em revisão",
+        "suspended": "Suspended",
+        "expired": "Expired"
+      },
+      "queued": "Não foi possível concluir a verificação."
     },
     "plan": {
       "label": "Plano médico",

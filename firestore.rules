@@ -32,12 +32,46 @@ service cloud.firestore {
       return signedIn()
         && request.auth.token.firebase.get('sign_in_second_factor', '') != '';
     }
+    // Annual expiry: expire-due admin job sets verificationStatus to 'expired';
+    // Clients/server also check expiresAt via isDoctorEntitled.
     function doctorIsReady() {
       return signedIn()
         && doctorHasSecondFactor()
         && exists(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid))
         && doctorProfile().doctorPlan == true
         && doctorProfile().verificationStatus == 'verified';
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && doctorHasSecondFactor()
+        && request.auth.token.get('admin', false) == true;
+    }
+
+    // Fields clients must never set or mutate toward privileged states.
+    function clientForbiddenVerificationFieldsUnchanged() {
+      return request.resource.data.get('verifiedAt', resource.data.get('verifiedAt', null))
+          == resource.data.get('verifiedAt', null)
+        && request.resource.data.get('expiresAt', resource.data.get('expiresAt', null))
+          == resource.data.get('expiresAt', null)
+        && request.resource.data.get('verificationRejectionReason', resource.data.get('verificationRejectionReason', null))
+          == resource.data.get('verificationRejectionReason', null)
+        && request.resource.data.get('identityProvider', resource.data.get('identityProvider', null))
+          == resource.data.get('identityProvider', null)
+        && request.resource.data.get('identitySessionId', resource.data.get('identitySessionId', null))
+          == resource.data.get('identitySessionId', null)
+        && request.resource.data.get('identityStatus', resource.data.get('identityStatus', null))
+          == resource.data.get('identityStatus', null);
+    }
+
+    function clientCreateOmitsPrivilegedVerification() {
+      return !('verifiedAt' in request.resource.data)
+        && !('expiresAt' in request.resource.data)
+        && !('verificationRejectionReason' in request.resource.data)
+        && !('identityProvider' in request.resource.data)
+        && !('identitySessionId' in request.resource.data)
+        && !('identityStatus' in request.resource.data)
+        && request.resource.data.verificationStatus in ['unverified', 'pending'];
     }
     function accessPath(patientId) {
       return /databases/$(database)/documents/doctorPatientAccess/$(request.auth.uid + '_' + patientId);
@@ -80,19 +114,34 @@ service cloud.firestore {
         && request.resource.data.get('doctorPlanUpdatedAt', '') == resource.data.get('doctorPlanUpdatedAt', '');
     }
     function verificationSafeOnUpdate() {
-      return resource.data.verificationStatus == 'verified'
+      // Clients can never set verified / pending_review / suspended / expired themselves.
+      // Once verified (or suspended/expired), freeze credential + verification fields.
+      return resource.data.verificationStatus in ['verified', 'suspended', 'expired']
         ? (
-            request.resource.data.verificationStatus == 'verified'
+            request.resource.data.verificationStatus == resource.data.verificationStatus
             && request.resource.data.cedulaNumber == resource.data.cedulaNumber
+            && request.resource.data.get('npiNumber', '') == resource.data.get('npiNumber', '')
+            && request.resource.data.get('specialtyCedulaNumber', '') == resource.data.get('specialtyCedulaNumber', '')
             && request.resource.data.get('verificationUpdatedAt', '') == resource.data.get('verificationUpdatedAt', '')
             && request.resource.data.get('verificationMessage', '') == resource.data.get('verificationMessage', '')
+            && request.resource.data.get('verifiedAt', null) == resource.data.get('verifiedAt', null)
+            && request.resource.data.get('expiresAt', null) == resource.data.get('expiresAt', null)
           )
-        : request.resource.data.verificationStatus in ['unverified', 'pending', 'rejected'];
+        : (
+            request.resource.data.verificationStatus in ['unverified', 'pending', 'rejected']
+            && request.resource.data.verificationStatus != 'verified'
+            && request.resource.data.verificationStatus != 'pending_review'
+            && request.resource.data.verificationStatus != 'suspended'
+            && request.resource.data.verificationStatus != 'expired'
+            && clientForbiddenVerificationFieldsUnchanged()
+          );
     }
 
     match /doctorProfiles/{uid} {
       // Self, or a patient with an active link to this doctor (needed for office-hours display).
+      // Patients must not read verification evidence fields (those live in a separate collection).
       allow read: if isSelf(uid)
+        || isAdmin()
         || (
           signedIn()
           && exists(/databases/$(database)/documents/doctorPatientAccess/$(uid + '_' + request.auth.uid))
@@ -103,15 +152,22 @@ service cloud.firestore {
       allow create: if isSelf(uid)
         && request.resource.data.uid == uid
         && request.resource.data.doctorPlan == false
-        && request.resource.data.verificationStatus in ['unverified', 'pending']
+        && clientCreateOmitsPrivilegedVerification()
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() <= 200
         && request.resource.data.specialty is string
         && request.resource.data.specialty.size() <= 200
         && request.resource.data.cedulaNumber is string
         && request.resource.data.cedulaNumber.size() <= 40
+        && optionalStr(request.resource.data.get('legalFullName', ''), 200)
+        && optionalStr(request.resource.data.get('specialtyCedulaNumber', ''), 40)
+        && optionalStr(request.resource.data.get('npiNumber', ''), 20)
+        && optionalStr(request.resource.data.get('licenseNumber', ''), 40)
+        && optionalStr(request.resource.data.get('licenseState', ''), 8)
+        && (!('country' in request.resource.data) || request.resource.data.country in ['MX', 'US'])
         && request.resource.data.keys().hasOnly([
-          'uid', 'displayName', 'specialty', 'cedulaNumber',
+          'uid', 'displayName', 'legalFullName', 'specialty', 'cedulaNumber',
+          'specialtyCedulaNumber', 'country', 'npiNumber', 'licenseNumber', 'licenseState',
           'verificationStatus', 'verificationUpdatedAt', 'verificationMessage',
           'doctorPlan', 'doctorPlanSource', 'doctorPlanUpdatedAt',
           'timeZone', 'officeHours', 'aiInsightsWaitlisted', 'aiInsightsWaitlistedAt',
@@ -129,6 +185,13 @@ service cloud.firestore {
         && request.resource.data.cedulaNumber is string
         && request.resource.data.cedulaNumber.size() <= 40;
       allow delete: if false;
+    }
+
+    // Registry + identity evidence — admin claim (+ MFA) only. Clients never read/write.
+    // Server writes use the Admin SDK (bypasses rules).
+    match /doctorVerificationEvidence/{uid} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     function pairLinkActive(doctorId, patientId) {

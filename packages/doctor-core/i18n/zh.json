@@ -18,7 +18,15 @@
       "required": "姓名、专科和执照号码为必填项。",
       "save": "保存资料",
       "saved": "医生资料已保存。",
-      "saveFailed": "无法保存医生资料。"
+      "saveFailed": "无法保存医生资料。",
+      "legalName": "姓名",
+      "country": "Country",
+      "countryMx": "Mexico",
+      "countryUs": "United States",
+      "specialtyCedula": "Specialty cédula",
+      "npi": "NPI",
+      "licenseNumber": "License number",
+      "licenseState": "License state"
     },
     "verification": {
       "title": "执照验证",
@@ -29,8 +37,12 @@
         "unverified": "未验证",
         "pending": "待审核",
         "verified": "已验证",
-        "rejected": "已拒绝"
-      }
+        "rejected": "已拒绝",
+        "pending_review": "审核中",
+        "suspended": "已暂停",
+        "expired": "已过期"
+      },
+      "queued": "无法完成验证。"
     },
     "plan": {
       "label": "医生方案",

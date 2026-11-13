@@ -3783,6 +3783,9 @@ app.listen(port, () => {
   console.log('   GET  /api/me/subscription');
   console.log('   POST /api/doctor/alerts/evaluate');
   console.log('   POST /api/doctor/verification/submit');
+  console.log('   GET  /api/doctor/admin/verification/queue');
+  console.log('   POST /api/doctor/admin/verification/:uid/approve|reject|suspend|revoke');
+  console.log('   GET  /doctor-admin');
   console.log('   POST /api/doctor/plan/mock-grant');
   console.log('   POST /api/doctor/summary/descriptive');
   console.log('   POST /api/doctor/messages/notify');
