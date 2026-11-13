@@ -3765,12 +3765,14 @@ app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
 });
 
 // Doctor Mode Phase 1 — threshold alert evaluation (Firebase Admin + Expo push)
+// alerts/evaluate stays on verifyUser: patients trigger it after writing readings.
 require('./doctor-alerts').mountDoctorAlertRoutes(app, { verifyUser });
+const { verifyDoctorAuth, mountDoctorMfaRoutes } = require('./doctor-mfa');
 require('./doctor-verification').mountDoctorVerificationRoutes(app);
-// Descriptive-only AI summary (banned-term filter + template fallback)
-require('./doctor-ai-summary').mountDoctorAiSummaryRoutes(app, { verifyUser });
-// Secure messaging notify (generic push; pluggable channels)
-require('./doctor-messaging').mountDoctorMessagingRoutes(app, { verifyUser });
+mountDoctorMfaRoutes(app);
+// Doctor-only routes require MFA-issued tokens (sign_in_second_factor).
+require('./doctor-ai-summary').mountDoctorAiSummaryRoutes(app, { verifyDoctorAuth });
+require('./doctor-messaging').mountDoctorMessagingRoutes(app, { verifyDoctorAuth });
 
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
@@ -3784,4 +3786,6 @@ app.listen(port, () => {
   console.log('   POST /api/doctor/plan/mock-grant');
   console.log('   POST /api/doctor/summary/descriptive');
   console.log('   POST /api/doctor/messages/notify');
+  console.log('   POST /api/doctor/mfa/recovery/generate');
+  console.log('   POST /api/doctor/mfa/recovery/redeem');
 });
