@@ -21,7 +21,9 @@ test('admin gate rejects production, absent keys, and incorrect keys', () => {
     ['development', 'secret', undefined, 401], ['development', 'secret', 'wrong', 401],
     ['development', 'secret', 'secret', 200],
   ]) {
-    const guard = loadFunction('requireDevelopmentAdmin', '\napp.use(', {
+    // Stop before the following require('./profeco') line — \napp.use( is no longer
+    // adjacent to this helper after profeco install was inserted between them.
+    const guard = loadFunction('requireDevelopmentAdmin', '\nrequire(', {
       process: { env: { NODE_ENV: env, ADMIN_CLEANUP_KEY: key } },
     });
     const res = response(); let allowed = false;
