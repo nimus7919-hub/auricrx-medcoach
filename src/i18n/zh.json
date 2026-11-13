@@ -4427,8 +4427,12 @@
         "unverified": "未验证",
         "pending": "待审核",
         "verified": "已验证",
-        "rejected": "已拒绝"
-      }
+        "rejected": "已拒绝",
+        "pending_review": "审核中",
+        "suspended": "已暂停",
+        "expired": "已过期"
+      },
+      "queued": "已提交人工审核。管理员完成审核后，您将在此看到结果。"
     },
     "plan": {
       "label": "医生方案",

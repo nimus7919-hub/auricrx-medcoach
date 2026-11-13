@@ -17,7 +17,7 @@ import { compareNames } from './nameMatch';
  * - otherwise → match (still queued for human review by the server)
  */
 export function isMockVerificationAllowed(
-  env: NodeJS.ProcessEnv = typeof process !== 'undefined' ? process.env : {}
+  env: NodeJS.ProcessEnv = typeof process !== 'undefined' ? process.env : ({} as NodeJS.ProcessEnv)
 ): boolean {
   const nodeEnv = String(env.NODE_ENV || '').toLowerCase();
   if (nodeEnv === 'production' || nodeEnv === 'prod') return false;
@@ -136,7 +136,7 @@ let singleton: MockCedulaProvider | null = null;
  * Returns mock only when DOCTOR_ALLOW_MOCK_VERIFICATION is enabled outside production.
  */
 export function getCedulaVerificationProvider(
-  env: NodeJS.ProcessEnv = typeof process !== 'undefined' ? process.env : {}
+  env: NodeJS.ProcessEnv = typeof process !== 'undefined' ? process.env : ({} as NodeJS.ProcessEnv)
 ): CedulaVerificationProvider {
   if (!isMockVerificationAllowed(env)) {
     throw new Error('mock_verification_disabled_in_production');

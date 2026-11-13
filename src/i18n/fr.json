@@ -4506,8 +4506,12 @@
         "unverified": "Non vérifiée",
         "pending": "En attente",
         "verified": "Vérifiée",
-        "rejected": "Refusée"
-      }
+        "rejected": "Refusée",
+        "pending_review": "En révision",
+        "suspended": "Suspendue",
+        "expired": "Expirée"
+      },
+      "queued": "Soumis pour examen manuel. Vous verrez la décision ici lorsqu'un administrateur aura terminé l'examen."
     },
     "plan": {
       "label": "Forfait médecin",

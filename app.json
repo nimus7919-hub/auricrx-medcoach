@@ -25,7 +25,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
-        "NSFaceIDUsageDescription": "AuricRX MedCoach uses Face ID to unlock your Documents vault on this device.",
+        "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo.",
         "UIBackgroundModes": [
           "location",
           "fetch",

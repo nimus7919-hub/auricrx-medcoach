@@ -4420,8 +4420,12 @@
         "unverified": "Nicht verifiziert",
         "pending": "Ausstehend",
         "verified": "Verifiziert",
-        "rejected": "Abgelehnt"
-      }
+        "rejected": "Abgelehnt",
+        "pending_review": "In Prüfung",
+        "suspended": "Ausgesetzt",
+        "expired": "Abgelaufen"
+      },
+      "queued": "Zur manuellen Prüfung eingereicht. Die Entscheidung erscheint hier, sobald ein Admin die Prüfung abgeschlossen hat."
     },
     "plan": {
       "label": "Arztplan",

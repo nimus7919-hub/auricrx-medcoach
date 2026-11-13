@@ -142,7 +142,7 @@ export class NoneIdentityProvider implements IdentityVerificationProvider {
  */
 export function getIdentityVerificationProvider(
   country: 'MX' | 'US',
-  env: NodeJS.ProcessEnv = typeof process !== 'undefined' ? process.env : {}
+  env: NodeJS.ProcessEnv = typeof process !== 'undefined' ? process.env : ({} as NodeJS.ProcessEnv)
 ): IdentityVerificationProvider {
   const forced = String(env.DOCTOR_IDENTITY_PROVIDER || '')
     .trim()

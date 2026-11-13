@@ -4513,8 +4513,12 @@
         "unverified": "Não verificada",
         "pending": "Pendente",
         "verified": "Verificada",
-        "rejected": "Rejeitada"
-      }
+        "rejected": "Rejeitada",
+        "pending_review": "Em revisão",
+        "suspended": "Suspensa",
+        "expired": "Expirada"
+      },
+      "queued": "Enviado para revisão manual. Você verá a decisão aqui quando um administrador concluir a revisão."
     },
     "plan": {
       "label": "Plano médico",
