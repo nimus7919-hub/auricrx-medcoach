@@ -84,7 +84,15 @@ service cloud.firestore {
     }
 
     match /doctorProfiles/{uid} {
-      allow read: if isSelf(uid);
+      // Self, or a patient with an active link to this doctor (needed for office-hours display).
+      allow read: if isSelf(uid)
+        || (
+          signedIn()
+          && exists(/databases/$(database)/documents/doctorPatientAccess/$(uid + '_' + request.auth.uid))
+          && get(/databases/$(database)/documents/doctorPatientAccess/$(uid + '_' + request.auth.uid)).data.status == 'active'
+          && get(/databases/$(database)/documents/doctorPatientAccess/$(uid + '_' + request.auth.uid)).data.doctorId == uid
+          && get(/databases/$(database)/documents/doctorPatientAccess/$(uid + '_' + request.auth.uid)).data.patientId == request.auth.uid
+        );
       allow create: if isSelf(uid)
         && request.resource.data.uid == uid
         && request.resource.data.doctorPlan == false
@@ -99,6 +107,7 @@ service cloud.firestore {
           'uid', 'displayName', 'specialty', 'cedulaNumber',
           'verificationStatus', 'verificationUpdatedAt', 'verificationMessage',
           'doctorPlan', 'doctorPlanSource', 'doctorPlanUpdatedAt',
+          'timeZone', 'officeHours', 'aiInsightsWaitlisted', 'aiInsightsWaitlistedAt',
           'createdAt', 'updatedAt'
         ]);
       allow update: if isSelf(uid)
@@ -112,6 +121,101 @@ service cloud.firestore {
         && request.resource.data.specialty.size() <= 200
         && request.resource.data.cedulaNumber is string
         && request.resource.data.cedulaNumber.size() <= 40;
+      allow delete: if false;
+    }
+
+    function pairLinkActive(doctorId, patientId) {
+      return exists(/databases/$(database)/documents/doctorPatientAccess/$(doctorId + '_' + patientId))
+        && get(/databases/$(database)/documents/doctorPatientAccess/$(doctorId + '_' + patientId)).data.status == 'active'
+        && get(/databases/$(database)/documents/doctorPatientAccess/$(doctorId + '_' + patientId)).data.doctorId == doctorId
+        && get(/databases/$(database)/documents/doctorPatientAccess/$(doctorId + '_' + patientId)).data.patientId == patientId;
+    }
+
+    function validPatientRequestType(t) {
+      return t in ['refill', 'side_effect', 'appointment', 'general'];
+    }
+
+    function validDoctorAction(a) {
+      return a in ['approve_refill', 'book_visit', 'seen', 'text_reply'];
+    }
+
+    function validMessageCreate(d, messageId) {
+      return d.id == messageId
+        && linkPartiesDistinct(d)
+        && d.linkId is string
+        && d.linkId.size() <= 128
+        && d.direction == 'patient_to_doctor'
+        && validPatientRequestType(d.requestType)
+        && d.body is string
+        && d.body.size() > 0
+        && d.body.size() <= 500
+        && d.status in ['queued', 'pending_doctor']
+        && isIsoDate(d.createdAt)
+        && isIsoDate(d.visibleToDoctorAt)
+        && isIsoDate(d.updatedAt)
+        && d.keys().hasOnly([
+          'id', 'linkId', 'doctorId', 'patientId', 'direction', 'requestType',
+          'body', 'status', 'createdAt', 'visibleToDoctorAt', 'updatedAt',
+          'patientAutoNotice'
+        ])
+        && (!('patientAutoNotice' in d)
+            || d.patientAutoNotice in ['queued_outside_office_hours', 'messaging_paused']);
+    }
+
+    function validMessageDoctorUpdate() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.linkId == resource.data.linkId
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.patientId == resource.data.patientId
+        && request.resource.data.direction == resource.data.direction
+        && request.resource.data.requestType == resource.data.requestType
+        && request.resource.data.body == resource.data.body
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.visibleToDoctorAt == resource.data.visibleToDoctorAt
+        && request.resource.data.status in ['pending_doctor', 'answered', 'closed', 'queued']
+        && (!('doctorAction' in request.resource.data) || validDoctorAction(request.resource.data.doctorAction))
+        && optionalStr(request.resource.data.get('doctorReplyText', ''), 500)
+        && (!('answeredAt' in request.resource.data) || isIsoDate(request.resource.data.answeredAt))
+        && isIsoDate(request.resource.data.updatedAt);
+    }
+
+    // Appointment requests (doctor-authored; patient may read own).
+    match /doctorAppointmentRequests/{reqId} {
+      allow read: if signedIn()
+        && (resource.data.doctorId == request.auth.uid || resource.data.patientId == request.auth.uid)
+        && pairLinkActive(resource.data.doctorId, resource.data.patientId);
+      allow create: if signedIn()
+        && doctorIsReady()
+        && request.resource.data.doctorId == request.auth.uid
+        && request.resource.data.id == reqId
+        && pairLinkActive(request.resource.data.doctorId, request.resource.data.patientId)
+        && request.resource.data.status in ['draft', 'pending_doctor_review', 'sent']
+        && optionalStr(request.resource.data.get('message', ''), 2000);
+      allow update: if signedIn()
+        && resource.data.doctorId == request.auth.uid
+        && doctorIsReady()
+        && pairLinkActive(resource.data.doctorId, resource.data.patientId)
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.patientId == resource.data.patientId
+        && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+    }
+
+    // Secure in-app messaging: only the active linked pair can read/write.
+    // Revoking the link (status != active) cuts access immediately.
+    match /doctorPatientMessages/{messageId} {
+      allow read: if signedIn()
+        && (resource.data.patientId == request.auth.uid || resource.data.doctorId == request.auth.uid)
+        && pairLinkActive(resource.data.doctorId, resource.data.patientId);
+      allow create: if signedIn()
+        && request.resource.data.patientId == request.auth.uid
+        && validMessageCreate(request.resource.data, messageId)
+        && pairLinkActive(request.resource.data.doctorId, request.resource.data.patientId);
+      allow update: if signedIn()
+        && resource.data.doctorId == request.auth.uid
+        && doctorIsReady()
+        && pairLinkActive(resource.data.doctorId, resource.data.patientId)
+        && validMessageDoctorUpdate();
       allow delete: if false;
     }
 
@@ -322,6 +426,16 @@ service cloud.firestore {
       allow delete: if isSelf(uid);
     }
 
+    match /patientPushTokens/{uid} {
+      allow read: if isSelf(uid);
+      allow write: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.expoPushToken is string
+        && request.resource.data.expoPushToken.size() > 0
+        && request.resource.data.expoPushToken.size() <= 4096;
+      allow delete: if isSelf(uid);
+    }
+
     match /doctorAuditLogs/{logId} {
       allow read: if signedIn()
         && (resource.data.patientId == request.auth.uid
@@ -332,7 +446,9 @@ service cloud.firestore {
         && request.resource.data.actorRole in ['patient', 'doctor']
         && request.resource.data.action in [
           'link_created', 'link_confirmed', 'link_revoked',
-          'consent_updated', 'doctor_read', 'verification_submitted'
+          'consent_updated', 'doctor_read', 'verification_submitted',
+          'message_sent', 'message_replied', 'message_export',
+          'appointment_request_sent', 'office_hours_updated', 'ai_waitlist_joined'
         ]
         && optionalStr(request.resource.data.get('detail', ''), 2000)
         && isIsoDate(request.resource.data.createdAt);

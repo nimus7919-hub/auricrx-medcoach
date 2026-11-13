@@ -158,7 +158,10 @@
         "gte": "mayor o igual",
         "lt": "menor que",
         "lte": "menor o igual"
-      }
+      },
+      "crossedLimitDetailNamed": "Lectura {{observed}} {{relation}} del límite de {{limit}} que usted configuró",
+      "relationAbove": "por encima",
+      "relationBelow": "por debajo"
     },
     "patientHub": {
       "title": "Bitácora y médicos",
@@ -168,6 +171,118 @@
       "auditHint": "Eventos recientes de vínculo, consentimiento y lecturas del médico.",
       "auditEmpty": "Aún no hay eventos de auditoría.",
       "doctorAppNote": "Tu médico ve los datos compartidos en AuricRX Médicos (com.auricrx.doctors), no dentro de esta app de paciente."
+    },
+    "compliance": {
+      "disclaimer": "AuricRX Médicos es una herramienta para organizar información. No sustituye su criterio clínico.",
+      "disclaimerShort": "Herramienta de organización — no sustituye el criterio clínico.",
+      "notForEmergencies": "Este canal no es para emergencias. Ante una emergencia, use los servicios locales de emergencia."
+    },
+    "digest": {
+      "title": "Resumen de la mañana",
+      "subtitle": "Solo lo nuevo desde su última revisión — ordenado por fecha, no por estado de salud.",
+      "empty": "No hay excepciones nuevas.",
+      "kinds": {
+        "new_symptom": "Nuevo síntoma registrado",
+        "missed_dose": "Dosis no registrada",
+        "limit_crossed": "Límite del médico cruzado",
+        "new_document": "Documento nuevo"
+      },
+      "open": "Abrir resumen",
+      "lastLook": "Desde la última revisión"
+    },
+    "preVisit": {
+      "title": "Hoja previa a la consulta",
+      "subtitle": "Conteos descriptivos, últimas lecturas con fechas, totales del registro de dosis, preguntas del paciente y archivos nuevos.",
+      "generate": "Abrir hoja previa",
+      "readings": "Lecturas",
+      "doseLogs": "Registro de dosis",
+      "questions": "Preguntas del paciente",
+      "documents": "Documentos nuevos",
+      "symptoms": "Síntomas (texto del paciente)",
+      "empty": "Nada que mostrar en este periodo.",
+      "ofLogged": "{{logged}} de {{expected}} registrados"
+    },
+    "appointmentRequest": {
+      "title": "Solicitar cita",
+      "subtitle": "Redacte el mensaje, revíselo y luego envíelo. No se escribe en su calendario.",
+      "draft": "Borrador",
+      "proposedTimes": "Horarios propuestos (opcional, hasta 3)",
+      "message": "Mensaje",
+      "review": "Marcar como revisado",
+      "send": "Enviar al paciente",
+      "needsReview": "Revise el mensaje antes de enviarlo.",
+      "sent": "Solicitud enviada para que el paciente la revise.",
+      "slotPlaceholder": "Hora ISO o nota local"
+    },
+    "calendar": {
+      "title": "Agenda de hoy",
+      "subtitle": "Solo lectura desde Google u Outlook. Todas las horas usan su zona horaria.",
+      "stubHint": "OAuth del calendario aún no está conectado. La agenda permanece no disponible (cierre seguro).",
+      "stale": "La sincronización del calendario está atrasada. Agenda oculta hasta una sincronización reciente.",
+      "unavailable": "Calendario no disponible. Agenda oculta.",
+      "overlap": "Citas traslapadas marcadas",
+      "lastSync": "Última sincronización",
+      "empty": "No hay citas para hoy.",
+      "open": "Abrir agenda"
+    },
+    "officeHours": {
+      "title": "Horario de consultorio",
+      "subtitle": "Usted elige qué días y ventanas horarias aceptan mensajes de pacientes, en su zona horaria. Puede pausar los mensajes durante una ausencia. Fuera de sus ventanas, los mensajes se encolan para la siguiente.",
+      "timezone": "Zona horaria",
+      "saved": "Horario de consultorio guardado.",
+      "windowsHint": "Ventanas por día (24 h). Ejemplo: 09:00-13:00, 16:00-20:00. Déjelo vacío para cerrar ese día.",
+      "pauseMessaging": "Pausar mensajes (ausencia)",
+      "resumeMessaging": "Reanudar mensajes",
+      "pausedHint": "Los mensajes están pausados. Los mensajes nuevos del paciente quedan en cola hasta que reanude.",
+      "weekdays": {
+        "0": "Domingo",
+        "1": "Lunes",
+        "2": "Martes",
+        "3": "Miércoles",
+        "4": "Jueves",
+        "5": "Viernes",
+        "6": "Sábado"
+      }
+    },
+    "aiInsights": {
+      "title": "Ideas con IA",
+      "comingSoon": "Próximamente",
+      "body": "La revisión con IA registrada no está disponible en la Fase 1. Únase a la lista de espera si desea enterarse cuando abra.",
+      "waitlist": "Unirme a la lista de espera",
+      "waitlisted": "Está en la lista de espera."
+    },
+    "messaging": {
+      "title": "Mensajes",
+      "needsAction": "Requiere acción hoy",
+      "needsActionHint": "Solicitudes estructuradas del paciente que tocan en su ventana de consultorio actual.",
+      "emptyInbox": "Nada requiere acción ahora.",
+      "optionalReply": "Respuesta corta opcional",
+      "replied": "Respuesta guardada.",
+      "replyFailed": "No se pudo enviar la respuesta.",
+      "exportTitle": "Exportar resumen de mensajes",
+      "exportFailed": "No se pudo exportar el resumen.",
+      "notForEmergencies": "Este canal no es para emergencias.",
+      "writeTitle": "Escribir a su médico",
+      "writeHint": "Elija un tipo de solicitud. No es un chat abierto y no es para emergencias.",
+      "seeHours": "Horario de mensajes del médico",
+      "body": "Su mensaje",
+      "send": "Enviar solicitud",
+      "sent": "Solicitud enviada.",
+      "sendFailed": "No se pudo enviar la solicitud.",
+      "queuedNotice": "Fuera del horario de consultorio. Su mensaje queda en cola para la siguiente ventana del médico. No se espera respuesta hasta entonces.",
+      "pausedNotice": "El médico pausó los mensajes. Su mensaje queda en cola. No se espera respuesta hasta que reanude.",
+      "requestTypes": {
+        "refill": "Solicitud de surtido",
+        "side_effect": "Pregunta sobre efecto secundario",
+        "appointment": "Cita",
+        "general": "Pregunta general"
+      },
+      "actions": {
+        "approve_refill": "Aprobar surtido",
+        "book_visit": "Agendar visita",
+        "seen": "Visto",
+        "text_reply": "Enviar respuesta de texto"
+      }
     }
   }
 }

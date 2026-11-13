@@ -23,6 +23,10 @@
   "nav": {
     "patients": "患者",
     "profile": "资料",
-    "alerts": "告警"
+    "alerts": "告警",
+    "digest": "Digest",
+    "agenda": "Agenda",
+    "officeHours": "Office hours",
+    "inbox": "Inbox"
   }
 }

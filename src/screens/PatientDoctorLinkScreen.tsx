@@ -21,14 +21,16 @@ import DoctorModeService from '../services/doctorModeService';
 import BitacoraScreen from './BitacoraScreen';
 import {
   CONSENT_CATEGORIES,
+  PATIENT_REQUEST_TYPES,
   type ConsentCategory,
   type PatientDoctorLink,
-} from '../doctor/types';
+  type PatientRequestType,
+} from '../doctor';
 
-type ViewMode = 'hub' | 'bitacora' | 'links' | 'enterCode';
+type ViewMode = 'hub' | 'bitacora' | 'links' | 'enterCode' | 'message';
 
 export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getAccentColor } = useWallpaper();
   const service = DoctorModeService.getInstance();
 
@@ -39,6 +41,11 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
   const [inviteCode, setInviteCode] = useState('');
   const [enterCode, setEnterCode] = useState('');
   const [auditPreview, setAuditPreview] = useState<string[]>([]);
+  const [messageLink, setMessageLink] = useState<PatientDoctorLink | null>(null);
+  const [requestType, setRequestType] = useState<PatientRequestType>('general');
+  const [messageBody, setMessageBody] = useState('');
+  const [hoursLines, setHoursLines] = useState<string[]>([]);
+  const [lastAutoNotice, setLastAutoNotice] = useState<string | null>(null);
 
   const cardBg = getCardBackgroundColor();
   const border = getCardBorderColor();
@@ -141,7 +148,9 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
             ? t('doctorMode.patientHub.title')
             : view === 'links'
               ? t('doctorMode.linking.myDoctors')
-              : t('doctorMode.linking.enterCode')}
+              : view === 'message'
+                ? t('doctorMode.messaging.writeTitle')
+                : t('doctorMode.linking.enterCode')}
         </DynamicText>
         <TouchableOpacity onPress={() => (view === 'hub' ? onClose() : setView('hub'))}>
           <DynamicText type="card" style={styles.close}>
@@ -191,6 +200,32 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
               </View>
 
               <View style={[styles.card, { backgroundColor: cardBg, borderColor: border }]}>
+                <DynamicText type="card" style={styles.sectionTitle}>{t('doctorMode.messaging.writeTitle')}</DynamicText>
+                <DynamicText type="card" style={styles.sectionDesc}>{t('doctorMode.messaging.writeHint')}</DynamicText>
+                <DynamicText type="card" style={styles.sectionDesc}>{t('doctorMode.messaging.notForEmergencies')}</DynamicText>
+                {patientLinks.filter((l) => l.status === 'active').map((link) => (
+                  <ActionBtn
+                    key={link.id}
+                    label={`${t('doctorMode.messaging.writeTitle')}: ${link.doctorDisplayName || link.doctorId.slice(0, 8)}`}
+                    accent={accent}
+                    onPress={async () => {
+                      setMessageLink(link);
+                      setLastAutoNotice(null);
+                      setMessageBody('');
+                      setRequestType('general');
+                      setHoursLines(
+                        await service.getDoctorOfficeHoursDisplay(
+                          link,
+                          i18n.language?.startsWith('en') ? 'en' : 'es'
+                        )
+                      );
+                      setView('message');
+                    }}
+                  />
+                ))}
+              </View>
+
+              <View style={[styles.card, { backgroundColor: cardBg, borderColor: border }]}>
                 <DynamicText type="card" style={styles.sectionTitle}>{t('doctorMode.patientHub.audit')}</DynamicText>
                 <DynamicText type="card" style={styles.sectionDesc}>{t('doctorMode.patientHub.auditHint')}</DynamicText>
                 {auditPreview.length === 0 && (
@@ -205,6 +240,74 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
                 {t('doctorMode.patientHub.doctorAppNote')}
               </DynamicText>
             </>
+          )}
+
+          {view === 'message' && messageLink && (
+            <View style={[styles.card, { backgroundColor: cardBg, borderColor: border }]}>
+              <DynamicText type="card" style={styles.sectionTitle}>{t('doctorMode.messaging.writeTitle')}</DynamicText>
+              <DynamicText type="card" style={styles.sectionDesc}>{t('doctorMode.messaging.notForEmergencies')}</DynamicText>
+              <DynamicText type="card" style={styles.sectionTitle}>{t('doctorMode.messaging.seeHours')}</DynamicText>
+              {hoursLines.map((line, i) => (
+                <DynamicText key={i} type="card" style={styles.meta}>{line}</DynamicText>
+              ))}
+              <DynamicText type="card" style={styles.label}>{t('doctorMode.messaging.requestTypes.general')}</DynamicText>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+                {PATIENT_REQUEST_TYPES.map((rt) => (
+                  <TouchableOpacity
+                    key={rt}
+                    onPress={() => setRequestType(rt)}
+                    style={[
+                      styles.typeChip,
+                      { borderColor: border },
+                      requestType === rt && { backgroundColor: accent },
+                    ]}
+                  >
+                    <DynamicText type="card" style={styles.meta}>
+                      {t(`doctorMode.messaging.requestTypes.${rt}`)}
+                    </DynamicText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <DynamicText type="card" style={styles.label}>{t('doctorMode.messaging.body')}</DynamicText>
+              <TextInput
+                value={messageBody}
+                onChangeText={setMessageBody}
+                multiline
+                style={[styles.input, { borderColor: border, minHeight: 80 }]}
+                placeholderTextColor="#8a8070"
+              />
+              {!!lastAutoNotice && (
+                <DynamicText type="card" style={styles.sectionDesc}>{lastAutoNotice}</DynamicText>
+              )}
+              <ActionBtn
+                label={t('doctorMode.messaging.send')}
+                accent={accent}
+                disabled={busy}
+                onPress={async () => {
+                  setBusy(true);
+                  try {
+                    const msg = await service.sendStructuredRequest({
+                      link: messageLink,
+                      requestType,
+                      body: messageBody,
+                    });
+                    if (msg.patientAutoNotice === 'messaging_paused') {
+                      setLastAutoNotice(t('doctorMode.messaging.pausedNotice'));
+                    } else if (msg.patientAutoNotice === 'queued_outside_office_hours') {
+                      setLastAutoNotice(t('doctorMode.messaging.queuedNotice'));
+                    } else {
+                      setLastAutoNotice(null);
+                    }
+                    setMessageBody('');
+                    Alert.alert(t('common.success'), t('doctorMode.messaging.sent'));
+                  } catch (e: any) {
+                    Alert.alert(t('common.error'), e?.message || t('doctorMode.messaging.sendFailed'));
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              />
+            </View>
           )}
 
           {view === 'enterCode' && (
@@ -329,4 +432,5 @@ const styles = StyleSheet.create({
   linkBlock: { borderWidth: 1, borderRadius: 10, padding: 12, marginTop: 10 },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6 },
   switchLabel: { fontSize: 13, flex: 1, paddingRight: 8 },
+  typeChip: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
 });

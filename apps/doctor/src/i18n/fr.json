@@ -23,6 +23,10 @@
   "nav": {
     "patients": "Patients",
     "profile": "Profil",
-    "alerts": "Alertes"
+    "alerts": "Alertes",
+    "digest": "Digest",
+    "agenda": "Agenda",
+    "officeHours": "Office hours",
+    "inbox": "Inbox"
   }
 }

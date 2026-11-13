@@ -5,3 +5,5 @@ export * from './invites';
 export * from './verification/CedulaVerificationProvider';
 export * from './verification/MockCedulaProvider';
 export * from './entitlements/doctorPlanEntitlement';
+export * from './compliance';
+export * from './phase1';

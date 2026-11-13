@@ -48,6 +48,18 @@ export function defaultConsent(): ConsentMap {
   };
 }
 
+/** Multi-window schedule; see packages/doctor-core/src/phase1/officeHours.ts */
+export interface DoctorOfficeHours {
+  timeZone: string;
+  messagingPaused: boolean;
+  windowsByDay: Record<string, Array<{ startMinutes: number; endMinutes: number }>>;
+  /** @deprecated legacy fields — still read by normalizeOfficeHours */
+  days?: number[];
+  startHour?: number;
+  endHour?: number;
+  enabled?: boolean;
+}
+
 export interface DoctorProfile {
   uid: string;
   displayName: string;
@@ -60,6 +72,13 @@ export interface DoctorProfile {
   doctorPlan: boolean;
   doctorPlanSource?: 'mock' | 'iap' | 'stripe' | 'admin';
   doctorPlanUpdatedAt?: string;
+  /** IANA timezone for agenda display and office hours. */
+  timeZone?: string;
+  /** When patient messages are expected; outside window is not for emergencies. */
+  officeHours?: DoctorOfficeHours;
+  /** AI insights waitlist only (feature disabled in Phase 1). */
+  aiInsightsWaitlisted?: boolean;
+  aiInsightsWaitlistedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -144,7 +163,14 @@ export interface AuditLogEntry {
     | 'alert_triggered'
     | 'verification_submitted'
     | 'verification_updated'
-    | 'doctor_plan_updated';
+    | 'doctor_plan_updated'
+    | 'appointment_request_sent'
+    | 'office_hours_updated'
+    | 'ai_waitlist_joined'
+    | 'consent_revoked'
+    | 'message_sent'
+    | 'message_replied'
+    | 'message_export';
   patientId?: string;
   doctorId?: string;
   linkId?: string;
