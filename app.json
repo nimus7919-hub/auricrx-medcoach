@@ -81,9 +81,7 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ],
-      "runtimeVersion": {
-        "policy": "appVersion"
-      }
+      "runtimeVersion": "1.1.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
