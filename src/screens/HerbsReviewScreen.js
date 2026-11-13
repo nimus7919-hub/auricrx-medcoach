@@ -3,7 +3,9 @@ import { getRegion } from '../services/region';
 import usNotices from '../legal/usDisclaimers.json';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import Modal from '../components/BackModal';
 import { HERBS, HERB_IMAGE_PLACEHOLDER } from '../data/herbCatalog.js';
 import { findHerbInteractions, getMedicationIngredients } from '../data/herbInteractions.js';
@@ -28,6 +30,7 @@ function HerbImage({ herb, label, large, fallbackLabel }) {
 export default function HerbsReviewScreen({ onClose, currentLang, medications = [] }) {
   // Hooks always run at component level, including while the modal is closed.
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const requestedLanguage = (currentLang || i18n.resolvedLanguage || i18n.language || 'es').split('-')[0];
@@ -57,12 +60,12 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
       <HerbImage key={`${herb.key}-${large}`} herb={herb} label={nameOf(herb)} large={large} fallbackLabel={tr('imagePending')} />
       {!herb.imageVerified && <Text style={styles.caption}>{tr('imagePending')}</Text>}
       {large && herb.imageAttribution && <Text style={styles.caption}>
-        {language === 'en' ? 'Photo' : 'Foto'}: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
+        {t('herbs.photo', { lng: language })}: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
           onPress={() => openSource('https://creativecommons.org/licenses/' +
             (herb.imageAttribution.license.includes('BY-SA') ? 'by-sa/' : 'by/') +
             herb.imageAttribution.license.split(' ').pop() + '/')}>{herb.imageAttribution.license}</Text>, <Text
           accessibilityRole="link" style={styles.photoLink} onPress={() => openSource(herb.imageAttribution.url)}>Wikimedia Commons</Text>
-        {herb.imageAttribution.modification ? ' · Recorte' : ''}
+        {herb.imageAttribution.modification ? t('herbs.cropSuffix', { lng: language }) : ''}
       </Text>}
     </View>
   );
@@ -75,7 +78,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 0) + 12 }]}>
         <TouchableOpacity onPress={onClose} accessibilityRole="button" accessibilityLabel={tr('close')}>
           <Image source={require('../../assets/AuricRX_home_button_across_screens.png')} style={styles.home} resizeMode="contain" />
         </TouchableOpacity>
@@ -85,7 +88,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
         placeholder={t('herbs.search', { lng: language })} placeholderTextColor="#BAC5D5"
         accessibilityLabel={t('herbs.search', { lng: language })} />
       <FlatList data={filtered} keyExtractor={herb => herb.id} numColumns={2}
-        contentContainerStyle={styles.list} columnWrapperStyle={styles.row} keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.list, { paddingBottom: FAB_SCROLL_PADDING }]} columnWrapperStyle={styles.row} keyboardShouldPersistTaps="handled"
         ListEmptyComponent={<Text style={styles.body}>{t('herbs.noResults', { lng: language })}</Text>}
         ListFooterComponent={footer}
         renderItem={({ item }) => (
@@ -94,8 +97,14 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
               {herbImage(item)}
               <Text style={styles.name}>{nameOf(item)}</Text>
               {risk(item)}
+              {/* F13: Evidence badges */}
+              {!!item.evidence && (
+                <View style={styles.evidenceBadge}>
+                  <Text style={styles.evidenceText}>{t(`plantBadges.${item.evidence}`, { lng: language })}</Text>
+                </View>
+              )}
               {detailsOf(item) ? <Text style={styles.caption}>{detailsOf(item).uses}</Text> :
-                !!item.evidence && <Text style={styles.caption}>{tr(item.evidence)}</Text>}
+                !!item.summaryKey && <Text style={styles.caption}>{tr(item.summaryKey)}</Text>}
             </TouchableOpacity>
             {sourceLink(detailsOf(item)?.sources[0] || item.source)}
           </View>
@@ -114,9 +123,17 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 {herbImage(selected, true)}
                 <Text style={styles.label}>{tr('safety')}</Text>
                 {risk(selected)}
+                
+                {/* F13: Evidence badge in detail view */}
+                {!!selected.evidence && (
+                  <View style={styles.evidenceBadgeDetail}>
+                    <Text style={styles.evidenceTextDetail}>{t(`plantBadges.${selected.evidence}`, { lng: language })}</Text>
+                  </View>
+                )}
+                
                 {detailsOf(selected) ? <>
                   <Text style={styles.body}>{detailsOf(selected).uses}</Text>
-                  <Text style={styles.label}>{getRegion() === 'US' ? 'What the evidence says' : 'Lo que dice la evidencia'}</Text>
+                  <Text style={styles.label}>{t('herbs.whatEvidenceSays', { lng: language })}</Text>
                   <Text style={styles.body}>{detailsOf(selected).evidence}</Text>
                   <Text style={styles.label}>{tr('precautions')}</Text>
                   <Text style={styles.body}>{detailsOf(selected).precautions}</Text>
@@ -124,7 +141,6 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                   <Text style={styles.body}>{detailsOf(selected).interactions}</Text>
                   {detailsOf(selected).sources.map(source => <View key={source.url}>{sourceLink(source)}</View>)}
                 </> : <>
-                {!!selected.evidence && <Text style={styles.body}>{tr(selected.evidence)}</Text>}
                 {!!summary(selected) && <Text style={styles.body}>{summary(selected)}</Text>}
                 {!selected.specificSource && selected.summaryKey !== 'notReviewed' && <Text style={styles.body}>{tr('notReviewed')}</Text>}
                 {sourceLink(selected.source)}
@@ -137,6 +153,15 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
                 {/* No guessed interactions and no affirmative empty-state verdict. */}
                 {selected.interactionKeys.map(key => <Text key={key} style={styles.body}>{tr(`class_${key}`)}</Text>)}
                 {!!selected.interactionKeys.length && sourceLink(selected.source)}
+                
+                {/* F13: Block H footer with source/date disclaimer */}
+                <Text style={styles.evidenceFooter}>
+                  {t('plantBadges.footer', { 
+                    source: selected.source.name, 
+                    date: selected.source.checked,
+                    lng: language 
+                  })}
+                </Text>
                 </>}
                 <Text style={styles.body}>{tr('generalPrecaution')}</Text>
                 {sourceLink(GENERAL_SOURCE)}
@@ -174,6 +199,11 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: 170, minHeight: 170, marginBottom: 8, backgroundColor: '#071426', borderRadius: 10 },
   name: { color: '#F4E3B1', fontSize: 16, fontWeight: '600', marginVertical: 6 },
   risk: { color: '#E2C57D', fontSize: 14, lineHeight: 20, marginVertical: 6 },
+  evidenceBadge: { backgroundColor: 'rgba(219, 182, 92, 0.15)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginVertical: 4, alignSelf: 'flex-start' },
+  evidenceText: { color: '#E2C57D', fontSize: 11, fontWeight: '600' },
+  evidenceBadgeDetail: { backgroundColor: 'rgba(219, 182, 92, 0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginVertical: 8, alignSelf: 'flex-start' },
+  evidenceTextDetail: { color: '#E2C57D', fontSize: 13, fontWeight: '600' },
+  evidenceFooter: { color: '#BAC5D5', fontSize: 13, lineHeight: 21, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderColor: '#9F8548', fontStyle: 'italic' },
   caption: { color: '#BAC5D5', fontSize: 12, lineHeight: 18 },
   photoLink: { textDecorationLine: 'underline' },
   sourceButton: { paddingVertical: 10 },

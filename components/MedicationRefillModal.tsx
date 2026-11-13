@@ -17,6 +17,8 @@ import { findNearbyPharmacies, getMedicationPrices, StorePrice, QQPQuote, format
 // ENABLED: EnhancedMedicationSearch for Excel integration with safety measures
 const EnhancedMedicationSearch = require("../services/enhancedMedicationSearch");
 import medicationDataCollector from "../services/medicationDataCollector";
+import LocationRequiredPanel from "../src/components/LocationRequiredPanel";
+const { resolveSearchLocation } = require("../src/utils/resolveSearchLocation");
 
 interface MedicationInfo { name: string; dosage: string; activeIngredient?: string; strength?: string; form?: string; ean?: string; quantity?: string; quantityUnit?: string; lastRefill?: string }
 interface Props { 
@@ -66,6 +68,7 @@ function MexicoMedicationRefillModal({ visible, onClose, medication, strings, la
   const [currency, setCurrency] = useState<string>(uiI18n.t("common.usd"));
   const [mockMode, setMockMode] = useState(false);
   const [coordsUsed, setCoordsUsed] = useState<{lat:number; lon:number}|null>(null);
+  const [locationBlocked, setLocationBlocked] = useState(false);
   const LAST_LOC_KEY = 'AURIC_LAST_LOC';
 
   // Price contribution modal state
@@ -94,39 +97,45 @@ function MexicoMedicationRefillModal({ visible, onClose, medication, strings, la
     const id = ++requestId.current;
     try {
       setLoading(true);
-      setResults([]); setQqpQuote(null); setPriceError(false);
+      setResults([]); setQqpQuote(null); setPriceError(false); setLocationBlocked(false);
       
-      // Use pre-loaded data if available for faster loading
+      // Use pre-loaded data if available for faster loading — never invent a default city
       let hasCoords = !!preloadedCoords;
-      let coords = preloadedCoords || { latitude: 0, longitude: 0 };
-      let determinedCurrency: string = preloadedCurrency || uiI18n.t("common.usd");
+      let coords = preloadedCoords || null;
+      let determinedCurrency: string = preloadedCurrency || (getRegion() === 'US' ? uiI18n.t("common.usd") : uiI18n.t("common.mxn"));
       let near = preloadedPharmacies || [];
       
-      // If no pre-loaded data, load it manually (fallback)
+      // If no pre-loaded data, require a live granted location (no city / cache fallback)
       if (!preloadedCoords || !preloadedPharmacies || !preloadedCurrency) {
         const { status } = await Location.requestForegroundPermissionsAsync();
+        let positionError: unknown = null;
         if (status === "granted") {
           try {
             const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
             coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
             hasCoords = true;
-            // cache it
             AsyncStorage.setItem(LAST_LOC_KEY, JSON.stringify(coords)).catch(()=>{});
-          } catch {}
+          } catch (error) {
+            positionError = error;
+            coords = null;
+            hasCoords = false;
+          }
         } else {
-          // attempt cached last location
-          try {
-            const cached = await AsyncStorage.getItem(LAST_LOC_KEY);
-            if (cached) {
-              const parsed = JSON.parse(cached);
-              if (parsed && typeof parsed.latitude==='number' && typeof parsed.longitude==='number') {
-                coords = { latitude: parsed.latitude, longitude: parsed.longitude };
-                hasCoords = true;
-              }
-            }
-          } catch {}
+          coords = null;
+          hasCoords = false;
         }
-        setCoordsUsed(hasCoords ? { lat: coords.latitude, lon: coords.longitude } : null);
+        const resolved = resolveSearchLocation({ permissionStatus: status, coords, positionError });
+        if (!resolved.ok) {
+          if (id !== requestId.current) return;
+          setLocationBlocked(true);
+          setCoordsUsed(null);
+          setResults([]);
+          setLoading(false);
+          return;
+        }
+        coords = resolved.coords;
+        hasCoords = true;
+        setCoordsUsed({ lat: coords.latitude, lon: coords.longitude });
         
         // Determine currency from country (reverse geocode); fall back to language mapping then USD
         if (!preloadedCurrency && hasCoords) {
@@ -587,7 +596,9 @@ function MexicoMedicationRefillModal({ visible, onClose, medication, strings, la
 
           {/* List */}
       <View style={{ marginTop: spacing.lg, maxHeight: 360 }}>
-            {loading ? (
+            {locationBlocked ? (
+              <LocationRequiredPanel onRetry={() => load()} />
+            ) : loading ? (
               <ActivityIndicator color={colors.gold} />
             ) : (
               <FlatList

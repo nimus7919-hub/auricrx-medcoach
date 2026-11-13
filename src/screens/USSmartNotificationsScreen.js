@@ -3,7 +3,10 @@ import { ActivityIndicator, ScrollView, Switch, Text, TextInput, TouchableOpacit
 import { useTranslation } from 'react-i18next';
 import { readSmart, updateSmart, reconcileSmart, suggestions } from '../services/smartNotificationEngine';
 import { ensureReminderPermission, reconcileReminderNotifications } from '../services/reminderNotifications';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 export default function USSmartNotificationsScreen({ onClose, meds = [], reminders = [], setMeds, setReminders }) {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const tr = (key, values = {}) => t(`usSmart.${key}`, { lng: 'en', ...values });
   const [state, setState] = useState(null);
@@ -15,7 +18,7 @@ export default function USSmartNotificationsScreen({ onClose, meds = [], reminde
   const text = { color: '#F1F1F1', fontSize: 15, marginVertical: 8 };
   const button = (label, action) => <TouchableOpacity disabled={busy} accessibilityRole="button" onPress={() => run(action)} style={{ paddingVertical: 14 }}><Text style={{ color: '#D4AF37' }}>{label}</Text></TouchableOpacity>;
   const input = (label, value, onChangeText, numeric = false) => <View><Text style={text}>{label}</Text><TextInput accessibilityLabel={label} value={String(value ?? '')} onChangeText={onChangeText} keyboardType={numeric ? 'decimal-pad' : 'default'} style={{ color: 'white', borderColor: '#D4AF37', borderWidth: 1, padding: 12, borderRadius: 8 }} /></View>;
-  return <ScrollView style={{ flex: 1, backgroundColor: '#101B2A' }} contentContainerStyle={{ padding: 22, paddingTop: 48, paddingBottom: 70 }} keyboardShouldPersistTaps="handled">
+  return <ScrollView style={{ flex: 1, backgroundColor: '#101B2A' }} contentContainerStyle={{ padding: 22, paddingTop: Math.max(insets.top, 0) + 12, paddingBottom: FAB_SCROLL_PADDING }} keyboardShouldPersistTaps="handled">
     {button(tr('back'), onClose)}<Text style={[text, { fontSize: 24 }]}>{tr('title')}</Text><Text style={text}>{tr('local')}</Text>
     {!!error && <Text accessibilityRole="alert" style={text}>{error}</Text>}
     {!state ? <ActivityIndicator /> : <>

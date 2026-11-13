@@ -16,13 +16,17 @@ import * as FileSystem from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
+import { capturedDocumentFields } from '../lib/documentCapture';
 import { createDocumentPdf } from '../lib/documentPdf';
 import { scanDocumentPages } from '../lib/documentScanner';
 import { SecureSharing } from '../lib/SecureSharing';
+import { migrateAndHydrateDocuments, openDocumentUri, readDocumentBase64, sealCopiedDocument, toStorageDocument } from '../lib/documentVaultIo';
 import DynamicText from '../components/DynamicText';
 import PDFViewer from '../components/PDFViewer';
 import type { DoctorContact } from '../services/appointmentService';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -53,6 +57,7 @@ interface DocumentItem {
 export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoDocumentScan }: MedicalDocumentsScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -578,11 +583,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
 
   const loadDocuments = async () => {
     try {
-      // Load documents from storage
+      // Load documents from storage, migrate plaintext files, hydrate readable URIs
       const documentsData = await FileSystem.readAsStringAsync(
         `${FileSystem.documentDirectory}medical_documents.json`
       );
-      setDocuments(JSON.parse(documentsData));
+      const parsed = JSON.parse(documentsData);
+      const list = Array.isArray(parsed) ? parsed : [];
+      const hydrated = await migrateAndHydrateDocuments(list);
+      setDocuments(hydrated);
     } catch (error) {
       // File doesn't exist yet, start with empty array
       setDocuments([]);
@@ -591,11 +599,15 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
 
   const saveDocuments = async (newDocuments: DocumentItem[]) => {
     try {
+      // Persist encrypted storage paths (not plaintext cache URIs)
+      const toPersist = newDocuments.map((doc) => toStorageDocument(doc));
       await FileSystem.writeAsStringAsync(
         `${FileSystem.documentDirectory}medical_documents.json`,
-        JSON.stringify(newDocuments)
+        JSON.stringify(toPersist)
       );
-      setDocuments(newDocuments);
+      // Keep UI on readable (hydrated) URIs
+      const hydrated = await migrateAndHydrateDocuments(toPersist);
+      setDocuments(hydrated);
     } catch (error) {
       console.error('Failed to save documents:', error);
       throw error;
@@ -674,7 +686,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
 
       // Use document picker specifically for PDF files
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'single',
+        type: 'application/pdf',
         copyToCacheDirectory: true,
         multiple: false,
       });
@@ -706,11 +718,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             if (!fileInfo.exists || (fileInfo.exists ? fileInfo.size : 0) === 0) {
               throw new Error(t("medicalDocuments.pdfCorrupted"));
             }
+
+            const sealed = await sealCopiedDocument(newUri);
                       
                       const newDocument: DocumentItem = {
                         id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                         name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.pdfDocument") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-                        uri: newUri,
+                        uri: sealed.displayUri,
                         type,
                         category,
                         createdAt: new Date().toISOString(),
@@ -745,24 +759,48 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
       const scan = autoScan ? await scanDocumentPages(type === 'single' ? 100 : 1) : { status: 'unavailable' as const, images: [] };
       if (scan.status === 'cancel') return;
       if (scan.status === 'success') {
-        // Retain ID originals for the existing front/back preview and pairing UI.
-        const sources = await Promise.all(scan.images.map(async (uri, index) => {
-          const saved = `${FileSystem.documentDirectory}scan_${Date.now()}_${index}_${Math.random().toString(36).slice(2)}.jpg`;
-          await FileSystem.copyAsync({ from: uri, to: saved });
-          return { uri: saved, type };
-        }));
-        const pdfUri = await createDocumentPdf(sources, type !== 'single');
-        const newDocument: DocumentItem = {
-          id: `doc_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('medicalDocuments.pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-          uri: type === 'single' ? pdfUri : sources[0].uri,
-          pdfUri,
-          mimeType: type === 'single' ? 'application/pdf' : 'image/jpeg',
-          type, category, createdAt: new Date().toISOString(),
-        };
-        await saveDocuments([...documents, newDocument]);
-        triggerHaptic('medium');
-        showCustomAlertMsg(t('common.success'), t('medicalDocuments.uploadSuccess'), 'success');
+        try {
+          // Retain ID originals for the existing front/back preview and pairing UI.
+          const sources = await Promise.all(scan.images.map(async (uri, index) => {
+            const saved = `${FileSystem.documentDirectory}scan_${Date.now()}_${index}_${Math.random().toString(36).slice(2)}.jpg`;
+            await FileSystem.copyAsync({ from: uri, to: saved });
+            // Seal after PDF creation so branding can still read plaintext scan images.
+            return { uri: saved, type };
+          }));
+          // PDF branding can fail on Android release asset URIs; never drop the scan.
+          let pdfUri: string | undefined;
+          try {
+            pdfUri = await createDocumentPdf(sources, type !== 'single');
+          } catch (pdfError) {
+            console.error('Failed to create document PDF after scan:', pdfError);
+          }
+          const sealedSources = await Promise.all(
+            sources.map(async (source) => {
+              const sealed = await sealCopiedDocument(source.uri);
+              return { ...source, uri: sealed.displayUri, storageUri: sealed.storageUri };
+            })
+          );
+          let sealedPdfUri: string | undefined;
+          if (pdfUri) {
+            const sealedPdf = await sealCopiedDocument(pdfUri);
+            sealedPdfUri = sealedPdf.displayUri;
+          }
+          const fields = capturedDocumentFields({ type, imageUri: sealedSources[0].uri, pdfUri: sealedPdfUri });
+          const newDocument: DocumentItem = {
+            id: `doc_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+            name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('medicalDocuments.pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+            uri: fields.uri,
+            pdfUri: fields.pdfUri,
+            mimeType: fields.mimeType,
+            type, category, createdAt: new Date().toISOString(),
+          };
+          await saveDocuments([...documents, newDocument]);
+          triggerHaptic('medium');
+          showCustomAlertMsg(t('common.success'), t('medicalDocuments.uploadSuccess'), 'success');
+        } catch (saveError) {
+          console.error('Failed to save scanned document:', saveError);
+          showCustomAlertMsg(t('common.error'), t('medicalDocuments.uploadFailed'), 'error');
+        }
         return;
       }
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -785,27 +823,50 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
-        const asset = result.assets[0];
-        const savedImageUri = `${FileSystem.documentDirectory}photo_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-        await FileSystem.copyAsync({ from: asset.uri, to: savedImageUri });
-        const pdfUri = await createDocumentPdf([{ uri: savedImageUri, type }], type !== 'single');
-        const newDocument: DocumentItem = {
-          id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.document") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-          uri: savedImageUri,
-          pdfUri,
-          mimeType: 'image/jpeg',
-          type,
-          category,
-          createdAt: new Date().toISOString(),
-          
-        };
+        try {
+          const asset = result.assets[0];
+          const savedImageUri = `${FileSystem.documentDirectory}photo_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+          await FileSystem.copyAsync({ from: asset.uri, to: savedImageUri });
+          // Keep the photo even when branded PDF generation fails (e.g. release logo URI).
+          let pdfUri: string | undefined;
+          try {
+            pdfUri = await createDocumentPdf([{ uri: savedImageUri, type }], type !== 'single');
+          } catch (pdfError) {
+            console.error('Failed to create document PDF after photo:', pdfError);
+          }
+          const sealedImage = await sealCopiedDocument(savedImageUri);
+          let sealedPdfUri: string | undefined;
+          if (pdfUri) {
+            const sealedPdf = await sealCopiedDocument(pdfUri);
+            sealedPdfUri = sealedPdf.displayUri;
+          }
+          // Camera captures always keep the JPEG as the primary uri (PDF stays optional).
+          const fields = capturedDocumentFields({
+            type,
+            imageUri: sealedImage.displayUri,
+            pdfUri: sealedPdfUri,
+            preferPdfForSingle: false,
+          });
+          const newDocument: DocumentItem = {
+            id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.document") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
+            uri: fields.uri,
+            pdfUri: fields.pdfUri,
+            mimeType: fields.mimeType,
+            type,
+            category,
+            createdAt: new Date().toISOString(),
+          };
 
-        const updatedDocuments = [...documents, newDocument];
-        await saveDocuments(updatedDocuments);
-        
-        triggerHaptic('medium');
-        showCustomAlertMsg(t("common.success"), t("medicalDocuments.photoTakenSuccessfully"), 'success');
+          const updatedDocuments = [...documents, newDocument];
+          await saveDocuments(updatedDocuments);
+
+          triggerHaptic('medium');
+          showCustomAlertMsg(t("common.success"), t("medicalDocuments.photoTakenSuccessfully"), 'success');
+        } catch (saveError) {
+          console.error('Failed to save camera document:', saveError);
+          showCustomAlertMsg(t('common.error'), t('medicalDocuments.uploadFailed'), 'error');
+        }
       }
     } catch (error) {
       console.error('Failed to take photo:', error);
@@ -972,7 +1033,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                 </div>
                 
                 <div class="footer">
-                ${uiI18n.t("ui.generatedbyAuricRXMedicalCoach")}Coach</p>
+                Generated by AuricRX MedCoach</p>
                   <p>Document created: ${new Date().toLocaleDateString()}</p>
                 </div>
               </body>
@@ -1021,7 +1082,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               }
             } catch (shareError) {
               console.error('❌ ID PDF sharing failed:', shareError);
-              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToSharePdfValue", { value1: (shareError instanceof Error ? shareError.message : String(shareError)) || 'Unknown error' }));
+              console.error('❌ Share PDF failed:', shareError);
+              Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToSharePdfValue"));
             }
             
           } catch (pdfError) {
@@ -1051,7 +1113,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               }
             } catch (fallbackError) {
               console.error('❌ Fallback sharing failed:', fallbackError);
-              Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue", { value1: (fallbackError instanceof Error ? fallbackError.message : String(fallbackError)) || 'Unknown error' }));
+              Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToShareDocumentValue"));
             }
           }
         } else {
@@ -1079,7 +1141,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             }
           } catch (regularError) {
             console.error('❌ Regular sharing failed:', regularError);
-            Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue_8669f8", { value1: (regularError instanceof Error ? regularError.message : String(regularError)) || 'Unknown error' }));
+            Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToShareDocumentValue_8669f8"));
           }
         }
       } else {
@@ -1106,7 +1168,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           }
         } catch (nonIdError) {
           console.error('❌ Non-ID sharing failed:', nonIdError);
-          Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToShareDocumentValue_8669f8", { value1: (nonIdError instanceof Error ? nonIdError.message : String(nonIdError)) || 'Unknown error' }));
+          Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToShareDocumentValue_8669f8"));
         }
       }
       
@@ -1284,7 +1346,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                       <div style="font-size: 32px; font-weight: 700; color: #333;">
                         AURIC<span style="color: #C5860A;">RX</span>
                       </div>
-                      <div style="font-size: 14px; color: #666; margin-top: 5${uiI18n.t("ui.medicalCoachApp")}h App</div>
+                      <div style="font-size: 14px; color: #666; margin-top: 5px;">AuricRX MedCoach App</div>
                     </div>
                   `}
                 </div>
@@ -1307,7 +1369,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                 </div>
                 
                 <div class="footer">
-                  <div style="font-weight: bold; color: #C58${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}ch App</div>
+                  <div style="font-weight: bold; color: #C58B2A;">Generated by AuricRX MedCoach App</div>
                   <div style="margin-top:${uiI18n.t("ui.secureProfessionalReliable")}eliable</div>
                   <div style="margin-top: 10px; font-size: 10px;">
                     Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
@@ -1580,7 +1642,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                       <div style="font-size: 32px; font-weight: 700; color: #333;">
                         AURIC<span style="color: #C5860A;">RX</span>
                       </div>
-                      <div style="font-size: 14px; color: #666; margin-top: 5${uiI18n.t("ui.medicalCoachApp")}h App</div>
+                      <div style="font-size: 14px; color: #666; margin-top: 5px;">AuricRX MedCoach App</div>
                     </div>
                   `}
                 </div>
@@ -1603,7 +1665,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                 </div>
                 
                 <div class="footer">
-                  <div style="font-weight: bold; color: #C58${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}ch App</div>
+                  <div style="font-weight: bold; color: #C58B2A;">Generated by AuricRX MedCoach App</div>
                   <div style="margin-top:${uiI18n.t("ui.secureProfessionalReliable")}eliable</div>
                   <div style="margin-top: 10px; font-size: 10px;">
                     Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
@@ -1653,7 +1715,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                 // Try to use IntentLauncher to open WhatsApp directly with the file
                 try {
                   await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-                    type: 'single',
+                    type: 'application/pdf',
                     data: whatsappUri,
                     extra: {
                       'android.intent.extra.TEXT': uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95", { value1: doctor.name }),
@@ -1667,7 +1729,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                   // Try without package restriction
                   try {
                     await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-                      type: 'single',
+                      type: 'application/pdf',
                       data: whatsappUri,
                       extra: {
                         'android.intent.extra.TEXT': uiI18n.t("ui.hiDrValuePleaseFindAttachedMyIdDocumentForYourRecords_15ce95", { value1: doctor.name }),
@@ -1793,7 +1855,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               
               // Launch Gmail with the PDF attached
               await IntentLauncher.startActivityAsync('android.intent.action.SEND', {
-                type: 'single',
+                type: 'application/pdf',
                 data: `file://${gmailUri}`,
                 extra: {
                   'android.intent.extra.SUBJECT': uiI18n.t("ui.medicalDocumentDrValue", { value1: doctor.name }),
@@ -2119,12 +2181,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         return uri;
       }
       
-      // For file URIs, read the file and convert to base64
+      // For file URIs, decrypt-from-vault when needed then convert to base64
       if (uri.startsWith('file://')) {
         console.log('🔄 Reading file and converting to base64...');
-        const base64 = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        const base64 = await readDocumentBase64(uri);
         return `data:image/jpeg;base64,${base64}`;
       }
       
@@ -2160,10 +2220,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
     try {
       console.log('🔄 Converting URI to shareable format:', uri);
       
-      // If it's already a file URI, return as is
+      // If it's already a file URI, open a plaintext/cache copy when encrypted
       if (uri.startsWith('file://')) {
-        console.log('✅ Already a file URI');
-        return uri;
+        const readable = await openDocumentUri(uri);
+        console.log('✅ Shareable file URI ready');
+        return readable;
       }
       
       // If it's a content URI, copy to a temporary file
@@ -2236,7 +2297,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         <html>
         <head>
           <meta charset="utf-8">
-          <t${uiI18n.t("ui.auricrxIDDocument")}ument</title>
+          <title>AuricRX ID Document</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -2323,7 +2384,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           </div>
           
           <div class="footer">
-          ${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}h App</p>
+          Generated by AuricRX MedCoach App</p>
             <p>Document created on ${new Date().toLocaleString()}</p>
           </div>
         </body>
@@ -2410,7 +2471,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
               // Create a temporary document object for the PDF viewer
               const pdfDocument: DocumentItem = {
                 id: `view-${Date.now()}`,
-                name: `ID_Document_${new Date().toISOString().split(uiI18n.t("reminders.tuesdayShort"))[0]}.pdf`,
+                name: `ID_Document_${new Date().toISOString().split('T')[0]}.pdf`,
                 uri: pdfUri,
                 type: 'single',
                 mimeType: 'application/pdf',
@@ -2487,7 +2548,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         uri: document.uri,
         type: document.type
       });
-      Alert.alert('❌ ' + t("common.error"), uiI18n.t("ui.failedToOpenDocumentValue", { value1: (error instanceof Error ? error.message : String(error)) || 'Unknown error' }));
+      console.error('❌ Open document failed:', error);
+      Alert.alert(t("errors.title"), uiI18n.t("errors.generic"));
     }
   };
 
@@ -2843,7 +2905,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -2851,6 +2913,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }
@@ -2910,10 +2973,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         {showUploadModal && selectedCategory && (
           <AddDocumentSheet title={DOCUMENT_CATEGORIES[selectedCategory].title} dualSided={DOCUMENT_CATEGORIES[selectedCategory].supportsDualSides}
             onClose={() => { setShowUploadModal(false); setSelectedCategory(null); triggerHaptic('light'); }}
-            onScan={(side) => { setShowUploadModal(false); takePhoto(selectedCategory, side, true); }}
-            onPhoto={(side) => { setShowUploadModal(false); takePhoto(selectedCategory, side); }}
-            onGallery={(side) => { setShowUploadModal(false); uploadDocument(selectedCategory, side); }}
-            onPDF={(side) => { setShowUploadModal(false); uploadPDF(selectedCategory, side); }} />
+            onScan={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); takePhoto(selectedCategory, side, true); }}
+            onPhoto={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); takePhoto(selectedCategory, side); }}
+            onGallery={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); uploadDocument(selectedCategory, side); }}
+            onPDF={(side: 'front' | 'back' | 'single') => { setShowUploadModal(false); uploadPDF(selectedCategory, side); }} />
         )}
 
         {/* View Document Modal */}
@@ -3003,7 +3066,8 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                             );
                           } catch (error) {
                             console.error('Debug failed:', error);
-                            Alert.alert(uiI18n.t("ui.debugError"), (error instanceof Error ? error.message : String(error)));
+                            console.error('Debug error:', error);
+                            Alert.alert(uiI18n.t("errors.title"), uiI18n.t("errors.generic"));
                           }
                         }}
                       >
@@ -3155,7 +3219,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                                 try {
                                   await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
                                     data: selectedDocument.uri,
-                                    type: 'single',
+                                    type: 'application/pdf',
                                     flags: 1, // FLAG_ACTIVITY_NEW_TASK
                                   });
                                   
@@ -3532,7 +3596,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                         const htmlContent = `
                           <html>
                           <head>
-                            <tit${uiI18n.t("ui.auricrxIDDocument")}ent</title>
+                            <title>AuricRX ID Document</title>
                             <style>
                               body { 
                                 font-family: Arial, sans-serif; 
@@ -3651,7 +3715,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                                   <div style="font-size: 32px; font-weight: 700; color: #333;">
                                     AURIC<span style="color: #C5860A;">RX</span>
                                   </div>
-                                  <div style="font-size: 14px; color: #666; margin-top: 5${uiI18n.t("ui.medicalCoachApp")}h App</div>
+                                  <div style="font-size: 14px; color: #666; margin-top: 5px;">AuricRX MedCoach App</div>
                                 </div>
                               `}
                             </div>
@@ -3674,7 +3738,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
                             </div>
                             
                             <div class="footer">
-                              <div style="font-weight: bold; color: #C58${uiI18n.t("ui.generatedbyAuricRXMedicalCoachApp")}ch App</div>
+                              <div style="font-weight: bold; color: #C58B2A;">Generated by AuricRX MedCoach App</div>
                               <div style="margin-top:${uiI18n.t("ui.secureProfessionalReliable")}eliable</div>
                               <div style="margin-top: 10px; font-size: 10px;">
                                 Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
@@ -3824,7 +3888,8 @@ startxref
                         
                       } catch (error) {
                         console.error('❌ Error creating/sharing PDF:', error);
-                        Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToCreateOrSharePdf") + (error instanceof Error ? error.message : String(error)));
+                        console.error('Create/share PDF failed:', error);
+                        Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToCreateOrSharePdf"));
                       }
                     }}
                   >

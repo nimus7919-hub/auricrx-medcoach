@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "AuricRX Médicos",
+    "slug": "auricrx-doctors",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080E1B"
+    },
+    "scheme": [
+      "auricrx-doctors",
+      "com.auricrx.doctors"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.auricrx.doctors",
+      "runtimeVersion": {
+        "policy": "appVersion"
+      },
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Unlock AuricRX Médicos after you have signed in with two-factor authentication.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#080E1B"
+      },
+      "package": "com.auricrx.doctors",
+      "versionCode": 1,
+      "runtimeVersion": "1.0.0",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Unlock AuricRX Médicos after you have signed in with two-factor authentication."
+        }
+      ]
+    ],
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "firebaseNote": "Same Firebase project auricrx-medcoach, named database auricrxmedcoach. Apps registered for com.auricrx.doctors.",
+      "eas": {
+        "projectId": "d8a48be8-b7f0-44cb-a4e0-aa18f36ddccc"
+      }
+    },
+    "owner": "firef1"
+  }
+}

@@ -894,14 +894,15 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       console.error('AI analysis failed:', error);
       
       // Fallback analysis
-      return uiI18n.t("ui.documentAnalysis") + '\n' + uiI18n.t("ui.errorDuringAnalysisValue", { value1: error instanceof Error ? error.message : String(error) }) + '\n' + uiI18n.t("ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor") + '\n' + uiI18n.t("ui.patientInformation") + '\n' + uiI18n.t("ui.prescriptionDetails") + '\n' + uiI18n.t("ui.medicalInstructions") + '\n' + uiI18n.t("ui.importantDatesOrNumbers") + '\n' + uiI18n.t("ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable");
+      console.error('Document analysis failed:', error);
+      return uiI18n.t("ui.documentAnalysis") + '\n' + uiI18n.t("ui.errorDuringAnalysisValue") + '\n' + uiI18n.t("ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor") + '\n' + uiI18n.t("ui.patientInformation") + '\n' + uiI18n.t("ui.prescriptionDetails") + '\n' + uiI18n.t("ui.medicalInstructions") + '\n' + uiI18n.t("ui.importantDatesOrNumbers") + '\n' + uiI18n.t("ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable");
     }
   };
 
   const saveAIAnalysisAsDocument = async (content: string) => {
     try {
       const timestamp = new Date().toISOString();
-      const fileName = `AI_Analysis_${timestamp.split(uiI18n.t("reminders.tuesdayShort"))[0]}.txt`;
+      const fileName = `AI_Analysis_${timestamp.split('T')[0]}.txt`;
       
       // Save to document directory
       const documentPath = `${FileSystem.documentDirectory}${fileName}`;
@@ -939,7 +940,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       
       // Create a simple text-only PDF first to test
       const timestamp = new Date().toISOString();
-      const fileName = `AI_Analysis_${timestamp.split(uiI18n.t("reminders.tuesdayShort"))[0]}.txt`;
+      const fileName = `AI_Analysis_${timestamp.split('T')[0]}.txt`;
       
       // Save as text file first
       const documentPath = `${FileSystem.documentDirectory}${fileName}`;

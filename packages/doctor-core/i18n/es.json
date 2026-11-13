@@ -1,0 +1,304 @@
+{
+  "doctorMode": {
+    "title": "Modo médico",
+    "dashboardSubtitle": "Bitácora, vínculo con médico y lecturas compartidas",
+    "subtitle": "Registra tus lecturas, vincúlate con un médico cuando tú lo decidas y comparte solo las categorías que autorices. La app nunca etiqueta valores como altos, bajos o peligrosos.",
+    "gate": {
+      "title": "Se requiere acceso de médico",
+      "needVerifiedPlan": "Los datos del paciente solo están disponibles con un plan de médico activo y una credencial profesional verificada por un humano que no haya vencido. Los médicos no verificados no pueden ver datos del paciente."
+    },
+    "onboarding": {
+      "title": "Perfil médico",
+      "enable": "Activar Modo médico",
+      "edit": "Editar perfil médico",
+      "hint": "Ingresa tu nombre legal y credenciales profesionales. La consulta al registro se envía a revisión humana: nada se aprueba automáticamente.",
+      "name": "Nombre para mostrar",
+      "legalName": "Nombre legal completo",
+      "specialty": "Especialidad",
+      "country": "País",
+      "countryMx": "México",
+      "countryUs": "Estados Unidos",
+      "cedula": "Número de cédula profesional",
+      "specialtyCedula": "Cédula de especialidad (si aplica)",
+      "npi": "Número NPI",
+      "licenseNumber": "Número de licencia estatal",
+      "licenseState": "Estado de la licencia (p. ej. TX)",
+      "required": "Nombre legal, especialidad y los campos de credencial de tu país son obligatorios.",
+      "save": "Guardar perfil",
+      "saved": "Perfil médico guardado.",
+      "saveFailed": "No se pudo guardar el perfil médico."
+    },
+    "verification": {
+      "title": "Verificación profesional",
+      "label": "Verificación",
+      "submit": "Enviar para verificación",
+      "failed": "No se pudo enviar la verificación.",
+      "queued": "Enviado a revisión manual. Verás la decisión aquí cuando un administrador termine la revisión.",
+      "expires": "Vigente hasta {{date}}",
+      "expiredHint": "Tu verificación venció. Vuelve a enviarla para revisión.",
+      "identityHint": "La verificación de identidad (INE/pasaporte + prueba de vida) se abre en el flujo del proveedor cuando esté configurado. No almacenamos imágenes de identificación.",
+      "startIdentity": "Continuar verificación de identidad",
+      "status": {
+        "unverified": "Sin verificar",
+        "pending": "Pendiente",
+        "pending_review": "En revisión",
+        "verified": "Verificada",
+        "rejected": "Rechazada",
+        "suspended": "Suspendida",
+        "expired": "Vencida"
+      }
+    },
+    "plan": {
+      "label": "Plan de médico",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "mockEnable": "Activar plan de médico (simulado)",
+      "mockDisable": "Desactivar plan de médico (simulado)"
+    },
+    "linking": {
+      "title": "Vínculo paciente ↔ médico",
+      "hubHint": "Crea un código de invitación de corta duración o ingresa uno. Tú confirmas el vínculo y controlas cada consentimiento (todos desactivados por defecto).",
+      "createPatientInvite": "Crear mi código de paciente",
+      "createDoctorInvite": "Crear mi código de médico",
+      "enterDoctorCode": "Ingresar código del médico",
+      "enterPatientCode": "Ingresar código del paciente",
+      "manageLinks": "Administrar médicos vinculados y consentimientos",
+      "myDoctors": "Médicos vinculados",
+      "inviteCreated": "Invitación creada",
+      "inviteShare": "Comparte este código (vence en {{minutes}} min): {{code}}",
+      "inviteFailed": "No se pudo crear la invitación.",
+      "enterCode": "Ingresar código de invitación",
+      "enterDoctorHint": "Ingresa el código que te compartió tu médico. Confirmarás antes de compartir cualquier dato.",
+      "enterPatientHint": "Ingresa el código que compartió tu paciente. Debes estar verificado y con plan activo.",
+      "code": "Código de invitación",
+      "confirm": "Confirmar vínculo",
+      "linked": "Vínculo confirmado. Las categorías de consentimiento inician en OFF.",
+      "expired": "Esta invitación ha vencido.",
+      "invalid": "Código inválido o ya utilizado.",
+      "doctorNotReady": "El médico debe tener cédula verificada y un plan de médico activo.",
+      "linkFailed": "No se pudo completar el vínculo.",
+      "consentHint": "Cada categoría está en OFF por defecto. Activa solo lo que quieras que vea este médico. Revocar corta el acceso de inmediato.",
+      "consentFailed": "No se pudo actualizar el consentimiento.",
+      "noLinks": "Aún no hay médicos vinculados.",
+      "doctorLabel": "Médico",
+      "status": "Estado",
+      "statuses": {
+        "pending": "Pendiente",
+        "active": "Activo",
+        "revoked": "Revocado"
+      },
+      "revokeTitle": "Revocar acceso",
+      "revokeMessage": "Este médico perderá de inmediato el acceso a tus datos compartidos.",
+      "revoke": "Revocar acceso",
+      "revokeFailed": "No se pudo revocar el acceso."
+    },
+    "consent": {
+      "bloodPressure": "Presión arterial",
+      "glucose": "Glucosa",
+      "weight": "Peso",
+      "symptoms": "Síntomas",
+      "medicationList": "Lista de medicamentos",
+      "reminderAdherence": "Adherencia a recordatorios"
+    },
+    "bitacora": {
+      "title": "Bitácora",
+      "hubHint": "Registro rápido de presión arterial, glucosa, peso y síntomas — solo valores crudos.",
+      "open": "Abrir Bitácora",
+      "disclaimer": "Los valores se guardan tal como los ingresas. La app no los interpreta como normales, altos, bajos o peligrosos.",
+      "bp": "Presión",
+      "glucose": "Glucosa",
+      "weight": "Peso",
+      "symptoms": "Síntomas",
+      "systolic": "Sistólica",
+      "diastolic": "Diastólica",
+      "pulse": "Pulso (opcional)",
+      "glucoseMgDl": "Glucosa (mg/dL)",
+      "weightKg": "Peso (kg)",
+      "symptomsText": "Síntomas",
+      "noteOptional": "Nota (opcional)",
+      "save": "Guardar registro",
+      "saveFailed": "No se pudo guardar el registro.",
+      "bpRequired": "Ingresa sistólica y diastólica.",
+      "glucoseRequired": "Ingresa un valor de glucosa.",
+      "weightRequired": "Ingresa un valor de peso.",
+      "symptomsRequired": "Describe los síntomas.",
+      "charts": "Gráficas (valores crudos)",
+      "chartsHint": "Gráficas simples de tus números — sin bandas de referencia ni colores de riesgo.",
+      "history": "Historial",
+      "empty": "Aún no hay registros.",
+      "timing": {
+        "fasting": "En ayunas",
+        "after_meal": "Después de comer",
+        "other": "Otro"
+      },
+      "types": {
+        "blood_pressure": "Presión arterial",
+        "glucose": "Glucosa",
+        "weight": "Peso",
+        "symptoms": "Síntomas"
+      }
+    },
+    "doctor": {
+      "section": "Para médicos",
+      "hubHint": "Requiere plan de médico + cédula verificada. Los médicos no verificados no pueden ver datos del paciente.",
+      "patients": "Mis pacientes",
+      "patientDetail": "Paciente",
+      "noPatients": "Aún no hay pacientes vinculados con consentimiento activo.",
+      "tapToOpen": "Abrir bitácora compartida",
+      "rawOnly": "Lecturas compartidas solo como valores crudos — sin etiquetas clínicas.",
+      "medsSharedHint": "La lista de medicamentos está compartida (solo lectura).",
+      "adherenceSharedHint": "La adherencia a recordatorios se comparte cuando está disponible."
+    },
+    "alerts": {
+      "title": "Límites de alerta",
+      "hint": "Avísame solo cuando una lectura nueva cruce un límite que yo configuré. Las alertas nunca dicen que un valor es alto, bajo o peligroso.",
+      "readingType": "Lectura",
+      "comparator": "Cuando el valor sea",
+      "value": "Valor límite",
+      "valueRequired": "Ingresa un límite numérico.",
+      "save": "Guardar límite",
+      "saved": "Límite de alerta guardado.",
+      "saveFailed": "No se pudo guardar el límite.",
+      "pushTitle": "AuricRX Modo médico",
+      "pushBody": "Una lectura cruzó un límite que usted configuró. Abra la app para ver el detalle.",
+      "crossedLimitDetail": "Una lectura cruzó un límite que usted configuró.",
+      "types": {
+        "systolic": "Sistólica",
+        "diastolic": "Diastólica",
+        "pulse": "Pulso",
+        "glucose": "Glucosa",
+        "weight": "Peso"
+      },
+      "comparators": {
+        "gt": "mayor que",
+        "gte": "mayor o igual",
+        "lt": "menor que",
+        "lte": "menor o igual"
+      },
+      "crossedLimitDetailNamed": "Lectura {{observed}} {{relation}} del límite de {{limit}} que usted configuró",
+      "relationAbove": "por encima",
+      "relationBelow": "por debajo"
+    },
+    "patientHub": {
+      "title": "Bitácora y médicos",
+      "dashboardSubtitle": "Registra lecturas y controla lo que ve tu médico",
+      "subtitle": "Registra tus lecturas y vincúlate con un médico cuando tú lo decidas. Los médicos usan la app aparte AuricRX Médicos.",
+      "audit": "Registro de acceso",
+      "auditHint": "Eventos recientes de vínculo, consentimiento y lecturas del médico.",
+      "auditEmpty": "Aún no hay eventos de auditoría.",
+      "doctorAppNote": "Tu médico ve los datos compartidos en AuricRX Médicos (com.auricrx.doctors), no dentro de esta app de paciente."
+    },
+    "compliance": {
+      "disclaimer": "AuricRX Médicos es una herramienta para organizar información. No sustituye su criterio clínico.",
+      "disclaimerShort": "Herramienta de organización — no sustituye el criterio clínico.",
+      "notForEmergencies": "Este canal no es para emergencias. Ante una emergencia, use los servicios locales de emergencia."
+    },
+    "digest": {
+      "title": "Resumen de la mañana",
+      "subtitle": "Solo lo nuevo desde su última revisión — ordenado por fecha, no por estado de salud.",
+      "empty": "No hay excepciones nuevas.",
+      "kinds": {
+        "new_symptom": "Nuevo síntoma registrado",
+        "missed_dose": "Dosis no registrada",
+        "limit_crossed": "Límite del médico cruzado",
+        "new_document": "Documento nuevo"
+      },
+      "open": "Abrir resumen",
+      "lastLook": "Desde la última revisión"
+    },
+    "preVisit": {
+      "title": "Hoja previa a la consulta",
+      "subtitle": "Conteos descriptivos, últimas lecturas con fechas, totales del registro de dosis, preguntas del paciente y archivos nuevos.",
+      "generate": "Abrir hoja previa",
+      "readings": "Lecturas",
+      "doseLogs": "Registro de dosis",
+      "questions": "Preguntas del paciente",
+      "documents": "Documentos nuevos",
+      "symptoms": "Síntomas (texto del paciente)",
+      "empty": "Nada que mostrar en este periodo.",
+      "ofLogged": "{{logged}} de {{expected}} registrados"
+    },
+    "appointmentRequest": {
+      "title": "Solicitar cita",
+      "subtitle": "Redacte el mensaje, revíselo y luego envíelo. No se escribe en su calendario.",
+      "draft": "Borrador",
+      "proposedTimes": "Horarios propuestos (opcional, hasta 3)",
+      "message": "Mensaje",
+      "review": "Marcar como revisado",
+      "send": "Enviar al paciente",
+      "needsReview": "Revise el mensaje antes de enviarlo.",
+      "sent": "Solicitud enviada para que el paciente la revise.",
+      "slotPlaceholder": "Hora ISO o nota local"
+    },
+    "calendar": {
+      "title": "Agenda de hoy",
+      "subtitle": "Solo lectura desde Google u Outlook. Todas las horas usan su zona horaria.",
+      "stubHint": "OAuth del calendario aún no está conectado. La agenda permanece no disponible (cierre seguro).",
+      "stale": "La sincronización del calendario está atrasada. Agenda oculta hasta una sincronización reciente.",
+      "unavailable": "Calendario no disponible. Agenda oculta.",
+      "overlap": "Citas traslapadas marcadas",
+      "lastSync": "Última sincronización",
+      "empty": "No hay citas para hoy.",
+      "open": "Abrir agenda"
+    },
+    "officeHours": {
+      "title": "Horario de consultorio",
+      "subtitle": "Usted elige qué días y ventanas horarias aceptan mensajes de pacientes, en su zona horaria. Puede pausar los mensajes durante una ausencia. Fuera de sus ventanas, los mensajes se encolan para la siguiente.",
+      "timezone": "Zona horaria",
+      "saved": "Horario de consultorio guardado.",
+      "windowsHint": "Ventanas por día (24 h). Ejemplo: 09:00-13:00, 16:00-20:00. Déjelo vacío para cerrar ese día.",
+      "pauseMessaging": "Pausar mensajes (ausencia)",
+      "resumeMessaging": "Reanudar mensajes",
+      "pausedHint": "Los mensajes están pausados. Los mensajes nuevos del paciente quedan en cola hasta que reanude.",
+      "weekdays": {
+        "0": "Domingo",
+        "1": "Lunes",
+        "2": "Martes",
+        "3": "Miércoles",
+        "4": "Jueves",
+        "5": "Viernes",
+        "6": "Sábado"
+      }
+    },
+    "aiInsights": {
+      "title": "Ideas con IA",
+      "comingSoon": "Próximamente",
+      "body": "La revisión con IA registrada no está disponible en la Fase 1. Únase a la lista de espera si desea enterarse cuando abra.",
+      "waitlist": "Unirme a la lista de espera",
+      "waitlisted": "Está en la lista de espera."
+    },
+    "messaging": {
+      "title": "Mensajes",
+      "needsAction": "Requiere acción hoy",
+      "needsActionHint": "Solicitudes estructuradas del paciente que tocan en su ventana de consultorio actual.",
+      "emptyInbox": "Nada requiere acción ahora.",
+      "optionalReply": "Respuesta corta opcional",
+      "replied": "Respuesta guardada.",
+      "replyFailed": "No se pudo enviar la respuesta.",
+      "exportTitle": "Exportar resumen de mensajes",
+      "exportFailed": "No se pudo exportar el resumen.",
+      "notForEmergencies": "Este canal no es para emergencias.",
+      "writeTitle": "Escribir a su médico",
+      "writeHint": "Elija un tipo de solicitud. No es un chat abierto y no es para emergencias.",
+      "seeHours": "Horario de mensajes del médico",
+      "body": "Su mensaje",
+      "send": "Enviar solicitud",
+      "sent": "Solicitud enviada.",
+      "sendFailed": "No se pudo enviar la solicitud.",
+      "queuedNotice": "Fuera del horario de consultorio. Su mensaje queda en cola para la siguiente ventana del médico. No se espera respuesta hasta entonces.",
+      "pausedNotice": "El médico pausó los mensajes. Su mensaje queda en cola. No se espera respuesta hasta que reanude.",
+      "requestTypes": {
+        "refill": "Solicitud de surtido",
+        "side_effect": "Pregunta sobre efecto secundario",
+        "appointment": "Cita",
+        "general": "Pregunta general"
+      },
+      "actions": {
+        "approve_refill": "Aprobar surtido",
+        "book_visit": "Agendar visita",
+        "seen": "Visto",
+        "text_reply": "Enviar respuesta de texto"
+      }
+    }
+  }
+}

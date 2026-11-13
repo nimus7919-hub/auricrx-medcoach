@@ -3569,7 +3569,7 @@ app.post('/api/sync/push', verifyUser, async (req, res) => {
     
     const { dataType, payload } = req.body;
     
-    if (!dataType || !payload) {
+    if (!dataType || payload === undefined || payload === null) {
       return res.status(400).json({
         ok: false,
         error: 'MISSING_FIELDS',
@@ -3579,10 +3579,32 @@ app.post('/api/sync/push', verifyUser, async (req, res) => {
     
     // Check if exists
     const existing = await neonClient`
-      SELECT id, sync_version FROM health_data 
+      SELECT id, sync_version, payload FROM health_data 
       WHERE user_id = ${uid} AND data_type = ${dataType} AND is_deleted = false
       LIMIT 1
     `;
+
+    // Guard: do not wipe non-empty reminder payloads with an accidental empty array
+    // unless the client explicitly opts in (forceClear).
+    if (
+      dataType === 'reminders' &&
+      Array.isArray(payload) &&
+      payload.length === 0 &&
+      !req.body?.forceClear &&
+      existing.length > 0
+    ) {
+      let prior = existing[0].payload;
+      if (typeof prior === 'string') {
+        try { prior = JSON.parse(prior); } catch { prior = []; }
+      }
+      if (Array.isArray(prior) && prior.length > 0) {
+        return res.status(409).json({
+          ok: false,
+          error: 'EMPTY_OVERWRITE_BLOCKED',
+          message: 'Refusing to overwrite non-empty reminders with an empty list'
+        });
+      }
+    }
     
     let result;
     if (existing.length > 0) {
@@ -3742,6 +3764,16 @@ app.delete('/api/sync/delete/:dataType', verifyUser, async (req, res) => {
   }
 });
 
+// Doctor Mode Phase 1 — threshold alert evaluation (Firebase Admin + Expo push)
+// alerts/evaluate stays on verifyUser: patients trigger it after writing readings.
+require('./doctor-alerts').mountDoctorAlertRoutes(app, { verifyUser });
+const { verifyDoctorAuth, mountDoctorMfaRoutes } = require('./doctor-mfa');
+require('./doctor-verification').mountDoctorVerificationRoutes(app);
+mountDoctorMfaRoutes(app);
+// Doctor-only routes require MFA-issued tokens (sign_in_second_factor).
+require('./doctor-ai-summary').mountDoctorAiSummaryRoutes(app, { verifyDoctorAuth });
+require('./doctor-messaging').mountDoctorMessagingRoutes(app, { verifyDoctorAuth });
+
 app.listen(port, () => {
   console.log(`✅ API running on http://localhost:${port}`);
   console.log('🔥 SERVER IS RUNNING - IF YOU SEE THIS, THE SERVER IS WORKING!');
@@ -3749,4 +3781,14 @@ app.listen(port, () => {
   console.log('   POST /api/subscription/cancel');
   console.log('   POST /api/subscription/resubscribe');
   console.log('   GET  /api/me/subscription');
+  console.log('   POST /api/doctor/alerts/evaluate');
+  console.log('   POST /api/doctor/verification/submit');
+  console.log('   GET  /api/doctor/admin/verification/queue');
+  console.log('   POST /api/doctor/admin/verification/:uid/approve|reject|suspend|revoke');
+  console.log('   GET  /doctor-admin');
+  console.log('   POST /api/doctor/plan/mock-grant');
+  console.log('   POST /api/doctor/summary/descriptive');
+  console.log('   POST /api/doctor/messages/notify');
+  console.log('   POST /api/doctor/mfa/recovery/generate');
+  console.log('   POST /api/doctor/mfa/recovery/redeem');
 });

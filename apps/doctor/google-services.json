@@ -1,0 +1,122 @@
+{
+  "project_info": {
+    "project_number": "1043512593259",
+    "project_id": "auricrx-medcoach",
+    "storage_bucket": "auricrx-medcoach.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043512593259:android:cde5adeddd3a20645eda2e",
+        "android_client_info": {
+          "package_name": "com.auricrx.doctors"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043512593259-mkpcv9c0boht5j478n3eaamo87fl4i8d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr17-jW7GxYXwCfXa3f-x2S9kGYDbBL78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043512593259-mkpcv9c0boht5j478n3eaamo87fl4i8d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.auricrx.medcoach"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043512593259:android:b6dd7f396601df6c5eda2e",
+        "android_client_info": {
+          "package_name": "com.auricrx.medcoach"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043512593259-43cnaik3m2kuc7dcn3v7kl2od0t26kf2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.auricrx.medcoach",
+            "certificate_hash": "d5213f4f821a3787ddbc78ad2245f1e8dfaa911a"
+          }
+        },
+        {
+          "client_id": "1043512593259-4mrlc7bm03354lo0m96aub399e6fqpe8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.auricrx.medcoach",
+            "certificate_hash": "0b2ed500852b19edd161cfe3f9abd0a83e15300a"
+          }
+        },
+        {
+          "client_id": "1043512593259-4v9d860v74rs76ms9oa0gc0nglk0so8o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.auricrx.medcoach",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1043512593259-bcnqrd8cdhgrepn6n11i8fdogm23c3l8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.auricrx.medcoach",
+            "certificate_hash": "234e292ac1cd6237828ec2ea4b688dfe5abb1567"
+          }
+        },
+        {
+          "client_id": "1043512593259-to1ist2tdi2q4gucj2b65t6dum11r2o7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.auricrx.medcoach",
+            "certificate_hash": "5c87bea19e48d4825e1c98064ed1f0f8c533702f"
+          }
+        },
+        {
+          "client_id": "1043512593259-mkpcv9c0boht5j478n3eaamo87fl4i8d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr17-jW7GxYXwCfXa3f-x2S9kGYDbBL78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043512593259-mkpcv9c0boht5j478n3eaamo87fl4i8d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.auricrx.medcoach"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

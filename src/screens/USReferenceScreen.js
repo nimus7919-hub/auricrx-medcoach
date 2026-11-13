@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { PremiumEntitlementService } from '../services/premiumEntitlementService';
+import PremiumUpgradeScreen from './PremiumUpgradeScreen';
 import { usReference, costPlusSearchUrl } from '../services/usReferenceService';
 import notices from '../legal/usDisclaimers.json';
 import { Image } from 'react-native';
@@ -8,15 +10,41 @@ import GoldHealthIcon from '../components/GoldHealthIcon';
 import PremiumButton from '../components/PremiumButton';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import { styles as app } from './appStyles';
 const modes = { drugs: 'Drug search and labels', interactions: 'Interaction label text', recalls: 'FDA recalls', 'fda-labels': 'FDA labels', nadac: 'Acquisition cost', pharmacies: 'US pharmacies' };
 export default function USReferenceScreen({ onClose, initialMode = 'drugs', initialQuery = '', drugName = '' }) {
+  const insets = useSafeAreaInsets();
   const { getCardBackgroundColor, getCardBorderColor, getSubTextColor, getAccentColor } = useWallpaper();
   const cardBg = getCardBackgroundColor() + 'CC', border = getCardBorderColor(), sub = getSubTextColor(), accent = getAccentColor();
+  
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [entitlement, setEntitlement] = useState(null);
   const [mode, setMode] = useState(initialMode);
   const [query, setQuery] = useState(initialQuery);
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  
+  useEffect(() => {
+    checkPremiumAccess();
+  }, []);
+  
+  const checkPremiumAccess = async () => {
+    const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+    setEntitlement(ent);
+    if (!ent.hasPremiumAccess && (initialMode === 'pharmacies' || initialMode === 'drugs')) {
+      setShowUpgrade(true);
+    }
+  };
+  
+  if (showUpgrade && entitlement) {
+    return <PremiumUpgradeScreen 
+      onClose={onClose} 
+      entitlement={entitlement} 
+      feature={initialMode === 'pharmacies' ? 'pharmacy' : 'general'} 
+    />;
+  }
   const [data, setData] = useState(null);
   const [label, setLabel] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -24,6 +52,13 @@ export default function USReferenceScreen({ onClose, initialMode = 'drugs', init
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
   const load = async (kind, params) => {
+    const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+    if (!ent.hasPremiumAccess && (kind === 'pharmacies' || kind === 'drugs' || kind === 'nadac' || kind === 'recalls' || kind === 'interactions' || kind === 'fda-labels' || kind === 'labels' || kind === 'label')) {
+      setEntitlement(ent);
+      setShowUpgrade(true);
+      return;
+    }
+    
     request.current?.abort();
     const controller = new AbortController(); request.current = controller;
     setBusy(true); setError(''); setData(null); setLabel(null);
@@ -31,7 +66,10 @@ export default function USReferenceScreen({ onClose, initialMode = 'drugs', init
       const result = await usReference(kind, params, controller.signal);
       if (controller.signal.aborted) return;
       if (kind === 'label') setLabel(result); else setData(result);
-    } catch (e) { if (!controller.signal.aborted) setError(e.message); }
+    } catch (e) {
+      console.warn('USReference load failed:', e?.message || e);
+      if (!controller.signal.aborted) setError(require('../i18n').default.t('errors.generic'));
+    }
     finally { if (!controller.signal.aborted) setBusy(false); }
   };
   const search = () => load(mode === 'interactions' ? 'drugs' : mode, mode === 'pharmacies' ? { zip: query.trim(), city: city.trim(), state: state.toUpperCase().trim() } : mode === 'nadac' ? { ndc: query.trim() } : { name: query.trim() });
@@ -41,7 +79,7 @@ export default function USReferenceScreen({ onClose, initialMode = 'drugs', init
   const tool = TOOLS.find(t => t.key === mode || (t.key === 'drugs' && isMedicine)) || TOOLS[0];
   const placeholder = mode === 'pharmacies' ? 'ZIP code' : mode === 'nadac' ? '11-digit NDC from the package' : mode === 'interactions' ? 'First medicine name' : 'Medicine name, e.g. ibuprofen';
   const hint = mode === 'nadac' ? 'Typical pharmacy acquisition cost - pharmacy acquisition cost, not your price. Enter the exact 11-digit NDC from the package; do not guess a match.' : mode === 'pharmacies' ? 'Search by ZIP, or leave ZIP blank and enter city and state. Registry entries are not a recommendation.' : mode === 'recalls' ? 'Type a medicine name to see FDA safety recalls.' : mode === 'interactions' ? 'Search one medicine, pick the exact product, then read what its official label says about other medicines.' : 'Search a medicine, pick the exact one, then read its official label (uses, warnings, side effects).';
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+  return <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 0) + 12, paddingBottom: FAB_SCROLL_PADDING }]} keyboardShouldPersistTaps="handled">
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" onPress={onClose} style={app.headerHomeButton}><Image source={require('../../assets/AuricRX_home_button_across_screens.png')} style={app.headerHomeIcon} resizeMode="contain" /></TouchableOpacity>
     <DynamicText type="primary" style={[styles.h1, { fontFamily: 'Inter_700Bold' }]}>Look up a medicine</DynamicText>
     <Text style={[styles.intro, { color: sub, fontFamily: 'Inter_400Regular' }]}>Official US information about medicines, recalls, prices and pharmacies.</Text>

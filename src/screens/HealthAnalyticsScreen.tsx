@@ -16,6 +16,8 @@ import DynamicText from '../components/DynamicText';
 import { ActivityHealthSection } from './ActivityHealthScreen';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 // Simplified Health Analytics - no external service dependencies
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -89,6 +91,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
   
   // Create translation function from S object
   const { t } = useScreenTranslation();
+  const insets = useSafeAreaInsets();
   
   // Default theme if not provided
   const defaultTheme = {
@@ -1177,7 +1180,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -1185,6 +1188,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }

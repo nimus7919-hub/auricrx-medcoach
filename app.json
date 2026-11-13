@@ -2,7 +2,7 @@
   "expo": {
     "name": "AuricRX MedCoach",
     "slug": "auricrx-medcoach",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon-auric.png",
     "userInterfaceStyle": "light",
@@ -25,12 +25,12 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
+        "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo.",
         "UIBackgroundModes": [
           "location",
-          "fetch",
-          "location",
           "fetch"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       },
       "runtimeVersion": {
         "policy": "appVersion"
@@ -38,12 +38,13 @@
     },
     "android": {
       "softwareKeyboardLayoutMode": "resize",
-      "predictiveBackGestureEnabled": false,
+      "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-auric.png",
         "backgroundColor": "#0d1019"
       },
       "package": "com.auricrx.medcoach",
+      "versionCode": 11,
       "googleServicesFile": "./android/app/google-services.json",
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
@@ -74,9 +75,11 @@
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ],
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.1.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -89,6 +92,7 @@
           "iosUrlScheme": "com.googleusercontent.apps.1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1"
         }
       ],
+      "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [
         "expo-notifications",
@@ -108,7 +112,53 @@
           "isAndroidForegroundServiceEnabled": true
         }
       ],
-      "expo-background-fetch"
+      "expo-background-fetch",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "deploymentTarget": "15.5"
+          }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Usamos la cámara para escanear recetas, etiquetas y documentos médicos que tú eliges guardar.",
+          "microphonePermission": "AuricRX solo usa el micrófono si tú lo activas; no graba audio en segundo plano.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite elegir fotos de recetas o documentos para guardarlos en la app.",
+          "cameraPermission": "Usamos la cámara para tomar fotos de recetas y documentos que tú eliges guardar.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Permite agregar tus citas y recordatorios a tu calendario.",
+          "remindersPermission": "Permite crear recordatorios de tus medicamentos y citas."
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "./plugins/withIosFirebaseStatic"
     ],
     "extra": {
       "googleAuth": {

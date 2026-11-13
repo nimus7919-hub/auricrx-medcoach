@@ -3,12 +3,15 @@ import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View, StyleSheet
 import i18n from '../i18n';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { startupSafeAreaMetrics } from '../lib/safeAreaMetrics';
 import { Ionicons } from '@expo/vector-icons';
 import { vip } from '../theme/vip';
 import { getRegion, initializeRegion, subscribeRegion, setRegion, hasSavedRegionChoice, hasUSStartupConsent, saveUSStartupConsent } from '../services/region';
 import { US_POLICIES } from '../legal/usPolicies';
 import notices from '../legal/usDisclaimers.json';
 const Context = createContext(null);
+// Never leave startup waiting on storage: fall back to region confirmation after a timeout.
+const withTimeout = (promise, ms) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('REGION_INIT_TIMEOUT')), ms))]);
 async function stopLocationTasks() { try { await require('../services/smartNotificationEngine').disableUSLocationTasks(); } catch {} }
 export const useRegion = () => useContext(Context);
 export function RegionProvider({ children }) {
@@ -19,12 +22,12 @@ export function RegionProvider({ children }) {
   const [regionConfirmed, setRegionConfirmed] = useState(false);
   useEffect(() => {
     const unsubscribe = subscribeRegion(value => { update(value); setConsented(hasUSStartupConsent()); });
-    initializeRegion().then(async value => { if (value === 'US') { await stopLocationTasks(); if (!hasUSStartupConsent()) { try { await require('expo-notifications').cancelAllScheduledNotificationsAsync(); } catch {} } } update(value); setRegionConfirmed(hasSavedRegionChoice()); setConsented(hasUSStartupConsent()); setReady(true); }).catch(() => setError('Unable to load region preferences. Restart to retry.'));
+    withTimeout(initializeRegion(), 8000).then(async value => { if (value === 'US') { await stopLocationTasks(); if (!hasUSStartupConsent()) { try { await require('expo-notifications').cancelAllScheduledNotificationsAsync(); } catch {} } } update(value); setRegionConfirmed(hasSavedRegionChoice()); setConsented(hasUSStartupConsent()); setReady(true); }).catch(() => { setRegionConfirmed(false); setReady(true); });
     return unsubscribe;
   }, []);
   const changeRegion = async value => { await setRegion(value); if (value === 'US') await stopLocationTasks(); await i18n.changeLanguage(value === 'US' ? 'en' : 'es'); };
   const context = { region, changeRegion, withdraw: () => setConsented(false) };
-  return <Context.Provider value={context}>{!ready ? <View style={{ flex: 1, justifyContent: 'center' }}><ActivityIndicator /><Text>{error}</Text></View> : !regionConfirmed ? <RegionConfirmation onConfirmed={() => setRegionConfirmed(true)} /> : region === 'US' && !consented ? <USStartupConsent onSaved={() => setConsented(true)} /> : children}</Context.Provider>;
+  return <Context.Provider value={context}>{!ready ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: vip.colors.navy }}><ActivityIndicator size="large" color={vip.colors.gold} /><Text style={{ color: vip.colors.white, marginTop: 12 }}>{error}</Text></View> : !regionConfirmed ? <RegionConfirmation onConfirmed={() => setRegionConfirmed(true)} /> : region === 'US' && !consented ? <USStartupConsent onSaved={() => setConsented(true)} /> : children}</Context.Provider>;
 }
 function RegionConfirmation({ onConfirmed }) {
   const { region, changeRegion } = useRegion();
@@ -33,7 +36,7 @@ function RegionConfirmation({ onConfirmed }) {
   const [error, setError] = useState('');
   const spanish = (i18n.resolvedLanguage || i18n.language || 'es').startsWith('es');
   const name = value => value === 'MX' ? (spanish ? 'México' : 'Mexico') : (spanish ? 'Estados Unidos' : 'United States');
-  return <SafeAreaProvider><SafeAreaView style={styles.screen}><ScrollView contentContainerStyle={styles.content}><View style={styles.container}>
+  return <SafeAreaProvider initialMetrics={startupSafeAreaMetrics()}><SafeAreaView style={styles.screen}><ScrollView contentContainerStyle={styles.content}><View style={styles.container}>
     <Text accessibilityRole="header" style={styles.title}>AuricRX MedCoach</Text>
     <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.region} onPress={() => setSelection(value => value === 'MX' ? 'US' : 'MX')}>
       <Text style={styles.regionText}>{spanish ? 'Detectamos: ' : 'We detected: '}{name(region)} · {spanish ? 'Cambiar' : 'Change'}</Text>
@@ -59,7 +62,7 @@ function USStartupConsent({ onSaved }) {
   const labels = { terms: 'I agree to the Terms and Privacy Policy.', collect: 'I consent to collection and processing of my health data (medications, documents, herbs, and wellness entries).', share: 'I separately consent to sharing health data with OpenAI for chat and Firebase/Google, Render, and Neon for authentication, hosting, and synchronization.', adult: 'I confirm that I am 18 or older.' };
   const titles = { terms: 'Terms and privacy', collect: 'Health data collection', share: 'Health data sharing', adult: 'Age confirmation' };
   const disabled = busy || !Object.values(choices).every(Boolean);
-  return <SafeAreaProvider><SafeAreaView style={styles.screen}>
+  return <SafeAreaProvider initialMetrics={startupSafeAreaMetrics()}><SafeAreaView style={styles.screen}>
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.container}>
         <Text accessibilityRole="header" style={styles.title}>AuricRX MedCoach - United States</Text>

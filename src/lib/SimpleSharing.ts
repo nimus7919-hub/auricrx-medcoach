@@ -92,8 +92,8 @@ export class SimpleSharing {
       
       // Show error alert
       Alert.alert(
-        uiI18n.t("adminProfile.error"),
-        uiI18n.t("ui.failedToOpenWhatsappValue_c60ff1", { value1: error instanceof Error ? error.message : 'Unknown error' }),
+        uiI18n.t("errors.title"),
+        uiI18n.t("errors.generic"),
         [
           {
             text: uiI18n.t("adminProfile.ok"),
@@ -176,8 +176,8 @@ export class SimpleSharing {
       
       // Show error alert
       Alert.alert(
-        uiI18n.t("adminProfile.error"),
-        uiI18n.t("ui.failedToOpenGmailValue_fe0fdc", { value1: error instanceof Error ? error.message : 'Unknown error' }),
+        uiI18n.t("errors.title"),
+        uiI18n.t("errors.generic"),
         [
           {
             text: uiI18n.t("adminProfile.ok"),

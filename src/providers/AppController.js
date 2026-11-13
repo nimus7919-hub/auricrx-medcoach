@@ -20,6 +20,7 @@ import { useMedicalStream } from "./../hooks/useMedicalStream";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView, Alert, TextInput, Linking, AppState, Platform, Keyboard, StatusBar, ActivityIndicator } from 'react-native';
 import TypingEffect from "./../components/TypingEffect";
+import MarkdownText from "./../components/MarkdownText";
 import * as ImagePicker from "expo-image-picker";
 import { herbs } from "./../data/herbs";
 
@@ -37,6 +38,16 @@ import * as Location from "expo-location";
 import { Audio } from "expo-audio";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  TOMBSTONE_STORAGE_KEY,
+  addReminderTombstones,
+  mergeReminders,
+  normalizeTombstones,
+  pruneReminderTombstones,
+  shouldPushReminders,
+} from "../utils/reminderPersistence";
+import { toUserFacingError, logTechnicalError } from "../utils/userFacingError";
+import { resolveSearchLocation } from "../utils/resolveSearchLocation";
 
 import { askMedicalAI } from "./../api/api.medical-ai";
 
@@ -136,6 +147,15 @@ export default function App() {
   const openAddReminder = () => { setOpenReminderOnEntry(true); setRoute('reminders'); };
   const [route, setRoute] = useAndroidBackNavigation(!showAuth && !isRestoringAuth && !isLoading);
   const [resetAuthToSignIn, setResetAuthToSignIn] = useState(0); // Counter to trigger reset
+  // Reminder cloud-sync guards (declared early for sign-out / auth handlers)
+  const remindersCloudReadyRef = useRef(false);
+  const remoteRemindersHadDataRef = useRef(false);
+  const allowEmptyRemindersPushRef = useRef(false);
+  const remindersRef = useRef([]);
+  const reminderTombstonesRef = useRef({});
+  const skipReminderTombstoneRef = useRef(false);
+  const clearRemindersStateRef = useRef(() => {});
+  const promptSessionExpiredRef = useRef(() => {});
 
   // Authentication handlers
   const handleAuthSuccess = async (authData) => {
@@ -240,15 +260,15 @@ export default function App() {
         });
       } else {
         showAlert({
-          title: uiI18n.t("adminProfile.error"),
-          message: result.error,
+          title: uiI18n.t("errors.title"),
+          message: toUserFacingError(result.error, 'errors.generic'),
           buttonText: uiI18n.t("adminProfile.ok"),
         });
       }
     } catch (error) {
       console.error('Auth error:', error);
       showAlert({
-        title: uiI18n.t("adminProfile.error"),
+        title: uiI18n.t("errors.title"),
         message: uiI18n.t("ui.authenticationFailedPleaseTryAgain"),
         buttonText: uiI18n.t("adminProfile.ok"),
       });
@@ -261,7 +281,38 @@ export default function App() {
 
   const handleSignOut = async () => {
     try {
+      // Push reminders (including offline deletes via filtered/empty payload) before clearing.
+      try {
+        const pending = remindersRef.current || [];
+        const tombstones = reminderTombstonesRef.current || {};
+        const hasPendingDeletes = Object.keys(tombstones).length > 0;
+        if (pending.length || hasPendingDeletes) {
+          const result = await cloudSyncService.syncReminders(
+            pending,
+            (!pending.length && hasPendingDeletes) || allowEmptyRemindersPushRef.current
+              ? { forceClear: true }
+              : {}
+          );
+          if (result?.success) {
+            reminderTombstonesRef.current = pruneReminderTombstones(tombstones, pending);
+            await AsyncStorage.setItem(
+              TOMBSTONE_STORAGE_KEY,
+              JSON.stringify(reminderTombstonesRef.current)
+            ).catch(() => {});
+          }
+        }
+      } catch (syncError) {
+        console.warn('⚠️ Failed to sync reminders before sign-out:', syncError);
+      }
       await authService.signOut();
+      remindersCloudReadyRef.current = false;
+      remoteRemindersHadDataRef.current = false;
+      allowEmptyRemindersPushRef.current = false;
+      skipReminderTombstoneRef.current = true;
+      reminderTombstonesRef.current = {};
+      AsyncStorage.removeItem(TOMBSTONE_STORAGE_KEY).catch(() => {});
+      clearRemindersStateRef.current();
+      skipReminderTombstoneRef.current = false;
       setUser(null);
       setUserData(null);
       setShowAuth(true);
@@ -320,34 +371,26 @@ export default function App() {
           message: S.membershipCancelled || uiI18n.t("settings.membershipCancelled")
         });
         setShowMembershipResultModal(true);
-        // Refresh subscription status
+        // Refresh subscription status (soft-fail keeps last known state)
         if (user?.firebaseUser) {
           const status = await getSubscriptionStatus(user.firebaseUser);
-          setSubscriptionStatus(status);
+          if (status?.ok) setSubscriptionStatus(status);
         }
       } else {
+        logTechnicalError('cancelMembership/api', result);
         setMembershipResult({
           type: 'error',
-          title: S.error || uiI18n.t("adminProfile.error"),
-          message: result.message || result.error || S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed")
+          title: S.error || uiI18n.t("errors.title"),
+          message: S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed"),
         });
         setShowMembershipResultModal(true);
       }
     } catch (error) {
-      console.error('Cancel membership error:', error);
-      let errorMessage = S.cancelMembershipFailed || uiI18n.t("settings.cancelMembershipFailed");
-      
-      // Provide more specific error messages
-      if (error.message && error.message.includes('JSON Parse error')) {
-        errorMessage = uiI18n.t("ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport");
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+      logTechnicalError('cancelMembership', error);
       setMembershipResult({
         type: 'error',
-        title: S.error || uiI18n.t("adminProfile.error"),
-        message: errorMessage
+        title: S.error || uiI18n.t("errors.title"),
+        message: toUserFacingError(error, 'settings.cancelMembershipFailed'),
       });
       setShowMembershipResultModal(true);
     }
@@ -396,33 +439,25 @@ export default function App() {
           message: S.membershipRestarted || uiI18n.t("settings.membershipRestarted")
         });
         setShowMembershipResultModal(true);
-        // Refresh subscription status
         if (user?.firebaseUser) {
           const status = await getSubscriptionStatus(user.firebaseUser);
-          setSubscriptionStatus(status);
+          if (status?.ok) setSubscriptionStatus(status);
         }
       } else {
+        logTechnicalError('restartMembership/api', result);
         setMembershipResult({
           type: 'error',
-          title: S.error || uiI18n.t("adminProfile.error"),
-          message: result.message || result.error || S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed")
+          title: S.error || uiI18n.t("errors.title"),
+          message: S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed"),
         });
         setShowMembershipResultModal(true);
       }
     } catch (error) {
-      console.error('Restart membership error:', error);
-      let errorMessage = S.restartMembershipFailed || uiI18n.t("settings.restartMembershipFailed");
-      
-      if (error.message && error.message.includes('JSON Parse error')) {
-        errorMessage = uiI18n.t("ui.serverErrorInvalidResponseFromServerPleaseTryAgainLaterOrContactSupport");
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+      logTechnicalError('restartMembership', error);
       setMembershipResult({
         type: 'error',
-        title: S.error || uiI18n.t("adminProfile.error"),
-        message: errorMessage
+        title: S.error || uiI18n.t("errors.title"),
+        message: toUserFacingError(error, 'settings.restartMembershipFailed'),
       });
       setShowMembershipResultModal(true);
     }
@@ -637,16 +672,12 @@ export default function App() {
     // Tiles
     reminders: t('tiles.reminders'),
     pharmacyLocations: t('tiles.pharmacyLocations'),
-    medications: t('tiles.medications'),
     labsLocations: t('tiles.labsLocations'),
     prescription: t('tiles.prescription'),
     appointmentLog: t('tiles.appointmentLog'),
     documents: t('tiles.documents'),
     herbs: t('tiles.herbs'),
     supplements: t('tiles.supplements'),
-    smartAlerts: t('tiles.smartAlerts'),
-    healthAnalytics: t('tiles.healthAnalytics'),
-    aiHealth: t('tiles.aiHealth'),
     
     // Dashboard
     dashboard: t('dashboard.title'),
@@ -678,30 +709,15 @@ export default function App() {
     pushNotifications: t('settings.pushNotifications'),
     emailNotifications: t('settings.emailNotifications'),
     smsNotifications: t('settings.smsNotifications'),
-    changePassword: t('settings.changePassword'),
     dataCollection: t('settings.dataCollection'),
     analytics: t('settings.analytics'),
-    changeWallpaper: t('settings.changeWallpaper'),
     
     // Common
-    ok: t('common.ok'),
-    cancel: t('common.cancel'),
-    save: t('common.save'),
-    delete: t('common.delete'),
-    edit: t('common.edit'),
     add: t('common.add'),
-    close: t('common.close'),
-    back: t('common.back'),
     next: t('common.next'),
     previous: t('common.previous'),
     done: t('common.done'),
     loading: t('common.loading'),
-    error: t('common.error'),
-    success: t('common.success'),
-    warning: t('common.warning'),
-    info: t('common.info'),
-    yes: t('common.yes'),
-    no: t('common.no'),
     confirm: t('common.confirm'),
     search: t('common.search'),
     filter: t('common.filter'),
@@ -712,27 +728,17 @@ export default function App() {
     skip: t('common.skip'),
     finish: t('common.finish'),
     start: t('common.start'),
-    stop: t('common.stop'),
-    pause: t('common.pause'),
-    resume: t('common.resume'),
     reset: t('common.reset'),
-    clear: t('common.clear'),
     select: t('common.select'),
     deselect: t('common.deselect'),
     all: t('common.all'),
     none: t('common.none'),
-    other: t('common.other'),
-    custom: t('common.custom'),
-    default: t('common.default'),
     advanced: t('common.advanced'),
     basic: t('common.basic'),
     simple: t('common.simple'),
     complex: t('common.complex'),
     easy: t('common.easy'),
     hard: t('common.hard'),
-    low: t('common.low'),
-    medium: t('common.medium'),
-    high: t('common.high'),
     small: t('common.small'),
     large: t('common.large'),
     short: t('common.short'),
@@ -750,10 +756,8 @@ export default function App() {
     updated: t('common.updated'),
     created: t('common.created'),
     modified: t('common.modified'),
-    active: t('common.active'),
     inactive: t('common.inactive'),
     enabled: t('common.enabled'),
-    disabled: t('common.disabled'),
     visible: t('common.visible'),
     hidden: t('common.hidden'),
     public: t('common.public'),
@@ -816,19 +820,6 @@ export default function App() {
     selected: t('reminders.selected'),
     
     // Fasting Profile
-    yourFastingProfile: t("ai.yourFastingProfile"),
-    needsReview: t("ai.needsReview"),
-    compatible: t("ai.compatible"),
-    notAnalyzed: t("ai.notAnalyzed"),
-    recommendedFastingWindow: t("ai.recommendedFastingWindow"),
-    importantConsiderations: t("ai.importantConsiderations"),
-    reAnalyzeFasting: t("ai.reAnalyzeFasting"),
-    analyzeFastingCompatibility: t("ai.analyzeFastingCompatibility"),
-    completeYourFastingProfile: t("ai.completeYourFastingProfile"),
-    exportHealthReport: t("ai.exportHealthReport"),
-    fastingAnalysis: t("ai.fastingAnalysis"),
-    status: t("ai.status"),
-    analysis: t("ai.analysis"),
     
     // Health Profile
     healthProfile: t('healthProfile.title'),
@@ -854,7 +845,6 @@ export default function App() {
     contributionSuccess: t('ai.contributionSuccess'),
     contributionSuccessText: t('ai.contributionSuccessText'),
     submitContribution: t('ai.submitContribution'),
-    supplementName: t('ai.supplementName'),
     supplementNamePlaceholder: t('ai.supplementNamePlaceholder'),
     brandPlaceholder: t('ai.brandPlaceholder'),
     dosagePlaceholder: t('ai.dosagePlaceholder'),
@@ -862,7 +852,6 @@ export default function App() {
     quantityPlaceholder: t('ai.quantityPlaceholder'),
     storeNamePlaceholder: t('ai.storeNamePlaceholder'),
     storeAddressPlaceholder: t('ai.storeAddressPlaceholder'),
-    weight: t('healthProfile.weight'),
     height: t('healthProfile.height'),
     weightUnit: t('healthProfile.weightUnit'),
     heightUnit: t('healthProfile.heightUnit'),
@@ -889,13 +878,13 @@ export default function App() {
     chooseWallpaperDescription: t('settings.chooseWallpaperDescription'),
     emailUs: t('settings.emailUs'),
     emailAddress: t('settings.emailAddress'),
+    forBusiness: t('settings.forBusiness'),
     signOut: t('settings.signOut'),
     subscription: t('settings.subscription'),
     currentPlan: t('settings.currentPlan'),
     proPlan: t('settings.proPlan'),
     trial: t('settings.trial'),
     daysRemaining: t('settings.daysRemaining'),
-    status: t('settings.status'),
     cancelMembership: t('settings.cancelMembership'),
     restartMembership: t('settings.restartMembership'),
     cancelMembershipConfirm: t('settings.cancelMembershipConfirm', { date: (subscriptionStatus?.currentPeriodEnd || subscriptionStatus?.current_period_end) ? new Date(subscriptionStatus.currentPeriodEnd || subscriptionStatus.current_period_end).toLocaleDateString() : (uiI18n.t("localized.AppController.S.sObject.cancelMembershipConfirm.date.text855")) }),
@@ -942,7 +931,6 @@ export default function App() {
     adminProfileTitle: t('adminProfile.title'),
     displayName: t('adminProfile.displayName'),
     email: t('adminProfile.email'),
-    phoneNumber: t('adminProfile.phoneNumber'),
     noPhoneNumber: t('adminProfile.noPhoneNumber'),
     updateProfile: t('adminProfile.updateProfile'),
     securitySettings: t('adminProfile.securitySettings'),
@@ -951,7 +939,6 @@ export default function App() {
     processing: t('adminProfile.processing'),
     error: t('adminProfile.error'),
     success: t('adminProfile.success'),
-    ok: t('adminProfile.ok'),
     displayNameRequired: t('adminProfile.displayNameRequired'),
     profileUpdatedSuccessfully: t('adminProfile.profileUpdatedSuccessfully'),
     failedToUpdateProfile: t('adminProfile.failedToUpdateProfile'),
@@ -1093,10 +1080,8 @@ export default function App() {
     strengthExample: t('medications.strengthExample'),
     strengthPlaceholder: t('medications.strengthPlaceholder'),
     components: t('medications.components'),
-    notesOptional: t('medications.notesOptional'),
     selectTimes: t('medications.selectTimes'),
     startDate: t('medications.startDate'),
-    endDateOptional: t('medications.endDateOptional'),
     
     // Supplements
     addSupplement: t('supplements.addSupplement'),
@@ -1134,21 +1119,14 @@ export default function App() {
     medication: t('reminders.medication'),
     appointment: t('reminders.appointment'),
     exercise: t('reminders.exercise'),
-    other: t('reminders.other'),
-    daily: t('reminders.daily'),
-    weekly: t('reminders.weekly'),
-    monthly: t('reminders.monthly'),
-    custom: t('reminders.custom'),
     medicationDetails: t('reminders.medicationDetails'),
     medicationNamePlaceholder: t('reminders.medicationNamePlaceholder'),
     appointmentDetails: t('reminders.appointmentDetails'),
     addressPlaceholder: t('reminders.addressPlaceholder'),
     startDateOptional: t('reminders.startDateOptional'),
     endDateOptional: t('reminders.endDateOptional'),
-    notesOptional: t('reminders.notesOptional'),
     selectTime: t('reminders.selectTime'),
     total: t('reminders.total'),
-    selectUnit: t('reminders.selectUnit'),
     selectQuantityUnit: t('reminders.selectQuantityUnit'),
     
     // Units translations
@@ -1193,7 +1171,6 @@ export default function App() {
     
     // Dashboard Cards
     smartAlerts: t('tiles.smartAlerts'),
-    healthAnalytics: t('tiles.healthAnalytics'),
     aiHealth: t('tiles.aiHealth'),
     
     // Fasting Profile
@@ -1254,16 +1231,13 @@ export default function App() {
     wearableDevices: t('healthProfile.wearableDevices'),
     
     // Options
-    low: t('healthProfile.low'),
     normal: t('healthProfile.normal'),
-    high: t('healthProfile.high'),
     poor: t('healthProfile.poor'),
     fair: t('healthProfile.fair'),
     good: t('healthProfile.good'),
     excellent: t('healthProfile.excellent'),
     sedentary: t('healthProfile.sedentary'),
     light: t('healthProfile.light'),
-    moderate: t('healthProfile.moderate'),
     athlete: t('healthProfile.athlete'),
     timeRestricted: t('healthProfile.timeRestricted'),
     alternateDay: t('healthProfile.alternateDay'),
@@ -1302,12 +1276,7 @@ export default function App() {
     pleaseEnterSymptoms: t('ai.pleaseEnterSymptoms'),
     pleaseEnterMedications: t('ai.pleaseEnterMedications'),
     symptomAnalysisComplete: t('ai.symptomAnalysisComplete'),
-    noInteractionsFound: t('ai.noInteractionsFound'),
     noKnownInteractions: t('ai.noKnownInteractions'),
-    foundInteractions: t('ai.foundInteractions'),
-    severity: t('ai.severity'),
-    urgency: t('ai.urgency'),
-    recommendations: t('ai.recommendations'),
     followUpActions: t('ai.followUpActions'),
     store: t('ai.store'),
     delete: t('ai.delete'),
@@ -1334,10 +1303,6 @@ export default function App() {
     low: t('ai.low'),
     medium: t('ai.medium'),
     high: t('ai.high'),
-    emergency: t('ai.emergency'),
-    mild: t('ai.mild'),
-    moderate: t('ai.moderate'),
-    severe: t('ai.severe'),
     contactDoctorImmediately: t('ai.contactDoctorImmediately'),
     exportSymptomReport: t('ai.exportSymptomReport'),
     importantNotice: t('ai.importantNotice'),
@@ -1380,7 +1345,6 @@ export default function App() {
     noInteractionsMessage: t('ai.noInteractionsMessage'),
     clinicalEffects: t('ai.clinicalEffects'),
     management: t('ai.management'),
-    summary: t('ai.summary'),
     generalSymptoms: t('ai.generalSymptoms'),
     multipleSymptomsDescription: t('ai.multipleSymptomsDescription'),
     monitorSymptomsClosely: t('ai.monitorSymptomsClosely'),
@@ -1395,7 +1359,6 @@ export default function App() {
     mildSideEffectsPossible: t('ai.mildSideEffectsPossible'),
     monitorUnusualSymptoms: t('ai.monitorUnusualSymptoms'),
     drugInteractionDatabase: t('ai.drugInteractionDatabase'),
-    severity: t('ai.severity'),
     urgency: t('ai.urgency'),
     recommendations: t('ai.recommendations'),
     fastingCompatible: t('ai.fastingCompatible'),
@@ -1422,13 +1385,11 @@ export default function App() {
     goals: t('ai.goals'),
     medicalSupervisionMonitoring: t('ai.medicalSupervisionMonitoring'),
     exportSuccessful: t('ai.exportSuccessful'),
-    healthReportGenerated: t('ai.healthReportGenerated'),
     setupRequired: t('ai.setupRequired'),
     pleaseGoToSettings: t('ai.pleaseGoToSettings'),
     info: t('ai.info'),
     warning: t('ai.warning'),
     critical: t('ai.critical'),
-    unknown: t('ai.unknown'),
     
     // Appointments
     appointmentManagement: t('appointments.appointmentManagement'),
@@ -1443,7 +1404,6 @@ export default function App() {
     locationPlaceholder: t('appointments.locationPlaceholder'),
     date: t('appointments.date'),
     time: t('appointments.time'),
-    notesOptional: t('appointments.notesOptional'),
     notesPlaceholder: t('appointments.notesPlaceholder'),
     schedule: t('appointments.schedule'),
     addDoctor: t('appointments.addDoctor'),
@@ -1464,7 +1424,6 @@ export default function App() {
     noAppointmentsFound: t('appointments.noAppointmentsFound'),
     noPastAppointments: t('appointments.noPastAppointments'),
     attended: t('appointments.attended'),
-    missed: t('appointments.missed'),
     doctorVisit: t('appointments.doctorVisit'),
     labTest: t('appointments.labTest'),
     pharmacy: t('appointments.pharmacy'),
@@ -1478,7 +1437,6 @@ export default function App() {
     completed: t('appointments.completed'),
     cancelled: t('appointments.cancelled'),
     rescheduled: t('appointments.rescheduled'),
-    unknown: t('appointments.unknown'),
     totalAppointments: t('appointments.totalAppointments'),
     upcoming: t('appointments.upcoming'),
     doctors: t('appointments.doctors'),
@@ -1679,49 +1637,79 @@ export default function App() {
     return sObject;
   }, [t, isReady, uiI18n.resolvedLanguage]);
 
-  // meds/reminders (light placeholder list)
-  const [reminders, setReminders] = useState([]);
+  // meds/reminders — empty until AsyncStorage / Neon restore (no demo placeholders)
+  const [reminders, setRemindersState] = useState([]);
   const [remindersLoaded, setRemindersLoaded] = useState(false);
-  const [meds, setMeds] = useState([
-    {
-      id: '1',
-      name: 'Metformina',
-      strength: '500mg',
-      strengthValue: '500',
-      strengthUnit: uiI18n.t("reminders.units.mg"),
-      status: 'taking',
-      times: ['08:00', '20:00'],
-      startDate: '2024-01-15',
-      endDate: '',
-      notes: '',
-      dosesLeft: '0',
-      quantity: '0 tablet',
-      quantityValue: '0',
-      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
-      remainingQuantity: '0',
-      lastRefill: null,
-      isSingleComponent: true
-    },
-    {
-      id: '2',
-      name: 'Aspirina',
-      strength: '100Mg',
-      strengthValue: '100',
-      strengthUnit: uiI18n.t("reminders.units.mg"),
-      status: 'taking',
-      times: ['17:30'],
-      startDate: '2024-01-01',
-      endDate: '',
-      notes: '',
-      dosesLeft: '30',
-      quantity: '30 tablet',
-      quantityValue: '30',
-      quantityUnit: uiI18n.t("medications.quantityUnits.tablet"),
-      remainingQuantity: '30',
-      lastRefill: null,
-      isSingleComponent: true
+  const [meds, setMeds] = useState([]);
+  const [medsLoaded, setMedsLoaded] = useState(false);
+
+  // Wrap reminder updates so offline deletes become durable tombstones.
+  // options.skipTombstone must be captured in-closure — setState updaters run later.
+  const setReminders = (updater, options = {}) => {
+    const skipTombstone = !!(options.skipTombstone || skipReminderTombstoneRef.current);
+    setRemindersState((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const nextList = Array.isArray(next) ? next : [];
+      const prevList = Array.isArray(prev) ? prev : [];
+      if (!skipTombstone && prevList.length) {
+        const nextIds = new Set(nextList.map((r) => String(r?.id)));
+        const removedIds = prevList
+          .filter((r) => r && r.id != null && !nextIds.has(String(r.id)))
+          .map((r) => r.id);
+        if (removedIds.length) {
+          reminderTombstonesRef.current = addReminderTombstones(
+            reminderTombstonesRef.current,
+            removedIds
+          );
+          AsyncStorage.setItem(
+            TOMBSTONE_STORAGE_KEY,
+            JSON.stringify(reminderTombstonesRef.current)
+          ).catch(() => {});
+          // Ensure the filtered list is pushed even if it becomes empty.
+          if (nextList.length === 0) {
+            allowEmptyRemindersPushRef.current = true;
+          }
+        }
+      }
+      return nextList;
+    });
+  };
+
+  remindersRef.current = reminders;
+  clearRemindersStateRef.current = () => {
+    setReminders([], { skipTombstone: true });
+    setMeds([]);
+  };
+
+  promptSessionExpiredRef.current = async () => {
+    // Only prompt after getSubscriptionStatus confirmed expiry post-refresh.
+    // Double-check Firebase still cannot mint a token so a race cannot wipe a valid session.
+    const live = authService.getCurrentUser();
+    if (live) {
+      try {
+        await live.getIdToken(true);
+        console.warn('⚠️ Skipping session-expired prompt — Firebase session still valid after refresh');
+        return;
+      } catch (tokenError) {
+        const code = String(tokenError?.code || '');
+        const definitive = /auth\/(user-token-expired|invalid-user-token|user-disabled|user-not-found|invalid-refresh-token|id-token-expired|id-token-revoked)/i.test(
+          code || String(tokenError?.message || '')
+        );
+        if (!definitive) {
+          console.warn('⚠️ Skipping session-expired prompt — token refresh failed transiently', tokenError);
+          return;
+        }
+      }
     }
-  ]); // lifted medications state
+    showAlert({
+      title: uiI18n.t("errors.title"),
+      message: uiI18n.t("errors.sessionExpired"),
+      buttonText: uiI18n.t("adminProfile.ok"),
+      onPress: () => {
+        handleSignOut();
+      },
+    });
+  };
   const [supplements, setSupplements] = useState([
     {
       id: '1',
@@ -1810,34 +1798,40 @@ useEffect(() => {
   const loadLocationData = async () => {
     if (getRegion() === 'US') return;
     try {
-      // Request location permission
+      // Never invent a default city — skip search when location is off/denied
       const { status } = await requestSearchLocationPermission();
-      if (status !== 'granted') {
-        console.log('📍 Location permission denied - skipping auto-load');
-        return;
+      let coords = null;
+      let positionError = null;
+
+      if (status === 'granted') {
+        try {
+          const position = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+            timeout: 10000, // 10 second timeout
+            maximumAge: 300000 // 5 minutes
+          });
+          coords = position.coords;
+          console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
+        } catch (locationError) {
+          positionError = locationError;
+          console.warn('⚠️ Location request failed — skipping pharmacy/lab auto-load:', locationError?.message || locationError);
+        }
+      } else {
+        console.log('📍 Location permission denied — skipping pharmacy/lab auto-load');
       }
 
-      // Get current position with error handling for Google Play Services issues
-      let coords;
-      try {
-        const position = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-          timeout: 10000, // 10 second timeout
-          maximumAge: 300000 // 5 minutes
-        });
-        coords = position.coords;
-        console.log('📍 Auto-loading data for coordinates:', coords.latitude, coords.longitude);
-      } catch (locationError) {
-        // Handle Google Play Services disconnection or other location errors
-        const errorMessage = locationError?.message || locationError?.toString() || '';
-        if (errorMessage.includes('Google Play services') || errorMessage.includes('service disconnection')) {
-          console.warn('⚠️ Google Play Services unavailable - skipping auto-load location data');
-          return;
-        }
-        // For other errors, log but don't crash
-        console.warn('⚠️ Location request failed - skipping auto-load:', errorMessage);
+      const resolved = resolveSearchLocation({ permissionStatus: status, coords, positionError });
+      if (!resolved.ok) {
+        const message = uiI18n.t('locationSearch.locationOffMessage');
+        setPharmacies([]);
+        setPharmaciesError(message);
+        setPharmaciesLoading(false);
+        setLabs([]);
+        setLabsError(message);
+        setLabsLoading(false);
         return;
       }
+      coords = resolved.coords;
 
       // Load pharmacies
       setPharmaciesLoading(true);
@@ -1845,6 +1839,7 @@ useEffect(() => {
         const { findNearbyPharmacies } = await import('../../services/pharmacySearch');
         const nearbyPharmacies = await findNearbyPharmacies(coords.latitude, coords.longitude, lang, { noCache: true });
         setPharmacies(nearbyPharmacies);
+        setPharmaciesError(null);
         console.log('🏪 Auto-loaded pharmacies:', nearbyPharmacies.length);
         
         // Debug: Log first pharmacy data to see what we're getting
@@ -1871,6 +1866,7 @@ useEffect(() => {
         const { findNearbyLabs } = await import('../../services/labSearch');
         const nearbyLabs = await findNearbyLabs(coords.latitude, coords.longitude, lang, { noCache: true });
         setLabs(nearbyLabs);
+        setLabsError(null);
         console.log('🧪 Auto-loaded labs:', nearbyLabs.length);
         
         // Debug: Log first lab data to see what we're getting
@@ -2259,14 +2255,28 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (N) setNight(N === '1');
         if (M) setMoodShift(M === '1');
 
-        if (R) { try { setReminders(JSON.parse(R)); } catch {} }
+        try {
+          const tombRaw = await AsyncStorage.getItem(TOMBSTONE_STORAGE_KEY);
+          reminderTombstonesRef.current = normalizeTombstones(tombRaw);
+        } catch {
+          reminderTombstonesRef.current = {};
+        }
+        if (R) {
+          try {
+            const parsed = JSON.parse(R);
+            const filtered = mergeReminders(parsed, [], {
+              tombstones: reminderTombstonesRef.current,
+            });
+            setReminders(filtered, { skipTombstone: true });
+          } catch {
+          }
+        }
         if (P) { try { setRxPhotos(JSON.parse(P)); } catch {} }
   if (V) { try { setVoiceNotes(JSON.parse(V)); } catch {} }
         if (MD) { 
           try { 
             const parsedMeds = JSON.parse(MD);
-            // Only set meds if they exist, otherwise keep defaults
-            if (parsedMeds && parsedMeds.length > 0) {
+            if (Array.isArray(parsedMeds)) {
               setMeds(parsedMeds);
             }
           } catch {} 
@@ -2274,7 +2284,10 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         if (SD) { try { setSelectedAIDoctor(SD); } catch {} }
       } catch {
         // ignore corrupt storage on boot
-      } finally { setRemindersLoaded(true); }
+      } finally {
+        setRemindersLoaded(true);
+        setMedsLoaded(true);
+      }
     })();
   }, []);
 
@@ -2312,8 +2325,50 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
   useEffect(() => { if (remindersLoaded) AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(reminders)); }, [reminders, remindersLoaded]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.rxPhotos, JSON.stringify(rxPhotos)); }, [rxPhotos]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.voiceNotes, JSON.stringify(voiceNotes)); }, [voiceNotes]);
-  useEffect(() => { AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds]);
+  useEffect(() => { if (medsLoaded) AsyncStorage.setItem(STORAGE.meds, JSON.stringify(meds)); }, [meds, medsLoaded]);
   useEffect(() => { AsyncStorage.setItem(STORAGE.selectedAIDoctor, selectedAIDoctor); }, [selectedAIDoctor]);
+
+  // Allow pushing [] after the user deletes the last reminder (not during initial hydrate).
+  const prevRemindersCountRef = useRef(0);
+  useEffect(() => {
+    if (remindersCloudReadyRef.current && prevRemindersCountRef.current > 0 && reminders.length === 0) {
+      allowEmptyRemindersPushRef.current = true;
+    }
+    prevRemindersCountRef.current = reminders.length;
+  }, [reminders]);
+
+  // Push reminders to Neon after local+cloud hydration so they survive logout/reinstall/reboot.
+  // Pending tombstones force a push (including empty) so offline deletes reach the server.
+  useEffect(() => {
+    if (!remindersLoaded || !user || showAuth) return;
+    const hasPendingDeletes = Object.keys(reminderTombstonesRef.current || {}).length > 0;
+    const forceClear =
+      (allowEmptyRemindersPushRef.current || hasPendingDeletes) && reminders.length === 0;
+    if (!shouldPushReminders({
+      cloudReady: remindersCloudReadyRef.current,
+      reminders,
+      remoteHadData: remoteRemindersHadDataRef.current,
+      allowEmptyPush: forceClear,
+      hasPendingDeletes,
+    })) return;
+    allowEmptyRemindersPushRef.current = false;
+    if (reminders.length > 0) remoteRemindersHadDataRef.current = true;
+    else if (forceClear) remoteRemindersHadDataRef.current = false;
+    cloudSyncService.syncReminders(reminders, forceClear ? { forceClear: true } : {}).then((result) => {
+      if (result?.success) {
+        reminderTombstonesRef.current = pruneReminderTombstones(
+          reminderTombstonesRef.current,
+          reminders
+        );
+        AsyncStorage.setItem(
+          TOMBSTONE_STORAGE_KEY,
+          JSON.stringify(reminderTombstonesRef.current)
+        ).catch(() => {});
+      }
+    }).catch(error => {
+      console.warn('⚠️ Reminder cloud sync failed:', error);
+    });
+  }, [reminders, remindersLoaded, user?.uid, showAuth]);
 
   // Authentication state listener and restoration
   useEffect(() => {
@@ -2398,7 +2453,11 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
         
         if (restoreResult.success) {
           console.log('✅ Auth state restored successfully - user will stay signed in');
-          setUser(restoreResult.user);
+          const liveUser = restoreResult.user?.firebaseUser || authService.getCurrentUser();
+          setUser({
+            ...restoreResult.user,
+            firebaseUser: liveUser || restoreResult.user?.firebaseUser || null,
+          });
           setShowAuth(false);
           setRoute('dashboard'); // Navigate to dashboard after auth restoration
           
@@ -2446,65 +2505,38 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     return () => unsubscribe();
   }, []);
 
-  // migrate from reminders if meds empty
-  useEffect(() => {
-    if (meds.length === 0 && reminders.length) {
-      const converted = reminders.map(r => ({
-        id: r.id,
-        name: r.name,
-        times: r.time ? [r.time] : (Array.isArray(r.times) ? r.times : []),
-        status: 'taking',
-        startDate: null,
-        endDate: null,
-        notes: '',
-      }));
-      setMeds(converted);
-    }
-  }, [reminders, meds.length]);
-
-  // keep meds in sync when new reminders added
-  useEffect(() => {
-    if (!reminders.length) return;
-    setMeds(prev => {
-      const existing = new Set(prev.map(m => m.id));
-      const additions = reminders.filter(r => !existing.has(r.id)).map(r => ({
-        id: r.id,
-        name: r.name,
-        times: r.time ? [r.time] : (Array.isArray(r.times) ? r.times : []),
-        status: 'taking',
-        startDate: null,
-        endDate: null,
-        notes: '',
-      }));
-      return additions.length ? [...prev, ...additions] : prev;
-    });
-  }, [reminders]);
-
   // Load subscription status and cloud sync when user is authenticated
   useEffect(() => {
     if (user && !showAuth) {
       (async () => {
         try {
           console.log('📊 Loading subscription status...');
-          const status = await getSubscriptionStatus(user.firebaseUser || null);
-          if (status.ok) {
-            console.log('✅ Subscription status loaded:', status);
-            setSubscriptionStatus(status);
-            
-            // Check if subscription has expired (0 days left)
-            const daysLeft = status.daysLeft || 0;
-            const isExpired = status.status === 'expired';
-            
-            if (isExpired && status.plan !== 'pro') {
-              console.log('⚠️ Subscription expired - showing modal');
-              setShowSubscriptionExpiredModal(true);
-              // Note: User will be logged out when they dismiss the modal
-            }
+          const liveFirebaseUser = user.firebaseUser || authService.getCurrentUser();
+          if (!liveFirebaseUser) {
+            console.warn('⚠️ Skipping subscription fetch — auth not ready');
           } else {
-            console.log('⚠️ Failed to load subscription status:', status);
+            const status = await getSubscriptionStatus(liveFirebaseUser);
+            if (status?.ok) {
+              console.log('✅ Subscription status loaded:', status);
+              setSubscriptionStatus(status);
+
+              const isExpired = status.status === 'expired';
+              if (isExpired && status.plan !== 'pro') {
+                console.log('⚠️ Subscription expired - showing modal');
+                setShowSubscriptionExpiredModal(true);
+              }
+            } else if (status?.sessionExpired && status?.confirmedAfterRefresh) {
+              // Only after refresh+retry confirmed an invalid session — never on one 401/network/500.
+              console.warn('⚠️ Confirmed session expiry during subscription check');
+              await promptSessionExpiredRef.current?.();
+            } else {
+              // Soft-fail: keep last known subscription state; log only.
+              logTechnicalError('subscriptionStatus/softFail', status);
+            }
           }
         } catch (error) {
-          console.error('❌ Error loading subscription status:', error);
+          // Soft-fail: never surface subscription fetch failures to the user.
+          logTechnicalError('subscriptionStatus', error);
         }
 
         // Cloud sync - pull all active data from cloud
@@ -2583,22 +2615,49 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
               console.error('❌ Error fetching medications from database:', medsError);
             }
             
-            // Merge reminders - cloudData.reminders is the payload array directly
-            if (cloudData.reminders && Array.isArray(cloudData.reminders)) {
-              const cloudReminders = cloudData.reminders;
-              console.log('⏰ Merging reminders from cloud:', cloudReminders.length, 'items');
-              setReminders(prev => {
-                const merged = [...prev];
-                cloudReminders.forEach(cloudRem => {
-                  const existingIndex = merged.findIndex(r => r.id === cloudRem.id);
-                  if (existingIndex >= 0) {
-                    merged[existingIndex] = cloudRem;
-                  } else {
-                    merged.push(cloudRem);
-                  }
-                });
-                return merged;
-              });
+            // Merge reminders - restore from Neon after logout/reinstall; never leave local empty when cloud has data.
+            // Tombstones prevent offline-deleted items from being resurrected by pull.
+            if (cloudData.reminders != null) {
+              const cloudReminders = Array.isArray(cloudData.reminders)
+                ? cloudData.reminders
+                : (typeof cloudData.reminders === 'string'
+                  ? (() => { try { return JSON.parse(cloudData.reminders); } catch { return []; } })()
+                  : []);
+              if (Array.isArray(cloudReminders)) {
+                remoteRemindersHadDataRef.current = cloudReminders.length > 0;
+                console.log('⏰ Merging reminders from cloud:', cloudReminders.length, 'items');
+                setReminders(prev => {
+                  const merged = mergeReminders(prev, cloudReminders, {
+                    tombstones: reminderTombstonesRef.current,
+                  });
+                  AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(merged)).catch(() => {});
+                  return merged;
+                }, { skipTombstone: true });
+              }
+            }
+
+            // Also pull reminders endpoint as backup if pull-all omitted them
+            try {
+              const pulled = await cloudSyncService.pullReminders();
+              if (pulled.success && pulled.hasData && pulled.payload != null) {
+                const payload = Array.isArray(pulled.payload)
+                  ? pulled.payload
+                  : (typeof pulled.payload === 'string'
+                    ? (() => { try { return JSON.parse(pulled.payload); } catch { return []; } })()
+                    : []);
+                if (Array.isArray(payload) && payload.length) {
+                  remoteRemindersHadDataRef.current = true;
+                  setReminders(prev => {
+                    const merged = mergeReminders(prev, payload, {
+                      tombstones: reminderTombstonesRef.current,
+                    });
+                    AsyncStorage.setItem(STORAGE.reminders, JSON.stringify(merged)).catch(() => {});
+                    return merged;
+                  }, { skipTombstone: true });
+                }
+              }
+            } catch (pullReminderError) {
+              console.warn('⚠️ Dedicated reminder pull failed:', pullReminderError);
             }
             
             // Merge appointments
@@ -2626,8 +2685,39 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
           }
         } catch (error) {
           console.error('❌ Cloud sync error:', error);
+        } finally {
+          // Allow local→cloud pushes only after the pull attempt finishes (success or fail).
+          remindersCloudReadyRef.current = true;
+          // If local still has reminders (or pending deletes) push them now.
+          const local = remindersRef.current || [];
+          const hasPendingDeletes = Object.keys(reminderTombstonesRef.current || {}).length > 0;
+          if (shouldPushReminders({
+            cloudReady: true,
+            reminders: local,
+            remoteHadData: remoteRemindersHadDataRef.current,
+            allowEmptyPush: hasPendingDeletes && local.length === 0,
+            hasPendingDeletes,
+          })) {
+            cloudSyncService
+              .syncReminders(local, hasPendingDeletes && local.length === 0 ? { forceClear: true } : {})
+              .then((result) => {
+                if (result?.success) {
+                  reminderTombstonesRef.current = pruneReminderTombstones(
+                    reminderTombstonesRef.current,
+                    local
+                  );
+                  AsyncStorage.setItem(
+                    TOMBSTONE_STORAGE_KEY,
+                    JSON.stringify(reminderTombstonesRef.current)
+                  ).catch(() => {});
+                }
+              })
+              .catch(err => console.warn('⚠️ Initial reminder push failed:', err));
+          }
         }
       })();
+    } else if (!user || showAuth) {
+      remindersCloudReadyRef.current = false;
     }
   }, [user, showAuth]);
 
@@ -2986,8 +3076,10 @@ const handleAskMedicalAI = async () => {
                   style={{ color: '#FFF3DC', fontFamily: 'Inter_400Regular' }}
                   showCursor={true}
                 />
+              ) : m.role === 'assistant' ? (
+              <MarkdownText text={m.text} style={{ color: '#FFF3DC', fontFamily: 'Inter_400Regular' }} />
               ) : (
-              <Text style={{ color: m.role === 'user' ? theme.text : '#FFF3DC', fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
+              <Text style={{ color: theme.text, fontFamily: 'Inter_400Regular' }}>{m.text}</Text>
               )}
             </View>
           ))}

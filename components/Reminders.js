@@ -21,6 +21,8 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../src/layout/fabLayout';
+import { getDateTimePickerLocale } from '../src/utils/dateTimeLocale';
 
 // Reminders component moved outside App to prevent remounting
 const Reminders = ({ 
@@ -90,7 +92,6 @@ const Reminders = ({
     medicationName: '',
     components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }], // Array for multiple components
     quantity: '',
-    quantityUnit: uiI18n.t("medications.quantityUnits.tablets"),
     isSingleComponent: true, // Default to single component
     // Supplement-specific fields
     supplementName: '',
@@ -219,38 +220,43 @@ const Reminders = ({
   const routeReminderToCard = async (reminderData) => {
     try {
       if (reminderData.type === 'medication') {
-        // Route to medications card
+        // Only medication reminders may create/update a med — never appointment/exercise/other.
+        // Upsert by reminderId/name so we never attach a stray duplicate entry.
         console.log('📋 Routing medication reminder to medications card:', reminderData);
-        
-        // Create medication object for medications card
+        const medName = reminderData.medicationName || reminderData.name;
+        const existing = (meds || []).find(med =>
+          med?.reminderId === reminderData.id ||
+          med?.id === reminderData.id ||
+          (medName && String(med.name || '').trim().toLowerCase() === String(medName).trim().toLowerCase())
+        );
+
         const medicationData = {
-          id: reminderData.id,
-          name: reminderData.medicationName || reminderData.name,
+          id: existing?.id || reminderData.id,
+          name: medName,
           components: reminderData.components,
           strength: reminderData.components ? 
             reminderData.components.map(comp => `${comp.strength}${comp.unit}`).join('/') : 
-            '500mg',
+            (existing?.strength || '500mg'),
           strengthValue: reminderData.components ? 
             reminderData.components.map(comp => comp.strength).join('/') : 
-            '500',
+            (existing?.strengthValue || '500'),
           strengthUnit: reminderData.components ? 
             reminderData.components[0]?.unit || 'mg' : 
-            'mg',
-          quantity: reminderData.quantity ? `${reminderData.quantity} ${reminderData.quantityUnit}` : '30 tablets',
-          quantityValue: reminderData.quantity || '30',
-          quantityUnit: reminderData.quantityUnit || 'tablets',
+            (existing?.strengthUnit || 'mg'),
+          quantity: reminderData.quantity ? `${reminderData.quantity} ${reminderData.quantityUnit}` : (existing?.quantity || '30 tablets'),
+          quantityValue: reminderData.quantity || existing?.quantityValue || '30',
+          quantityUnit: reminderData.quantityUnit || existing?.quantityUnit || 'tablets',
           isSingleComponent: reminderData.isSingleComponent !== undefined ? reminderData.isSingleComponent : true,
           times: [reminderData.time],
-          status: 'taking',
-          startDate: reminderData.startDate || formatReminderDate(new Date()),
-          endDate: reminderData.endDate || '',
-          notes: reminderData.notes || '',
-          // Add reminder reference
+          status: existing?.status || 'taking',
+          startDate: reminderData.startDate || existing?.startDate || formatReminderDate(new Date()),
+          endDate: reminderData.endDate || existing?.endDate || '',
+          notes: reminderData.notes || existing?.notes || '',
           reminderId: reminderData.id,
-          fromReminder: true
+          fromReminder: true,
+          dbId: existing?.dbId,
         };
 
-        // Call parent function to add to medications
         if (onAddMedicationFromReminder) {
           await onAddMedicationFromReminder(medicationData);
         }
@@ -325,23 +331,30 @@ const Reminders = ({
 
   // Delete reminder and corresponding medication/appointment
   const handleDeleteReminder = (reminderId) => {
-    // Find the reminder to check its type
     const reminderToDelete = reminders.find(r => r.id === reminderId);
-    
-    // Delete the reminder
-    setReminders(prev => prev.filter(r => r.id !== reminderId));
-    
-    // If this reminder created a medication, also delete the medication
-    if (reminderToDelete?.type === 'medication' && setMeds && meds) {
-      const correspondingMed = meds.find(med => med.reminderId === reminderId);
-      if (correspondingMed) {
-        console.log('🗑️ Also deleting corresponding medication:', correspondingMed.id);
-        setMeds(prev => prev.filter(med => med.reminderId !== reminderId));
-      }
-    }
-    
-    // Note: For appointments, we would do the same if we had access to appointments state
-    // This can be added when appointments functionality is fully integrated
+    const label = reminderToDelete?.name || reminderToDelete?.medicationName || '';
+    Alert.alert(
+      t('reminders.deleteTitle'),
+      t('reminders.deleteMessage', { name: label }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            setReminders(prev => prev.filter(r => r.id !== reminderId));
+            // Only remove a med that was created from this reminder — never unrelated meds
+            if (reminderToDelete?.type === 'medication' && setMeds && meds) {
+              const correspondingMed = meds.find(med => med.reminderId === reminderId);
+              if (correspondingMed) {
+                console.log('🗑️ Also deleting corresponding medication:', correspondingMed.id);
+                setMeds(prev => prev.filter(med => med.reminderId !== reminderId));
+              }
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -353,6 +366,7 @@ const Reminders = ({
         justifyContent: 'space-between', 
         paddingHorizontal: 20,
         paddingVertical: 16,
+        paddingTop: Math.max(insets.top, 0) + 12,
         borderBottomWidth: 1,
         borderBottomColor: theme.chip
       }}>
@@ -388,7 +402,7 @@ const Reminders = ({
 
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: 24 }]}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: FAB_SCROLL_PADDING }]}>
         <ReminderPermissionBanner />
         {/* Add Reminder Button */}
           <PremiumButton
@@ -584,7 +598,15 @@ const Reminders = ({
                     {S.reminderType || uiI18n.t("reminders.type")}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {['medication', 'supplement', 'appointment', 'exercise', 'other'].map((type) => (
+                    {['medication', 'supplement', 'appointment', 'exercise', 'other'].map((type) => {
+                      const typeLabels = {
+                        medication: S.medication || uiI18n.t('reminders.medication'),
+                        supplement: uiI18n.t('reminders.supplement'),
+                        appointment: S.appointment || uiI18n.t('reminders.appointment'),
+                        exercise: S.exercise || uiI18n.t('reminders.exercise'),
+                        other: S.other || uiI18n.t('reminders.other'),
+                      };
+                      return (
                       <TouchableOpacity
                         key={type}
                         onPress={() => handleTypeChange(type)}
@@ -607,14 +629,11 @@ const Reminders = ({
                             textAlign: 'center'
                           }}
                         >
-                          {type === uiI18n.t("reminders.medication") ? (S.medication || uiI18n.t("reminders.medication")) :
-                           type === uiI18n.t("reminders.appointment") ? (S.appointment || uiI18n.t("reminders.appointment")) :
-                           type === uiI18n.t("reminders.exercise") ? (S.exercise || uiI18n.t("reminders.exercise")) :
-                           type === uiI18n.t("reminders.other") ? (S.other || uiI18n.t("reminders.other")) :
-                           type.charAt(0).toUpperCase() + type.slice(1)}
+                          {typeLabels[type]}
                         </DynamicText>
                       </TouchableOpacity>
-                    ))}
+                      );
+                    })}
                   </View>
                 </View>
 
@@ -624,7 +643,14 @@ const Reminders = ({
                     {S.frequency || uiI18n.t("reminders.frequency")}
                   </DynamicText>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {['daily', 'weekly', 'monthly', 'custom'].map((freq) => (
+                    {['daily', 'weekly', 'monthly', 'custom'].map((freq) => {
+                      const freqLabels = {
+                        daily: S.daily || uiI18n.t('healthProfile.daily'),
+                        weekly: S.weekly || uiI18n.t('healthProfile.weekly'),
+                        monthly: S.monthly || uiI18n.t('ai.monthly'),
+                        custom: S.custom || uiI18n.t('healthProfile.custom'),
+                      };
+                      return (
                       <TouchableOpacity
                         key={freq}
                         onPress={() => setAddForm(prev => ({ ...prev, frequency: freq }))}
@@ -647,19 +673,16 @@ const Reminders = ({
                             textAlign: 'center'
                           }}
                         >
-                          {freq === uiI18n.t("healthProfile.daily") ? (S.daily || uiI18n.t("healthProfile.daily")) :
-                           freq === uiI18n.t("healthProfile.weekly") ? (S.weekly || uiI18n.t("healthProfile.weekly")) :
-                           freq === uiI18n.t("ai.monthly") ? (S.monthly || uiI18n.t("ai.monthly")) :
-                           freq === uiI18n.t("healthProfile.custom") ? (S.custom || uiI18n.t("healthProfile.custom")) :
-                           freq.charAt(0).toUpperCase() + freq.slice(1)}
+                          {freqLabels[freq]}
                         </DynamicText>
                       </TouchableOpacity>
-                    ))}
+                      );
+                    })}
                   </View>
                 </View>
 
                 {/* Custom Days Selection (only show when frequency is 'custom') */}
-                {addForm.frequency === uiI18n.t("healthProfile.custom") && (
+                {addForm.frequency === 'custom' && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
                       {S.selectDays || uiI18n.t("reminders.selectDays")}
@@ -1267,7 +1290,10 @@ const Reminders = ({
                     const notificationId = await testReminderNotification();
                     if (!notificationId) return;
                     Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1253"), uiI18n.t("localized.Reminders.Reminders.text1253"));
-                  } catch (error) { Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), error.message); }
+                  } catch (error) {
+                    console.error('[Reminders] test notification failed', error);
+                    Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), uiI18n.t("errors.generic"));
+                  }
                 }} style={{
                   alignSelf: 'center',
                   maxWidth: '100%',
@@ -1351,7 +1377,7 @@ const Reminders = ({
                     setEditingReminderId(null);
                     } catch (error) {
                       console.error('[Reminders] save failed', error);
-                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), error.message);
+                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), uiI18n.t("errors.generic"));
                     } finally { setSaving(false); }
                   }}
                 >
@@ -1369,7 +1395,8 @@ const Reminders = ({
           <DateTimePicker 
             value={new Date()} 
             mode="date" 
-            display="default" 
+            display="default"
+            locale={getDateTimePickerLocale()}
             onChange={onDatePick} 
           />
         )}
@@ -1380,7 +1407,8 @@ const Reminders = ({
             value={new Date()} 
             mode="time" 
             is24Hour={timeFormat === '24h'} 
-            display="default" 
+            display="default"
+            locale={getDateTimePickerLocale()}
             onChange={onPick} 
           />
         )}

@@ -1,0 +1,32 @@
+{
+  "appName": "AuricRX Médicos",
+  "common": {
+    "close": "Fechar",
+    "back": "Voltar",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "loading": "Carregando…",
+    "email": "E-mail",
+    "password": "Senha",
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "save": "Salvar"
+  },
+  "auth": {
+    "title": "Entrar",
+    "hint": "Use sua conta médica AuricRX.",
+    "needAccount": "Peça ao administrador uma conta ou registre-se com e-mail.",
+    "register": "Criar conta",
+    "registerOk": "Conta criada. Complete seu perfil médico."
+  },
+  "nav": {
+    "patients": "Pacientes",
+    "profile": "Perfil",
+    "alerts": "Alertas",
+    "digest": "Digest",
+    "agenda": "Agenda",
+    "officeHours": "Office hours",
+    "inbox": "Inbox"
+  }
+}

@@ -96,7 +96,7 @@ class AppointmentService {
         initialize: async () => {},
         addLocationReminder: async () => ({ id: 'mock', name: 'mock', latitude: 0, longitude: 0, radius: 100, message: 'mock', enabled: true }),
         deleteLocationReminder: async () => {},
-        addWeatherAlert: async () => ({ id: 'mock', medicationId: 'mock', weatherCondition: 'pollen', threshold: 3, message: 'mock', enabled: true }),
+        addWeatherAlert: async () => ({ id: 'mock', medicationId: 'mock', weatherCondition: 'pollen', condition: 'pollen', threshold: 3, message: 'mock', enabled: true }),
         deleteWeatherAlert: async () => {},
         updateUsagePattern: async () => {},
         getSmartRefillPrediction: async () => null,

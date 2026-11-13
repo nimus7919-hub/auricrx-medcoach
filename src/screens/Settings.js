@@ -3,7 +3,7 @@ import RegionSettings from '../components/RegionSettings';
 import { resetSearchLocationConsent } from "../lib/locationPermission";
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Linking } from "react-native";
 import { useWallpaper } from "./../contexts/WallpaperContext";
 import { useTimeFormat } from "./../hooks/useTimeFormat";
 import { formatTime } from "./../utils/time";
@@ -13,6 +13,10 @@ import { styles } from "./appStyles";
 import { Platform } from 'react-native';
 import { HealthConnectPrivacyControls } from './ActivityHealthScreen';
 import { HEALTH_CONNECT_ENABLED } from '../services/healthConnectService';
+import { BUSINESS_EMAIL } from '../lib/supportEmail';
+import { useEffect, useState } from 'react';
+import DocumentsSecurityService from '../services/documentsSecurityService';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createSettings(getScope) {
@@ -21,6 +25,21 @@ export default function createSettings(getScope) {
     const { setRoute, setPrivacyOpen, handleSignOut, handleCancelMembership, handleRestartMembership, lang, notificationsEnabled, setNotificationsEnabled, emailNotifications, setEmailNotifications, smsNotifications, setSmsNotifications, selectedAIDoctor, setSelectedAIDoctor, dataCollection, setDataCollection, analytics, setAnalytics, subscriptionStatus, t, currentLanguage, handleLanguageChange, S, theme, setExpandedSections, CollapsibleSection, Header, RowSwitch, SwitchRow } = getScope();
 
     const { getCardBackgroundColor, getCardBorderColor } = useWallpaper();
+    const [documentsLockEnabled, setDocumentsLockEnabled] = useState(true);
+
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        const init = await DocumentsSecurityService.getInstance().initializeLockPreference();
+        if (!cancelled) setDocumentsLockEnabled(init.enabled);
+      })();
+      return () => { cancelled = true; };
+    }, []);
+
+    const handleDocumentsLockToggle = async (value) => {
+      await DocumentsSecurityService.getInstance().setLockEnabled(value);
+      setDocumentsLockEnabled(value);
+    };
     const { timeFormat, setTimeFormat, getTimeFormatOptions, getTimeFormatLabel } = useTimeFormat({
       translations: {
         useDeviceSetting: t('settings.useDeviceSetting'),
@@ -39,7 +58,7 @@ export default function createSettings(getScope) {
     return (
       <ScrollView 
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: FAB_SCROLL_PADDING }}
         keyboardShouldPersistTaps="handled"
         scrollsToTop={false}
         showsVerticalScrollIndicator={true}
@@ -327,6 +346,14 @@ export default function createSettings(getScope) {
         
         <CollapsibleSection title={S.security} sectionKey="security" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+            <RowSwitch
+              label={t('documentsSecurity.lockToggle')}
+              value={documentsLockEnabled}
+              onValueChange={handleDocumentsLockToggle}
+            />
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 12, opacity: 0.7, marginBottom: 12, paddingHorizontal: 4 }}>
+              {t('documentsSecurity.lockToggleHint')}
+            </DynamicText>
             <TouchableOpacity 
               onPress={() => setRoute('admin-profile')}
               style={[styles.settingsButton, {
@@ -352,6 +379,44 @@ export default function createSettings(getScope) {
         
         <CollapsibleSection title={S.privacy} sectionKey="privacy" onToggle={toggleSection}>
           {Platform.OS === 'android' && HEALTH_CONNECT_ENABLED && <HealthConnectPrivacyControls userId={getScope().user?.uid} onConnect={() => setRoute('health-connect-consent')} />}
+          <TouchableOpacity 
+            onPress={() => setRoute('privacy-notice')}
+            style={[styles.settingsButton, {
+              backgroundColor: getCardBackgroundColor() + 'CC',
+              borderColor: getCardBorderColor(),
+              borderWidth: 2,
+              borderRadius: 12,
+              padding: 16,
+              marginHorizontal: 16,
+              marginBottom: 12
+            }]}
+          >
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>
+              {t('privacyNotice.title')}
+            </DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
+              View your privacy rights and data practices
+            </DynamicText>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => setRoute('cloud-backup')}
+            style={[styles.settingsButton, {
+              backgroundColor: getCardBackgroundColor() + 'CC',
+              borderColor: getCardBorderColor(),
+              borderWidth: 2,
+              borderRadius: 12,
+              padding: 16,
+              marginHorizontal: 16,
+              marginBottom: 12
+            }]}
+          >
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>
+              {t('cloudBackup.title')}
+            </DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
+              {t('cloudBackup.premiumFeature')}
+            </DynamicText>
+          </TouchableOpacity>
           <TouchableOpacity style={{ padding: 16 }} onPress={async () => {
             try {
               await resetSearchLocationConsent();
@@ -414,7 +479,21 @@ export default function createSettings(getScope) {
         <CollapsibleSection title={S.help} sectionKey="help" onToggle={toggleSection}>
           <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginBottom: 12, opacity: 0.7 }}>{S.emailUs}</DynamicText>
-            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{S.emailAddress}</DynamicText>
+            <TouchableOpacity
+              accessibilityRole="link"
+              accessibilityLabel={S.emailAddress}
+              onPress={() => Linking.openURL(`mailto:${S.emailAddress}`).catch(() => {})}
+            >
+              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{S.emailAddress}</DynamicText>
+            </TouchableOpacity>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', marginTop: 16, marginBottom: 12, opacity: 0.7 }}>{S.forBusiness}</DynamicText>
+            <TouchableOpacity
+              accessibilityRole="link"
+              accessibilityLabel={`${S.forBusiness}: ${BUSINESS_EMAIL}`}
+              onPress={() => Linking.openURL(`mailto:${BUSINESS_EMAIL}`).catch(() => {})}
+            >
+              <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{BUSINESS_EMAIL}</DynamicText>
+            </TouchableOpacity>
           </View>
         </CollapsibleSection>
         

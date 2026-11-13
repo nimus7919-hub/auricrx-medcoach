@@ -22,6 +22,8 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../src/layout/fabLayout';
 
 // Medications component moved outside App to prevent remounting
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
@@ -31,6 +33,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   const { timeFormat } = useTimeFormat();
+  const insets = useSafeAreaInsets();
   
   // Helper function to convert unit to sentence case
   const toSentenceCase = (str) => {
@@ -425,20 +428,16 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     }
   };
 
-  const handleDeleteMed = async (id) => {
-    // Find the medication to check if it was created from a reminder
+  const performDeleteMed = async (id) => {
     const medToDelete = meds.find(med => med.id === id);
-    
-    // Delete the medication from local state first for immediate UI update
+
     setMeds(prev => prev.filter(med => med.id !== id));
-    
-    // If this medication was created from a reminder, also delete the reminder
+
     if (medToDelete?.fromReminder && medToDelete?.reminderId && setReminders) {
       console.log('🗑️ Also deleting corresponding reminder:', medToDelete.reminderId);
       setReminders(prev => prev.filter(r => r.id !== medToDelete.reminderId));
     }
-    
-    // Sync deletion to cloud if user is authenticated and medication has database ID
+
     if (user && user.uid && (medToDelete?.dbId || medToDelete?.id)) {
       try {
         const medicationId = medToDelete.dbId || medToDelete.id;
@@ -448,7 +447,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
             'Content-Type': 'application/json',
           }
         });
-        
+
         if (response.ok) {
           console.log('✅ Medication deleted from database:', medicationId);
         } else {
@@ -458,11 +457,26 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       } catch (dbError) {
         console.error('❌ Database delete error:', dbError);
         console.log('📱 Medication deleted locally but not synced to server');
-        // Don't fail the entire operation if database delete fails
       }
     } else {
       console.log('⚠️ User not authenticated or medication has no database ID, medication deleted locally only');
     }
+  };
+
+  const handleDeleteMed = (id) => {
+    const medToDelete = meds.find(med => med.id === id);
+    Alert.alert(
+      t('medications.deleteTitle'),
+      t('medications.deleteMessage', { name: medToDelete?.name || '' }),
+      [
+        { text: t('medications.cancel'), style: 'cancel' },
+        {
+          text: t('medications.delete'),
+          style: 'destructive',
+          onPress: () => { performDeleteMed(id); },
+        },
+      ]
+    );
   };
 
   // Handle refill completion - update lastRefill date
@@ -605,6 +619,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         justifyContent: 'space-between', 
         paddingHorizontal: 20,
         paddingVertical: 16,
+        paddingTop: Math.max(insets.top, 0) + 12,
         borderBottomWidth: 1,
         borderBottomColor: theme.chip
       }}>
@@ -641,7 +656,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       </View>
 
       <ScrollView 
-        contentContainerStyle={[{ padding: 16, paddingBottom: 20 }, { paddingBottom: 24 }]} 
+        contentContainerStyle={[{ padding: 16, paddingBottom: 20 }, { paddingBottom: FAB_SCROLL_PADDING }]} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
@@ -1700,8 +1715,23 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
                   <TouchableOpacity
                     onPress={() => {
-                      setMeds(prev => prev.filter(med => med.id !== editForm.id));
-                      setShowEdit(false);
+                      const id = editForm.id;
+                      const medToDelete = meds.find(med => med.id === id);
+                      Alert.alert(
+                        t('medications.deleteTitle'),
+                        t('medications.deleteMessage', { name: medToDelete?.name || '' }),
+                        [
+                          { text: t('medications.cancel'), style: 'cancel' },
+                          {
+                            text: t('medications.delete'),
+                            style: 'destructive',
+                            onPress: () => {
+                              performDeleteMed(id);
+                              setShowEdit(false);
+                            },
+                          },
+                        ]
+                      );
                     }}
                     style={{
                       backgroundColor: '#f87171',

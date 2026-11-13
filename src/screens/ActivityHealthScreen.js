@@ -5,8 +5,10 @@ const usText = (key, original) => getRegion() === 'US' ? i18n.t('activityUS.' + 
 import GoldHealthIcon from '../components/GoldHealthIcon';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 import Svg, { Circle, Line, Polyline, Rect, Text as SvgText } from 'react-native-svg';
-import { connectionStatus, connectHealth, disconnectHealth, openHealthSettings, openHealthStore, privacy, readHealth, statusText } from '../services/healthConnectService';
+import { connectionStatus, connectHealth, disconnectHealth, openHealthSettings, openHealthStore, privacy, readHealth, statusText } from '../services/auricHealthConnect';
 
 const C = { navy: '#020D1B', card: '#0F1D2A', gold: '#E8BF80', text: '#F6F5F2', gray: '#AAA6A0' };
 export function HealthButton({ title, onPress, disabled }) {
@@ -45,7 +47,8 @@ function ConnectionActions({ status, onConnect, refresh }) {
   </>;
 }
 function Page({ title, onClose, children }) {
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+  const insets = useSafeAreaInsets();
+  return <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 0) + 12, paddingBottom: FAB_SCROLL_PADDING }]}>
     <HealthButton title={usText("text5", "Volver")} onPress={onClose} />
     <Text accessibilityRole="header" style={styles.title}>{title}</Text>{children}
   </ScrollView>;

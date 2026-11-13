@@ -1,12 +1,16 @@
 import { getRegion } from '../services/region';
 import USSmartNotificationsScreen from './USSmartNotificationsScreen';
-﻿import React, { useEffect, useState } from 'react';
+import uiI18n from '../i18n';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TextInput, Switch, TouchableOpacity, Alert, Linking, AppState, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { readSmart, updateSmart, nativeCapabilities, reconcileSmart, smartStatus, currentCoordinates, addressCoordinates, backgroundPermission, suggestions } from '../services/smartNotificationEngine';
 import { ensureReminderPermission, reconcileReminderNotifications } from '../services/reminderNotifications';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 function MexicoSmartNotificationsScreen({ onClose, theme, meds = [], reminders = [], setMeds, setReminders }: any) {
+  const insets = useSafeAreaInsets();
   const [state, setState] = useState<any>(null);
   const [status, setStatus] = useState<any>({});
   const [busy, setBusy] = useState(false);
@@ -16,7 +20,17 @@ function MexicoSmartNotificationsScreen({ onClose, theme, meds = [], reminders =
   const color = theme?.text || '#eee';
   const refresh = async () => { setState(await readSmart()); setStatus(await smartStatus()); };
   useEffect(() => { refresh().catch(report); const sub = AppState.addEventListener('change', s => { if (s === 'active') refresh().catch(report); }); return () => sub.remove(); }, [meds, reminders]);
-  function report(e: any) { Alert.alert('Notificaciones inteligentes', e.message || 'No se pudo completar la operación.', [{ text: 'Cerrar' }, { text: 'Abrir Ajustes', onPress: () => Linking.openSettings() }]); }
+  function report(e: any) {
+    console.warn('[SmartNotifications]', e?.message || e);
+    Alert.alert(
+      uiI18n.t('errors.title'),
+      uiI18n.t('errors.generic'),
+      [
+        { text: uiI18n.t('adminProfile.ok') },
+        { text: uiI18n.t('locationSearch.openSettings'), onPress: () => Linking.openSettings() },
+      ]
+    );
+  }
   async function run(fn: any) { setBusy(true); try { await fn(); await refresh(); } catch (e) { report(e); } finally { setBusy(false); } }
   async function save(patch: any) { await updateSmart(patch); await reconcileSmart(meds, reminders); await reconcileReminderNotifications(reminders); }
   const button = (title: string, fn: any) => <TouchableOpacity disabled={busy} accessibilityRole="button" onPress={() => run(fn)} style={styles.button}><Text style={{ color: '#D4AF37' }}>{title}</Text></TouchableOpacity>;
@@ -32,7 +46,7 @@ function MexicoSmartNotificationsScreen({ onClose, theme, meds = [], reminders =
       await save({ [key]: value, ...(key === 'location' && !value ? { inside: [] } : {}) });
     });
   }} /></View><Text style={{ color }}>{detail}</Text></View>;
-  return <ScrollView style={[styles.container, { backgroundColor: theme?.card || '#10141e' }]} contentContainerStyle={{ paddingBottom: 80 }} keyboardShouldPersistTaps="handled">
+  return <ScrollView style={[styles.container, { backgroundColor: theme?.card || '#10141e' }]} contentContainerStyle={{ paddingTop: Math.max(insets.top, 0) + 12, paddingBottom: FAB_SCROLL_PADDING }} keyboardShouldPersistTaps="handled">
     {button('Volver', onClose)}
     <Text style={[styles.heading, { color }]}>Notificaciones Inteligentes</Text>
     <Text accessibilityLiveRegion="polite" style={{ color: status.active ? '#D4AF37' : color }}>{status.active ? 'Activas: hay funciones operativas' : 'Sin funciones activas: revisa configuración y permisos'}</Text>
@@ -87,7 +101,7 @@ function MexicoSmartNotificationsScreen({ onClose, theme, meds = [], reminders =
     <Text style={{ color }}>Todo el análisis de tomas es local. Open-Meteo recibe solo coordenadas redondeadas para consultar el pronóstico.</Text>
   </ScrollView>;
 }
-const styles = StyleSheet.create({ container: { flex: 1, padding: 20, paddingTop: 40 }, heading: { fontSize: 24, fontWeight: '700', marginBottom: 12 }, title: { fontSize: 16, fontWeight: '600' }, card: { borderColor: '#D4AF3755', borderWidth: 1, borderRadius: 16, padding: 14, marginVertical: 8 }, row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }, badge: { borderColor: '#D4AF3770', borderWidth: 1, borderRadius: 12, padding: 9, backgroundColor: '#D4AF3714' }, input: { borderColor: '#D4AF3766', borderWidth: 1, padding: 10, marginVertical: 8, borderRadius: 8 }, button: { padding: 12, marginVertical: 3, borderRadius: 8, backgroundColor: '#D4AF3718' } });
+const styles = StyleSheet.create({ container: { flex: 1, paddingHorizontal: 20, paddingBottom: 20 }, heading: { fontSize: 24, fontWeight: '700', marginBottom: 12 }, title: { fontSize: 16, fontWeight: '600' }, card: { borderColor: '#D4AF3755', borderWidth: 1, borderRadius: 16, padding: 14, marginVertical: 8 }, row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }, badge: { borderColor: '#D4AF3770', borderWidth: 1, borderRadius: 12, padding: 9, backgroundColor: '#D4AF3714' }, input: { borderColor: '#D4AF3766', borderWidth: 1, padding: 10, marginVertical: 8, borderRadius: 8 }, button: { padding: 12, marginVertical: 3, borderRadius: 8, backgroundColor: '#D4AF3718' } });
 
 export default function SmartNotificationsScreen(props: any) {
   return getRegion() === 'US' ? <USSmartNotificationsScreen {...props} /> : <MexicoSmartNotificationsScreen {...props} />;
