@@ -92,7 +92,6 @@ const Reminders = ({
     medicationName: '',
     components: [{ strength: '', unit: uiI18n.t("reminders.units.mg") }], // Array for multiple components
     quantity: '',
-    quantityUnit: uiI18n.t("medications.quantityUnits.tablets"),
     isSingleComponent: true, // Default to single component
     // Supplement-specific fields
     supplementName: '',
