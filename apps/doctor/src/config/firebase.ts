@@ -1,5 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { initializeAuth, getAuth, type Auth } from 'firebase/auth';
+// Firebase typings omit getReactNativePersistence (it lives on the RN Auth entry).
+// @ts-expect-error RN helper is exported at runtime from firebase/auth
+import { initializeAuth, getAuth, getReactNativePersistence, type Auth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,22 +26,12 @@ const app = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
 
 function createAuth(): Auth {
   try {
-    // Prefer RN persistence when the modular helper is available at runtime.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const authMod = require('firebase/auth') as typeof import('firebase/auth') & {
-      getReactNativePersistence?: (storage: typeof AsyncStorage) => unknown;
-    };
-    if (typeof authMod.getReactNativePersistence === 'function') {
-      return initializeAuth(app, {
-        persistence: authMod.getReactNativePersistence(AsyncStorage) as never,
-      });
-    }
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
   } catch {
-    // fall through
-  }
-  try {
-    return initializeAuth(app);
-  } catch {
+    // Already initialized (Fast Refresh) or a duplicate init. Do not call
+    // initializeAuth() without persistence — that crashes Hermes on SDK 53.
     return getAuth(app);
   }
 }
