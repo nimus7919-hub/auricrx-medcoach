@@ -14,5 +14,7 @@ module.exports = ({ config }) => {
     }
     return plugin;
   });
-  return { ...config, plugins, extra: { ...config.extra, googleAuth } };
+  // iOS Firebase config comes from the EAS file env var GOOGLE_SERVICES_INFO_PLIST (kept out of git).
+  const ios = { ...config.ios, googleServicesFile: process.env.GOOGLE_SERVICES_INFO_PLIST || config.ios?.googleServicesFile };
+  return { ...config, ios, plugins, extra: { ...config.extra, googleAuth } };
 };

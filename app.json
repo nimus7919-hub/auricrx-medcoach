@@ -28,8 +28,6 @@
         "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo.",
         "UIBackgroundModes": [
           "location",
-          "fetch",
-          "location",
           "fetch"
         ],
         "ITSAppUsesNonExemptEncryption": false
@@ -94,6 +92,7 @@
           "iosUrlScheme": "com.googleusercontent.apps.1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1"
         }
       ],
+      "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [
         "expo-notifications",
@@ -114,8 +113,52 @@
         }
       ],
       "expo-background-fetch",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "deploymentTarget": "15.5"
+          }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Usamos la cámara para escanear recetas, etiquetas y documentos médicos que tú eliges guardar.",
+          "microphonePermission": "AuricRX solo usa el micrófono si tú lo activas; no graba audio en segundo plano.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite elegir fotos de recetas o documentos para guardarlos en la app.",
+          "cameraPermission": "Usamos la cámara para tomar fotos de recetas y documentos que tú eliges guardar.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Permite agregar tus citas y recordatorios a tu calendario.",
+          "remindersPermission": "Permite crear recordatorios de tus medicamentos y citas."
+        }
+      ],
       "expo-secure-store",
-      "expo-local-authentication"
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "./plugins/withIosFirebaseStatic"
     ],
     "extra": {
       "googleAuth": {
