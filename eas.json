@@ -42,7 +42,11 @@
       },
       "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
       "developmentClient": false,
-      "channel": "production"
+      "channel": "production",
+      "ios": {
+        "image": "macos-sequoia-15.6-xcode-26.0",
+        "prebuildCommand": "prebuild --no-install"
+      }
     },
     "us-internal": {
       "extends": "production",
