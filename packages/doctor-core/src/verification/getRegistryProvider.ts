@@ -16,7 +16,8 @@ export function getRegistryLookupProvider(
     forceMock?: boolean;
   } = {}
 ): RegistryLookupProvider {
-  const env = opts.env || (typeof process !== 'undefined' ? process.env : {});
+  const env: NodeJS.ProcessEnv =
+    opts.env || (typeof process !== 'undefined' ? process.env : ({} as NodeJS.ProcessEnv));
   const nodeEnv = String(env.NODE_ENV || '').toLowerCase();
   const production = nodeEnv === 'production' || nodeEnv === 'prod';
 

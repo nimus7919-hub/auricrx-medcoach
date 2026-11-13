@@ -2,7 +2,7 @@
   "expo": {
     "name": "AuricRX MedCoach",
     "slug": "auricrx-medcoach",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon-auric.png",
     "userInterfaceStyle": "light",
@@ -25,6 +25,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
+        "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo.",
         "UIBackgroundModes": [
           "location",
           "fetch",
@@ -75,7 +76,9 @@
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ],
       "runtimeVersion": "1.0.0"
     },
@@ -109,7 +112,9 @@
           "isAndroidForegroundServiceEnabled": true
         }
       ],
-      "expo-background-fetch"
+      "expo-background-fetch",
+      "expo-secure-store",
+      "expo-local-authentication"
     ],
     "extra": {
       "googleAuth": {

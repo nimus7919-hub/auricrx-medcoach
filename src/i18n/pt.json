@@ -4513,8 +4513,12 @@
         "unverified": "Não verificada",
         "pending": "Pendente",
         "verified": "Verificada",
-        "rejected": "Rejeitada"
-      }
+        "rejected": "Rejeitada",
+        "pending_review": "Em revisão",
+        "suspended": "Suspensa",
+        "expired": "Expirada"
+      },
+      "queued": "Enviado para revisão manual. Você verá a decisão aqui quando um administrador concluir a revisão."
     },
     "plan": {
       "label": "Plano médico",
@@ -4768,5 +4772,22 @@
         "text_reply": "Send text reply"
       }
     }
+  },
+  "documentsSecurity": {
+    "lockToggle": "Bloquear Documentos",
+    "lockToggleHint": "Exigir impressão digital, Face ID ou PIN do dispositivo para abrir Documentos. Os dados biométricos ficam no seu dispositivo.",
+    "enableTitle": "Proteger seus Documentos?",
+    "enableMessage": "Bloqueie Documentos com impressão digital, Face ID ou PIN do dispositivo. Nunca armazenamos dados biométricos nem criamos uma nova senha do app.",
+    "enableCta": "Ativar bloqueio",
+    "notNow": "Agora não",
+    "lockedTitle": "Documentos bloqueados",
+    "lockedMessage": "Desbloqueie com impressão digital, Face ID ou PIN do dispositivo para ver seus documentos.",
+    "unlockPrompt": "Desbloquear Documentos",
+    "unlockCta": "Desbloquear",
+    "noCredentialsMessage": "Este dispositivo não tem biometria nem bloqueio de tela. Você pode continuar ou configurar um bloqueio nas configurações do sistema.",
+    "continueAnyway": "Continuar sem bloqueio",
+    "setupScreenLockHint": "Dica: configure um bloqueio de tela nas configurações do dispositivo para proteger Documentos da próxima vez.",
+    "authError": "Não foi possível verificar sua identidade. Tente novamente.",
+    "privacyCover": "Documentos AuricRX"
   }
 }

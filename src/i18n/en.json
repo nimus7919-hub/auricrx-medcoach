@@ -4625,5 +4625,22 @@
         "text_reply": "Send text reply"
       }
     }
+  },
+  "documentsSecurity": {
+    "lockToggle": "Lock Documents",
+    "lockToggleHint": "Require fingerprint, Face ID, or your device PIN to open Documents. Biometric data stays on your device.",
+    "enableTitle": "Protect your Documents?",
+    "enableMessage": "Lock Documents with fingerprint, Face ID, or your device PIN. We never store biometric data or create a new app password.",
+    "enableCta": "Enable lock",
+    "notNow": "Not now",
+    "lockedTitle": "Documents locked",
+    "lockedMessage": "Unlock with fingerprint, Face ID, or your device PIN to view your documents.",
+    "unlockPrompt": "Unlock Documents",
+    "unlockCta": "Unlock",
+    "noCredentialsMessage": "This device has no biometrics or screen lock set up. You can continue, or set a screen lock in system settings for stronger protection.",
+    "continueAnyway": "Continue without lock",
+    "setupScreenLockHint": "Tip: set a screen lock in your device settings to protect Documents next time.",
+    "authError": "Could not verify your identity. Please try again.",
+    "privacyCover": "AuricRX Documents"
   }
 }

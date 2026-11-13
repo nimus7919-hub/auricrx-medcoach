@@ -4506,8 +4506,12 @@
         "unverified": "Non vérifiée",
         "pending": "En attente",
         "verified": "Vérifiée",
-        "rejected": "Refusée"
-      }
+        "rejected": "Refusée",
+        "pending_review": "En révision",
+        "suspended": "Suspendue",
+        "expired": "Expirée"
+      },
+      "queued": "Soumis pour examen manuel. Vous verrez la décision ici lorsqu'un administrateur aura terminé l'examen."
     },
     "plan": {
       "label": "Forfait médecin",
@@ -4761,5 +4765,22 @@
         "text_reply": "Send text reply"
       }
     }
+  },
+  "documentsSecurity": {
+    "lockToggle": "Verrouiller les documents",
+    "lockToggleHint": "Exiger l'empreinte, Face ID ou le code de l'appareil pour ouvrir Documents. Les données biométriques restent sur votre appareil.",
+    "enableTitle": "Protéger vos documents ?",
+    "enableMessage": "Verrouillez Documents avec empreinte, Face ID ou le code de l'appareil. Nous ne stockons jamais de données biométriques ni ne créons de nouveau mot de passe d'application.",
+    "enableCta": "Activer le verrouillage",
+    "notNow": "Pas maintenant",
+    "lockedTitle": "Documents verrouillés",
+    "lockedMessage": "Déverrouillez avec empreinte, Face ID ou le code de l'appareil pour voir vos documents.",
+    "unlockPrompt": "Déverrouiller Documents",
+    "unlockCta": "Déverrouiller",
+    "noCredentialsMessage": "Cet appareil n'a ni biométrie ni verrouillage d'écran. Vous pouvez continuer, ou configurer un verrouillage dans les réglages système.",
+    "continueAnyway": "Continuer sans verrouillage",
+    "setupScreenLockHint": "Astuce : configurez un verrouillage d'écran dans les réglages de l'appareil pour protéger Documents la prochaine fois.",
+    "authError": "Impossible de vérifier votre identité. Réessayez.",
+    "privacyCover": "Documents AuricRX"
   }
 }

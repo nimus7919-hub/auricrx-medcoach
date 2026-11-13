@@ -20,6 +20,7 @@ import { capturedDocumentFields } from '../lib/documentCapture';
 import { createDocumentPdf } from '../lib/documentPdf';
 import { scanDocumentPages } from '../lib/documentScanner';
 import { SecureSharing } from '../lib/SecureSharing';
+import { migrateAndHydrateDocuments, openDocumentUri, readDocumentBase64, sealCopiedDocument, toStorageDocument } from '../lib/documentVaultIo';
 import DynamicText from '../components/DynamicText';
 import PDFViewer from '../components/PDFViewer';
 import type { DoctorContact } from '../services/appointmentService';
@@ -582,11 +583,14 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
 
   const loadDocuments = async () => {
     try {
-      // Load documents from storage
+      // Load documents from storage, migrate plaintext files, hydrate readable URIs
       const documentsData = await FileSystem.readAsStringAsync(
         `${FileSystem.documentDirectory}medical_documents.json`
       );
-      setDocuments(JSON.parse(documentsData));
+      const parsed = JSON.parse(documentsData);
+      const list = Array.isArray(parsed) ? parsed : [];
+      const hydrated = await migrateAndHydrateDocuments(list);
+      setDocuments(hydrated);
     } catch (error) {
       // File doesn't exist yet, start with empty array
       setDocuments([]);
@@ -595,11 +599,15 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
 
   const saveDocuments = async (newDocuments: DocumentItem[]) => {
     try {
+      // Persist encrypted storage paths (not plaintext cache URIs)
+      const toPersist = newDocuments.map((doc) => toStorageDocument(doc));
       await FileSystem.writeAsStringAsync(
         `${FileSystem.documentDirectory}medical_documents.json`,
-        JSON.stringify(newDocuments)
+        JSON.stringify(toPersist)
       );
-      setDocuments(newDocuments);
+      // Keep UI on readable (hydrated) URIs
+      const hydrated = await migrateAndHydrateDocuments(toPersist);
+      setDocuments(hydrated);
     } catch (error) {
       console.error('Failed to save documents:', error);
       throw error;
@@ -710,11 +718,13 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
             if (!fileInfo.exists || (fileInfo.exists ? fileInfo.size : 0) === 0) {
               throw new Error(t("medicalDocuments.pdfCorrupted"));
             }
+
+            const sealed = await sealCopiedDocument(newUri);
                       
                       const newDocument: DocumentItem = {
                         id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                         name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t("medicalDocuments.pdfDocument") : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
-                        uri: newUri,
+                        uri: sealed.displayUri,
                         type,
                         category,
                         createdAt: new Date().toISOString(),
@@ -754,6 +764,7 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           const sources = await Promise.all(scan.images.map(async (uri, index) => {
             const saved = `${FileSystem.documentDirectory}scan_${Date.now()}_${index}_${Math.random().toString(36).slice(2)}.jpg`;
             await FileSystem.copyAsync({ from: uri, to: saved });
+            // Seal after PDF creation so branding can still read plaintext scan images.
             return { uri: saved, type };
           }));
           // PDF branding can fail on Android release asset URIs; never drop the scan.
@@ -763,7 +774,18 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           } catch (pdfError) {
             console.error('Failed to create document PDF after scan:', pdfError);
           }
-          const fields = capturedDocumentFields({ type, imageUri: sources[0].uri, pdfUri });
+          const sealedSources = await Promise.all(
+            sources.map(async (source) => {
+              const sealed = await sealCopiedDocument(source.uri);
+              return { ...source, uri: sealed.displayUri, storageUri: sealed.storageUri };
+            })
+          );
+          let sealedPdfUri: string | undefined;
+          if (pdfUri) {
+            const sealedPdf = await sealCopiedDocument(pdfUri);
+            sealedPdfUri = sealedPdf.displayUri;
+          }
+          const fields = capturedDocumentFields({ type, imageUri: sealedSources[0].uri, pdfUri: sealedPdfUri });
           const newDocument: DocumentItem = {
             id: `doc_${Date.now()}_${Math.random().toString(36).slice(2)}`,
             name: `${DOCUMENT_CATEGORIES[category].title} - ${type === 'single' ? t('medicalDocuments.pdfDocument') : type === 'front' ? DOCUMENT_CATEGORIES[category].frontLabel : DOCUMENT_CATEGORIES[category].backLabel}`,
@@ -812,11 +834,17 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
           } catch (pdfError) {
             console.error('Failed to create document PDF after photo:', pdfError);
           }
+          const sealedImage = await sealCopiedDocument(savedImageUri);
+          let sealedPdfUri: string | undefined;
+          if (pdfUri) {
+            const sealedPdf = await sealCopiedDocument(pdfUri);
+            sealedPdfUri = sealedPdf.displayUri;
+          }
           // Camera captures always keep the JPEG as the primary uri (PDF stays optional).
           const fields = capturedDocumentFields({
             type,
-            imageUri: savedImageUri,
-            pdfUri,
+            imageUri: sealedImage.displayUri,
+            pdfUri: sealedPdfUri,
             preferPdfForSingle: false,
           });
           const newDocument: DocumentItem = {
@@ -2153,12 +2181,10 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
         return uri;
       }
       
-      // For file URIs, read the file and convert to base64
+      // For file URIs, decrypt-from-vault when needed then convert to base64
       if (uri.startsWith('file://')) {
         console.log('🔄 Reading file and converting to base64...');
-        const base64 = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        const base64 = await readDocumentBase64(uri);
         return `data:image/jpeg;base64,${base64}`;
       }
       
@@ -2194,10 +2220,11 @@ export default function MedicalDocumentsScreen({ onClose, theme, S, requestAutoD
     try {
       console.log('🔄 Converting URI to shareable format:', uri);
       
-      // If it's already a file URI, return as is
+      // If it's already a file URI, open a plaintext/cache copy when encrypted
       if (uri.startsWith('file://')) {
-        console.log('✅ Already a file URI');
-        return uri;
+        const readable = await openDocumentUri(uri);
+        console.log('✅ Shareable file URI ready');
+        return readable;
       }
       
       // If it's a content URI, copy to a temporary file

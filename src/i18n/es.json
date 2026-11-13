@@ -4625,5 +4625,22 @@
         "text_reply": "Enviar respuesta de texto"
       }
     }
+  },
+  "documentsSecurity": {
+    "lockToggle": "Bloquear Documentos",
+    "lockToggleHint": "Pide huella, Face ID o el PIN del dispositivo para abrir Documentos. Los datos biométricos permanecen en tu dispositivo.",
+    "enableTitle": "¿Proteger tus Documentos?",
+    "enableMessage": "Bloquea Documentos con huella, Face ID o el PIN del dispositivo. Nunca guardamos datos biométricos ni creamos una contraseña nueva de la app.",
+    "enableCta": "Activar bloqueo",
+    "notNow": "Ahora no",
+    "lockedTitle": "Documentos bloqueados",
+    "lockedMessage": "Desbloquea con huella, Face ID o el PIN del dispositivo para ver tus documentos.",
+    "unlockPrompt": "Desbloquear Documentos",
+    "unlockCta": "Desbloquear",
+    "noCredentialsMessage": "Este dispositivo no tiene biometría ni bloqueo de pantalla. Puedes continuar, o configurar un bloqueo en los ajustes del sistema para más protección.",
+    "continueAnyway": "Continuar sin bloqueo",
+    "setupScreenLockHint": "Consejo: configura un bloqueo de pantalla en los ajustes del dispositivo para proteger Documentos la próxima vez.",
+    "authError": "No se pudo verificar tu identidad. Inténtalo de nuevo.",
+    "privacyCover": "Documentos AuricRX"
   }
 }
