@@ -58,6 +58,20 @@ function evaluateThresholdCrossings(entry, limits) {
   return crossings;
 }
 
+/** Descriptive in-app detail — names the doctor's rule. Push stays generic. */
+function formatDescriptiveCrossingMessage(crossing, language = 'es') {
+  const es = language === 'es' || language === 'es-MX';
+  const above = crossing.limit.comparator === 'gt' || crossing.limit.comparator === 'gte';
+  const observed = crossing.observedValue;
+  const limit = crossing.limit.value;
+  if (es) {
+    const rel = above ? 'por encima del' : 'por debajo del';
+    return `Lectura ${observed} ${rel} límite de ${limit} que usted configuró`;
+  }
+  const rel = above ? 'above the' : 'below the';
+  return `Reading ${observed} ${rel} limit of ${limit} that you configured`;
+}
+
 /** Generic lock-screen copy — NEVER include patient names or values. */
 function genericPushCopy(language = 'es') {
   const es = language === 'es' || language === 'es-MX';
@@ -169,6 +183,7 @@ async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, send
       pushed += 1;
     }
 
+    const descriptiveDetails = crossings.map((c) => formatDescriptiveCrossingMessage(c, language));
     await db.collection('doctorAuditLogs').doc(`alert_${Date.now()}_${doctorId}`).set({
       id: `alert_${Date.now()}_${doctorId}`,
       actorId: 'system',
@@ -177,9 +192,28 @@ async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, send
       patientId,
       doctorId,
       linkId: link.id || linkDoc.id,
-      detail: crossings.map((c) => c.readingType).join(','),
+      detail: descriptiveDetails.join(' | '),
       createdAt: new Date().toISOString(),
     });
+
+    // In-app alert docs (values OK here; never in push title/body)
+    for (let i = 0; i < crossings.length; i++) {
+      const c = crossings[i];
+      const alertId = `inapp_${Date.now()}_${doctorId}_${c.readingType}_${i}`;
+      await db.collection('doctorInAppAlerts').doc(alertId).set({
+        id: alertId,
+        doctorId,
+        patientId,
+        linkId: link.id || linkDoc.id,
+        readingType: c.readingType,
+        observedValue: c.observedValue,
+        limitValue: c.limit.value,
+        comparator: c.limit.comparator,
+        message: descriptiveDetails[i],
+        createdAt: new Date().toISOString(),
+        read: false,
+      });
+    }
 
     notifiedDoctors.push(doctorId);
   }
@@ -217,6 +251,7 @@ module.exports = {
   extractReadings,
   evaluateThresholdCrossings,
   genericPushCopy,
+  formatDescriptiveCrossingMessage,
   evaluateDoctorAlertsForEntry,
   mountDoctorAlertRoutes,
 };

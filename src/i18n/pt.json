@@ -4642,7 +4642,10 @@
         "gte": "maior ou igual",
         "lt": "menor que",
         "lte": "menor ou igual"
-      }
+      },
+      "crossedLimitDetailNamed": "Reading {{observed}} {{relation}} the limit of {{limit}} that you configured",
+      "relationAbove": "above",
+      "relationBelow": "below"
     },
     "patientHub": {
       "title": "Bitácora e médicos",
@@ -4652,6 +4655,118 @@
       "auditHint": "Eventos recentes de vínculo, consentimento e leituras do médico.",
       "auditEmpty": "Ainda não há eventos de auditoria.",
       "doctorAppNote": "Seu médico vê os dados compartilhados no AuricRX Médicos (com.auricrx.doctors), não neste app do paciente."
+    },
+    "compliance": {
+      "disclaimer": "AuricRX Médicos is a tool for organizing information. It does not replace your clinical judgment.",
+      "disclaimerShort": "Organizing tool — does not replace clinical judgment.",
+      "notForEmergencies": "This channel is not for emergencies. For emergencies, use local emergency services."
+    },
+    "digest": {
+      "title": "Morning digest",
+      "subtitle": "Only what is new since your last look — sorted by recency, not by health status.",
+      "empty": "No new exceptions.",
+      "kinds": {
+        "new_symptom": "New symptom logged",
+        "missed_dose": "Missed dose logged",
+        "limit_crossed": "Doctor limit crossed",
+        "new_document": "New document"
+      },
+      "open": "Open digest",
+      "lastLook": "Since last look"
+    },
+    "preVisit": {
+      "title": "Pre-visit one-pager",
+      "subtitle": "Descriptive counts, last readings with dates, dose-log totals, patient questions, and new files.",
+      "generate": "Open pre-visit page",
+      "readings": "Readings",
+      "doseLogs": "Dose log",
+      "questions": "Patient questions",
+      "documents": "New documents",
+      "symptoms": "Symptoms (verbatim)",
+      "empty": "Nothing to show for this period.",
+      "ofLogged": "{{logged}} of {{expected}} logged"
+    },
+    "appointmentRequest": {
+      "title": "Request appointment",
+      "subtitle": "Draft a message, review it, then send. Nothing is written to your calendar.",
+      "draft": "Draft request",
+      "proposedTimes": "Proposed times (optional, up to 3)",
+      "message": "Message",
+      "review": "Mark reviewed",
+      "send": "Send to patient",
+      "needsReview": "Review the message before sending.",
+      "sent": "Request sent for the patient to review.",
+      "slotPlaceholder": "ISO time or local note"
+    },
+    "calendar": {
+      "title": "Today's agenda",
+      "subtitle": "Read-only from Google or Outlook. All times use your timezone.",
+      "stubHint": "Calendar OAuth is not connected yet. Agenda stays unavailable (fail closed).",
+      "stale": "Calendar sync is stale. Agenda hidden until a fresh sync succeeds.",
+      "unavailable": "Calendar unavailable. Agenda hidden.",
+      "overlap": "Overlapping appointments flagged",
+      "lastSync": "Last sync",
+      "empty": "No appointments for today.",
+      "open": "Open agenda"
+    },
+    "officeHours": {
+      "title": "Office hours",
+      "subtitle": "You choose which days and time windows accept patient messages, in your timezone. You can pause messaging while away. Outside your windows, messages queue for the next one.",
+      "timezone": "Timezone",
+      "saved": "Office hours saved.",
+      "windowsHint": "Windows per day (24h). Example: 09:00-13:00, 16:00-20:00. Leave blank to close that day.",
+      "pauseMessaging": "Pause messaging (away)",
+      "resumeMessaging": "Resume messaging",
+      "pausedHint": "Messaging is paused. New patient messages stay queued until you resume.",
+      "weekdays": {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday"
+      }
+    },
+    "aiInsights": {
+      "title": "AI insights",
+      "comingSoon": "Coming soon",
+      "body": "Registered AI review is not available in Phase 1. Join the waitlist if you want to hear when it opens.",
+      "waitlist": "Join waitlist",
+      "waitlisted": "You are on the waitlist."
+    },
+    "messaging": {
+      "title": "Messages",
+      "needsAction": "Needs action today",
+      "needsActionHint": "Structured patient requests that are due in your current office window.",
+      "emptyInbox": "Nothing needs action right now.",
+      "optionalReply": "Optional short reply",
+      "replied": "Reply saved.",
+      "replyFailed": "Could not send reply.",
+      "exportTitle": "Export message summary",
+      "exportFailed": "Could not export summary.",
+      "notForEmergencies": "This channel is not for emergencies.",
+      "writeTitle": "Message your doctor",
+      "writeHint": "Choose a request type. This is not open chat and not for emergencies.",
+      "seeHours": "Doctor message hours",
+      "body": "Your message",
+      "send": "Send request",
+      "sent": "Request sent.",
+      "sendFailed": "Could not send request.",
+      "queuedNotice": "Outside office hours. Your message is queued for the doctor's next window. No reply is expected until then.",
+      "pausedNotice": "The doctor paused messaging. Your message is queued. No reply is expected until messaging resumes.",
+      "requestTypes": {
+        "refill": "Refill request",
+        "side_effect": "Side-effect question",
+        "appointment": "Appointment",
+        "general": "General question"
+      },
+      "actions": {
+        "approve_refill": "Approve refill",
+        "book_visit": "Book a visit",
+        "seen": "Seen",
+        "text_reply": "Send text reply"
+      }
     }
   }
 }

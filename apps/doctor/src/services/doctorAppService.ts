@@ -33,6 +33,7 @@ import {
   type AlertReadingType,
   type AlertComparator,
   type AuditLogEntry,
+  type DoctorOfficeHours,
   setLocalDoctorPlan,
   type DoctorPlanSource,
   isDoctorEntitled,
@@ -43,6 +44,27 @@ import {
   isInviteExpired,
   normalizeInviteCode,
   defaultConsent,
+  buildMorningDigest,
+  type DigestExceptionEvent,
+  type MorningDigestItem,
+  buildPreVisitOnePager,
+  type PreVisitOnePager,
+  createAppointmentRequestDraft,
+  markAppointmentRequestReviewed,
+  sendAppointmentRequest,
+  type AppointmentRequest,
+  normalizeOfficeHours,
+  evaluateCalendarAgenda,
+  type CalendarAgendaResult,
+  evaluateThresholdCrossings,
+  formatDescriptiveAlertMessage,
+  listNeedsActionToday,
+  applyDoctorQuickReply,
+  buildMessageSummaryExport,
+  promoteDueMessages,
+  type DoctorPatientMessage,
+  type DoctorQuickAction,
+  type MessageThreadExport,
 } from '@auricrx/doctor-core';
 import { auth, db } from '../config/firebase';
 import { API_BASE } from '../config/api';
@@ -405,6 +427,316 @@ class DoctorAppService {
     } catch (e) {
       console.warn('audit write failed', e);
     }
+  }
+
+  async saveOfficeHours(hours: Partial<DoctorOfficeHours>, timeZone?: string): Promise<DoctorProfile> {
+    const uid = uidOrThrow();
+    const normalized = normalizeOfficeHours(hours);
+    if (timeZone) normalized.timeZone = timeZone;
+    const ts = nowIso();
+    await updateDoc(doc(db, 'doctorProfiles', uid), {
+      officeHours: normalized,
+      timeZone: normalized.timeZone,
+      updatedAt: ts,
+    });
+    const dayCount = Object.keys(normalized.windowsByDay).length;
+    await this.writeAudit({
+      actorId: uid,
+      actorRole: 'doctor',
+      action: 'office_hours_updated',
+      doctorId: uid,
+      detail: `tz:${normalized.timeZone};days:${dayCount};paused:${normalized.messagingPaused}`,
+    });
+    return (await this.getDoctorProfile(uid))!;
+  }
+
+  async joinAiInsightsWaitlist(): Promise<DoctorProfile> {
+    const uid = uidOrThrow();
+    const ts = nowIso();
+    await updateDoc(doc(db, 'doctorProfiles', uid), {
+      aiInsightsWaitlisted: true,
+      aiInsightsWaitlistedAt: ts,
+      updatedAt: ts,
+    });
+    await this.writeAudit({
+      actorId: uid,
+      actorRole: 'doctor',
+      action: 'ai_waitlist_joined',
+      doctorId: uid,
+    });
+    return (await this.getDoctorProfile(uid))!;
+  }
+
+  /**
+   * Exception-first digest across linked patients (descriptive events only).
+   * sinceIso defaults to start of local day.
+   */
+  async buildExceptionDigest(sinceIso?: string): Promise<MorningDigestItem[]> {
+    const uid = uidOrThrow();
+    const profile = await this.getDoctorProfile(uid);
+    if (!isDoctorEntitled(profile)) return [];
+    const since =
+      sinceIso ||
+      (() => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d.toISOString();
+      })();
+    const patients = await this.listPatients();
+    const events: DigestExceptionEvent[] = [];
+
+    for (const link of patients) {
+      const label = link.patientDisplayName || link.patientId.slice(0, 8);
+      const [entries, limits, adherence] = await Promise.all([
+        this.listBitacoraForPatient(link),
+        this.listAlertLimits(link.patientId),
+        this.getSharedAdherence(link),
+      ]);
+      for (const entry of entries) {
+        if (entry.timestamp < since) continue;
+        if (entry.type === 'symptoms') {
+          events.push({
+            patientId: link.patientId,
+            patientLabel: label,
+            kind: 'new_symptom',
+            at: entry.timestamp,
+            detail: entry.symptomsText,
+          });
+        }
+        const crossings = evaluateThresholdCrossings(entry, limits);
+        for (const c of crossings) {
+          events.push({
+            patientId: link.patientId,
+            patientLabel: label,
+            kind: 'limit_crossed',
+            at: entry.timestamp,
+            detail: formatDescriptiveAlertMessage({
+              readingType: c.readingType,
+              observedValue: c.observedValue,
+              observedSecondary:
+                entry.type === 'blood_pressure'
+                  ? c.readingType === 'systolic'
+                    ? entry.diastolic
+                    : entry.systolic
+                  : undefined,
+              limit: c.limit,
+              locale: 'es',
+            }),
+          });
+        }
+      }
+      for (const a of adherence) {
+        if (typeof a.adherenceRate === 'number' && a.adherenceRate < 100) {
+          events.push({
+            patientId: link.patientId,
+            patientLabel: label,
+            kind: 'missed_dose',
+            at: nowIso(),
+            detail: `${a.name}${typeof a.adherenceRate === 'number' ? ` · ${a.adherenceRate}%` : ''}`,
+          });
+        }
+      }
+      // Documents: Phase 2 sharing — surface zero unless a stub collection appears
+      try {
+        const docsSnap = await getDocs(
+          query(collection(db, 'patientSharedDocuments', link.patientId, 'files'), orderBy('addedAt', 'desc'), limit(5))
+        );
+        for (const d of docsSnap.docs) {
+          const data = d.data() as { name?: string; addedAt?: string };
+          if (data.addedAt && data.addedAt >= since) {
+            events.push({
+              patientId: link.patientId,
+              patientLabel: label,
+              kind: 'new_document',
+              at: data.addedAt,
+              detail: data.name || d.id,
+            });
+          }
+        }
+      } catch {
+        // Collection may not exist yet — ignore
+      }
+    }
+
+    return buildMorningDigest(events);
+  }
+
+  async buildPreVisit(link: PatientDoctorLink, sinceIso?: string): Promise<PreVisitOnePager> {
+    const entries = await this.listBitacoraForPatient(link);
+    const adherence = await this.getSharedAdherence(link);
+    const doseLogs = adherence.map((a) => ({
+      name: a.name,
+      logged: typeof a.adherenceRate === 'number' ? Math.round(a.adherenceRate) : 0,
+      expected: 100,
+    }));
+    return buildPreVisitOnePager({
+      patientLabel: link.patientDisplayName || link.patientId.slice(0, 8),
+      entries,
+      doseLogs,
+      patientQuestions: [],
+      documents: [],
+      sinceIso,
+    });
+  }
+
+  async saveAppointmentRequestDraft(input: {
+    patientId: string;
+    proposedSlotsIso?: string[];
+    message?: string;
+    locale?: 'en' | 'es';
+  }): Promise<AppointmentRequest> {
+    const doctorId = uidOrThrow();
+    const id = newId('apptreq');
+    const draft = createAppointmentRequestDraft(
+      {
+        id,
+        doctorId,
+        patientId: input.patientId,
+        proposedSlotsIso: input.proposedSlotsIso,
+        message: input.message,
+      },
+      input.locale || 'es'
+    );
+    await setDoc(doc(db, 'doctorAppointmentRequests', id), draft);
+    return draft;
+  }
+
+  async reviewAppointmentRequest(id: string): Promise<AppointmentRequest> {
+    const snap = await getDoc(doc(db, 'doctorAppointmentRequests', id));
+    if (!snap.exists()) throw new Error('not_found');
+    const updated = markAppointmentRequestReviewed(snap.data() as AppointmentRequest);
+    await setDoc(doc(db, 'doctorAppointmentRequests', id), updated);
+    return updated;
+  }
+
+  async sendAppointmentRequest(id: string): Promise<AppointmentRequest> {
+    const doctorId = uidOrThrow();
+    const snap = await getDoc(doc(db, 'doctorAppointmentRequests', id));
+    if (!snap.exists()) throw new Error('not_found');
+    const updated = sendAppointmentRequest(snap.data() as AppointmentRequest);
+    await setDoc(doc(db, 'doctorAppointmentRequests', id), updated);
+    await this.writeAudit({
+      actorId: doctorId,
+      actorRole: 'doctor',
+      action: 'appointment_request_sent',
+      doctorId,
+      patientId: updated.patientId,
+      detail: updated.id,
+    });
+    return updated;
+  }
+
+  /** Read-only agenda — OAuth stubbed unless feature flag is on with fresh sync. */
+  getTodayAgendaStub(timeZone?: string): CalendarAgendaResult {
+    return evaluateCalendarAgenda({
+      appointments: [],
+      timeZone: timeZone || 'America/Mexico_City',
+      lastSyncedAt: undefined,
+      featureFlagEnabled: false,
+      providerAvailable: false,
+    });
+  }
+
+  async requestDescriptiveSummary(facts: Record<string, unknown>, language: string) {
+    return doctorApi('/api/doctor/summary/descriptive', { facts, language });
+  }
+
+  async listMessagesForDoctor(): Promise<DoctorPatientMessage[]> {
+    const doctorId = uidOrThrow();
+    const profile = await this.getDoctorProfile(doctorId);
+    if (!isDoctorEntitled(profile)) return [];
+    const snap = await getDocs(
+      query(collection(db, 'doctorPatientMessages'), where('doctorId', '==', doctorId), orderBy('createdAt', 'desc'), limit(100))
+    );
+    const raw = snap.docs.map((d) => d.data() as DoctorPatientMessage);
+    // Promote due queued items locally when a doctor window is open and not paused
+    const promoted = promoteDueMessages(raw, nowIso(), profile?.officeHours);
+    for (let i = 0; i < raw.length; i++) {
+      if (raw[i].status === 'queued' && promoted[i].status === 'pending_doctor') {
+        try {
+          await updateDoc(doc(db, 'doctorPatientMessages', raw[i].id), {
+            status: 'pending_doctor',
+            updatedAt: nowIso(),
+          });
+        } catch {
+          /* rules may block status-only promote without action — list still shows via client filter */
+        }
+      }
+    }
+    return promoted;
+  }
+
+  async listNeedsActionInbox(): Promise<DoctorPatientMessage[]> {
+    const doctorId = uidOrThrow();
+    const profile = await this.getDoctorProfile(doctorId);
+    const all = await this.listMessagesForDoctor();
+    return listNeedsActionToday(all, nowIso(), profile?.officeHours);
+  }
+
+  async replyToMessage(
+    messageId: string,
+    action: DoctorQuickAction,
+    replyText?: string,
+    language: string = 'es'
+  ): Promise<DoctorPatientMessage> {
+    const doctorId = uidOrThrow();
+    const snap = await getDoc(doc(db, 'doctorPatientMessages', messageId));
+    if (!snap.exists()) throw new Error('not_found');
+    const current = snap.data() as DoctorPatientMessage;
+    if (current.doctorId !== doctorId) throw new Error('forbidden');
+    const updated = applyDoctorQuickReply(current, action, replyText);
+    await setDoc(doc(db, 'doctorPatientMessages', messageId), updated);
+    await this.writeAudit({
+      actorId: doctorId,
+      actorRole: 'doctor',
+      action: 'message_replied',
+      doctorId,
+      patientId: updated.patientId,
+      linkId: updated.linkId,
+      detail: action,
+    });
+    try {
+      await doctorApi('/api/doctor/messages/notify', {
+        toUserId: updated.patientId,
+        role: 'patient',
+        language,
+        messageId,
+        channel: 'push',
+      });
+    } catch {
+      /* notify is best-effort */
+    }
+    return updated;
+  }
+
+  async exportMessageSummaryForPatient(
+    patientId: string,
+    locale: 'en' | 'es' = 'es'
+  ): Promise<MessageThreadExport> {
+    const doctorId = uidOrThrow();
+    const snap = await getDocs(
+      query(
+        collection(db, 'doctorPatientMessages'),
+        where('doctorId', '==', doctorId),
+        where('patientId', '==', patientId),
+        orderBy('createdAt', 'asc'),
+        limit(200)
+      )
+    );
+    const messages = snap.docs.map((d) => d.data() as DoctorPatientMessage);
+    const exported = buildMessageSummaryExport(messages, {
+      locale,
+      doctorLabel: (await this.getDoctorProfile(doctorId))?.displayName,
+    });
+    await this.writeAudit({
+      actorId: doctorId,
+      actorRole: 'doctor',
+      action: 'message_export',
+      doctorId,
+      patientId,
+      detail: `lines:${exported.lines.length}`,
+    });
+    return exported;
   }
 }
 

@@ -101,6 +101,70 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "doctorPatientMessages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "doctorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "doctorPatientMessages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "patientId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "doctorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "doctorPatientMessages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "doctorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "patientId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "doctorAppointmentRequests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "doctorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

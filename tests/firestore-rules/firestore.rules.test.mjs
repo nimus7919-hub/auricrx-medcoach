@@ -320,3 +320,108 @@ describe('links, invites, shared data, audit logs', () => {
     await assertFails(deleteDoc(doc(pat, 'doctorAuditLogs', 'audit_1')));
   });
 });
+
+describe('doctor profile office-hours visibility', () => {
+  it('linked patients can read the doctor profile for office hours; strangers cannot', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc', {
+        officeHours: {
+          timeZone: 'America/Mexico_City',
+          messagingPaused: false,
+          windowsByDay: { '1': [{ startMinutes: 540, endMinutes: 1080 }] },
+        },
+      }));
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
+    });
+    await assertSucceeds(getDoc(doc(authed('pat'), 'doctorProfiles', 'doc')));
+    await assertFails(getDoc(doc(authed('stranger'), 'doctorProfiles', 'doc')));
+  });
+});
+
+describe('doctorPatientMessages (secure in-app messaging)', () => {
+  function messageDoc(over = {}) {
+    return {
+      id: 'msg_1',
+      linkId: 'link_1',
+      doctorId: 'doc',
+      patientId: 'pat',
+      direction: 'patient_to_doctor',
+      requestType: 'refill',
+      body: 'Necesito surtir mi medicamento',
+      status: 'pending_doctor',
+      createdAt: iso('02'),
+      visibleToDoctorAt: iso('02'),
+      updatedAt: iso('02'),
+      ...over,
+    };
+  }
+
+  it('only the linked pair can read; outsiders and revoked links cannot', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
+      await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), messageDoc());
+    });
+    await assertSucceeds(getDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1')));
+    await assertSucceeds(getDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1')));
+    await assertFails(getDoc(doc(authed('other'), 'doctorPatientMessages', 'msg_1')));
+
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat', { status: 'revoked' }));
+    });
+    await assertFails(getDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1')));
+    await assertFails(getDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1')));
+  });
+
+  it('patient can create a structured request when link is active; doctor cannot create as patient', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
+    });
+    await assertSucceeds(setDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1'), messageDoc()));
+    await assertFails(
+      setDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_2'), messageDoc({ id: 'msg_2' }))
+    );
+    await assertFails(
+      setDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_3'), messageDoc({ id: 'msg_3', body: '' }))
+    );
+  });
+
+  it('doctor can apply a quick reply; patient cannot edit the request body after send', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
+      await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), messageDoc());
+    });
+    await assertSucceeds(
+      updateDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1'), {
+        status: 'answered',
+        doctorAction: 'approve_refill',
+        doctorReplyText: 'OK',
+        answeredAt: iso('03'),
+        updatedAt: iso('03'),
+      })
+    );
+    await assertFails(
+      updateDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1'), {
+        body: 'changed',
+        updatedAt: iso('04'),
+      })
+    );
+  });
+
+  it('revocation blocks doctor replies', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat', { status: 'revoked' }));
+      await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), messageDoc());
+    });
+    await assertFails(
+      updateDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1'), {
+        status: 'answered',
+        doctorAction: 'seen',
+        updatedAt: iso('03'),
+      })
+    );
+  });
+});

@@ -94,9 +94,32 @@ Unchanged in intent from the shared Firestore model:
 
 `doctorMode.*` in all six languages (en/es/fr/de/pt/zh), shared via `packages/doctor-core/i18n` and mirrored in the patient app locales. Doctor app adds `appName` / auth strings under `apps/doctor/src/i18n`.
 
+## Compliance guardrails (SaMD / CDS)
+
+See `docs/COMPLIANCE_GUARDRAILS.md`. Phase 1 stays descriptive: doctor-set limits, generic push, AI summary filter + template fallback, AI insights = Próximamente waitlist only.
+
+```bash
+npm run check:compliance-terms
+```
+
+## Phase 1 time-saving features
+
+| Feature | Status |
+|---|---|
+| Exception-first morning digest | Built (doctor app) |
+| Trend charts with doctor limit line | Built |
+| Descriptive pre-visit one-pager | Built |
+| One-tap appointment request (review before send) | Built (no calendar write) |
+| Read-only today's agenda (Google/Outlook) | Stub — OAuth behind `DOCTOR_CALENDAR_OAUTH`; fails closed |
+| Office hours for patient messages | Built — multi-window/day, timezone, vacation pause; patients see hours before writing |
+| Secure in-app messaging (structured) | Built — Firestore `doctorPatientMessages`, needs-action inbox, quick replies, generic push channel layer; WhatsApp channel stubbed |
+| Message summary export | Built (in-app text summary for doctor's records) |
+
 ## Tests
 
 ```bash
 npm test -- --testPathPattern=doctor
+npm run check:compliance-terms
 node server/doctor-alerts.test.js
+node server/doctor-ai-summary.test.js
 ```

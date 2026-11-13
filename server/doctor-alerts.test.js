@@ -4,6 +4,7 @@ const {
   extractReadings,
   evaluateThresholdCrossings,
   genericPushCopy,
+  formatDescriptiveCrossingMessage,
 } = require('./doctor-alerts');
 
 function test(name, fn) {
@@ -57,6 +58,27 @@ test('generic push copy has no patient name or value placeholders', () => {
   }
   const es = genericPushCopy('es');
   assert.ok(/l[ií]mite/i.test(es.body));
+});
+
+test('descriptive in-app alert names the doctor rule with values', () => {
+  const msg = formatDescriptiveCrossingMessage(
+    {
+      observedValue: 162,
+      limit: { comparator: 'gt', value: 150 },
+      readingType: 'systolic',
+    },
+    'es'
+  );
+  assert.strictEqual(msg, 'Lectura 162 por encima del límite de 150 que usted configuró');
+  const en = formatDescriptiveCrossingMessage(
+    {
+      observedValue: 162,
+      limit: { comparator: 'gt', value: 150 },
+      readingType: 'systolic',
+    },
+    'en'
+  );
+  assert.strictEqual(en, 'Reading 162 above the limit of 150 that you configured');
 });
 
 console.log('doctor-alerts tests passed');
