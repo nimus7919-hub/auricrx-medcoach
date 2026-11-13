@@ -26,7 +26,8 @@
       },
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Unlock AuricRX Médicos after you have signed in with two-factor authentication."
+        "NSFaceIDUsageDescription": "Unlock AuricRX Médicos after you have signed in with two-factor authentication.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
