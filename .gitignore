@@ -133,3 +133,8 @@ q6-export/
 
 # Local export artifacts
 dist-android-export/
+
+# Firebase emulator logs
+firestore-debug.log
+firebase-debug.log
+ui-debug.log

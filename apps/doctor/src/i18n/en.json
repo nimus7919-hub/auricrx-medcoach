@@ -1,0 +1,90 @@
+{
+  "appName": "AuricRX for Doctors",
+  "common": {
+    "close": "Close",
+    "back": "Back",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "save": "Save"
+  },
+  "auth": {
+    "title": "Sign in",
+    "hint": "Use your AuricRX doctor account.",
+    "needAccount": "Ask your admin to create a doctor account, or register with email.",
+    "register": "Create account",
+    "registerOk": "Account created. Next, set up two-factor authentication."
+  },
+  "nav": {
+    "patients": "Patients",
+    "profile": "Profile",
+    "alerts": "Alerts",
+    "digest": "Digest",
+    "agenda": "Agenda",
+    "officeHours": "Office hours",
+    "inbox": "Inbox"
+  },
+  "mfa": {
+    "auth": {
+      "requiredNotice": "Two-factor authentication is required for every doctor account. Patient data stays locked until setup is complete.",
+      "needSecondFactor": "Sign in again and enter your authenticator code.",
+      "afterEnroll": "Authenticator saved. Sign in with your email, password, and authenticator code.",
+      "sessionExpired": "For your security, sign in again with two-factor authentication."
+    },
+    "enroll": {
+      "title": "Set up two-factor authentication",
+      "subtitle": "Use an authenticator app such as Google Authenticator. This is required before you can open patient information.",
+      "verifyEmailTitle": "Verify your email",
+      "verifyEmailBody": "We sent a verification link. Open it, then return here. Two-factor setup needs a verified email.",
+      "resendEmail": "Resend verification email",
+      "iVerified": "I verified my email",
+      "scanTitle": "Scan this QR code",
+      "scanBody": "Open your authenticator app and scan the code, or enter the key manually.",
+      "manualKey": "Manual key",
+      "codeLabel": "6-digit code from your app",
+      "confirm": "Confirm and continue"
+    },
+    "challenge": {
+      "title": "Two-factor verification",
+      "subtitle": "Enter the code from your authenticator app to continue.",
+      "totp": "Authenticator app",
+      "sms": "SMS backup",
+      "codeLabel": "Authentication code",
+      "verify": "Verify",
+      "useRecovery": "Use a recovery code",
+      "smsNativeHint": "SMS backup sign-in needs phone MFA (reCAPTCHA / native). Use your authenticator app or a recovery code.",
+      "smsPreferTotp": "Authenticator app is the primary method."
+    },
+    "recovery": {
+      "title": "Recovery code",
+      "subtitle": "Enter one unused recovery code. This signs you in once and removes your authenticator so you can set it up again.",
+      "codeLabel": "Recovery code",
+      "submit": "Continue with recovery code",
+      "reenrollHint": "Recovery code accepted. Sign in, then set up your authenticator again."
+    },
+    "codes": {
+      "title": "Save your recovery codes",
+      "subtitle": "Store these codes offline. Each code works only once. They will not be shown again.",
+      "onceWarning": "If you lose your authenticator and these codes, you will need admin help to regain access.",
+      "savedContinue": "I saved these codes — continue"
+    },
+    "biometric": {
+      "title": "Unlock AuricRX Médicos",
+      "subtitle": "Use biometrics or your device PIN. Full two-factor sign-in is required again after 30 days, on a new device, or after sign-out.",
+      "prompt": "Unlock AuricRX Médicos",
+      "fallback": "Use device PIN",
+      "unlock": "Unlock",
+      "usePassword": "Sign in with password & 2FA",
+      "failed": "Could not unlock. Try again or sign in with password."
+    },
+    "home": {
+      "protected": "Account protected with two-factor authentication.",
+      "smsBackupHint": "Optional SMS backup can be added after phone MFA is enabled in Firebase (see setup doc). Authenticator app remains required."
+    }
+  }
+}

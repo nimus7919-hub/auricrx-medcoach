@@ -21,6 +21,7 @@ import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../src/layout/fabLayout';
 import { getDateTimePickerLocale } from '../src/utils/dateTimeLocale';
 
 // Reminders component moved outside App to prevent remounting
@@ -366,6 +367,7 @@ const Reminders = ({
         justifyContent: 'space-between', 
         paddingHorizontal: 20,
         paddingVertical: 16,
+        paddingTop: Math.max(insets.top, 0) + 12,
         borderBottomWidth: 1,
         borderBottomColor: theme.chip
       }}>
@@ -401,7 +403,7 @@ const Reminders = ({
 
       </View>
 
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: 24 }]}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[{ padding: 16 }, { paddingBottom: FAB_SCROLL_PADDING }]}>
         <ReminderPermissionBanner />
         {/* Add Reminder Button */}
           <PremiumButton
@@ -1289,7 +1291,10 @@ const Reminders = ({
                     const notificationId = await testReminderNotification();
                     if (!notificationId) return;
                     Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1253"), uiI18n.t("localized.Reminders.Reminders.text1253"));
-                  } catch (error) { Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), error.message); }
+                  } catch (error) {
+                    console.error('[Reminders] test notification failed', error);
+                    Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1254"), uiI18n.t("errors.generic"));
+                  }
                 }} style={{
                   alignSelf: 'center',
                   maxWidth: '100%',
@@ -1373,7 +1378,7 @@ const Reminders = ({
                     setEditingReminderId(null);
                     } catch (error) {
                       console.error('[Reminders] save failed', error);
-                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), error.message);
+                      Alert.alert(uiI18n.t("localized.Reminders.Reminders.text1326"), uiI18n.t("errors.generic"));
                     } finally { setSaving(false); }
                   }}
                 >

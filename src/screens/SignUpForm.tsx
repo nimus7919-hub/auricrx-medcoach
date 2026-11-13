@@ -428,7 +428,8 @@ export default function SignUpForm({ onGoogleSuccess, onSignUp, onClose, onLangu
       await onSignUp(userData);
     } catch (error) {
       console.error('Sign up error:', error);
-      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.signUpFailedValue", { value1: (error instanceof Error ? error.message : String(error)) || 'Please try again.' }));
+      console.error('Sign up technical error:', error);
+      Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.signUpFailedValue"));
     } finally {
       setLoading(false);
     }

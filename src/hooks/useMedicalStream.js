@@ -31,7 +31,10 @@ export function useMedicalStream(serverUrl = `${API_BASE}/api/ai/stream`, option
         body: JSON.stringify({ ...options, messages }),
         signal: controller.signal,
       });
-      if (!response.ok) throw new Error(uiI18n.t("ui.aiRequestFailedHttpValue", { value1: response.status }));
+      if (!response.ok) {
+        console.warn('AI stream HTTP error:', response.status);
+        throw new Error(uiI18n.t("ui.aiRequestFailedHttpValue"));
+      }
       if (!isCurrent()) return;
       if (options.stream === false) {
         const full = await response.text();

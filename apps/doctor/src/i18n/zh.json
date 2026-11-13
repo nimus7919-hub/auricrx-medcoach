@@ -1,0 +1,32 @@
+{
+  "appName": "AuricRX 医生端",
+  "common": {
+    "close": "关闭",
+    "back": "返回",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "loading": "加载中…",
+    "email": "邮箱",
+    "password": "密码",
+    "signIn": "登录",
+    "signOut": "退出登录",
+    "save": "保存"
+  },
+  "auth": {
+    "title": "登录",
+    "hint": "使用您的 AuricRX 医生账户。",
+    "needAccount": "请管理员创建账户，或使用邮箱注册。",
+    "register": "创建账户",
+    "registerOk": "账户已创建。请完善医生资料。"
+  },
+  "nav": {
+    "patients": "患者",
+    "profile": "资料",
+    "alerts": "告警",
+    "digest": "Digest",
+    "agenda": "Agenda",
+    "officeHours": "Office hours",
+    "inbox": "Inbox"
+  }
+}

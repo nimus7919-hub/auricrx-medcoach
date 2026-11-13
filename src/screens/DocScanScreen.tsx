@@ -894,7 +894,8 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       console.error('AI analysis failed:', error);
       
       // Fallback analysis
-      return uiI18n.t("ui.documentAnalysis") + '\n' + uiI18n.t("ui.errorDuringAnalysisValue", { value1: error instanceof Error ? error.message : String(error) }) + '\n' + uiI18n.t("ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor") + '\n' + uiI18n.t("ui.patientInformation") + '\n' + uiI18n.t("ui.prescriptionDetails") + '\n' + uiI18n.t("ui.medicalInstructions") + '\n' + uiI18n.t("ui.importantDatesOrNumbers") + '\n' + uiI18n.t("ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable");
+      console.error('Document analysis failed:', error);
+      return uiI18n.t("ui.documentAnalysis") + '\n' + uiI18n.t("ui.errorDuringAnalysisValue") + '\n' + uiI18n.t("ui.thisAppearsToBeAMedicalDocumentPleaseReviewTheImageManuallyFor") + '\n' + uiI18n.t("ui.patientInformation") + '\n' + uiI18n.t("ui.prescriptionDetails") + '\n' + uiI18n.t("ui.medicalInstructions") + '\n' + uiI18n.t("ui.importantDatesOrNumbers") + '\n' + uiI18n.t("ui.considerTakingAClearerPhotoIfTheTextIsNotEasilyReadable");
     }
   };
 

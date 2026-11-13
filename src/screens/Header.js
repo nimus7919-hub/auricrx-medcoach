@@ -1,6 +1,7 @@
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import { View, Image } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DynamicText from "./../components/DynamicText";
 
 import { styles } from "./appStyles";
@@ -9,8 +10,9 @@ import { styles } from "./appStyles";
 export default function createHeader(getScope) {
   return ({ title }) => {
   useUILanguage();
+    const insets = useSafeAreaInsets();
     const { route, setRoute, theme, AnimatedButton } = getScope();
-    return (<View style={[styles.header, { borderColor: theme.chip }]}>
+    return (<View style={[styles.header, { borderColor: theme.chip, paddingTop: Math.max(insets.top, 0) + 8 }]}>
       {route !== uiI18n.t("dashboard.title") ? (
         <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.headerHomeButton, { marginLeft: -65 }]}>
           <Image 

@@ -126,7 +126,9 @@ describe('PremiumEntitlementService', () => {
       const result = await service.startPremiumTrial('test-user-123');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Device already used for trial');
+      // User-facing copy is translated; raw backend reason stays in logs only.
+      expect(result.error).toBeTruthy();
+      expect(result.error).not.toMatch(/Device already used|status code|Invalid token/i);
     });
 
     it('should gracefully degrade if backend check fails', async () => {

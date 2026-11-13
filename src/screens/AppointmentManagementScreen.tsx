@@ -13,6 +13,8 @@ import * as Haptics from 'expo-haptics';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import AppointmentService, { Appointment, DoctorContact, AppointmentStats } from '../services/appointmentService';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -27,6 +29,7 @@ type AppointmentType = 'doctor' | 'lab' | 'pharmacy' | 'specialist' | 'emergency
 export default function AppointmentManagementScreen({ onClose, theme, S }: AppointmentManagementScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -1303,7 +1306,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -1311,6 +1314,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }

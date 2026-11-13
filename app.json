@@ -2,7 +2,7 @@
   "expo": {
     "name": "AuricRX MedCoach",
     "slug": "auricrx-medcoach",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon-auric.png",
     "userInterfaceStyle": "light",

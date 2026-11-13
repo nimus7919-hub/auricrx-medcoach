@@ -1,59 +1,61 @@
 import { getRegion } from './region';
-import uiI18n from "../i18n";
 // src/services/cloudSyncService.js
 // Cloud sync service for active health data
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth } from '../config/firebase';
-
 import { API_BASE as API_BASE_URL } from '../config/api';
+import { fetchWithAuth, getLiveFirebaseUser } from './authToken';
+import {
+  ERROR_CATEGORY,
+  createUserFacingError,
+  logTechnicalError,
+  toUserFacingError,
+} from '../utils/userFacingError';
 
 // Keep the timeout active until the response body has been consumed.
 async function requestSync(path, options = {}) {
-  const token = await getAuthToken();
-  if (!token) throw new Error(uiI18n.t("ui.notAuthenticated"));
+  const live = getLiveFirebaseUser();
+  if (!live) {
+    throw createUserFacingError(ERROR_CATEGORY.NOT_SIGNED_IN, `requestSync ${path}`);
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, 'X-Auric-Region': getRegion() },
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(uiI18n.t("ui.serverErrorValue_2600e2", { value1: response.status }));
+    const response = await fetchWithAuth(
+      `${API_BASE_URL}${path}`,
+      {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auric-Region': getRegion(),
+          ...(options.headers || {}),
+        },
+        signal: controller.signal,
+      },
+      { user: live }
+    );
+
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      logTechnicalError('cloudSync/http', { path, status: response.status, body: bodyText.slice(0, 300) });
+      if (response.status === 401 || response.status === 403) {
+        throw createUserFacingError(ERROR_CATEGORY.SESSION_EXPIRED, { status: response.status, path });
+      }
+      throw createUserFacingError(ERROR_CATEGORY.SERVER_UNAVAILABLE, { status: response.status, path });
+    }
     if (!response.headers.get('content-type')?.includes('application/json')) {
-      throw new Error(uiI18n.t("ui.serverReturnedNonJsonResponse"));
+      logTechnicalError('cloudSync/non-json', path);
+      throw createUserFacingError(ERROR_CATEGORY.SERVER_UNAVAILABLE, path);
     }
     const data = await response.json();
-    if (!data.ok) throw new Error(data.message || uiI18n.t("ui.syncFailed"));
+    if (!data.ok) {
+      logTechnicalError('cloudSync/api', data);
+      throw createUserFacingError(ERROR_CATEGORY.SERVER_UNAVAILABLE, data.message || data.error);
+    }
     return data;
   } finally {
     clearTimeout(timeout);
   }
-}
-
-/**
- * Get Firebase auth token
- */
-async function getAuthToken() {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const token = await user.getIdToken();
-      return token;
-    }
-  } catch (error) {
-    console.warn('⚠️ Could not get auth token:', error);
-  }
-  
-  // Fallback to AsyncStorage
-  const authState = await AsyncStorage.getItem('AURIC_AUTH_STATE');
-  if (authState) {
-    const parsed = JSON.parse(authState);
-    return parsed.idToken;
-  }
-  
-  return null;
 }
 
 /**
@@ -70,8 +72,8 @@ async function pushToCloud(dataType, payload, options = {}) {
 
     return { success: true, data };
   } catch (error) {
-    console.error(`❌ Failed to sync ${dataType}:`, error);
-    return { success: false, error: error.message };
+    logTechnicalError(`pushToCloud:${dataType}`, error);
+    return { success: false, error: toUserFacingError(error) };
   }
 }
 
@@ -84,8 +86,8 @@ async function pullFromCloud(dataType) {
 
     return { success: true, hasData: data.hasData, payload: data.data?.payload };
   } catch (error) {
-    console.error(`❌ Failed to pull ${dataType}:`, error);
-    return { success: false, error: error.message };
+    logTechnicalError(`pullFromCloud:${dataType}`, error);
+    return { success: false, error: toUserFacingError(error) };
   }
 }
 
@@ -98,9 +100,8 @@ async function pullAllFromCloud() {
 
     return { success: true, data: data.data };
   } catch (error) {
-    console.error('❌ Failed to pull all data:', error);
-    console.error('❌ Error stack:', error.stack);
-    return { success: false, error: error.message };
+    logTechnicalError('pullAllFromCloud', error);
+    return { success: false, error: toUserFacingError(error) };
   }
 }
 
@@ -108,98 +109,57 @@ async function pullAllFromCloud() {
  * Cloud sync service for active health data
  */
 class CloudSyncService {
-  /**
-   * Sync medications to cloud
-   */
   async syncMedications(medications) {
     return await pushToCloud('medications', medications);
   }
-  
-  /**
-   * Pull medications from cloud
-   */
+
   async pullMedications() {
     return await pullFromCloud('medications');
   }
-  
-  /**
-   * Sync reminders to cloud
-   */
+
   async syncReminders(reminders, options = {}) {
     return await pushToCloud('reminders', reminders, options);
   }
-  
-  /**
-   * Pull reminders from cloud
-   */
+
   async pullReminders() {
     return await pullFromCloud('reminders');
   }
-  
-  /**
-   * Sync appointments to cloud
-   */
+
   async syncAppointments(appointments) {
     return await pushToCloud('appointments', appointments);
   }
-  
-  /**
-   * Pull appointments from cloud
-   */
+
   async pullAppointments() {
     return await pullFromCloud('appointments');
   }
-  
-  /**
-   * Sync doctor contacts to cloud
-   */
+
   async syncDoctors(doctors) {
     return await pushToCloud('doctors', doctors);
   }
-  
-  /**
-   * Pull doctor contacts from cloud
-   */
+
   async pullDoctors() {
     return await pullFromCloud('doctors');
   }
-  
-  /**
-   * Sync AI doctor preference
-   */
+
   async syncAIDoctor(doctorName) {
     return await pushToCloud('ai_doctor', { doctor: doctorName });
   }
-  
-  /**
-   * Pull AI doctor preference
-   */
+
   async pullAIDoctor() {
     return await pullFromCloud('ai_doctor');
   }
-  
-  /**
-   * Pull all active data from cloud
-   * Called on app load to sync everything
-   */
+
   async pullAll() {
     return await pullAllFromCloud();
   }
-  
-  /**
-   * Wrapper for pushToCloud
-   */
+
   async pushToCloud(dataType, payload) {
     return await pushToCloud(dataType, payload);
   }
-  
-  /**
-   * Wrapper for pullFromCloud
-   */
+
   async pullFromCloud(dataType) {
     return await pullFromCloud(dataType);
   }
 }
 
 export default new CloudSyncService();
-
