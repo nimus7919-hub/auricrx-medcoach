@@ -115,6 +115,15 @@ npm run check:compliance-terms
 | Secure in-app messaging (structured) | Built — Firestore `doctorPatientMessages`, needs-action inbox, quick replies, generic push channel layer; WhatsApp channel stubbed |
 | Message summary export | Built (in-app text summary for doctor's records) |
 
+## Roadmap after Phase 1
+
+These items are not in the Phase 1 build. They are listed here so the doctor-app plan stays in one place. There is no separate `ROADMAP` file in this repo.
+
+| Feature | Status | Notes |
+|---|---|---|
+| Pre-visit AI intake (descriptive only) | Design draft (approved to design 13 Nov 2026) | Conversational interview *before* the visit. The patient confirms a short history of their own words. No diagnosis, triage, red-flag screening, or treatment. Full design: [`docs/doctor/pre-visit-intake.md`](doctor/pre-visit-intake.md). This is **not** the same as the built pre-visit one-pager, which only templates already-logged bitácora data. Patient-side UI lives in the patient app (Nova); this entry does not change patient-app code. |
+| AI scribe (during the visit) | Planned for after launch (Freddy, 11 Nov 2026) | Records the visit with consent from both, transcribes, and drafts a descriptive-only note the doctor reviews and signs. Audio is deleted after approval. This is **during** the visit; pre-visit intake is the interview **before** it. |
+
 ## Tests
 
 ```bash
