@@ -66,6 +66,11 @@ export const PREMIUM_FEATURES = {
   
   // Premium themes
   PREMIUM_THEMES: true,
+
+  // Doctor Mode (separate doctorPlan entitlement — not the consumer Pro plan)
+  DOCTOR_MODE: true,
+  DOCTOR_MODE_ALERTS: true,
+  DOCTOR_MODE_PATIENT_VIEW: true,
 };
 
 // Free features (core essentials)

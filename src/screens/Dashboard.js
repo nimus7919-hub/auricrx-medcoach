@@ -113,6 +113,12 @@ export default function createDashboard(getScope) {
               onPress={() => setRoute('daily-habits')}
               subtitle={uiI18n.t('ui.dailyHabitsSubtitle')}
             />
+            <Card
+              title={uiI18n.t('doctorMode.patientHub.title')}
+              icon={<View style={{ alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><Text style={{ fontSize: 32 }}>🩺</Text></View>}
+              onPress={() => setRoute('bitacora')}
+              subtitle={uiI18n.t('doctorMode.patientHub.dashboardSubtitle')}
+            />
             {/* Medication Promotions - Hidden for now */}
             {/* <Card 
               title="Medication Promotions" 

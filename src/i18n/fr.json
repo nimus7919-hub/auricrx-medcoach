@@ -4475,5 +4475,176 @@
     "serverUnavailable": "Nous n'arrivons pas à joindre le serveur. Réessayez dans un moment.",
     "generic": "Une erreur s'est produite. Veuillez réessayer.",
     "title": "Une erreur s'est produite"
+  },
+  "doctorMode": {
+    "title": "Mode médecin",
+    "dashboardSubtitle": "Bitácora, liaison médecin et mesures partagées",
+    "subtitle": "Enregistrez vos mesures, liez-vous à un médecin quand vous le souhaitez et ne partagez que les catégories autorisées. L’app n’étiquette jamais les valeurs comme élevées, basses ou dangereuses.",
+    "gate": {
+      "title": "Accès médecin requis",
+      "needVerifiedPlan": "Les données patient du Mode médecin ne sont disponibles qu’avec un forfait médecin actif et une cédula vérifiée. Les médecins non vérifiés ne peuvent pas voir les données patient."
+    },
+    "onboarding": {
+      "title": "Profil médecin",
+      "enable": "Activer le Mode médecin",
+      "edit": "Modifier le profil médecin",
+      "hint": "Saisissez vos informations professionnelles. La vérification utilise un contrôle automatisé de cédula (fournisseur fictif en Phase 1).",
+      "name": "Nom complet",
+      "specialty": "Spécialité",
+      "cedula": "Numéro de cédula professionnelle",
+      "required": "Le nom, la spécialité et la cédula sont obligatoires.",
+      "save": "Enregistrer le profil",
+      "saved": "Profil médecin enregistré.",
+      "saveFailed": "Impossible d’enregistrer le profil médecin."
+    },
+    "verification": {
+      "title": "Vérification de cédula",
+      "label": "Vérification",
+      "submit": "Soumettre la cédula pour vérification",
+      "failed": "La vérification n’a pas pu être terminée.",
+      "status": {
+        "unverified": "Non vérifiée",
+        "pending": "En attente",
+        "verified": "Vérifiée",
+        "rejected": "Refusée"
+      }
+    },
+    "plan": {
+      "label": "Forfait médecin",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "mockEnable": "Activer le forfait médecin (simulation)",
+      "mockDisable": "Désactiver le forfait médecin (simulation)"
+    },
+    "linking": {
+      "title": "Liaison patient ↔ médecin",
+      "hubHint": "Créez une invitation à courte durée ou saisissez un code. Vous confirmez la liaison et contrôlez chaque consentement (tous désactivés par défaut).",
+      "createPatientInvite": "Créer mon code patient",
+      "createDoctorInvite": "Créer mon code médecin",
+      "enterDoctorCode": "Saisir le code du médecin",
+      "enterPatientCode": "Saisir le code du patient",
+      "manageLinks": "Gérer les médecins liés et les consentements",
+      "myDoctors": "Médecins liés",
+      "inviteCreated": "Invitation créée",
+      "inviteShare": "Partagez ce code (expire dans {{minutes}} min) : {{code}}",
+      "inviteFailed": "Impossible de créer l’invitation.",
+      "enterCode": "Saisir le code d’invitation",
+      "enterDoctorHint": "Saisissez le code partagé par votre médecin. Vous confirmerez avant tout partage.",
+      "enterPatientHint": "Saisissez le code partagé par votre patient. Vous devez être vérifié et avoir un forfait actif.",
+      "code": "Code d’invitation",
+      "confirm": "Confirmer la liaison",
+      "linked": "Liaison confirmée. Les catégories de consentement commencent sur OFF.",
+      "expired": "Cette invitation a expiré.",
+      "invalid": "Code invalide ou déjà utilisé.",
+      "doctorNotReady": "Le médecin doit avoir une cédula vérifiée et un forfait médecin actif.",
+      "linkFailed": "Impossible de terminer la liaison.",
+      "consentHint": "Chaque catégorie est OFF par défaut. Activez uniquement ce que ce médecin peut voir. La révocation coupe l’accès immédiatement.",
+      "consentFailed": "Impossible de mettre à jour le consentement.",
+      "noLinks": "Aucun médecin lié pour le moment.",
+      "doctorLabel": "Médecin",
+      "status": "Statut",
+      "statuses": {
+        "pending": "En attente",
+        "active": "Actif",
+        "revoked": "Révoqué"
+      },
+      "revokeTitle": "Révoquer l’accès",
+      "revokeMessage": "Ce médecin perdra immédiatement l’accès à vos données partagées.",
+      "revoke": "Révoquer l’accès",
+      "revokeFailed": "Impossible de révoquer l’accès."
+    },
+    "consent": {
+      "bloodPressure": "Tension artérielle",
+      "glucose": "Glycémie",
+      "weight": "Poids",
+      "symptoms": "Symptômes",
+      "medicationList": "Liste des médicaments",
+      "reminderAdherence": "Observance des rappels"
+    },
+    "bitacora": {
+      "title": "Bitácora",
+      "hubHint": "Saisie rapide de tension, glycémie, poids et symptômes — valeurs brutes uniquement.",
+      "open": "Ouvrir la Bitácora",
+      "disclaimer": "Les valeurs sont enregistrées telles quelles. L’app ne les interprète pas comme normales, élevées, basses ou dangereuses.",
+      "bp": "Tension",
+      "glucose": "Glycémie",
+      "weight": "Poids",
+      "symptoms": "Symptômes",
+      "systolic": "Systolique",
+      "diastolic": "Diastolique",
+      "pulse": "Pouls (facultatif)",
+      "glucoseMgDl": "Glycémie (mg/dL)",
+      "weightKg": "Poids (kg)",
+      "symptomsText": "Symptômes",
+      "noteOptional": "Note (facultative)",
+      "save": "Enregistrer",
+      "saveFailed": "Impossible d’enregistrer l’entrée.",
+      "bpRequired": "Saisissez la systolique et la diastolique.",
+      "glucoseRequired": "Saisissez une valeur de glycémie.",
+      "weightRequired": "Saisissez un poids.",
+      "symptomsRequired": "Décrivez les symptômes.",
+      "charts": "Graphiques (valeurs brutes)",
+      "chartsHint": "Courbes simples de vos chiffres — sans bandes de référence ni couleurs de risque.",
+      "history": "Historique",
+      "empty": "Aucune entrée pour le moment.",
+      "timing": {
+        "fasting": "À jeun",
+        "after_meal": "Après repas",
+        "other": "Autre"
+      },
+      "types": {
+        "blood_pressure": "Tension artérielle",
+        "glucose": "Glycémie",
+        "weight": "Poids",
+        "symptoms": "Symptômes"
+      }
+    },
+    "doctor": {
+      "section": "Pour les médecins",
+      "hubHint": "Nécessite un forfait médecin + cédula vérifiée. Les médecins non vérifiés ne peuvent pas voir les données patient.",
+      "patients": "Mes patients",
+      "patientDetail": "Patient",
+      "noPatients": "Aucun patient lié avec consentement actif.",
+      "tapToOpen": "Ouvrir la bitácora partagée",
+      "rawOnly": "Mesures partagées en valeurs brutes uniquement — sans libellés cliniques.",
+      "medsSharedHint": "La liste des médicaments est partagée (lecture seule).",
+      "adherenceSharedHint": "L’observance des rappels est partagée lorsqu’elle est disponible."
+    },
+    "alerts": {
+      "title": "Limites d’alerte",
+      "hint": "Prévenez-moi seulement quand une nouvelle mesure dépasse une limite que j’ai définie. Les alertes ne disent jamais qu’une valeur est élevée, basse ou dangereuse.",
+      "readingType": "Mesure",
+      "comparator": "Lorsque la valeur est",
+      "value": "Valeur limite",
+      "valueRequired": "Saisissez une limite numérique.",
+      "save": "Enregistrer la limite",
+      "saved": "Limite d’alerte enregistrée.",
+      "saveFailed": "Impossible d’enregistrer la limite.",
+      "pushTitle": "AuricRX Mode médecin",
+      "pushBody": "Une mesure a dépassé une limite que vous avez définie. Ouvrez l’app pour les détails.",
+      "crossedLimitDetail": "Une mesure a dépassé une limite que vous avez définie.",
+      "types": {
+        "systolic": "Systolique",
+        "diastolic": "Diastolique",
+        "pulse": "Pouls",
+        "glucose": "Glycémie",
+        "weight": "Poids"
+      },
+      "comparators": {
+        "gt": "supérieure à",
+        "gte": "supérieure ou égale",
+        "lt": "inférieure à",
+        "lte": "inférieure ou égale"
+      }
+    },
+    "patientHub": {
+      "title": "Bitácora et médecins",
+      "dashboardSubtitle": "Enregistrez vos mesures et contrôlez ce que voit votre médecin",
+      "subtitle": "Enregistrez vos mesures et liez-vous à un médecin quand vous le souhaitez. Les médecins utilisent l’app séparée AuricRX Médecins.",
+      "audit": "Journal d’accès",
+      "auditHint": "Événements récents de liaison, consentement et lectures médecin.",
+      "auditEmpty": "Aucun événement d’audit pour le moment.",
+      "doctorAppNote": "Votre médecin consulte les données partagées dans AuricRX Médecins (com.auricrx.doctors), pas dans cette app patient."
+    }
   }
 }

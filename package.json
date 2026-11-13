@@ -7,7 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest --passWithNoTests && npm run test:i18n",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1",
@@ -15,7 +15,10 @@
     "lint:i18n": "node scripts/validate-i18n.js",
     "test:i18n": "node scripts/check-i18n-locale-parity.cjs && node scripts/check-hardcoded-jsx-strings.cjs && node scripts/check-i18n.cjs",
     "test:i18n:parity": "node scripts/check-i18n-locale-parity.cjs",
-    "test:i18n:hardcoded": "node scripts/check-hardcoded-jsx-strings.cjs"
+    "test:i18n:hardcoded": "node scripts/check-hardcoded-jsx-strings.cjs",
+    "start:doctor": "npm --prefix apps/doctor start",
+    "test:doctor-core": "jest --testPathPattern=doctor",
+    "test:firestore-rules": "npx -y firebase-tools@latest emulators:exec --only firestore --project demo-auricrx-rules --config firebase.json 'npm --prefix tests/firestore-rules test'"
   },
   "engines": {
     "node": ">=20"
@@ -83,7 +86,9 @@
     "react-native-svg": "15.11.2",
     "react-native-webview": "13.13.5",
     "xlsx": "^0.18.5",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "firebase": "^12.10.0",
+    "@auricrx/doctor-core": "file:packages/doctor-core"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

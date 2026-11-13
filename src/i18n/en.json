@@ -4335,5 +4335,176 @@
     "serverUnavailable": "We're having trouble reaching the server. Please try again in a moment.",
     "generic": "Something went wrong. Please try again.",
     "title": "Something went wrong"
+  },
+  "doctorMode": {
+    "title": "Doctor Mode",
+    "dashboardSubtitle": "Log readings and control what your doctor can see",
+    "subtitle": "Log your readings, link with a doctor when you choose, and share only the categories you allow. The app never labels values as high, low, or dangerous.",
+    "gate": {
+      "title": "Doctor access required",
+      "needVerifiedPlan": "Doctor Mode patient data is available only with an active doctor plan and a verified cédula. Unverified doctors cannot see patient data."
+    },
+    "onboarding": {
+      "title": "Doctor profile",
+      "enable": "Enable Doctor Mode",
+      "edit": "Edit doctor profile",
+      "hint": "Enter your professional details. Verification uses an automated cédula check (mock provider in Phase 1).",
+      "name": "Full name",
+      "specialty": "Specialty",
+      "cedula": "Cédula profesional number",
+      "required": "Name, specialty, and cédula are required.",
+      "save": "Save profile",
+      "saved": "Doctor profile saved.",
+      "saveFailed": "Could not save doctor profile."
+    },
+    "verification": {
+      "title": "Cédula verification",
+      "label": "Verification",
+      "submit": "Submit cédula for verification",
+      "failed": "Verification could not be completed.",
+      "status": {
+        "unverified": "Unverified",
+        "pending": "Pending",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      }
+    },
+    "plan": {
+      "label": "Doctor plan",
+      "active": "Active",
+      "inactive": "Inactive",
+      "mockEnable": "Enable doctor plan (mock)",
+      "mockDisable": "Disable doctor plan (mock)"
+    },
+    "linking": {
+      "title": "Patient ↔ doctor linking",
+      "hubHint": "Create a short-lived invite or enter a code. You confirm the link and control every consent toggle (all off by default).",
+      "createPatientInvite": "Create my patient invite code",
+      "createDoctorInvite": "Create my doctor invite code",
+      "enterDoctorCode": "Enter doctor's invite code",
+      "enterPatientCode": "Enter patient's invite code",
+      "manageLinks": "Manage linked doctors & consent",
+      "myDoctors": "Linked doctors",
+      "inviteCreated": "Invite created",
+      "inviteShare": "Share this code (expires in {{minutes}} min): {{code}}",
+      "inviteFailed": "Could not create invite.",
+      "enterCode": "Enter invite code",
+      "enterDoctorHint": "Enter the code your doctor shared. You will confirm before any data is shared.",
+      "enterPatientHint": "Enter the code your patient shared. You must be verified and entitled.",
+      "code": "Invite code",
+      "confirm": "Confirm link",
+      "linked": "Link confirmed. Consent categories start OFF.",
+      "expired": "This invite has expired.",
+      "invalid": "Invalid or already used invite code.",
+      "doctorNotReady": "Doctor must have a verified cédula and an active doctor plan.",
+      "linkFailed": "Could not complete the link.",
+      "consentHint": "Each category is OFF by default. Turn on only what you want this doctor to see. Revoking cuts access immediately.",
+      "consentFailed": "Could not update consent.",
+      "noLinks": "No linked doctors yet.",
+      "doctorLabel": "Doctor",
+      "status": "Status",
+      "statuses": {
+        "pending": "Pending",
+        "active": "Active",
+        "revoked": "Revoked"
+      },
+      "revokeTitle": "Revoke access",
+      "revokeMessage": "This doctor will immediately lose access to your shared data.",
+      "revoke": "Revoke access",
+      "revokeFailed": "Could not revoke access."
+    },
+    "consent": {
+      "bloodPressure": "Blood pressure",
+      "glucose": "Glucose",
+      "weight": "Weight",
+      "symptoms": "Symptoms",
+      "medicationList": "Medication list",
+      "reminderAdherence": "Reminder adherence"
+    },
+    "bitacora": {
+      "title": "Bitácora",
+      "hubHint": "Quick log for blood pressure, glucose, weight, and symptoms — raw values only.",
+      "open": "Open Bitácora",
+      "disclaimer": "Values are stored as entered. The app does not interpret them as normal, high, low, or dangerous.",
+      "bp": "Blood pressure",
+      "glucose": "Glucose",
+      "weight": "Weight",
+      "symptoms": "Symptoms",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "pulse": "Pulse (optional)",
+      "glucoseMgDl": "Glucose (mg/dL)",
+      "weightKg": "Weight (kg)",
+      "symptomsText": "Symptoms",
+      "noteOptional": "Note (optional)",
+      "save": "Save entry",
+      "saveFailed": "Could not save entry.",
+      "bpRequired": "Enter systolic and diastolic values.",
+      "glucoseRequired": "Enter a glucose value.",
+      "weightRequired": "Enter a weight value.",
+      "symptomsRequired": "Describe the symptoms.",
+      "charts": "Charts (raw values)",
+      "chartsHint": "Simple plots of your numbers — no reference bands or risk colors.",
+      "history": "History",
+      "empty": "No entries yet.",
+      "timing": {
+        "fasting": "Fasting",
+        "after_meal": "After meal",
+        "other": "Other"
+      },
+      "types": {
+        "blood_pressure": "Blood pressure",
+        "glucose": "Glucose",
+        "weight": "Weight",
+        "symptoms": "Symptoms"
+      }
+    },
+    "doctor": {
+      "section": "For doctors",
+      "hubHint": "Requires doctor plan + verified cédula. Unverified doctors cannot see patient data.",
+      "patients": "My patients",
+      "patientDetail": "Patient",
+      "noPatients": "No linked patients with active consent yet.",
+      "tapToOpen": "Open shared bitácora",
+      "rawOnly": "Shared readings as raw values only — no clinical labels.",
+      "medsSharedHint": "Medication list is shared (read-only). Full med sync arrives with live consent filters in a later pass.",
+      "adherenceSharedHint": "Reminder adherence is shared when available from the patient's reminders."
+    },
+    "alerts": {
+      "title": "Alert limits",
+      "hint": "Notify me only when a new reading crosses a limit I set. Alerts never say a value is high, low, or dangerous.",
+      "readingType": "Reading",
+      "comparator": "When value is",
+      "value": "Limit value",
+      "valueRequired": "Enter a numeric limit.",
+      "save": "Save limit",
+      "saved": "Alert limit saved.",
+      "saveFailed": "Could not save alert limit.",
+      "pushTitle": "AuricRX Doctor Mode",
+      "pushBody": "A reading crossed a limit you set. Open the app for details.",
+      "crossedLimitDetail": "A reading crossed a limit you set.",
+      "types": {
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "glucose": "Glucose",
+        "weight": "Weight"
+      },
+      "comparators": {
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "lt": "less than",
+        "lte": "less or equal"
+      }
+    },
+    "patientHub": {
+      "title": "Bitácora & doctors",
+      "dashboardSubtitle": "Log readings and control what your doctor can see",
+      "subtitle": "Log your readings and link with a doctor when you choose. Doctors use the separate AuricRX for Doctors app.",
+      "audit": "Access log",
+      "auditHint": "Recent link, consent, and doctor-read events.",
+      "auditEmpty": "No audit events yet.",
+      "doctorAppNote": "Your doctor views shared data in AuricRX for Doctors (com.auricrx.doctors), not inside this patient app."
+    }
   }
 }

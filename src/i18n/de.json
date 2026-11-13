@@ -4389,5 +4389,176 @@
     "serverUnavailable": "Der Server ist vorübergehend nicht erreichbar. Bitte versuchen Sie es gleich noch einmal.",
     "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "title": "Etwas ist schiefgelaufen"
+  },
+  "doctorMode": {
+    "title": "Arztmodus",
+    "dashboardSubtitle": "Bitácora, Arztverknüpfung und geteilte Messwerte",
+    "subtitle": "Protokollieren Sie Messwerte, verknüpfen Sie sich bei Bedarf mit einem Arzt und teilen Sie nur erlaubte Kategorien. Die App kennzeichnet Werte niemals als hoch, niedrig oder gefährlich.",
+    "gate": {
+      "title": "Arztzugang erforderlich",
+      "needVerifiedPlan": "Patientendaten im Arztmodus sind nur mit aktivem Arztplan und verifizierter Cédula verfügbar. Nicht verifizierte Ärzte sehen keine Patientendaten."
+    },
+    "onboarding": {
+      "title": "Arztprofil",
+      "enable": "Arztmodus aktivieren",
+      "edit": "Arztprofil bearbeiten",
+      "hint": "Geben Sie Ihre Berufsdaten ein. Die Prüfung nutzt eine automatisierte Cédula-Prüfung (Mock-Anbieter in Phase 1).",
+      "name": "Vollständiger Name",
+      "specialty": "Fachrichtung",
+      "cedula": "Cédula-profesional-Nummer",
+      "required": "Name, Fachrichtung und Cédula sind erforderlich.",
+      "save": "Profil speichern",
+      "saved": "Arztprofil gespeichert.",
+      "saveFailed": "Arztprofil konnte nicht gespeichert werden."
+    },
+    "verification": {
+      "title": "Cédula-Verifizierung",
+      "label": "Verifizierung",
+      "submit": "Cédula zur Prüfung einreichen",
+      "failed": "Verifizierung konnte nicht abgeschlossen werden.",
+      "status": {
+        "unverified": "Nicht verifiziert",
+        "pending": "Ausstehend",
+        "verified": "Verifiziert",
+        "rejected": "Abgelehnt"
+      }
+    },
+    "plan": {
+      "label": "Arztplan",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "mockEnable": "Arztplan aktivieren (Mock)",
+      "mockDisable": "Arztplan deaktivieren (Mock)"
+    },
+    "linking": {
+      "title": "Verknüpfung Patient ↔ Arzt",
+      "hubHint": "Erstellen Sie einen kurzlebigen Einladungscode oder geben Sie einen ein. Sie bestätigen die Verknüpfung und steuern jede Einwilligung (standardmäßig alle AUS).",
+      "createPatientInvite": "Meinen Patienten-Code erstellen",
+      "createDoctorInvite": "Meinen Arzt-Code erstellen",
+      "enterDoctorCode": "Arzt-Code eingeben",
+      "enterPatientCode": "Patienten-Code eingeben",
+      "manageLinks": "Verknüpfte Ärzte & Einwilligungen verwalten",
+      "myDoctors": "Verknüpfte Ärzte",
+      "inviteCreated": "Einladung erstellt",
+      "inviteShare": "Teilen Sie diesen Code (gültig {{minutes}} Min.): {{code}}",
+      "inviteFailed": "Einladung konnte nicht erstellt werden.",
+      "enterCode": "Einladungscode eingeben",
+      "enterDoctorHint": "Geben Sie den vom Arzt geteilten Code ein. Sie bestätigen vor jeder Freigabe.",
+      "enterPatientHint": "Geben Sie den vom Patienten geteilten Code ein. Sie müssen verifiziert und berechtigt sein.",
+      "code": "Einladungscode",
+      "confirm": "Verknüpfung bestätigen",
+      "linked": "Verknüpfung bestätigt. Einwilligungskategorien starten auf AUS.",
+      "expired": "Diese Einladung ist abgelaufen.",
+      "invalid": "Ungültiger oder bereits verwendeter Code.",
+      "doctorNotReady": "Der Arzt braucht eine verifizierte Cédula und einen aktiven Arztplan.",
+      "linkFailed": "Verknüpfung konnte nicht abgeschlossen werden.",
+      "consentHint": "Jede Kategorie ist standardmäßig AUS. Aktivieren Sie nur, was dieser Arzt sehen soll. Widerruf beendet den Zugriff sofort.",
+      "consentFailed": "Einwilligung konnte nicht aktualisiert werden.",
+      "noLinks": "Noch keine verknüpften Ärzte.",
+      "doctorLabel": "Arzt",
+      "status": "Status",
+      "statuses": {
+        "pending": "Ausstehend",
+        "active": "Aktiv",
+        "revoked": "Widerrufen"
+      },
+      "revokeTitle": "Zugriff widerrufen",
+      "revokeMessage": "Dieser Arzt verliert sofort den Zugriff auf Ihre geteilten Daten.",
+      "revoke": "Zugriff widerrufen",
+      "revokeFailed": "Zugriff konnte nicht widerrufen werden."
+    },
+    "consent": {
+      "bloodPressure": "Blutdruck",
+      "glucose": "Blutzucker",
+      "weight": "Gewicht",
+      "symptoms": "Symptome",
+      "medicationList": "Medikamentenliste",
+      "reminderAdherence": "Erinnerungs-Adhärenz"
+    },
+    "bitacora": {
+      "title": "Bitácora",
+      "hubHint": "Schnelleingabe für Blutdruck, Blutzucker, Gewicht und Symptome — nur Rohwerte.",
+      "open": "Bitácora öffnen",
+      "disclaimer": "Werte werden wie eingegeben gespeichert. Die App interpretiert sie nicht als normal, hoch, niedrig oder gefährlich.",
+      "bp": "Blutdruck",
+      "glucose": "Blutzucker",
+      "weight": "Gewicht",
+      "symptoms": "Symptome",
+      "systolic": "Systolisch",
+      "diastolic": "Diastolisch",
+      "pulse": "Puls (optional)",
+      "glucoseMgDl": "Blutzucker (mg/dL)",
+      "weightKg": "Gewicht (kg)",
+      "symptomsText": "Symptome",
+      "noteOptional": "Notiz (optional)",
+      "save": "Eintrag speichern",
+      "saveFailed": "Eintrag konnte nicht gespeichert werden.",
+      "bpRequired": "Systolisch und diastolisch eingeben.",
+      "glucoseRequired": "Blutzuckerwert eingeben.",
+      "weightRequired": "Gewicht eingeben.",
+      "symptomsRequired": "Symptome beschreiben.",
+      "charts": "Diagramme (Rohwerte)",
+      "chartsHint": "Einfache Kurven Ihrer Zahlen — ohne Referenzbänder oder Risikofarben.",
+      "history": "Verlauf",
+      "empty": "Noch keine Einträge.",
+      "timing": {
+        "fasting": "Nüchtern",
+        "after_meal": "Nach dem Essen",
+        "other": "Sonstiges"
+      },
+      "types": {
+        "blood_pressure": "Blutdruck",
+        "glucose": "Blutzucker",
+        "weight": "Gewicht",
+        "symptoms": "Symptome"
+      }
+    },
+    "doctor": {
+      "section": "Für Ärzte",
+      "hubHint": "Erfordert Arztplan + verifizierte Cédula. Nicht verifizierte Ärzte sehen keine Patientendaten.",
+      "patients": "Meine Patienten",
+      "patientDetail": "Patient",
+      "noPatients": "Noch keine verknüpften Patienten mit aktiver Einwilligung.",
+      "tapToOpen": "Geteilte Bitácora öffnen",
+      "rawOnly": "Geteilte Messwerte nur als Rohwerte — ohne klinische Labels.",
+      "medsSharedHint": "Medikamentenliste ist freigegeben (nur lesen).",
+      "adherenceSharedHint": "Erinnerungs-Adhärenz wird geteilt, sofern verfügbar."
+    },
+    "alerts": {
+      "title": "Alarmgrenzen",
+      "hint": "Benachrichtigen Sie mich nur, wenn ein neuer Messwert eine von mir gesetzte Grenze überschreitet. Alarme sagen nie, dass ein Wert hoch, niedrig oder gefährlich ist.",
+      "readingType": "Messwert",
+      "comparator": "Wenn der Wert",
+      "value": "Grenzwert",
+      "valueRequired": "Numerischen Grenzwert eingeben.",
+      "save": "Grenze speichern",
+      "saved": "Alarmgrenze gespeichert.",
+      "saveFailed": "Grenze konnte nicht gespeichert werden.",
+      "pushTitle": "AuricRX Arztmodus",
+      "pushBody": "Ein Messwert hat ein von Ihnen gesetztes Limit überschritten. Öffnen Sie die App für Details.",
+      "crossedLimitDetail": "Ein Messwert hat ein von Ihnen gesetztes Limit überschritten.",
+      "types": {
+        "systolic": "Systolisch",
+        "diastolic": "Diastolisch",
+        "pulse": "Puls",
+        "glucose": "Blutzucker",
+        "weight": "Gewicht"
+      },
+      "comparators": {
+        "gt": "größer als",
+        "gte": "größer oder gleich",
+        "lt": "kleiner als",
+        "lte": "kleiner oder gleich"
+      }
+    },
+    "patientHub": {
+      "title": "Bitácora & Ärzte",
+      "dashboardSubtitle": "Messwerte protokollieren und freigeben, was Ihr Arzt sieht",
+      "subtitle": "Protokollieren Sie Messwerte und verknüpfen Sie sich bei Bedarf mit einem Arzt. Ärzte nutzen die separate App AuricRX für Ärzte.",
+      "audit": "Zugriffsprotokoll",
+      "auditHint": "Aktuelle Ereignisse zu Verknüpfung, Einwilligung und Arztzugriff.",
+      "auditEmpty": "Noch keine Audit-Ereignisse.",
+      "doctorAppNote": "Ihr Arzt sieht freigegebene Daten in AuricRX für Ärzte (com.auricrx.doctors), nicht in dieser Patienten-App."
+    }
   }
 }

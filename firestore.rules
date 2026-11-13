@@ -1,0 +1,342 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function optionalStr(value, max) {
+      return !(value is string) ? (value == null) : value.size() <= max;
+    }
+    function isIsoDate(value) {
+      return value is string && value.size() >= 10 && value.size() <= 40;
+    }
+
+    // Live patient app compatibility. Previous production rules also covered
+    // /users, but allowed any signed-in user to read every profile and to
+    // create any users/{document}. Tightened to owner-only. User profiles
+    // used by the live app live in Neon; no current client queries this
+    // collection cross-user. Previous rules: /workspace/firebase-rules-backup-20261111-193024.rules
+    match /users/{userId} {
+      allow read, write: if isSelf(userId);
+    }
+
+    function doctorProfile() {
+      return get(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid)).data;
+    }
+    function doctorIsReady() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid))
+        && doctorProfile().doctorPlan == true
+        && doctorProfile().verificationStatus == 'verified';
+    }
+    function accessPath(patientId) {
+      return /databases/$(database)/documents/doctorPatientAccess/$(request.auth.uid + '_' + patientId);
+    }
+    function hasActiveLink(patientId) {
+      return doctorIsReady()
+        && exists(accessPath(patientId))
+        && get(accessPath(patientId)).data.status == 'active'
+        && get(accessPath(patientId)).data.doctorId == request.auth.uid
+        && get(accessPath(patientId)).data.patientId == patientId;
+    }
+    function hasActiveConsent(patientId, category) {
+      return hasActiveLink(patientId)
+        && get(accessPath(patientId)).data.consent[category] == true;
+    }
+
+    function validConsent(c) {
+      return c is map
+        && c.keys().hasOnly(['bloodPressure', 'glucose', 'weight', 'symptoms', 'medicationList', 'reminderAdherence'])
+        && c.bloodPressure is bool
+        && c.glucose is bool
+        && c.weight is bool
+        && c.symptoms is bool
+        && c.medicationList is bool
+        && c.reminderAdherence is bool;
+    }
+    function allConsentFalse(c) {
+      return validConsent(c)
+        && c.bloodPressure == false
+        && c.glucose == false
+        && c.weight == false
+        && c.symptoms == false
+        && c.medicationList == false
+        && c.reminderAdherence == false;
+    }
+
+    function planFieldsUnchanged() {
+      return request.resource.data.doctorPlan == resource.data.doctorPlan
+        && request.resource.data.get('doctorPlanSource', '') == resource.data.get('doctorPlanSource', '')
+        && request.resource.data.get('doctorPlanUpdatedAt', '') == resource.data.get('doctorPlanUpdatedAt', '');
+    }
+    function verificationSafeOnUpdate() {
+      return resource.data.verificationStatus == 'verified'
+        ? (
+            request.resource.data.verificationStatus == 'verified'
+            && request.resource.data.cedulaNumber == resource.data.cedulaNumber
+            && request.resource.data.get('verificationUpdatedAt', '') == resource.data.get('verificationUpdatedAt', '')
+            && request.resource.data.get('verificationMessage', '') == resource.data.get('verificationMessage', '')
+          )
+        : request.resource.data.verificationStatus in ['unverified', 'pending', 'rejected'];
+    }
+
+    match /doctorProfiles/{uid} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.doctorPlan == false
+        && request.resource.data.verificationStatus in ['unverified', 'pending']
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 200
+        && request.resource.data.specialty is string
+        && request.resource.data.specialty.size() <= 200
+        && request.resource.data.cedulaNumber is string
+        && request.resource.data.cedulaNumber.size() <= 40
+        && request.resource.data.keys().hasOnly([
+          'uid', 'displayName', 'specialty', 'cedulaNumber',
+          'verificationStatus', 'verificationUpdatedAt', 'verificationMessage',
+          'doctorPlan', 'doctorPlanSource', 'doctorPlanUpdatedAt',
+          'createdAt', 'updatedAt'
+        ]);
+      allow update: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && planFieldsUnchanged()
+        && verificationSafeOnUpdate()
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 200
+        && request.resource.data.specialty is string
+        && request.resource.data.specialty.size() <= 200
+        && request.resource.data.cedulaNumber is string
+        && request.resource.data.cedulaNumber.size() <= 40;
+      allow delete: if false;
+    }
+
+    match /doctorInvites/{code} {
+      allow get: if signedIn();
+      allow list: if signedIn() && resource.data.createdBy == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.code == code
+        && code.size() >= 8
+        && code.size() <= 16
+        && request.resource.data.role in ['patient', 'doctor']
+        && request.resource.data.consumed == false
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.keys().hasOnly([
+          'code', 'createdBy', 'role', 'expiresAt', 'createdAt',
+          'consumed', 'consumedBy', 'consumedAt'
+        ]);
+      allow update: if signedIn()
+        && resource.data.consumed == false
+        && request.time < resource.data.expiresAt
+        && request.resource.data.consumed == true
+        && request.resource.data.consumedBy == request.auth.uid
+        && request.resource.data.consumedAt is timestamp
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.expiresAt == resource.data.expiresAt
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if false;
+    }
+
+    function linkPartiesDistinct(d) {
+      return d.patientId is string
+        && d.doctorId is string
+        && d.patientId != d.doctorId
+        && d.patientId.size() <= 128
+        && d.doctorId.size() <= 128;
+    }
+    function linkImmutable() {
+      return request.resource.data.id == resource.data.id
+        && request.resource.data.patientId == resource.data.patientId
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.get('inviteCode', '') == resource.data.get('inviteCode', '');
+    }
+
+    match /doctorLinks/{linkId} {
+      allow read: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.id == linkId
+        && linkPartiesDistinct(request.resource.data)
+        && request.resource.data.status == 'active'
+        && validConsent(request.resource.data.consent)
+        && isIsoDate(request.resource.data.createdAt)
+        && isIsoDate(request.resource.data.updatedAt)
+        && (
+          request.resource.data.patientId == request.auth.uid
+          || (request.resource.data.doctorId == request.auth.uid
+              && doctorIsReady()
+              && allConsentFalse(request.resource.data.consent))
+        );
+      allow update: if signedIn()
+        && linkImmutable()
+        && (
+          (
+            resource.data.patientId == request.auth.uid
+            && validConsent(request.resource.data.consent)
+            && (
+              request.resource.data.status == resource.data.status
+              || (resource.data.status == 'active' && request.resource.data.status == 'revoked')
+            )
+          )
+          || (
+            resource.data.doctorId == request.auth.uid
+            && request.resource.data.consent == resource.data.consent
+            && resource.data.status == 'active'
+            && request.resource.data.status == 'revoked'
+          )
+        );
+      allow delete: if false;
+    }
+
+    function accessShape(d, accessId) {
+      return d.accessId == accessId
+        && d.accessId == d.doctorId + '_' + d.patientId
+        && linkPartiesDistinct(d)
+        && validConsent(d.consent)
+        && d.status in ['active', 'revoked', 'pending']
+        && d.linkId is string
+        && d.linkId.size() <= 128;
+    }
+
+    match /doctorPatientAccess/{accessId} {
+      allow read: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid);
+      allow create: if signedIn()
+        && accessShape(request.resource.data, accessId)
+        && (
+          request.resource.data.patientId == request.auth.uid
+          || (request.resource.data.doctorId == request.auth.uid
+              && doctorIsReady()
+              && allConsentFalse(request.resource.data.consent)
+              && request.resource.data.status == 'active')
+        );
+      allow update: if signedIn()
+        && accessShape(request.resource.data, accessId)
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.patientId == resource.data.patientId
+        && request.resource.data.accessId == resource.data.accessId
+        && request.resource.data.linkId == resource.data.linkId
+        && (
+          (
+            resource.data.patientId == request.auth.uid
+            && (
+              request.resource.data.status == resource.data.status
+              || (resource.data.status == 'active' && request.resource.data.status == 'revoked')
+            )
+          )
+          || (
+            resource.data.doctorId == request.auth.uid
+            && request.resource.data.consent == resource.data.consent
+            && resource.data.status == 'active'
+            && request.resource.data.status == 'revoked'
+          )
+        );
+      allow delete: if false;
+    }
+
+    function entryCategory() {
+      return resource.data.type == 'blood_pressure' ? 'bloodPressure'
+        : resource.data.type == 'glucose' ? 'glucose'
+        : resource.data.type == 'weight' ? 'weight'
+        : resource.data.type == 'symptoms' ? 'symptoms'
+        : 'none';
+    }
+    function validNumber(value, min, max) {
+      return (value is int || value is float) && value >= min && value <= max;
+    }
+    function validEntry(d, patientId, entryId) {
+      return d.id == entryId
+        && d.patientId == patientId
+        && d.type in ['blood_pressure', 'glucose', 'weight', 'symptoms']
+        && isIsoDate(d.timestamp)
+        && isIsoDate(d.createdAt)
+        && isIsoDate(d.updatedAt)
+        && d.keys().hasOnly([
+          'id', 'patientId', 'type', 'timestamp', 'note',
+          'systolic', 'diastolic', 'pulse',
+          'glucoseMgDl', 'glucoseTiming',
+          'weightKg', 'symptomsText',
+          'createdAt', 'updatedAt', 'source'
+        ])
+        && optionalStr(d.get('note', ''), 2000)
+        && optionalStr(d.get('symptomsText', ''), 2000)
+        && (!('systolic' in d) || validNumber(d.systolic, 0, 400))
+        && (!('diastolic' in d) || validNumber(d.diastolic, 0, 400))
+        && (!('pulse' in d) || validNumber(d.pulse, 0, 400))
+        && (!('glucoseMgDl' in d) || validNumber(d.glucoseMgDl, 0, 2000))
+        && (!('weightKg' in d) || validNumber(d.weightKg, 0, 1000))
+        && (!('glucoseTiming' in d) || d.glucoseTiming in ['fasting', 'after_meal', 'other'])
+        && (!('source' in d) || d.source in ['bitacora', 'health_metrics']);
+    }
+
+    match /bitacora/{patientId}/entries/{entryId} {
+      allow read: if isSelf(patientId) || hasActiveConsent(patientId, entryCategory());
+      allow create, update: if isSelf(patientId)
+        && validEntry(request.resource.data, patientId, entryId);
+      allow delete: if isSelf(patientId);
+    }
+
+    match /patientSharedMeds/{patientId} {
+      allow read: if isSelf(patientId) || hasActiveConsent(patientId, 'medicationList');
+      allow write: if isSelf(patientId);
+      allow delete: if isSelf(patientId);
+    }
+    match /patientSharedAdherence/{patientId} {
+      allow read: if isSelf(patientId) || hasActiveConsent(patientId, 'reminderAdherence');
+      allow write: if isSelf(patientId);
+      allow delete: if isSelf(patientId);
+    }
+
+    match /doctorAlertLimits/{limitId} {
+      allow read: if signedIn() && resource.data.doctorId == request.auth.uid;
+      allow create, update: if signedIn()
+        && doctorIsReady()
+        && request.resource.data.doctorId == request.auth.uid
+        && request.resource.data.id == limitId
+        && hasActiveLink(request.resource.data.patientId)
+        && request.resource.data.readingType in ['systolic', 'diastolic', 'pulse', 'glucose', 'weight']
+        && request.resource.data.comparator in ['gt', 'gte', 'lt', 'lte']
+        && (request.resource.data.value is int || request.resource.data.value is float)
+        && request.resource.data.enabled is bool;
+      allow delete: if signedIn() && resource.data.doctorId == request.auth.uid;
+    }
+
+    match /doctorPushTokens/{uid} {
+      allow read: if isSelf(uid);
+      allow write: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.expoPushToken is string
+        && request.resource.data.expoPushToken.size() > 0
+        && request.resource.data.expoPushToken.size() <= 4096;
+      allow delete: if isSelf(uid);
+    }
+
+    match /doctorAuditLogs/{logId} {
+      allow read: if signedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.id == logId
+        && request.resource.data.actorId == request.auth.uid
+        && request.resource.data.actorRole in ['patient', 'doctor']
+        && request.resource.data.action in [
+          'link_created', 'link_confirmed', 'link_revoked',
+          'consent_updated', 'doctor_read', 'verification_submitted'
+        ]
+        && optionalStr(request.resource.data.get('detail', ''), 2000)
+        && isIsoDate(request.resource.data.createdAt);
+      allow update, delete: if false;
+    }
+  }
+}

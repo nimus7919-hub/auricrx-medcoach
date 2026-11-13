@@ -1,0 +1,173 @@
+{
+  "doctorMode": {
+    "title": "医生模式",
+    "dashboardSubtitle": "健康日志、医患关联与共享读数",
+    "subtitle": "记录您的读数，在您同意时与医生关联，并仅共享您允许的类别。应用绝不会把数值标注为偏高、偏低或危险。",
+    "gate": {
+      "title": "需要医生权限",
+      "needVerifiedPlan": "医生模式下的患者数据仅在医生方案有效且职业执照（cédula）已验证时可查看。未验证的医生无法查看任何患者数据。"
+    },
+    "onboarding": {
+      "title": "医生资料",
+      "enable": "启用医生模式",
+      "edit": "编辑医生资料",
+      "hint": "填写您的职业信息。验证通过自动化职业执照核验（第1阶段为模拟服务商）。",
+      "name": "姓名",
+      "specialty": "专科",
+      "cedula": "职业执照号码（cédula profesional）",
+      "required": "姓名、专科和执照号码为必填项。",
+      "save": "保存资料",
+      "saved": "医生资料已保存。",
+      "saveFailed": "无法保存医生资料。"
+    },
+    "verification": {
+      "title": "执照验证",
+      "label": "验证状态",
+      "submit": "提交执照进行验证",
+      "failed": "无法完成验证。",
+      "status": {
+        "unverified": "未验证",
+        "pending": "待审核",
+        "verified": "已验证",
+        "rejected": "已拒绝"
+      }
+    },
+    "plan": {
+      "label": "医生方案",
+      "active": "已启用",
+      "inactive": "未启用",
+      "mockEnable": "启用医生方案（模拟）",
+      "mockDisable": "停用医生方案（模拟）"
+    },
+    "linking": {
+      "title": "患者 ↔ 医生关联",
+      "hubHint": "创建短期邀请码或输入对方代码。您确认关联并控制每一项授权（默认全部关闭）。",
+      "createPatientInvite": "创建我的患者邀请码",
+      "createDoctorInvite": "创建我的医生邀请码",
+      "enterDoctorCode": "输入医生邀请码",
+      "enterPatientCode": "输入患者邀请码",
+      "manageLinks": "管理已关联医生与授权",
+      "myDoctors": "已关联医生",
+      "inviteCreated": "邀请已创建",
+      "inviteShare": "分享此代码（{{minutes}} 分钟后失效）：{{code}}",
+      "inviteFailed": "无法创建邀请。",
+      "enterCode": "输入邀请码",
+      "enterDoctorHint": "输入医生分享的代码。在共享任何数据前您需要确认。",
+      "enterPatientHint": "输入患者分享的代码。您必须已验证且拥有有效医生方案。",
+      "code": "邀请码",
+      "confirm": "确认关联",
+      "linked": "关联已确认。授权类别默认全部关闭。",
+      "expired": "此邀请已过期。",
+      "invalid": "邀请码无效或已被使用。",
+      "doctorNotReady": "医生必须完成执照验证并拥有有效医生方案。",
+      "linkFailed": "无法完成关联。",
+      "consentHint": "每一类默认关闭。仅打开您希望该医生看到的内容。撤销后立即切断访问。",
+      "consentFailed": "无法更新授权。",
+      "noLinks": "尚无关联的医生。",
+      "doctorLabel": "医生",
+      "status": "状态",
+      "statuses": {
+        "pending": "待确认",
+        "active": "有效",
+        "revoked": "已撤销"
+      },
+      "revokeTitle": "撤销访问",
+      "revokeMessage": "该医生将立即失去对您共享数据的访问权限。",
+      "revoke": "撤销访问",
+      "revokeFailed": "无法撤销访问。"
+    },
+    "consent": {
+      "bloodPressure": "血压",
+      "glucose": "血糖",
+      "weight": "体重",
+      "symptoms": "症状",
+      "medicationList": "用药列表",
+      "reminderAdherence": "提醒依从性"
+    },
+    "bitacora": {
+      "title": "健康日志",
+      "hubHint": "快速记录血压、血糖、体重和症状——仅保存原始数值。",
+      "open": "打开健康日志",
+      "disclaimer": "数值按您输入的内容保存。应用不会将其解释为正常、偏高、偏低或危险。",
+      "bp": "血压",
+      "glucose": "血糖",
+      "weight": "体重",
+      "symptoms": "症状",
+      "systolic": "收缩压",
+      "diastolic": "舒张压",
+      "pulse": "脉搏（可选）",
+      "glucoseMgDl": "血糖（mg/dL）",
+      "weightKg": "体重（kg）",
+      "symptomsText": "症状",
+      "noteOptional": "备注（可选）",
+      "save": "保存记录",
+      "saveFailed": "无法保存记录。",
+      "bpRequired": "请输入收缩压和舒张压。",
+      "glucoseRequired": "请输入血糖值。",
+      "weightRequired": "请输入体重。",
+      "symptomsRequired": "请描述症状。",
+      "charts": "图表（原始数值）",
+      "chartsHint": "仅绘制您的数值曲线——无参考区间，无风险颜色。",
+      "history": "历史记录",
+      "empty": "暂无记录。",
+      "timing": {
+        "fasting": "空腹",
+        "after_meal": "餐后",
+        "other": "其他"
+      },
+      "types": {
+        "blood_pressure": "血压",
+        "glucose": "血糖",
+        "weight": "体重",
+        "symptoms": "症状"
+      }
+    },
+    "doctor": {
+      "section": "医生专用",
+      "hubHint": "需要医生方案 + 已验证执照。未验证的医生无法查看患者数据。",
+      "patients": "我的患者",
+      "patientDetail": "患者",
+      "noPatients": "尚无已关联且授权有效的患者。",
+      "tapToOpen": "打开共享健康日志",
+      "rawOnly": "共享读数仅为原始数值——无临床标签。",
+      "medsSharedHint": "用药列表已共享（只读）。",
+      "adherenceSharedHint": "在可用时共享提醒依从性。"
+    },
+    "alerts": {
+      "title": "告警限值",
+      "hint": "仅在新读数越过我设置的限值时通知我。告警绝不会声称某个值偏高、偏低或危险。",
+      "readingType": "读数类型",
+      "comparator": "当数值",
+      "value": "限值",
+      "valueRequired": "请输入数字限值。",
+      "save": "保存限值",
+      "saved": "告警限值已保存。",
+      "saveFailed": "无法保存告警限值。",
+      "pushTitle": "AuricRX 医生模式",
+      "pushBody": "有一条读数超过了您设置的限值。打开应用查看详情。",
+      "crossedLimitDetail": "有一条读数超过了您设置的限值。",
+      "types": {
+        "systolic": "收缩压",
+        "diastolic": "舒张压",
+        "pulse": "脉搏",
+        "glucose": "血糖",
+        "weight": "体重"
+      },
+      "comparators": {
+        "gt": "大于",
+        "gte": "大于等于",
+        "lt": "小于",
+        "lte": "小于等于"
+      }
+    },
+    "patientHub": {
+      "title": "健康日志与医生",
+      "dashboardSubtitle": "记录读数并控制医生可见内容",
+      "subtitle": "记录您的读数，并在您同意时与医生关联。医生使用独立的 AuricRX 医生端应用。",
+      "audit": "访问日志",
+      "auditHint": "近期的关联、授权与医生读取事件。",
+      "auditEmpty": "暂无审计事件。",
+      "doctorAppNote": "您的医生在 AuricRX 医生端（com.auricrx.doctors）查看共享数据，而不是在此患者应用内。"
+    }
+  }
+}
