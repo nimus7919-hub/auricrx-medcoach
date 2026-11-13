@@ -23,9 +23,9 @@
       "bundleIdentifier": "com.auricrx.medcoach",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Usamos tu ubicaci\u00f3n para guardar lugares y consultar el pron\u00f3stico aproximado.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app est\u00e9 cerrada.",
-        "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu b\u00f3veda de Documentos en este dispositivo.",
+        "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
+        "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo.",
         "UIBackgroundModes": [
           "location",
           "fetch",
@@ -106,8 +106,8 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Usamos tu ubicaci\u00f3n para guardar lugares y consultar el pron\u00f3stico aproximado.",
-          "locationAlwaysAndWhenInUsePermission": "Permite detectar entradas y salidas de tus lugares para recordatorios aunque la app est\u00e9 cerrada.",
+          "locationWhenInUsePermission": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
+          "locationAlwaysAndWhenInUsePermission": "Permite detectar entradas y salidas de tus lugares para recordatorios aunque la app esté cerrada.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true
