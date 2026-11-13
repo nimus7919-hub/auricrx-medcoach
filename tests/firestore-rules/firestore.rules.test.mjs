@@ -81,8 +81,21 @@ function bpEntry(patientId, id = 'e1') {
 
 let testEnv;
 
-function authed(uid) {
-  return testEnv.authenticatedContext(uid).firestore();
+function authed(uid, claims = {}) {
+  return testEnv.authenticatedContext(uid, claims).firestore();
+}
+
+/** Doctor context with MFA-issued token claims (sign_in_second_factor). */
+function doctorAuthed(uid) {
+  return authed(uid, {
+    email: `${uid}@example.com`,
+    email_verified: true,
+    firebase: {
+      sign_in_provider: 'password',
+      sign_in_second_factor: 'totp',
+      identities: { email: [`${uid}@example.com`] },
+    },
+  });
 }
 
 async function seed(writer) {
@@ -120,7 +133,7 @@ describe('bitacora ownership and doctor reads', () => {
   it('patients can write their own readings; doctors cannot write them', async () => {
     const pat = authed('pat');
     await assertSucceeds(setDoc(doc(pat, 'bitacora', 'pat', 'entries', 'e1'), bpEntry('pat')));
-    const docDb = authed('doc');
+    const docDb = doctorAuthed('doc');
     await assertFails(setDoc(doc(docDb, 'bitacora', 'pat', 'entries', 'e2'), bpEntry('pat', 'e2')));
     await assertFails(updateDoc(doc(docDb, 'bitacora', 'pat', 'entries', 'e1'), { systolic: 180 }));
   });
@@ -136,7 +149,7 @@ describe('bitacora ownership and doctor reads', () => {
         glucoseMgDl: 100,
       });
     });
-    const docDb = authed('doc');
+    const docDb = doctorAuthed('doc');
     await assertSucceeds(getDoc(doc(docDb, 'bitacora', 'pat', 'entries', 'bp')));
     await assertFails(getDoc(doc(docDb, 'bitacora', 'pat', 'entries', 'glu')));
   });
@@ -147,7 +160,7 @@ describe('bitacora ownership and doctor reads', () => {
       await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat', { status: 'revoked' }));
       await setDoc(doc(db, 'bitacora', 'pat', 'entries', 'e1'), bpEntry('pat'));
     });
-    await assertFails(getDoc(doc(authed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
   });
 
   it('an unlinked doctor cannot read patient readings', async () => {
@@ -155,7 +168,7 @@ describe('bitacora ownership and doctor reads', () => {
       await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
       await setDoc(doc(db, 'bitacora', 'pat', 'entries', 'e1'), bpEntry('pat'));
     });
-    await assertFails(getDoc(doc(authed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
   });
 
   it('an unverified doctor cannot read even with an access doc', async () => {
@@ -164,7 +177,7 @@ describe('bitacora ownership and doctor reads', () => {
       await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
       await setDoc(doc(db, 'bitacora', 'pat', 'entries', 'e1'), bpEntry('pat'));
     });
-    await assertFails(getDoc(doc(authed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
   });
 
   it('a doctor without a paid plan cannot read', async () => {
@@ -173,13 +186,13 @@ describe('bitacora ownership and doctor reads', () => {
       await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
       await setDoc(doc(db, 'bitacora', 'pat', 'entries', 'e1'), bpEntry('pat'));
     });
-    await assertFails(getDoc(doc(authed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
   });
 });
 
 describe('self-promotion and access-mirror writes', () => {
   it('a doctor cannot set verified or doctorPlan on their own profile', async () => {
-    const db = authed('doc');
+    const db = doctorAuthed('doc');
     await assertSucceeds(
       setDoc(doc(db, 'doctorProfiles', 'doc'), {
         uid: 'doc',
@@ -201,7 +214,7 @@ describe('self-promotion and access-mirror writes', () => {
     await seed(async (db) => {
       await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
     });
-    const db = authed('doc');
+    const db = doctorAuthed('doc');
     await assertFails(
       setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat', { consent: bpConsent }))
     );
@@ -221,9 +234,9 @@ describe('self-promotion and access-mirror writes', () => {
     });
     const pat = authed('pat');
     await assertSucceeds(updateDoc(doc(pat, 'doctorPatientAccess', 'doc_pat'), { consent: bpConsent }));
-    await assertSucceeds(getDoc(doc(authed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
+    await assertSucceeds(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
     await assertSucceeds(updateDoc(doc(pat, 'doctorPatientAccess', 'doc_pat'), { status: 'revoked' }));
-    await assertFails(getDoc(doc(authed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'e1')));
   });
 });
 
@@ -232,7 +245,7 @@ describe('links, invites, shared data, audit logs', () => {
     await seed(async (db) => {
       await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
     });
-    const db = authed('doc');
+    const db = doctorAuthed('doc');
     const link = {
       id: 'link_1',
       patientId: 'pat',
@@ -271,7 +284,7 @@ describe('links, invites, shared data, audit logs', () => {
     const pat = authed('pat');
     await assertSucceeds(getDoc(doc(pat, 'doctorInvites', 'DRABCDEFGH')));
     await assertFails(getDocs(query(collection(pat, 'doctorInvites'), where('createdBy', '==', 'doc'))));
-    await assertSucceeds(getDocs(query(collection(authed('doc'), 'doctorInvites'), where('createdBy', '==', 'doc'))));
+    await assertSucceeds(getDocs(query(collection(doctorAuthed('doc'), 'doctorInvites'), where('createdBy', '==', 'doc'))));
     await assertFails(
       updateDoc(doc(pat, 'doctorInvites', 'DREXPIREDX'), {
         consumed: true,
@@ -294,14 +307,14 @@ describe('links, invites, shared data, audit logs', () => {
       await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat', { consent: bpConsent }));
       await setDoc(doc(db, 'patientSharedMeds', 'pat'), { medications: [{ name: 'Metformin' }] });
     });
-    await assertFails(getDoc(doc(authed('doc'), 'patientSharedMeds', 'pat')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'patientSharedMeds', 'pat')));
     await seed(async (db) => {
       await setDoc(
         doc(db, 'doctorPatientAccess', 'doc_pat'),
         accessDoc('doc', 'pat', { consent: { ...falseConsent, medicationList: true } })
       );
     });
-    await assertSucceeds(getDoc(doc(authed('doc'), 'patientSharedMeds', 'pat')));
+    await assertSucceeds(getDoc(doc(doctorAuthed('doc'), 'patientSharedMeds', 'pat')));
   });
 
   it('audit logs are append-only and cannot be edited or deleted', async () => {
@@ -363,13 +376,13 @@ describe('doctorPatientMessages (secure in-app messaging)', () => {
       await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), messageDoc());
     });
     await assertSucceeds(getDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1')));
-    await assertSucceeds(getDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1')));
+    await assertSucceeds(getDoc(doc(doctorAuthed('doc'), 'doctorPatientMessages', 'msg_1')));
     await assertFails(getDoc(doc(authed('other'), 'doctorPatientMessages', 'msg_1')));
 
     await seed(async (db) => {
       await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat', { status: 'revoked' }));
     });
-    await assertFails(getDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'doctorPatientMessages', 'msg_1')));
     await assertFails(getDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1')));
   });
 
@@ -380,7 +393,7 @@ describe('doctorPatientMessages (secure in-app messaging)', () => {
     });
     await assertSucceeds(setDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_1'), messageDoc()));
     await assertFails(
-      setDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_2'), messageDoc({ id: 'msg_2' }))
+      setDoc(doc(doctorAuthed('doc'), 'doctorPatientMessages', 'msg_2'), messageDoc({ id: 'msg_2' }))
     );
     await assertFails(
       setDoc(doc(authed('pat'), 'doctorPatientMessages', 'msg_3'), messageDoc({ id: 'msg_3', body: '' }))
@@ -394,7 +407,7 @@ describe('doctorPatientMessages (secure in-app messaging)', () => {
       await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), messageDoc());
     });
     await assertSucceeds(
-      updateDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1'), {
+      updateDoc(doc(doctorAuthed('doc'), 'doctorPatientMessages', 'msg_1'), {
         status: 'answered',
         doctorAction: 'approve_refill',
         doctorReplyText: 'OK',
@@ -417,11 +430,50 @@ describe('doctorPatientMessages (secure in-app messaging)', () => {
       await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), messageDoc());
     });
     await assertFails(
-      updateDoc(doc(authed('doc'), 'doctorPatientMessages', 'msg_1'), {
+      updateDoc(doc(doctorAuthed('doc'), 'doctorPatientMessages', 'msg_1'), {
         status: 'answered',
         doctorAction: 'seen',
         updatedAt: iso('03'),
       })
     );
+  });
+});
+
+describe('doctor MFA (sign_in_second_factor)', () => {
+  it('a ready doctor without MFA cannot read patient data; with MFA can', async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, 'doctorProfiles', 'doc'), readyProfile('doc'));
+      await setDoc(doc(db, 'doctorPatientAccess', 'doc_pat'), accessDoc('doc', 'pat'));
+      await setDoc(doc(db, 'bitacora', 'pat', 'entries', 'bp'), bpEntry('pat', 'bp'));
+      await setDoc(doc(db, 'doctorPatientMessages', 'msg_1'), {
+        id: 'msg_1',
+        linkId: 'link_1',
+        doctorId: 'doc',
+        patientId: 'pat',
+        direction: 'patient_to_doctor',
+        requestType: 'general',
+        body: 'hello',
+        status: 'pending_doctor',
+        createdAt: iso(),
+        visibleToDoctorAt: iso(),
+        updatedAt: iso(),
+      });
+      await setDoc(doc(db, 'doctorMfaRecovery', 'doc'), { uid: 'doc', salt: 'x', codes: [] });
+    });
+
+    const noMfa = authed('doc', {
+      email: 'doc@example.com',
+      firebase: { sign_in_provider: 'password', identities: { email: ['doc@example.com'] } },
+    });
+    await assertFails(getDoc(doc(noMfa, 'bitacora', 'pat', 'entries', 'bp')));
+    await assertFails(getDoc(doc(noMfa, 'doctorPatientMessages', 'msg_1')));
+
+    await assertSucceeds(getDoc(doc(doctorAuthed('doc'), 'bitacora', 'pat', 'entries', 'bp')));
+    await assertSucceeds(getDoc(doc(doctorAuthed('doc'), 'doctorPatientMessages', 'msg_1')));
+
+    // Patients still read without MFA; recovery hashes are never client-readable.
+    await assertSucceeds(getDoc(doc(authed('pat'), 'bitacora', 'pat', 'entries', 'bp')));
+    await assertFails(getDoc(doc(doctorAuthed('doc'), 'doctorMfaRecovery', 'doc')));
+    await assertFails(getDoc(doc(authed('pat'), 'doctorMfaRecovery', 'doc')));
   });
 });

@@ -12,10 +12,31 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import type { MultiFactorResolver } from 'firebase/auth';
 import './src/i18n';
 import { colors } from './src/theme/colors';
 import DoctorAppService from './src/services/doctorAppService';
 import RawChart from './src/components/RawChart';
+import MfaEnrollView from './src/components/mfa/MfaEnrollView';
+import MfaChallengeView from './src/components/mfa/MfaChallengeView';
+import MfaRecoveryView from './src/components/mfa/MfaRecoveryView';
+import MfaRecoveryCodesView from './src/components/mfa/MfaRecoveryCodesView';
+import BiometricUnlockView from './src/components/mfa/BiometricUnlockView';
+import {
+  getEnrolledFactors,
+  hasTotpEnrolled,
+  isMfaRequiredError,
+  resolverFromError,
+} from './src/services/doctorMfaService';
+import {
+  canUseBiometricUnlock,
+  clearUnlockSession,
+  isSessionUnlocked,
+  markSessionLocked,
+  needsFullMfaAgain,
+  recordFullMfaSignIn,
+  tokenHasSecondFactor,
+} from './src/services/doctorSessionUnlock';
 import {
   isDoctorEntitled,
   type DoctorProfile,
@@ -41,6 +62,11 @@ import {
 
 type Screen =
   | 'auth'
+  | 'mfaEnroll'
+  | 'mfaChallenge'
+  | 'mfaRecovery'
+  | 'mfaCodes'
+  | 'biometric'
   | 'home'
   | 'profile'
   | 'patients'
@@ -127,6 +153,13 @@ export default function App() {
   );
   const [inbox, setInbox] = useState<DoctorPatientMessage[]>([]);
   const [replyText, setReplyText] = useState('');
+  const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [authHint, setAuthHint] = useState<string | null>(null);
+
+  useEffect(() => {
+    void markSessionLocked();
+  }, []);
 
   useEffect(() => {
     const unsub = service.watchAuth(async (user) => {
@@ -134,9 +167,45 @@ export default function App() {
       if (!user) {
         setScreen('auth');
         setProfile(null);
+        setMfaResolver(null);
         setReady(true);
         return;
       }
+
+      // Mandatory TOTP enrollment before any patient data screens.
+      const factors = getEnrolledFactors(user);
+      if (!factors.length || !hasTotpEnrolled(user)) {
+        setScreen('mfaEnroll');
+        setReady(true);
+        return;
+      }
+
+      const hasMfaClaim = await tokenHasSecondFactor();
+      if (!hasMfaClaim) {
+        // Enrolled but current token was not issued with a second factor.
+        await clearUnlockSession();
+        await service.signOut();
+        setAuthHint(t('mfa.auth.needSecondFactor'));
+        setScreen('auth');
+        setReady(true);
+        return;
+      }
+
+      if (await needsFullMfaAgain()) {
+        await clearUnlockSession();
+        await service.signOut();
+        setAuthHint(t('mfa.auth.sessionExpired'));
+        setScreen('auth');
+        setReady(true);
+        return;
+      }
+
+      if (!(await isSessionUnlocked()) && (await canUseBiometricUnlock())) {
+        setScreen('biometric');
+        setReady(true);
+        return;
+      }
+
       const p = await service.getDoctorProfile().catch(() => null);
       setProfile(p);
       if (p) {
@@ -152,19 +221,38 @@ export default function App() {
       setReady(true);
     });
     return unsub;
-  }, [service]);
+  }, [service, t]);
 
   const refreshPatients = async () => {
     const list = await service.listPatients().catch(() => []);
     setPatients(list);
   };
 
+  const handleSignOut = async () => {
+    await clearUnlockSession();
+    await service.signOut();
+    setAuthHint(null);
+    setMfaResolver(null);
+    setScreen('auth');
+  };
+
   const handleSignIn = async () => {
     setBusy(true);
+    setAuthHint(null);
     try {
       await service.signIn(email, password);
+      // If MFA is not enrolled, watchAuth routes to enrollment.
+      // If enrolled, Firebase throws multi-factor-auth-required (caught below).
+      if (hasTotpEnrolled()) {
+        await recordFullMfaSignIn();
+      }
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'auth_failed');
+      if (isMfaRequiredError(e)) {
+        setMfaResolver(resolverFromError(e));
+        setScreen('mfaChallenge');
+      } else {
+        Alert.alert(t('common.error'), e?.message || 'auth_failed');
+      }
     } finally {
       setBusy(false);
     }
@@ -449,6 +537,8 @@ export default function App() {
         <ScrollView contentContainerStyle={styles.authPad} keyboardShouldPersistTaps="handled">
           <Text style={styles.brand}>{t('appName')}</Text>
           <Text style={styles.sub}>{t('auth.hint')}</Text>
+          {!!authHint && <Text style={styles.warn}>{authHint}</Text>}
+          <Text style={styles.sub}>{t('mfa.auth.requiredNotice')}</Text>
           <Field label={t('common.email')} value={email} onChangeText={setEmail} autoCapitalize="none" />
           <Field label={t('common.password')} value={password} onChangeText={setPassword} secureTextEntry />
           <GoldButton label={t('common.signIn')} onPress={handleSignIn} disabled={busy} />
@@ -464,9 +554,86 @@ export default function App() {
         </ScrollView>
       )}
 
+      {screen === 'mfaEnroll' && (
+        <MfaEnrollView
+          onEnrolled={(codes) => {
+            setRecoveryCodes(codes);
+            setScreen('mfaCodes');
+          }}
+          onError={(msg) => Alert.alert(t('common.error'), msg)}
+        />
+      )}
+
+      {screen === 'mfaCodes' && (
+        <MfaRecoveryCodesView
+          codes={recoveryCodes}
+          onContinue={async () => {
+            setRecoveryCodes([]);
+            await clearUnlockSession();
+            await service.signOut();
+            setAuthHint(t('mfa.auth.afterEnroll'));
+            setScreen('auth');
+          }}
+        />
+      )}
+
+      {screen === 'mfaChallenge' && mfaResolver && (
+        <MfaChallengeView
+          resolver={mfaResolver}
+          email={email}
+          password={password}
+          onSuccess={() => {
+            setMfaResolver(null);
+            // watchAuth will advance to home/biometric after MFA token is present
+          }}
+          onUseRecovery={() => setScreen('mfaRecovery')}
+          onError={(msg) => Alert.alert(t('common.error'), msg)}
+        />
+      )}
+
+      {screen === 'mfaRecovery' && (
+        <MfaRecoveryView
+          email={email}
+          password={password}
+          onRedeemed={async () => {
+            setMfaResolver(null);
+            await clearUnlockSession();
+            setAuthHint(t('mfa.recovery.reenrollHint'));
+            // MFA cleared server-side; sign in again then enroll
+            try {
+              await service.signIn(email, password);
+            } catch (e: any) {
+              Alert.alert(t('common.error'), e?.message || 'auth_failed');
+              setScreen('auth');
+            }
+          }}
+          onBack={() => setScreen(mfaResolver ? 'mfaChallenge' : 'auth')}
+          onError={(msg) => Alert.alert(t('common.error'), msg)}
+        />
+      )}
+
+      {screen === 'biometric' && (
+        <BiometricUnlockView
+          onUnlocked={async () => {
+            const p = await service.getDoctorProfile().catch(() => null);
+            setProfile(p);
+            if (p) {
+              setDisplayName(p.displayName);
+              setSpecialty(p.specialty);
+              setCedula(p.cedulaNumber);
+            }
+            setScreen('home');
+          }}
+          onUsePassword={async () => {
+            await handleSignOut();
+          }}
+          onError={(msg) => Alert.alert(t('common.error'), msg)}
+        />
+      )}
+
       {screen === 'home' && (
         <ScrollView style={styles.content}>
-          {header(t('appName'), () => service.signOut())}
+          {header(t('appName'), () => handleSignOut())}
           <Text style={styles.lead}>{userEmail}</Text>
           {!isDoctorEntitled(profile) && (
             <Text style={styles.warn}>{t('doctorMode.gate.needVerifiedPlan')}</Text>
@@ -531,7 +698,9 @@ export default function App() {
             />
           </Card>
           <Text style={styles.disclaimer}>{t('doctorMode.compliance.disclaimer')}</Text>
-          <GoldButton label={t('common.signOut')} onPress={() => service.signOut()} />
+          <GoldButton label={t('common.signOut')} onPress={handleSignOut} />
+          <Text style={styles.sub}>{t('mfa.home.protected')}</Text>
+          <Text style={styles.meta}>{t('mfa.home.smsBackupHint')}</Text>
         </ScrollView>
       )}
 

@@ -26,8 +26,15 @@ service cloud.firestore {
     function doctorProfile() {
       return get(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid)).data;
     }
+    // Doctor patient-data access requires an MFA-issued ID token.
+    // Firebase sets token.firebase.sign_in_second_factor (e.g. "totp" or "phone").
+    function doctorHasSecondFactor() {
+      return signedIn()
+        && request.auth.token.firebase.get('sign_in_second_factor', '') != '';
+    }
     function doctorIsReady() {
       return signedIn()
+        && doctorHasSecondFactor()
         && exists(/databases/$(database)/documents/doctorProfiles/$(request.auth.uid))
         && doctorProfile().doctorPlan == true
         && doctorProfile().verificationStatus == 'verified';
@@ -182,8 +189,11 @@ service cloud.firestore {
     // Appointment requests (doctor-authored; patient may read own).
     match /doctorAppointmentRequests/{reqId} {
       allow read: if signedIn()
-        && (resource.data.doctorId == request.auth.uid || resource.data.patientId == request.auth.uid)
-        && pairLinkActive(resource.data.doctorId, resource.data.patientId);
+        && pairLinkActive(resource.data.doctorId, resource.data.patientId)
+        && (
+          resource.data.patientId == request.auth.uid
+          || (resource.data.doctorId == request.auth.uid && doctorHasSecondFactor())
+        );
       allow create: if signedIn()
         && doctorIsReady()
         && request.resource.data.doctorId == request.auth.uid
@@ -203,10 +213,14 @@ service cloud.firestore {
 
     // Secure in-app messaging: only the active linked pair can read/write.
     // Revoking the link (status != active) cuts access immediately.
+    // Doctors need MFA; patients do not.
     match /doctorPatientMessages/{messageId} {
       allow read: if signedIn()
-        && (resource.data.patientId == request.auth.uid || resource.data.doctorId == request.auth.uid)
-        && pairLinkActive(resource.data.doctorId, resource.data.patientId);
+        && pairLinkActive(resource.data.doctorId, resource.data.patientId)
+        && (
+          resource.data.patientId == request.auth.uid
+          || (resource.data.doctorId == request.auth.uid && doctorHasSecondFactor())
+        );
       allow create: if signedIn()
         && request.resource.data.patientId == request.auth.uid
         && validMessageCreate(request.resource.data, messageId)
@@ -266,8 +280,10 @@ service cloud.firestore {
 
     match /doctorLinks/{linkId} {
       allow read: if signedIn()
-        && (resource.data.patientId == request.auth.uid
-            || resource.data.doctorId == request.auth.uid);
+        && (
+          resource.data.patientId == request.auth.uid
+          || (resource.data.doctorId == request.auth.uid && doctorHasSecondFactor())
+        );
       allow create: if signedIn()
         && request.resource.data.id == linkId
         && linkPartiesDistinct(request.resource.data)
@@ -314,8 +330,10 @@ service cloud.firestore {
 
     match /doctorPatientAccess/{accessId} {
       allow read: if signedIn()
-        && (resource.data.patientId == request.auth.uid
-            || resource.data.doctorId == request.auth.uid);
+        && (
+          resource.data.patientId == request.auth.uid
+          || (resource.data.doctorId == request.auth.uid && doctorHasSecondFactor())
+        );
       allow create: if signedIn()
         && accessShape(request.resource.data, accessId)
         && (
@@ -403,7 +421,9 @@ service cloud.firestore {
     }
 
     match /doctorAlertLimits/{limitId} {
-      allow read: if signedIn() && resource.data.doctorId == request.auth.uid;
+      allow read: if signedIn()
+        && doctorHasSecondFactor()
+        && resource.data.doctorId == request.auth.uid;
       allow create, update: if signedIn()
         && doctorIsReady()
         && request.resource.data.doctorId == request.auth.uid
@@ -413,7 +433,14 @@ service cloud.firestore {
         && request.resource.data.comparator in ['gt', 'gte', 'lt', 'lte']
         && (request.resource.data.value is int || request.resource.data.value is float)
         && request.resource.data.enabled is bool;
-      allow delete: if signedIn() && resource.data.doctorId == request.auth.uid;
+      allow delete: if signedIn()
+        && doctorHasSecondFactor()
+        && resource.data.doctorId == request.auth.uid;
+    }
+
+    // Recovery-code hashes — Admin SDK only. Never client-readable.
+    match /doctorMfaRecovery/{uid} {
+      allow read, write: if false;
     }
 
     match /doctorPushTokens/{uid} {
@@ -448,7 +475,8 @@ service cloud.firestore {
           'link_created', 'link_confirmed', 'link_revoked',
           'consent_updated', 'doctor_read', 'verification_submitted',
           'message_sent', 'message_replied', 'message_export',
-          'appointment_request_sent', 'office_hours_updated', 'ai_waitlist_joined'
+          'appointment_request_sent', 'office_hours_updated', 'ai_waitlist_joined',
+          'mfa_enrolled', 'mfa_recovery_generated', 'mfa_recovery_redeemed'
         ]
         && optionalStr(request.resource.data.get('detail', ''), 2000)
         && isIsoDate(request.resource.data.createdAt);
