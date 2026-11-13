@@ -7,7 +7,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1"
+    "make-env-example": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/make-env-example.ps1",
+    "test:doctor-core": "jest --testPathPattern=doctor",
+    "test:firestore-rules": "npx -y firebase-tools@latest emulators:exec --only firestore --project demo-auricrx-rules --config firebase.json 'npm --prefix tests/firestore-rules test'",
+    "check:compliance-terms": "node scripts/check-compliance-terms.js"
   },
   "engines": {
     "node": ">=20 <21"

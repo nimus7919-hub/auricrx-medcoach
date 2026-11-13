@@ -1,0 +1,17 @@
+{
+  "name": "@auricrx/doctor-core",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./i18n/*": "./i18n/*"
+  },
+  "peerDependencies": {
+    "@react-native-async-storage/async-storage": "*"
+  },
+  "scripts": {
+    "test": "echo \"Run tests from repo root\""
+  }
+}
