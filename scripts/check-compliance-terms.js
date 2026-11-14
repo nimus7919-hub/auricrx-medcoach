@@ -6,7 +6,7 @@
  * Scans:
  * - packages/doctor-core/i18n/*.json
  * - apps/doctor/src/i18n/*.json
- * - src/i18n/*.json doctorMode + preVisitIntake subtrees
+ * - src/i18n/*.json doctorMode + preVisitIntake + bodyMap subtrees
  * - packages/doctor-core/src/compliance/descriptiveSummary.ts (template literals via export test)
  * - server/doctor-alerts.js push copy
  * - server/doctor-ai-summary.js templates
@@ -147,6 +147,8 @@ function scanJsonDoctorMode(filePath) {
       ...walkStrings(raw.doctorMode || {}, 'doctorMode'),
       // Pre-visit intake (patient side) — descriptive-only copy, see docs/doctor/pre-visit-intake.md
       ...walkStrings(raw.preVisitIntake || {}, 'preVisitIntake'),
+      // Layered body pain map (patient-reported locations only)
+      ...walkStrings(raw.bodyMap || {}, 'bodyMap'),
     ];
   }
   return walkStrings(raw);

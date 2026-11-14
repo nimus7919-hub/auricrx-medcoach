@@ -5,6 +5,7 @@
  * patient can simply skip. It is only reachable when EXPO_PUBLIC_PREVISIT_INTAKE_API=http.
  */
 import type {
+  BodyPainMapPayload,
   IntakeDoctor,
   IntakeSession,
   IntakeSummary,
@@ -24,6 +25,8 @@ export const PRE_VISIT_INTAKE_ENDPOINTS = {
   discard: { method: 'POST', path: '/api/patient/intake/discard' },
   deleteChat: { method: 'POST', path: '/api/patient/intake/delete-chat' },
   listSessionsForAppointment: { method: 'GET', path: '/api/patient/intake/list' },
+  /** Optional body pain map (EXPO_PUBLIC_FEATURE_BODY_PAIN_MAP). Body: { sessionId, bodyPainMap: BodyPainMapPayload | null }. */
+  submitBodyPainMap: { method: 'POST', path: '/api/patient/intake/body-map' },
 } as const;
 
 type FetchLike = (url: string, init?: { method?: string; headers?: Record<string, string>; body?: string }) => Promise<{
@@ -66,5 +69,7 @@ export function createHttpPreVisitIntakeClient(deps: HttpClientDeps): PreVisitIn
     deleteChat: (sessionId) => call<IntakeSession>('deleteChat', { sessionId }),
     listSessionsForAppointment: (appointmentId) =>
       call<IntakeSession[]>('listSessionsForAppointment', undefined, { appointmentId }),
+    submitBodyPainMap: (sessionId: string, payload: BodyPainMapPayload | null) =>
+      call<IntakeSession>('submitBodyPainMap', { sessionId, bodyPainMap: payload }),
   };
 }

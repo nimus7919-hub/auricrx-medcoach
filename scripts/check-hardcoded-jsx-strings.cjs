@@ -37,6 +37,10 @@ const TARGETS = [
   'src/screens/preVisitIntake/SummaryView.tsx',
   'src/screens/preVisitIntake/IntakeHistory.tsx',
   'src/screens/preVisitIntake/ConfirmDialog.tsx',
+  'src/screens/preVisitIntake/BodyMapStep.tsx',
+  'src/components/bodyMap/BodyMap.tsx',
+  'src/components/bodyMap/PainDescriptorSheet.tsx',
+  'src/components/bodyMap/RegionListSheet.tsx',
 ];
 
 const ALLOW = [

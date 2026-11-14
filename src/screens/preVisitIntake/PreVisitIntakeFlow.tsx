@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { PRE_VISIT_INTAKE_CONFIG } from '../../config/preVisitIntake';
+import { PRE_VISIT_INTAKE_CONFIG, isBodyPainMapEnabled } from '../../config/preVisitIntake';
 import { getPreVisitIntakeClient } from '../../services/preVisitIntake';
 import {
   initialIntakeState,
@@ -13,6 +13,7 @@ import {
 import type { IntakeDoctor, IntakeSession, IntakeTurn, PreVisitIntakeClient } from '../../services/preVisitIntake/types';
 import IntakeFrame from './IntakeFrame';
 import IntakeChat from './IntakeChat';
+import BodyMapStep from './BodyMapStep';
 import SummaryReview from './SummaryReview';
 import IntakeHistory from './IntakeHistory';
 import ConfirmDialog from './ConfirmDialog';
@@ -39,10 +40,12 @@ export interface PreVisitIntakeFlowProps {
   now?: () => Date;
   /** Incremented by the host (e.g. Android back) to request a close; the flow decides whether to confirm. */
   closeRequestToken?: number;
+  /** Optional body pain map step before the chat. Defaults to the EXPO_PUBLIC_FEATURE_BODY_PAIN_MAP flag (off). */
+  bodyMapEnabled?: boolean;
 }
 
 const STEP_INDEX: Record<string, number> = { selectAppointment: 1, selectDoctor: 2, offer: 3, chat: 4, review: 5 };
-const TOTAL_STEPS = 5;
+const STEP_INDEX_WITH_MAP: Record<string, number> = { selectAppointment: 1, selectDoctor: 2, offer: 3, bodyMap: 4, chat: 5, review: 6 };
 
 export default function PreVisitIntakeFlow(props: PreVisitIntakeFlowProps) {
   return (
@@ -52,7 +55,8 @@ export default function PreVisitIntakeFlow(props: PreVisitIntakeFlowProps) {
   );
 }
 
-function FlowInner({ appointments, mode, initialAppointmentId, justBookedId, onClose, client: injected, now, closeRequestToken }: PreVisitIntakeFlowProps) {
+function FlowInner({ appointments, mode, initialAppointmentId, justBookedId, onClose, client: injected, now, closeRequestToken, bodyMapEnabled }: PreVisitIntakeFlowProps) {
+  const withBodyMap = bodyMapEnabled ?? isBodyPainMapEnabled();
   const { t, i18n } = useTranslation();
   const locale: 'en' | 'es' = String(i18n?.language || 'es').startsWith('es') ? 'es' : 'en';
   const client = useMemo(
@@ -110,7 +114,7 @@ function FlowInner({ appointments, mode, initialAppointmentId, justBookedId, onC
         },
       });
       setFirstTurns(res.session.turns.length ? res.session.turns : [res.firstMessage]);
-      dispatch({ type: 'SESSION_STARTED', sessionId: res.session.id });
+      dispatch({ type: 'SESSION_STARTED', sessionId: res.session.id, bodyMap: withBodyMap });
     } catch {
       setError(true);
     } finally {
@@ -148,8 +152,9 @@ function FlowInner({ appointments, mode, initialAppointmentId, justBookedId, onC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closeRequestToken]);
 
-  const stepIdx = STEP_INDEX[state.step];
-  const frameStep = stepIdx ? { current: stepIdx, total: TOTAL_STEPS } : null;
+  const stepMap = withBodyMap ? STEP_INDEX_WITH_MAP : STEP_INDEX;
+  const stepIdx = stepMap[state.step];
+  const frameStep = stepIdx ? { current: stepIdx, total: withBodyMap ? 6 : 5 } : null;
   const skip = () => dispatch({ type: 'SKIP' });
 
   let content: React.ReactNode = null;
@@ -190,6 +195,8 @@ function FlowInner({ appointments, mode, initialAppointmentId, justBookedId, onC
         onSkip={skip}
       />
     );
+  } else if (state.step === 'bodyMap' && state.sessionId) {
+    content = <BodyMapStep client={client} sessionId={state.sessionId} locale={locale} onDone={() => dispatch({ type: 'BODY_MAP_DONE' })} />;
   } else if (state.step === 'chat' && state.sessionId) {
     content = (
       <IntakeChat

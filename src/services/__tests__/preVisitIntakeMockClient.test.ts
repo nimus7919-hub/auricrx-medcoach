@@ -147,7 +147,7 @@ describe('mock pre-visit intake client', () => {
 
   it('exposes every interface method as an expected endpoint', () => {
     expect(Object.keys(PRE_VISIT_INTAKE_ENDPOINTS).sort()).toEqual(
-      ['addComment', 'confirmAndShare', 'deleteChat', 'discard', 'getSummary', 'listSessionsForAppointment', 'sendMessage', 'startSession'].sort()
+      ['addComment', 'confirmAndShare', 'deleteChat', 'discard', 'getSummary', 'listSessionsForAppointment', 'sendMessage', 'startSession', 'submitBodyPainMap'].sort()
     );
   });
 });

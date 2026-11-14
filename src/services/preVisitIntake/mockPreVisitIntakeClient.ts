@@ -8,7 +8,9 @@
  */
 import { PRE_VISIT_INTAKE_CONFIG } from '../../config/preVisitIntake';
 import { computeRawChatDeleteAt, isRawChatExpired } from './retention';
+import { parseBodyPainMapPayload } from '../../components/bodyMap/payload';
 import type {
+  BodyPainMapPayload,
   IntakeDoctor,
   IntakeSession,
   IntakeSummary,
@@ -161,6 +163,7 @@ export function createMockPreVisitIntakeClient(opts: MockClientOptions): PreVisi
         sharedAt: null,
         rawChatDeleteAt: computeRawChatDeleteAt(input.appointmentStartIso, opts.retentionDays, createdAt),
         rawChatDeletedAt: null,
+        bodyPainMap: null,
       };
       sessions.set(session.id, session);
       answers.set(session.id, {});
@@ -194,7 +197,11 @@ export function createMockPreVisitIntakeClient(opts: MockClientOptions): PreVisi
       const s = get(sessionId);
       if (s.status === 'discarded') throw new Error('intake_discarded');
       if (s.summary && s.status !== 'in_progress') return s.summary;
-      const summary = buildDescriptiveSummary(answers.get(sessionId) ?? {}, s.locale, now().toISOString());
+      const summary: IntakeSummary = {
+        ...buildDescriptiveSummary(answers.get(sessionId) ?? {}, s.locale, now().toISOString()),
+        // Copied verbatim from what the patient marked; the mock never rewrites or interprets it.
+        bodyPainMap: s.bodyPainMap ?? null,
+      };
       save({ ...s, summary, status: 'awaiting_confirmation' });
       return summary;
     },
@@ -229,6 +236,13 @@ export function createMockPreVisitIntakeClient(opts: MockClientOptions): PreVisi
       if (s.status !== 'confirmed') throw new Error('use_discard_for_unsent');
       answers.delete(sessionId);
       return save({ ...s, turns: [], rawChatDeletedAt: s.rawChatDeletedAt ?? now().toISOString() });
+    },
+
+    async submitBodyPainMap(sessionId: string, payload: BodyPainMapPayload | null) {
+      await wait();
+      const s = get(sessionId);
+      if (s.status !== 'in_progress') throw new Error('body_map_locked');
+      return save({ ...s, bodyPainMap: parseBodyPainMapPayload(payload) });
     },
 
     async listSessionsForAppointment(appointmentId: string) {
