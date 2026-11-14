@@ -28,7 +28,8 @@
       "infoPlist": {
         "NSFaceIDUsageDescription": "Unlock AuricRX Médicos after you have signed in with two-factor authentication.",
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "7"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,8 +37,10 @@
         "backgroundColor": "#080E1B"
       },
       "package": "com.auricrx.doctors",
-      "versionCode": 1,
-      "runtimeVersion": "1.0.0",
+      "versionCode": 2,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      },
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "USE_BIOMETRIC",
@@ -53,7 +56,8 @@
         {
           "faceIDPermission": "Unlock AuricRX Médicos after you have signed in with two-factor authentication."
         }
-      ]
+      ],
+      "expo-updates"
     ],
     "web": {
       "bundler": "metro"
@@ -64,6 +68,12 @@
         "projectId": "d8a48be8-b7f0-44cb-a4e0-aa18f36ddccc"
       }
     },
-    "owner": "firef1"
+    "owner": "firef1",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d8a48be8-b7f0-44cb-a4e0-aa18f36ddccc"
+    }
   }
 }
