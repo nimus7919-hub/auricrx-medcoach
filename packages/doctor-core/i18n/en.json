@@ -218,6 +218,27 @@
       "empty": "Nothing to show for this period.",
       "ofLogged": "{{logged}} of {{expected}} logged"
     },
+    "preVisitIntake": {
+      "title": "Pre-visit intake",
+      "needsAction": "Pre-visit intake confirmed",
+      "subtitle": "The patient's own words, organized for the visit. This is not a medical opinion.",
+      "comment": "Patient comment",
+      "viewConversation": "View conversation",
+      "hideConversation": "Hide conversation",
+      "chatDeleted": "The conversation is no longer available. The confirmed summary and comment were kept.",
+      "notMentioned": "Not mentioned",
+      "mainConcern": "Main concern",
+      "location": "Location",
+      "duration": "Duration",
+      "severity": "Severity (as stated)",
+      "severitySaid": "Patient said {{n}} / 10",
+      "alsoMentioned": "Also mentioned",
+      "questionsForDoctor": "Questions for the doctor",
+      "confirmedAt": "Confirmed",
+      "empty": "No pre-visit intake for this patient.",
+      "appointmentStart": "Appointment",
+      "open": "Open intake"
+    },
     "appointmentRequest": {
       "title": "Request appointment",
       "subtitle": "Draft a message, review it, then send. Nothing is written to your calendar.",

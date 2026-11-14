@@ -218,6 +218,27 @@
       "empty": "Nada que mostrar en este periodo.",
       "ofLogged": "{{logged}} de {{expected}} registrados"
     },
+    "preVisitIntake": {
+      "title": "Entrevista previa a la consulta",
+      "needsAction": "Entrevista previa a la consulta confirmada",
+      "subtitle": "Las palabras de la persona, organizadas para la consulta. Esto no es una opinión médica.",
+      "comment": "Comentario de la persona",
+      "viewConversation": "Ver la conversación",
+      "hideConversation": "Ocultar la conversación",
+      "chatDeleted": "La conversación ya no está disponible. Se conservaron el resumen confirmado y el comentario.",
+      "notMentioned": "No se mencionó",
+      "mainConcern": "Motivo principal",
+      "location": "Lugar",
+      "duration": "Duración",
+      "severity": "Intensidad (según lo indicado)",
+      "severitySaid": "La persona indicó {{n}} / 10",
+      "alsoMentioned": "También mencionó",
+      "questionsForDoctor": "Preguntas para el médico o la médica",
+      "confirmedAt": "Confirmada",
+      "empty": "No hay entrevista previa a la consulta para esta persona.",
+      "appointmentStart": "Consulta",
+      "open": "Abrir entrevista"
+    },
     "appointmentRequest": {
       "title": "Solicitar cita",
       "subtitle": "Redacte el mensaje, revíselo y luego envíelo. No se escribe en su calendario.",
