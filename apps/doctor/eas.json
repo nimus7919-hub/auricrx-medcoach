@@ -18,7 +18,10 @@
       "android": {
         "buildType": "apk"
       },
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_FEATURE_PREVISIT_INTAKE": "true"
+      }
     },
     "production": {
       "autoIncrement": true,
@@ -30,6 +33,9 @@
       "ios": {
         "simulator": false,
         "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "env": {
+        "EXPO_PUBLIC_FEATURE_PREVISIT_INTAKE": "true"
       }
     }
   },

@@ -22,6 +22,7 @@
     "expo-localization": "^16.1.6",
     "expo-secure-store": "~14.2.3",
     "expo-status-bar": "~2.2.3",
+    "expo-updates": "~0.28.18",
     "firebase": "^12.10.0",
     "i18next": "^25.6.0",
     "react": "19.0.0",
