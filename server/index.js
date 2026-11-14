@@ -3811,7 +3811,7 @@ app.listen(port, () => {
   console.log('   POST /api/doctor/messages/notify');
   console.log('   POST /api/doctor/mfa/recovery/generate');
   console.log('   POST /api/doctor/mfa/recovery/redeem');
-  console.log('   POST /api/patient/intake/start|turn|summarize|comment|confirm|discard|delete-chat');
+  console.log('   POST /api/patient/intake/start|turn|summarize|comment|confirm|discard|delete-chat|body-map');
   console.log('   GET  /api/patient/intake/list');
   console.log('   GET  /api/doctor/intake/list');
   console.log('   GET  /api/doctor/intake/:id');

@@ -2,7 +2,7 @@
  * Pre-visit AI intake routes (patient + doctor) and service.
  *
  * Patient contract matches PR #36 httpPreVisitIntakeClient exactly:
- *   POST /api/patient/intake/start|turn|summarize|comment|confirm|discard|delete-chat
+ *   POST /api/patient/intake/start|turn|summarize|comment|confirm|discard|delete-chat|body-map
  *   GET  /api/patient/intake/list?appointmentId=
  *
  * Doctor:
@@ -33,6 +33,7 @@ const {
   QUESTION_KEYS,
 } = require('./previsit-intake-lib');
 const { createStore } = require('./previsit-intake-store');
+const { validateBodyPainMapPayload } = require('./previsit-intake-bodymap');
 
 class IntakeError extends Error {
   constructor(code, status = 400) {
@@ -75,6 +76,7 @@ function toSession(row, turns) {
     sharedAt: row.sharedAt,
     rawChatDeleteAt: row.rawChatDeleteAt,
     rawChatDeletedAt: row.rawChatDeletedAt,
+    bodyPainMap: row.bodyPainMap ?? null,
   };
 }
 
@@ -161,6 +163,7 @@ function createIntakeService({
         sharedAt: null,
         rawChatDeleteAt: computeRawChatDeleteAt(input.appointmentStartIso, retentionDays, createdAt),
         rawChatDeletedAt: null,
+        bodyPainMap: null,
       };
       await store.insertIntake(row);
       await store.appendTurn({ ...first, intakeId: row.id });
@@ -224,7 +227,14 @@ function createIntakeService({
     async getSummary(patientId, sessionId) {
       const row = await requireOwned(sessionId, patientId);
       if (row.status === 'discarded') throw new IntakeError('intake_discarded', 400);
-      if (row.summary && row.status !== 'in_progress') return row.summary;
+      if (row.summary && row.status !== 'in_progress') {
+        if (row.bodyPainMap && !row.summary.bodyPainMap) {
+          const summary = { ...row.summary, bodyPainMap: row.bodyPainMap };
+          await store.updateIntake(row.id, { summary });
+          return summary;
+        }
+        return { ...row.summary, bodyPainMap: row.summary.bodyPainMap ?? row.bodyPainMap ?? null };
+      }
       const turns = await store.listTurns(row.id);
       const generatedAt = clock();
       const result = await interviewer.summarize({
@@ -233,7 +243,7 @@ function createIntakeService({
         locale: row.locale,
         generatedAt,
       });
-      const summary = result.summary;
+      const summary = { ...result.summary, bodyPainMap: row.bodyPainMap ?? null };
       await store.updateIntake(row.id, { summary, status: 'awaiting_confirmation' });
       return summary;
     },
@@ -297,6 +307,29 @@ function createIntakeService({
       await store.deleteTurns(row.id);
       const updated = await store.updateIntake(row.id, {
         rawChatDeletedAt: row.rawChatDeletedAt || clock(),
+      });
+      return withTurns(updated);
+    },
+
+    async submitBodyPainMap(patientId, sessionId, rawPayload) {
+      const row = await requireOwned(sessionId, patientId);
+      if (row.status === 'confirmed') throw new IntakeError('already_shared', 400);
+      if (row.status === 'discarded') throw new IntakeError('intake_discarded', 400);
+      const checked = validateBodyPainMapPayload(rawPayload);
+      if (!checked.ok) throw new IntakeError(checked.error, 400);
+      const patch = { bodyPainMap: checked.payload };
+      if (row.summary) {
+        patch.summary = { ...row.summary, bodyPainMap: checked.payload };
+      }
+      const updated = await store.updateIntake(row.id, patch);
+      await writeAudit({
+        actorId: patientId,
+        actorRole: 'patient',
+        action: 'intake_body_map_updated',
+        patientId,
+        doctorId: row.doctorId,
+        detail: row.id,
+        createdAt: clock(),
       });
       return withTurns(updated);
     },
@@ -512,6 +545,16 @@ function mountPreVisitIntakeRoutes(app, deps = {}) {
   app.post('/api/patient/intake/delete-chat', guard, deps.verifyUser, async (req, res) => {
     try {
       const session = await service.deleteChat(req.userId, req.body?.sessionId);
+      return res.json(session);
+    } catch (err) {
+      return sendErr(res, err);
+    }
+  });
+
+  app.post('/api/patient/intake/body-map', guard, deps.verifyUser, async (req, res) => {
+    try {
+      const { sessionId, bodyPainMap } = req.body || {};
+      const session = await service.submitBodyPainMap(req.userId, sessionId, bodyPainMap ?? null);
       return res.json(session);
     } catch (err) {
       return sendErr(res, err);
