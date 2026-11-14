@@ -75,3 +75,21 @@ export function getPreVisitIntakeApiMode(): PreVisitIntakeApiMode {
 export function isInputModeSupported(mode: PreVisitIntakeInputMode): boolean {
   return PRE_VISIT_INTAKE_CONFIG.SUPPORTED_INPUT_MODES.includes(mode);
 }
+
+/**
+ * Layered body pain map inside the intake (optional, skippable step before the chat).
+ * OFF BY DEFAULT. Needs BOTH the intake flag and EXPO_PUBLIC_FEATURE_BODY_PAIN_MAP="true"/"1".
+ */
+export const BODY_PAIN_MAP_FLAG_ENV = 'EXPO_PUBLIC_FEATURE_BODY_PAIN_MAP';
+
+/** Pure gate — unit tested. */
+export function computeBodyPainMapEnabled({ intakeEnabled, flag }: { intakeEnabled: boolean; flag?: string | null }): boolean {
+  return intakeEnabled === true && truthy(flag);
+}
+
+export function isBodyPainMapEnabled(): boolean {
+  return computeBodyPainMapEnabled({
+    intakeEnabled: isPreVisitIntakeEnabled(),
+    flag: process.env.EXPO_PUBLIC_FEATURE_BODY_PAIN_MAP,
+  });
+}
