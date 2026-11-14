@@ -2,7 +2,10 @@
  * Layered "where does it hurt?" body map.
  *
  * - Layers: skin, muscles, blood vessels, bones, organs (openly licensed anatomy artwork, BodyFigure.tsx + art/)
- * - Front / back flip, zoom presets (whole body / upper / lower)
+ * - Front / back flip, zoom presets (whole body / upper / lower + close-ups: head, chest & belly, hands, feet)
+ * - Pinch-to-zoom (up to 4x), drag-to-pan, double-tap to zoom in, zoom +/- and a reset button.
+ *   Built on PanResponder (no gesture-handler dependency); camera math lives in zoomCamera.ts.
+ *   Pins stay at their full-body position and keep a constant on-screen size (44pt touch target).
  * - Tap to drop a numbered pin on a named region; tap a pin to edit or remove it
  * - Optional patient-reported details per pin (PainDescriptorSheet)
  * - List-based fallback (RegionListSheet) and per-region accessible targets for screen readers
@@ -12,7 +15,7 @@
  * No new native modules: react-native-svg + Animated only (OTA-compatible).
  */
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, PanResponder, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { darkColors } from '../../theme/colors';
 import BodyFigure from './BodyFigure';
@@ -23,18 +26,29 @@ import { bodyMapReducer, canPlaceMore, initialBodyMapState, type BodyMapState } 
 import { describeMarkerParts, layerLabelKey, regionLabelKey } from './payload';
 import {
   BODY_VIEWBOX,
-  BODY_ZOOMS,
-  canvasToViewBox,
   findRegion,
   getRegions,
   hitTestRegion,
   shapeCenter,
   viewBoxToCanvas,
   type BodyRegion,
-  type BodyZoom,
   type RegionShape,
 } from './regions';
 import { BODY_LAYERS, BODY_VIEWS, MAX_BODY_MARKERS, type BodyPainMarker, type BodyView } from './types';
+import {
+  CLOSE_UP_PRESETS,
+  DOUBLE_TAP_FACTOR,
+  MAX_ZOOM,
+  WIDE_PRESETS,
+  cameraScale,
+  isFullCamera,
+  panBy,
+  presetCamera,
+  tapToBody,
+  zoomAt,
+  type Camera,
+  type ZoomPreset,
+} from './zoomCamera';
 
 export interface BodyMapProps {
   palette?: BodyMapPalette;
@@ -44,14 +58,22 @@ export interface BodyMapProps {
   onChange?: (markers: BodyPainMarker[]) => void;
   /** Canvas height in px; width follows the figure's aspect ratio. */
   canvasHeight?: number;
+  /** Start at this zoom preset (defaults to the reducer's zoom). */
+  initialPreset?: ZoomPreset;
+  /** Start at this exact camera (previews / tests). */
+  initialCamera?: Camera;
   /** Render the details sheet inline instead of a Modal (web previews). */
   inlineSheet?: boolean;
   testID?: string;
 }
 
 const USE_NATIVE = Platform.OS !== 'web';
-const ZOOMS: BodyZoom[] = ['full', 'upper', 'lower'];
 const PIN = 26;
+/** Minimum touch target for pins and zoom controls (pt). */
+const TOUCH = 44;
+const DOUBLE_TAP_MS = 260;
+const DOUBLE_TAP_SLOP = 30;
+const PAN_SLOP = 6;
 
 function shapeBounds(shape: RegionShape) {
   switch (shape.kind) {
@@ -87,7 +109,7 @@ function Pin({ marker, active, selected, left, top, label, onPress }: { marker: 
   return (
     <Animated.View
       pointerEvents="box-none"
-      style={[bm.pin, { left: left - size / 2, top: top - size / 2, width: size, height: size, transform: [{ scale: pop }] }]}
+      style={[bm.pin, { left: left - TOUCH / 2, top: top - TOUCH / 2, width: TOUCH, height: TOUCH, transform: [{ scale: pop }] }]}
     >
       {selected ? (
         <Animated.View
@@ -109,8 +131,10 @@ function Pin({ marker, active, selected, left, top, label, onPress }: { marker: 
         accessibilityRole="button"
         accessibilityLabel={label}
         onPress={onPress}
-        hitSlop={8}
-        style={{
+        style={{ width: TOUCH, height: TOUCH, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <View
+          style={{
           width: size,
           height: size,
           borderRadius: size / 2,
@@ -127,13 +151,14 @@ function Pin({ marker, active, selected, left, top, label, onPress }: { marker: 
           elevation: 4,
         }}
       >
-        <Text style={{ color: active ? darkColors.onAccent : darkColors.gold, fontSize: active ? 12 : 10, fontFamily: 'Inter_700Bold', fontWeight: '700' }}>{marker.seq}</Text>
+          <Text style={{ color: active ? darkColors.onAccent : darkColors.gold, fontSize: active ? 12 : 10, fontFamily: 'Inter_700Bold', fontWeight: '700' }}>{marker.seq}</Text>
+        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
-export default function BodyMap({ palette = darkColors, initialState, initialEditingId = null, onChange, canvasHeight = 440, inlineSheet, testID = 'bodymap' }: BodyMapProps) {
+export default function BodyMap({ palette = darkColors, initialState, initialEditingId = null, onChange, canvasHeight = 440, initialPreset, initialCamera, inlineSheet, testID = 'bodymap' }: BodyMapProps) {
   const { t } = useTranslation();
   const p = palette;
   const fig = useMemo(() => figurePalette(p), [p]);
@@ -148,7 +173,26 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
     const width = (height * BODY_VIEWBOX.width) / BODY_VIEWBOX.height;
     return { width, height };
   }, [canvasHeight]);
-  const vb = BODY_ZOOMS[state.zoom];
+  // Zoom camera (viewBox window onto the full body). Presets set it; pinch / pan / double-tap adjust it.
+  const [preset, setPreset] = useState<ZoomPreset | null>(initialCamera ? null : initialPreset ?? state.zoom);
+  const [camera, setCamera] = useState<Camera>(() => initialCamera ?? presetCamera(initialPreset ?? state.zoom, state.view));
+  const vb = camera;
+  const cameraRef = useRef(camera);
+  cameraRef.current = camera;
+  const zoomedIn = !isFullCamera(camera);
+  const scale = cameraScale(camera);
+
+  const applyPreset = (z: ZoomPreset, view: BodyView = state.view) => {
+    setPreset(z);
+    setCamera(presetCamera(z, view));
+    if (z === 'full' || z === 'upper' || z === 'lower') dispatch({ type: 'SET_ZOOM', zoom: z });
+  };
+  const setCustomCamera = (c: Camera) => {
+    setPreset(isFullCamera(c) ? 'full' : null);
+    setCamera(c);
+  };
+  const zoomBy = (factor: number) => setCustomCamera(zoomAt(cameraRef.current, canvas.width / 2, canvas.height / 2, factor, canvas));
+  const resetZoom = () => applyPreset('full');
 
   // Report marker changes to the host (skip the very first render).
   const first = useRef(true);
@@ -189,10 +233,12 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
       if (view === state.view) return;
       Animated.timing(flip, { toValue: 0, duration: 140, easing: Easing.in(Easing.quad), useNativeDriver: USE_NATIVE }).start(() => {
         dispatch({ type: 'SET_VIEW', view });
+        // Hand / foot close-ups follow the same limb when the body turns around.
+        if (preset && preset !== 'full') setCamera(presetCamera(preset, view));
         Animated.timing(flip, { toValue: 1, duration: 180, easing: Easing.out(Easing.quad), useNativeDriver: USE_NATIVE }).start();
       });
     },
-    [flip, state.view]
+    [flip, state.view, preset]
   );
 
   const flash = (msg: string) => {
@@ -223,12 +269,8 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
     setEditingId(id);
   };
 
-  const onCanvasPress = (e: any) => {
-    const ne = e?.nativeEvent ?? {};
-    const px = Number(ne.locationX ?? ne.offsetX);
-    const py = Number(ne.locationY ?? ne.offsetY);
-    if (!Number.isFinite(px) || !Number.isFinite(py)) return;
-    const pt = canvasToViewBox(px, py, canvas, vb);
+  const placeAtCanvas = (px: number, py: number) => {
+    const pt = tapToBody(px, py, canvas, cameraRef.current);
     const region = hitTestRegion(state.layer, state.view, pt.x, pt.y);
     if (!region) {
       flash(t(state.layer === 'organs' ? 'bodyMap.missOrgans' : 'bodyMap.miss'));
@@ -236,6 +278,96 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
     }
     placeAt(region.id, pt.x, pt.y);
   };
+
+  const gesture = useRef<{ start: Camera; dist: number; origin: { x: number; y: number } } | null>(null);
+  const gestureEndedAt = useRef(0);
+  // Single tap places a marker; a second tap close by within DOUBLE_TAP_MS zooms in instead.
+  const lastTap = useRef<{ at: number; px: number; py: number } | null>(null);
+  const pendingTap = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (pendingTap.current) clearTimeout(pendingTap.current);
+  }, []);
+  const onCanvasPress = (e: any) => {
+    // A press that ends a pinch / drag is not a tap (web fires a click after a mouse drag).
+    if (gesture.current || Date.now() - gestureEndedAt.current < 250) return;
+    const ne = e?.nativeEvent ?? {};
+    const px = Number(ne.locationX ?? ne.offsetX);
+    const py = Number(ne.locationY ?? ne.offsetY);
+    if (!Number.isFinite(px) || !Number.isFinite(py)) return;
+    const now = Date.now();
+    const prev = lastTap.current;
+    if (prev && now - prev.at < DOUBLE_TAP_MS && Math.hypot(px - prev.px, py - prev.py) < DOUBLE_TAP_SLOP) {
+      if (pendingTap.current) clearTimeout(pendingTap.current);
+      pendingTap.current = null;
+      lastTap.current = null;
+      const c = cameraRef.current;
+      setCustomCamera(cameraScale(c) >= MAX_ZOOM - 0.01 ? presetCamera('full', state.view) : zoomAt(c, px, py, DOUBLE_TAP_FACTOR, canvas));
+      return;
+    }
+    lastTap.current = { at: now, px, py };
+    if (pendingTap.current) clearTimeout(pendingTap.current);
+    pendingTap.current = setTimeout(() => {
+      pendingTap.current = null;
+      placeAtCanvas(px, py);
+    }, DOUBLE_TAP_MS);
+  };
+
+  // Pinch (two fingers) and drag (one finger, when zoomed in). Taps fall through to the Pressable.
+  const canvasRef = useRef<View>(null);
+  const touchInfo = (evt: any) => {
+    const touches = evt?.nativeEvent?.touches ?? [];
+    if (touches.length >= 2) {
+      const [a, b] = touches;
+      return { n: 2, dist: Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY), mx: (a.pageX + b.pageX) / 2, my: (a.pageY + b.pageY) / 2 };
+    }
+    return { n: touches.length, dist: 0, mx: 0, my: 0 };
+  };
+  const wantsGesture = (evt: any, g: { dx: number; dy: number }) =>
+    touchInfo(evt).n >= 2 || (!isFullCamera(cameraRef.current) && Math.abs(g.dx) + Math.abs(g.dy) > PAN_SLOP);
+  const pan = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: (evt) => touchInfo(evt).n >= 2,
+        onMoveShouldSetPanResponder: wantsGesture,
+        onMoveShouldSetPanResponderCapture: wantsGesture,
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderGrant: (evt, g) => {
+          if (pendingTap.current) clearTimeout(pendingTap.current);
+          pendingTap.current = null;
+          const info = touchInfo(evt);
+          gesture.current = { start: cameraRef.current, dist: info.dist, origin: { x: g.x0 - (evt.nativeEvent?.locationX ?? 0), y: g.y0 - (evt.nativeEvent?.locationY ?? 0) } };
+          canvasRef.current?.measure?.((_x, _y, _w, _h, pageX, pageY) => {
+            if (gesture.current && Number.isFinite(pageX) && Number.isFinite(pageY)) gesture.current.origin = { x: pageX, y: pageY };
+          });
+        },
+        onPanResponderMove: (evt, g) => {
+          const st = gesture.current;
+          if (!st) return;
+          const info = touchInfo(evt);
+          if (info.n >= 2) {
+            if (!st.dist) {
+              // Second finger joined mid-drag: restart the pinch from here.
+              gesture.current = { ...st, start: cameraRef.current, dist: info.dist };
+              return;
+            }
+            const next = zoomAt(st.start, info.mx - st.origin.x, info.my - st.origin.y, info.dist / st.dist, canvas);
+            setCustomCamera(next);
+          } else if (!st.dist) {
+            setCustomCamera(panBy(st.start, g.dx, g.dy, canvas));
+          }
+        },
+        onPanResponderRelease: () => {
+          gesture.current = null;
+          gestureEndedAt.current = Date.now();
+        },
+        onPanResponderTerminate: () => {
+          gesture.current = null;
+          gestureEndedAt.current = Date.now();
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [canvas.width, canvas.height]
+  );
 
   const selected = state.markers.find((m) => m.id === state.selectedId) ?? null;
   const editing = state.markers.find((m) => m.id === editingId) ?? null;
@@ -302,8 +434,8 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
           })}
         </View>
         <View style={[bm.segment, { borderColor: p.border }]} accessibilityRole="tablist">
-          {ZOOMS.map((z) => {
-            const on = state.zoom === z;
+          {WIDE_PRESETS.map((z) => {
+            const on = preset === z;
             return (
               <TouchableOpacity
                 key={z}
@@ -311,7 +443,7 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
                 accessibilityLabel={t(`bodyMap.zoomA11y.${z}`)}
-                onPress={() => dispatch({ type: 'SET_ZOOM', zoom: z })}
+                onPress={() => applyPreset(z)}
                 style={[bm.segmentItem, { paddingHorizontal: 11, backgroundColor: on ? p.muted : 'transparent' }]}
               >
                 <Text style={[bm.chipText, { color: on ? p.accent : p.sub }]}>{t(`bodyMap.zoom.${z}`)}</Text>
@@ -321,6 +453,26 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
         </View>
       </View>
 
+      {/* Close-ups */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 6 }}>
+        {CLOSE_UP_PRESETS.map((z) => {
+          const on = preset === z;
+          return (
+            <TouchableOpacity
+              key={z}
+              testID={`bodymap-closeup-${z}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={t(`bodyMap.closeUpA11y.${z}`)}
+              onPress={() => applyPreset(z)}
+              style={[bm.chip, { minHeight: 36, paddingVertical: 6, borderColor: on ? p.gold : p.border, backgroundColor: on ? p.muted : 'transparent' }]}
+            >
+              <Text style={[bm.chipText, { fontSize: 12, color: on ? p.accent : p.sub }]}>{t(`bodyMap.closeUp.${z}`)}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
       {/* Canvas */}
       <View
         style={[bm.card, { borderColor: p.border, backgroundColor: p.mode === 'dark' ? '#0D1628' : '#FBF5EA', alignItems: 'center', paddingVertical: 14 }]}
@@ -329,7 +481,12 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
           <Text style={[bm.small, { color: p.sub }]}>{leftTag}</Text>
           <Text style={[bm.small, { color: p.sub }]}>{rightTag}</Text>
         </View>
-        <Animated.View style={{ width: canvas.width, height: canvas.height, transform: [{ scaleX: flip }] }}>
+        <Animated.View
+          ref={canvasRef as any}
+          testID="bodymap-gesture-area"
+          {...pan.panHandlers}
+          style={{ width: canvas.width, height: canvas.height, overflow: 'hidden', transform: [{ scaleX: flip }] }}
+        >
           <Pressable
             testID="bodymap-canvas"
             accessibilityRole="imagebutton"
@@ -357,6 +514,8 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
                 const tl = viewBoxToCanvas(b.x, b.y, canvas, vb);
                 const br = viewBoxToCanvas(b.x + b.w, b.y + b.h, canvas, vb);
                 const c = shapeCenter(r.shape);
+                // Regions outside the zoomed window are skipped (the list fallback still lists every region).
+                if (br.left < 0 || br.top < 0 || tl.left > canvas.width || tl.top > canvas.height) return null;
                 return (
                   <Pressable
                     key={r.id}
@@ -365,7 +524,7 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
                     accessibilityLabel={t(regionLabelKey(r.id))}
                     accessibilityHint={t('bodyMap.regionHint')}
                     onPress={() => placeAt(r.id, c.x, c.y)}
-                    style={{ position: 'absolute', left: tl.left, top: tl.top, width: Math.max(8, br.left - tl.left), height: Math.max(8, br.top - tl.top) }}
+                    style={{ position: 'absolute', left: tl.left, top: tl.top, width: Math.max(TOUCH, br.left - tl.left), height: Math.max(TOUCH, br.top - tl.top) }}
                   />
                 );
               })
@@ -387,8 +546,42 @@ export default function BodyMap({ palette = darkColors, initialState, initialEdi
             );
           })}
         </Animated.View>
-        <Text testID="bodymap-hint" style={[bm.small, { color: hint ? p.accent : p.sub, marginTop: 8, textAlign: 'center', paddingHorizontal: 16 }]}>
-          {hint ?? t('bodyMap.tapHint')}
+        <View style={{ position: 'absolute', right: 8, top: 30, alignItems: 'center' }}>
+          {[
+            { id: 'in', glyph: '+', label: t('bodyMap.zoomIn'), onPress: () => zoomBy(1.6), disabled: scale >= MAX_ZOOM - 0.01 },
+            { id: 'out', glyph: '−', label: t('bodyMap.zoomOut'), onPress: () => zoomBy(1 / 1.6), disabled: !zoomedIn },
+          ].map((b) => (
+            <TouchableOpacity
+              key={b.id}
+              testID={`bodymap-zoom-${b.id}`}
+              accessibilityRole="button"
+              accessibilityLabel={b.label}
+              accessibilityState={{ disabled: b.disabled }}
+              disabled={b.disabled}
+              onPress={b.onPress}
+              style={{ width: TOUCH, height: TOUCH, borderRadius: TOUCH / 2, borderWidth: 1.5, borderColor: p.border, backgroundColor: p.card, alignItems: 'center', justifyContent: 'center', marginTop: 8, opacity: b.disabled ? 0.45 : 1 }}
+            >
+              <Text style={{ color: p.accent, fontSize: 22, lineHeight: 24, fontFamily: 'Inter_700Bold', fontWeight: '700' }}>{b.glyph}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {/* Reserved row so the layout does not jump when the reset button appears. */}
+        <View style={{ minHeight: TOUCH, marginTop: 8, alignItems: 'center', justifyContent: 'center' }}>
+          {zoomedIn ? (
+            <TouchableOpacity
+              testID="bodymap-zoom-reset"
+              accessibilityRole="button"
+              accessibilityLabel={t('bodyMap.zoomResetA11y')}
+              onPress={resetZoom}
+              style={{ minHeight: TOUCH, paddingHorizontal: 16, borderRadius: TOUCH / 2, borderWidth: 1.5, borderColor: p.gold, backgroundColor: p.card, flexDirection: 'row', alignItems: 'center' }}
+            >
+              <Text style={[bm.chipText, { color: p.accent }]}>{`⤢ ${t('bodyMap.zoomReset')}`}</Text>
+              <Text style={[bm.small, { color: p.sub, marginLeft: 8 }]}>{`${scale.toFixed(1)}×`}</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <Text testID="bodymap-hint" style={[bm.small, { color: hint ? p.accent : p.sub, marginTop: 4, textAlign: 'center', paddingHorizontal: 16 }]}>
+          {hint ?? t(zoomedIn ? 'bodyMap.zoomHint' : 'bodyMap.tapHint')}
         </Text>
       </View>
 

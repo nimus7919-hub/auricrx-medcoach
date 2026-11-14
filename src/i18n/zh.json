@@ -4979,7 +4979,28 @@
       "back_ribs_right": "Upper back, right side (over the ribs)",
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
-    }
+    },
+    "closeUp": {
+      "head": "头部和面部",
+      "torso": "胸部和腹部",
+      "hand_right": "右手",
+      "hand_left": "左手",
+      "foot_right": "右脚",
+      "foot_left": "左脚"
+    },
+    "closeUpA11y": {
+      "head": "放大头部和面部",
+      "torso": "放大胸部和腹部",
+      "hand_right": "放大您的右手",
+      "hand_left": "放大您的左手",
+      "foot_right": "放大您的右脚",
+      "foot_left": "放大您的左脚"
+    },
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "zoomReset": "重置",
+    "zoomResetA11y": "重置缩放并显示全身",
+    "zoomHint": "双指捏合或使用 + 和 − 缩放，拖动以移动。轻点以放置标记。"
   },
   "openSourceLicenses": {
     "title": "开源许可",
