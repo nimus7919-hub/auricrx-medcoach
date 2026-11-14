@@ -495,6 +495,26 @@ export default function createSettings(getScope) {
               <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: theme.accent }}>{BUSINESS_EMAIL}</DynamicText>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() => setRoute('open-source-licenses')}
+            style={[styles.settingsButton, {
+              backgroundColor: getCardBackgroundColor() + 'CC',
+              borderColor: getCardBorderColor(),
+              borderWidth: 2,
+              borderRadius: 12,
+              padding: 16,
+              marginHorizontal: 16,
+              marginBottom: 12
+            }]}
+          >
+            <DynamicText type="card" style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>
+              {t('openSourceLicenses.title')}
+            </DynamicText>
+            <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
+              {t('openSourceLicenses.settingsSubtitle')}
+            </DynamicText>
+          </TouchableOpacity>
         </CollapsibleSection>
         
         <CollapsibleSection title={S.subscription || uiI18n.t("settings.subscription")} sectionKey="subscription" onToggle={toggleSection}>

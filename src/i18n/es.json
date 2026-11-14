@@ -4919,5 +4919,18 @@
       "flank_left": "Costado izquierdo de la mitad de la espalda",
       "flank_right": "Costado derecho de la mitad de la espalda"
     }
+  },
+  "openSourceLicenses": {
+    "title": "Licencias de código abierto",
+    "settingsSubtitle": "Créditos de las ilustraciones de terceros usadas en la app",
+    "intro": "Las ilustraciones del mapa corporal están adaptadas de imágenes con licencias abiertas. Gracias a sus autores.",
+    "sectionArt": "Ilustraciones del mapa corporal",
+    "usedFor": "Se usa en",
+    "author": "Autor",
+    "license": "Licencia",
+    "source": "Fuente",
+    "viewLicense": "Ver licencia",
+    "openSource": "Abrir página de origen",
+    "adapted": "Adaptadas: redimensionadas, simplificadas y con colores ajustados a la app."
   }
 }

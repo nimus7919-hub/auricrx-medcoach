@@ -4980,5 +4980,18 @@
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
     }
+  },
+  "openSourceLicenses": {
+    "title": "开源许可",
+    "settingsSubtitle": "应用中使用的第三方插图的署名",
+    "intro": "身体图插图改编自开放许可的图片。感谢原作者。",
+    "sectionArt": "身体图插图",
+    "usedFor": "用于",
+    "author": "作者",
+    "license": "许可",
+    "source": "来源",
+    "viewLicense": "查看许可",
+    "openSource": "打开来源页面",
+    "adapted": "已改编：调整大小、简化并重新着色以适配应用。"
   }
 }

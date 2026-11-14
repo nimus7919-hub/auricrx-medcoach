@@ -26,6 +26,7 @@ const TARGETS = [
   'src/screens/HerbsReviewScreen.js',
   'src/screens/PrivacyDataScreen.tsx',
   'src/screens/PrivacyNoticeScreen.tsx',
+  'src/screens/OpenSourceLicensesScreen.tsx',
   'src/screens/PremiumUpgradeScreen.tsx',
   'src/components/ModalScreenHeader.tsx',
   'src/screens/preVisitIntake/PreVisitIntakeFlow.tsx',

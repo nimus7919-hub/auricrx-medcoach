@@ -9,6 +9,11 @@ Organ shapes are drawn as visual context only; the app never labels them with or
 
 Licenses were checked on each file's Commons description page on 2026-11-14.
 
+In the app, these credits are listed under Settings → Help → "Open-source licenses"
+(`OpenSourceLicensesScreen`), read from `src/legal/thirdPartyArtCredits.ts`. Keep that file and
+this table in sync; `src/lib/__tests__/thirdPartyArtCredits.test.ts` checks it. No credit text is
+shown on the body map or intake screens.
+
 | Layer / file(s) | Source file | Author | License | Changes |
 | --- | --- | --- | --- | --- |
 | Body silhouette and surface lines: `art/skin.ts` | [Silhouette humain asexue anterieur posterieur.svg](https://commons.wikimedia.org/wiki/File:Silhouette_humain_asexue_anterieur_posterieur.svg) | Christophe Dang Ngoc Chan (Cdang), derived from his "Silhouette femme homme anterieur posterieur.svg" | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | Filled outline, inset shading, recoloured |

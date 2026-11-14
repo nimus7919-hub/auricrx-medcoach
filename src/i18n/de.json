@@ -4973,5 +4973,18 @@
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
     }
+  },
+  "openSourceLicenses": {
+    "title": "Open-Source-Lizenzen",
+    "settingsSubtitle": "Nachweise für in der App verwendete Grafiken Dritter",
+    "intro": "Die Grafiken der Körperkarte basieren auf frei lizenzierten Illustrationen. Danke an die Urheber.",
+    "sectionArt": "Grafiken der Körperkarte",
+    "usedFor": "Verwendet für",
+    "author": "Urheber",
+    "license": "Lizenz",
+    "source": "Quelle",
+    "viewLicense": "Lizenz ansehen",
+    "openSource": "Quellseite öffnen",
+    "adapted": "Angepasst: skaliert, vereinfacht und für die App neu eingefärbt."
   }
 }

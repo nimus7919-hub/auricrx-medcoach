@@ -4919,5 +4919,18 @@
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
     }
+  },
+  "openSourceLicenses": {
+    "title": "Open-source licenses",
+    "settingsSubtitle": "Credits for third-party artwork used in the app",
+    "intro": "The body map artwork is adapted from openly licensed illustrations. Thank you to their authors.",
+    "sectionArt": "Body map artwork",
+    "usedFor": "Used for",
+    "author": "Author",
+    "license": "License",
+    "source": "Source",
+    "viewLicense": "View license",
+    "openSource": "Open source page",
+    "adapted": "Adapted: resized, simplified and recoloured to fit the app."
   }
 }
