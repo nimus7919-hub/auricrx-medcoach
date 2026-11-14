@@ -28,6 +28,15 @@ const TARGETS = [
   'src/screens/PrivacyNoticeScreen.tsx',
   'src/screens/PremiumUpgradeScreen.tsx',
   'src/components/ModalScreenHeader.tsx',
+  'src/screens/preVisitIntake/PreVisitIntakeFlow.tsx',
+  'src/screens/preVisitIntake/IntakeFrame.tsx',
+  'src/screens/preVisitIntake/StaticEmergencyNotice.tsx',
+  'src/screens/preVisitIntake/IntakeSimpleSteps.tsx',
+  'src/screens/preVisitIntake/IntakeChat.tsx',
+  'src/screens/preVisitIntake/SummaryReview.tsx',
+  'src/screens/preVisitIntake/SummaryView.tsx',
+  'src/screens/preVisitIntake/IntakeHistory.tsx',
+  'src/screens/preVisitIntake/ConfirmDialog.tsx',
 ];
 
 const ALLOW = [

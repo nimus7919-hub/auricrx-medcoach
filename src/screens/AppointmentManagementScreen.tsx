@@ -15,6 +15,8 @@ import { useWallpaper } from '../contexts/WallpaperContext';
 import AppointmentService, { Appointment, DoctorContact, AppointmentStats } from '../services/appointmentService';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
+import { isPreVisitIntakeEnabled } from '../config/preVisitIntake';
+import PreVisitIntakeModal from './preVisitIntake/PreVisitIntakeModal';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -473,6 +475,9 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
   const [doctorContacts, setDoctorContacts] = useState<DoctorContact[]>([]);
   const [stats, setStats] = useState<AppointmentStats | null>(null);
   const [showAddAppointmentModal, setShowAddAppointmentModal] = useState(false);
+  // Optional pre-visit intake (feature-flagged, OFF by default). Offered only AFTER the appointment is saved.
+  const preVisitIntakeEnabled = isPreVisitIntakeEnabled();
+  const [preVisitIntake, setPreVisitIntake] = useState<null | { mode: 'book' | 'history'; appointmentId: string; justBooked?: Appointment }>(null);
   const [showAddDoctorModal, setShowAddDoctorModal] = useState(false);
   const [showEditDoctorModal, setShowEditDoctorModal] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<DoctorContact | null>(null);
@@ -871,7 +876,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour duration
 
-      await appointmentService.createAppointment({
+      const createdAppointment = await appointmentService.createAppointment({
         title: appointmentTitle,
         type: selectedAppointmentType,
         location: appointmentLocation,
@@ -895,7 +900,14 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       loadData();
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"));
+      if (preVisitIntakeEnabled && createdAppointment?.id) {
+        // Booking is already saved; the intake offer opens after the confirmation is dismissed.
+        Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"), [
+          { text: t("common.ok"), onPress: () => setPreVisitIntake({ mode: 'book', appointmentId: createdAppointment.id, justBooked: createdAppointment }) },
+        ]);
+      } else {
+        Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"));
+      }
     } catch (error) {
       console.error('Failed to add appointment:', error);
       Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToSchedule"));
@@ -1200,6 +1212,16 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               {getStatusLabel(appointment.status)}
             </DynamicText>
           </View>
+          {preVisitIntakeEnabled && (
+            <TouchableOpacity
+              testID={`previsit-intake-entry-${appointment.id}`}
+              accessibilityRole="button"
+              onPress={() => setPreVisitIntake({ mode: 'history', appointmentId: appointment.id })}
+              style={{ alignSelf: 'flex-start', marginTop: 8, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1, borderColor: currentTheme.accent }}
+            >
+              <DynamicText type="accent" style={{ fontSize: 13, fontWeight: '600' }}>{t("preVisitIntake.entry.openIntake")}</DynamicText>
+            </TouchableOpacity>
+          )}
         </View>
       ))}
       
@@ -1357,6 +1379,22 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           {renderDoctorContacts()}
         </ScrollView>
       </View>
+
+      {preVisitIntakeEnabled && preVisitIntake && (
+        <PreVisitIntakeModal
+          visible
+          mode={preVisitIntake.mode}
+          initialAppointmentId={preVisitIntake.appointmentId}
+          justBookedId={preVisitIntake.justBooked?.id ?? null}
+          appointments={
+            preVisitIntake.justBooked
+              ? [preVisitIntake.justBooked, ...appointments.filter(a => a.id !== preVisitIntake.justBooked?.id)]
+              : appointments
+          }
+          dark={currentTheme?.mode !== 'light'}
+          onClose={() => setPreVisitIntake(null)}
+        />
+      )}
 
       {/* Add Appointment Modal */}
       <Modal

@@ -4642,5 +4642,122 @@
     "setupScreenLockHint": "Tip: set a screen lock in your device settings to protect Documents next time.",
     "authError": "Could not verify your identity. Please try again.",
     "privacyCover": "AuricRX Documents"
+  },
+  "preVisitIntake": {
+    "title": "Pre-visit intake",
+    "optionalBadge": "Optional",
+    "emergencyNoticeLabel": "Emergency notice",
+    "emergencyNotice": "If this is an emergency, call 911 or go to the nearest emergency room. This intake is not emergency care and is not monitored in real time.",
+    "common": {
+      "close": "Close",
+      "back": "Back",
+      "cancel": "Cancel",
+      "retry": "Try again",
+      "loading": "Loading…",
+      "stepOf": "Step {{current}} of {{total}}",
+      "demoBadge": "Demo data",
+      "errorGeneric": "Something went wrong. You can try again or skip this step. Your appointment is already saved."
+    },
+    "selectAppointment": {
+      "title": "Which appointment is this for?",
+      "subtitle": "Pick the appointment you just booked, or another upcoming one.",
+      "empty": "You have no upcoming appointments.",
+      "dateAt": "{{date}} at {{time}}",
+      "justBooked": "Just booked",
+      "continue": "Continue"
+    },
+    "selectDoctor": {
+      "title": "Which doctor are you seeing?",
+      "subtitle": "Only doctors linked to your account can receive your intake.",
+      "empty": "You don't have a linked doctor yet. You can link your doctor from Doctor Mode and come back later. Your appointment is saved either way.",
+      "continue": "Continue"
+    },
+    "offer": {
+      "title": "Tell your doctor what's going on before the visit",
+      "body": "Answer a few short questions in your own words. Your answers are organized into a short summary that you review before anything is sent to {{doctor}}.",
+      "optional": "This is optional. Skipping it doesn't affect your appointment.",
+      "privacy": "Nothing is shared until you confirm, and only with {{doctor}}. The chat is deleted automatically {{days}} days after your appointment. The confirmed summary and your comment are kept as the record. See the privacy notice in Settings for details.",
+      "notMedical": "This is not a medical consultation. The assistant only organizes what you say. It does not give medical opinions or advice.",
+      "start": "I agree, start",
+      "notNow": "Not now"
+    },
+    "chat": {
+      "title": "Tell us in your own words",
+      "assistantLabel": "MedCoach assistant",
+      "youLabel": "You",
+      "placeholder": "Type your answer…",
+      "send": "Send",
+      "finish": "I'm done, review summary",
+      "textOnly": "Text only for now.",
+      "questionCount": "Question {{current}} of {{total}}",
+      "doneHint": "That's all the questions. Next, review your summary.",
+      "leave": "Leave",
+      "leaveTitle": "Leave without sending?",
+      "leaveBody": "Your answers will be discarded and nothing will be sent to your doctor.",
+      "leaveConfirm": "Discard and leave",
+      "keepGoing": "Keep going"
+    },
+    "review": {
+      "title": "Review your summary",
+      "readOnlyNote": "This summary organizes your own words. It can't be edited, but you can add a comment below.",
+      "recipient": "Will be sent to: {{doctor}}",
+      "fields": {
+        "mainConcern": "Main concern",
+        "location": "Location",
+        "duration": "Duration",
+        "severity": "Severity",
+        "alsoMentioned": "Also mentioned",
+        "questionsForDoctor": "Questions for the doctor"
+      },
+      "notMentioned": "Not mentioned",
+      "severityValue": "Patient said {{value}} / 10",
+      "footer": "This is the patient's own description, organized for the visit. It is not a medical opinion. The doctor reviews it and draws the conclusions.",
+      "commentLabel": "Your comment for the doctor (optional)",
+      "commentPlaceholder": "Add anything else you want {{doctor}} to know",
+      "commentHint": "Your comment is shown next to the summary, exactly as you write it.",
+      "share": "Confirm and send to {{doctor}}",
+      "dontSend": "Don't send",
+      "discardTitle": "Don't send this summary?",
+      "discardBody": "Your answers and this summary will be discarded. Nothing will be sent.",
+      "discardConfirm": "Discard"
+    },
+    "done": {
+      "sharedTitle": "Sent to {{doctor}}",
+      "sharedBody": "Your doctor can read this summary and your comment before the visit.",
+      "retention": "The chat will be deleted automatically on {{date}}. You can delete it sooner from the appointment.",
+      "discardedTitle": "Nothing was sent",
+      "discardedBody": "Your answers were discarded. Your appointment is still saved.",
+      "backToAppointments": "Back to appointments"
+    },
+    "history": {
+      "title": "Pre-visit summaries",
+      "subtitle": "Summaries you sent for this appointment.",
+      "empty": "You haven't sent a summary for this appointment yet.",
+      "start": "Start a pre-visit intake",
+      "sentOn": "Sent to {{doctor}} on {{date}}",
+      "commentLabel": "Your comment",
+      "chatAutoDelete": "The chat will be deleted automatically on {{date}} ({{days}} days left).",
+      "chatDeleted": "Chat deleted. The summary and your comment are kept.",
+      "deleteChat": "Delete chat now",
+      "deleteTitle": "Delete the chat now?",
+      "deleteBody": "The full conversation will be permanently deleted. The confirmed summary and your comment stay as the record.",
+      "deleteConfirm": "Delete chat",
+      "showChat": "Show conversation",
+      "hideChat": "Hide conversation"
+    },
+    "entry": {
+      "openIntake": "Pre-visit intake"
+    },
+    "mockQuestions": {
+      "mainConcern": "In your own words, what would you like your doctor to know about this visit?",
+      "location": "Where do you notice it, if that applies to you?",
+      "duration": "How long has this been going on?",
+      "severity": "If you'd like, on a scale from 1 to 10, what number would you give it?",
+      "character": "How would you describe the feeling, in your own words?",
+      "betterWorse": "Have you noticed anything that makes it better or worse?",
+      "otherSensations": "Is there anything else you've noticed that you'd like to mention?",
+      "medicinesMentioned": "Are there any medicines, supplements or allergies you want your doctor to know about?",
+      "questionsForDoctor": "Is there anything you want to ask your doctor?"
+    }
   }
 }
