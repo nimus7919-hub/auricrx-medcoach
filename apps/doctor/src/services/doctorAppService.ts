@@ -65,9 +65,11 @@ import {
   type DoctorPatientMessage,
   type DoctorQuickAction,
   type MessageThreadExport,
+  type IntakeSession,
 } from '@auricrx/doctor-core';
 import { auth, db } from '../config/firebase';
 import { API_BASE } from '../config/api';
+import { isPreVisitIntakeEnabled } from '../config/preVisitIntake';
 
 function uidOrThrow(): string {
   const uid = auth.currentUser?.uid;
@@ -89,6 +91,22 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
   return out as T;
 }
 
+
+
+async function doctorApiGet<T = any>(path: string): Promise<T> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('not_authenticated');
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || `request_failed_${res.status}`);
+  }
+  return data as T;
+}
 
 async function doctorApi<T = any>(path: string, body: Record<string, unknown> = {}): Promise<T> {
   const user = auth.currentUser;
@@ -782,6 +800,37 @@ class DoctorAppService {
       detail: `lines:${exported.lines.length}`,
     });
     return exported;
+  }
+
+  async listConfirmedIntakes(): Promise<IntakeSession[]> {
+    if (!isPreVisitIntakeEnabled()) return [];
+    try {
+      const data = await doctorApiGet<{ ok: true; intakes: IntakeSession[] }>('/api/doctor/intake/list');
+      return data.intakes || [];
+    } catch {
+      return [];
+    }
+  }
+
+  async getConfirmedIntake(id: string): Promise<IntakeSession | null> {
+    if (!isPreVisitIntakeEnabled()) return null;
+    const data = await doctorApiGet<{ ok: true; intake: IntakeSession }>(`/api/doctor/intake/${encodeURIComponent(id)}`);
+    return data.intake || null;
+  }
+
+  async viewConfirmedIntake(id: string): Promise<IntakeSession | null> {
+    if (!isPreVisitIntakeEnabled()) return null;
+    try {
+      const data = await doctorApi<{ ok: true; intake: IntakeSession }>(`/api/doctor/intake/${encodeURIComponent(id)}/view`, {});
+      return data.intake || null;
+    } catch {
+      return this.getConfirmedIntake(id);
+    }
+  }
+
+  async listConfirmedIntakesForPatient(patientId: string): Promise<IntakeSession[]> {
+    const all = await this.listConfirmedIntakes();
+    return all.filter((s) => s.patientId === patientId);
   }
 }
 

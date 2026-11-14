@@ -18,6 +18,8 @@ import './src/i18n';
 import { colors } from './src/theme/colors';
 import DoctorAppService from './src/services/doctorAppService';
 import RawChart from './src/components/RawChart';
+import PreVisitIntakeCard from './src/components/PreVisitIntakeCard';
+import { isPreVisitIntakeEnabled } from './src/config/preVisitIntake';
 import MfaEnrollView from './src/components/mfa/MfaEnrollView';
 import MfaChallengeView from './src/components/mfa/MfaChallengeView';
 import MfaRecoveryView from './src/components/mfa/MfaRecoveryView';
@@ -59,6 +61,7 @@ import {
   minutesFromHhMm,
   type DoctorPatientMessage,
   type DoctorQuickAction,
+  type IntakeSession,
 } from '@auricrx/doctor-core';
 
 type Screen =
@@ -79,6 +82,7 @@ type Screen =
   | 'preVisit'
   | 'appointment'
   | 'inbox'
+  | 'intakeDetail'
   | 'adminReview';
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon→Sun for editor
@@ -162,6 +166,9 @@ export default function App() {
     windowsToEditorText(DEFAULT_OFFICE_HOURS)
   );
   const [inbox, setInbox] = useState<DoctorPatientMessage[]>([]);
+  const [intakes, setIntakes] = useState<IntakeSession[]>([]);
+  const [selectedIntake, setSelectedIntake] = useState<IntakeSession | null>(null);
+  const [intakeReturnScreen, setIntakeReturnScreen] = useState<Screen>('inbox');
   const [replyText, setReplyText] = useState('');
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
@@ -361,6 +368,33 @@ export default function App() {
     }
   };
 
+  const loadIntakes = async (patientId?: string) => {
+    if (!isPreVisitIntakeEnabled()) {
+      setIntakes([]);
+      return;
+    }
+    try {
+      const all = patientId
+        ? await service.listConfirmedIntakesForPatient(patientId)
+        : await service.listConfirmedIntakes();
+      setIntakes(all);
+    } catch {
+      setIntakes([]);
+    }
+  };
+
+  const openIntake = async (intake: IntakeSession, back: Screen = 'inbox') => {
+    setSelectedIntake(intake);
+    setIntakeReturnScreen(back);
+    setScreen('intakeDetail');
+    try {
+      const viewed = await service.viewConfirmedIntake(intake.id);
+      if (viewed) setSelectedIntake(viewed);
+    } catch {
+      /* still show the list payload */
+    }
+  };
+
   const openPatient = async (link: PatientDoctorLink) => {
     if (!isDoctorEntitled(profile)) {
       Alert.alert(t('doctorMode.gate.title'), t('doctorMode.gate.needVerifiedPlan'));
@@ -370,16 +404,18 @@ export default function App() {
     setScreen('patient');
     setBusy(true);
     try {
-      const [e, l, m, a] = await Promise.all([
+      const [e, l, m, a, intakeList] = await Promise.all([
         service.listBitacoraForPatient(link),
         service.listAlertLimits(link.patientId),
         service.getSharedMedications(link),
         service.getSharedAdherence(link),
+        isPreVisitIntakeEnabled() ? service.listConfirmedIntakesForPatient(link.patientId) : Promise.resolve([] as IntakeSession[]),
       ]);
       setEntries(e);
       setLimits(l);
       setMeds(m);
       setAdherence(a);
+      setIntakes(intakeList);
     } finally {
       setBusy(false);
     }
@@ -462,7 +498,11 @@ export default function App() {
     setBusy(true);
     setScreen('preVisit');
     try {
-      setPreVisit(await service.buildPreVisit(selected));
+      const [page] = await Promise.all([
+        service.buildPreVisit(selected),
+        loadIntakes(selected.patientId),
+      ]);
+      setPreVisit(page);
     } finally {
       setBusy(false);
     }
@@ -474,6 +514,7 @@ export default function App() {
     setApptMessage('');
     setApptSlot1('');
     setScreen('appointment');
+    void loadIntakes(selected.patientId);
   };
 
   const handleSaveOfficeHours = async () => {
@@ -504,7 +545,11 @@ export default function App() {
     setBusy(true);
     setScreen('inbox');
     try {
-      setInbox(await service.listNeedsActionInbox());
+      const [messages] = await Promise.all([
+        service.listNeedsActionInbox(),
+        loadIntakes(),
+      ]);
+      setInbox(messages);
     } finally {
       setBusy(false);
     }
@@ -899,6 +944,14 @@ export default function App() {
             <GoldButton label={t('doctorMode.preVisit.generate')} onPress={openPreVisit} disabled={busy} />
             <GoldButton label={t('doctorMode.appointmentRequest.title')} onPress={openAppointment} />
             <GoldButton label={t('doctorMode.messaging.exportTitle')} onPress={handleExportMessages} disabled={busy} />
+            {isPreVisitIntakeEnabled() &&
+              intakes.map((intake) => (
+                <GoldButton
+                  key={intake.id}
+                  label={t('doctorMode.preVisitIntake.open')}
+                  onPress={() => void openIntake(intake, 'patient')}
+                />
+              ))}
             {busy && <ActivityIndicator color={colors.accent} />}
             <RawChart
               title={t('doctorMode.bitacora.systolic')}
@@ -1158,7 +1211,24 @@ export default function App() {
           )}
           <Field label={t('doctorMode.messaging.optionalReply')} value={replyText} onChangeText={setReplyText} />
           {busy && <ActivityIndicator color={colors.accent} />}
-          {!busy && inbox.length === 0 && <Text style={styles.sub}>{t('doctorMode.messaging.emptyInbox')}</Text>}
+          {!busy && inbox.length === 0 && intakes.length === 0 && <Text style={styles.sub}>{t('doctorMode.messaging.emptyInbox')}</Text>}
+          {isPreVisitIntakeEnabled() &&
+            intakes.map((intake) => (
+              <TouchableOpacity
+                key={intake.id}
+                style={styles.patientRow}
+                onPress={() => void openIntake(intake, 'inbox')}
+                accessibilityRole="button"
+                accessibilityLabel={t('doctorMode.preVisitIntake.open')}
+              >
+                <Text style={styles.patientName}>{t('doctorMode.preVisitIntake.needsAction')}</Text>
+                <Text style={styles.meta}>
+                  {(patients.find((p) => p.patientId === intake.patientId)?.patientDisplayName ||
+                    intake.patientId.slice(0, 10))}
+                  {intake.sharedAt ? ` · ${new Date(intake.sharedAt).toLocaleString()}` : ''}
+                </Text>
+              </TouchableOpacity>
+            ))}
           {inbox.map((m) => (
             <View key={m.id} style={styles.patientRow}>
               <Text style={styles.patientName}>
@@ -1229,6 +1299,15 @@ export default function App() {
               {preVisit.documents.length === 0 && <Text style={styles.meta}>—</Text>}
             </Card>
           )}
+          {isPreVisitIntakeEnabled() &&
+            intakes.map((intake) => (
+              <PreVisitIntakeCard
+                key={intake.id}
+                session={intake}
+                t={t}
+                patientLabel={selected?.patientDisplayName || selected?.patientId}
+              />
+            ))}
         </ScrollView>
       )}
 
@@ -1307,6 +1386,29 @@ export default function App() {
               </Text>
             )}
           </Card>
+          {isPreVisitIntakeEnabled() &&
+            intakes.map((intake) => (
+              <PreVisitIntakeCard
+                key={intake.id}
+                session={intake}
+                t={t}
+                patientLabel={selected?.patientDisplayName || selected?.patientId}
+              />
+            ))}
+        </ScrollView>
+      )}
+
+      {screen === 'intakeDetail' && selectedIntake && (
+        <ScrollView style={styles.content}>
+          {header(t('doctorMode.preVisitIntake.title'), () => setScreen(intakeReturnScreen))}
+          <PreVisitIntakeCard
+            session={selectedIntake}
+            t={t}
+            patientLabel={
+              patients.find((p) => p.patientId === selectedIntake.patientId)?.patientDisplayName ||
+              selectedIntake.patientId
+            }
+          />
         </ScrollView>
       )}
     </SafeAreaView>
