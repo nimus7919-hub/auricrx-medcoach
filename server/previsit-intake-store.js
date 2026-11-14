@@ -96,6 +96,7 @@ function mapIntakeRow(r) {
     sharedAt: r.shared_at instanceof Date ? r.shared_at.toISOString() : r.shared_at,
     rawChatDeleteAt: r.raw_chat_delete_at instanceof Date ? r.raw_chat_delete_at.toISOString() : r.raw_chat_delete_at,
     rawChatDeletedAt: r.raw_chat_deleted_at instanceof Date ? r.raw_chat_deleted_at.toISOString() : r.raw_chat_deleted_at,
+    bodyPainMap: r.body_pain_map == null ? null : typeof r.body_pain_map === 'string' ? JSON.parse(r.body_pain_map) : r.body_pain_map,
   };
 }
 
@@ -119,6 +120,7 @@ function createNeonStore({ sql, now = () => new Date() } = {}) {
           id, patient_id, doctor_id, doctor_display_name,
           appointment_id, appointment_start_iso, appointment_request_id,
           locale, status, consent, follow_ups_asked, summary, patient_comment,
+          body_pain_map,
           created_at, updated_at, shared_at, raw_chat_delete_at, raw_chat_deleted_at
         ) VALUES (
           ${row.id}, ${row.patientId}, ${row.doctorId}, ${row.doctorDisplayName},
@@ -126,6 +128,7 @@ function createNeonStore({ sql, now = () => new Date() } = {}) {
           ${row.locale}, ${row.status}, ${JSON.stringify(row.consent)}::jsonb,
           ${row.followUpsAsked}, ${row.summary ? JSON.stringify(row.summary) : null}::jsonb,
           ${row.patientComment},
+          ${row.bodyPainMap ? JSON.stringify(row.bodyPainMap) : null}::jsonb,
           ${row.createdAt}, ${row.updatedAt}, ${row.sharedAt},
           ${row.rawChatDeleteAt}, ${row.rawChatDeletedAt}
         )
@@ -145,7 +148,8 @@ function createNeonStore({ sql, now = () => new Date() } = {}) {
           updated_at = ${next.updatedAt},
           shared_at = ${next.sharedAt},
           raw_chat_deleted_at = ${next.rawChatDeletedAt},
-          doctor_display_name = ${next.doctorDisplayName}
+          doctor_display_name = ${next.doctorDisplayName},
+          body_pain_map = ${next.bodyPainMap ? JSON.stringify(next.bodyPainMap) : null}::jsonb
         WHERE id = ${id}
       `;
       return next;

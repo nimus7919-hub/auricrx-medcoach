@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { TFunction } from 'i18next';
 import type { IntakeSession } from '@auricrx/doctor-core';
+import { sideFromRegionId } from '@auricrx/doctor-core';
 import { colors } from '../theme/colors';
+import BodyPainMapDiagram from './BodyPainMapDiagram';
 
 function field(value: string | null | undefined, notMentioned: string): string {
   const v = (value || '').trim();
@@ -76,6 +78,63 @@ export default function PreVisitIntakeCard({
       ) : (
         <Text style={styles.meta}>{t('doctorMode.preVisitIntake.empty')}</Text>
       )}
+      {session.bodyPainMap && session.bodyPainMap.markers.length > 0 ? (
+        <>
+          <Text style={styles.label}>{t('doctorMode.preVisitIntake.bodyMap.title')}</Text>
+          <Text style={styles.sub}>{t('doctorMode.preVisitIntake.bodyMap.subtitle')}</Text>
+          <BodyPainMapDiagram payload={session.bodyPainMap} t={t} />
+          {session.bodyPainMap.markers.map((m, i) => {
+            const side = sideFromRegionId(m.regionId);
+            const sideLabel =
+              side === 'left'
+                ? t('doctorMode.preVisitIntake.bodyMap.sideLeft')
+                : side === 'right'
+                  ? t('doctorMode.preVisitIntake.bodyMap.sideRight')
+                  : t('doctorMode.preVisitIntake.bodyMap.sideNone');
+            const feel =
+              m.feels.length > 0
+                ? m.feels.map((f) => t(`doctorMode.preVisitIntake.bodyMap.feelWords.${f}`)).join(', ')
+                : notMentioned;
+            const onset = m.onset
+              ? t(`doctorMode.preVisitIntake.bodyMap.onsetWords.${m.onset}`)
+              : notMentioned;
+            const intensity =
+              m.intensity != null
+                ? t('doctorMode.preVisitIntake.bodyMap.intensitySaid', { n: m.intensity })
+                : notMentioned;
+            return (
+              <View key={`${m.regionId}-${i}`} style={styles.marker}>
+                <Text style={styles.text}>
+                  {i + 1}. {m.layerLabel} · {m.regionLabel}
+                </Text>
+                <Text style={styles.meta}>
+                  {t('doctorMode.preVisitIntake.bodyMap.layer')}: {m.layerLabel}
+                </Text>
+                <Text style={styles.meta}>
+                  {t('doctorMode.preVisitIntake.bodyMap.region')}: {m.regionLabel}
+                </Text>
+                <Text style={styles.meta}>
+                  {t('doctorMode.preVisitIntake.bodyMap.side')}: {sideLabel}
+                </Text>
+                <Text style={styles.meta}>
+                  {t('doctorMode.preVisitIntake.bodyMap.intensity')}: {intensity}
+                </Text>
+                <Text style={styles.meta}>
+                  {t('doctorMode.preVisitIntake.bodyMap.feels')}: {feel}
+                </Text>
+                <Text style={styles.meta}>
+                  {t('doctorMode.preVisitIntake.bodyMap.onset')}: {onset}
+                </Text>
+                {m.note ? (
+                  <Text style={styles.comment}>
+                    {t('doctorMode.preVisitIntake.bodyMap.note')}: {m.note}
+                  </Text>
+                ) : null}
+              </View>
+            );
+          })}
+        </>
+      ) : null}
       {session.patientComment ? (
         <>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.comment')}</Text>
@@ -126,4 +185,5 @@ const styles = StyleSheet.create({
   sub: { color: colors.sub, fontSize: 13, marginBottom: 8, lineHeight: 18 },
   link: { color: colors.accent, fontSize: 14, marginTop: 10, textDecorationLine: 'underline' },
   turn: { color: colors.sub, fontSize: 13, marginTop: 6, lineHeight: 18 },
+  marker: { marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border },
 });

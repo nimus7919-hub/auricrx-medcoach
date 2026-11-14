@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS pre_visit_intakes (
   follow_ups_asked INTEGER NOT NULL DEFAULT 0,
   summary JSONB,
   patient_comment TEXT,
+  body_pain_map JSONB,
   created_at TIMESTAMPTZ NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL,
   shared_at TIMESTAMPTZ,
@@ -52,3 +53,6 @@ CREATE TABLE IF NOT EXISTS pre_visit_turns (
 
 CREATE INDEX IF NOT EXISTS pre_visit_turns_intake
   ON pre_visit_turns (intake_id, created_at);
+
+-- Additive column for installs that already applied an earlier copy of this file.
+ALTER TABLE pre_visit_intakes ADD COLUMN IF NOT EXISTS body_pain_map JSONB;

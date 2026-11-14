@@ -357,15 +357,19 @@ function createMockProvider() {
 
 /**
  * Optional OpenAI provider. Used only when PREVISIT_INTAKE_PROVIDER=openai and a key
- * is present (OPENAI_API_KEY or DOCTOR_AI_API_KEY). On any failure, callers fall back
- * to the mock / verbatim template. Never logs the key.
+ * is present. Prefers DOCTOR_AI_API_KEY, then falls back to OPENAI_API_KEY.
+ * On any failure, callers fall back to the mock / verbatim template. Never logs the key.
  */
+function getOpenAiKey(env = process.env) {
+  return env.DOCTOR_AI_API_KEY || env.OPENAI_API_KEY || '';
+}
+
 function hasOpenAiKey(env = process.env) {
-  return Boolean(env.OPENAI_API_KEY || env.DOCTOR_AI_API_KEY);
+  return Boolean(getOpenAiKey(env));
 }
 
 function createOpenAiProvider({ fetchImpl, env = process.env } = {}) {
-  const key = env.OPENAI_API_KEY || env.DOCTOR_AI_API_KEY;
+  const key = getOpenAiKey(env);
   const model = env.PREVISIT_INTAKE_MODEL || env.DOCTOR_AI_SUMMARY_MODEL || 'gpt-4o-mini';
   const fetchFn = fetchImpl || fetch;
 
@@ -499,6 +503,7 @@ module.exports = {
   createOpenAiProvider,
   createProvider,
   hasOpenAiKey,
+  getOpenAiKey,
   genericIntakePushCopy,
   INTAKE_EXTRA_BANNED,
 };

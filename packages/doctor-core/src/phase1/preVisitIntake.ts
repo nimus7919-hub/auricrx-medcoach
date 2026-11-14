@@ -5,6 +5,43 @@
 
 export type IntakeLocale = 'en' | 'es';
 
+export const BODY_LAYERS = ['skin', 'muscles', 'vessels', 'bones', 'organs'] as const;
+export type BodyLayer = (typeof BODY_LAYERS)[number];
+export const BODY_VIEWS = ['front', 'back'] as const;
+export type BodyView = (typeof BODY_VIEWS)[number];
+export const PAIN_FEELS = ['sharp', 'dull', 'burning', 'throbbing', 'tingling', 'aching'] as const;
+export type PainFeel = (typeof PAIN_FEELS)[number];
+/** Wire values from PR #39 (today | days | weeks | months | unsure). */
+export const PAIN_ONSETS = ['today', 'days', 'weeks', 'months', 'unsure'] as const;
+export type PainOnset = (typeof PAIN_ONSETS)[number];
+
+export interface BodyPainMarkerPayload {
+  layer: BodyLayer;
+  view: BodyView;
+  regionId: string;
+  regionLabel: string;
+  layerLabel: string;
+  position: { x: number; y: number };
+  intensity: number | null;
+  feels: PainFeel[];
+  onset: PainOnset | null;
+  note: string | null;
+}
+
+export interface BodyPainMapPayload {
+  version: 1;
+  locale: IntakeLocale;
+  reportedAt: string;
+  markers: BodyPainMarkerPayload[];
+}
+
+export function sideFromRegionId(regionId: string): 'left' | 'right' | null {
+  if (String(regionId).endsWith('_left')) return 'left';
+  if (String(regionId).endsWith('_right')) return 'right';
+  return null;
+}
+
+
 export type IntakeSessionStatus =
   | 'in_progress'
   | 'awaiting_confirmation'
@@ -19,6 +56,7 @@ export interface IntakeSummary {
   severityReported: number | null;
   alsoMentioned: string[];
   questionsForDoctor: string[];
+  bodyPainMap?: BodyPainMapPayload | null;
   locale: IntakeLocale;
   generatedAt: string;
 }
@@ -56,6 +94,7 @@ export interface IntakeSession {
   sharedAt: string | null;
   rawChatDeleteAt: string;
   rawChatDeletedAt: string | null;
+  bodyPainMap?: BodyPainMapPayload | null;
 }
 
 /** Display helper — never treat this number as a risk score. */

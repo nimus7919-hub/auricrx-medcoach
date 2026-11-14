@@ -237,7 +237,41 @@
       "confirmedAt": "Confirmed",
       "empty": "No pre-visit intake for this patient.",
       "appointmentStart": "Appointment",
-      "open": "Open intake"
+      "open": "Open intake",
+      "bodyMap": {
+        "title": "Where the patient marked",
+        "subtitle": "As the patient described it. This is not a medical opinion.",
+        "layer": "Layer",
+        "region": "Area",
+        "side": "Side",
+        "sideLeft": "Left (the patient's left)",
+        "sideRight": "Right (the patient's right)",
+        "sideNone": "Not a left or right area",
+        "viewFront": "Front",
+        "viewBack": "Back",
+        "intensity": "Intensity (as stated)",
+        "intensitySaid": "Patient said {{n}} / 10",
+        "feels": "Feel",
+        "feelWords": {
+          "sharp": "sharp",
+          "dull": "dull",
+          "burning": "burning",
+          "throbbing": "throbbing",
+          "tingling": "tingling",
+          "aching": "aching"
+        },
+        "onset": "When it started",
+        "onsetWords": {
+          "today": "today",
+          "days": "a few days ago",
+          "weeks": "1 to 4 weeks ago",
+          "months": "more than a month ago",
+          "unsure": "not sure"
+        },
+        "note": "Patient note",
+        "diagram": "Marked spots (front / back)",
+        "empty": "No body map was shared."
+      }
     },
     "appointmentRequest": {
       "title": "Request appointment",

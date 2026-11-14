@@ -237,7 +237,41 @@
       "confirmedAt": "Confirmada",
       "empty": "No hay entrevista previa a la consulta para esta persona.",
       "appointmentStart": "Consulta",
-      "open": "Abrir entrevista"
+      "open": "Abrir entrevista",
+      "bodyMap": {
+        "title": "Dónde lo marcó la persona",
+        "subtitle": "Tal como lo describió la persona. Esto no es una opinión médica.",
+        "layer": "Capa",
+        "region": "Zona",
+        "side": "Lado",
+        "sideLeft": "Izquierdo (izquierda de la persona)",
+        "sideRight": "Derecho (derecha de la persona)",
+        "sideNone": "No es una zona izquierda o derecha",
+        "viewFront": "Frente",
+        "viewBack": "Espalda",
+        "intensity": "Intensidad (según lo indicado)",
+        "intensitySaid": "La persona indicó {{n}} / 10",
+        "feels": "Sensación",
+        "feelWords": {
+          "sharp": "aguda",
+          "dull": "sorda",
+          "burning": "ardor",
+          "throbbing": "latido",
+          "tingling": "hormigueo",
+          "aching": "dolorimiento"
+        },
+        "onset": "Desde cuándo",
+        "onsetWords": {
+          "today": "hoy",
+          "days": "hace unos días",
+          "weeks": "hace 1 a 4 semanas",
+          "months": "hace más de un mes",
+          "unsure": "no está segura o seguro"
+        },
+        "note": "Nota de la persona",
+        "diagram": "Puntos marcados (frente / espalda)",
+        "empty": "No se compartió un mapa del cuerpo."
+      }
     },
     "appointmentRequest": {
       "title": "Solicitar cita",
