@@ -4972,6 +4972,40 @@
       "back_ribs_right": "Upper back, right side (over the ribs)",
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
-    }
+    },
+    "closeUp": {
+      "head": "Kopf & Gesicht",
+      "torso": "Brust & Bauch",
+      "hand_right": "Rechte Hand",
+      "hand_left": "Linke Hand",
+      "foot_right": "Rechter Fuß",
+      "foot_left": "Linker Fuß"
+    },
+    "closeUpA11y": {
+      "head": "Kopf und Gesicht vergrößern",
+      "torso": "Brust und Bauch vergrößern",
+      "hand_right": "Ihre rechte Hand vergrößern",
+      "hand_left": "Ihre linke Hand vergrößern",
+      "foot_right": "Ihren rechten Fuß vergrößern",
+      "foot_left": "Ihren linken Fuß vergrößern"
+    },
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "zoomReset": "Zurücksetzen",
+    "zoomResetA11y": "Zoom zurücksetzen und den ganzen Körper zeigen",
+    "zoomHint": "Mit zwei Fingern oder + und − zoomen, ziehen zum Verschieben. Tippen, um eine Markierung zu setzen."
+  },
+  "openSourceLicenses": {
+    "title": "Open-Source-Lizenzen",
+    "settingsSubtitle": "Nachweise für in der App verwendete Grafiken Dritter",
+    "intro": "Die Grafiken der Körperkarte basieren auf frei lizenzierten Illustrationen. Danke an die Urheber.",
+    "sectionArt": "Grafiken der Körperkarte",
+    "usedFor": "Verwendet für",
+    "author": "Urheber",
+    "license": "Lizenz",
+    "source": "Quelle",
+    "viewLicense": "Lizenz ansehen",
+    "openSource": "Quellseite öffnen",
+    "adapted": "Angepasst: skaliert, vereinfacht und für die App neu eingefärbt."
   }
 }

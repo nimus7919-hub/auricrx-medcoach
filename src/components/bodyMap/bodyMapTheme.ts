@@ -7,6 +7,7 @@ export type BodyMapPalette = typeof darkColors | ReturnType<typeof premiumTheme>
 export function figurePalette(p: BodyMapPalette): BodyFigurePalette {
   const dark = p.mode === 'dark';
   return {
+    mode: dark ? 'dark' : 'light',
     fill: dark ? '#2C3D5E' : '#F3E7D0',
     fillEnd: dark ? '#1B2843' : '#E3D2B2',
     outline: p.gold,

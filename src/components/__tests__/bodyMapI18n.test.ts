@@ -4,6 +4,7 @@ import en from '../../i18n/en.json';
 import es from '../../i18n/es.json';
 import { getAllRegionIds } from '../bodyMap/regions';
 import { BODY_LAYERS, PAIN_FEELS, PAIN_ONSETS } from '../bodyMap/types';
+import { CLOSE_UP_PRESETS } from '../bodyMap/zoomCamera';
 import { findBannedClinicalTerms } from '../../../packages/doctor-core/src/compliance/bannedTerms';
 
 const flat = (o: any, p = ''): [string, string][] =>
@@ -19,6 +20,9 @@ function dynamicKeys(): string[] {
     ...PAIN_ONSETS.map((o) => `bodyMap.onsets.${o}`),
     ...['front', 'back'].map((v) => `bodyMap.views.${v}`),
     ...['full', 'upper', 'lower'].flatMap((z) => [`bodyMap.zoom.${z}`, `bodyMap.zoomA11y.${z}`]),
+    ...CLOSE_UP_PRESETS.flatMap((z) => [`bodyMap.closeUp.${z}`, `bodyMap.closeUpA11y.${z}`]),
+    'bodyMap.zoomHint',
+    'bodyMap.tapHint',
   ];
 }
 

@@ -20,6 +20,7 @@ import WallpaperSettingsScreen from "./../screens/WallpaperSettingsScreen";
 import { HealthConnectConsentScreen, HealthConnectPrivacyScreen } from '../screens/ActivityHealthScreen';
 // F2, F9-F11, F13, F15, F4-F8 screens
 import PrivacyNoticeScreen from '../screens/PrivacyNoticeScreen';
+import OpenSourceLicensesScreen from '../screens/OpenSourceLicensesScreen';
 import DocumentCloudBackupScreen from '../screens/DocumentCloudBackupScreen';
 import PremiumUpgradeScreen from '../screens/PremiumUpgradeScreen';
 import InviteFamilyMemberScreen from '../screens/InviteFamilyMemberScreen';
@@ -68,6 +69,7 @@ export default function createAppNavigator(getScope) {
     route === 'wallpaper' ? <WallpaperSettingsScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} theme={theme} S={S} /> :
     route === 'admin-profile' ? <AdminProfileScreen onClose={() => setRoute('dashboard')} onNavigateToSettings={() => setRoute('settings')} currentUser={user} theme={theme} S={S} /> :
     route === 'privacy-notice' ? <PrivacyNoticeScreen onClose={() => setRoute('settings')} /> :
+    route === 'open-source-licenses' ? <OpenSourceLicensesScreen onClose={() => setRoute('settings')} /> :
     route === 'cloud-backup' ? <DocumentCloudBackupScreen onClose={() => setRoute('settings')} /> :
     route === 'premium-upgrade' ? <PremiumUpgradeScreen onClose={() => setRoute('dashboard')} entitlement={{ hasPremiumAccess: false, isInTrial: false, trialDaysRemaining: 14, isPremium: false }} /> :
     route === 'invite-family-member' ? <InviteFamilyMemberScreen onClose={() => setRoute('dashboard')} memberId="temp-id" memberName="Family Member" /> :

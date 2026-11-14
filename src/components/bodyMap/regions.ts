@@ -1,5 +1,5 @@
 /**
- * Tappable regions of the stylized body figure, per layer and view.
+ * Tappable regions of the body figure, per layer and view.
  *
  * Region names are PLAIN LOCATION WORDS ONLY ("upper right abdomen area", "left forearm").
  * They never name a condition or suggest what a location could mean.
@@ -38,17 +38,17 @@ const poly = (...points: [number, number][]): RegionShape => ({ kind: 'poly', po
 const C = (base: string, shape: RegionShape): RegionTemplate => ({ base, sided: false, shape });
 const S = (base: string, shape: RegionShape): RegionTemplate => ({ base, sided: true, shape });
 
-// Arm / leg geometry shared by surface layers (viewer's right half).
-const HAND = rect(146, 203, 28, 34);
-const FOREARM = poly([139, 146], [159, 146], [168, 203], [147, 203]);
-const UPPER_ARM = poly([135, 104], [153, 100], [159, 146], [139, 146]);
-const SHOULDER = ellipse(139, 93, 14, 12);
-const THIGH = rect(100, 230, 37, 68);
-const KNEE = rect(100, 298, 33, 24);
-const LOWER_LEG = rect(102, 322, 31, 68);
-const FOOT = rect(102, 390, 32, 34);
-const HEAD = ellipse(100, 37, 24, 29);
-const NECK = rect(88, 62, 24, 19);
+// Arm / leg geometry shared by surface layers (viewer's right half), fitted to the anatomy artwork in ./art.
+const HAND = rect(148, 212, 42, 46);
+const FOREARM = poly([137, 162], [157, 162], [168, 212], [148, 212]);
+const UPPER_ARM = poly([135, 106], [153, 102], [157, 162], [137, 162]);
+const SHOULDER = ellipse(138, 95, 15, 11);
+const THIGH = rect(100, 236, 43, 63);
+const KNEE = rect(104, 299, 38, 25);
+const LOWER_LEG = rect(106, 324, 42, 70);
+const FOOT = rect(110, 394, 44, 42);
+const HEAD = ellipse(100, 38, 24, 33);
+const NECK = rect(86, 66, 28, 18);
 
 /** Order matters: the first region that contains the point wins (specific before broad). */
 const SURFACE_FRONT: RegionTemplate[] = [
@@ -58,10 +58,10 @@ const SURFACE_FRONT: RegionTemplate[] = [
   S('forearm', FOREARM),
   S('upper_arm', UPPER_ARM),
   S('shoulder', SHOULDER),
-  S('chest', rect(100, 81, 36, 49)),
-  C('abdomen_upper', rect(66, 130, 68, 35)),
-  C('abdomen_lower', rect(66, 165, 68, 35)),
-  S('hip', rect(100, 200, 38, 30)),
+  S('chest', rect(100, 84, 35, 46)),
+  C('abdomen_upper', rect(65, 130, 70, 35)),
+  C('abdomen_lower', rect(63, 165, 74, 35)),
+  S('hip', rect(100, 200, 42, 36)),
   S('thigh', THIGH),
   S('knee', KNEE),
   S('lower_leg', LOWER_LEG),
@@ -75,11 +75,11 @@ const SURFACE_BACK: RegionTemplate[] = [
   S('forearm_back', FOREARM),
   S('upper_arm_back', UPPER_ARM),
   S('shoulder_back', SHOULDER),
-  S('upper_back', rect(100, 81, 36, 49)),
-  C('mid_back', rect(66, 130, 68, 35)),
-  S('lower_back', rect(100, 165, 36, 35)),
-  S('buttock', rect(100, 200, 38, 34)),
-  S('thigh_back', rect(100, 234, 37, 64)),
+  S('upper_back', rect(100, 84, 35, 46)),
+  C('mid_back', rect(65, 130, 70, 35)),
+  S('lower_back', rect(100, 165, 37, 35)),
+  S('buttock', rect(100, 200, 42, 40)),
+  S('thigh_back', rect(100, 240, 43, 59)),
   S('knee_back', KNEE),
   S('calf', LOWER_LEG),
   S('heel', FOOT),
@@ -88,25 +88,25 @@ const SURFACE_BACK: RegionTemplate[] = [
 const ORGANS_FRONT: RegionTemplate[] = [
   C('head', HEAD),
   C('throat', NECK),
-  C('chest_center', rect(92, 81, 16, 47)),
-  S('chest', rect(108, 81, 27, 47)),
-  C('abdomen_upper_middle', rect(90, 128, 20, 30)),
-  S('upper_abdomen', rect(110, 128, 25, 30)),
-  C('navel', rect(88, 158, 24, 22)),
-  S('mid_abdomen', rect(112, 158, 23, 22)),
-  C('abdomen_lower_middle', rect(90, 180, 20, 22)),
-  S('lower_abdomen', rect(110, 180, 25, 22)),
-  C('pelvic', rect(76, 202, 48, 26)),
+  C('chest_center', rect(92, 84, 16, 48)),
+  S('chest', rect(108, 84, 27, 48)),
+  C('abdomen_upper_middle', rect(90, 132, 20, 34)),
+  S('upper_abdomen', rect(110, 132, 26, 34)),
+  C('navel', rect(88, 166, 24, 22)),
+  S('mid_abdomen', rect(112, 166, 24, 22)),
+  C('abdomen_lower_middle', rect(90, 188, 20, 22)),
+  S('lower_abdomen', rect(110, 188, 27, 22)),
+  C('pelvic', rect(72, 210, 56, 30)),
 ];
 
 const ORGANS_BACK: RegionTemplate[] = [
   C('head_back', HEAD),
   C('neck_back', NECK),
-  C('spine', rect(94, 81, 12, 119)),
-  S('back_ribs', rect(106, 81, 29, 51)),
-  S('flank', rect(106, 132, 29, 33)),
-  S('lower_back', rect(106, 165, 29, 35)),
-  C('pelvic_back', rect(76, 200, 48, 28)),
+  C('spine', rect(94, 84, 12, 126)),
+  S('back_ribs', rect(106, 84, 30, 52)),
+  S('flank', rect(106, 136, 30, 32)),
+  S('lower_back', rect(106, 168, 30, 42)),
+  C('pelvic_back', rect(72, 210, 56, 30)),
 ];
 
 function mirrorShape(shape: RegionShape): RegionShape {

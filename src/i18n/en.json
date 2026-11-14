@@ -4918,6 +4918,40 @@
       "back_ribs_right": "Upper back, right side (over the ribs)",
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
-    }
+    },
+    "closeUp": {
+      "head": "Head & face",
+      "torso": "Chest & belly",
+      "hand_right": "Right hand",
+      "hand_left": "Left hand",
+      "foot_right": "Right foot",
+      "foot_left": "Left foot"
+    },
+    "closeUpA11y": {
+      "head": "Zoom in on the head and face",
+      "torso": "Zoom in on the chest and belly",
+      "hand_right": "Zoom in on your right hand",
+      "hand_left": "Zoom in on your left hand",
+      "foot_right": "Zoom in on your right foot",
+      "foot_left": "Zoom in on your left foot"
+    },
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Reset",
+    "zoomResetA11y": "Reset zoom and show the whole body",
+    "zoomHint": "Pinch or use + and − to zoom, drag to move. Tap to place a marker."
+  },
+  "openSourceLicenses": {
+    "title": "Open-source licenses",
+    "settingsSubtitle": "Credits for third-party artwork used in the app",
+    "intro": "The body map artwork is adapted from openly licensed illustrations. Thank you to their authors.",
+    "sectionArt": "Body map artwork",
+    "usedFor": "Used for",
+    "author": "Author",
+    "license": "License",
+    "source": "Source",
+    "viewLicense": "View license",
+    "openSource": "Open source page",
+    "adapted": "Adapted: resized, simplified and recoloured to fit the app."
   }
 }

@@ -5065,6 +5065,40 @@
       "back_ribs_right": "Upper back, right side (over the ribs)",
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
-    }
+    },
+    "closeUp": {
+      "head": "Cabeça e rosto",
+      "torso": "Peito e barriga",
+      "hand_right": "Mão direita",
+      "hand_left": "Mão esquerda",
+      "foot_right": "Pé direito",
+      "foot_left": "Pé esquerdo"
+    },
+    "closeUpA11y": {
+      "head": "Aproximar a cabeça e o rosto",
+      "torso": "Aproximar o peito e a barriga",
+      "hand_right": "Aproximar sua mão direita",
+      "hand_left": "Aproximar sua mão esquerda",
+      "foot_right": "Aproximar seu pé direito",
+      "foot_left": "Aproximar seu pé esquerdo"
+    },
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "zoomReset": "Redefinir",
+    "zoomResetA11y": "Redefinir o zoom e mostrar o corpo inteiro",
+    "zoomHint": "Faça o gesto de pinça ou use + e − para aproximar, arraste para mover. Toque para colocar um marcador."
+  },
+  "openSourceLicenses": {
+    "title": "Licenças de código aberto",
+    "settingsSubtitle": "Créditos das ilustrações de terceiros usadas no app",
+    "intro": "As ilustrações do mapa corporal foram adaptadas de imagens com licenças abertas. Obrigado aos autores.",
+    "sectionArt": "Ilustrações do mapa corporal",
+    "usedFor": "Usado em",
+    "author": "Autor",
+    "license": "Licença",
+    "source": "Fonte",
+    "viewLicense": "Ver licença",
+    "openSource": "Abrir página de origem",
+    "adapted": "Adaptadas: redimensionadas, simplificadas e com cores ajustadas ao app."
   }
 }

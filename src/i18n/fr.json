@@ -5058,6 +5058,40 @@
       "back_ribs_right": "Upper back, right side (over the ribs)",
       "flank_left": "Left side of the middle back",
       "flank_right": "Right side of the middle back"
-    }
+    },
+    "closeUp": {
+      "head": "Tête et visage",
+      "torso": "Poitrine et ventre",
+      "hand_right": "Main droite",
+      "hand_left": "Main gauche",
+      "foot_right": "Pied droit",
+      "foot_left": "Pied gauche"
+    },
+    "closeUpA11y": {
+      "head": "Zoomer sur la tête et le visage",
+      "torso": "Zoomer sur la poitrine et le ventre",
+      "hand_right": "Zoomer sur votre main droite",
+      "hand_left": "Zoomer sur votre main gauche",
+      "foot_right": "Zoomer sur votre pied droit",
+      "foot_left": "Zoomer sur votre pied gauche"
+    },
+    "zoomIn": "Zoomer",
+    "zoomOut": "Dézoomer",
+    "zoomReset": "Réinitialiser",
+    "zoomResetA11y": "Réinitialiser le zoom et afficher tout le corps",
+    "zoomHint": "Pincez ou utilisez + et − pour zoomer, faites glisser pour vous déplacer. Touchez pour placer un repère."
+  },
+  "openSourceLicenses": {
+    "title": "Licences open source",
+    "settingsSubtitle": "Crédits des illustrations tierces utilisées dans l'app",
+    "intro": "Les illustrations de la carte du corps sont adaptées d'images sous licence libre. Merci à leurs auteurs.",
+    "sectionArt": "Illustrations de la carte du corps",
+    "usedFor": "Utilisé pour",
+    "author": "Auteur",
+    "license": "Licence",
+    "source": "Source",
+    "viewLicense": "Voir la licence",
+    "openSource": "Ouvrir la page source",
+    "adapted": "Adaptées : redimensionnées, simplifiées et recolorées pour l'app."
   }
 }
