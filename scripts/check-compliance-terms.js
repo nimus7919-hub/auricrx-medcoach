@@ -6,7 +6,7 @@
  * Scans:
  * - packages/doctor-core/i18n/*.json
  * - apps/doctor/src/i18n/*.json
- * - src/i18n/*.json doctorMode subtree
+ * - src/i18n/*.json doctorMode + preVisitIntake subtrees
  * - packages/doctor-core/src/compliance/descriptiveSummary.ts (template literals via export test)
  * - server/doctor-alerts.js push copy
  * - server/doctor-ai-summary.js templates
@@ -143,7 +143,11 @@ function scanJsonDoctorMode(filePath) {
   const raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
   // Patient locales are huge — only scan doctorMode (+ top-level doctor app keys already small)
   if (filePath.includes(`${path.sep}src${path.sep}i18n${path.sep}`)) {
-    return walkStrings(raw.doctorMode || {}, 'doctorMode');
+    return [
+      ...walkStrings(raw.doctorMode || {}, 'doctorMode'),
+      // Pre-visit intake (patient side) — descriptive-only copy, see docs/doctor/pre-visit-intake.md
+      ...walkStrings(raw.preVisitIntake || {}, 'preVisitIntake'),
+    ];
   }
   return walkStrings(raw);
 }

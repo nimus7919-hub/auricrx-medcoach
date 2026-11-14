@@ -4642,5 +4642,122 @@
     "setupScreenLockHint": "Consejo: configura un bloqueo de pantalla en los ajustes del dispositivo para proteger Documentos la próxima vez.",
     "authError": "No se pudo verificar tu identidad. Inténtalo de nuevo.",
     "privacyCover": "Documentos AuricRX"
+  },
+  "preVisitIntake": {
+    "title": "Entrevista previa a la consulta",
+    "optionalBadge": "Opcional",
+    "emergencyNoticeLabel": "Aviso de emergencia",
+    "emergencyNotice": "Si esto es una emergencia, llama al 911 o acude a la sala de emergencias más cercana. Esta entrevista no es atención de emergencias y no se vigila en tiempo real.",
+    "common": {
+      "close": "Cerrar",
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "retry": "Intentar de nuevo",
+      "loading": "Cargando…",
+      "stepOf": "Paso {{current}} de {{total}}",
+      "demoBadge": "Datos de demostración",
+      "errorGeneric": "Algo salió mal. Puedes intentarlo de nuevo u omitir este paso. Tu cita ya está guardada."
+    },
+    "selectAppointment": {
+      "title": "¿Para qué cita es?",
+      "subtitle": "Elige la cita que acabas de agendar u otra próxima.",
+      "empty": "No tienes citas próximas.",
+      "dateAt": "{{date}} a las {{time}}",
+      "justBooked": "Recién agendada",
+      "continue": "Continuar"
+    },
+    "selectDoctor": {
+      "title": "¿Con qué médico es tu cita?",
+      "subtitle": "Solo los médicos vinculados a tu cuenta pueden recibir tu entrevista.",
+      "empty": "Aún no tienes un médico vinculado. Puedes vincularlo desde el Modo Médico y volver después. Tu cita queda guardada de todos modos.",
+      "continue": "Continuar"
+    },
+    "offer": {
+      "title": "Cuéntale a tu médico qué está pasando antes de la consulta",
+      "body": "Responde unas preguntas breves con tus propias palabras. Tus respuestas se organizan en un resumen corto que revisas antes de que se envíe algo a {{doctor}}.",
+      "optional": "Es opcional. Si la omites, tu cita no cambia.",
+      "privacy": "No se comparte nada hasta que lo confirmes, y solo con {{doctor}}. El chat se elimina automáticamente {{days}} días después de tu cita. El resumen confirmado y tu comentario se conservan como registro. Consulta el aviso de privacidad en Ajustes para más detalles.",
+      "notMedical": "Esto no es una consulta médica. El asistente solo organiza lo que dices. No da opiniones ni consejos médicos.",
+      "start": "Acepto, comenzar",
+      "notNow": "Ahora no"
+    },
+    "chat": {
+      "title": "Cuéntanos con tus palabras",
+      "assistantLabel": "Asistente MedCoach",
+      "youLabel": "Tú",
+      "placeholder": "Escribe tu respuesta…",
+      "send": "Enviar",
+      "finish": "Terminé, revisar resumen",
+      "textOnly": "Por ahora solo texto.",
+      "questionCount": "Pregunta {{current}} de {{total}}",
+      "doneHint": "Esas son todas las preguntas. Ahora revisa tu resumen.",
+      "leave": "Salir",
+      "leaveTitle": "¿Salir sin enviar?",
+      "leaveBody": "Tus respuestas se descartarán y no se enviará nada a tu médico.",
+      "leaveConfirm": "Descartar y salir",
+      "keepGoing": "Seguir"
+    },
+    "review": {
+      "title": "Revisa tu resumen",
+      "readOnlyNote": "Este resumen organiza tus propias palabras. No se puede editar, pero puedes agregar un comentario abajo.",
+      "recipient": "Se enviará a: {{doctor}}",
+      "fields": {
+        "mainConcern": "Motivo principal",
+        "location": "Ubicación",
+        "duration": "Duración",
+        "severity": "Intensidad",
+        "alsoMentioned": "También mencionó",
+        "questionsForDoctor": "Preguntas para el médico"
+      },
+      "notMentioned": "No se mencionó",
+      "severityValue": "El paciente dijo {{value}} / 10",
+      "footer": "Esta es la descripción del propio paciente, organizada para la consulta. No es una opinión médica. El médico la revisa y saca las conclusiones.",
+      "commentLabel": "Tu comentario para el médico (opcional)",
+      "commentPlaceholder": "Agrega algo más que quieras que sepa {{doctor}}",
+      "commentHint": "Tu comentario se muestra junto al resumen, tal como lo escribas.",
+      "share": "Confirmar y enviar a {{doctor}}",
+      "dontSend": "No enviar",
+      "discardTitle": "¿No enviar este resumen?",
+      "discardBody": "Tus respuestas y este resumen se descartarán. No se enviará nada.",
+      "discardConfirm": "Descartar"
+    },
+    "done": {
+      "sharedTitle": "Enviado a {{doctor}}",
+      "sharedBody": "Tu médico podrá leer este resumen y tu comentario antes de la consulta.",
+      "retention": "El chat se eliminará automáticamente el {{date}}. Puedes eliminarlo antes desde la cita.",
+      "discardedTitle": "No se envió nada",
+      "discardedBody": "Tus respuestas se descartaron. Tu cita sigue guardada.",
+      "backToAppointments": "Volver a citas"
+    },
+    "history": {
+      "title": "Resúmenes previos a la consulta",
+      "subtitle": "Resúmenes que enviaste para esta cita.",
+      "empty": "Aún no has enviado un resumen para esta cita.",
+      "start": "Iniciar entrevista previa",
+      "sentOn": "Enviado a {{doctor}} el {{date}}",
+      "commentLabel": "Tu comentario",
+      "chatAutoDelete": "El chat se eliminará automáticamente el {{date}} (faltan {{days}} días).",
+      "chatDeleted": "Chat eliminado. El resumen y tu comentario se conservan.",
+      "deleteChat": "Eliminar chat ahora",
+      "deleteTitle": "¿Eliminar el chat ahora?",
+      "deleteBody": "La conversación completa se eliminará de forma permanente. El resumen confirmado y tu comentario se conservan como registro.",
+      "deleteConfirm": "Eliminar chat",
+      "showChat": "Ver conversación",
+      "hideChat": "Ocultar conversación"
+    },
+    "entry": {
+      "openIntake": "Entrevista previa"
+    },
+    "mockQuestions": {
+      "mainConcern": "Con tus propias palabras, ¿qué te gustaría que tu médico supiera sobre esta consulta?",
+      "location": "¿En qué parte lo notas, si aplica?",
+      "duration": "¿Desde hace cuánto tiempo pasa esto?",
+      "severity": "Si quieres, en una escala del 1 al 10, ¿qué número le darías?",
+      "character": "¿Cómo describirías la sensación, con tus propias palabras?",
+      "betterWorse": "¿Has notado algo que lo haga sentir mejor o peor?",
+      "otherSensations": "¿Hay algo más que hayas notado y quieras mencionar?",
+      "medicinesMentioned": "¿Hay medicamentos, suplementos o alergias que quieras que tu médico sepa?",
+      "questionsForDoctor": "¿Hay algo que quieras preguntarle a tu médico?"
+    }
   }
 }
