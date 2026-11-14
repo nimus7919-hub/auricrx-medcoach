@@ -21,7 +21,8 @@
       "channel": "preview",
       "env": {
         "EXPO_PUBLIC_FEATURE_PREVISIT_INTAKE": "true"
-      }
+      },
+      "autoIncrement": true
     },
     "production": {
       "autoIncrement": true,
