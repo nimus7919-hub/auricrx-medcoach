@@ -1,7 +1,7 @@
 /**
  * Layered "where does it hurt?" body map.
  *
- * - Layers: skin, muscles, blood vessels, bones, organs (stylized original artwork, BodyFigure.tsx)
+ * - Layers: skin, muscles, blood vessels, bones, organs (openly licensed anatomy artwork, BodyFigure.tsx + art/)
  * - Front / back flip, zoom presets (whole body / upper / lower)
  * - Tap to drop a numbered pin on a named region; tap a pin to edit or remove it
  * - Optional patient-reported details per pin (PainDescriptorSheet)
