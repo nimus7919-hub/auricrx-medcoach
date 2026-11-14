@@ -4,6 +4,10 @@
  * The client never calls a model directly. All model output arrives from the server, already filtered.
  */
 
+import type { BodyPainMapPayload } from '../../components/bodyMap/types';
+
+export type { BodyPainMapPayload, BodyPainMarkerPayload } from '../../components/bodyMap/types';
+
 export type IntakeLocale = 'en' | 'es';
 
 export type IntakeSessionStatus =
@@ -45,6 +49,11 @@ export interface IntakeSummary {
   severityReported: number | null;
   alsoMentioned: string[];
   questionsForDoctor: string[];
+  /**
+   * Patient-reported body map (layer + region + the patient's own descriptors), copied as-is.
+   * Optional/nullable: servers that don't support it can omit it. Never interpreted.
+   */
+  bodyPainMap?: BodyPainMapPayload | null;
   locale: IntakeLocale;
   generatedAt: string;
 }
@@ -69,6 +78,8 @@ export interface IntakeSession {
   /** When the raw chat is auto-deleted (appointment start + retention days). */
   rawChatDeleteAt: string;
   rawChatDeletedAt: string | null;
+  /** Patient-reported body map for this intake, or null/absent when skipped or unsupported. */
+  bodyPainMap?: BodyPainMapPayload | null;
 }
 
 export interface StartSessionInput {
@@ -103,4 +114,9 @@ export interface PreVisitIntakeClient {
   discard(sessionId: string): Promise<void>;
   deleteChat(sessionId: string): Promise<IntakeSession>;
   listSessionsForAppointment(appointmentId: string): Promise<IntakeSession[]>;
+  /**
+   * Attach (or clear with null) the patient-reported body map before the chat summary is built.
+   * Optional so older clients/servers keep working; the flow skips it when absent.
+   */
+  submitBodyPainMap?(sessionId: string, payload: BodyPainMapPayload | null): Promise<IntakeSession>;
 }

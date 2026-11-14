@@ -1,7 +1,8 @@
 /**
  * Pure state machine for the patient pre-visit intake flow.
  *
- *   selectAppointment → selectDoctor → offer → chat → review → done
+ *   selectAppointment → selectDoctor → offer → [bodyMap] → chat → review → done
+ *   (bodyMap only when EXPO_PUBLIC_FEATURE_BODY_PAIN_MAP is on; always skippable)
  *                                        │        │       │
  *                                        └─ skip / leave / don't send ─→ closed (booking unaffected)
  *   history (past summaries for one appointment) is a separate entry.
@@ -13,6 +14,7 @@ export type IntakeStep =
   | 'selectAppointment'
   | 'selectDoctor'
   | 'offer'
+  | 'bodyMap'
   | 'chat'
   | 'review'
   | 'done'
@@ -32,7 +34,8 @@ export interface IntakeFlowState {
 export type IntakeFlowEvent =
   | { type: 'SELECT_APPOINTMENT'; appointmentId: string }
   | { type: 'SELECT_DOCTOR'; doctorId: string }
-  | { type: 'SESSION_STARTED'; sessionId: string }
+  | { type: 'SESSION_STARTED'; sessionId: string; bodyMap?: boolean }
+  | { type: 'BODY_MAP_DONE' }
   | { type: 'CHAT_FINISHED' }
   | { type: 'SHARED' }
   | { type: 'DISCARDED' }
@@ -68,7 +71,11 @@ export function intakeReducer(state: IntakeFlowState, event: IntakeFlowEvent): I
       return { ...state, doctorId: event.doctorId, step: 'offer' };
     case 'SESSION_STARTED':
       if (state.step !== 'offer' || !state.appointmentId || !state.doctorId || !event.sessionId) return state;
-      return { ...state, sessionId: event.sessionId, step: 'chat' };
+      return { ...state, sessionId: event.sessionId, step: event.bodyMap ? 'bodyMap' : 'chat' };
+    case 'BODY_MAP_DONE':
+      // Continue or skip both lead to the chat; the map never blocks the intake.
+      if (state.step !== 'bodyMap' || !state.sessionId) return state;
+      return { ...state, step: 'chat' };
     case 'CHAT_FINISHED':
       if (state.step !== 'chat' || !state.sessionId) return state;
       return { ...state, step: 'review' };
@@ -76,7 +83,7 @@ export function intakeReducer(state: IntakeFlowState, event: IntakeFlowEvent): I
       if (state.step !== 'review' || !state.sessionId) return state;
       return { ...state, step: 'done', outcome: 'shared' };
     case 'DISCARDED':
-      if (state.step !== 'chat' && state.step !== 'review') return state;
+      if (state.step !== 'bodyMap' && state.step !== 'chat' && state.step !== 'review') return state;
       return { ...state, step: 'done', sessionId: null, outcome: 'discarded' };
     case 'SKIP':
       // Optional at every pre-chat step. Never affects the saved appointment.
@@ -102,7 +109,7 @@ export function intakeReducer(state: IntakeFlowState, event: IntakeFlowEvent): I
 
 /** Leaving mid-interview must ask before throwing away the draft. */
 export function requiresDiscardConfirmation(step: IntakeStep): boolean {
-  return step === 'chat' || step === 'review';
+  return step === 'bodyMap' || step === 'chat' || step === 'review';
 }
 
 export interface AppointmentLike {

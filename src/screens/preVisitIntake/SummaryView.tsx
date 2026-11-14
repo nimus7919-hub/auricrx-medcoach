@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { IntakeSummary } from '../../services/preVisitIntake/types';
+import { describeBodyPainMap } from '../../components/bodyMap/payload';
 import { intakeStyles, useIntakePalette } from './intakeTheme';
 
 /** Read-only rendering of the fixed-field summary. No edit affordances by design (Freddy, 14 Nov 2026). */
@@ -32,6 +33,11 @@ export default function SummaryView({ summary }: { summary: IntakeSummary }) {
       <Field label={t('preVisitIntake.review.fields.severity')}>
         {line(summary.severityReported != null ? t('preVisitIntake.review.severityValue', { value: summary.severityReported }) : null)}
       </Field>
+      {summary.bodyPainMap?.markers?.length ? (
+        <Field label={t('bodyMap.summary.fieldLabel')}>
+          <View testID="intake-summary-body-map">{list(describeBodyPainMap(summary.bodyPainMap, (k, o) => String(t(k, o as any))))}</View>
+        </Field>
+      ) : null}
       <Field label={t('preVisitIntake.review.fields.alsoMentioned')}>{list(summary.alsoMentioned)}</Field>
       <Field label={t('preVisitIntake.review.fields.questionsForDoctor')}>{list(summary.questionsForDoctor)}</Field>
       <Text style={[intakeStyles.small, { color: p.sub, fontStyle: 'italic', marginTop: 4 }]}>{t('preVisitIntake.review.footer')}</Text>
