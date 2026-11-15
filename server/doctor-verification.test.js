@@ -13,7 +13,8 @@ const { startIdentityCheck } = require('./verification/identityProviders');
 const { computeExpiryFromVerifiedAt, isExpired, isDueForRecheck } = require('./verification/registry');
 
 // Load only after helpers — doctor-verification lazily requires firebase.
-const { validateSubmission, isAdminToken } = require('./doctor-verification');
+const { validateSubmission, isAdminToken, sanitizeForFirestore } = require('./doctor-verification');
+const { hasUndefined } = require('./verification/firestoreSafe');
 
 function pass(name) {
   console.log(`ok - ${name}`);
@@ -52,7 +53,40 @@ async function run() {
     }
   );
   assert.strictEqual(sep.outcome, 'lookup_unavailable');
+  assert.ok(sep.raw !== undefined);
+  assert.strictEqual(hasUndefined(sep), false);
   pass('SEP captcha → lookup_unavailable');
+
+  const abortErr = new Error('aborted');
+  abortErr.name = 'AbortError';
+  const sepTimeout = await lookupSepCedula(
+    { country: 'MX', legalFullName: 'Ana', cedulaNumber: 'DEMO-0001' },
+    { fetchImpl: async () => { throw abortErr; }, timeoutMs: 50 }
+  );
+  assert.strictEqual(sepTimeout.outcome, 'lookup_unavailable');
+  assert.ok(/timed out/i.test(sepTimeout.message));
+  assert.strictEqual(sepTimeout.raw, null);
+  assert.strictEqual(hasUndefined(sepTimeout), false);
+  assert.doesNotThrow(() => JSON.parse(JSON.stringify(sanitizeForFirestore(sepTimeout))));
+  pass('SEP timeout → lookup_unavailable, raw is null, Firestore-safe');
+
+  const sepThrow = await lookupSepCedula(
+    { country: 'MX', legalFullName: 'Ana', cedulaNumber: 'DEMO-0001' },
+    { fetchImpl: async () => { throw new Error('SEP network down'); }, timeoutMs: 50 }
+  );
+  assert.strictEqual(sepThrow.outcome, 'lookup_unavailable');
+  assert.strictEqual(sepThrow.message, 'SEP network down');
+  assert.strictEqual(sepThrow.raw, null);
+  assert.strictEqual(hasUndefined(sepThrow), false);
+  const evidence = sanitizeForFirestore({
+    doctorId: 'demo-uid',
+    registry: sepThrow,
+    identity: { provider: 'none', status: 'not_configured', sessionId: undefined, launchUrl: undefined },
+  });
+  assert.strictEqual(evidence.registry.raw, null);
+  assert.strictEqual(evidence.identity.sessionId, null);
+  assert.strictEqual(hasUndefined(evidence), false);
+  pass('SEP throw → lookup_unavailable, evidence sanitized for Firestore');
 
   const npi = await lookupNpi(
     {

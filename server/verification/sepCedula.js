@@ -25,7 +25,7 @@ function toRecord(item) {
     familyName: joinNameParts(paterno, materno),
     title: String(item?.titulo || item?.carrera || item?.title || ''),
     institution: String(item?.institucion || item?.universidad || ''),
-    year: item?.anioRegistro || item?.anno || item?.anio || undefined,
+    year: item?.anioRegistro || item?.anno || item?.anio || null,
     raw: item,
   };
 }
@@ -80,6 +80,7 @@ async function fetchByCedula(cedulaNumber, fetchImpl, timeoutMs) {
       unavailable: true,
       items: [],
       message: err?.name === 'AbortError' ? 'SEP lookup timed out' : err?.message || 'SEP lookup failed',
+      raw: null,
     };
   } finally {
     clearTimeout(timer);
@@ -102,6 +103,7 @@ async function lookupSepCedula(request, opts = {}) {
       referenceId,
       message: 'Missing cédula number',
       records: [],
+      raw: null,
     };
   }
 
@@ -115,7 +117,7 @@ async function lookupSepCedula(request, opts = {}) {
       referenceId,
       message: primary.message || 'SEP lookup unavailable',
       records: [],
-      raw: primary.raw,
+      raw: primary.raw ?? null,
     };
   }
 
@@ -129,7 +131,7 @@ async function lookupSepCedula(request, opts = {}) {
       referenceId,
       message: 'No SEP record for this cédula',
       records: [],
-      raw: primary.raw,
+      raw: primary.raw ?? null,
     };
   }
 
@@ -175,7 +177,7 @@ async function lookupSepCedula(request, opts = {}) {
     medicalTitleOk,
     specialtyTitleOk,
     records,
-    raw: { primary: primary.raw, specialty: specialtyRaw },
+    raw: { primary: primary.raw ?? null, specialty: specialtyRaw ?? null },
   };
 }
 

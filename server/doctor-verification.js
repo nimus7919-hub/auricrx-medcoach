@@ -10,6 +10,7 @@
 
 const path = require('path');
 const { lookupRegistry, computeExpiryFromVerifiedAt, isExpired, isDueForRecheck } = require('./verification/registry');
+const { sanitizeForFirestore } = require('./verification/firestoreSafe');
 const { startIdentityCheck } = require('./verification/identityProviders');
 
 const EVIDENCE_COLLECTION = 'doctorVerificationEvidence';
@@ -191,7 +192,7 @@ function mountDoctorVerificationRoutes(app) {
         updatedAt,
       };
 
-      await db.collection(EVIDENCE_COLLECTION).doc(uid).set(evidence, { merge: true });
+      await db.collection(EVIDENCE_COLLECTION).doc(uid).set(sanitizeForFirestore(evidence), { merge: true });
 
       await ref.set(
         {
@@ -582,4 +583,5 @@ module.exports = {
   isAdminToken,
   REVIEW_STATUSES,
   verifyDoctorAuth,
+  sanitizeForFirestore,
 };
