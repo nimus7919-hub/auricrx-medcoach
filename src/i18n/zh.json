@@ -5014,5 +5014,15 @@
     "viewLicense": "查看许可",
     "openSource": "打开来源页面",
     "adapted": "已改编：调整大小、简化并重新着色以适配应用。"
+  },
+  "updateNotice": {
+    "title": "有可用更新",
+    "otaMessage": "有新的更新可以安装。你可以现在更新，也可以稍后再说。",
+    "storeMessage": "应用商店中有新版本的 AuricRX MedCoach。",
+    "updateNow": "立即更新",
+    "later": "稍后",
+    "notificationTitle": "AuricRX 有可用更新",
+    "notificationBodyOta": "有更新可以安装。打开应用即可安装。",
+    "notificationBodyStore": "有新版本可用。打开应用即可更新。"
   }
 }

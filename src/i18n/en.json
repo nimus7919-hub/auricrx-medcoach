@@ -4953,5 +4953,15 @@
     "viewLicense": "View license",
     "openSource": "Open source page",
     "adapted": "Adapted: resized, simplified and recoloured to fit the app."
+  },
+  "updateNotice": {
+    "title": "Update available",
+    "otaMessage": "A new update is ready to install. You can update now or later.",
+    "storeMessage": "A new version of AuricRX MedCoach is available in the store.",
+    "updateNow": "Update now",
+    "later": "Later",
+    "notificationTitle": "AuricRX update available",
+    "notificationBodyOta": "An update is ready. Open the app to install it.",
+    "notificationBodyStore": "A new version is available. Open the app to update."
   }
 }
