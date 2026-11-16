@@ -38,7 +38,9 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "EXPO_PUBLIC_FEATURE_UPDATE_NOTICE": "true",
+        "EXPO_PUBLIC_LATEST_ANDROID": "1.1.0"
       },
       "prebuildCommand": "chmod +x ./eas-build-pre-gradle.sh && ./eas-build-pre-gradle.sh",
       "developmentClient": false,
