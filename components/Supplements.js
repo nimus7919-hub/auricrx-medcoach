@@ -246,14 +246,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         setAiAnalysisQuery(results);
       } else {
         // Fallback to AI-powered search if no specific stores found
-        const aiQuery = `Find nearby stores selling ${supplementName} supplement with price comparison. Include pharmacies, health stores, and supplement shops. Provide store names, addresses, and estimated prices.`;
+        const aiQuery = uiI18n.t('supplements.noStoresFound', { name: supplementName });
         setAiAnalysisQuery(aiQuery);
       }
       
     } catch (error) {
       console.error('Error searching for supplements:', error);
       // Fallback to AI-powered search
-      const aiQuery = `Find nearby stores selling ${supplementName} supplement with price comparison. Include pharmacies, health stores, and supplement shops. Provide store names, addresses, and estimated prices.`;
+      const aiQuery = uiI18n.t('supplements.noStoresFound', { name: supplementName });
       setShowAiAnalysis(true);
       setAiAnalysisQuery(aiQuery);
     }
@@ -619,7 +619,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                                 try {
                                   const supplementId = supp.dbId || supp.id;
                                   const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/supplements?userId=${user.uid}&supplementId=${supplementId}`, {
-                                    method: uiI18n.t("ai.delete")
+                                    method: 'DELETE'
                                   });
                                   
                                   const result = await response.json();

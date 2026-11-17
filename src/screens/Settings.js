@@ -395,7 +395,7 @@ export default function createSettings(getScope) {
               {t('privacyNotice.title')}
             </DynamicText>
             <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.7, marginTop: 4 }}>
-              View your privacy rights and data practices
+              {t('privacyNotice.subtitle')}
             </DynamicText>
           </TouchableOpacity>
           <TouchableOpacity 
@@ -537,7 +537,7 @@ export default function createSettings(getScope) {
                     color: subscriptionStatus.plan === 'pro' ? '#22c55e' : '#f59e0b',
                     marginRight: 8
                   }}>
-                    {subscriptionStatus.plan === uiI18n.t("settings.proPlan") ? (S.proPlan || uiI18n.t("settings.proPlan")) : (S.trial || uiI18n.t("settings.trial"))}
+                    {subscriptionStatus.plan === 'pro' ? (S.proPlan || uiI18n.t("settings.proPlan")) : (S.trial || uiI18n.t("settings.trial"))}
                   </DynamicText>
                   {/* Only show days if subscription is cancelled */}
                   {subscriptionStatus.subscription_cancelled_at && subscriptionStatus.daysLeft !== undefined && subscriptionStatus.daysLeft >= 0 && (

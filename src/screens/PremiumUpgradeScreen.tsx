@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import React from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +47,7 @@ export default function PremiumUpgradeScreen({ onClose, entitlement, feature = '
   const getTrialEndDate = () => {
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate() + 14);
-    return trialEnd.toLocaleDateString();
+    return trialEnd.toLocaleDateString(getDateTimePickerLocale());
   };
 
   const getFeatureKey = () => {

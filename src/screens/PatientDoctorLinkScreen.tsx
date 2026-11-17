@@ -2,6 +2,7 @@
  * Patient-app Doctor linking + Bitácora (Phase 1).
  * Doctor clinical UI lives in apps/doctor (AuricRX Médicos).
  */
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
@@ -18,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DoctorModeService from '../services/doctorModeService';
+import { doctorModeErrorMessage } from '../utils/doctorModeErrors';
 import BitacoraScreen from './BitacoraScreen';
 import {
   CONSENT_CATEGORIES,
@@ -58,7 +60,7 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
       setLinks(l);
       const audits = await service.listAuditLogs({ max: 10 }).catch(() => []);
       setAuditPreview(
-        audits.slice(0, 8).map((a) => `${a.action} · ${new Date(a.createdAt).toLocaleString()}`)
+        audits.slice(0, 8).map((a) => `${a.action} · ${new Date(a.createdAt).toLocaleString(getDateTimePickerLocale())}`)
       );
     } finally {
       setLoading(false);
@@ -85,7 +87,7 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
         t('doctorMode.linking.inviteShare', { code: invite.code, minutes: 30 })
       );
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.linking.inviteFailed'));
+      Alert.alert(t('common.error'), doctorModeErrorMessage(e, t, 'doctorMode.linking.inviteFailed'));
     } finally {
       setBusy(false);
     }
@@ -100,13 +102,7 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
       setView('links');
       Alert.alert(t('common.success'), t('doctorMode.linking.linked'));
     } catch (e: any) {
-      const key = e?.message;
-      const msg =
-        key === 'expired_invite'
-          ? t('doctorMode.linking.expired')
-          : key === 'invalid_invite'
-            ? t('doctorMode.linking.invalid')
-            : e?.message || t('doctorMode.linking.linkFailed');
+      const msg = doctorModeErrorMessage(e, t, 'doctorMode.linking.linkFailed');
       Alert.alert(t('common.error'), msg);
     } finally {
       setBusy(false);
@@ -118,7 +114,7 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
       const updated = await service.updateConsent(link.id, { [category]: value });
       setLinks((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.linking.consentFailed'));
+      Alert.alert(t('common.error'), doctorModeErrorMessage(e, t, 'doctorMode.linking.consentFailed'));
     }
   };
 
@@ -133,7 +129,7 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
             await service.revokeLink(link.id);
             await refresh();
           } catch (e: any) {
-            Alert.alert(t('common.error'), e?.message || t('doctorMode.linking.revokeFailed'));
+            Alert.alert(t('common.error'), doctorModeErrorMessage(e, t, 'doctorMode.linking.revokeFailed'));
           }
         },
       },
@@ -301,7 +297,7 @@ export default function PatientDoctorLinkScreen({ onClose }: { onClose: () => vo
                     setMessageBody('');
                     Alert.alert(t('common.success'), t('doctorMode.messaging.sent'));
                   } catch (e: any) {
-                    Alert.alert(t('common.error'), e?.message || t('doctorMode.messaging.sendFailed'));
+                    Alert.alert(t('common.error'), doctorModeErrorMessage(e, t, 'doctorMode.messaging.sendFailed'));
                   } finally {
                     setBusy(false);
                   }

@@ -1,3 +1,5 @@
+import uiI18n from '../i18n';
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
@@ -105,7 +107,7 @@ class PrivacyExportService {
       if (Platform.OS !== 'web' && await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'application/json',
-          dialogTitle: 'Exportar Datos de AuricRX',
+          dialogTitle: uiI18n.t('privacyExport.dialogTitle'),
         });
       }
 
@@ -127,7 +129,7 @@ class PrivacyExportService {
       if (Platform.OS !== 'web' && await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(fileUri, {
           mimeType: 'text/plain',
-          dialogTitle: 'Exportar Datos de AuricRX',
+          dialogTitle: uiI18n.t('privacyExport.dialogTitle'),
         });
       }
 
@@ -140,40 +142,40 @@ class PrivacyExportService {
 
   private generatePDFContent(data: any): string {
     let content = '=================================\n';
-    content += 'EXPORTACIÓN DE DATOS - AURICRX MEDCOACH\n';
+    content += uiI18n.t('privacyExport.title') + '\n';
     content += '=================================\n\n';
-    content += `Fecha de exportación: ${new Date(data.exportedAt).toLocaleString()}\n`;
-    content += `Versión: ${data.appVersion}\n`;
-    content += `Plataforma: ${data.platform}\n\n`;
+    content += uiI18n.t('privacyExport.exportedAt', { value: new Date(data.exportedAt).toLocaleString(getDateTimePickerLocale()) }) + '\n';
+    content += uiI18n.t('privacyExport.version', { value: data.appVersion }) + '\n';
+    content += uiI18n.t('privacyExport.platform', { value: data.platform }) + '\n\n';
 
     if (data.reminders && data.reminders.length > 0) {
-      content += '\n--- RECORDATORIOS ---\n';
-      content += `Total: ${data.reminders.length}\n\n`;
+      content += `\n--- ${uiI18n.t('privacyExport.reminders')} ---\n`;
+      content += uiI18n.t('privacyExport.total', { value: data.reminders.length }) + '\n\n';
     }
 
     if (data.medications && data.medications.length > 0) {
-      content += '\n--- MEDICAMENTOS ---\n';
-      content += `Total: ${data.medications.length}\n\n`;
+      content += `\n--- ${uiI18n.t('privacyExport.medications')} ---\n`;
+      content += uiI18n.t('privacyExport.total', { value: data.medications.length }) + '\n\n';
     }
 
     if (data.dailyHabits && data.dailyHabits.length > 0) {
-      content += '\n--- HÁBITOS DIARIOS ---\n';
-      content += `Total de entradas: ${data.dailyHabits.length}\n\n`;
+      content += `\n--- ${uiI18n.t('privacyExport.habits')} ---\n`;
+      content += uiI18n.t('privacyExport.totalEntries', { value: data.dailyHabits.length }) + '\n\n';
     }
 
     if (data.familyCircle) {
-      content += '\n--- CÍRCULO FAMILIAR ---\n';
-      content += `Miembros: ${data.familyCircle.members?.length || 0}\n`;
-      content += `Registros de dosis: ${data.familyCircle.doseLogs?.length || 0}\n\n`;
+      content += `\n--- ${uiI18n.t('privacyExport.family')} ---\n`;
+      content += uiI18n.t('privacyExport.members', { value: data.familyCircle.members?.length || 0 }) + '\n';
+      content += uiI18n.t('privacyExport.doseLogs', { value: data.familyCircle.doseLogs?.length || 0 }) + '\n\n';
     }
 
     if (data.labValues && data.labValues.length > 0) {
-      content += '\n--- VALORES DE LABORATORIO ---\n';
-      content += `Total: ${data.labValues.length}\n\n`;
+      content += `\n--- ${uiI18n.t('privacyExport.labs')} ---\n`;
+      content += uiI18n.t('privacyExport.total', { value: data.labValues.length }) + '\n\n';
     }
 
     content += '\n=================================\n';
-    content += 'FIN DE LA EXPORTACIÓN\n';
+    content += uiI18n.t('privacyExport.end') + '\n';
     content += '=================================\n';
 
     return content;

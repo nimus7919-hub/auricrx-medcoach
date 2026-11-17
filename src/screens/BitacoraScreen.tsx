@@ -1,4 +1,6 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { doctorModeErrorMessage } from '../utils/doctorModeErrors';
 import {
   View,
   ScrollView,
@@ -116,7 +118,7 @@ export default function BitacoraScreen({ onClose }: { onClose: () => void }) {
       resetForm();
       await load();
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.bitacora.saveFailed'));
+      Alert.alert(t('common.error'), doctorModeErrorMessage(e, t, 'doctorMode.bitacora.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -289,7 +291,7 @@ export default function BitacoraScreen({ onClose }: { onClose: () => void }) {
                 {!!e.note && <DynamicText type="card" style={styles.rowNote}>{e.note}</DynamicText>}
               </View>
               <DynamicText type="card" style={styles.rowTime}>
-                {new Date(e.timestamp).toLocaleString()}
+                {new Date(e.timestamp).toLocaleString(getDateTimePickerLocale())}
               </DynamicText>
             </View>
           ))}

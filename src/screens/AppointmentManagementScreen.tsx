@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
@@ -745,7 +746,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     setShowDatePicker(false);
     if (selectedDate) {
       setSelectedDate(selectedDate);
-      setAppointmentDate(selectedDate.toLocaleDateString());
+      setAppointmentDate(selectedDate.toLocaleDateString(getDateTimePickerLocale()));
     }
   };
 
@@ -753,12 +754,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     setShowTimePicker(false);
     if (selectedTime) {
       setSelectedTime(selectedTime);
-      setAppointmentTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      setAppointmentTime(selectedTime.toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' }));
     }
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(getDateTimePickerLocale(), {
       weekday: 'short',
       year: 'numeric',
       month: 'short',
@@ -767,7 +768,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(getDateTimePickerLocale(), {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
@@ -1197,7 +1198,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           </DynamicText>
           
           <DynamicText type="card" style={dynamicStyles.appointmentDateTime}>
-            📅 {new Date(appointment.startDate).toLocaleDateString()}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            📅 {new Date(appointment.startDate).toLocaleDateString(getDateTimePickerLocale())}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
           </DynamicText>
           
           <DynamicText type="card" style={dynamicStyles.appointmentLocation}>
@@ -1263,7 +1264,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             
             {/* Dialing Options */}
             <View style={dynamicStyles.dialingOptions}>
-              {(doctor.dialingMethod === uiI18n.t("ui.phone") || doctor.dialingMethod === 'both') && (
+              {(doctor.dialingMethod === 'phone' || doctor.dialingMethod === 'both') && (
                 <TouchableOpacity
                   style={[dynamicStyles.dialButton, { backgroundColor: currentTheme.accent + 'CC' }]}
                   onPress={() => {
@@ -1275,7 +1276,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
                 </TouchableOpacity>
               )}
               
-              {(doctor.dialingMethod === uiI18n.t("appointments.whatsapp") || doctor.dialingMethod === 'both') && (
+              {(doctor.dialingMethod === 'whatsapp' || doctor.dialingMethod === 'both') && (
                 <TouchableOpacity
                   style={[dynamicStyles.dialButton, { backgroundColor: '#25D366' + 'CC' }]}
                   onPress={() => {
@@ -1869,7 +1870,7 @@ setShowCountryPicker(true)
                         }
                       ]}>
                         <DynamicText type="card" style={dynamicStyles.statusText}>
-                          {appointment.status === uiI18n.t("appointments.completed") ? uiI18n.t("healthAnalytics.value", { value1: t("appointments.attended") }) : uiI18n.t("healthAnalytics.value", { value1: t("appointments.missed") })}
+                          {appointment.status === 'completed' ? uiI18n.t("healthAnalytics.value", { value1: t("appointments.attended") }) : uiI18n.t("healthAnalytics.value", { value1: t("appointments.missed") })}
                         </DynamicText>
                       </View>
                     </View>
@@ -1885,7 +1886,7 @@ setShowCountryPicker(true)
                     )}
                     
                     <DynamicText type="card" style={dynamicStyles.appointmentDateTime}>
-                      📅 {new Date(appointment.startDate).toLocaleDateString()}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      📅 {new Date(appointment.startDate).toLocaleDateString(getDateTimePickerLocale())}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                     </DynamicText>
                     
                     {appointment.notes && (

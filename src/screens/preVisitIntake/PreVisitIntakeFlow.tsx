@@ -58,7 +58,7 @@ export default function PreVisitIntakeFlow(props: PreVisitIntakeFlowProps) {
 function FlowInner({ appointments, mode, initialAppointmentId, justBookedId, onClose, client: injected, now, closeRequestToken, bodyMapEnabled }: PreVisitIntakeFlowProps) {
   const withBodyMap = bodyMapEnabled ?? isBodyPainMapEnabled();
   const { t, i18n } = useTranslation();
-  const locale: 'en' | 'es' = String(i18n?.language || 'es').startsWith('es') ? 'es' : 'en';
+  const locale: 'en' | 'es' = String(i18n?.language || 'en').startsWith('es') ? 'es' : 'en';
   const client = useMemo(
     () => injected ?? getPreVisitIntakeClient((key, lng) => String(i18n.t(`preVisitIntake.mockQuestions.${key}`, { lng }))),
     [injected, i18n]

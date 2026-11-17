@@ -122,8 +122,8 @@ export default function SettingsScreen({ userData, onSignOut }: SettingsScreenPr
         {/* Content */}
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {activeTab === 'account' && renderAccountDetails()}
-          {activeTab === uiI18n.t("ui.theme_dc151a") && renderThemeSettings()}
-          {activeTab === uiI18n.t("settings.language") && renderLanguageSettings()}
+          {activeTab === 'theme' && renderThemeSettings()}
+          {activeTab === 'language' && renderLanguageSettings()}
         </ScrollView>
 
         {/* Sign Out Button */}

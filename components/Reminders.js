@@ -1,6 +1,7 @@
 import ReminderPermissionBanner from '../src/components/ReminderPermissionBanner';
 import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
+import { weekdayNumber, localizeWeekday } from "../src/utils/reminderDays";
 import { useTranslation as useUILanguage } from "react-i18next";
 import GrowingTextInput from './GrowingTextInput';
 import KeyboardForm from './KeyboardForm';
@@ -697,7 +698,7 @@ const Reminders = ({
                         { full: uiI18n.t("reminders.saturday"), shortKey: 'saturdayShort' },
                         { full: uiI18n.t("reminders.sunday"), shortKey: 'sundayShort' }
                       ].map((day) => {
-                        const isSelected = addForm.customDays.includes(day.full);
+                        const isSelected = addForm.customDays.some(d => weekdayNumber(d) === weekdayNumber(day.full));
                         return (
                           <TouchableOpacity
                             key={day.full}
@@ -705,7 +706,7 @@ const Reminders = ({
                               setAddForm(prev => ({
                                 ...prev,
                                 customDays: isSelected
-                                  ? prev.customDays.filter(d => d !== day.full)
+                                  ? prev.customDays.filter(d => weekdayNumber(d) !== weekdayNumber(day.full))
                                   : [...prev.customDays, day.full]
                               }));
                             }}
@@ -737,14 +738,14 @@ const Reminders = ({
                     </View>
                     {addForm.customDays.length > 0 && (
                       <DynamicText type="sub" style={{ fontSize: 10, marginTop: 8, color: getCardTextColor() + '80' }}>
-                        {S.selected || uiI18n.t("reminders.selected")}: {addForm.customDays.join(', ')}
+                        {S.selected || uiI18n.t("reminders.selected")}: {addForm.customDays.map(localizeWeekday).join(', ')}
                       </DynamicText>
                     )}
                   </View>
                 )}
 
                 {/* Medication-specific fields */}
-                {addForm.type === uiI18n.t("reminders.medication") && (
+                {addForm.type === 'medication' && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
                       {S.medicationDetails || uiI18n.t("reminders.medicationDetails")}
@@ -1183,7 +1184,7 @@ const Reminders = ({
                 )}
 
                 {/* Appointment-specific fields */}
-                {addForm.type === uiI18n.t("reminders.appointment") && (
+                {addForm.type === 'appointment' && (
                   <View style={{ marginBottom: 12 }}>
                     <DynamicText type="card" style={{ fontSize: 14, fontFamily: 'Inter_600SemiBold', marginBottom: 8, color: getCardTextColor() }}>
                       {S.appointmentDetails || uiI18n.t("reminders.appointmentDetails")}

@@ -7,7 +7,7 @@ import { useRegion } from '../providers/RegionProvider';
 import { saveUSStartupConsent } from '../services/region';
 import { consentRequest } from '../services/consentService';
 import { US_POLICIES } from '../legal/usPolicies';
-import notices from '../legal/usDisclaimers.json';
+import notices from '../legal/usNotices';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';
 import { styles } from '../screens/appStyles';
@@ -65,11 +65,11 @@ export default function RegionSettings() {
       const notifications = require('expo-notifications');
       await notifications.cancelAllScheduledNotificationsAsync();
       withdraw();
-    } catch { Alert.alert('Consent withdrawal could not be saved. Please retry.'); }
+    } catch { Alert.alert(t('usSettings.withdrawFailed')); }
   };
-  const confirmRevoke = (kind, label) => Alert.alert(label, 'Are you sure? You can give consent again later.', [
-    { text: 'Cancel', style: 'cancel' },
-    { text: 'Withdraw', style: 'destructive', onPress: () => revoke(kind) },
+  const confirmRevoke = (kind, label) => Alert.alert(label, t('usSettings.confirmWithdraw'), [
+    { text: t('usSettings.cancel'), style: 'cancel' },
+    { text: t('usSettings.withdraw'), style: 'destructive', onPress: () => revoke(kind) },
   ]);
 
   const regionOption = (code, label, flag) => {
@@ -96,16 +96,16 @@ export default function RegionSettings() {
       </Card>
 
       {region === 'US' && <>
-        <Card title="Emergency help" accent="#B91C1C">
+        <Card title={t('usSettings.emergencyHelp')} accent="#B91C1C">
           <DynamicText type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, opacity: 0.9, marginBottom: 10 }}>{notices.crisis}</DynamicText>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 }}>
-            <CallButton label="911" sub="Emergency" tel="911" primary />
-            <CallButton label="988" sub="Crisis Lifeline" tel="988" />
-            <CallButton label="Poison" sub="1-800-222-1222" tel="18002221222" />
+            <CallButton label="911" sub={t('usSettings.emergency')} tel="911" primary />
+            <CallButton label="988" sub={t('usSettings.crisisLifeline')} tel="988" />
+            <CallButton label={t('usSettings.poison')} sub="1-800-222-1222" tel="18002221222" />
           </View>
         </Card>
 
-        <Card title="Legal & Privacy" open={open.legal} onToggle={() => toggle('legal')}>
+        <Card title={t('usSettings.legalPrivacy')} open={open.legal} onToggle={() => toggle('legal')}>
           {policyKeys.map((key, i) => {
             const isOpen = document === US_POLICIES[key];
             return <View key={key}>
@@ -115,13 +115,13 @@ export default function RegionSettings() {
           })}
         </Card>
 
-        <Card title="Your consents" open={open.consents} onToggle={() => toggle('consents')}>
-          <Row destructive label="Withdraw health-data collection consent" onPress={() => confirmRevoke('collect', 'Withdraw health-data collection consent')} />
-          <Row destructive last label="Withdraw processor-sharing consent" onPress={() => confirmRevoke('share', 'Withdraw processor-sharing consent')} />
+        <Card title={t('usSettings.yourConsents')} open={open.consents} onToggle={() => toggle('consents')}>
+          <Row destructive label={t('usSettings.withdrawCollect')} onPress={() => confirmRevoke('collect', t('usSettings.withdrawCollect'))} />
+          <Row destructive last label={t('usSettings.withdrawShare')} onPress={() => confirmRevoke('share', t('usSettings.withdrawShare'))} />
         </Card>
 
-        <Card title="Sources and attributions" open={open.sources} onToggle={() => toggle('sources')}>
-          {SOURCES.map(key => <DynamicText key={key} type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, opacity: 0.85, marginTop: 8 }}>{notices[key].replace('[date]', 'shown with each result')}</DynamicText>)}
+        <Card title={t('usSettings.sources')} open={open.sources} onToggle={() => toggle('sources')}>
+          {SOURCES.map(key => <DynamicText key={key} type="card" style={{ fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 19, opacity: 0.85, marginTop: 8 }}>{notices[key].replace('[date]', t('usRef.shownWithResult'))}</DynamicText>)}
         </Card>
       </>}
     </View>

@@ -1,4 +1,5 @@
 import uiI18n from "../i18n";
+import { normalizeLanguage } from "../i18n/language";
 import { API_BASE } from "../config/api";
 import { useEffect, useRef, useState } from "react";
 
@@ -28,7 +29,8 @@ export function useMedicalStream(serverUrl = `${API_BASE}/api/ai/stream`, option
       const response = await fetch(serverUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...options, messages }),
+        // `language` is not read by the server yet; sent so /ask-stream can answer in the app language.
+        body: JSON.stringify({ language: normalizeLanguage(uiI18n.language) || 'en', ...options, messages }),
         signal: controller.signal,
       });
       if (!response.ok) {

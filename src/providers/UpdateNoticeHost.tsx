@@ -89,6 +89,7 @@ export default function UpdateNoticeHost() {
         platform: Platform.OS,
         title,
         body,
+        channelName: t('updateNotice.channelName'),
       });
       if (result.scheduled) {
         notifiedRef.current = result.key;

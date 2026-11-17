@@ -36,6 +36,8 @@ export interface ScheduleUpdateNotificationInput {
   platform: 'ios' | 'android' | 'web' | string;
   title: string;
   body: string;
+  /** Localized Android channel name shown in system notification settings. */
+  channelName?: string;
   /** When false, skip. Never request a new permission. */
   requestPermission?: false;
 }
@@ -69,6 +71,7 @@ export async function maybeScheduleUpdateNotification({
   platform,
   title,
   body,
+  channelName,
 }: ScheduleUpdateNotificationInput): Promise<{ scheduled: boolean; key: string }> {
   const key = offerKey(kind, version);
   if (alreadyNotifiedKey === key) return { scheduled: false, key };
@@ -77,7 +80,7 @@ export async function maybeScheduleUpdateNotification({
     if (!isPermissionGranted(permission)) return { scheduled: false, key };
     if (platform === 'android' && notifications.setNotificationChannelAsync) {
       await notifications.setNotificationChannelAsync(UPDATE_NOTICE_CONFIG.ANDROID_CHANNEL_ID, {
-        name: 'App updates',
+        name: channelName || 'App updates',
         importance: notifications.AndroidImportance?.DEFAULT,
         sound: 'default',
       });

@@ -2,6 +2,7 @@ import { readSmart, quietDate, contextualBody, occurrences } from './smartNotifi
 import uiI18n from "../i18n";
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { weekdayNumber } from '../utils/reminderDays';
 import { parseReminderTime } from '../utils/reminderTime';
 import { normalizeReminderDates, parseReminderDate, nextReminderOccurrence } from '../utils/reminderDate';
 
@@ -62,8 +63,7 @@ function triggersFor(reminder) {
     case 'weekly': recurring = [{ ...base, type: types.WEEKLY, weekday: anchor.getDay() + 1 }]; break;
     case 'monthly': recurring = [{ ...base, type: types.MONTHLY, day: anchor.getDate() }]; break;
     case 'custom': {
-      const days = [uiI18n.t("reminders.sunday"), uiI18n.t("reminders.monday"), uiI18n.t("reminders.tuesday"), uiI18n.t("reminders.wednesday"), uiI18n.t("reminders.thursday"), uiI18n.t("reminders.friday"), uiI18n.t("reminders.saturday")];
-      selected = (reminder.customDays || []).map(day => days.indexOf(day) + 1);
+      selected = (reminder.customDays || []).map(weekdayNumber);
       if (!selected.length || selected.some(day => day < 1)) throw new Error(uiI18n.t("ui.seleccionaLosDiasSelectReminderDays"));
       recurring = selected.map(weekday => ({ ...base, type: types.WEEKLY, weekday })); break;
     }
@@ -88,7 +88,8 @@ async function upsert(reminder, existing) {
   const body = contextualBody(reminder, state);
   // A bounded queue can express quiet hours, unlike repeating native triggers.
   const triggers = reminder.enabled === false ? [] : state.context ? occurrences(reminder, 32).map(date => ({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: quietDate(date, state), channelId: REMINDER_CHANNEL })) : triggersFor(reminder);
-  const fingerprint = JSON.stringify({ name: body, triggers });
+  // The language is part of the fingerprint so a language change reschedules existing reminders (title/body).
+  const fingerprint = JSON.stringify({ name: body, lng: uiI18n.language, triggers });
   const previous = existing.filter(n => n.content.data?.owner === OWNER && n.content.data?.reminderId === String(reminder.id));
   if (previous.length === triggers.length && previous.every(n => n.content.data?.fingerprint === fingerprint)) return previous.map(n => n.identifier);
   const ids = [];

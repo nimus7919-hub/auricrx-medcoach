@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, Alert, StyleSheet, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -264,7 +265,7 @@ export default function FamilyDocumentsScreen({ onClose }: FamilyDocumentsScreen
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <DynamicText type="card" style={styles.documentName}>{doc.name}</DynamicText>
                   <DynamicText type="card" style={styles.documentMeta}>
-                    {t(`familyDocuments.categories.${doc.category}`)} • {new Date(doc.createdAt).toLocaleDateString()}
+                    {t(`familyDocuments.categories.${doc.category}`)} • {new Date(doc.createdAt).toLocaleDateString(getDateTimePickerLocale())}
                   </DynamicText>
                 </View>
                 <TouchableOpacity onPress={() => handleDeleteDocument(doc.id)}>

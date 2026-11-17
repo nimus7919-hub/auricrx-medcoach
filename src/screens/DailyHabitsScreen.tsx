@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, TextInput, Modal, Alert, StyleSheet, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -275,7 +276,7 @@ export default function DailyHabitsScreen({ onClose }: { onClose: () => void }) 
           {weekEntries.map(entry => (
             <View key={entry.id} style={[styles.entryCard, { borderColor: getCardBorderColor() }]}>
               <DynamicText type="card" style={styles.entryDate}>
-                {new Date(entry.date).toLocaleDateString()}
+                {new Date(entry.date).toLocaleDateString(getDateTimePickerLocale())}
               </DynamicText>
               <View style={styles.entryStats}>
                 {entry.water && <DynamicText type="card" style={styles.entryStat}>💧 {entry.water}</DynamicText>}

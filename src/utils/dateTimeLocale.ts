@@ -9,8 +9,8 @@ const LOCALE_MAP: Record<string, string> = {
   zh: 'zh-CN',
 };
 
-/** BCP-47 locale for DateTimePicker / toLocaleDateString. Spanish uses es-MX. */
+/** BCP-47 locale for DateTimePicker / toLocaleDateString, following the app language. Spanish uses es-MX. */
 export function getDateTimePickerLocale(language?: string): string {
-  const lang = (language || i18n.resolvedLanguage || i18n.language || 'es').split('-')[0];
-  return LOCALE_MAP[lang] || LOCALE_MAP.es;
+  const lang = (language || i18n.resolvedLanguage || i18n.language || 'en').split('-')[0];
+  return LOCALE_MAP[lang] || LOCALE_MAP.en;
 }

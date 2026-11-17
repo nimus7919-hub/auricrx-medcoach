@@ -1,6 +1,7 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import { useRegion } from './RegionProvider';
 import { getRegion } from '../services/region';
-import usNotices from '../legal/usDisclaimers.json';
+import usNotices from '../legal/usNotices';
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { getAICharacter } from '../utils/aiCharacters';
@@ -887,7 +888,7 @@ export default function App() {
     daysRemaining: t('settings.daysRemaining'),
     cancelMembership: t('settings.cancelMembership'),
     restartMembership: t('settings.restartMembership'),
-    cancelMembershipConfirm: t('settings.cancelMembershipConfirm', { date: (subscriptionStatus?.currentPeriodEnd || subscriptionStatus?.current_period_end) ? new Date(subscriptionStatus.currentPeriodEnd || subscriptionStatus.current_period_end).toLocaleDateString() : (uiI18n.t("localized.AppController.S.sObject.cancelMembershipConfirm.date.text855")) }),
+    cancelMembershipConfirm: t('settings.cancelMembershipConfirm', { date: (subscriptionStatus?.currentPeriodEnd || subscriptionStatus?.current_period_end) ? new Date(subscriptionStatus.currentPeriodEnd || subscriptionStatus.current_period_end).toLocaleDateString(getDateTimePickerLocale()) : (uiI18n.t("localized.AppController.S.sObject.cancelMembershipConfirm.date.text855")) }),
     restartMembershipConfirm: t('settings.restartMembershipConfirm'),
     confirmCancel: t('settings.confirmCancel'),
     confirmRestart: t('settings.confirmRestart'),
@@ -1918,7 +1919,8 @@ useEffect(() => {
         
         // If geocode failed, use language fallback
         if (determinedCurrency === 'USD') {
-          determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : uiI18n.t("common.usd"));
+          // Currency follows the region (not the UI language): a Spanish-language user in the US still sees USD.
+          determinedCurrency = getRegion() === 'US' ? uiI18n.t("common.usd") : uiI18n.t("common.mxn");
         }
         
         setRefillCurrency(determinedCurrency);
@@ -2307,7 +2309,7 @@ async function sendAi(reminders, rxPhotos, meds, supplements, herbs, theme, fast
     sync();
     const subscription = AppState.addEventListener('change', state => { if (state === 'active') sync(); });
     return () => subscription.remove();
-  }, [meds, reminders, remindersLoaded, user?.uid, healthConsentReady]);
+  }, [meds, reminders, remindersLoaded, user?.uid, healthConsentReady, currentLanguage]); // currentLanguage: reschedule so notification text follows a language change
 
   // Sync lang state with i18n when it becomes ready
   useEffect(() => {

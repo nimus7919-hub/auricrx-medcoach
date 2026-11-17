@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { vip } from '../theme/vip';
 import { getRegion, initializeRegion, subscribeRegion, setRegion, hasSavedRegionChoice, hasUSStartupConsent, saveUSStartupConsent } from '../services/region';
 import { US_POLICIES } from '../legal/usPolicies';
-import notices from '../legal/usDisclaimers.json';
+import notices from '../legal/usNotices';
 const Context = createContext(null);
 // Never leave startup waiting on storage: fall back to region confirmation after a timeout.
 const withTimeout = (promise, ms) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('REGION_INIT_TIMEOUT')), ms))]);
@@ -25,7 +25,7 @@ export function RegionProvider({ children }) {
     withTimeout(initializeRegion(), 8000).then(async value => { if (value === 'US') { await stopLocationTasks(); if (!hasUSStartupConsent()) { try { await require('expo-notifications').cancelAllScheduledNotificationsAsync(); } catch {} } } update(value); setRegionConfirmed(hasSavedRegionChoice()); setConsented(hasUSStartupConsent()); setReady(true); }).catch(() => { setRegionConfirmed(false); setReady(true); });
     return unsubscribe;
   }, []);
-  const changeRegion = async value => { await setRegion(value); if (value === 'US') await stopLocationTasks(); await i18n.changeLanguage(value === 'US' ? 'en' : 'es'); };
+  const changeRegion = async value => { await setRegion(value); if (value === 'US') await stopLocationTasks(); };
   const context = { region, changeRegion, withdraw: () => setConsented(false) };
   return <Context.Provider value={context}>{!ready ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: vip.colors.navy }}><ActivityIndicator size="large" color={vip.colors.gold} /><Text style={{ color: vip.colors.white, marginTop: 12 }}>{error}</Text></View> : !regionConfirmed ? <RegionConfirmation onConfirmed={() => setRegionConfirmed(true)} /> : region === 'US' && !consented ? <USStartupConsent onSaved={() => setConsented(true)} /> : children}</Context.Provider>;
 }
@@ -34,40 +34,40 @@ function RegionConfirmation({ onConfirmed }) {
   const [selection, setSelection] = useState(region);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const spanish = (i18n.resolvedLanguage || i18n.language || 'es').startsWith('es');
-  const name = value => value === 'MX' ? (spanish ? 'México' : 'Mexico') : (spanish ? 'Estados Unidos' : 'United States');
+  const { t } = useTranslation();
+  const name = value => t(value === 'MX' ? 'region.mx' : 'region.us');
   return <SafeAreaProvider initialMetrics={startupSafeAreaMetrics()}><SafeAreaView style={styles.screen}><ScrollView contentContainerStyle={styles.content}><View style={styles.container}>
     <Text accessibilityRole="header" style={styles.title}>AuricRX MedCoach</Text>
     <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.region} onPress={() => setSelection(value => value === 'MX' ? 'US' : 'MX')}>
-      <Text style={styles.regionText}>{spanish ? 'Detectamos: ' : 'We detected: '}{name(region)} · {spanish ? 'Cambiar' : 'Change'}</Text>
+      <Text style={styles.regionText}>{t('regionConfirm.detected')}{name(region)} · {t('regionConfirm.change')}</Text>
     </TouchableOpacity>
-    <Text style={styles.body}>{spanish ? 'Región seleccionada: ' : 'Selected region: '}{name(selection)}</Text>
+    <Text style={styles.body}>{t('regionConfirm.selected')}{name(selection)}</Text>
     <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.continueButton} onPress={async () => {
       setBusy(true); setError('');
       try { await changeRegion(selection); onConfirmed(); }
-      catch { setError(spanish ? 'No se pudo guardar. Intenta de nuevo.' : 'Could not save. Please retry.'); }
+      catch { setError(t('regionConfirm.saveFailed')); }
       finally { setBusy(false); }
-    }}><Text style={styles.continueText}>{spanish ? 'Confirmar región y continuar' : 'Confirm region and continue'}</Text></TouchableOpacity>
+    }}><Text style={styles.continueText}>{t('regionConfirm.confirm')}</Text></TouchableOpacity>
     {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
   </View></ScrollView></SafeAreaView></SafeAreaProvider>;
 }
 function USStartupConsent({ onSaved }) {
   const { region, changeRegion } = useRegion();
   const { t } = useTranslation();
-  const english = key => t(key, { lng: 'en' });
   const [choices, setChoices] = useState({ terms: false, collect: false, share: false, adult: false });
   const [document, setDocument] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const labels = { terms: 'I agree to the Terms and Privacy Policy.', collect: 'I consent to collection and processing of my health data (medications, documents, herbs, and wellness entries).', share: 'I separately consent to sharing health data with OpenAI for chat and Firebase/Google, Render, and Neon for authentication, hosting, and synchronization.', adult: 'I confirm that I am 18 or older.' };
-  const titles = { terms: 'Terms and privacy', collect: 'Health data collection', share: 'Health data sharing', adult: 'Age confirmation' };
+  const keys = ['terms', 'collect', 'share', 'adult'];
+  const labels = Object.fromEntries(keys.map(key => [key, t(`usOnboarding.labels.${key}`)]));
+  const titles = Object.fromEntries(keys.map(key => [key, t(`usOnboarding.titles.${key}`)]));
   const disabled = busy || !Object.values(choices).every(Boolean);
   return <SafeAreaProvider initialMetrics={startupSafeAreaMetrics()}><SafeAreaView style={styles.screen}>
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.container}>
-        <Text accessibilityRole="header" style={styles.title}>AuricRX MedCoach - United States</Text>
+        <Text accessibilityRole="header" style={styles.title}>{t('usOnboarding.pageTitle')}</Text>
         <TouchableOpacity accessibilityRole="button" onPress={() => changeRegion('MX')} style={styles.region}>
-          <Text style={styles.regionText}>{english('region.title')}: {english(region === 'US' ? 'region.us' : 'region.mx')} ? {english('usOnboarding.change')}</Text>
+          <Text style={styles.regionText}>{t('region.title')}: {t(region === 'US' ? 'region.us' : 'region.mx')} · {t('usOnboarding.change')}</Text>
           <Ionicons name="chevron-forward" size={18} color={vip.colors.gold} />
         </TouchableOpacity>
         <View style={styles.infoCard}>
@@ -80,6 +80,7 @@ function USStartupConsent({ onSaved }) {
             <Ionicons name="chevron-forward" size={20} color={vip.colors.gold} />
           </TouchableOpacity>)}
         </View>
+        {(i18n.language || '').startsWith('en') ? null : <Text style={styles.explanation}>{t('usOnboarding.legalEnglishOnly')}</Text>}
         {!!document && <View style={styles.infoCard}><Text selectable style={styles.body}>{document}</Text></View>}
         {Object.keys(labels).map(key => <TouchableOpacity key={key} accessibilityRole="checkbox" accessibilityLabel={`${titles[key]}. ${labels[key]}`} accessibilityState={{ checked: choices[key], disabled: busy }} disabled={busy} onPress={() => setChoices(prev => ({ ...prev, [key]: !prev[key] }))} style={[styles.consentCard, choices[key] && styles.selectedCard]}>
           <View style={styles.checkbox}>{choices[key] && <Ionicons name="checkmark" size={22} color={vip.colors.gold} />}</View>
@@ -88,9 +89,9 @@ function USStartupConsent({ onSaved }) {
             <Text style={styles.body}>{labels[key]}</Text>
           </View>
         </TouchableOpacity>)}
-        <Text style={styles.explanation}>Separate choices, unticked by default. This beta requires collection and processor sharing to enable its cloud features. You may decline and return to region selection. Withdraw in Settings; existing cloud data can be deleted through account deletion.</Text>
-        <TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled, busy }} disabled={disabled} style={[styles.continueButton, disabled && styles.disabled]} onPress={async () => { setBusy(true); try { await saveUSStartupConsent(choices); onSaved(); } catch { setError('Consent could not be saved. Please retry.'); } finally { setBusy(false); } }}>
-          <Text style={styles.continueText}>{english('usOnboarding.continue')}</Text>
+        <Text style={styles.explanation}>{t('usOnboarding.explanation')}</Text>
+        <TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled, busy }} disabled={disabled} style={[styles.continueButton, disabled && styles.disabled]} onPress={async () => { setBusy(true); try { await saveUSStartupConsent(choices); onSaved(); } catch { setError(t('usOnboarding.couldNotSave')); } finally { setBusy(false); } }}>
+          <Text style={styles.continueText}>{t('usOnboarding.continue')}</Text>
         </TouchableOpacity>
         {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
       </View>

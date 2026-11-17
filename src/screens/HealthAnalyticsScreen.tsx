@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import { getRegion } from '../services/region';
 import USScreen from './ActivityHealthScreen';
 import Modal from '../components/BackModal';
@@ -799,7 +800,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
     }
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       
       // Create HTML content for PDF
       const metricsHtml = metrics.map((metric, index) => {
@@ -812,7 +813,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
           <div class="metric-item">
             <h3>${index + 1}. ${metricType?.icon || ''} ${metricType?.label || metric.type}</h3>
             <p><strong>${t("healthAnalytics.value")}:</strong> ${displayValue}</p>
-            <p><strong>${t("ai.date")}:</strong> ${new Date(metric.timestamp).toLocaleDateString()} ${new Date(metric.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            <p><strong>${t("ai.date")}:</strong> ${new Date(metric.timestamp).toLocaleDateString(getDateTimePickerLocale())} ${new Date(metric.timestamp).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}</p>
             ${metric.notes ? `<p><strong>${t("ai.notes")}:</strong> ${metric.notes}</p>` : ''}
           </div>
         `;
@@ -1027,12 +1028,12 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
                 {metricType?.icon} {metricType?.label}
               </DynamicText>
               <DynamicText type="card" style={dynamicStyles.metricValue}>
-                {metric.type === uiI18n.t("healthAnalytics.bloodPressure") && metric.systolic && metric.diastolic
+                {metric.type === 'blood_pressure' && metric.systolic && metric.diastolic
                   ? `${metric.systolic}/${metric.diastolic} ${metric.unit}`
                   : `${metric.value} ${metric.unit}`}
               </DynamicText>
               <DynamicText type="card" style={dynamicStyles.metricDate}>
-                {new Date(metric.timestamp).toLocaleDateString()}
+                {new Date(metric.timestamp).toLocaleDateString(getDateTimePickerLocale())}
               </DynamicText>
             </View>
           </View>
@@ -1151,7 +1152,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
             </View>
           </View>
           <DynamicText type="card" style={dynamicStyles.sideEffectDetails}>
-            {sideEffect.medicationName} • {t("healthAnalytics.started")} {new Date(sideEffect.reportedAt).toLocaleDateString()}
+            {sideEffect.medicationName} • {t("healthAnalytics.started")} {new Date(sideEffect.reportedAt).toLocaleDateString(getDateTimePickerLocale())}
             {sideEffect.notes && uiI18n.t("healthAnalytics.value", { value1: sideEffect.notes })}
           </DynamicText>
         </View>
@@ -1294,7 +1295,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
                     </TouchableOpacity>
                   </View>
 
-                  {metric.type === uiI18n.t("healthAnalytics.bloodPressure") ? (
+                  {metric.type === 'blood_pressure' ? (
                     <>
                       <View style={dynamicStyles.inputGroup}>
                         <DynamicText type="card" style={dynamicStyles.inputLabel}>{t("healthAnalytics.systolic") || uiI18n.t("healthAnalytics.systolic")}</DynamicText>
@@ -1731,12 +1732,12 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
                           {metricType?.icon} {metricType?.label}
                         </DynamicText>
                         <DynamicText type="card" style={dynamicStyles.metricValue}>
-                          {metric.type === uiI18n.t("healthAnalytics.bloodPressure") && metric.systolic && metric.diastolic
+                          {metric.type === 'blood_pressure' && metric.systolic && metric.diastolic
                             ? `${metric.systolic}/${metric.diastolic} ${metric.unit}`
                             : `${metric.value} ${metric.unit}`}
                         </DynamicText>
                         <DynamicText type="card" style={dynamicStyles.metricDate}>
-                          {new Date(metric.timestamp).toLocaleDateString()} {new Date(metric.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(metric.timestamp).toLocaleDateString(getDateTimePickerLocale())} {new Date(metric.timestamp).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                         </DynamicText>
                         {metric.notes && (
                           <DynamicText type="card" style={[dynamicStyles.metricDate, { fontStyle: 'italic', marginTop: 4 }]}>
@@ -2028,7 +2029,7 @@ function MexicoHealthAnalyticsScreen({ onClose, theme, S, userId, onConnectHealt
                 backgroundColor: customAlertMessage.type === 'success' ? '#22c55e' : '#ef4444' 
               }]}>
                 <DynamicText type="card" style={styles.customAlertIconText}>
-                  {customAlertMessage.type === uiI18n.t("adminProfile.success") ? '✓' : '✕'}
+                  {customAlertMessage.type === 'success' ? '✓' : '✕'}
                 </DynamicText>
               </View>
               <DynamicText type="primary" style={styles.customAlertTitle}>
