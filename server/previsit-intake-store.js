@@ -13,6 +13,8 @@ function clone(value) {
 function createMemoryStore({ now = () => new Date() } = {}) {
   const intakes = new Map();
   const turnsByIntake = new Map();
+  // intakeId -> Map(lang -> { hash, strings }). Derived from the raw chat, so it is purged with it.
+  const translations = new Map();
 
   return {
     name: 'memory',
@@ -35,6 +37,16 @@ function createMemoryStore({ now = () => new Date() } = {}) {
     async deleteIntake(id) {
       intakes.delete(id);
       turnsByIntake.delete(id);
+      translations.delete(id);
+    },
+    async getTranslation(intakeId, lang) {
+      const hit = translations.get(intakeId) && translations.get(intakeId).get(lang);
+      return hit ? clone(hit) : null;
+    },
+    async putTranslation(intakeId, lang, entry) {
+      const perLang = translations.get(intakeId) || new Map();
+      perLang.set(lang, clone(entry));
+      translations.set(intakeId, perLang);
     },
     async listIntakes(filter = {}) {
       let rows = [...intakes.values()];
@@ -56,6 +68,7 @@ function createMemoryStore({ now = () => new Date() } = {}) {
     },
     async deleteTurns(intakeId) {
       turnsByIntake.set(intakeId, []);
+      translations.delete(intakeId);
     },
     async purgeExpiredTurns(at = now()) {
       let purged = 0;
@@ -63,6 +76,7 @@ function createMemoryStore({ now = () => new Date() } = {}) {
         if (row.status !== 'confirmed' || row.rawChatDeletedAt) continue;
         if (!isRawChatExpired(row.rawChatDeleteAt, at)) continue;
         turnsByIntake.set(row.id, []);
+        translations.delete(row.id);
         row.rawChatDeletedAt = at.toISOString();
         row.updatedAt = at.toISOString();
         intakes.set(row.id, row);
@@ -110,8 +124,30 @@ function mapTurnRow(r) {
   };
 }
 
+function isMissingTableError(err) {
+  const msg = String((err && err.message) || '');
+  return (err && err.code === '42P01') || /pre_visit_intake_translations.*does not exist|relation .* does not exist/i.test(msg);
+}
+
 function createNeonStore({ sql, now = () => new Date() } = {}) {
   if (!sql) throw new Error('neon_sql_required');
+  // Used only while pre_visit_intake_translations has not been migrated yet (see
+  // migrate-previsit-intake-translations.sql). Process-local, purged with the raw chat.
+  const localTranslations = new Map();
+  const localKey = (intakeId, lang) => `${intakeId}:${lang}`;
+  function dropLocalTranslations(intakeId) {
+    for (const k of [...localTranslations.keys()]) {
+      if (k.startsWith(`${intakeId}:`)) localTranslations.delete(k);
+    }
+  }
+  async function deleteStoredTranslations(intakeId) {
+    dropLocalTranslations(intakeId);
+    try {
+      await sql`DELETE FROM pre_visit_intake_translations WHERE intake_id = ${intakeId}`;
+    } catch (err) {
+      if (!isMissingTableError(err)) console.error('intake translation purge failed:', err && err.message);
+    }
+  }
   return {
     name: 'neon',
     async insertIntake(row) {
@@ -160,7 +196,38 @@ function createNeonStore({ sql, now = () => new Date() } = {}) {
     },
     async deleteIntake(id) {
       await sql`DELETE FROM pre_visit_turns WHERE intake_id = ${id}`;
+      await deleteStoredTranslations(id);
       await sql`DELETE FROM pre_visit_intakes WHERE id = ${id}`;
+    },
+    async getTranslation(intakeId, lang) {
+      const local = localTranslations.get(localKey(intakeId, lang));
+      if (local) return clone(local);
+      try {
+        const rows = await sql`
+          SELECT source_hash, payload FROM pre_visit_intake_translations
+          WHERE intake_id = ${intakeId} AND lang = ${lang} LIMIT 1
+        `;
+        const r = rows && rows[0];
+        if (!r) return null;
+        const payload = typeof r.payload === 'string' ? JSON.parse(r.payload) : r.payload;
+        return { hash: r.source_hash, strings: payload };
+      } catch (err) {
+        if (!isMissingTableError(err)) console.error('intake translation read failed:', err && err.message);
+        return null;
+      }
+    },
+    async putTranslation(intakeId, lang, entry) {
+      try {
+        await sql`
+          INSERT INTO pre_visit_intake_translations (intake_id, lang, source_hash, payload, created_at)
+          VALUES (${intakeId}, ${lang}, ${entry.hash}, ${JSON.stringify(entry.strings)}::jsonb, ${now().toISOString()})
+          ON CONFLICT (intake_id, lang) DO UPDATE
+            SET source_hash = EXCLUDED.source_hash, payload = EXCLUDED.payload, created_at = EXCLUDED.created_at
+        `;
+      } catch (err) {
+        if (!isMissingTableError(err)) console.error('intake translation write failed:', err && err.message);
+        localTranslations.set(localKey(intakeId, lang), clone(entry));
+      }
     },
     async listIntakes(filter = {}) {
       const rows = await sql`
@@ -188,6 +255,7 @@ function createNeonStore({ sql, now = () => new Date() } = {}) {
     },
     async deleteTurns(intakeId) {
       await sql`DELETE FROM pre_visit_turns WHERE intake_id = ${intakeId}`;
+      await deleteStoredTranslations(intakeId);
     },
     async purgeExpiredTurns(at = now()) {
       const iso = at.toISOString();
@@ -201,6 +269,7 @@ function createNeonStore({ sql, now = () => new Date() } = {}) {
       if (!ids.length) return { purged: 0 };
       for (const id of ids) {
         await sql`DELETE FROM pre_visit_turns WHERE intake_id = ${id}`;
+        await deleteStoredTranslations(id);
         await sql`
           UPDATE pre_visit_intakes
           SET raw_chat_deleted_at = ${iso}, updated_at = ${iso}
