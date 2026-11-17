@@ -15,6 +15,12 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { MultiFactorResolver } from 'firebase/auth';
 import './src/i18n';
+import { auth } from './src/config/firebase';
+import { localizeError } from './src/lib/errors';
+import { formatDate, formatDateTime } from './src/lib/format';
+import { APP_LANGUAGES, normalizeAppLanguage, uiLocale } from './src/lib/language';
+import { setCurrentLanguage } from './src/lib/currentLanguage';
+import { verificationMessageKey } from './src/lib/verificationText';
 import { colors } from './src/theme/colors';
 import DoctorAppService from './src/services/doctorAppService';
 import RawChart from './src/components/RawChart';
@@ -121,6 +127,10 @@ function editorTextToWindows(dayTexts: Record<string, string>): Record<string, A
 export default function App() {
   const { t, i18n } = useTranslation();
   const service = DoctorAppService.getInstance();
+  // The in-app language (EN | ES) drives every date, locale and server-language decision below.
+  const appLang = normalizeAppLanguage(i18n.language);
+  setCurrentLanguage(appLang);
+  const fmtDateTime = (v: string | number | Date | null | undefined) => formatDateTime(v, appLang);
 
   const [ready, setReady] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -177,6 +187,15 @@ export default function App() {
   useEffect(() => {
     void markSessionLocked();
   }, []);
+
+  // Firebase verification emails / SMS and server push copy follow the in-app language.
+  useEffect(() => {
+    auth.languageCode = appLang;
+  }, [appLang]);
+  useEffect(() => {
+    if (userEmail) void service.syncLanguagePreference(appLang);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appLang, userEmail]);
 
   useEffect(() => {
     const unsub = service.watchAuth(async (user) => {
@@ -280,7 +299,7 @@ export default function App() {
         setMfaResolver(resolverFromError(e));
         setScreen('mfaChallenge');
       } else {
-        Alert.alert(t('common.error'), e?.message || 'auth_failed');
+        Alert.alert(t('common.error'), localizeError(e, t, 'errors.auth_failed'));
       }
     } finally {
       setBusy(false);
@@ -293,7 +312,7 @@ export default function App() {
       await service.register(email, password);
       Alert.alert(t('common.success'), t('auth.registerOk'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'register_failed');
+      Alert.alert(t('common.error'), localizeError(e, t, 'errors.register_failed'));
     } finally {
       setBusy(false);
     }
@@ -330,7 +349,7 @@ export default function App() {
       Alert.alert(t('common.success'), t('doctorMode.onboarding.saved'));
       setScreen('home');
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.onboarding.saveFailed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.onboarding.saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -350,7 +369,7 @@ export default function App() {
           t(`doctorMode.verification.status.${p.verificationStatus}`)
       );
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.verification.failed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.verification.failed'));
     } finally {
       setBusy(false);
     }
@@ -362,7 +381,7 @@ export default function App() {
       const p = await service.setDoctorPlan(!profile?.doctorPlan, 'mock');
       setProfile(p);
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'plan_failed');
+      Alert.alert(t('common.error'), localizeError(e, t, 'errors.plan_failed'));
     } finally {
       setBusy(false);
     }
@@ -428,8 +447,7 @@ export default function App() {
       setInviteCode(invite.code);
       Alert.alert(t('doctorMode.linking.inviteCreated'), t('doctorMode.linking.inviteShare', { code: invite.code, minutes: 30 }));
     } catch (e: any) {
-      const msg = e?.message === 'doctor_not_ready' ? t('doctorMode.gate.needVerifiedPlan') : e?.message;
-      Alert.alert(t('common.error'), msg || t('doctorMode.linking.inviteFailed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.linking.inviteFailed'));
     } finally {
       setBusy(false);
     }
@@ -444,7 +462,7 @@ export default function App() {
       Alert.alert(t('common.success'), t('doctorMode.linking.linked'));
       setScreen('patients');
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.linking.linkFailed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.linking.linkFailed'));
     } finally {
       setBusy(false);
     }
@@ -468,7 +486,7 @@ export default function App() {
       setLimits(await service.listAlertLimits(selected.patientId));
       Alert.alert(t('common.success'), t('doctorMode.alerts.saved'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.alerts.saveFailed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.alerts.saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -531,7 +549,7 @@ export default function App() {
       setProfile(p);
       Alert.alert(t('common.success'), t('doctorMode.officeHours.saved'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'office_hours_failed');
+      Alert.alert(t('common.error'), localizeError(e, t, 'errors.office_hours_failed'));
     } finally {
       setBusy(false);
     }
@@ -562,13 +580,13 @@ export default function App() {
         messageId,
         action,
         action === 'text_reply' ? replyText : undefined,
-        i18n.language?.startsWith('en') ? 'en' : 'es'
+        appLang
       );
       setReplyText('');
       setInbox(await service.listNeedsActionInbox());
       Alert.alert(t('common.success'), t('doctorMode.messaging.replied'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.messaging.replyFailed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.messaging.replyFailed'));
     } finally {
       setBusy(false);
     }
@@ -580,11 +598,11 @@ export default function App() {
     try {
       const exported = await service.exportMessageSummaryForPatient(
         selected.patientId,
-        i18n.language?.startsWith('en') ? 'en' : 'es'
+        appLang
       );
       Alert.alert(t('doctorMode.messaging.exportTitle'), exported.lines.slice(0, 12).join('\n'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('doctorMode.messaging.exportFailed'));
+      Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.messaging.exportFailed'));
     } finally {
       setBusy(false);
     }
@@ -597,7 +615,7 @@ export default function App() {
       setProfile(p);
       Alert.alert(t('doctorMode.aiInsights.title'), t('doctorMode.aiInsights.waitlisted'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || 'waitlist_failed');
+      Alert.alert(t('common.error'), localizeError(e, t, 'errors.waitlist_failed'));
     } finally {
       setBusy(false);
     }
@@ -638,9 +656,16 @@ export default function App() {
           <GoldButton label={t('auth.register')} onPress={handleRegister} disabled={busy} />
           <Text style={styles.sub}>{t('auth.needAccount')}</Text>
           <View style={styles.langRow}>
-            {['es', 'en', 'pt', 'fr', 'de', 'zh'].map((lng) => (
-              <TouchableOpacity key={lng} onPress={() => i18n.changeLanguage(lng)} style={styles.langChip}>
-                <Text style={styles.langText}>{lng.toUpperCase()}</Text>
+            {APP_LANGUAGES.map((lng) => (
+              <TouchableOpacity
+                key={lng}
+                onPress={() => i18n.changeLanguage(lng)}
+                style={styles.langChip}
+                accessibilityRole="button"
+                accessibilityState={{ selected: appLang === lng }}
+                accessibilityLabel={t(`language.${lng}`)}
+              >
+                <Text style={styles.langText}>{t(`language.${lng}`)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -696,7 +721,7 @@ export default function App() {
             try {
               await service.signIn(email, password);
             } catch (e: any) {
-              Alert.alert(t('common.error'), e?.message || 'auth_failed');
+              Alert.alert(t('common.error'), localizeError(e, t, 'errors.auth_failed'));
               setScreen('auth');
             }
           }}
@@ -752,12 +777,17 @@ export default function App() {
             {!!profile?.expiresAt && profile.verificationStatus === 'verified' && (
               <Text style={styles.meta}>
                 {t('doctorMode.verification.expires', {
-                  date: String(profile.expiresAt).slice(0, 10),
+                  date: formatDate(profile.expiresAt, appLang),
                 })}
               </Text>
             )}
-            {!!profile?.verificationMessage && (
-              <Text style={styles.sub}>{profile.verificationMessage}</Text>
+            {!!verificationMessageKey(profile?.verificationMessageCode) && (
+              <Text style={styles.sub}>{t(verificationMessageKey(profile?.verificationMessageCode) as string)}</Text>
+            )}
+            {!!profile?.verificationReviewerNote && (
+              <Text style={styles.sub}>
+                {t('doctorMode.verification.reviewerNote')}: {profile.verificationReviewerNote}
+              </Text>
             )}
             <Text style={styles.meta}>
               {t('doctorMode.plan.label')}:{' '}
@@ -780,7 +810,7 @@ export default function App() {
               disabled={busy}
             />
             {isAdminUser && (
-              <GoldButton label="Admin review" onPress={() => setScreen('adminReview')} />
+              <GoldButton label={t('admin.button')} onPress={() => setScreen('adminReview')} />
             )}
           </Card>
           <Card>
@@ -887,19 +917,14 @@ export default function App() {
 
       {screen === 'adminReview' && (
         <ScrollView style={styles.content}>
-          {header('Admin review', () => setScreen('home'))}
+          {header(t('admin.title'), () => setScreen('home'))}
           <Card>
-            <Text style={styles.cardTitle}>AuricRX Médicos</Text>
-            <Text style={styles.sub}>
-              Open the web review queue on the API host (requires admin claim + MFA token):
-            </Text>
+            <Text style={styles.cardTitle}>{t('admin.appName')}</Text>
+            <Text style={styles.sub}>{t('admin.queueHint')}</Text>
             <Text style={styles.code}>/doctor-admin</Text>
-            <Text style={styles.sub}>
-              Approve / reject / suspend / revoke with a reason. Evidence (registry + identity) is never
-              readable by patients or other doctors.
-            </Text>
+            <Text style={styles.sub}>{t('admin.actionsHint')}</Text>
             <GoldButton
-              label="Open doctor-admin"
+              label={t('admin.open')}
               onPress={() => {
                 const base = (require('./src/config/api') as { API_BASE: string }).API_BASE;
                 void Linking.openURL(`${base.replace(/\/$/, '')}/doctor-admin`);
@@ -1001,7 +1026,7 @@ export default function App() {
             {entries.map((e) => (
               <View key={e.id} style={styles.entryRow}>
                 <Text style={styles.meta}>
-                  {t(`doctorMode.bitacora.types.${e.type}`)} · {new Date(e.timestamp).toLocaleString()}
+                  {t(`doctorMode.bitacora.types.${e.type}`)} · {fmtDateTime(e.timestamp)}
                 </Text>
                 <Text style={styles.text}>
                   {e.type === 'blood_pressure'
@@ -1030,7 +1055,7 @@ export default function App() {
                             observedValue: e.systolic!,
                             observedSecondary: e.diastolic,
                             limit: l,
-                            locale: i18n.language?.startsWith('en') ? 'en' : 'es',
+                            locale: appLang,
                           })}
                         </Text>
                       );
@@ -1115,7 +1140,7 @@ export default function App() {
               }}
             >
               <Text style={styles.patientName}>{item.patientLabel || item.patientId.slice(0, 10)}</Text>
-              <Text style={styles.meta}>{new Date(item.latestAt).toLocaleString()}</Text>
+              <Text style={styles.meta}>{fmtDateTime(item.latestAt)}</Text>
               {item.kinds.map((k) => (
                 <Text key={k} style={styles.text}>
                   {t(`doctorMode.digest.kinds.${k}`)}
@@ -1147,7 +1172,7 @@ export default function App() {
           {agenda?.lastSyncedAt && (
             <Text style={styles.meta}>
               {t('doctorMode.calendar.lastSync')}:{' '}
-              {formatInTimeZone(agenda.lastSyncedAt, agenda.timeZone, i18n.language?.startsWith('en') ? 'en-US' : 'es-MX')}
+              {formatInTimeZone(agenda.lastSyncedAt, agenda.timeZone, uiLocale(appLang))}
             </Text>
           )}
           {agenda?.ok && agenda.appointments.length === 0 && (
@@ -1158,9 +1183,9 @@ export default function App() {
               <View key={a.id} style={styles.patientRow}>
                 <Text style={styles.patientName}>{a.title}</Text>
                 <Text style={styles.meta}>
-                  {formatInTimeZone(a.startIso, agenda.timeZone, i18n.language?.startsWith('en') ? 'en-US' : 'es-MX')}
+                  {formatInTimeZone(a.startIso, agenda.timeZone, uiLocale(appLang))}
                   {' — '}
-                  {formatInTimeZone(a.endIso, agenda.timeZone, i18n.language?.startsWith('en') ? 'en-US' : 'es-MX')}
+                  {formatInTimeZone(a.endIso, agenda.timeZone, uiLocale(appLang))}
                 </Text>
               </View>
             ))}
@@ -1225,7 +1250,7 @@ export default function App() {
                 <Text style={styles.meta}>
                   {(patients.find((p) => p.patientId === intake.patientId)?.patientDisplayName ||
                     intake.patientId.slice(0, 10))}
-                  {intake.sharedAt ? ` · ${new Date(intake.sharedAt).toLocaleString()}` : ''}
+                  {intake.sharedAt ? ` · ${fmtDateTime(intake.sharedAt)}` : ''}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -1234,7 +1259,7 @@ export default function App() {
               <Text style={styles.patientName}>
                 {t(`doctorMode.messaging.requestTypes.${m.requestType || 'general'}`)}
               </Text>
-              <Text style={styles.meta}>{m.patientId.slice(0, 10)} · {new Date(m.createdAt).toLocaleString()}</Text>
+              <Text style={styles.meta}>{m.patientId.slice(0, 10)} · {fmtDateTime(m.createdAt)}</Text>
               <Text style={styles.text}>{m.body}</Text>
               <GoldButton
                 label={t('doctorMode.messaging.actions.approve_refill')}
@@ -1270,13 +1295,13 @@ export default function App() {
           {preVisit && (
             <Card>
               <Text style={styles.cardTitle}>{preVisit.patientLabel}</Text>
-              <Text style={styles.meta}>{preVisit.generatedAt}</Text>
+              <Text style={styles.meta}>{fmtDateTime(preVisit.generatedAt)}</Text>
               <Text style={styles.cardTitle}>{t('doctorMode.preVisit.readings')}</Text>
               {preVisit.readings.map((r) => (
                 <Text key={r.type} style={styles.text}>
                   {t(`doctorMode.bitacora.types.${r.type}`)}: {r.count}
                   {r.lastDisplay ? ` · ${r.lastDisplay}` : ''}
-                  {r.lastAt ? ` · ${new Date(r.lastAt).toLocaleString()}` : ''}
+                  {r.lastAt ? ` · ${fmtDateTime(r.lastAt)}` : ''}
                 </Text>
               ))}
               <Text style={styles.cardTitle}>{t('doctorMode.preVisit.doseLogs')}</Text>
@@ -1305,6 +1330,7 @@ export default function App() {
                 key={intake.id}
                 session={intake}
                 t={t}
+                lang={appLang}
                 patientLabel={selected?.patientDisplayName || selected?.patientId}
               />
             ))}
@@ -1337,12 +1363,12 @@ export default function App() {
                     patientId: selected.patientId,
                     message: apptMessage || undefined,
                     proposedSlotsIso: apptSlot1 ? [apptSlot1] : [],
-                    locale: i18n.language?.startsWith('en') ? 'en' : 'es',
+                    locale: appLang,
                   });
                   setApptDraft(draft);
                   setApptMessage(draft.message);
                 } catch (e: any) {
-                  Alert.alert(t('common.error'), e?.message || 'draft_failed');
+                  Alert.alert(t('common.error'), localizeError(e, t, 'errors.draft_failed'));
                 } finally {
                   setBusy(false);
                 }
@@ -1357,7 +1383,7 @@ export default function App() {
                 try {
                   setApptDraft(await service.reviewAppointmentRequest(apptDraft.id));
                 } catch (e: any) {
-                  Alert.alert(t('common.error'), e?.message || t('doctorMode.appointmentRequest.needsReview'));
+                  Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.appointmentRequest.needsReview'));
                 } finally {
                   setBusy(false);
                 }
@@ -1374,7 +1400,7 @@ export default function App() {
                   setApptDraft(sent);
                   Alert.alert(t('common.success'), t('doctorMode.appointmentRequest.sent'));
                 } catch (e: any) {
-                  Alert.alert(t('common.error'), e?.message || t('doctorMode.appointmentRequest.needsReview'));
+                  Alert.alert(t('common.error'), localizeError(e, t, 'doctorMode.appointmentRequest.needsReview'));
                 } finally {
                   setBusy(false);
                 }
@@ -1382,7 +1408,7 @@ export default function App() {
             />
             {apptDraft && (
               <Text style={styles.meta}>
-                {apptDraft.status} · {apptDraft.id}
+                {t(`doctorMode.appointmentRequest.statuses.${apptDraft.status}`, { defaultValue: '—' })} · {apptDraft.id}
               </Text>
             )}
           </Card>
@@ -1392,6 +1418,7 @@ export default function App() {
                 key={intake.id}
                 session={intake}
                 t={t}
+                lang={appLang}
                 patientLabel={selected?.patientDisplayName || selected?.patientId}
               />
             ))}
@@ -1404,6 +1431,7 @@ export default function App() {
           <PreVisitIntakeCard
             session={selectedIntake}
             t={t}
+            lang={appLang}
             patientLabel={
               patients.find((p) => p.patientId === selectedIntake.patientId)?.patientDisplayName ||
               selectedIntake.patientId

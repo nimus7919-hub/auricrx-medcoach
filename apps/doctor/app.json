@@ -26,8 +26,14 @@
       },
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Unlock AuricRX Médicos after you have signed in with two-factor authentication.",
-        "ITSAppUsesNonExemptEncryption": false
+        "NSFaceIDUsageDescription": "Desbloquea AuricRX Médicos después de iniciar sesión con la autenticación en dos pasos.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleDevelopmentRegion": "es",
+        "CFBundleLocalizations": [
+          "es",
+          "en"
+        ]
       },
       "buildNumber": "7"
     },
@@ -54,7 +60,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Unlock AuricRX Médicos after you have signed in with two-factor authentication."
+          "faceIDPermission": "Desbloquea AuricRX Médicos después de iniciar sesión con la autenticación en dos pasos."
         }
       ],
       "expo-updates"
@@ -74,6 +80,10 @@
     },
     "updates": {
       "url": "https://u.expo.dev/d8a48be8-b7f0-44cb-a4e0-aa18f36ddccc"
+    },
+    "locales": {
+      "es": "./locales/es.json",
+      "en": "./locales/en.json"
     }
   }
 }

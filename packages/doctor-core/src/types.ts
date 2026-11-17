@@ -87,7 +87,19 @@ export interface DoctorProfile {
   licenseState?: string;
   verificationStatus: VerificationStatus;
   verificationUpdatedAt?: string;
+  /** Legacy English prose written by the server. Do NOT render it — use verificationMessageCode. */
   verificationMessage?: string;
+  /** Machine code for the status text; the app translates it (EN/ES). */
+  verificationMessageCode?:
+    | 'queued_registry_unavailable'
+    | 'queued_manual_review'
+    | 'expired'
+    | 'approved'
+    | 'rejected'
+    | 'suspended'
+    | 'revoked';
+  /** Free text from the human reviewer (written in the reviewer's language). */
+  verificationReviewerNote?: string | null;
   verificationRejectionReason?: string;
   /** Set only by admin approve — never by clients. */
   verifiedAt?: string;

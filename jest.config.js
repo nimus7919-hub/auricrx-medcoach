@@ -19,6 +19,7 @@ module.exports = {
     '**/src/region/__tests__/**/*.test.{ts,tsx,js,jsx}',
     '**/src/components/__tests__/**/*.test.{js,jsx,ts,tsx}',
     '**/packages/doctor-core/src/**/__tests__/**/*.test.{ts,tsx,js,jsx}',
+    '**/apps/doctor/src/**/__tests__/**/*.test.{ts,tsx,js,jsx}',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

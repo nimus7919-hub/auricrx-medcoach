@@ -606,13 +606,15 @@ class DoctorModeService {
 
   // ─── Push token ──────────────────────────────────────────────────
 
-  async registerPushToken(expoPushToken: string, platform?: string): Promise<void> {
+  async registerPushToken(expoPushToken: string, platform?: string, language?: 'en' | 'es'): Promise<void> {
     const uid = uidOrThrow();
-    // Patient tokens for doctor→patient message notify
+    // Patient tokens for doctor→patient message notify. `language` is the patient's in-app language:
+    // the server picks the push copy by the RECIPIENT's language (never the sender's).
     await setDoc(doc(db, 'patientPushTokens', uid), {
       uid,
       expoPushToken,
       platform: platform || undefined,
+      ...(language === 'en' || language === 'es' ? { language } : {}),
       updatedAt: nowIso(),
     });
   }

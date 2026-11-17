@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "AuricRX for Doctors",
+    "NSFaceIDUsageDescription": "Unlock AuricRX for Doctors after you have signed in with two-factor authentication."
+  },
+  "android": {
+    "app_name": "AuricRX for Doctors"
+  }
+}

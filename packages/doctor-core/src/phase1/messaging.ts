@@ -168,46 +168,91 @@ export interface MessageThreadExport {
   lines: string[];
 }
 
-/** One-page descriptive export for the doctor's own records (no clinical judgment). */
+const EXPORT_LABELS = {
+  es: {
+    title: 'Resumen de mensajes (solo lectura — registros propios del médico)',
+    patient: 'Paciente',
+    doctor: 'Médico',
+    system: 'Sistema',
+    notEmergency: 'Este canal no es para emergencias. No sustituye el criterio clínico.',
+    reply: 'Respuesta',
+    none: 'Sin mensajes.',
+    requestTypes: {
+      refill: 'Solicitud de surtido',
+      side_effect: 'Pregunta sobre efecto secundario',
+      appointment: 'Cita',
+      general: 'Pregunta general',
+    } as Record<string, string>,
+    actions: {
+      approve_refill: 'Aprobar surtido',
+      book_visit: 'Agendar visita',
+      seen: 'Visto',
+      text_reply: 'Respuesta de texto',
+    } as Record<string, string>,
+  },
+  en: {
+    title: 'Message summary (read-only — doctor’s own records)',
+    patient: 'Patient',
+    doctor: 'Doctor',
+    system: 'System',
+    notEmergency: 'This channel is not for emergencies. It does not replace clinical judgment.',
+    reply: 'Reply',
+    none: 'No messages.',
+    requestTypes: {
+      refill: 'Refill request',
+      side_effect: 'Side-effect question',
+      appointment: 'Appointment',
+      general: 'General question',
+    } as Record<string, string>,
+    actions: {
+      approve_refill: 'Approve refill',
+      book_visit: 'Book a visit',
+      seen: 'Seen',
+      text_reply: 'Text reply',
+    } as Record<string, string>,
+  },
+};
+
+function formatExportTimestamp(iso: string, locale: 'en' | 'es'): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  try {
+    return d.toLocaleString(locale === 'en' ? 'en-US' : 'es-MX');
+  } catch {
+    return iso;
+  }
+}
+
+/**
+ * One-page descriptive export for the doctor's own records (no clinical judgment).
+ * Every label (speaker, request type, action, timestamp) is rendered in `opts.locale`;
+ * message bodies and reply text are the authors' own words.
+ */
 export function buildMessageSummaryExport(
   messages: DoctorPatientMessage[],
   opts: { patientLabel?: string; doctorLabel?: string; locale?: 'en' | 'es' } = {}
 ): MessageThreadExport {
-  const locale = opts.locale === 'en' ? 'en' : 'es';
+  const locale: 'en' | 'es' = opts.locale === 'en' ? 'en' : 'es';
+  const L = EXPORT_LABELS[locale];
   const sorted = [...messages].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const lines: string[] = [];
-  if (locale === 'es') {
-    lines.push('Resumen de mensajes (solo lectura — registros propios del médico)');
-    lines.push(`Paciente: ${opts.patientLabel || sorted[0]?.patientId || '—'}`);
-    lines.push(`Médico: ${opts.doctorLabel || sorted[0]?.doctorId || '—'}`);
-    lines.push('Este canal no es para emergencias. No sustituye el criterio clínico.');
-  } else {
-    lines.push('Message summary (read-only — doctor’s own records)');
-    lines.push(`Patient: ${opts.patientLabel || sorted[0]?.patientId || '—'}`);
-    lines.push(`Doctor: ${opts.doctorLabel || sorted[0]?.doctorId || '—'}`);
-    lines.push('This channel is not for emergencies. It does not replace clinical judgment.');
-  }
+  lines.push(L.title);
+  lines.push(`${L.patient}: ${opts.patientLabel || sorted[0]?.patientId || '—'}`);
+  lines.push(`${L.doctor}: ${opts.doctorLabel || sorted[0]?.doctorId || '—'}`);
+  lines.push(L.notEmergency);
   lines.push('');
   for (const m of sorted) {
     const who =
-      m.direction === 'patient_to_doctor'
-        ? locale === 'es'
-          ? 'Paciente'
-          : 'Patient'
-        : m.direction === 'doctor_to_patient'
-          ? locale === 'es'
-            ? 'Médico'
-            : 'Doctor'
-          : 'System';
-    const type = m.requestType ? ` [${m.requestType}]` : '';
-    const action = m.doctorAction ? ` → ${m.doctorAction}` : '';
-    lines.push(`${m.createdAt} · ${who}${type}${action}`);
+      m.direction === 'patient_to_doctor' ? L.patient : m.direction === 'doctor_to_patient' ? L.doctor : L.system;
+    const type = m.requestType ? ` [${L.requestTypes[m.requestType] || L.requestTypes.general}]` : '';
+    const action = m.doctorAction ? ` → ${L.actions[m.doctorAction] || L.actions.seen}` : '';
+    lines.push(`${formatExportTimestamp(m.createdAt, locale)} · ${who}${type}${action}`);
     lines.push(m.body);
-    if (m.doctorReplyText) lines.push(`  ${locale === 'es' ? 'Respuesta' : 'Reply'}: ${m.doctorReplyText}`);
+    if (m.doctorReplyText) lines.push(`  ${L.reply}: ${m.doctorReplyText}`);
     lines.push('');
   }
   if (!sorted.length) {
-    lines.push(locale === 'es' ? 'Sin mensajes.' : 'No messages.');
+    lines.push(L.none);
   }
   return {
     patientId: sorted[0]?.patientId || '',
