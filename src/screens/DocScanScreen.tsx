@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
@@ -913,7 +914,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       // Also save to scan storage for consistency
       const scanManifest: ScanManifest = {
         id: `ai_${Date.now()}`,
-        name: uiI18n.t("ui.aiAnalysisValue", { value1: new Date().toLocaleDateString() }),
+        name: uiI18n.t("ui.aiAnalysisValue", { value1: new Date().toLocaleDateString(getDateTimePickerLocale()) }),
         pages: [],
         ocrText: content,
         pageCount: 0,
@@ -951,7 +952,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
       // Also save to scan storage
       const scanManifest: ScanManifest = {
         id: `ai_${Date.now()}`,
-        name: uiI18n.t("ui.aiAnalysisValue_bb716b", { value1: new Date().toLocaleDateString() }),
+        name: uiI18n.t("ui.aiAnalysisValue_bb716b", { value1: new Date().toLocaleDateString(getDateTimePickerLocale()) }),
         pages: [imageUri],
         ocrText: content,
         pageCount: 1,
@@ -971,7 +972,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
         
         const pdfResult = await PdfGenerator.createPdf({
           pages: [], // No images to avoid preprocessing issues
-          title: uiI18n.t("ui.aiAnalysisValue_bb716b", { value1: new Date().toLocaleDateString() }),
+          title: uiI18n.t("ui.aiAnalysisValue_bb716b", { value1: new Date().toLocaleDateString(getDateTimePickerLocale()) }),
           author: uiI18n.t("ai.auricrxMedCoach"),
           subject: uiI18n.t("ui.aiDocumentAnalysis"),
           keywords: ['ai', 'analysis', 'medical', 'document'],
@@ -1786,7 +1787,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                     </View>
                     
                     <Text style={[dynamicStyles.savedScanDate, { color: currentTheme.sub }]}>
-                      {new Date(scan.createdAt).toLocaleDateString()}
+                      {new Date(scan.createdAt).toLocaleDateString(getDateTimePickerLocale())}
                     </Text>
                     
                     <View style={styles.savedScanActions}>
@@ -1995,7 +1996,7 @@ export default function DocScanScreen({ onClose, onScanSaved, theme }: DocScanSc
                           dynamicStyles.pdfOptionButtonText,
                           pdfLayout === layout && styles.pdfOptionButtonTextActive
                         ]}>
-                          {layout === uiI18n.t("ui.portrait") ? uiI18n.t("ui.portrait_10826b") : uiI18n.t("ui.landscape")}
+                          {layout === 'portrait' ? uiI18n.t("ui.portrait_10826b") : uiI18n.t("ui.landscape")}
                         </Text>
                       </TouchableOpacity>
                     ))}

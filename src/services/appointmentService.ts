@@ -476,7 +476,7 @@ class AppointmentService {
         const notificationId = await Notifications.scheduleNotificationAsync({
           content: {
             title: uiI18n.t("ui.appointmentReminder"),
-            body: `${appointment.title} in ${minutesBefore} minutes`,
+            body: uiI18n.t("appointments.reminderBody", { title: appointment.title, minutes: minutesBefore }),
             data: {
               appointmentId: appointment.id,
               type: 'appointment_reminder'

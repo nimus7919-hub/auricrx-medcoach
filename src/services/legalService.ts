@@ -37,7 +37,9 @@ export async function loadPrivacyText(language: string): Promise<string> {
   const content = applySupportEmail(loadLegalFile(language), language);
   if (content.includes(PRIVACY_ANCHOR)) {
     const [, privacyContent] = content.split(PRIVACY_ANCHOR);
-    return `# AURICRX MEDCOACH — PRIVACY POLICY${privacyContent}`.trim();
+    // The English heading is only the split anchor. The Spanish document already opens with its own
+    // Spanish title, so it must not be prefixed with the English one.
+    return `${LEGAL_TEXTS[language] === legalTexts.termsES ? '' : '# AURICRX MEDCOACH — PRIVACY POLICY'}${privacyContent}`.trim();
   }
   return content.trim();
 }

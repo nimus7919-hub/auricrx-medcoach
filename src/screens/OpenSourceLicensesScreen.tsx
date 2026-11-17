@@ -29,14 +29,14 @@ export default function OpenSourceLicensesScreen({ onClose }: { onClose: () => v
       <DynamicText type="card" style={[styles.cardTitle, { color: text }]}>{c.title}</DynamicText>
       <Row label={t('openSourceLicenses.usedFor')} value={c.layers.map((l) => t(`bodyMap.layers.${l}`)).join(', ')} />
       <Row label={t('openSourceLicenses.author')} value={c.author} />
-      <Row label={t('openSourceLicenses.license')} value={c.license} />
+      <Row label={t('openSourceLicenses.license')} value={c.license === 'Public domain' ? t('openSourceLicenses.publicDomain') : c.license} />
       <Row label={t('openSourceLicenses.source')} value={c.sourceUrl} />
       <View style={styles.links}>
         <TouchableOpacity accessibilityRole="link" accessibilityLabel={`${t('openSourceLicenses.openSource')}: ${c.title}`} onPress={() => open(c.sourceUrl)} style={styles.linkBtn}>
           <DynamicText type="card" style={[styles.link, { color: gold.y400 }]}>{t('openSourceLicenses.openSource')}</DynamicText>
         </TouchableOpacity>
         {c.licenseUrl ? (
-          <TouchableOpacity accessibilityRole="link" accessibilityLabel={`${t('openSourceLicenses.viewLicense')}: ${c.license}`} onPress={() => open(c.licenseUrl as string)} style={styles.linkBtn}>
+          <TouchableOpacity accessibilityRole="link" accessibilityLabel={`${t('openSourceLicenses.viewLicense')}: ${c.license === 'Public domain' ? t('openSourceLicenses.publicDomain') : c.license}`} onPress={() => open(c.licenseUrl as string)} style={styles.linkBtn}>
             <DynamicText type="card" style={[styles.link, { color: gold.y400 }]}>{t('openSourceLicenses.viewLicense')}</DynamicText>
           </TouchableOpacity>
         ) : null}

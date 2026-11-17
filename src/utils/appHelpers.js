@@ -1,5 +1,5 @@
 import { getRegion } from '../services/region';
-import usNotices from '../legal/usDisclaimers.json';
+import usNotices from '../legal/usNotices';
 import uiI18n from "../i18n";
 // Keep helper closures tied to the render that created them.
 export function creategetInitialAIMessage(getScope) {
@@ -11,7 +11,7 @@ export function creategetInitialAIMessage(getScope) {
     'mimi': S.mimiIntro || uiI18n.t("ai.mimiIntro"),
     'pawlmer': S.pawlmerIntro || uiI18n.t("ai.pawlmerIntro")
   };
-  if (getRegion() === 'US') return `${usNotices.ai}\n\n${selectedDoctor === 'mimi' ? 'I am Mimi, an AI wellness guide.' : selectedDoctor === 'pawlmer' ? 'I am Pawlmer, an AI reminder buddy.' : 'I am Alfred, an AI information assistant.'}`;
+  if (getRegion() === 'US') return `${usNotices.ai}\n\n${uiI18n.t(selectedDoctor === 'mimi' ? 'ai.usIntroMimi' : selectedDoctor === 'pawlmer' ? 'ai.usIntroPawlmer' : 'ai.usIntroAlfred')}`;
   return introductions[selectedDoctor] || introductions['alfred'];
 };
 }

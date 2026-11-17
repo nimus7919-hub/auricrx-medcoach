@@ -242,14 +242,11 @@ class AuthService {
       }
 
       if (result.type !== 'success' || !result.params?.code) {
-        const errorDescription =
-          result.params?.error_description ||
-          result.error?.message ||
-          uiI18n.t("googleAuth.error");
-        console.warn('⚠️ Google Sign-In did not complete successfully:', result);
+        // Provider text (error_description / error.message) is English-only and technical: log it, never show it.
+        console.warn('⚠️ Google Sign-In did not complete successfully:', result.params?.error_description || result.error?.message, result);
         return {
           success: false,
-          error: errorDescription,
+          error: uiI18n.t("googleAuth.error"),
         };
       }
 
@@ -361,7 +358,7 @@ class AuthService {
   async deleteAccount() {
     const token = await this.auth.currentUser?.getIdToken();
     if (!token) throw new Error(uiI18n.t("ui.pleaseSignInAgainIniciaSesionDeNuevo"));
-    const response = await authenticatedFetch(API_BASE + '/api/account', { method: uiI18n.t("ai.delete"), headers: { Authorization: 'Bearer ' + token } });
+    const response = await authenticatedFetch(API_BASE + '/api/account', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
     if (!response.ok) throw new Error(uiI18n.t("ui.deletionDidNotCompletePleaseRetryNoSeCompletoLaEliminacionIntentaDeNuevo"));
     const result = await this.signOut();
     if (!result.success) throw new Error(result.error);

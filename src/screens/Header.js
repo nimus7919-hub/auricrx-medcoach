@@ -13,7 +13,7 @@ export default function createHeader(getScope) {
     const insets = useSafeAreaInsets();
     const { route, setRoute, theme, AnimatedButton } = getScope();
     return (<View style={[styles.header, { borderColor: theme.chip, paddingTop: Math.max(insets.top, 0) + 8 }]}>
-      {route !== uiI18n.t("dashboard.title") ? (
+      {route !== 'dashboard' ? (
         <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.headerHomeButton, { marginLeft: -65 }]}>
           <Image 
             source={require('../../assets/AuricRX_home_button_across_screens.png')} 
@@ -33,7 +33,7 @@ export default function createHeader(getScope) {
         transform: [{ translateX: -50 }],
         maxWidth: '60%'
       }]}>{title}</DynamicText>
-      {route !== uiI18n.t("dashboard.title") ? (
+      {route !== 'dashboard' ? (
         <View style={{ width: 40 }} />
       ) : (
         <AnimatedButton onPress={() => setRoute('settings')} style={styles.headerSettingsButton}>

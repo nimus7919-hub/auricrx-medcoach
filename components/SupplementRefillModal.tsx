@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../src/utils/dateTimeLocale';
 import { getRegion } from '../src/services/region';
 import USRefillModal from '../src/components/USRefillModal';
 import Modal from '../src/components/BackModal';
@@ -125,7 +126,7 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
       } catch {}
       // If geocode failed we can do a crude language fallback
       if (!determinedCurrency) {
-        determinedCurrency = (lang === 'es' ? 'EUR' : lang === 'zh' ? 'CNY' : uiI18n.t("common.usd"));
+        determinedCurrency = getRegion() === 'US' ? uiI18n.t("common.usd") : uiI18n.t("common.mxn"); // currency follows region, not UI language
       }
       setCurrency(determinedCurrency); // single definitive assignment
       
@@ -530,7 +531,7 @@ function MexicoSupplementRefillModal({ visible, onClose, supplement, strings, la
             </View>
               {fxMeta && (
               <Text style={{ color: colors.sub, fontSize: 10, marginTop: spacing.xs }}>
-                {(uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString():''}`}
+                {(uiI18n.t("common.fx"))+`: 1 USD → ${(fxMeta.rate||1).toFixed(4)} ${fxMeta.currency}${fxMeta.fxTs? ' @ '+new Date(fxMeta.fxTs).toLocaleDateString(getDateTimePickerLocale()):''}`}
               </Text>
             )}
           </View>

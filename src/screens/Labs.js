@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -245,7 +246,7 @@ export default function createLabs(getScope) {
           {/* Last updated */}
           {lastUpdated && (
             <DynamicText type="card" style={{ fontSize: 12, marginBottom: 16, fontFamily: 'Inter_500Medium', opacity: 0.7 }}>
-              {S.lastUpdated}: {lastUpdated.toLocaleTimeString()}
+              {S.lastUpdated}: {lastUpdated.toLocaleTimeString(getDateTimePickerLocale())}
             </DynamicText>
           )}
 

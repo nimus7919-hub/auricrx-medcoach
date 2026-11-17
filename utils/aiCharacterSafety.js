@@ -17,7 +17,7 @@ function safetyText(language) {
   return (locales[String(language || 'en').split(/[-_]/)[0]] || locales.en).ai;
 }
 function appendSafety(reply, question, language, region) {
-  if (region === 'US' && detectUrgency(question, region).emergency) return require('../src/legal/usDisclaimers.json').crisis;
+  if (region === 'US' && detectUrgency(question, region).emergency) return require('../src/legal/usNotices').default.crisis;
   const labels = safetyText(language);
   const urgency = detectUrgency(question, region);
   const notices = [];

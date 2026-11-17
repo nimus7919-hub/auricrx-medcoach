@@ -8,7 +8,7 @@ import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 export default function USSmartNotificationsScreen({ onClose, meds = [], reminders = [], setMeds, setReminders }) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const tr = (key, values = {}) => t(`usSmart.${key}`, { lng: 'en', ...values });
+  const tr = (key, values = {}) => t(`usSmart.${key}`, values);
   const [state, setState] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);

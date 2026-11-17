@@ -24,12 +24,10 @@ export async function clearConsentCache(uid?: string) {
 }
 // Serialize per account/region so a delayed grant cannot overwrite a withdrawal.
 const operations = new Map<string, Promise<any>>();
-const localMessage = () => uiI18n.language?.startsWith('es')
-  ? 'No se pudieron guardar tus preferencias en este dispositivo. Intenta de nuevo.'
-  : 'Your preferences could not be saved on this device. Please retry.';
+const localMessage = () => uiI18n.t('consent.errors.localSaveFailed');
 export async function consentRequest(method = 'GET', choices?: ConsentChoices, provider?: string) {
   const user = auth.currentUser;
-  if (!user) throw new Error(uiI18n.language?.startsWith('es') ? 'Inicia sesi?n de nuevo.' : 'Please sign in again.');
+  if (!user) throw new Error(uiI18n.t('ui.pleaseSignInAgainIniciaSesionDeNuevo'));
   const region = getRegion();
   const noticeVersion = version();
   const key = cacheKey(user.uid);
@@ -100,7 +98,7 @@ export function registerConsentPrompt(handler: typeof prompt) { prompt = handler
 export async function requireAccountConsent(method: string) {
   const current = await consentRequest();
   if (current.terms && current.privacy) return;
-  if (getRegion() === 'US') throw new Error(uiI18n.language?.startsWith('es') ? 'Revisa tus preferencias de privacidad en Ajustes.' : 'Review your privacy preferences in Settings.');
+  if (getRegion() === 'US') throw new Error(uiI18n.t('consent.errors.reviewPrivacy'));
   if (!prompt) throw new Error(uiI18n.t("ui.consentScreenUnavailable"));
   await prompt(method);
 }

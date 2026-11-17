@@ -147,7 +147,7 @@ export class SecureSharing {
       
       // Step 3: Try to open Gmail with pre-filled message
       console.log('📧 Step 3: Opening Gmail...');
-      const gmailUrl = `mailto:${doctor.email}?subject=Medical Document: ${options.fileName}&body=${encodeURIComponent(gmailMessage)}`;
+      const gmailUrl = `mailto:${doctor.email}?subject=${encodeURIComponent(uiI18n.t("secureSharing.emailSubject", { fileName: options.fileName }))}&body=${encodeURIComponent(gmailMessage)}`;
       
       console.log('📧 Gmail URL:', gmailUrl);
       

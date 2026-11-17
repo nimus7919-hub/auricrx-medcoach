@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
@@ -217,7 +218,7 @@ export default function createPharmacies(getScope) {
           {/* Last updated */}
           {lastUpdated && (
             <DynamicText type="card" style={{ fontSize: 12, marginBottom: 16, fontFamily: 'Inter_500Medium', opacity: 0.7 }}>
-              {S.lastUpdated}: {lastUpdated.toLocaleTimeString()}
+              {S.lastUpdated}: {lastUpdated.toLocaleTimeString(getDateTimePickerLocale())}
             </DynamicText>
           )}
 

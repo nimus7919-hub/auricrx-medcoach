@@ -142,7 +142,7 @@ export default function LabDocumentOrganizerScreen({ onClose, openFindLab }: { o
             <DynamicText type="card" style={styles.itemTitle}>{doc.title}</DynamicText>
             <DynamicText type="card" style={styles.itemTag}>{t(`labOrganizer.types.${doc.type}`)}</DynamicText>
           </View>
-          <DynamicText type="card" style={styles.itemDate}>📅 {new Date(doc.date).toLocaleDateString()}</DynamicText>
+          <DynamicText type="card" style={styles.itemDate}>📅 {new Date(doc.date).toLocaleDateString(getDateTimePickerLocale())}</DynamicText>
           {doc.memberName && (
             <DynamicText type="card" style={styles.itemMember}>👤 {doc.memberName}</DynamicText>
           )}

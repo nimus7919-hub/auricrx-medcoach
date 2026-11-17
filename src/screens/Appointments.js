@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import uiI18n from "../i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
 import PremiumButton from "./../components/PremiumButton";
@@ -21,7 +22,7 @@ export default function createAppointments(getScope) {
 
         {voiceNotes.map(n => (
           <View key={n.id} style={[styles.row, { backgroundColor: theme.card, borderColor: theme.chip, marginTop: 12 }]}>
-            <Text style={{ color: theme.text, flex: 1, fontFamily: 'Inter_400Regular' }}>{new Date(n.createdAt).toLocaleString()}</Text>
+            <Text style={{ color: theme.text, flex: 1, fontFamily: 'Inter_400Regular' }}>{new Date(n.createdAt).toLocaleString(getDateTimePickerLocale())}</Text>
             <TouchableOpacity onPress={() => playNote(n.uri)}><Text style={{ color: theme.sub, fontFamily: 'Inter_600SemiBold' }}>{S.play}</Text></TouchableOpacity>
           </View>
         ))}

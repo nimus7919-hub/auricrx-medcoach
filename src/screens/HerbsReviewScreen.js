@@ -1,6 +1,6 @@
 import { HERB_DETAILS_EN, UNREVIEWED_HERB_EN } from '../data/herbDetailsEn';
 import { getRegion } from '../services/region';
-import usNotices from '../legal/usDisclaimers.json';
+import usNotices from '../legal/usNotices';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,7 +60,7 @@ export default function HerbsReviewScreen({ onClose, currentLang, medications = 
       <HerbImage key={`${herb.key}-${large}`} herb={herb} label={nameOf(herb)} large={large} fallbackLabel={tr('imagePending')} />
       {!herb.imageVerified && <Text style={styles.caption}>{tr('imagePending')}</Text>}
       {large && herb.imageAttribution && <Text style={styles.caption}>
-        {t('herbs.photo', { lng: language })}: {herb.imageAttribution.author}, <Text accessibilityRole="link" style={styles.photoLink}
+        {t('herbs.photo', { lng: language })}: {herb.imageAttribution.author}{herb.imageAttribution.croppedBy ? `; ${t('herbs.photoCropBy', { lng: language, name: herb.imageAttribution.croppedBy })}` : ''}, <Text accessibilityRole="link" style={styles.photoLink}
           onPress={() => openSource('https://creativecommons.org/licenses/' +
             (herb.imageAttribution.license.includes('BY-SA') ? 'by-sa/' : 'by/') +
             herb.imageAttribution.license.split(' ').pop() + '/')}>{herb.imageAttribution.license}</Text>, <Text

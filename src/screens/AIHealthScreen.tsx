@@ -1,7 +1,9 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import { getRegion } from '../services/region';
 import USScreen from './USReferenceScreen';
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
+import { normalizeLanguage } from "../i18n/language";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { authenticatedFetch } from '../services/authenticatedFetch';
@@ -892,11 +894,12 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
       });
 
       // Detect current language
-      const currentLanguage = i18n.language === 'es' ? 'Spanish' : 
-                             i18n.language === 'zh' ? 'Chinese' : 
-                             i18n.language === 'fr' ? 'French' : 
-                             i18n.language === 'de' ? 'German' : 
-                             i18n.language === 'pt' ? 'Portuguese' : uiI18n.t("settings.languages.en");
+      const appLanguage = normalizeLanguage(i18n.language) || 'en';
+      const currentLanguage = appLanguage === 'es' ? 'Spanish' :
+                             appLanguage === 'zh' ? 'Chinese' :
+                             appLanguage === 'fr' ? 'French' :
+                             appLanguage === 'de' ? 'German' :
+                             appLanguage === 'pt' ? 'Portuguese' : 'English';
 
       // Race between fetch and timeout
       const fetchPromise = authenticatedFetch(apiUrl, {
@@ -906,6 +909,8 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
         },
         body: JSON.stringify({
           items: allItems,
+          // Not read by the server yet (see PR follow-ups); sent so it can answer in the app language.
+          language: normalizeLanguage(i18n.language) || 'en',
           messages: [
             {
               role: 'user',
@@ -1018,9 +1023,9 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
 
       let errorMessage = S?.failedToCheckInteractions || uiI18n.t("ui.failedToCheckInteractions");
       if (error.message?.includes('timeout')) {
-        errorMessage = uiI18n.t("ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta");
+        errorMessage = uiI18n.t("aiHealth.errors.timeout");
       } else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        errorMessage = uiI18n.t("ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP");
+        errorMessage = uiI18n.t("aiHealth.errors.unreachable");
       } else {
         errorMessage = uiI18n.t("errors.generic");
       }
@@ -1113,7 +1118,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     console.log('🧠 Fasting analysis exists:', !!fastingAnalysis);
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for PDF...');
@@ -1420,7 +1425,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     }
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for Active Symptoms PDF...');
@@ -1431,7 +1436,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       const symptomsHtml = symptomAnalyses.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
           <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} ${new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}</p>
           ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || uiI18n.t("ai.notes")}: ${analysis.notes}</p>` : ''}
         </div>
       `).join('');
@@ -1555,7 +1560,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     }
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for Complete Symptom History PDF...');
@@ -1571,7 +1576,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       const symptomsHtml = sortedSymptoms.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
           <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} ${new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}</p>
           ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || uiI18n.t("ai.notes")}: ${analysis.notes}</p>` : ''}
         </div>
       `).join('');
@@ -2003,7 +2008,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           </View>
           
           <DynamicText type="card" style={dynamicStyles.insightDescription}>
-            {new Date(analysis.createdAt).toLocaleDateString()}
+            {new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())}
           </DynamicText>
           
           <View style={dynamicStyles.insightFooter}>
@@ -2474,7 +2479,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   </View>
                   
                   <DynamicText type="card" style={dynamicStyles.insightDescription}>
-                    {new Date(analysis.createdAt).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} {new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                   </DynamicText>
                   
                   <View style={dynamicStyles.insightFooter}>
@@ -2519,7 +2524,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   </View>
                   
                   <DynamicText type="card" style={dynamicStyles.insightDescription}>
-                    {new Date(analysis.createdAt).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} {new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                   </DynamicText>
                   
                   <View style={dynamicStyles.insightFooter}>

@@ -294,7 +294,7 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
         <DynamicText style={dynamicStyles.title}>
           {authMode === 'login' ? uiI18n.t("ui.welcomeBack") : 
            authMode === 'register' ? uiI18n.t("ui.createAccount") : 
-           authMode === uiI18n.t("ui.phone") ? uiI18n.t("ui.phoneVerification") : uiI18n.t("ui.emailVerification")}
+           authMode === 'phone' ? uiI18n.t("ui.phoneVerification") : uiI18n.t("ui.emailVerification")}
         </DynamicText>
 
         <DynamicText style={dynamicStyles.subtitle}>
@@ -324,13 +324,13 @@ export default function AuthScreen({ onAuthSuccess, onClose }: AuthScreenProps) 
           </TouchableOpacity>
         </View>
 
-        {authMode === uiI18n.t("ui.phone") ? renderPhoneForm() : renderEmailForm()}
+        {authMode === 'phone' ? renderPhoneForm() : renderEmailForm()}
 
         {loading && (
           <View style={dynamicStyles.loadingContainer}>
             <ActivityIndicator color={vip.colors.gold} />
             <Text style={dynamicStyles.loadingText}>
-              {authMode === uiI18n.t("ui.phone") ? uiI18n.t("ui.sendingVerificationCode") : uiI18n.t("ui.authenticating")}
+              {authMode === 'phone' ? uiI18n.t("ui.sendingVerificationCode") : uiI18n.t("ui.authenticating")}
             </Text>
           </View>
         )}

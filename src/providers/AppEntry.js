@@ -2,6 +2,7 @@ import '../services/privacyLogging';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import AppController from './AppController';
+import i18n from '../i18n';
 import { RegionProvider } from './RegionProvider';
 
 // Last-resort guard: a render error at startup shows a visible retry screen instead of a blank window.
@@ -13,9 +14,9 @@ class StartupErrorBoundary extends React.Component {
     if (!this.state.error) return this.props.children;
     return <View style={{ flex: 1, backgroundColor: '#020D1B', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <Text style={{ color: '#FFE5A2', fontSize: 22, fontWeight: '700', marginBottom: 12, textAlign: 'center' }}>AuricRX MedCoach</Text>
-      <Text style={{ color: '#F6F5F2', fontSize: 15, textAlign: 'center', marginBottom: 20 }}>Algo salió mal al iniciar. / Something went wrong while starting.</Text>
+      <Text style={{ color: '#F6F5F2', fontSize: 15, textAlign: 'center', marginBottom: 20 }}>{i18n.t('startup.error', { defaultValue: 'Something went wrong while starting the app.' })}</Text>
       <TouchableOpacity accessibilityRole="button" onPress={() => this.setState({ error: null })} style={{ backgroundColor: '#E8BF80', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 12 }}>
-        <Text style={{ color: '#17130B', fontWeight: '700' }}>Reintentar / Retry</Text>
+        <Text style={{ color: '#17130B', fontWeight: '700' }}>{i18n.t('startup.retry', { defaultValue: 'Try again' })}</Text>
       </TouchableOpacity>
     </View>;
   }

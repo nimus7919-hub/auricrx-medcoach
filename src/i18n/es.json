@@ -16,10 +16,10 @@
     "delete": "Eliminar"
   },
   "locationSearch": {
-    "disclosure": "Usamos tu ubicaci?n solo para buscar farmacias o laboratorios cercanos. No la guardamos ni la usamos para seguimiento. Las b?squedas de farmacias usan datos de INEGI DENUE/PROFECO a trav?s de nuestro servidor; las b?squedas de laboratorios y las distancias opcionales en auto usan Google Places/Maps.",
-    "reset": "Restablecer permiso de ubicaci?n",
-    "resetDone": "Consentimiento de ubicaci?n restablecido. Te preguntaremos de nuevo en tu pr?xima b?squeda.",
-    "resetError": "No se pudo restablecer el consentimiento de ubicaci?n. Int?ntalo de nuevo.",
+    "disclosure": "Usamos tu ubicación solo para buscar farmacias o laboratorios cercanos. No la guardamos ni la usamos para seguimiento. Las búsquedas de farmacias usan datos de INEGI DENUE/PROFECO a través de nuestro servidor; las búsquedas de laboratorios y las distancias opcionales en auto usan Google Places/Maps.",
+    "reset": "Restablecer permiso de ubicación",
+    "resetDone": "Consentimiento de ubicación restablecido. Te preguntaremos de nuevo en tu próxima búsqueda.",
+    "resetError": "No se pudo restablecer el consentimiento de ubicación. Inténtalo de nuevo.",
     "locationOffTitle": "La ubicación está desactivada",
     "locationOffMessage": "No se pueden buscar farmacias porque la ubicación está desactivada o no está disponible. Activa la ubicación, otorga el permiso e inténtalo de nuevo.",
     "openSettings": "Abrir ajustes",
@@ -360,7 +360,10 @@
     "disclaimer": "Asistente de IA. No soy médico ni profesional de la salud. Solo información general.",
     "emergencyBanner": "Posible emergencia: llama al 911 ahora.",
     "selfHarmBanner": "Si puedes hacerte daño, llama al 911 o a Línea de la Vida: 800 911 2000.",
-    "medicationWarning": "No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico."
+    "medicationWarning": "No cambies ni suspendas ningún medicamento sin hablar con tu médico o farmacéutico.",
+    "usIntroMimi": "Soy Mimi, una guía de bienestar con IA.",
+    "usIntroPawlmer": "Soy Pawlmer, un compañero de recordatorios con IA.",
+    "usIntroAlfred": "Soy Alfred, un asistente de información con IA."
   },
   "healthProfile": {
     "title": "Perfil de Salud",
@@ -537,7 +540,19 @@
     "failedToWhatsApp": "Error al compartir con el doctor por WhatsApp",
     "documentUploadedSuccessfully": "Documento subido exitosamente",
     "failedToUploadDocument": "Error al subir el documento",
-    "areYouSureDeleteDocument": "¿Estás seguro de que quieres eliminar este documento?"
+    "areYouSureDeleteDocument": "¿Estás seguro de que quieres eliminar este documento?",
+    "pdf": {
+      "generatedBy": "Generado por la app AuricRX MedCoach",
+      "generatedOn": "Generado el {{date}} a las {{time}}",
+      "documentCreated": "Documento creado: {{date}}",
+      "documentCreatedOn": "Documento creado el {{value}}",
+      "idDocument": "Documento de identificación AuricRX",
+      "idDocumentDated": "Documento de identificación - {{date}}",
+      "frontSide": "Lado frontal",
+      "backSide": "Lado posterior",
+      "idFrontAlt": "Identificación, frente",
+      "idBackAlt": "Identificación, reverso"
+    }
   },
   "adminProfile": {
     "title": "Perfil de Administrador",
@@ -716,7 +731,8 @@
     "noHerbsFound": "No se encontraron hierbas",
     "photo": "Foto",
     "cropSuffix": " · Recorte",
-    "whatEvidenceSays": "Lo que dice la evidencia"
+    "whatEvidenceSays": "Lo que dice la evidencia",
+    "photoCropBy": "recorte de {{name}}"
   },
   "medications": {
     "title": "Medicamentos",
@@ -849,7 +865,8 @@
     "utility": {
       "lowSupply": "Suministro Bajo",
       "expired": "Vencido"
-    }
+    },
+    "noStoresFound": "No encontramos tiendas cercanas que vendan {{name}} por ahora. Inténtalo más tarde o pregunta al asistente de IA."
   },
   "reminders": {
     "title": "Recordatorios",
@@ -911,7 +928,12 @@
     "smartNotifications": "Notificaciones inteligentes",
     "supplement": "Suplemento",
     "deleteTitle": "Eliminar recordatorio",
-    "deleteMessage": "¿Seguro que deseas eliminar «{{name}}»? Esta acción no se puede deshacer."
+    "deleteMessage": "¿Seguro que deseas eliminar «{{name}}»? Esta acción no se puede deshacer.",
+    "errors": {
+      "startDate": "Elige una fecha de inicio válida en el calendario.",
+      "endDate": "Elige una fecha de fin válida en el calendario.",
+      "endBeforeStart": "La fecha de fin debe ser igual o posterior a la fecha de inicio."
+    }
   },
   "pharmacies": {
     "title": "Farmacias",
@@ -1040,7 +1062,8 @@
     "pastAppts": "Citas Pasadas",
     "call": "Llamar",
     "whatsapp": "WhatsApp",
-    "doctorEmailAddress": "Correo electrónico del médico"
+    "doctorEmailAddress": "Correo electrónico del médico",
+    "reminderBody": "{{title}} en {{minutes}} minutos"
   },
   "settings": {
     "title": "Configuración",
@@ -2277,7 +2300,9 @@
   "consentChoices": {
     "terms": "Acepto los Términos de Servicio.",
     "privacy": "He leído el Aviso de Privacidad.",
-    "health": "Doy mi consentimiento expreso para que AuricRX trate mis datos de salud (medicamentos, padecimientos, síntomas y perfil de ayuno) para darme recordatorios e información general. Puedo retirar este consentimiento en Ajustes > Privacidad."
+    "health": "Doy mi consentimiento expreso para que AuricRX trate mis datos de salud (medicamentos, padecimientos, síntomas y perfil de ayuno) para darme recordatorios e información general. Puedo retirar este consentimiento en Ajustes > Privacidad.",
+    "healthUS": "Doy mi consentimiento para la recopilación y el procesamiento de mis datos de salud.",
+    "shareUS": "Doy mi consentimiento por separado para compartir datos de salud con OpenAI (chat), Firebase/Google, Render y Neon (autenticación, alojamiento y sincronización)."
   },
   "authSignIn": {
     "email": "Correo",
@@ -2728,7 +2753,7 @@
     "SignInScreen": {
       "copy": {
         "resetSent": {
-          "text175": "Revisa tu correo electr?nico para restablecer tu contrase?a."
+          "text175": "Revisa tu correo electrónico para restablecer tu contraseña."
         }
       },
       "loginCopy": {
@@ -2739,7 +2764,7 @@
         "signIn": "Iniciar sesión",
         "loading": "Conectando...",
         "forgot": "¿Olvidaste tu contraseña?",
-        "resetHelp": "Introduce tu correo electr?nico para recuperar tu contrase?a.",
+        "resetHelp": "Introduce tu correo electrónico para recuperar tu contraseña.",
         "newHere": "¿Nuevo aquí?",
         "createAccount": "Crear cuenta",
         "terms": "Términos",
@@ -3687,14 +3712,14 @@
     "pricesFor": "Precios para: {{name}}",
     "detailsUnavailable": "Detalles del producto no disponibles",
     "within": "Dentro de {{radius}} km",
-    "expand": "Ampliar b?squeda",
+    "expand": "Ampliar búsqueda",
     "noPrices": "Sin precios PROFECO para este medicamento",
     "noNearby": "Sin tiendas con precio dentro de este radio",
     "state": "Estatal",
     "national": "Nacional",
     "units": {
       "tablets": "tabletas",
-      "capsules": "c?psulas",
+      "capsules": "cápsulas",
       "dragees": "grageas",
       "ampoules": "ampolletas",
       "sachets": "sobres"
@@ -4100,8 +4125,9 @@
     "deleteCloudButton": "Eliminar Todas las Copias en la Nube",
     "deleteCloudTitle": "Eliminar Documentos en la Nube",
     "deleteCloudSuccess": "Todas las copias en la nube han sido eliminadas.",
-    "deleteCloudNotImplemented": "La eliminación en la nube aún no está implementada. Esto es un TODO para la integración del backend.",
-    "disclaimer": "Los documentos locales siempre funcionan incluso sin respaldo en la nube. El respaldo en la nube es opcional."
+    "deleteCloudNotImplemented": "La eliminación en la nube aún no está disponible.",
+    "disclaimer": "Los documentos locales siempre funcionan incluso sin respaldo en la nube. El respaldo en la nube es opcional.",
+    "deleteCloudMessage": "Se eliminarán todas las copias de tus documentos guardadas en la nube. Las copias en este dispositivo se conservarán. Esta acción no se puede deshacer."
   },
   "plantBadges": {
     "evidenceLimited": "Evidencia: limitada",
@@ -4212,7 +4238,23 @@
   },
   "usOnboarding": {
     "change": "Cambiar",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "pageTitle": "AuricRX MedCoach - Estados Unidos",
+    "labels": {
+      "terms": "Acepto los Términos y la Política de Privacidad.",
+      "collect": "Doy mi consentimiento para la recopilación y el procesamiento de mis datos de salud (medicamentos, documentos, hierbas y registros de bienestar).",
+      "share": "Doy mi consentimiento por separado para compartir datos de salud con OpenAI para el chat y con Firebase/Google, Render y Neon para autenticación, alojamiento y sincronización.",
+      "adult": "Confirmo que tengo 18 años o más."
+    },
+    "titles": {
+      "terms": "Términos y privacidad",
+      "collect": "Recopilación de datos de salud",
+      "share": "Compartir datos de salud",
+      "adult": "Confirmación de edad"
+    },
+    "explanation": "Opciones independientes, sin marcar de forma predeterminada. Esta versión beta requiere la recopilación y el uso compartido con proveedores para habilitar sus funciones en la nube. Puedes rechazar y volver a la selección de región. Puedes retirarlo en Ajustes; los datos que ya estén en la nube se pueden eliminar al borrar la cuenta.",
+    "couldNotSave": "No se pudo guardar el consentimiento. Inténtalo de nuevo.",
+    "legalEnglishOnly": "Los documentos legales de abajo solo están disponibles en inglés."
   },
   "privacyNotice": {
     "title": "Aviso de Privacidad",
@@ -4229,7 +4271,8 @@
     "contact": "Contacto para Preguntas de Privacidad",
     "contactText": "soporte@auricrx.com.mx\n\nPara preguntas sobre tus derechos de privacidad o para ejercerlos, escribe al correo anterior.",
     "viewFullPolicy": "Ver Aviso de Privacidad Completo",
-    "lastUpdated": "Última actualización: Noviembre 2026"
+    "lastUpdated": "Última actualización: Noviembre 2026",
+    "subtitle": "Consulta tus derechos de privacidad y cómo tratamos tus datos"
   },
   "familyDocuments": {
     "title": "Documentos Familiares",
@@ -4624,6 +4667,25 @@
         "seen": "Visto",
         "text_reply": "Enviar respuesta de texto"
       }
+    },
+    "errors": {
+      "not_authenticated": "Inicia sesión de nuevo para continuar.",
+      "doctor_profile_required": "Primero configura tu perfil de médico.",
+      "verification_failed": "No se pudo completar la verificación. Inténtalo de nuevo.",
+      "plan_update_failed": "No se pudo actualizar el plan. Inténtalo de nuevo.",
+      "invalid_invite": "Código de invitación no válido o ya utilizado.",
+      "expired_invite": "Esta invitación ha caducado.",
+      "cannot_link_self": "No puedes vincularte contigo mismo.",
+      "invite_role_mismatch": "Este código de invitación es para otro tipo de usuario.",
+      "doctor_not_ready": "El médico debe tener una cédula profesional verificada y un plan de médico activo.",
+      "only_patient_updates_consent": "Solo el paciente puede cambiar estos ajustes de consentimiento.",
+      "link_not_found": "No se encontró este vínculo.",
+      "link_not_active": "Este vínculo no está activo.",
+      "not_link_participant": "No formas parte de este vínculo.",
+      "no_active_link": "No hay un vínculo activo con este paciente.",
+      "not_owner": "No tienes permiso para hacer eso.",
+      "forbidden": "No tienes permiso para hacer eso.",
+      "link_inactive": "Este vínculo no está activo."
     }
   },
   "documentsSecurity": {
@@ -4952,7 +5014,8 @@
     "source": "Fuente",
     "viewLicense": "Ver licencia",
     "openSource": "Abrir página de origen",
-    "adapted": "Adaptadas: redimensionadas, simplificadas y con colores ajustados a la app."
+    "adapted": "Adaptadas: redimensionadas, simplificadas y con colores ajustados a la app.",
+    "publicDomain": "Dominio público"
   },
   "updateNotice": {
     "title": "Actualización disponible",
@@ -4962,6 +5025,331 @@
     "later": "Más tarde",
     "notificationTitle": "Actualización de AuricRX disponible",
     "notificationBodyOta": "Hay una actualización lista. Abre la app para instalarla.",
-    "notificationBodyStore": "Hay una nueva versión disponible. Abre la app para actualizar."
+    "notificationBodyStore": "Hay una nueva versión disponible. Abre la app para actualizar.",
+    "channelName": "Actualizaciones de la app"
+  },
+  "secureSharing": {
+    "emailSubject": "Documento médico: {{fileName}}"
+  },
+  "aiHealth": {
+    "errors": {
+      "timeout": "El asistente tarda demasiado en responder. Inténtalo de nuevo.",
+      "unreachable": "No se puede contactar al asistente. Revisa tu conexión e inténtalo de nuevo."
+    }
+  },
+  "smartNotif": {
+    "loading": "Cargando ajustes…",
+    "back": "Volver",
+    "heading": "Notificaciones Inteligentes",
+    "statusActive": "Activas: hay funciones operativas",
+    "statusInactive": "Sin funciones activas: revisa configuración y permisos",
+    "statusLine": "Ubicación: {{geo}} · Clima en segundo plano: {{weather}}",
+    "registered": "registrada",
+    "registeredWeather": "registrado",
+    "inactiveF": "inactiva",
+    "inactiveM": "inactivo",
+    "needsBuild": "Esta versión de la app requiere una nueva compilación para ubicación y clima en segundo plano. Los ajustes locales siguen disponibles.",
+    "reviewPermissions": "Revisar permisos en Ajustes",
+    "allowNotifications": "Permitir notificaciones",
+    "permissionDenied": "Permiso denegado. Abre Ajustes para habilitarlo.",
+    "notificationsDenied": "Notificaciones denegadas. Habilítalas en Ajustes.",
+    "enableNotifications": "Habilita notificaciones en Ajustes.",
+    "refill": "Predicciones de Recarga",
+    "refillDetail": "Calcula existencias según el calendario real. Completa cantidad y unidades por toma. Una alerta por configuración de inventario.",
+    "daysBefore": "{{n}} días antes",
+    "currentQuantityOptional": "Cantidad actual (opcional)",
+    "unitsPerDoseOptional": "Unidades por toma (opcional)",
+    "currentQuantity": "Cantidad actual",
+    "unitsPerDose": "Unidades por toma",
+    "daysRemaining": "días restantes",
+    "timing": "Tiempo Inteligente",
+    "timingDetail": "Con 5 tomas registradas y una mediana de retraso mayor a 20 minutos, propone un horario. Tú decides.",
+    "suggestion": "Sueles tomar {{name}} a las {{time}}. ¿Mover el recordatorio?",
+    "accept": "Aceptar",
+    "no": "No",
+    "location": "Recordatorios Basados en Ubicación",
+    "locationDetail": "Al entrar o salir de lugares guardados. La ubicación y los lugares se guardan en el teléfono.",
+    "bgLocationTitle": "Permitir ubicación en segundo plano",
+    "bgLocationBody": "Primero pediremos permiso mientras usas la app. Después, permite ubicación siempre para detectar entradas y salidas aunque la app esté cerrada. Android puede abrir Ajustes. Puedes desactivarlo en cualquier momento. Los lugares permanecen en este teléfono.",
+    "continueRequest": "Continuar y solicitar permisos",
+    "notNow": "Ahora no",
+    "editPlace": "Editar lugar",
+    "addPlace": "Agregar lugar",
+    "placeName": "Nombre del lugar",
+    "placeAddress": "Dirección (o usa ubicación actual)",
+    "useCurrent": "Usar ubicación actual",
+    "currentLocationLabel": "Ubicación actual",
+    "selectedLocation": "Ubicación seleccionada: {{lat}}, {{lng}}",
+    "radius": "Radio en metros (150–300)",
+    "chooseReminder": "Elige un recordatorio:",
+    "eventEnter": "Evento: al entrar (cambiar)",
+    "eventExit": "Evento: al salir (cambiar)",
+    "placeMessage": "Mensaje del lugar / texto contextual",
+    "savePlace": "Guardar lugar",
+    "placeIncomplete": "Completa nombre, mensaje, recordatorio y radio de 150 a 300 m.",
+    "placeLimit": "Máximo 20 lugares por dispositivo.",
+    "placeSummary": "{{name}} · {{radius}} m · {{event}}",
+    "onExit": "salir",
+    "onEnter": "entrar",
+    "youAreHere": " · Estás aquí",
+    "edit": "Editar",
+    "deletePlace": "Eliminar lugar",
+    "weather": "Alertas Basadas en el Clima",
+    "weatherDetail": "Pronóstico Open-Meteo con coordenadas aproximadas. Revisión al abrir y por la mañana cuando el sistema permita la tarea; máximo un envío de cada alerta por día.",
+    "editWeatherAlert": "Editar alerta climática",
+    "addWeatherAlert": "Agregar alerta climática",
+    "condHeat": "Calor mayor a °C",
+    "condCold": "Frío menor a °C",
+    "condRain": "Lluvia",
+    "condHumidity": "Humedad mayor a %",
+    "condUv": "Índice UV mayor a",
+    "shortHeat": "Calor",
+    "shortCold": "Frío",
+    "shortRain": "Lluvia",
+    "shortHumidity": "Humedad",
+    "shortUv": "UV",
+    "threshold": "Umbral",
+    "practicalMessage": "Mensaje práctico (sin afirmaciones médicas)",
+    "saveAlert": "Guardar alerta",
+    "alertIncomplete": "Escribe un mensaje y un umbral válido.",
+    "deleteAlert": "Eliminar alerta",
+    "context": "Recordatorios Conscientes del Contexto",
+    "contextDetail": "Pospone los recordatorios hasta el final de las horas de silencio. En un lugar guardado usa su mensaje para el recordatorio elegido.",
+    "quietFrom": "Silencio desde (HH:mm)",
+    "quietUntil": "Silencio hasta (HH:mm)",
+    "saveQuiet": "Guardar horas de silencio",
+    "invalidQuiet": "Usa horas válidas en formato HH:mm.",
+    "localNote": "Todo el análisis de tomas es local. Open-Meteo recibe solo coordenadas redondeadas para consultar el pronóstico.",
+    "refillNotifTitle": "Predicción de recarga",
+    "refillNotifBody": "Te quedan ~{{days}} días de {{name}}. Considera surtir tu receta.",
+    "errors": {
+      "usDisabled": "Los recordatorios de ubicación y clima aún no están disponibles.",
+      "needsBuildLocation": "Esta versión de la app necesita una actualización para usar la ubicación.",
+      "locationDenied": "Permiso de ubicación denegado. Puedes habilitarlo en Ajustes.",
+      "addressNotFound": "No se encontró esa dirección.",
+      "needsBuildBackground": "Esta versión de la app necesita una actualización para usar tareas en segundo plano.",
+      "backgroundDenied": "Ubicación en segundo plano denegada. Selecciona permitir siempre en Ajustes.",
+      "forecastFailed": "No se pudo consultar el pronóstico.",
+      "forecastIncomplete": "Pronóstico incompleto."
+    }
+  },
+  "activityHealth": {
+    "text1": "Conectar Health Connect",
+    "text2": "Instalar o actualizar Health Connect",
+    "text3": "Abrir ajustes de Health Connect",
+    "text4": "Volver a comprobar",
+    "text5": "Volver",
+    "text31": "No se pudo completar la conexión. Puedes continuar usando la app e intentarlo después.",
+    "text6": "Aceptar y continuar",
+    "text7": "Ahora no",
+    "text32": "Conexión, consentimiento y datos importados locales borrados.",
+    "text33": "Consentimiento y datos locales borrados. Retira también los permisos en los ajustes de Health Connect.",
+    "text34": "No se pudo borrar el consentimiento local. Intenta de nuevo y retira los permisos en Health Connect.",
+    "text8": "Desconectar Health Connect",
+    "text35": "No se pudieron abrir los ajustes de Health Connect. Búscalos en los ajustes del teléfono.",
+    "text9": "Datos de actividad y salud de Health Connect",
+    "text10": "Privacidad · Health Connect",
+    "text29": "Sin registros de frecuencia cardíaca en los últimos 7 días.",
+    "text30": "Últimos 7 días · promedio por hora · lpm",
+    "text36": "sin registros",
+    "text11": "Actividad y salud",
+    "text12": "Solo visualización · datos en tu teléfono. Estos datos no se usan en análisis con IA, puntuaciones ni recomendaciones.",
+    "text13": "Leyendo datos del teléfono…",
+    "text14": "Pasos hoy:",
+    "text15": "Pasos de los últimos 7 días",
+    "text16": "Un día con 0 puede indicar que no hay registros sincronizados.",
+    "text17": "Frecuencia cardíaca en reposo promedio esta semana:",
+    "text18": "(semana anterior:",
+    "text19": "Semanas de lunes a domingo; la semana actual incluye los registros disponibles hasta ahora.",
+    "text20": "Frecuencia cardíaca",
+    "text21": "Sesiones de ejercicio:",
+    "text22": "esta semana",
+    "text23": "Sin sesiones sincronizadas esta semana.",
+    "text24": "Fuente: Health Connect",
+    "text25": "Actualizado:",
+    "text26": "Actualizar datos",
+    "text27": "Privacidad y conexión",
+    "text28": "Si tienes dudas sobre tus resultados, consulta a tu médico.",
+    "steps": "pasos",
+    "bpmUnit": "lpm",
+    "heartA11y": "Frecuencia cardíaca, promedios por hora en lpm."
+  },
+  "healthConnect": {
+    "status": {
+      "loading": "Consultando conexión…",
+      "connected": "Health Connect conectado",
+      "disconnected": "Health Connect sin conectar",
+      "denied": "Permisos denegados o incompletos. Puedes cambiarlos en Health Connect.",
+      "install": "Instala o actualiza Health Connect para continuar.",
+      "unavailable": "Health Connect no está disponible en este teléfono.",
+      "nativeMissing": "Esta versión no incluye el módulo Health Connect. Requiere una nueva compilación Android; no está disponible en Expo Go.",
+      "ios": "Próximamente",
+      "error": "No se pudo consultar Health Connect. Intenta de nuevo."
+    },
+    "statusUS": {
+      "loading": "Consultando conexión…",
+      "connected": "Conectado",
+      "disconnected": "Sin conectar",
+      "denied": "Permiso no concedido",
+      "install": "Instala o actualiza Health Connect",
+      "unavailable": "Health Connect no está disponible en este dispositivo",
+      "error": "No se pudo leer Health Connect. Inténtalo de nuevo.",
+      "ios": "HealthKit no está disponible en esta versión",
+      "nativeMissing": "Health Connect requiere una versión nativa más reciente",
+      "fallback": "Health Connect no disponible"
+    },
+    "privacy": {
+      "title": "Conectar Health Connect",
+      "body": "Con tu permiso, AuricRX MedCoach leerá de Health Connect tu frecuencia cardíaca, frecuencia cardíaca en reposo, pasos y sesiones de ejercicio (que pueden venir de Samsung Health, Fitbit, Garmin, Mi Fitness u otras apps). Los usamos solo para mostrarte tu historial y gráficas dentro de la app. No hacemos diagnósticos. No vendemos estos datos, no los usamos para publicidad y no los compartimos con terceros. Se quedan en tu teléfono y no se envían a nuestros servidores. Puedes retirar este permiso cuando quieras en Ajustes > Privacidad o en Health Connect, y borrar los datos importados.",
+      "checkbox": "Doy mi consentimiento expreso para que AuricRX MedCoach trate estos datos de salud con los fines descritos.",
+      "disclaimer": "Datos importados de tus apps y dispositivos para fines de bienestar. Pueden no ser exactos. No son un diagnóstico ni sustituyen la valoración de un médico. Si te sientes mal o tienes síntomas, busca atención médica; en una emergencia llama al 911."
+    },
+    "privacyUS": {
+      "title": "Privacidad y consentimiento de Health Connect",
+      "body": "Con tu permiso por separado, AuricRX lee pasos, frecuencia cardíaca, frecuencia cardíaca en reposo y sesiones de ejercicio desde Health Connect. Las lecturas permanecen en tu teléfono solo para mostrarse. Sin diagnósticos, alertas basadas en lecturas, análisis con IA, publicidad ni almacenamiento en iCloud. Desconecta en Ajustes para retirar el permiso y borrar el consentimiento local.",
+      "checkbox": "Doy mi consentimiento para leer estos registros de Health Connect en mi dispositivo solo para mostrarlos.",
+      "disclaimer": "Solo para bienestar general. Estas cifras no son mediciones médicas y no se revisan para detectar problemas. Consulta a un médico sobre cualquier preocupación de salud."
+    }
+  },
+  "usNotices": {
+    "global": "AuricRX MedCoach ofrece información general de salud y recordatorios. No es un dispositivo médico y no diagnostica, trata, cura ni previene ninguna enfermedad. No sustituye el consejo de tu médico o farmacéutico. En una emergencia, llama al 911.",
+    "ai": "Asistente de IA, no es un médico ni una persona. Las respuestas pueden ser incorrectas. Consulta con tu médico o farmacéutico antes de cambiar cualquier medicamento.",
+    "crisis": "Si crees que tienes una emergencia médica, llama al 911 ahora. Si tienes pensamientos de suicidio o estás en crisis emocional, llama o envía un mensaje de texto al 988 (Línea de Prevención del Suicidio y Crisis). Ante una posible intoxicación o sobredosis, llama a Control de Envenenamientos al 1-800-222-1222.",
+    "interactions": "Información de [DailyMed/NLM], última actualización [date]. No es una lista completa. La ausencia de resultados no significa que una combinación sea segura. Pregunta a tu farmacéutico.",
+    "herbs": "Las hierbas y los suplementos no son evaluados por la FDA en cuanto a seguridad o eficacia. La evidencia es limitada. Informa a tu médico o farmacéutico sobre todos los suplementos que tomas.",
+    "wearables": "Solo para bienestar general. Estas cifras no son mediciones médicas y no se revisan para detectar problemas. Consulta a un médico sobre cualquier preocupación de salud.",
+    "recalls": "Los reportes de eventos adversos no están verificados y no prueban que un medicamento causó un problema. Fuente: openFDA. No suspendas un medicamento sin hablar con tu médico.",
+    "prices": "Los precios son estimaciones solo informativas, pueden estar desactualizados y no son una oferta. Tu costo real depende de tu farmacia, tu seguro y la cantidad. Confirma con la farmacia.",
+    "nadac": "NADAC es el precio promedio que las farmacias pagan por comprar un medicamento, publicado semanalmente por CMS (data.medicaid.gov). No es lo que pagarás en la farmacia y no incluye honorarios de dispensación ni seguro. CMS no respalda esta app. Datos al [date].",
+    "nlm": "Este producto usa datos de acceso público cortesía de la Biblioteca Nacional de Medicina de EE. UU. (NLM), Institutos Nacionales de Salud, Departamento de Salud y Servicios Humanos; la NLM no es responsable del producto y no respalda ni recomienda este ni ningún otro producto.",
+    "fda": "Datos proporcionados por la Administración de Alimentos y Medicamentos de EE. UU. (https://open.fda.gov). La FDA no respalda esta app.",
+    "dailymed": "Información de etiquetas de DailyMed (dailymed.nlm.nih.gov), Biblioteca Nacional de Medicina de EE. UU. Última actualización [date].",
+    "nppes": "Listados de farmacias del Registro NPI NPPES de CMS; la información la proporcionan las farmacias y puede estar desactualizada.",
+    "costplus": "Cost Plus Drugs es una marca de su titular; AuricRX no está afiliada."
+  },
+  "usRef": {
+    "back": "Atrás",
+    "couldNotOpenLink": "No se pudo abrir el enlace de la fuente.",
+    "title": "Consultar un medicamento",
+    "intro": "Información oficial de EE. UU. sobre medicamentos, retiros del mercado, precios y farmacias.",
+    "searching": "Buscando…",
+    "search": "Buscar",
+    "pickMedicine": "Elige el medicamento exacto",
+    "pickLabel": "Elige la etiqueta del producto",
+    "noRecordsInteractions": "Esta consulta a {{source}} no devolvió registros al {{date}}. La ausencia de resultados no significa que una combinación sea segura. Prueba otra escritura o abre la fuente oficial.",
+    "noRecords": "Esta consulta no devolvió registros. Esto no es una conclusión médica. Prueba otra escritura o abre la fuente oficial.",
+    "tapLabels": " · toca para ver etiquetas",
+    "labelPublished": "Etiqueta publicada {{date}} · toca para leer",
+    "dateNotSupplied": "fecha no indicada",
+    "openDailyMed": "Abrir etiqueta de DailyMed",
+    "sourceDate": "Fecha de la fuente: {{date}}",
+    "npiLine": "NPI {{npi}} / Actualizado {{date}}",
+    "notSupplied": "no indicado",
+    "costLine": "NDC {{ndc}} / USD {{cost}} por {{unit}} costo de adquisición / Vigente {{effective}} / Datos al {{asOf}}",
+    "retrieved": "{{title}} / Consultado {{date}}",
+    "sourceDataDate": " / Fecha de los datos de la fuente {{date}}",
+    "openSource": "Abrir fuente oficial",
+    "openFullLabel": "Abrir etiqueta completa de DailyMed",
+    "inThisLabel": "En esta etiqueta: {{sections}}",
+    "noSections": "No se extrajeron secciones compatibles. Abre la etiqueta completa.",
+    "noInteractionFound": "No se encontró ninguna interacción en DailyMed/NLM al {{date}}. Esto no significa que la combinación sea segura.",
+    "checkCostPlus": "Consultar precio en Cost Plus Drugs",
+    "shownOnLabel": "indicada en la etiqueta seleccionada",
+    "shownWithResult": "indicada con cada resultado",
+    "ph": {
+      "pharmacies": "Código postal (ZIP)",
+      "nadac": "NDC de 11 dígitos del empaque",
+      "interactions": "Nombre del primer medicamento",
+      "drugs": "Nombre del medicamento, p. ej., ibuprofeno",
+      "city": "Ciudad",
+      "cityNoZip": "Ciudad (si no hay ZIP)",
+      "state": "Estado"
+    },
+    "hint": {
+      "nadac": "Costo típico de adquisición de la farmacia, no tu precio. Ingresa el NDC exacto de 11 dígitos del empaque; no adivines una coincidencia.",
+      "pharmacies": "Busca por código postal, o deja el ZIP en blanco e ingresa ciudad y estado. Los registros no son una recomendación.",
+      "recalls": "Escribe el nombre de un medicamento para ver los retiros de seguridad de la FDA.",
+      "interactions": "Busca un medicamento, elige el producto exacto y lee lo que dice su etiqueta oficial sobre otros medicamentos.",
+      "drugs": "Busca un medicamento, elige el exacto y lee su etiqueta oficial (usos, advertencias, efectos secundarios)."
+    },
+    "tools": {
+      "drugs": {
+        "title": "Información de medicamentos",
+        "sub": "Usos, advertencias y efectos secundarios de la etiqueta oficial"
+      },
+      "interactions": {
+        "title": "Revisar dos medicamentos juntos",
+        "sub": "Lo que dice la etiqueta sobre otros medicamentos"
+      },
+      "recalls": {
+        "title": "Retiros del mercado",
+        "sub": "Retiros de seguridad de la FDA"
+      },
+      "nadac": {
+        "title": "Consulta de precios",
+        "sub": "Costo típico en farmacias y Cost Plus Drugs"
+      },
+      "pharmacies": {
+        "title": "Buscar una farmacia",
+        "sub": "Farmacias cerca de un código postal o ciudad"
+      }
+    },
+    "errors": {
+      "badRequest": "Revisa tu búsqueda. Las farmacias requieren un ZIP de cinco dígitos o ciudad y estado de dos letras. NADAC requiere un NDC de 11 dígitos.",
+      "unavailable": "La fuente de referencia no está disponible. Inténtalo de nuevo. Que una fuente no esté disponible no establece nada sobre un medicamento o combinación."
+    },
+    "seg": {
+      "dailymed": "DailyMed (NLM)",
+      "fda": "Base de datos de etiquetas de la FDA"
+    }
+  },
+  "usSettings": {
+    "emergencyHelp": "Ayuda de emergencia",
+    "emergency": "Emergencia",
+    "crisisLifeline": "Línea de Crisis",
+    "poison": "Intoxicación",
+    "legalPrivacy": "Legal y privacidad",
+    "yourConsents": "Tus consentimientos",
+    "withdrawCollect": "Retirar el consentimiento de recopilación de datos de salud",
+    "withdrawShare": "Retirar el consentimiento para compartir con proveedores",
+    "sources": "Fuentes y atribuciones",
+    "withdrawFailed": "No se pudo guardar el retiro del consentimiento. Inténtalo de nuevo.",
+    "confirmWithdraw": "¿Seguro? Puedes volver a dar tu consentimiento más tarde.",
+    "cancel": "Cancelar",
+    "withdraw": "Retirar"
+  },
+  "consent": {
+    "errors": {
+      "localSaveFailed": "No se pudieron guardar tus preferencias en este dispositivo. Intenta de nuevo.",
+      "reviewPrivacy": "Revisa tus preferencias de privacidad en Ajustes."
+    }
+  },
+  "startup": {
+    "error": "Algo salió mal al iniciar la app.",
+    "retry": "Reintentar"
+  },
+  "privacyExport": {
+    "dialogTitle": "Exportar datos de AuricRX",
+    "title": "EXPORTACIÓN DE DATOS - AURICRX MEDCOACH",
+    "exportedAt": "Fecha de exportación: {{value}}",
+    "version": "Versión: {{value}}",
+    "platform": "Plataforma: {{value}}",
+    "reminders": "RECORDATORIOS",
+    "medications": "MEDICAMENTOS",
+    "habits": "HÁBITOS DIARIOS",
+    "family": "CÍRCULO FAMILIAR",
+    "labs": "VALORES DE LABORATORIO",
+    "total": "Total: {{value}}",
+    "totalEntries": "Total de entradas: {{value}}",
+    "members": "Miembros: {{value}}",
+    "doseLogs": "Registros de dosis: {{value}}",
+    "end": "FIN DE LA EXPORTACIÓN"
+  },
+  "regionConfirm": {
+    "detected": "Detectamos: ",
+    "change": "Cambiar",
+    "selected": "Región seleccionada: ",
+    "confirm": "Confirmar región y continuar",
+    "saveFailed": "No se pudo guardar. Intenta de nuevo."
   }
 }
