@@ -18,11 +18,11 @@ module.exports = function registerCompliance(app, sql, getStripe) {
       try { decoded = await admin.auth().verifyIdToken(token, true); }
       catch (e) { if (e?.code !== 'app/invalid-credential') throw e; console.warn('[identity] revocation check unavailable, verifying signature only'); decoded = await admin.auth().verifyIdToken(token); }
       if ([req.body?.userId, req.body?.user_id, req.body?.uid, req.query?.userId, req.query?.user_id, req.query?.uid].some(id => id && id !== decoded.uid)) {
-        return res.status(403).json({ error: 'USER_MISMATCH' });
+        return res.status(403).json({ ok: false, code: 'USER_MISMATCH', error: 'USER_MISMATCH' });
       }
       req.complianceUser = decoded;
       return next();
-    } catch (e) { console.warn('[identity] token verify failed:', e?.code, e?.message); return res.status(401).json({ error: 'INVALID_TOKEN' }); }
+    } catch (e) { console.warn('[identity] token verify failed:', e?.code, e?.message); return res.status(401).json({ ok: false, code: 'INVALID_TOKEN', error: 'INVALID_TOKEN' }); }
   }
   app.get('/account-deletion', (_req, res) => {
     res.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
@@ -39,7 +39,7 @@ module.exports = function registerCompliance(app, sql, getStripe) {
         WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
       const current = rows[0];
       res.json(current?.notice_version === NOTICE_VERSION ? current : { terms: false, privacy: false, health: false });
-    } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
+    } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ ok: false, code: 'CONSENTS_UNAVAILABLE', error: 'CONSENTS_UNAVAILABLE' }); }
   });
   app.post('/api/consents', identity, async (req, res) => {
     const { terms, privacy, health, noticeVersion } = req.body;
@@ -111,9 +111,9 @@ module.exports = function registerCompliance(app, sql, getStripe) {
     await identity(req, res, async () => {
       try {
         const rows = await sql`SELECT health, notice_version FROM consents WHERE user_id = ${req.complianceUser.uid} ORDER BY id DESC LIMIT 1`;
-        if (!rows[0]?.health || rows[0].notice_version !== NOTICE_VERSION) return res.status(403).json({ error: 'HEALTH_CONSENT_REQUIRED' });
+        if (!rows[0]?.health || rows[0].notice_version !== NOTICE_VERSION) return res.status(403).json({ ok: false, code: 'HEALTH_CONSENT_REQUIRED', error: 'HEALTH_CONSENT_REQUIRED' });
         return next();
-      } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ error: 'CONSENTS_UNAVAILABLE' }); }
+      } catch (e) { console.error('[consents] read failed:', e?.message); res.status(503).json({ ok: false, code: 'CONSENTS_UNAVAILABLE', error: 'CONSENTS_UNAVAILABLE' }); }
     });
   });
 };

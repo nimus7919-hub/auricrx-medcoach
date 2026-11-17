@@ -5,6 +5,8 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { z } = require('zod');
 const OpenAI = require('openai');
+const { explicitAiLanguage, guessMessageLanguage, normalizeAiLanguage, healthSafetyPrompt, errorBody } = require('./ai-language');
+const { resolveSuccessLanguage, successText, renderSuccessPage } = require('./success-page');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -57,7 +59,7 @@ const askLimiter = rateLimit({
   max: 10, // limit each IP to 10 requests/min
   standardHeaders: true,
   legacyHeaders: false,
-  message: { ok: false, error: "Too many requests, please slow down." },
+  message: errorBody('RATE_LIMITED'),
 });
 app.use(["/ask", "/ask-stream", "/api/ai"], askLimiter);
 
@@ -899,7 +901,7 @@ app.post('/ask', async (req, res) => {
     const schema = z.object({ 
       message: z.string().min(1).max(10000),
       character: z.enum(['alfred', 'mimi', 'pawlmer']).optional().default('alfred'),
-      language: z.enum(['en', 'es', 'de', 'fr', 'pt', 'zh']).optional(),
+      language: z.string().max(35).optional(), // normalized by explicitAiLanguage; unsupported values are ignored
       userData: z.object({
         meds: z.array(z.any()).optional().default([]),
         supplements: z.array(z.any()).optional().default([]),
@@ -911,11 +913,12 @@ app.post('/ask', async (req, res) => {
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
       console.log('Schema validation failed:', parsed.error);
-      return res.status(400).json({ ok: false, error: 'bad_request', details: parsed.error });
+      return res.status(400).json(errorBody('bad_request', { fields: [...new Set(parsed.error.issues.map(issue => issue.path.join('.')))] }));
     }
 
     const { message, userData, character } = parsed.data;
-    const language = parsed.data.language || req.body?.userData?.language || (/\b(hola|dolor|medicamento|no puedo|sobredosis|quiero morir)\b/i.test(message) ? 'es' : 'en');
+    // body language -> userData.language -> old message-based guess (older clients send neither)
+    const language = explicitAiLanguage(parsed.data.language, req.body?.userData?.language) || guessMessageLanguage(message);
     const urgency = detectCharacterUrgency(message);
     if (urgency.emergency) {
       return res.json({ ok: true, reply: appendCharacterSafety('', message, language) });
@@ -996,7 +999,7 @@ app.post('/ask', async (req, res) => {
     
     // If we exit the loop without a response
     console.log('Tool calling loop exceeded max iterations');
-    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'Alfred is unavailable right now. Please try again later.' });
+    res.status(503).json(errorBody('AI_UNAVAILABLE', { message: 'Alfred is unavailable right now. Please try again later.' })); // legacy `message` for old clients
     
   } catch (err) {
     // Keep provider messages, headers and credentials out of logs and responses.
@@ -1004,7 +1007,7 @@ app.post('/ask', async (req, res) => {
     const providerCode = err?.code || err?.error?.code || err?.type;
     const code = ['insufficient_quota', 'rate_limit_exceeded', 'rate_limit', 'server_error', 'invalid_api_key'].includes(providerCode) ? providerCode : 'provider_failure';
     console.error('Alfred request failed', { status, code });
-    res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'Alfred is unavailable right now. Please try again later.' });
+    res.status(503).json(errorBody('AI_UNAVAILABLE', { message: 'Alfred is unavailable right now. Please try again later.' })); // legacy `message` for old clients
   }
 });
 
@@ -1015,24 +1018,21 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
   try {
     // Accept either a full messages array or a single message string
     let { messages, message } = req.body || {};
+    // Only an explicit body language forces the answer language. Without one (older clients) the model mirrors
+    // the user's own language. Accept-Language is intentionally ignored (see ai-language.js).
+    const language = explicitAiLanguage(req.body && req.body.language);
     if (!Array.isArray(messages)) {
       if (typeof message === 'string' && message.trim()) {
-        messages = [
-          {
-            role: 'system',
-            content: HEALTH_SAFETY_PROMPT
-          },
-          { role: 'user', content: message.trim() },
-        ];
+        messages = [{ role: 'user', content: message.trim() }];
       } else {
-        return res.status(400).json({ ok: false, error: 'bad_request' });
+        return res.status(400).json(errorBody('bad_request'));
       }
     }
 
     if (!messages.length || messages.length > 100 || messages.some(m =>
       !m || typeof m.content !== 'string' ||
       !['user', 'assistant', 'system'].includes(m.role))) {
-      return res.status(400).json({ ok: false, error: 'bad_request' });
+      return res.status(400).json(errorBody('bad_request'));
     }
 
     // Basic validation / trimming
@@ -1040,6 +1040,8 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
       role: m.role === 'user' || m.role === 'assistant' || m.role === 'system' ? m.role : 'user',
       content: (m.content || '').slice(0, 8000),
     }));
+    // The server-owned, localized safety policy always comes first (previously only the single-message path had it).
+    messages = [{ role: 'system', content: healthSafetyPrompt(language) }, ...messages];
 
     if (req.body.stream === false) {
       const completion = await client.chat.completions.create({
@@ -1079,7 +1081,7 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
     res.end();
   } catch (err) {
     console.error('AI stream request failed');
-    if (!res.headersSent) return res.status(502).json({ ok: false, error: 'AI request failed' });
+    if (!res.headersSent) return res.status(502).json(errorBody('AI_UNAVAILABLE'));
     // Best-effort error emit; client can detect and show a message
     try { res.write('\n[STREAM_ERROR]\n'); } catch {}
     try { res.end(); } catch {}
@@ -2272,16 +2274,11 @@ app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
     // Only conversational text is accepted; clients cannot supply system instructions.
     const parsed = z.object({ messages: z.array(z.object({
       role: z.enum(['user', 'assistant']), content: z.string().min(1).max(10000)
-    }).strict()).min(1).max(20) }).safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ ok: false, error: 'INVALID_MESSAGES' });
-    const messages = [{ role: 'system', content: HEALTH_SAFETY_PROMPT }, ...parsed.data.messages];
-    
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: 'Invalid request - messages array required' 
-      });
-    }
+    }).strict()).min(1).max(20), language: z.string().max(35).optional() }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json(errorBody('INVALID_MESSAGES'));
+    // Explicit body language only; otherwise the model mirrors the user's language (older clients send none).
+    const language = explicitAiLanguage(parsed.data.language);
+    const messages = [{ role: 'system', content: healthSafetyPrompt(language) }, ...parsed.data.messages];
 
     console.log('🔍 Checking drug interactions...');
     
@@ -2297,12 +2294,8 @@ app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
     
     res.json({ result });
   } catch (error) {
-    console.error("Drug interaction check error:", error);
-    res.status(500).json({ 
-      ok: false, 
-      error: "Failed to check drug interactions",
-      message: error.message 
-    });
+    console.error('Drug interaction check failed:', error?.status || error?.code || 'unknown');
+    res.status(500).json(errorBody('AI_UNAVAILABLE'));
   }
 });
 
@@ -2860,6 +2853,9 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'invalid_billing_interval' });
     }
     const currency = 'mxn';
+    // Carry the app language to the bilingual /success page (only when the client states en|es).
+    const checkoutLanguage = normalizeAiLanguage(req.body.language); // es-MX -> es
+    const checkoutLang = ['en', 'es'].includes(checkoutLanguage) ? `&lang=${checkoutLanguage}` : '';
     const unitAmount = billingInterval === 'year' ? 69900 : 7900;
     
     console.log(`💰 Creating checkout for ${country}: ${currency.toUpperCase()} ${unitAmount / 100}`);
@@ -2953,7 +2949,7 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
             quantity: 1,
           },
         ],
-        success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}${checkoutLang}`,
         cancel_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/cancel`,
         metadata: {
           firebase_uid: uid,
@@ -3021,7 +3017,7 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
               quantity: 1,
             },
           ],
-          success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}`,
+          success_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/success?session_id={CHECKOUT_SESSION_ID}${checkoutLang}`,
           cancel_url: `${req.headers.origin || 'https://auricrx-medcoach.onrender.com'}/cancel`,
           metadata: {
             firebase_uid: uid,
@@ -3339,10 +3335,12 @@ app.get('/api/stripe/verify-subscription', verifyUser, async (req, res) => {
 app.get('/success', async (req, res) => {
   try {
     const sessionId = req.query.session_id;
+    const lang = resolveSuccessLanguage(req.query);
+    res.set('Content-Language', lang);
     
     if (!sessionId) {
       console.warn('⚠️ Success page accessed without session_id');
-      return res.status(400).send('Missing session_id parameter');
+      return res.status(400).send(successText(lang, 'missingSession'));
     }
 
     console.log('✅ Success page accessed with session_id:', sessionId);
@@ -3385,63 +3383,19 @@ app.get('/success', async (req, res) => {
         console.log(`✅ Updated user ${firebaseUid} to pro plan via success page`);
         console.log(`📅 Subscription period end: ${new Date(periodEnd * 1000).toISOString()}`);
 
-        // Return success page HTML
-        return res.send(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Payment Successful</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-              <style>
-                body {
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  min-height: 100vh;
-                  margin: 0;
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  color: white;
-                  text-align: center;
-                  padding: 20px;
-                }
-                .container {
-                  background: rgba(255, 255, 255, 0.1);
-                  backdrop-filter: blur(10px);
-                  border-radius: 20px;
-                  padding: 40px;
-                  max-width: 500px;
-                  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-                }
-                h1 { margin: 0 0 20px 0; font-size: 2em; }
-                p { margin: 10px 0; font-size: 1.1em; opacity: 0.9; }
-                .success-icon {
-                  font-size: 4em;
-                  margin-bottom: 20px;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="success-icon">✅</div>
-                <h1>Payment Successful!</h1>
-                <p>Your subscription has been activated.</p>
-                <p>You can now close this window and return to the app.</p>
-              </div>
-            </body>
-          </html>
-        `);
+        // Return success page HTML (localized by ?lang=en|es; English by default)
+        return res.send(renderSuccessPage(lang));
       } else {
         console.warn('⚠️ Session missing firebase_uid in metadata');
-        return res.status(400).send('Session missing required metadata');
+        return res.status(400).send(successText(lang, 'missingMetadata'));
       }
     } else {
       console.warn('⚠️ Payment not completed yet:', session.payment_status);
-      return res.status(400).send(`Payment status: ${session.payment_status}`);
+      return res.status(400).send(successText(lang, 'paymentPending'));
     }
   } catch (error) {
     console.error('❌ Error processing success page:', error);
-    return res.status(500).send(`Error: ${error.message}`);
+    return res.status(500).send(successText(resolveSuccessLanguage(req.query), 'genericError'));
   }
 });
 
@@ -3483,7 +3437,7 @@ async function verifyUser(req, res, next) {
     const suppliedIds = [req.body?.userId, req.body?.user_id, req.body?.uid,
       req.query?.userId, req.query?.user_id, req.query?.uid, req.params?.userId];
     if (suppliedIds.some(id => id !== undefined && id !== uid)) {
-      return res.status(403).json({ ok: false, error: 'USER_ID_MISMATCH' });
+      return res.status(403).json(errorBody('USER_ID_MISMATCH'));
     }
 
     // Ensure profile exists
@@ -3515,27 +3469,16 @@ async function verifyUser(req, res, next) {
         SET plan = 'expired', grace_expires_at = NOW() + INTERVAL '30 days'
         WHERE user_id = ${uid}
       `;
-      return res.status(401).json({ 
-        ok: false,
-        reason: 'SUBSCRIPTION_EXPIRED',
-        message: 'Your trial has expired. Please upgrade to continue.'
-      });
+      // `reason` is kept for existing clients; all fields are machine codes (no English prose).
+      return res.status(401).json(errorBody('SUBSCRIPTION_EXPIRED', { reason: 'SUBSCRIPTION_EXPIRED' }));
     }
 
     // Check expired accounts
     if (profile.plan === 'expired') {
       if (profile.grace_expires_at && now > new Date(profile.grace_expires_at)) {
-        return res.status(401).json({ 
-          ok: false,
-          reason: 'ACCOUNT_DELETED',
-          message: 'Your account has been deleted after grace period.'
-        });
+        return res.status(401).json(errorBody('ACCOUNT_DELETED', { reason: 'ACCOUNT_DELETED' }));
       }
-      return res.status(401).json({ 
-        ok: false,
-        reason: 'SUBSCRIPTION_EXPIRED',
-        message: 'Your subscription has expired. Please upgrade to continue.'
-      });
+      return res.status(401).json(errorBody('SUBSCRIPTION_EXPIRED', { reason: 'SUBSCRIPTION_EXPIRED' }));
     }
 
     // Attach profile to request
@@ -3544,11 +3487,7 @@ async function verifyUser(req, res, next) {
     next();
   } catch (error) {
     console.error('❌ User verification failed:', error.message);
-    return res.status(401).json({ 
-      ok: false,
-      reason: 'INVALID_TOKEN',
-      message: 'Invalid or expired authentication token.'
-    });
+    return res.status(401).json(errorBody('INVALID_TOKEN', { reason: 'INVALID_TOKEN' }));
   }
 }
 
@@ -3559,12 +3498,7 @@ async function verifyUser(req, res, next) {
 function requirePlan(allowedPlans) {
   return (req, res, next) => {
     if (!allowedPlans.includes(req.profile.plan)) {
-      return res.status(402).json({ 
-        ok: false,
-        code: 'UPGRADE_REQUIRED',
-        plan: req.profile.plan,
-        message: 'This feature requires an active subscription.'
-      });
+      return res.status(402).json(errorBody('UPGRADE_REQUIRED', { plan: req.profile.plan }));
     }
     next();
   };
