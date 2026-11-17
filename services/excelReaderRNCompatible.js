@@ -181,10 +181,8 @@ class ExcelReaderRNCompatible {
       
       // GLP-1 Receptor Agonists
       'victoza': ['liraglutide', 'liraglutida'],
-      'saxenda': ['liraglutide', 'liraglutida'],
       'ozempic': ['semaglutide', 'semaglutida'],
       'rybelsus': ['semaglutide oral', 'semaglutida oral'],
-      'wegovy': ['semaglutide', 'semaglutida'],
       'trulicity': ['dulaglutide', 'dulaglutida'],
       'bydureon': ['exenatide', 'exenatida'],
       'byetta': ['exenatide', 'exenatida'],
@@ -292,8 +290,6 @@ class ExcelReaderRNCompatible {
       // Anticoagulants
       'coumadin': ['warfarin', 'warfarina'],
       'jantoven': ['warfarin', 'warfarina'],
-      'xarelto': ['rivaroxaban'],
-      'eliquis': ['apixaban'],
       'pradaxa': ['dabigatran'],
       'savaysa': ['edoxaban'],
       'plavix': ['clopidogrel'],
@@ -503,9 +499,7 @@ class ExcelReaderRNCompatible {
       'rinvoq': ['upadacitinib'],
       'olumiant': ['baricitinib'],
       'otezla': ['apremilast'],
-      'dupixent': ['dupilumab'],
       'fasenra': ['benralizumab'],
-      'nucala': ['mepolizumab'],
       'xolair': ['omalizumab'],
       'ilaris': ['canakinumab'],
       'kineret': ['anakinra'],

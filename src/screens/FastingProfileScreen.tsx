@@ -7,6 +7,8 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, Image, Alert, TextInput } from 'react-native';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 interface FastingProfile {
   customHealthCondition: string;
@@ -32,6 +34,7 @@ export default function FastingProfileScreen({
 }: FastingProfileScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, getAccentColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -215,7 +218,7 @@ export default function FastingProfileScreen({
       
       <View style={[styles.container, { backgroundColor: getCardBackgroundColor() }]}>
         {/* Header */}
-        <View style={[styles.header, { borderColor: getCardBorderColor() }]}>
+        <View style={[styles.header, { borderColor: getCardBorderColor(), paddingTop: Math.max(insets.top, 0) + 12 }]}>
           <TouchableOpacity style={[styles.homeButton, { backgroundColor: getCardBackgroundColor() + 'CC', borderColor: getCardBorderColor(), borderWidth: 2 }]} onPress={onClose}>
             <Image 
               source={require('../../assets/dashboard Emojies/close Window.png')} 
@@ -230,7 +233,7 @@ export default function FastingProfileScreen({
 
         <ScrollView keyboardShouldPersistTaps="handled" 
           style={styles.scrollView}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]}
           showsVerticalScrollIndicator={true}
         >
           {/* Basic Information */}
@@ -442,7 +445,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 50,
     paddingBottom: 16,
     borderBottomWidth: 1,
   },

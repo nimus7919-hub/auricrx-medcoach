@@ -242,14 +242,11 @@ class AuthService {
       }
 
       if (result.type !== 'success' || !result.params?.code) {
-        const errorDescription =
-          result.params?.error_description ||
-          result.error?.message ||
-          uiI18n.t("googleAuth.error");
-        console.warn('⚠️ Google Sign-In did not complete successfully:', result);
+        // Provider text (error_description / error.message) is English-only and technical: log it, never show it.
+        console.warn('⚠️ Google Sign-In did not complete successfully:', result.params?.error_description || result.error?.message, result);
         return {
           success: false,
-          error: errorDescription,
+          error: uiI18n.t("googleAuth.error"),
         };
       }
 
@@ -361,7 +358,7 @@ class AuthService {
   async deleteAccount() {
     const token = await this.auth.currentUser?.getIdToken();
     if (!token) throw new Error(uiI18n.t("ui.pleaseSignInAgainIniciaSesionDeNuevo"));
-    const response = await authenticatedFetch(API_BASE + '/api/account', { method: uiI18n.t("ai.delete"), headers: { Authorization: 'Bearer ' + token } });
+    const response = await authenticatedFetch(API_BASE + '/api/account', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
     if (!response.ok) throw new Error(uiI18n.t("ui.deletionDidNotCompletePleaseRetryNoSeCompletoLaEliminacionIntentaDeNuevo"));
     const result = await this.signOut();
     if (!result.success) throw new Error(result.error);
@@ -448,7 +445,7 @@ class AuthService {
       console.error('Error message:', error.message);
       return {
         success: false,
-        error: this.getErrorMessage(error.code) || error.message || uiI18n.t("ui.anErrorOccurredPleaseTryAgain"),
+        error: this.getErrorMessage(error.code) || uiI18n.t("errors.generic"),
       };
     }
   }
@@ -480,7 +477,7 @@ class AuthService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Server response:', response.status, errorText);
-        throw new Error(uiI18n.t("ui.serverErrorValueValue", { value1: response.status, value2: errorText }));
+        throw new Error(uiI18n.t("errors.serverUnavailable"));
       }
       
       const result = await response.json();
@@ -489,7 +486,7 @@ class AuthService {
     } catch (error) {
       console.error('Error storing user data in Neon:', error);
       console.error('Error details:', error.message);
-      return { success: false, error: error.message };
+      return { success: false, error: uiI18n.t("errors.generic") };
     }
   }
 
@@ -502,14 +499,15 @@ class AuthService {
         if (response.status === 404) {
           return { success: false, error: uiI18n.t("ui.userDataNotFound") };
         }
-        throw new Error(uiI18n.t("ui.serverErrorValue", { value1: response.status }));
+        console.error('getUserData HTTP error:', response.status);
+        throw new Error(uiI18n.t("errors.serverUnavailable"));
       }
       
       const result = await response.json();
       return { success: true, data: result };
     } catch (error) {
       console.error('Error getting user data from Neon:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: uiI18n.t("errors.generic") };
     }
   }
 
@@ -592,6 +590,7 @@ class AuthService {
       // Clear all user-specific data
       await Promise.all([
         AsyncStorage.removeItem('AURIC_REMINDERS'),
+        AsyncStorage.removeItem('AURIC_REMINDER_TOMBSTONES'),
         AsyncStorage.removeItem('AURIC_RX_PHOTOS'),
         AsyncStorage.removeItem('AURIC_VOICE_NOTES'),
         AsyncStorage.removeItem('AURIC_MEDS'),
@@ -639,13 +638,21 @@ class AuthService {
         const currentUser = this.auth.currentUser;
         if (currentUser && currentUser.uid === storedAuth.uid) {
           console.log('✅ User already authenticated, restoring state');
+          // Warm a fresh ID token so authenticated calls never use a stale snapshot.
+          try {
+            await currentUser.getIdToken(/* forceRefresh */ true);
+          } catch (tokenError) {
+            console.warn('⚠️ Could not refresh ID token during restore:', tokenError);
+          }
           return {
             success: true,
             user: {
-              uid: storedAuth.uid,
-              email: storedAuth.email,
-              displayName: storedAuth.displayName,
-              emailVerified: storedAuth.emailVerified,
+              uid: currentUser.uid,
+              email: currentUser.email || storedAuth.email,
+              displayName: currentUser.displayName || storedAuth.displayName,
+              emailVerified: currentUser.emailVerified,
+              // Live Firebase user so callers can refresh tokens (never rely on AsyncStorage idToken).
+              firebaseUser: currentUser,
             },
           };
         }

@@ -1,15 +1,17 @@
 import uiI18n from '../i18n';
 import { View, Image, Text, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { styles } from "./appStyles";
 
 // Resolve render-local values when invoked, preserving the original closure and component lifetime.
 export default function createTopBar(getScope) {
   return () => {
+    const insets = useSafeAreaInsets();
     const { setRoute, setShowHelpModal, theme, AnimatedButton, TrialWidget, user, userData } = getScope();
     const name = (userData?.firstName || userData?.displayName || user?.displayName || user?.email?.split('@')[0] || '').trim();
     const photo = userData?.photoURL || user?.photoURL || user?.firebaseUser?.photoURL;
-    return (<View style={[styles.topbar, { borderColor: theme.chip }]}>
+    return (<View style={[styles.topbar, { borderColor: theme.chip, paddingTop: Math.max(insets.top, 0) + 12 }]}>
     <AnimatedButton onPress={() => setRoute('dashboard')} style={[styles.brandButton, { marginLeft: -65 }]}>
         <Image 
           source={require('../../assets/AuricRX_home_button_across_screens.png')} 

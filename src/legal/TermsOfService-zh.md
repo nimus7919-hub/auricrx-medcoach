@@ -8,7 +8,7 @@
 
 ## 1）我们是谁以及条款如何运作
 
-本服务条款（下称 **"条款"**）适用于您使用由 **[Auricrx LTD]、[Mexico]、[Auricrx.ltd@gmail.com]**（下称 **"AuricRX"、"我们"**）运营的 AuricRX MedCoach 移动应用、网站和相关服务（统称 **"服务"**）。使用服务即表示您同意本条款。
+本服务条款（下称 **"条款"**）适用于您使用由 **[Auricrx LTD]、[Mexico]、[zhichi@auricrx.com.mx]**（下称 **"AuricRX"、"我们"**）运营的 AuricRX MedCoach 移动应用、网站和相关服务（统称 **"服务"**）。使用服务即表示您同意本条款。
 
 若您不同意，请勿使用服务。我们可随时修改条款。如有重大变更，我们会提供通知（例如应用内提示），修改后的条款自发布时生效。
 
@@ -174,7 +174,7 @@ Pro: 每月 MXN $79; 每年 MXN $699. 含增值税。按所选周期自动续订
 
 *最后更新：2025 年 11 月 5 日*
 
-**数据控制者：** **[AuricRx LTD]**，**[Queretaro, Mexico]**，**[Auricrx.ltd@gmail.com]**。
+**数据控制者：** **[AuricRx LTD]**，**[Queretaro, Mexico]**，**[zhichi@auricrx.com.mx]**。
 
 本隐私政策说明您使用 AuricRX MedCoach（下称 **“服务”**）时，我们如何收集、使用、披露及保护信息。
 
@@ -278,7 +278,7 @@ Pro: 每月 MXN $79; 每年 MXN $699. 含增值税。按所选周期自动续订
 
 * **欧盟/英国：** 详见上述法律依据；跨境传输依据标准合同条款等保障措施。您可联系当地数据监管机构。
 
-* **墨西哥：** 依照 **《墨西哥个人持有者数据保护联邦法》** 处理个人数据。可联系 **[Auricrx.ltd@gmail.com]** 行使 ARCO 权利。
+* **墨西哥：** 依照 **《墨西哥个人持有者数据保护联邦法》** 处理个人数据。可联系 **[zhichi@auricrx.com.mx]** 行使 ARCO 权利。
 
 ---
 
@@ -294,7 +294,7 @@ Pro: 每月 MXN $79; 每年 MXN $699. 含增值税。按所选周期自动续订
 
 **[Queretaro, Mexico]**
 
-**邮箱：** **[Auricrx.ltd@gmail.com]**
+**邮箱：** **[zhichi@auricrx.com.mx]**
 
 ---
 

@@ -210,7 +210,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <${uiI18n.t("ui.auricrxIDDocumentViewer")}Viewer</title>
+        <title>AuricRX ID Document Viewer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
           * {
@@ -363,7 +363,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
             
           }).catch(function(error) {
             console.error('PDF loading error:', error);
-            document.getElementById('pdf-content').innerHTML = '<div class="error">Failed to load ID Document: ' + error.message + '</div>';
+            console.error('Failed to load ID Document:', error);
+            document.getElementById('pdf-content').innerHTML = '<div class="error">Something went wrong. Please try again.</div>';
           });
           
           async function extractImagesAndCreateFormattedView(pdf, container) {
@@ -431,7 +432,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
               
             } catch (error) {
               console.error('Error creating formatted view:', error);
-              container.innerHTML = '<div class="error">Failed to create formatted view: ' + error.message + '</div>';
+              console.error('Failed to create formatted view:', error);
+              container.innerHTML = '<div class="error">Something went wrong. Please try again.</div>';
             }
           }
         </script>
@@ -448,7 +450,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <${uiI18n.t("ui.pdfViewer")}Viewer</title>
+        <title>PDF Viewer</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
           * {
@@ -571,7 +573,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ uri, name, onClose, theme }) => {
           }).catch(function(error) {
             console.error('PDF loading error:', error);
             console.error('Error details:', error.message, error.stack);
-            document.getElementById('pdf-viewer').innerHTML = '<div class="error">Failed to load PDF: ' + error.message + '</div>';
+            document.getElementById('pdf-viewer').innerHTML = '<div class="error">Something went wrong. Please try again.</div>';
           });
         </script>
       </body>

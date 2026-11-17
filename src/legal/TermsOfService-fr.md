@@ -8,7 +8,7 @@
 
 ## 1) Qui Nous Sommes et Comment Fonctionnent Ces Conditions
 
-Ces Conditions d'utilisation (les **« Conditions »**) régissent votre utilisation de l'application mobile, des sites Web et des services associés AuricRX MedCoach (collectivement, les **« Services »**) exploités par **[Auricrx LTD], [Mexico], [Auricrx.ltd@gmail.com]** (**« AuricRX », « nous », « notre »**). En utilisant les Services, vous acceptez ces Conditions.
+Ces Conditions d'utilisation (les **« Conditions »**) régissent votre utilisation de l'application mobile, des sites Web et des services associés AuricRX MedCoach (collectivement, les **« Services »**) exploités par **[Auricrx LTD], [Mexico], [support@auricrx.com.mx]** (**« AuricRX », « nous », « notre »**). En utilisant les Services, vous acceptez ces Conditions.
 
 Si vous n'acceptez pas, n'utilisez pas les Services. Nous pouvons modifier ces Conditions à tout moment. En cas de modification substantielle, nous fournirons un avis (par exemple, dans l'application) et les Conditions révisées prendront effet à leur publication.
 
@@ -174,7 +174,7 @@ Si une disposition est inapplicable, elle sera appliquée dans la mesure maximal
 
 *Dernière mise à jour : 5 novembre 2025*
 
-**Responsable du traitement :** **[AuricRx LTD]**, **[Queretaro, Mexico]**, **[Auricrx.ltd@gmail.com]**.
+**Responsable du traitement :** **[AuricRx LTD]**, **[Queretaro, Mexico]**, **[support@auricrx.com.mx]**.
 
 Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez AuricRX MedCoach (les **« Services »**).
 
@@ -278,7 +278,7 @@ Les Services ne s'adressent pas aux enfants de moins de **13** ans (ou **16** lo
 
 * **UE/Royaume-Uni :** Bases juridiques ci-dessus ; les transferts reposent sur des garanties telles que les clauses contractuelles types. Vous pouvez contacter votre autorité locale de protection des données.
 
-* **Mexique :** Nous traitons les données personnelles selon la **Ley Federal de Protección de Datos Personales en Posesión de los Particulares**. Vous pouvez exercer vos droits ARCO en contactant **[Auricrx.ltd@gmail.com]**.
+* **Mexique :** Nous traitons les données personnelles selon la **Ley Federal de Protección de Datos Personales en Posesión de los Particulares**. Vous pouvez exercer vos droits ARCO en contactant **[support@auricrx.com.mx]**.
 
 ---
 
@@ -294,7 +294,7 @@ Nous pouvons mettre à jour cette Politique. Les changements significatifs seron
 
 **[Queretaro, Mexico]**
 
-**E-mail :** **[Auricrx.ltd@gmail.com]**
+**E-mail :** **[support@auricrx.com.mx]**
 
 ---
 

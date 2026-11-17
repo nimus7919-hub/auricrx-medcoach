@@ -93,6 +93,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
       }
       await onAuthSuccess({ provider: 'google', user: result.user });
     } catch (error) {
+      console.error('Google sign-in failed:', error);
       Alert.alert(uiI18n.t("adminProfile.error"), googleAuthText(selectedLanguage).error);
     } finally {
       setGoogleLoading(false);
@@ -218,7 +219,7 @@ export default function SignInScreen({ navigation, onAuthSuccess, onClose, onLan
             <TouchableOpacity style={StyleSheet.absoluteFill} accessibilityLabel={t.close} onPress={() => setShowLanguageDropdown(false)}/>
             <View style={styles.languageDropdown} accessibilityViewIsModal>
               {['es', 'en', 'pt', 'fr', 'de', 'zh'].map(lang => <TouchableOpacity key={lang} style={styles.languageOption} accessibilityRole="radio" accessibilityState={{selected: lang === selectedLanguage}} onPress={() => handleLanguageChange(lang)}>
-                <Text style={styles.languageOptionText}>{getLanguageLabel(lang)}</Text><Text style={styles.link}>{lang === selectedLanguage ? '?' : lang.toUpperCase()}</Text>
+                <Text style={styles.languageOptionText}>{getLanguageLabel(lang)}</Text><Text style={styles.link}>{lang === selectedLanguage ? '✓' : lang.toUpperCase()}</Text>
               </TouchableOpacity>)}
             </View>
           </View>

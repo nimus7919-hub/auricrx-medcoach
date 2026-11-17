@@ -1,10 +1,11 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   topbar: { 
     borderBottomWidth: 1, 
     paddingBottom: 12, 
-    paddingTop: Platform.OS === 'ios' ? 44 : 24,
+    // Top inset applied at runtime via useSafeAreaInsets in TopBar.js
+    paddingTop: 12,
     backgroundColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
@@ -37,6 +38,7 @@ export const styles = StyleSheet.create({
   widgetSub: { fontSize: 12, marginBottom: 4 },
   widgetBig: { fontSize: 20, marginBottom: 4 },
 
+  // Clears floating assistant FAB (see src/layout/fabLayout.js)
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, paddingBottom: 100 },
 card: {
     width: '46%',
@@ -47,9 +49,18 @@ card: {
     alignItems: 'center',
     minHeight: 120,
   },
-  cardIcon: { marginBottom: 12, width: 32, height: 32 },
-  cardIconLarge: { marginBottom: 12, width: 40, height: 40 },
-  cardIconExtraLarge: { marginBottom: 12, width: 48, height: 48 },
+  // Slot wraps whatever icon the card provides — never clips with a fixed box.
+  cardIconSlot: {
+    marginBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+    minHeight: 32,
+  },
+  // Sizing for Image-based icons (labs / pharmacy / meds / etc.)
+  cardIcon: { width: 32, height: 32 },
+  cardIconLarge: { width: 40, height: 40 },
+  cardIconExtraLarge: { width: 48, height: 48 },
   quickScanButton: {
     backgroundColor: '#d4af37',
     width: 32,
@@ -72,7 +83,8 @@ card: {
     alignItems: 'center',
     marginBottom: 16,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 44 : 24,
+    // Top inset applied at runtime via useSafeAreaInsets in Header.js
+    paddingTop: 8,
     paddingBottom: 8,
     justifyContent: 'space-between',
   },
@@ -102,6 +114,7 @@ card: {
   fab: {
     position: 'absolute',
     right: 16,
+    // bottom overridden at runtime with safe-area + FAB_BOTTOM_OFFSET
     bottom: 100,
     width: 60,
     height: 60,

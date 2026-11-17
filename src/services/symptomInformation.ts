@@ -1,5 +1,5 @@
 import { getRegion } from './region';
-import usNotices from '../legal/usDisclaimers.json';
+import usNotices from '../legal/usNotices';
 import uiI18n from "../i18n";
 export function symptomInformation(symptoms: string[], language = 'en', additionalInfo = '') {
   const text = [...symptoms, additionalInfo].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

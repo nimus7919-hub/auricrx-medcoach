@@ -3,6 +3,7 @@ import { getRegion, initializeRegion } from './region';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { parseReminderTime } from '../utils/reminderTime';
+import { weekdayNumber } from '../utils/reminderDays';
 import { parseReminderDate, nextReminderOccurrence } from '../utils/reminderDate';
 import i18n from '../i18n';
 let Location = null, Tasks = null, Fetch = null, Notifications = null;
@@ -32,8 +33,7 @@ function validOccurrences(reminder, count, now) {
   const start = parseReminderDate(reminder.startDate, now);
   const end = reminder.endDate ? parseReminderDate(reminder.endDate) : null;
   if (end) end.setHours(23, 59, 59, 999);
-  const names = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-  const days = (reminder.customDays || []).map(d => typeof d === 'number' ? d : names.findIndex(n => i18n.t(`reminders.${n}`) === d) + 1);
+  const days = (reminder.customDays || []).map(weekdayNumber);
   if (reminder.frequency === 'custom' && (!days.length || days.includes(0))) return [];
   const result = []; let cursor = now;
   for (let n = 0; n < count; n++) {
@@ -66,6 +66,8 @@ export function contextualBody(reminder, state) {
   const place = getRegion() !== 'US' && state.context && state.location && state.places.find(p => p.enabled !== false && state.inside.includes(p.id) && (!p.reminderId || String(p.reminderId) === String(reminder.id)));
   return place?.message || reminder.name;
 }
+// Errors carry a translated userMessage (current app language) so screens can show it directly.
+const userError = key => Object.assign(new Error(i18n.t(key)), { userMessage: i18n.t(key) });
 async function notify(body, state, id, date = new Date(), title = 'AuricRX MedCoach') {
   if (!Notifications || !(await Notifications.getPermissionsAsync()).granted) return false;
   const when = quietDate(date, state);
@@ -94,26 +96,26 @@ export function suggestions(state, reminders) {
   });
 }
 export async function foregroundLocation() {
-  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
-  if (!Location) throw new Error('Se necesita un nuevo APK para usar ubicación.');
+  if (getRegion() === 'US') throw userError('smartNotif.errors.usDisabled');
+  if (!Location) throw userError('smartNotif.errors.needsBuildLocation');
   const permission = await Location.requestForegroundPermissionsAsync();
-  if (!permission.granted) throw new Error('Permiso de ubicación denegado. Puedes habilitarlo en Ajustes.');
+  if (!permission.granted) throw userError('smartNotif.errors.locationDenied');
   return Location;
 }
 export async function currentCoordinates() {
-  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
+  if (getRegion() === 'US') throw userError('smartNotif.errors.usDisabled');
   const loc = await foregroundLocation(); const result = await loc.getCurrentPositionAsync({ accuracy: loc.Accuracy.Balanced }); return result.coords;
 }
 export async function addressCoordinates(address) {
-  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
+  if (getRegion() === 'US') throw userError('smartNotif.errors.usDisabled');
   const loc = await foregroundLocation(); const results = await loc.geocodeAsync(address);
-  if (!results.length) throw new Error('No se encontró esa dirección.'); return results[0];
+  if (!results.length) throw userError('smartNotif.errors.addressNotFound'); return results[0];
 }
 export async function backgroundPermission() {
-  if (getRegion() === 'US') throw new Error('US location and weather reminders are disabled pending review.');
+  if (getRegion() === 'US') throw userError('smartNotif.errors.usDisabled');
   await foregroundLocation();
-  if (!Tasks || !await Tasks.isAvailableAsync()) throw new Error('Se necesita un nuevo APK con tareas en segundo plano.');
-  if (!(await Location.requestBackgroundPermissionsAsync()).granted) throw new Error('Ubicación en segundo plano denegada. Selecciona permitir siempre en Ajustes.');
+  if (!Tasks || !await Tasks.isAvailableAsync()) throw userError('smartNotif.errors.needsBuildBackground');
+  if (!(await Location.requestBackgroundPermissionsAsync()).granted) throw userError('smartNotif.errors.backgroundDenied');
 }
 export async function syncGeofences(state) {
   if (getRegion() === 'US') { if (Location && await Location.hasStartedGeofencingAsync(GEO)) await Location.stopGeofencingAsync(GEO); return; }
@@ -133,9 +135,9 @@ export async function checkWeather(background = false) {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
   let response;
   try { response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,precipitation,uv_index&forecast_days=1&timezone=auto`, { signal: controller.signal }); } finally { clearTimeout(timeout); }
-  if (!response.ok) throw new Error('No se pudo consultar el pronóstico.');
+  if (!response.ok) throw userError('smartNotif.errors.forecastFailed');
   const data = await response.json(), h = data.hourly;
-  if (!h?.temperature_2m?.length) throw new Error('Pronóstico incompleto.');
+  if (!h?.temperature_2m?.length) throw userError('smartNotif.errors.forecastIncomplete');
   for (const alert of s.alerts.filter(a => a.enabled !== false)) {
     const values = h[({ heat: 'temperature_2m', cold: 'temperature_2m', rain: 'precipitation', humidity: 'relative_humidity_2m', uv: 'uv_index' })[alert.condition]] || [];
     const match = values.some(v => v != null && (alert.condition === 'cold' ? v < alert.threshold : alert.condition === 'rain' ? v > 0 : v > alert.threshold));
@@ -157,14 +159,14 @@ async function reconcileSmartNow(meds, reminders) {
     if (s.refill) for (const med of meds.filter(m => m.status !== "stopped")) {
       const days = daysRemaining(med, reminders); if (days == null) continue;
       const id = `smart-refill:${med.id}`; desired.add(id);
-      const fingerprint = JSON.stringify([med.remainingQuantity, med.unitsPerDose, linkedReminders(med, reminders), s.lead, s.context, s.quietStart, s.quietEnd]);
+      const fingerprint = JSON.stringify([med.remainingQuantity, med.unitsPerDose, linkedReminders(med, reminders), s.lead, s.context, s.quietStart, s.quietEnd, i18n.language]);
       const previous = pending.find(n => n.identifier === id);
       if (previous?.content.data?.fingerprint === fingerprint) continue;
       const planKey = fingerprint + ':' + med.id;
       if (s.refillPlans?.[med.id]?.key === planKey && new Date(s.refillPlans[med.id].date) <= new Date()) continue;
       const date = new Date(Date.now()+Math.max(0,days-s.lead)*86400000); date.setHours(9,0,0,0);
       const when = quietDate(new Date(Math.max(Date.now()+2000,date.getTime())),s);
-      if ((await Notifications.getPermissionsAsync()).granted) { await updateSmart(latest => { latest.refillPlans = { ...latest.refillPlans, [med.id]: { key: planKey, date: when.toISOString() } }; return latest; }); await Notifications.scheduleNotificationAsync({ identifier: id, content: { title: getRegion() === 'US' ? i18n.t('usSmart.inventoryTitle', { lng: 'en' }) : 'Predicción de recarga', body: getRegion() === 'US' ? i18n.t('usSmart.inventoryBody', { lng: 'en', days: Math.min(days, s.lead), name: med.name }) : `Te quedan ~${Math.min(days,s.lead)} días de ${med.name}. Considera surtir tu receta.`, data: { owner: 'auricrx-smart', fingerprint }, sound: 'default' }, trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when, channelId: 'medication-reminders-v2' } }); }
+      if ((await Notifications.getPermissionsAsync()).granted) { await updateSmart(latest => { latest.refillPlans = { ...latest.refillPlans, [med.id]: { key: planKey, date: when.toISOString() } }; return latest; }); await Notifications.scheduleNotificationAsync({ identifier: id, content: { title: getRegion() === 'US' ? i18n.t('usSmart.inventoryTitle') : i18n.t('smartNotif.refillNotifTitle'), body: getRegion() === 'US' ? i18n.t('usSmart.inventoryBody', { days: Math.min(days, s.lead), name: med.name }) : i18n.t('smartNotif.refillNotifBody', { days: Math.min(days, s.lead), name: med.name }), data: { owner: 'auricrx-smart', fingerprint }, sound: 'default' }, trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when, channelId: 'medication-reminders-v2' } }); }
     }
     for (const n of pending) if (n.identifier.startsWith('smart-refill:') && !desired.has(n.identifier)) await Notifications.cancelScheduledNotificationAsync(n.identifier);
   }

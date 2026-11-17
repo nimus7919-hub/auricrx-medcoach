@@ -1,9 +1,62 @@
 ﻿import uiI18n from '../i18n';
-import { Image } from 'react-native';
+import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as Print from 'expo-print';
 import { PDFDocument } from 'pdf-lib';
+import {
+  bundledAssetCachePath,
+  isManipulableImageUri,
+} from './bundledAssetUri';
+
+const LOGO_MODULE = require('../../assets/icon-auric.png');
+const LOGO_CACHE_NAME = 'auricrx-document-pdf-logo.png';
+
+/**
+ * Resolve a bundled image module to a real file:// URI ImageManipulator can open.
+ * Materializes Android release drawable resource names into the cache directory.
+ */
+export async function resolveBundledImageFileUri(
+  moduleId: number = LOGO_MODULE,
+  cacheFileName: string = LOGO_CACHE_NAME,
+): Promise<string> {
+  const asset = Asset.fromModule(moduleId);
+  await asset.downloadAsync();
+  let uri = asset.localUri || asset.uri;
+  if (!uri) {
+    throw new Error(uiI18n.t('ui.couldNotReadDocumentImage'));
+  }
+
+  if (isManipulableImageUri(uri)) {
+    return uri;
+  }
+
+  const dest = bundledAssetCachePath(FileSystem.cacheDirectory, cacheFileName);
+
+  if (/^https?:/i.test(uri)) {
+    const downloaded = await FileSystem.downloadAsync(uri, dest);
+    return downloaded.uri;
+  }
+
+  // Drawable / embedded resource name (Android release) or asset:/ URI.
+  // FileSystem.copyAsync can read those even when ImageManipulator cannot.
+  await FileSystem.copyAsync({ from: uri, to: dest });
+  return dest;
+}
+
+async function logoBase64(): Promise<string | null> {
+  try {
+    const logoUri = await resolveBundledImageFileUri();
+    const logo = await ImageManipulator.manipulateAsync(logoUri, [], {
+      format: ImageManipulator.SaveFormat.PNG,
+      base64: true,
+    });
+    return logo.base64 || null;
+  } catch (error) {
+    console.error('Failed to load document PDF logo:', error);
+    return null;
+  }
+}
 
 // Normalize camera/gallery formats (including HEIC) before embedding them.
 async function imageBytes(uri: string) {
@@ -36,11 +89,7 @@ export async function createDocumentPdf(
   const date = new Date().toLocaleDateString(uiI18n.language || 'es', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
-  const logoUri = Image.resolveAssetSource(require('../../assets/icon-auric.png')).uri;
-  const logo = await ImageManipulator.manipulateAsync(logoUri, [], {
-    format: ImageManipulator.SaveFormat.PNG, base64: true,
-  });
-  if (!logo.base64) throw new Error(uiI18n.t('ui.couldNotReadDocumentImage'));
+  const logo = await logoBase64();
   // Native HTML rendering preserves Unicode translations, including Chinese.
   // Compose source pages afterward so imported PDFs keep their vector content.
   const html = `<!DOCTYPE html><html lang="${escapeHtml(uiI18n.language || 'es')}"><head>
@@ -59,7 +108,7 @@ export async function createDocumentPdf(
       color: #D4AF37; font-size: 9pt; font-variant: small-caps; text-transform: uppercase; letter-spacing: 1.5pt; }
     footer { position: absolute; bottom: 18pt; left: 32pt; right: 32pt; border-top: .5pt solid #ded9cd;
       padding-top: 9pt; font-size: 8pt; color: #777b83; display: flex; justify-content: space-between; }
-    </style></head><body><header><img src="data:image/png;base64,${logo.base64}">
+    </style></head><body><header>${logo ? `<img src="data:image/png;base64,${logo}">` : ''}
     <div class="brand">${escapeHtml(brand)}</div><div class="title">${escapeHtml(title)}</div></header>
     ${sideBySide ? ordered.map((source, index) => {
       const left = ordered.length === 1 ? (width - frameWidth) / 2 : 32 + index * 344;

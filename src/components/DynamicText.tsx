@@ -3,7 +3,7 @@ import { Text, TextProps } from 'react-native';
 import { useWallpaper } from '../contexts/WallpaperContext';
 
 interface DynamicTextProps extends TextProps {
-  type?: 'primary' | 'secondary' | 'accent' | 'card' | 'sub';
+  type?: 'primary' | 'secondary' | 'accent' | 'card' | 'sub' | 'button';
   children: React.ReactNode;
 }
 

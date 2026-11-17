@@ -10,28 +10,14 @@ import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform 
 import * as WebBrowser from 'expo-web-browser';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';
-import { auth } from '../config/firebase';
 import { useTranslation } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFreshIdToken } from '../services/authToken';
 
 const API_BASE_URL = 'https://auricrx-medcoach.onrender.com';
 
 async function getAuthToken() {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      return await user.getIdToken();
-    }
-  } catch (error) {
-    console.warn('⚠️ Could not get auth token:', error);
-  }
-  
-  const authState = await AsyncStorage.getItem('AURIC_AUTH_STATE');
-  if (authState) {
-    const parsed = JSON.parse(authState);
-    return parsed.idToken;
-  }
-  return null;
+  // Live Firebase session only — never reuse a stale AsyncStorage idToken snapshot.
+  return getFreshIdToken({ requireAuth: false });
 }
 
 export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess, country = 'US' }) {
@@ -93,8 +79,9 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
       }
     } catch (err) {
       console.error('❌ Checkout creation failed:', err);
-      setError(err.message);
-      Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.failedToStartCheckoutValue", { value1: err.message }));
+      const friendly = uiI18n.t("errors.generic");
+      setError(friendly);
+      Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.failedToStartCheckoutValue"));
     } finally {
       setLoading(false);
     }

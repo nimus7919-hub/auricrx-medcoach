@@ -101,8 +101,8 @@ export class SecureSharing {
       
       // Show error alert
       Alert.alert(
-        uiI18n.t("adminProfile.error"),
-        uiI18n.t("ui.failedToOpenWhatsappValue", { value1: error instanceof Error ? error.message : 'Unknown error' }),
+        uiI18n.t("errors.title"),
+        uiI18n.t("errors.generic"),
         [
           {
             text: uiI18n.t("adminProfile.ok"),
@@ -147,7 +147,7 @@ export class SecureSharing {
       
       // Step 3: Try to open Gmail with pre-filled message
       console.log('📧 Step 3: Opening Gmail...');
-      const gmailUrl = `mailto:${doctor.email}?subject=Medical Document: ${options.fileName}&body=${encodeURIComponent(gmailMessage)}`;
+      const gmailUrl = `mailto:${doctor.email}?subject=${encodeURIComponent(uiI18n.t("secureSharing.emailSubject", { fileName: options.fileName }))}&body=${encodeURIComponent(gmailMessage)}`;
       
       console.log('📧 Gmail URL:', gmailUrl);
       
@@ -194,8 +194,8 @@ export class SecureSharing {
       
       // Show error alert
       Alert.alert(
-        uiI18n.t("adminProfile.error"),
-        uiI18n.t("ui.failedToOpenGmailValue", { value1: error instanceof Error ? error.message : 'Unknown error' }),
+        uiI18n.t("errors.title"),
+        uiI18n.t("errors.generic"),
         [
           {
             text: uiI18n.t("adminProfile.ok"),

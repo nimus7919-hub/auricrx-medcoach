@@ -1,0 +1,20 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
+    "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
+    "NSLocationAlwaysUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
+    "NSFaceIDUsageDescription": "AuricRX MedCoach usa Face ID para desbloquear tu bóveda de Documentos en este dispositivo.",
+    "NSCameraUsageDescription": "Usamos la cámara para tomar fotos de recetas y documentos que tú eliges guardar.",
+    "NSMicrophoneUsageDescription": "AuricRX solo usa el micrófono si tú lo activas; no graba audio en segundo plano.",
+    "NSPhotoLibraryUsageDescription": "Permite elegir fotos de recetas o documentos para guardarlos en la app.",
+    "NSCalendarsUsageDescription": "Permite agregar tus citas y recordatorios a tu calendario.",
+    "NSCalendarsFullAccessUsageDescription": "Permite agregar tus citas y recordatorios a tu calendario.",
+    "NSRemindersUsageDescription": "Permite crear recordatorios de tus medicamentos y citas.",
+    "NSRemindersFullAccessUsageDescription": "Permite crear recordatorios de tus medicamentos y citas."
+  },
+  "android": {
+    "hc_privacy_title": "Datos de Health Connect",
+    "hc_privacy_unavailable": "Aviso de privacidad no disponible",
+    "hc_privacy_notice": "Datos de actividad y salud de Health Connect\n\nCon tu permiso, AuricRX MedCoach leerá de Health Connect tu frecuencia cardíaca, frecuencia cardíaca en reposo, pasos y sesiones de ejercicio (que pueden venir de Samsung Health, Fitbit, Garmin, Mi Fitness u otras apps). Los usamos solo para mostrarte tu historial y gráficas dentro de la app. No hacemos diagnósticos. No vendemos estos datos, no los usamos para publicidad y no los compartimos con terceros. Se quedan en tu teléfono y no se envían a nuestros servidores. Puedes retirar este permiso cuando quieras en Ajustes > Privacidad o en Health Connect, y borrar los datos importados.\n\nDatos importados de tus apps y dispositivos para fines de bienestar. Pueden no ser exactos. No son un diagnóstico ni sustituyen la valoración de un médico. Si te sientes mal o tienes síntomas, busca atención médica; en una emergencia llama al 911."
+  }
+}

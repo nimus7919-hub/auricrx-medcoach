@@ -1,7 +1,9 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import { getRegion } from '../services/region';
 import USScreen from './USReferenceScreen';
 import Modal from '../components/BackModal';
 import uiI18n from "../i18n";
+import { normalizeLanguage } from "../i18n/language";
 import { useTranslation as useUILanguage } from "react-i18next";
 import KeyboardForm from '../../components/KeyboardForm';
 import { authenticatedFetch } from '../services/authenticatedFetch';
@@ -9,6 +11,8 @@ import { symptomInformation } from '../services/symptomInformation';
 import { API_BASE } from "../config/api";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet, Animated, StatusBar, Image, Platform, Vibration, Dimensions, TextInput, Share } from 'react-native';
+import { PremiumEntitlementService } from '../services/premiumEntitlementService';
+import PremiumUpgradeScreen from './PremiumUpgradeScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -22,7 +26,26 @@ import { ActivityHealthSection } from './ActivityHealthScreen';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import { createAIHealthTranslations } from '../services/aiHealthTranslations';
 import { useTranslation } from 'react-i18next';
+import { resolveBundledImageFileUri } from '../lib/documentPdf';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 const { width: screenWidth } = Dimensions.get('window');
+const SIGN_IN_LOGO = require('../../assets/sign in logo.png');
+
+async function loadSignInLogoBase64(): Promise<string> {
+  try {
+    const logoUri = await resolveBundledImageFileUri(SIGN_IN_LOGO, 'sign-in-logo-pdf.png');
+    const compressedLogo = await ImageManipulator.manipulateAsync(
+      logoUri,
+      [{ resize: { width: 400 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.PNG, base64: true },
+    );
+    return compressedLogo.base64 || '';
+  } catch (error) {
+    console.error('Failed to load AI PDF logo:', error);
+    return '';
+  }
+}
 
 interface AIHealthScreenProps {
   onClose: () => void;
@@ -67,6 +90,31 @@ interface DrugInteraction {
 function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivacy, theme, S, fastingProfile, medications = [], supplements = [] }: AIHealthScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getAccentColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
+  
+  // Premium access state
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [entitlement, setEntitlement] = useState<any>(null);
+  
+  useEffect(() => {
+    checkPremiumAccess();
+  }, []);
+  
+  const checkPremiumAccess = async () => {
+    const ent = await PremiumEntitlementService.getInstance().checkPremiumAccess();
+    setEntitlement(ent);
+    if (!ent.hasPremiumAccess) {
+      setShowUpgrade(true);
+    }
+  };
+  
+  if (showUpgrade && entitlement) {
+    return <PremiumUpgradeScreen 
+      onClose={onClose} 
+      entitlement={entitlement} 
+      feature="general" 
+    />;
+  }
   
   // Use translation hook directly for AI Health
   const { t: i18nT, i18n } = useTranslation();
@@ -846,11 +894,12 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
       });
 
       // Detect current language
-      const currentLanguage = i18n.language === 'es' ? 'Spanish' : 
-                             i18n.language === 'zh' ? 'Chinese' : 
-                             i18n.language === 'fr' ? 'French' : 
-                             i18n.language === 'de' ? 'German' : 
-                             i18n.language === 'pt' ? 'Portuguese' : uiI18n.t("settings.languages.en");
+      const appLanguage = normalizeLanguage(i18n.language) || 'en';
+      const currentLanguage = appLanguage === 'es' ? 'Spanish' :
+                             appLanguage === 'zh' ? 'Chinese' :
+                             appLanguage === 'fr' ? 'French' :
+                             appLanguage === 'de' ? 'German' :
+                             appLanguage === 'pt' ? 'Portuguese' : 'English';
 
       // Race between fetch and timeout
       const fetchPromise = authenticatedFetch(apiUrl, {
@@ -860,6 +909,8 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
         },
         body: JSON.stringify({
           items: allItems,
+          // Not read by the server yet (see PR follow-ups); sent so it can answer in the app language.
+          language: normalizeLanguage(i18n.language) || 'en',
           messages: [
             {
               role: 'user',
@@ -969,24 +1020,18 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       console.error('Failed to check drug interactions:', error);
       console.error('Error details:', error.message);
-      
+
       let errorMessage = S?.failedToCheckInteractions || uiI18n.t("ui.failedToCheckInteractions");
-      
-      // Check for timeout
       if (error.message?.includes('timeout')) {
-        errorMessage = uiI18n.t("ui.connectionTimeoutTheAiServerIsNotRespondingPlease1MakeSureTheServerIsRunningCdServerNpmSta");
+        errorMessage = uiI18n.t("aiHealth.errors.timeout");
+      } else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
+        errorMessage = uiI18n.t("aiHealth.errors.unreachable");
+      } else {
+        errorMessage = uiI18n.t("errors.generic");
       }
-      // Check for network errors
-      else if (error.message?.includes('Network') || error.message?.includes('Failed to fetch')) {
-        errorMessage = uiI18n.t("ui.networkErrorCannotConnectToAiServerPlease1StartTheServerCdServerNpmStart2CheckIfRunningOnP");
-      }
-      // Add error details for other errors
-      else if (error.message) {
-        errorMessage += uiI18n.t("ui.detailsValue", { value1: error.message });
-      }
-      
+
       Alert.alert(
-        '❌ ' + (S?.error || uiI18n.t("adminProfile.error")), 
+        S?.error || uiI18n.t("errors.title"),
         errorMessage
       );
     }
@@ -1073,40 +1118,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     console.log('🧠 Fasting analysis exists:', !!fastingAnalysis);
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for PDF...');
-      
-      // Get AuricRX logo as base64 (using Image.resolveAssetSource for proper handling)
-      const logoSource = Image.resolveAssetSource(require('../../assets/sign in logo.png'));
-      console.log('🔍 Logo source:', logoSource);
-      
-      // Download the logo to local storage
-      const logoUri = await FileSystem.downloadAsync(
-        logoSource.uri,
-        FileSystem.documentDirectory + 'sign-in-logo.png'
-      );
-      console.log('🔍 Logo downloaded to:', logoUri.uri);
-      
-      // Compress the logo to reduce file size for PDF
-      console.log('📦 Compressing logo for PDF...');
-      const compressedLogo = await ImageManipulator.manipulateAsync(
-        logoUri.uri,
-        [{ resize: { width: 400 } }], // Resize to 400px width for PDF
-        { 
-          compress: 0.7, // 70% quality
-          format: ImageManipulator.SaveFormat.PNG,
-          base64: true 
-        }
-      );
-      
-      if (!compressedLogo.base64) {
-        throw new Error(uiI18n.t("ui.failedToCompressLogo"));
-      }
-      
-      const logoBase64 = compressedLogo.base64;
-      console.log('✅ Logo compressed successfully, base64 length:', logoBase64.length);
+      const logoBase64 = await loadSignInLogoBase64();
+      console.log('✅ Logo base64 length:', logoBase64.length);
       
       // Create HTML content for PDF (similar to DocumentsScreen)
       const medicationsHtml = medications && medications.length > 0 ? 
@@ -1408,51 +1425,18 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     }
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for Active Symptoms PDF...');
       
-      // Try to load logo with better error handling
-      let logoBase64 = '';
-      try {
-        const logoAsset = require('../../assets/sign in logo.png');
-        const logoSource = Image.resolveAssetSource(logoAsset);
-        console.log('🔍 Logo source:', logoSource);
-        
-        // Try to download and convert to base64
-        const downloadPath = FileSystem.documentDirectory + 'temp-logo-active.png';
-        await FileSystem.downloadAsync(logoSource.uri, downloadPath);
-        
-        // Compress the logo for PDF to reduce file size
-        console.log('📦 Compressing logo for PDF...');
-        const compressedLogo = await ImageManipulator.manipulateAsync(
-          downloadPath,
-          [{ resize: { width: 400 } }],
-          { 
-            compress: 0.7,
-            format: ImageManipulator.SaveFormat.PNG,
-            base64: true 
-          }
-        );
-        
-        if (!compressedLogo.base64) {
-          throw new Error(uiI18n.t("ui.failedToCompressLogo"));
-        }
-        logoBase64 = compressedLogo.base64;
-        console.log('✅ Logo compressed, size:', logoBase64.length);
-        
-        // Clean up temp file
-        await FileSystem.deleteAsync(downloadPath, { idempotent: true });
-      } catch (error) {
-        console.warn('⚠️ Logo load failed, using text header:', error);
-      }
+      const logoBase64 = await loadSignInLogoBase64();
       
       // Create HTML content for ACTIVE symptoms only
       const symptomsHtml = symptomAnalyses.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
           <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} ${new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}</p>
           ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || uiI18n.t("ai.notes")}: ${analysis.notes}</p>` : ''}
         </div>
       `).join('');
@@ -1576,45 +1560,12 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
     }
     
     try {
-      const currentDate = new Date().toLocaleDateString();
+      const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
       console.log('📅 Generated date:', currentDate);
       
       console.log('📝 Creating HTML content for Complete Symptom History PDF...');
       
-      // Try to load logo with better error handling
-      let logoBase64 = '';
-      try {
-        const logoAsset = require('../../assets/sign in logo.png');
-        const logoSource = Image.resolveAssetSource(logoAsset);
-        console.log('🔍 Logo source:', logoSource);
-        
-        // Try to download and convert to base64
-        const downloadPath = FileSystem.documentDirectory + 'temp-logo-all.png';
-        await FileSystem.downloadAsync(logoSource.uri, downloadPath);
-        
-        // Compress the logo for PDF to reduce file size
-        console.log('📦 Compressing logo for PDF...');
-        const compressedLogo = await ImageManipulator.manipulateAsync(
-          downloadPath,
-          [{ resize: { width: 400 } }],
-          { 
-            compress: 0.7,
-            format: ImageManipulator.SaveFormat.PNG,
-            base64: true 
-          }
-        );
-        
-        if (!compressedLogo.base64) {
-          throw new Error(uiI18n.t("ui.failedToCompressLogo"));
-        }
-        logoBase64 = compressedLogo.base64;
-        console.log('✅ Logo compressed, size:', logoBase64.length);
-        
-        // Clean up temp file
-        await FileSystem.deleteAsync(downloadPath, { idempotent: true });
-      } catch (error) {
-        console.warn('⚠️ Logo load failed, using text header:', error);
-      }
+      const logoBase64 = await loadSignInLogoBase64();
       
       // Sort all symptoms by date (newest first)
       const sortedSymptoms = allSymptoms.sort((a, b) => 
@@ -1625,7 +1576,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       const symptomsHtml = sortedSymptoms.map((analysis, index) => `
         <div style="margin: 15px 0; padding: 10px; border-left: 3px solid #3B82F6;">
           <p style="margin: 0;"><strong>${index + 1}. ${analysis.symptoms.join(', ')}</strong> <span style="color: #666;"></span></p>
-          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString()} ${new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${S?.date || uiI18n.t("ai.date")}: ${new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} ${new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}</p>
           ${analysis.notes ? `<p style="margin: 5px 0 0 0; font-size: 12px;">${S?.notes || uiI18n.t("ai.notes")}: ${analysis.notes}</p>` : ''}
         </div>
       `).join('');
@@ -2057,7 +2008,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
           </View>
           
           <DynamicText type="card" style={dynamicStyles.insightDescription}>
-            {new Date(analysis.createdAt).toLocaleDateString()}
+            {new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())}
           </DynamicText>
           
           <View style={dynamicStyles.insightFooter}>
@@ -2127,7 +2078,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -2135,6 +2086,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }
@@ -2527,7 +2479,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   </View>
                   
                   <DynamicText type="card" style={dynamicStyles.insightDescription}>
-                    {new Date(analysis.createdAt).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} {new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                   </DynamicText>
                   
                   <View style={dynamicStyles.insightFooter}>
@@ -2572,7 +2524,7 @@ REMINDER: Write EVERYTHING in ${currentLanguage}. No English allowed except for 
                   </View>
                   
                   <DynamicText type="card" style={dynamicStyles.insightDescription}>
-                    {new Date(analysis.createdAt).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(analysis.createdAt).toLocaleDateString(getDateTimePickerLocale())} {new Date(analysis.createdAt).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                   </DynamicText>
                   
                   <View style={dynamicStyles.insightFooter}>

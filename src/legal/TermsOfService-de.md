@@ -8,7 +8,7 @@
 
 ## 1) Wer Wir Sind und Wie Diese Bedingungen Funktionieren
 
-Diese Nutzungsbedingungen (die **„Bedingungen"**) regeln Ihre Nutzung der AuricRX MedCoach Mobile-App, Websites und zugehörigen Dienste (zusammen die **„Dienste"**) von **[Auricrx LTD], [Mexico], [Auricrx.ltd@gmail.com]** (**„AuricRX", „wir", „uns", „unser"**). Durch die Nutzung der Dienste stimmen Sie diesen Bedingungen zu.
+Diese Nutzungsbedingungen (die **„Bedingungen"**) regeln Ihre Nutzung der AuricRX MedCoach Mobile-App, Websites und zugehörigen Dienste (zusammen die **„Dienste"**) von **[Auricrx LTD], [Mexico], [support@auricrx.com.mx]** (**„AuricRX", „wir", „uns", „unser"**). Durch die Nutzung der Dienste stimmen Sie diesen Bedingungen zu.
 
 Wenn Sie nicht zustimmen, nutzen Sie die Dienste nicht. Wir können diese Bedingungen jederzeit ändern. Bei wesentlichen Änderungen informieren wir Sie (z. B. In-App-Meldung) und die geänderten Bedingungen treten mit Veröffentlichung in Kraft.
 
@@ -174,7 +174,7 @@ Sollte eine Bestimmung nicht durchsetzbar sein, wird sie im größtmöglichen ge
 
 *Zuletzt aktualisiert: 5. November 2025*
 
-**Verantwortlicher:** **[AuricRx LTD]**, **[Queretaro, Mexico]**, **[Auricrx.ltd@gmail.com]**.
+**Verantwortlicher:** **[AuricRx LTD]**, **[Queretaro, Mexico]**, **[support@auricrx.com.mx]**.
 
 Diese Datenschutzerklärung beschreibt, wie wir Informationen erfassen, nutzen, offenlegen und schützen, wenn Sie AuricRX MedCoach (die **„Dienste“**) nutzen.
 
@@ -278,7 +278,7 @@ Die Dienste richten sich nicht an Kinder unter **13** Jahren (oder **16**, sofer
 
 * **EU/VK:** Rechtsgrundlagen siehe oben; Übermittlungen basieren auf Mechanismen wie Standardvertragsklauseln. Kontaktieren Sie Ihre Aufsichtsbehörde.
 
-* **Mexiko:** Verarbeitung gemäß **Ley Federal de Protección de Datos Personales en Posesión de los Particulares**. Sie können ARCO-Rechte über **[Auricrx.ltd@gmail.com]** ausüben.
+* **Mexiko:** Verarbeitung gemäß **Ley Federal de Protección de Datos Personales en Posesión de los Particulares**. Sie können ARCO-Rechte über **[support@auricrx.com.mx]** ausüben.
 
 ---
 
@@ -294,7 +294,7 @@ Wir können diese Erklärung aktualisieren. Wesentliche Änderungen werden in de
 
 **[Queretaro, Mexico]**
 
-**E-Mail:** **[Auricrx.ltd@gmail.com]**
+**E-Mail:** **[support@auricrx.com.mx]**
 
 ---
 

@@ -39,7 +39,7 @@ export const HERBS = records.map(record => ({
   ...record, detailsEs: HERB_DETAILS_ES[record.key], image: images[record.key] || placeholder,
   imageVerified: !!images[record.key],
   ...(record.key === 'cilantro' ? { imageAttribution: {
-    species: 'Coriandrum sativum', author: 'H. Zell; recorte de Epipelagic',
+    species: 'Coriandrum sativum', author: 'H. Zell', croppedBy: 'Epipelagic',
     license: 'CC BY-SA 3.0', url: 'https://commons.wikimedia.org/wiki/File:Coriandrum_sativum_003.JPG',
   } } : {}),
 }));

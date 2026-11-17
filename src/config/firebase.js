@@ -27,7 +27,7 @@ const auth = initializeAuth(app, {
 });
 
 // Initialize Firestore
-const db = getFirestore(app);
+const db = getFirestore(app, 'auricrxmedcoach');
 
 export { auth, db };
 export default app;

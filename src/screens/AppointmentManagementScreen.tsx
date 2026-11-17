@@ -1,3 +1,4 @@
+import { getDateTimePickerLocale } from '../utils/dateTimeLocale';
 import Modal from '../components/BackModal';
 import { useTranslation as useScreenTranslation } from "react-i18next";
 import uiI18n from "../i18n";
@@ -13,6 +14,10 @@ import * as Haptics from 'expo-haptics';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
 import AppointmentService, { Appointment, DoctorContact, AppointmentStats } from '../services/appointmentService';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
+import { isPreVisitIntakeEnabled } from '../config/preVisitIntake';
+import PreVisitIntakeModal from './preVisitIntake/PreVisitIntakeModal';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -27,6 +32,7 @@ type AppointmentType = 'doctor' | 'lab' | 'pharmacy' | 'specialist' | 'emergency
 export default function AppointmentManagementScreen({ onClose, theme, S }: AppointmentManagementScreenProps) {
   useUILanguage();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Use S object for translations, fallback to key if not available
   const { t } = useScreenTranslation();
@@ -470,6 +476,9 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
   const [doctorContacts, setDoctorContacts] = useState<DoctorContact[]>([]);
   const [stats, setStats] = useState<AppointmentStats | null>(null);
   const [showAddAppointmentModal, setShowAddAppointmentModal] = useState(false);
+  // Optional pre-visit intake (feature-flagged, OFF by default). Offered only AFTER the appointment is saved.
+  const preVisitIntakeEnabled = isPreVisitIntakeEnabled();
+  const [preVisitIntake, setPreVisitIntake] = useState<null | { mode: 'book' | 'history'; appointmentId: string; justBooked?: Appointment }>(null);
   const [showAddDoctorModal, setShowAddDoctorModal] = useState(false);
   const [showEditDoctorModal, setShowEditDoctorModal] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<DoctorContact | null>(null);
@@ -737,7 +746,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     setShowDatePicker(false);
     if (selectedDate) {
       setSelectedDate(selectedDate);
-      setAppointmentDate(selectedDate.toLocaleDateString());
+      setAppointmentDate(selectedDate.toLocaleDateString(getDateTimePickerLocale()));
     }
   };
 
@@ -745,12 +754,12 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
     setShowTimePicker(false);
     if (selectedTime) {
       setSelectedTime(selectedTime);
-      setAppointmentTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      setAppointmentTime(selectedTime.toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' }));
     }
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(getDateTimePickerLocale(), {
       weekday: 'short',
       year: 'numeric',
       month: 'short',
@@ -759,7 +768,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(getDateTimePickerLocale(), {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
@@ -868,7 +877,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour duration
 
-      await appointmentService.createAppointment({
+      const createdAppointment = await appointmentService.createAppointment({
         title: appointmentTitle,
         type: selectedAppointmentType,
         location: appointmentLocation,
@@ -892,7 +901,14 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       loadData();
       triggerHaptic('medium');
-      Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"));
+      if (preVisitIntakeEnabled && createdAppointment?.id) {
+        // Booking is already saved; the intake offer opens after the confirmation is dismissed.
+        Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"), [
+          { text: t("common.ok"), onPress: () => setPreVisitIntake({ mode: 'book', appointmentId: createdAppointment.id, justBooked: createdAppointment }) },
+        ]);
+      } else {
+        Alert.alert('✅ ' + t("appointments.success"), t("appointments.appointmentScheduled"));
+      }
     } catch (error) {
       console.error('Failed to add appointment:', error);
       Alert.alert('❌ ' + t("appointments.error"), t("appointments.failedToSchedule"));
@@ -1182,7 +1198,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           </DynamicText>
           
           <DynamicText type="card" style={dynamicStyles.appointmentDateTime}>
-            📅 {new Date(appointment.startDate).toLocaleDateString()}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            📅 {new Date(appointment.startDate).toLocaleDateString(getDateTimePickerLocale())}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
           </DynamicText>
           
           <DynamicText type="card" style={dynamicStyles.appointmentLocation}>
@@ -1197,6 +1213,16 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
               {getStatusLabel(appointment.status)}
             </DynamicText>
           </View>
+          {preVisitIntakeEnabled && (
+            <TouchableOpacity
+              testID={`previsit-intake-entry-${appointment.id}`}
+              accessibilityRole="button"
+              onPress={() => setPreVisitIntake({ mode: 'history', appointmentId: appointment.id })}
+              style={{ alignSelf: 'flex-start', marginTop: 8, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1, borderColor: currentTheme.accent }}
+            >
+              <DynamicText type="accent" style={{ fontSize: 13, fontWeight: '600' }}>{t("preVisitIntake.entry.openIntake")}</DynamicText>
+            </TouchableOpacity>
+          )}
         </View>
       ))}
       
@@ -1238,7 +1264,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             
             {/* Dialing Options */}
             <View style={dynamicStyles.dialingOptions}>
-              {(doctor.dialingMethod === uiI18n.t("ui.phone") || doctor.dialingMethod === 'both') && (
+              {(doctor.dialingMethod === 'phone' || doctor.dialingMethod === 'both') && (
                 <TouchableOpacity
                   style={[dynamicStyles.dialButton, { backgroundColor: currentTheme.accent + 'CC' }]}
                   onPress={() => {
@@ -1250,7 +1276,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
                 </TouchableOpacity>
               )}
               
-              {(doctor.dialingMethod === uiI18n.t("appointments.whatsapp") || doctor.dialingMethod === 'both') && (
+              {(doctor.dialingMethod === 'whatsapp' || doctor.dialingMethod === 'both') && (
                 <TouchableOpacity
                   style={[dynamicStyles.dialButton, { backgroundColor: '#25D366' + 'CC' }]}
                   onPress={() => {
@@ -1303,7 +1329,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
       
       <View style={styles.container}>
         <ScrollView keyboardShouldPersistTaps="handled" 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: 24 }]} 
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: FAB_SCROLL_PADDING }]} 
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
@@ -1311,6 +1337,7 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
             style={[
               styles.header,
               {
+                paddingTop: Math.max(insets.top, 0) + 12,
                 opacity: fadeAnim,
                 transform: [{ translateY: slideAnim }]
               }
@@ -1353,6 +1380,22 @@ export default function AppointmentManagementScreen({ onClose, theme, S }: Appoi
           {renderDoctorContacts()}
         </ScrollView>
       </View>
+
+      {preVisitIntakeEnabled && preVisitIntake && (
+        <PreVisitIntakeModal
+          visible
+          mode={preVisitIntake.mode}
+          initialAppointmentId={preVisitIntake.appointmentId}
+          justBookedId={preVisitIntake.justBooked?.id ?? null}
+          appointments={
+            preVisitIntake.justBooked
+              ? [preVisitIntake.justBooked, ...appointments.filter(a => a.id !== preVisitIntake.justBooked?.id)]
+              : appointments
+          }
+          dark={currentTheme?.mode !== 'light'}
+          onClose={() => setPreVisitIntake(null)}
+        />
+      )}
 
       {/* Add Appointment Modal */}
       <Modal
@@ -1827,7 +1870,7 @@ setShowCountryPicker(true)
                         }
                       ]}>
                         <DynamicText type="card" style={dynamicStyles.statusText}>
-                          {appointment.status === uiI18n.t("appointments.completed") ? uiI18n.t("healthAnalytics.value", { value1: t("appointments.attended") }) : uiI18n.t("healthAnalytics.value", { value1: t("appointments.missed") })}
+                          {appointment.status === 'completed' ? uiI18n.t("healthAnalytics.value", { value1: t("appointments.attended") }) : uiI18n.t("healthAnalytics.value", { value1: t("appointments.missed") })}
                         </DynamicText>
                       </View>
                     </View>
@@ -1843,7 +1886,7 @@ setShowCountryPicker(true)
                     )}
                     
                     <DynamicText type="card" style={dynamicStyles.appointmentDateTime}>
-                      📅 {new Date(appointment.startDate).toLocaleDateString()}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      📅 {new Date(appointment.startDate).toLocaleDateString(getDateTimePickerLocale())}{uiI18n.t("ui.at")}{new Date(appointment.startDate).toLocaleTimeString(getDateTimePickerLocale(), { hour: '2-digit', minute: '2-digit' })}
                     </DynamicText>
                     
                     {appointment.notes && (

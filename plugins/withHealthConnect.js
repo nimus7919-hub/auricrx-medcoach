@@ -1,7 +1,11 @@
 const { withAndroidManifest, withAppBuildGradle, withMainActivity, withMainApplication, withDangerousMod, withStringsXml, withGradleProperties } = require('@expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
-const privacy = require('../modules/health-connect/privacy.json');
+// Native Android strings: English is the default resource set; Spanish ships as values-b+es through the
+// Expo `locales` config (locales/es.json -> android). The phone's system language picks between them.
+const nativeEn = require('../locales/en.json').android;
+// Unquoted Android string resources need real escapes for apostrophes and newlines.
+const androidText = value => String(value).replace(/'/g, "\\'").replace(/\n/g, '\\n');
 const types = ['HEART_RATE', 'RESTING_HEART_RATE', 'STEPS', 'EXERCISE'];
 const dependency = 'implementation("androidx.health.connect:connect-client:1.1.0-alpha11")';
 const filter = (action, category) => ({ action: [{ $: { 'android:name': action } }], ...(category ? { category: [{ $: { 'android:name': category } }] } : {}) });
@@ -52,8 +56,13 @@ module.exports = function withHealthConnect(config) {
     return cfg;
   });
   config = withStringsXml(config, cfg => {
-    const value = { $: { name: 'hc_privacy_notice', formatted: 'false' }, _: `Datos de actividad y salud de Health Connect\n\n${privacy.body}\n\n${privacy.disclaimer}` };
-    cfg.modResults.resources.string = (cfg.modResults.resources.string || []).filter(s => s.$.name !== 'hc_privacy_notice').concat(value);
+    const entries = [
+      { $: { name: 'hc_privacy_title' }, _: androidText(nativeEn.hc_privacy_title) },
+      { $: { name: 'hc_privacy_unavailable' }, _: androidText(nativeEn.hc_privacy_unavailable) },
+      { $: { name: 'hc_privacy_notice', formatted: 'false' }, _: androidText(nativeEn.hc_privacy_notice) },
+    ];
+    const names = new Set(entries.map(entry => entry.$.name));
+    cfg.modResults.resources.string = (cfg.modResults.resources.string || []).filter(s => !names.has(s.$.name)).concat(entries);
     return cfg;
   });
   return withDangerousMod(config, ['android', async cfg => {

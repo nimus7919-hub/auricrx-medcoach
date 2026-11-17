@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Text, Animated } from 'react-native';
+import MarkdownText from './MarkdownText';
 
 export default function TypingEffect({ 
   text, 
@@ -67,7 +68,7 @@ export default function TypingEffect({
 
   return (
     <Text style={style}>
-      {displayedText}
+      <MarkdownText text={displayedText} style={style} />
       {showCursor && isTyping && (
         <Animated.Text style={{ opacity: cursorOpacity }}>|</Animated.Text>
       )}

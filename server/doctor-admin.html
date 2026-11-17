@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuricRX Médicos — Verification review</title>
+  <style>
+    :root {
+      --bg: #080e1b;
+      --bg2: #131e32;
+      --card: #172235;
+      --text: #fff5e4;
+      --sub: #c8bead;
+      --gold: #dbb65c;
+      --border: #756340;
+      --danger: #c45c5c;
+      --ok: #6a9a6a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 10% -10%, #1c2a45 0%, transparent 55%),
+        linear-gradient(165deg, var(--bg), var(--bg2));
+    }
+    header {
+      padding: 28px 24px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      letter-spacing: 0.02em;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    header p { margin: 8px 0 0; color: var(--sub); max-width: 52rem; }
+    main { padding: 20px 24px 48px; max-width: 1100px; margin: 0 auto; }
+    .auth {
+      display: grid;
+      gap: 10px;
+      max-width: 520px;
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    label { display: block; font-size: 0.85rem; color: var(--sub); margin-bottom: 4px; }
+    input, textarea, select, button {
+      font: inherit;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 0;
+      border: 1px solid var(--border);
+      background: #0d1524;
+      color: var(--text);
+    }
+    button {
+      background: var(--gold);
+      color: #17130b;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      width: auto;
+      padding: 10px 16px;
+    }
+    button.secondary { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+    button.danger { background: var(--danger); color: #fff; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .list { display: grid; gap: 14px; margin-top: 18px; }
+    .item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    .item h2 { margin: 0 0 6px; font-size: 1.15rem; color: var(--gold); }
+    .meta { color: var(--sub); font-size: 0.92rem; margin: 2px 0; }
+    .evidence {
+      margin-top: 10px;
+      padding: 10px;
+      background: #0d1524;
+      border: 1px solid #2a3a55;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 220px;
+      overflow: auto;
+    }
+    .err { color: var(--danger); margin-top: 8px; }
+    .ok { color: var(--ok); }
+    .hint { color: var(--sub); font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AuricRX Médicos</h1>
+    <p>Admin verification review. Approvals are manual only. Paste a Firebase ID token from an account with custom claim <code>admin: true</code> and MFA.</p>
+  </header>
+  <main>
+    <section class="auth" id="authBox">
+      <div>
+        <label for="apiBase">API base URL</label>
+        <input id="apiBase" value="" placeholder="https://your-api.onrender.com" />
+      </div>
+      <div>
+        <label for="token">Firebase ID token (admin + MFA)</label>
+        <textarea id="token" rows="4" placeholder="eyJhbGciOi..."></textarea>
+      </div>
+      <div class="row">
+        <button type="button" id="loadBtn">Load pending queue</button>
+        <button type="button" class="secondary" id="dueBtn">Expire / flag due</button>
+      </div>
+      <p class="hint">Set the admin claim with Admin SDK: <code>auth.setCustomUserClaims(uid, { admin: true })</code>. Token must include <code>sign_in_second_factor</code>.</p>
+      <p class="err" id="err" hidden></p>
+    </section>
+    <section class="list" id="list"></section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    $('apiBase').value = window.location.origin;
+
+    function token() { return $('token').value.trim(); }
+    function base() { return $('apiBase').value.replace(/\/$/, ''); }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(base() + path, {
+        ...opts,
+        headers: {
+          Authorization: 'Bearer ' + token(),
+          'Content-Type': 'application/json',
+          ...(opts.headers || {}),
+        },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || ('HTTP ' + res.status));
+      }
+      return data;
+    }
+
+    function showErr(msg) {
+      const el = $('err');
+      el.hidden = !msg;
+      el.textContent = msg || '';
+    }
+
+    function evidenceSummary(item) {
+      const e = item.evidence || {};
+      const r = e.registry || {};
+      const i = e.identity || {};
+      return {
+        registryOutcome: r.outcome,
+        nameMatch: r.nameMatch?.matched,
+        medicalTitleOk: r.medicalTitleOk,
+        provider: r.provider,
+        identity: i.status + ' / ' + i.provider,
+        stateBoard: r.stateBoardLookupUrl || null,
+        records: (r.records || []).map((x) => ({
+          id: x.registryId,
+          name: x.fullName,
+          title: x.title || x.taxonomyDesc,
+        })),
+      };
+    }
+
+    async function act(uid, action) {
+      const reason = prompt('Reason (required for reject/suspend/revoke):', action === 'approve' ? 'Approved after manual review' : '') || '';
+      if (action !== 'approve' && !reason.trim()) return;
+      await api('/api/doctor/admin/verification/' + uid + '/' + action, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      });
+      await loadQueue();
+    }
+
+    async function loadQueue() {
+      showErr('');
+      try {
+        const data = await api('/api/doctor/admin/verification/queue?status=pending_review');
+        const list = $('list');
+        list.innerHTML = '';
+        if (!data.items?.length) {
+          list.innerHTML = '<p class="ok">No doctors in pending_review.</p>';
+          return;
+        }
+        for (const item of data.items) {
+          const p = item.profile || {};
+          const div = document.createElement('div');
+          div.className = 'item';
+          const summary = evidenceSummary(item);
+          div.innerHTML =
+            '<h2>' + (p.legalFullName || p.displayName || item.doctorId) + '</h2>' +
+            '<p class="meta">' + (p.country || '—') + ' · ' + (p.specialty || '—') +
+            ' · cédula/NPI: ' + (p.cedulaNumber || p.npiNumber || '—') + '</p>' +
+            '<p class="meta">License: ' + (p.licenseNumber || '—') + ' ' + (p.licenseState || '') + '</p>' +
+            '<p class="meta">Submitted: ' + (p.verificationUpdatedAt || '—') + '</p>' +
+            '<div class="evidence">' + JSON.stringify(summary, null, 2) + '</div>' +
+            (summary.stateBoard ? '<p class="meta"><a style="color:var(--gold)" href="' + summary.stateBoard + '" target="_blank" rel="noopener">State board lookup</a></p>' : '') +
+            '<div class="row" style="margin-top:12px"></div>';
+          const row = div.querySelector('.row');
+          for (const [label, action, cls] of [
+            ['Approve', 'approve', ''],
+            ['Reject', 'reject', 'danger'],
+            ['Suspend', 'suspend', 'danger'],
+            ['Revoke', 'revoke', 'secondary'],
+          ]) {
+            const b = document.createElement('button');
+            b.textContent = label;
+            if (cls) b.className = cls;
+            b.onclick = () => act(item.doctorId, action).catch((e) => showErr(e.message));
+            row.appendChild(b);
+          }
+          list.appendChild(div);
+        }
+      } catch (e) {
+        showErr(e.message);
+      }
+    }
+
+    $('loadBtn').onclick = () => loadQueue();
+    $('dueBtn').onclick = async () => {
+      showErr('');
+      try {
+        const data = await api('/api/doctor/verification/expire-due', { method: 'POST', body: '{}' });
+        alert('Expired: ' + (data.expired || []).length + ' · Due: ' + (data.due || []).length);
+      } catch (e) {
+        showErr(e.message);
+      }
+    };
+  </script>
+</body>
+</html>

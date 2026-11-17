@@ -13,6 +13,8 @@ import * as Location from 'expo-location';
 import SupplementRefillModal from './SupplementRefillModal';
 import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../src/layout/fabLayout';
 
 // Supplements component moved outside App to prevent remounting
 const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
@@ -20,6 +22,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
   // Mount/unmount detection
   const mounted = useRef(0);
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
 
   // Unit options for supplements (dosage strength units only - NOT package types)
   const dosageUnits = [
@@ -243,14 +246,14 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         setAiAnalysisQuery(results);
       } else {
         // Fallback to AI-powered search if no specific stores found
-        const aiQuery = `Find nearby stores selling ${supplementName} supplement with price comparison. Include pharmacies, health stores, and supplement shops. Provide store names, addresses, and estimated prices.`;
+        const aiQuery = uiI18n.t('supplements.noStoresFound', { name: supplementName });
         setAiAnalysisQuery(aiQuery);
       }
       
     } catch (error) {
       console.error('Error searching for supplements:', error);
       // Fallback to AI-powered search
-      const aiQuery = `Find nearby stores selling ${supplementName} supplement with price comparison. Include pharmacies, health stores, and supplement shops. Provide store names, addresses, and estimated prices.`;
+      const aiQuery = uiI18n.t('supplements.noStoresFound', { name: supplementName });
       setShowAiAnalysis(true);
       setAiAnalysisQuery(aiQuery);
     }
@@ -426,7 +429,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         flexDirection: 'row', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
-        paddingTop: 50, 
+        paddingTop: Math.max(insets.top, 0) + 12, 
         paddingHorizontal: 20, 
         paddingVertical: 16,
         backgroundColor: theme.background,
@@ -468,7 +471,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
         style={{ flex: 1 }} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={[{ paddingBottom: 20 }, { paddingBottom: 24 }]}
+        contentContainerStyle={[{ paddingBottom: 20 }, { paddingBottom: FAB_SCROLL_PADDING }]}
       >
       <View style={{ padding: 16 }}>
         {/* Header with Filter and Add buttons */}
@@ -616,7 +619,7 @@ const Supplements = ({ supplements, setSupplements, S, theme, lang, userCountry,
                                 try {
                                   const supplementId = supp.dbId || supp.id;
                                   const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/supplements?userId=${user.uid}&supplementId=${supplementId}`, {
-                                    method: uiI18n.t("ai.delete")
+                                    method: 'DELETE'
                                   });
                                   
                                   const result = await response.json();

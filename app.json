@@ -2,7 +2,7 @@
   "expo": {
     "name": "AuricRX MedCoach",
     "slug": "auricrx-medcoach",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon-auric.png",
     "userInterfaceStyle": "light",
@@ -23,14 +23,15 @@
       "bundleIdentifier": "com.auricrx.medcoach",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Permite detectar entradas y salidas de tus lugares para enviarte recordatorios aunque la app esté cerrada.",
+        "NSLocationWhenInUseUsageDescription": "We use your location to save places and show the approximate weather forecast.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allows detecting arrivals and departures at your places so we can send you reminders even when the app is closed.",
+        "NSFaceIDUsageDescription": "AuricRX MedCoach uses Face ID to unlock your Documents vault on this device.",
         "UIBackgroundModes": [
           "location",
-          "fetch",
-          "location",
           "fetch"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true
       },
       "runtimeVersion": {
         "policy": "appVersion"
@@ -38,12 +39,13 @@
     },
     "android": {
       "softwareKeyboardLayoutMode": "resize",
-      "predictiveBackGestureEnabled": false,
+      "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-auric.png",
         "backgroundColor": "#0d1019"
       },
       "package": "com.auricrx.medcoach",
+      "versionCode": 11,
       "googleServicesFile": "./android/app/google-services.json",
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
@@ -74,9 +76,11 @@
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
       ],
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.1.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -89,6 +93,7 @@
           "iosUrlScheme": "com.googleusercontent.apps.1043512593259-psqc8dqa2d4krptqfp4avhgejnkhamt1"
         }
       ],
+      "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [
         "expo-notifications",
@@ -101,14 +106,60 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Usamos tu ubicación para guardar lugares y consultar el pronóstico aproximado.",
-          "locationAlwaysAndWhenInUsePermission": "Permite detectar entradas y salidas de tus lugares para recordatorios aunque la app esté cerrada.",
+          "locationWhenInUsePermission": "We use your location to save places and show the approximate weather forecast.",
+          "locationAlwaysAndWhenInUsePermission": "Allows detecting arrivals and departures at your places so we can send you reminders even when the app is closed.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true
         }
       ],
-      "expo-background-fetch"
+      "expo-background-fetch",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "deploymentTarget": "15.5"
+          }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "We use the camera to take photos of prescriptions and documents that you choose to save.",
+          "microphonePermission": "AuricRX only uses the microphone if you turn it on; it does not record audio in the background.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allows choosing photos of prescriptions or documents to save in the app.",
+          "cameraPermission": "We use the camera to take photos of prescriptions and documents that you choose to save.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allows adding your appointments and reminders to your calendar.",
+          "remindersPermission": "Allows creating reminders for your medications and appointments."
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "AuricRX MedCoach uses Face ID to unlock your Documents vault on this device."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "./plugins/withIosFirebaseStatic"
     ],
     "extra": {
       "googleAuth": {
@@ -127,6 +178,10 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "locales": {
+      "en": "./locales/en.json",
+      "es": "./locales/es.json"
     }
   }
 }

@@ -1,5 +1,5 @@
 Consumer Health Data Privacy Policy - US-2026-11-03
-This separate notice covers consumers including Washington, Nevada, and Connecticut. Controller: Adriana Hernandez, Mexico; contact Auricrx.ltd@gmail.com (owner confirmation pending).
+This separate notice covers consumers including Washington, Nevada, and Connecticut. Controller: Adriana Hernandez, Mexico; contact support@auricrx.com.mx.
 Categories: user-entered medications, supplements, herbs, health profiles, symptoms, reminders, appointments, documents, and chat content. Sources: you, your uploaded documents, and public reference services you query. Optional wearable data is kept on your device. Drug reference searches may reveal health interests.
 Purposes: organize your information, reminders, reference lookup, requested chat, and synchronization. We ask separately before health-data collection and before processor sharing. The cloud beta requires both to enable health features.
 Recipients: Firebase/Google for authentication, Render and Neon for hosting/sync, OpenAI for chat you choose to send. Reference queries go through Render to NLM RxNorm, DailyMed, FDA, CMS Medicaid NADAC, or CMS NPPES as selected; we send the search terms needed, not your complete health profile. External links open the recipient site under its own privacy terms.

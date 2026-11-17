@@ -16,6 +16,7 @@ export const STORAGE = {
   night: 'AURIC_NIGHT',
   mood: 'AURIC_MOOD',
   reminders: 'AURIC_REMINDERS',
+  reminderTombstones: 'AURIC_REMINDER_TOMBSTONES',
   rxPhotos: 'AURIC_RX_PHOTOS',
   voiceNotes: 'AURIC_VOICE_NOTES',
   meds: 'AURIC_MEDS',

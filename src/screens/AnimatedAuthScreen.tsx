@@ -91,7 +91,8 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
       Alert.alert(uiI18n.t("adminProfile.success"), uiI18n.t("ui.signedInSuccessfully"));
       onAuthSuccess();
     } catch (error) {
-      Alert.alert(uiI18n.t("adminProfile.error"), (error instanceof Error ? error.message : String(error)));
+      console.error('AnimatedAuth sign-in error:', error);
+      Alert.alert(uiI18n.t("errors.title"), uiI18n.t("ui.authenticationFailedPleaseTryAgain"));
     } finally {
       setLoading(false);
     }
@@ -112,6 +113,7 @@ const AnimatedAuthScreen = ({ onAuthSuccess, onClose }: { onAuthSuccess: (user?:
         Alert.alert(uiI18n.t("adminProfile.error"), result.error);
       }
     } catch (error) {
+      console.error('Google sign-in failed:', error);
       Alert.alert(uiI18n.t("adminProfile.error"), uiI18n.t("ui.googleAuthenticationFailed"));
     } finally {
       setLoading(false);

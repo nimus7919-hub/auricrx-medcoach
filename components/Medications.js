@@ -1,5 +1,5 @@
+import { getDateTimePickerLocale } from '../src/utils/dateTimeLocale';
 import { daysRemaining, recordDose, linkedReminders } from '../src/services/smartNotificationEngine';
-import { getRegion } from '../src/services/region';
 import Modal from '../src/components/BackModal';
 import uiI18n from "../src/i18n";
 import { useTranslation as useUILanguage } from "react-i18next";
@@ -22,6 +22,8 @@ import DynamicText from '../src/components/DynamicText';
 import { useWallpaper } from '../src/contexts/WallpaperContext';
 import { formatTime } from '../src/utils/time';
 import { useTimeFormat } from '../src/hooks/useTimeFormat';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../src/layout/fabLayout';
 
 // Medications component moved outside App to prevent remounting
 const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, user, onNavigateToDashboard, preloadedPharmacies, preloadedCoords, preloadedCurrency, preloadedFxMeta, reminders, setReminders }) => {
@@ -31,6 +33,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
   const { t } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor, getSubTextColor, currentWallpaper } = useWallpaper();
   const { timeFormat } = useTimeFormat();
+  const insets = useSafeAreaInsets();
   
   // Helper function to convert unit to sentence case
   const toSentenceCase = (str) => {
@@ -425,30 +428,26 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
     }
   };
 
-  const handleDeleteMed = async (id) => {
-    // Find the medication to check if it was created from a reminder
+  const performDeleteMed = async (id) => {
     const medToDelete = meds.find(med => med.id === id);
-    
-    // Delete the medication from local state first for immediate UI update
+
     setMeds(prev => prev.filter(med => med.id !== id));
-    
-    // If this medication was created from a reminder, also delete the reminder
+
     if (medToDelete?.fromReminder && medToDelete?.reminderId && setReminders) {
       console.log('🗑️ Also deleting corresponding reminder:', medToDelete.reminderId);
       setReminders(prev => prev.filter(r => r.id !== medToDelete.reminderId));
     }
-    
-    // Sync deletion to cloud if user is authenticated and medication has database ID
+
     if (user && user.uid && (medToDelete?.dbId || medToDelete?.id)) {
       try {
         const medicationId = medToDelete.dbId || medToDelete.id;
         const response = await authenticatedFetch(`https://auricrx-medcoach.onrender.com/api/medications?userId=${user.uid}&medicationId=${medicationId}`, {
-          method: uiI18n.t("ai.delete"),
+          method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           }
         });
-        
+
         if (response.ok) {
           console.log('✅ Medication deleted from database:', medicationId);
         } else {
@@ -458,16 +457,31 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       } catch (dbError) {
         console.error('❌ Database delete error:', dbError);
         console.log('📱 Medication deleted locally but not synced to server');
-        // Don't fail the entire operation if database delete fails
       }
     } else {
       console.log('⚠️ User not authenticated or medication has no database ID, medication deleted locally only');
     }
   };
 
+  const handleDeleteMed = (id) => {
+    const medToDelete = meds.find(med => med.id === id);
+    Alert.alert(
+      t('medications.deleteTitle'),
+      t('medications.deleteMessage', { name: medToDelete?.name || '' }),
+      [
+        { text: t('medications.cancel'), style: 'cancel' },
+        {
+          text: t('medications.delete'),
+          style: 'destructive',
+          onPress: () => { performDeleteMed(id); },
+        },
+      ]
+    );
+  };
+
   // Handle refill completion - update lastRefill date
   const handleRefillComplete = (medicationName) => {
-    const currentDate = new Date().toLocaleDateString();
+    const currentDate = new Date().toLocaleDateString(getDateTimePickerLocale());
     setMeds(prev => prev.map(med => 
       med.name === medicationName 
         ? { ...med, lastRefill: currentDate }
@@ -605,6 +619,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
         justifyContent: 'space-between', 
         paddingHorizontal: 20,
         paddingVertical: 16,
+        paddingTop: Math.max(insets.top, 0) + 12,
         borderBottomWidth: 1,
         borderBottomColor: theme.chip
       }}>
@@ -641,7 +656,7 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
       </View>
 
       <ScrollView 
-        contentContainerStyle={[{ padding: 16, paddingBottom: 20 }, { paddingBottom: 24 }]} 
+        contentContainerStyle={[{ padding: 16, paddingBottom: 20 }, { paddingBottom: FAB_SCROLL_PADDING }]} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
@@ -771,14 +786,14 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
 
             {/* Optional inventory is stored with the medicine in AsyncStorage. */}
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>{getRegion() === 'US' ? uiI18n.t('usSmart.quantity', { lng: 'en' }) : 'Cantidad actual (opcional)'}</Text><TextInput accessibilityLabel={getRegion() === 'US' ? 'Current quantity' : 'Cantidad actual'} keyboardType="decimal-pad" value={String(med.remainingQuantity ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, remainingQuantity: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
-              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>{getRegion() === 'US' ? uiI18n.t('usSmart.units', { lng: 'en' }) : 'Unidades por toma (opcional)'}</Text><TextInput accessibilityLabel={getRegion() === 'US' ? 'Units per recorded dose' : 'Unidades por toma'} keyboardType="decimal-pad" value={String(med.unitsPerDose ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, unitsPerDose: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
+              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>{uiI18n.t('smartNotif.currentQuantityOptional')}</Text><TextInput accessibilityLabel={uiI18n.t('smartNotif.currentQuantity')} keyboardType="decimal-pad" value={String(med.remainingQuantity ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, remainingQuantity: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
+              <View style={{ flex: 1 }}><Text style={{ color: getCardTextColor(), fontSize: 11 }}>{uiI18n.t('smartNotif.unitsPerDoseOptional')}</Text><TextInput accessibilityLabel={uiI18n.t('smartNotif.unitsPerDose')} keyboardType="decimal-pad" value={String(med.unitsPerDose ?? '')} onChangeText={value => setMeds(prev => prev.map(m => m.id === med.id ? { ...m, unitsPerDose: value } : m))} style={{ color: getCardTextColor(), borderColor: getCardBorderColor(), borderWidth: 1, borderRadius: 6, padding: 6 }} /></View>
             </View>
             {/* Counter and Took Button Row - Compact Corner */}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <DynamicText type="card" style={{ fontSize: 10, fontFamily: 'Inter_500Medium', opacity: 0.8, marginRight: 4 }}>
-                  {parseFloat(med.remainingQuantity || '0')} {S?.left || uiI18n.t("supplements.left")} {daysRemaining(med, reminders || []) != null ? ` · ~${daysRemaining(med, reminders || [])} ${getRegion() === 'US' ? 'days remaining' : 'días restantes'}` : ''}
+                  {parseFloat(med.remainingQuantity || '0')} {S?.left || uiI18n.t("supplements.left")} {daysRemaining(med, reminders || []) != null ? ` · ~${daysRemaining(med, reminders || [])} ${uiI18n.t('smartNotif.daysRemaining')}` : ''}
                 </DynamicText>
                 <TextInput
                   placeholder="0"
@@ -1700,8 +1715,23 @@ const Medications = ({ theme, meds, setMeds, S, themeKey, lang, userCountry, use
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
                   <TouchableOpacity
                     onPress={() => {
-                      setMeds(prev => prev.filter(med => med.id !== editForm.id));
-                      setShowEdit(false);
+                      const id = editForm.id;
+                      const medToDelete = meds.find(med => med.id === id);
+                      Alert.alert(
+                        t('medications.deleteTitle'),
+                        t('medications.deleteMessage', { name: medToDelete?.name || '' }),
+                        [
+                          { text: t('medications.cancel'), style: 'cancel' },
+                          {
+                            text: t('medications.delete'),
+                            style: 'destructive',
+                            onPress: () => {
+                              performDeleteMed(id);
+                              setShowEdit(false);
+                            },
+                          },
+                        ]
+                      );
                     }}
                     style={{
                       backgroundColor: '#f87171',

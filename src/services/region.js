@@ -22,7 +22,8 @@ export async function initializeRegion() {
 }
 export async function setRegion(value) {
   if (!['US', 'MX'].includes(value)) throw new Error('INVALID_REGION');
-  await AsyncStorage.multiSet([['AURIC_REGION', value], ['AURIC_LANG', value === 'US' ? 'en' : 'es']]);
+  // Region only stores region. Language is its own setting (AURIC_LANG) and is never overwritten here.
+  await AsyncStorage.setItem('AURIC_REGION', value);
   region = value;
   savedRegionChoice = true;
   listeners.forEach(listener => listener(value));

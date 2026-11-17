@@ -7,6 +7,8 @@ import { createDocumentPdf } from '../lib/documentPdf';
 import * as Sharing from 'expo-sharing';
 import DynamicText from '../components/DynamicText';
 import { useWallpaper } from '../contexts/WallpaperContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FAB_SCROLL_PADDING } from '../layout/fabLayout';
 
 
 type DocumentPage = {
@@ -18,6 +20,7 @@ type DocumentPage = {
 export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
   const { t, i18n } = useTranslation();
   const { getCardBackgroundColor, getCardBorderColor, getCardTextColor } = useWallpaper();
+  const insets = useSafeAreaInsets();
   
   // Debug logging
   console.log('🎨 Documents Screen Dynamic Colors:', {
@@ -93,6 +96,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         setPages(prev => [...prev, newPage]);
       }
     } catch (error) {
+      console.error('Failed to capture document page:', error);
       Alert.alert(t('common.error'), t('documents.failedToCapture'));
     }
   };
@@ -117,6 +121,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         setPages(prev => [...prev, ...newPages]);
       }
     } catch (error) {
+      console.error('Failed to select document pages:', error);
       Alert.alert(t('common.error'), t('documents.failedToSelect'));
     }
   };
@@ -207,8 +212,8 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: 50 }]}>
-      <View style={[styles.header, { backgroundColor: getCardBackgroundColor() + 'CC', borderBottomColor: getCardBorderColor() }]}>
+    <View style={styles.container}>
+      <View style={[styles.header, { backgroundColor: getCardBackgroundColor() + 'CC', borderBottomColor: getCardBorderColor(), paddingTop: Math.max(insets.top, 0) + 12 }]}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <DynamicText type="card" style={styles.closeButtonText}>←</DynamicText>
         </TouchableOpacity>
@@ -216,7 +221,7 @@ export default function DocumentsScreen({ onClose }: { onClose: () => void }) {
         <View style={styles.placeholder} />
       </View>
 
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingBottom: FAB_SCROLL_PADDING }]}>
         <View style={styles.buttonRow}>
           <TouchableOpacity 
             onPress={addFromCamera}

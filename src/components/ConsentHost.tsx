@@ -93,7 +93,10 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
         await Notifications.cancelAllScheduledNotificationsAsync();
         setError(uiI18n.t("localized.ConsentHost.save.text85"));
       } else { onHealthConsentChange(choices.health && (getRegion() !== 'US' || choices.share)); setVisible(false); onPrivacyClose(); resolvePrompt?.(); setResolvePrompt(null); setRejectPrompt(null); }
-    } catch (e: any) { setError(e.message); }
+    } catch (e: any) {
+      console.warn('ConsentHost load failed:', e?.message || e);
+      setError(uiI18n.t('errors.generic'));
+    }
     finally { setBusy(false); }
   };
   return <Modal visible={visible} onRequestClose={() => {
@@ -123,7 +126,10 @@ export default function ConsentHost({ language, user, privacyOpen, onPrivacyClos
           [{ text: uiI18n.t("localized.ConsentHost.item0.text.text106"), style: 'cancel' }, { text: uiI18n.t("localized.ConsentHost.item1.text.text106"), style: 'destructive', onPress: async () => {
             setBusy(true);
             try { await authService.deleteAccount(); setVisible(false); Alert.alert(uiI18n.t("localized.ConsentHost.item1.onPress.text108")); }
-            catch (e: any) { setError(e.message); }
+            catch (e: any) {
+              console.warn('ConsentHost deleteAccount failed:', e?.message || e);
+              setError(uiI18n.t('errors.generic'));
+            }
             finally { setBusy(false); }
           } }]
         )} />}

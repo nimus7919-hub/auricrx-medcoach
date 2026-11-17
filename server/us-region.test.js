@@ -18,8 +18,10 @@ function regionModule({ country = 'US', locale = 'en-US', missingNative = false,
   });
   return { api: exports, data };
 }
-test('US/MX region defaults honor device country, saved choice and old-build fallback', async () => {
-  assert.equal(await regionModule().api.initializeRegion(), 'US');
+test('US/MX region defaults honor timezone, saved choice and old-build fallback', async () => {
+  // Default fixture uses America/Mexico_City — timezone wins over en-US regionCode.
+  assert.equal(await regionModule().api.initializeRegion(), 'MX');
+  assert.equal(await regionModule({ country: 'US', timeZone: 'America/New_York' }).api.initializeRegion(), 'US');
   assert.equal(await regionModule({ country: 'MX', locale: 'en-US' }).api.initializeRegion(), 'MX');
   assert.equal(await regionModule({ stored: { AURIC_REGION: 'MX' } }).api.initializeRegion(), 'MX');
   assert.equal(await regionModule({ missingNative: true, locale: 'es-MX' }).api.initializeRegion(), 'MX');

@@ -1,0 +1,13 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@auricrx/doctor-core": ["../../packages/doctor-core/src/index.ts"],
+      "@auricrx/doctor-core/*": ["../../packages/doctor-core/src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "App.tsx"]
+}

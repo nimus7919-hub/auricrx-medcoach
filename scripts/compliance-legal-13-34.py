@@ -9,8 +9,8 @@ for lang in ['es','en']:
 Última actualización: 2 de noviembre de 2026
 
 ## Operador
-[Auricrx LTD], [Mexico], [Auricrx.ltd@gmail.com].
-TODO(OWNER-DECISION): Confirmar razón social, domicilio completo, teléfono y correo de privacidad reales. Se conservan los valores actuales hasta confirmación.
+[Auricrx LTD], [Mexico], [soporte@auricrx.com.mx].
+TODO(OWNER-DECISION): Confirmar razón social, domicilio completo y teléfono reales. Se conservan los valores actuales hasta confirmación.
 
 ## Elegibilidad y cuenta
 Debes tener 18 años o más para usar AuricRX MedCoach. Mantén seguras tus credenciales. Acepta estos términos expresamente al crear tu cuenta.
@@ -41,8 +41,8 @@ Consulta el Aviso de Privacidad y la Consumer Health Data Privacy Policy disponi
 
 Versión: 2026-11-02
 
-**Responsable:** [Auricrx LTD], [Mexico], [Auricrx.ltd@gmail.com].
-TODO(OWNER-DECISION): Razón social, domicilio completo, teléfono y correo de privacidad reales pendientes. Estos datos deben confirmarse antes de publicar.
+**Responsable:** [Auricrx LTD], [Mexico], [soporte@auricrx.com.mx].
+TODO(OWNER-DECISION): Razón social, domicilio completo y teléfono reales pendientes. Estos datos deben confirmarse antes de publicar.
 
 **Datos:** nombre, correo, teléfono, país, idioma, identificador Firebase, estado de suscripción e identificadores de elegibilidad de prueba. Datos sensibles: medicamentos, padecimientos, síntomas, perfil de ayuno, métricas de salud, adherencia y conversaciones con IA. También registros técnicos y reportes de fallos. No recibimos números completos de tarjeta.
 
@@ -54,7 +54,7 @@ TODO(OWNER-DECISION): Razón social, domicilio completo, teléfono y correo de p
 
 **Encargados y transferencias:** OpenAI (EE.UU., respuestas de IA); Google/Firebase (EE.UU., autenticación y búsqueda Places); Neon (EE.UU., base de datos); Render (EE.UU., alojamiento); Stripe (EE.UU., pagos web); Expo (EE.UU., entrega de notificaciones). TODO(OWNER-DECISION): Verificar regiones contratadas de Render, Google/Firebase, Stripe y Expo antes de publicar. Las transferencias se realizan conforme al artículo 36 de la LFPDPPP y los acuerdos aplicables con los encargados, solo para operar el servicio. No vendemos ni compartimos tus datos de salud con fines de publicidad o comercialización, incluidos conjuntos agregados o desidentificados.
 
-**Opciones, revocación y ARCO:** limita el uso retirando el consentimiento en Ajustes > Privacidad o desactivando permisos de ubicación/notificaciones. Puedes solicitar acceso, rectificación, cancelación u oposición en [Auricrx.ltd@gmail.com] (TODO(OWNER-DECISION): confirmar correo de privacidad). Indica el derecho que deseas ejercer, los datos involucrados y un medio de respuesta. Verificaremos tu identidad por la cuenta autenticada; no envíes copias completas de identificaciones por correo. Responderemos conforme a los plazos legales aplicables. Retirar el consentimiento bloquea las funciones de salud; puedes eliminar cuenta y datos en Ajustes > Privacidad o mediante la página pública /account-deletion.
+**Opciones, revocación y ARCO:** limita el uso retirando el consentimiento en Ajustes > Privacidad o desactivando permisos de ubicación/notificaciones. Puedes solicitar acceso, rectificación, cancelación u oposición en [soporte@auricrx.com.mx]. Indica el derecho que deseas ejercer, los datos involucrados y un medio de respuesta. Verificaremos tu identidad por la cuenta autenticada; no envíes copias completas de identificaciones por correo. Responderemos conforme a los plazos legales aplicables. Retirar el consentimiento bloquea las funciones de salud; puedes eliminar cuenta y datos en Ajustes > Privacidad o mediante la página pública /account-deletion.
 
 **Retención:** '''+es_ret+'''
 
@@ -68,8 +68,8 @@ TODO(OWNER-DECISION): Razón social, domicilio completo, teléfono y correo de p
 Last updated: November 2, 2026
 
 ## Operator
-[AuricRx LTD], [Queretaro, Mexico], [Auricrx.ltd@gmail.com].
-TODO(OWNER-DECISION): Confirm the real legal entity, full address, phone and privacy email. Current values are retained pending confirmation.
+[AuricRx LTD], [Queretaro, Mexico], [support@auricrx.com.mx].
+TODO(OWNER-DECISION): Confirm the real legal entity, full address and phone. Current values are retained pending confirmation.
 
 ## Eligibility and account
 You must be 18 or older to use AuricRX MedCoach. Protect your credentials. Accept these terms expressly when creating an account.
@@ -100,8 +100,8 @@ Read the Privacy Notice and Consumer Health Data Privacy Policy from Home or Set
 
 Version: 2026-11-02
 
-**Controller:** [AuricRx LTD], [Queretaro, Mexico], [Auricrx.ltd@gmail.com].
-TODO(OWNER-DECISION): Confirm real legal entity, full address, phone and privacy email before publication.
+**Controller:** [AuricRx LTD], [Queretaro, Mexico], [support@auricrx.com.mx].
+TODO(OWNER-DECISION): Confirm real legal entity, full address and phone before publication.
 
 **Data:** name, email, phone, country, language, Firebase identifier, subscription status and trial-eligibility identifiers. Sensitive health data includes medications, conditions, symptoms, fasting profile, health metrics, adherence and AI conversations. We also process technical logs and crash reports. We do not receive full payment card numbers.
 
@@ -113,7 +113,7 @@ TODO(OWNER-DECISION): Confirm real legal entity, full address, phone and privacy
 
 **Service providers and transfers:** OpenAI (USA, AI responses); Google/Firebase (USA, authentication and Places search); Neon (USA, database); Render (USA, backend hosting); Stripe (USA, web payments); Expo (USA, notification delivery). TODO(OWNER-DECISION): Verify contracted processing regions for Render, Google/Firebase, Stripe and Expo before publication. Transfers follow LFPDPPP article 36 and applicable processor agreements and are only for operating the app. We don't sell or share your health data for advertising or marketing, including aggregated or de-identified datasets.
 
-**Choices, withdrawal and rights:** limit use by withdrawing health consent in Settings > Privacy or disabling location/notification permissions. Request access, correction, deletion or opposition at [Auricrx.ltd@gmail.com] (TODO(OWNER-DECISION): confirm privacy email). Describe the right, affected data and reply contact. We verify identity through your authenticated account; do not email full copies of IDs. We respond within applicable statutory deadlines. Withdrawal blocks health features. Delete your account and data in Settings > Privacy or through the public /account-deletion page. These choices also apply to US consumers.
+**Choices, withdrawal and rights:** limit use by withdrawing health consent in Settings > Privacy or disabling location/notification permissions. Request access, correction, deletion or opposition at [support@auricrx.com.mx]. Describe the right, affected data and reply contact. We verify identity through your authenticated account; do not email full copies of IDs. We respond within applicable statutory deadlines. Withdrawal blocks health features. Delete your account and data in Settings > Privacy or through the public /account-deletion page. These choices also apply to US consumers.
 
 **Retention:** '''+en_ret+'''
 

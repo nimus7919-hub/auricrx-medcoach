@@ -1,13 +1,14 @@
 import { getRegion } from './region';
-import uiI18n from "../i18n";
-import { auth } from '../config/firebase';
+import { fetchWithAuth } from './authToken';
 
+/**
+ * Authenticated fetch that waits on a live Firebase session, attaches a fresh
+ * ID token, and retries once after getIdToken(true) on HTTP 401.
+ */
 export async function authenticatedFetch(url, options = {}) {
-  const user = auth.currentUser;
-  if (!user) throw new Error(uiI18n.t("ui.notAuthenticated"));
-  const token = await user.getIdToken();
-  return fetch(url, {
-    ...options,
-    headers: { ...options.headers, Authorization: `Bearer ${token}`, 'X-Auric-Region': getRegion() },
-  });
+  const headers = {
+    ...(options.headers || {}),
+    'X-Auric-Region': getRegion(),
+  };
+  return fetchWithAuth(url, { ...options, headers });
 }

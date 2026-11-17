@@ -1,0 +1,50 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "node": "22.20.0"
+    },
+    "preview": {
+      "distribution": "internal",
+      "node": "22.20.0",
+      "android": {
+        "buildType": "apk"
+      },
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_FEATURE_PREVISIT_INTAKE": "true"
+      },
+      "autoIncrement": true
+    },
+    "production": {
+      "autoIncrement": true,
+      "node": "22.20.0",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "channel": "production",
+      "ios": {
+        "simulator": false,
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "env": {
+        "EXPO_PUBLIC_FEATURE_PREVISIT_INTAKE": "true"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6834305438"
+      }
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import uiI18n from '../i18n';
 // Calendar dates stay in the device timezone, including when DST changes.
 export function formatReminderDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -28,13 +29,13 @@ export function parseReminderDate(value, fallback = new Date(), locale) {
 }
 
 export function normalizeReminderDates(reminder, now = new Date(), locale) {
-  const es = locale?.startsWith('es');
+  const msg = key => uiI18n.t(key, locale ? { lng: locale } : undefined);
   let start, end;
   try { start = parseReminderDate(reminder.startDate, now); }
-  catch { throw new Error(es ? 'Elige una fecha de inicio válida en el calendario.' : 'Please choose a valid start date in the calendar.'); }
+  catch { throw new Error(msg('reminders.errors.startDate')); }
   try { end = reminder.endDate ? parseReminderDate(reminder.endDate, now) : null; }
-  catch { throw new Error(es ? 'Elige una fecha de fin válida en el calendario.' : 'Please choose a valid end date in the calendar.'); }
-  if (end && end < start) throw new Error(es ? 'La fecha de fin debe ser igual o posterior a la fecha de inicio.' : 'The end date must be on or after the start date.');
+  catch { throw new Error(msg('reminders.errors.endDate')); }
+  if (end && end < start) throw new Error(msg('reminders.errors.endBeforeStart'));
   return { startDate: formatReminderDate(start), endDate: end ? formatReminderDate(end) : '' };
 }
 
