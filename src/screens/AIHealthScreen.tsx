@@ -909,7 +909,7 @@ function MexicoAIHealthScreen({ onClose, userId, onConnectHealth, onHealthPrivac
         },
         body: JSON.stringify({
           items: allItems,
-          // Not read by the server yet (see PR follow-ups); sent so it can answer in the app language.
+          // The server reads `language` once server PR #49 is deployed, so it can answer in the app language.
           language: normalizeLanguage(i18n.language) || 'en',
           messages: [
             {

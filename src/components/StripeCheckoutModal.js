@@ -12,6 +12,7 @@ import { useWallpaper } from '../contexts/WallpaperContext';
 import DynamicText from './DynamicText';
 import { useTranslation } from 'react-i18next';
 import { getFreshIdToken } from '../services/authToken';
+import { normalizeLanguage } from '../i18n/language';
 
 const API_BASE_URL = 'https://auricrx-medcoach.onrender.com';
 
@@ -48,7 +49,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ country, platform: Platform.OS, billingInterval }),
+        body: JSON.stringify({ country, platform: Platform.OS, billingInterval, language: normalizeLanguage(i18n.language) || 'en' }),
       });
 
       const data = await response.json();
@@ -85,7 +86,7 @@ export default function StripeCheckoutModal({ visible, onClose, theme, onSuccess
     } finally {
       setLoading(false);
     }
-  }, [country, billingInterval, onClose, onSuccess]);
+  }, [country, billingInterval, i18n.language, onClose, onSuccess]);
 
 
 
