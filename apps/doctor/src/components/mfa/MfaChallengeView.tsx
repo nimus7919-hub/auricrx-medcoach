@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 
 import { useTranslation } from 'react-i18next';
 import type { MultiFactorResolver } from 'firebase/auth';
 import { colors } from '../../theme/colors';
+import { localizeError } from '../../lib/errors';
 import {
   hintsFromResolver,
   resolveTotpSignIn,
@@ -45,7 +46,7 @@ export default function MfaChallengeView({
       // SMS challenge needs a Recaptcha ApplicationVerifier (web) or native phone MFA.
       onError(t('mfa.challenge.smsNativeHint'));
     } catch (e: any) {
-      onError(e?.message || 'mfa_challenge_failed');
+      onError(localizeError(e, t, 'errors.mfa_challenge_failed'));
     } finally {
       setBusy(false);
     }

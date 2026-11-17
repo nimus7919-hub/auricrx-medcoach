@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "AuricRX Médicos",
+    "NSFaceIDUsageDescription": "Desbloquea AuricRX Médicos después de iniciar sesión con la autenticación en dos pasos."
+  },
+  "android": {
+    "app_name": "AuricRX Médicos"
+  }
+}

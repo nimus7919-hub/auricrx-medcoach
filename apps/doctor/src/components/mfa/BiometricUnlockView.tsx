@@ -21,7 +21,7 @@ export default function BiometricUnlockView({ onUnlocked, onUsePassword, onError
       if (ok) onUnlocked();
       else onError(t('mfa.biometric.failed'));
     } catch (e: any) {
-      onError(e?.message || t('mfa.biometric.failed'));
+      onError(t('mfa.biometric.failed'));
     } finally {
       setBusy(false);
     }

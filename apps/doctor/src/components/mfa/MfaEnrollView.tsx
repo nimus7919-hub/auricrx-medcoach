@@ -11,6 +11,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
 import { colors } from '../../theme/colors';
+import { localizeError } from '../../lib/errors';
 import {
   ensureEmailVerified,
   startTotpEnrollment,
@@ -39,11 +40,11 @@ export default function MfaEnrollView({ onEnrolled, onError }: Props) {
         setPhase('verify_email');
         return;
       }
-      const totp = await startTotpEnrollment(t('appName'));
+      const totp = await startTotpEnrollment();
       setSession(totp);
       setPhase('totp');
     } catch (e: any) {
-      onError(e?.message || 'mfa_enroll_failed');
+      onError(localizeError(e, t, 'errors.mfa_enroll_failed'));
     } finally {
       setBusy(false);
     }
@@ -62,7 +63,7 @@ export default function MfaEnrollView({ onEnrolled, onError }: Props) {
       const codes = await generateRecoveryCodes();
       onEnrolled(codes);
     } catch (e: any) {
-      onError(e?.message || 'mfa_enroll_failed');
+      onError(localizeError(e, t, 'errors.mfa_enroll_failed'));
     } finally {
       setBusy(false);
     }

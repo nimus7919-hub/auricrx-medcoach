@@ -97,6 +97,29 @@ describe('doctor structured messaging + office hours', () => {
     expect(replied.doctorAction).toBe('book_visit');
   });
 
+  it('export labels (speaker, request type, action) follow the chosen language and never mix', () => {
+    const msg = {
+      id: 'm1', linkId: 'l1', doctorId: 'd1', patientId: 'p1', direction: 'patient_to_doctor' as const,
+      requestType: 'refill' as const, body: 'Necesito mi receta', status: 'answered' as const,
+      createdAt: '2026-11-12T10:00:00.000Z', visibleToDoctorAt: '2026-11-12T10:00:00.000Z',
+      updatedAt: '2026-11-12T11:00:00.000Z', doctorAction: 'approve_refill' as const, doctorReplyText: 'Listo',
+    };
+    const system = { ...msg, id: 'm2', direction: 'system' as const, requestType: undefined, doctorAction: undefined, doctorReplyText: undefined, createdAt: '2026-11-12T12:00:00.000Z' };
+    const en = buildMessageSummaryExport([msg, system], { locale: 'en', patientLabel: 'Ana' }).lines.join('\n');
+    expect(en).toContain('Patient');
+    expect(en).toContain('[Refill request]');
+    expect(en).toContain('→ Approve refill');
+    expect(en).toContain('System');
+    expect(en).not.toMatch(/Paciente|Sistema|Solicitud de surtido|Aprobar surtido|\[refill\]|approve_refill/);
+    const es = buildMessageSummaryExport([msg, system], { locale: 'es', patientLabel: 'Ana' }).lines.join('\n');
+    expect(es).toContain('Paciente');
+    expect(es).toContain('[Solicitud de surtido]');
+    expect(es).toContain('→ Aprobar surtido');
+    expect(es).toContain('Sistema');
+    expect(es).not.toMatch(/Patient\b|\bSystem\b|Refill request|approve_refill/);
+    expect(es).not.toMatch(/2026-11-12T/); // timestamps are formatted, not raw ISO
+  });
+
   it('exports a one-page summary without banned clinical terms', () => {
     const exported = buildMessageSummaryExport(
       [

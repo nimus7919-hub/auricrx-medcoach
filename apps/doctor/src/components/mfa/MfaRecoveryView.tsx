@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../theme/colors';
+import { localizeError } from '../../lib/errors';
 import { redeemRecoveryCode } from '../../services/doctorMfaService';
 
 type Props = {
@@ -23,7 +24,7 @@ export default function MfaRecoveryView({ email, password, onRedeemed, onBack, o
       await redeemRecoveryCode(email, password, code);
       onRedeemed();
     } catch (e: any) {
-      onError(e?.message || 'recovery_failed');
+      onError(localizeError(e, t, 'errors.recovery_failed'));
     } finally {
       setBusy(false);
     }

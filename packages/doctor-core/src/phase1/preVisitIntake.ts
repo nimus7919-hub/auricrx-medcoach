@@ -74,6 +74,30 @@ export interface IntakeConsent {
   emergencyDisclaimerVersion: string;
 }
 
+/**
+ * Doctor-facing rendering of the patient-written text, produced by the server at read time
+ * (GET /api/doctor/intake/list|:id|:id/view with ?lang=). `status`:
+ *  - original:    already in the doctor's language
+ *  - translated:  machine-translated into the doctor's language (originals stay on the session)
+ *  - unavailable: translation failed; original text is returned and must be tagged with `sourceLang`
+ */
+export interface IntakeDisplay {
+  lang: IntakeLocale;
+  sourceLang: IntakeLocale;
+  status: 'original' | 'translated' | 'unavailable';
+  summary: {
+    mainConcern: string | null;
+    location: string | null;
+    duration: string | null;
+    alsoMentioned: string[];
+    questionsForDoctor: string[];
+  } | null;
+  patientComment: string | null;
+  turns: Array<{ id: string; text: string }>;
+  /** Parallel to bodyPainMap.markers (null where the marker has no note). */
+  markerNotes: Array<string | null>;
+}
+
 export interface IntakeSession {
   id: string;
   appointmentId: string;
@@ -95,6 +119,8 @@ export interface IntakeSession {
   rawChatDeleteAt: string;
   rawChatDeletedAt: string | null;
   bodyPainMap?: BodyPainMapPayload | null;
+  /** Present when the doctor app asked for a language (see IntakeDisplay). */
+  display?: IntakeDisplay;
 }
 
 /** Display helper — never treat this number as a risk score. */

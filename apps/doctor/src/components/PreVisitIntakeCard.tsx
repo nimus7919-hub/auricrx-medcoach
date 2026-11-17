@@ -5,6 +5,9 @@ import type { IntakeSession } from '@auricrx/doctor-core';
 import { sideFromRegionId } from '@auricrx/doctor-core';
 import { colors } from '../theme/colors';
 import BodyPainMapDiagram from './BodyPainMapDiagram';
+import { formatDateTime } from '../lib/format';
+import type { AppLanguage } from '../lib/language';
+import { hasTranslation, markerLabels, resolveIntakeText, speakerKey } from '../lib/intakeDisplay';
 
 function field(value: string | null | undefined, notMentioned: string): string {
   const v = (value || '').trim();
@@ -15,13 +18,21 @@ export default function PreVisitIntakeCard({
   session,
   t,
   patientLabel,
+  lang,
 }: {
   session: IntakeSession;
   t: TFunction;
   patientLabel?: string;
+  /** The doctor's in-app language. Dates, body-map names and speaker labels follow it. */
+  lang: AppLanguage;
 }) {
   const [showChat, setShowChat] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const text = resolveIntakeText(session, lang, showOriginal);
   const summary = session.summary;
+  const shown = text.summary;
+  const sourceLangName = t(`doctorMode.preVisitIntake.translation.languages.${text.sourceLang}`);
+  const canToggle = hasTranslation(session, lang);
   const notMentioned = t('doctorMode.preVisitIntake.notMentioned');
   const severity =
     summary?.severityReported != null
@@ -35,40 +46,66 @@ export default function PreVisitIntakeCard({
       {patientLabel ? <Text style={styles.meta}>{patientLabel}</Text> : null}
       {session.sharedAt ? (
         <Text style={styles.meta}>
-          {t('doctorMode.preVisitIntake.confirmedAt')} · {new Date(session.sharedAt).toLocaleString()}
+          {t('doctorMode.preVisitIntake.confirmedAt')} · {formatDateTime(session.sharedAt, lang)}
         </Text>
       ) : null}
       {session.appointmentStartIso ? (
         <Text style={styles.meta}>
-          {t('doctorMode.preVisitIntake.appointmentStart')} · {new Date(session.appointmentStartIso).toLocaleString()}
+          {t('doctorMode.preVisitIntake.appointmentStart')} · {formatDateTime(session.appointmentStartIso, lang)}
         </Text>
       ) : null}
       <Text style={styles.sub}>{t('doctorMode.preVisitIntake.subtitle')}</Text>
-      {summary ? (
+      {text.showTranslatedTag ? (
+        <Text style={styles.tag}>{t('doctorMode.preVisitIntake.translation.translatedFrom', { lang: sourceLangName })}</Text>
+      ) : null}
+      {text.showOriginalLanguageTag ? (
+        <Text style={styles.tag}>
+          {t(
+            text.status === 'unavailable'
+              ? 'doctorMode.preVisitIntake.translation.unavailable'
+              : 'doctorMode.preVisitIntake.translation.writtenIn',
+            { lang: sourceLangName }
+          )}
+        </Text>
+      ) : null}
+      {canToggle ? (
+        <TouchableOpacity
+          onPress={() => setShowOriginal((v) => !v)}
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            showOriginal ? 'doctorMode.preVisitIntake.translation.showTranslation' : 'doctorMode.preVisitIntake.translation.showOriginal'
+          )}
+        >
+          <Text style={styles.link}>
+            {t(showOriginal ? 'doctorMode.preVisitIntake.translation.showTranslation' : 'doctorMode.preVisitIntake.translation.showOriginal')}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
+      {summary && shown ? (
         <>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.mainConcern')}</Text>
-          <Text style={styles.text}>{field(summary.mainConcern, notMentioned)}</Text>
+          <Text style={styles.text}>{field(shown.mainConcern, notMentioned)}</Text>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.location')}</Text>
-          <Text style={styles.text}>{field(summary.location, notMentioned)}</Text>
+          <Text style={styles.text}>{field(shown.location, notMentioned)}</Text>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.duration')}</Text>
-          <Text style={styles.text}>{field(summary.duration, notMentioned)}</Text>
+          <Text style={styles.text}>{field(shown.duration, notMentioned)}</Text>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.severity')}</Text>
           <Text style={styles.text}>{severity}</Text>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.alsoMentioned')}</Text>
-          {summary.alsoMentioned.length === 0 ? (
+          {shown.alsoMentioned.length === 0 ? (
             <Text style={styles.text}>{notMentioned}</Text>
           ) : (
-            summary.alsoMentioned.map((line, i) => (
+            shown.alsoMentioned.map((line, i) => (
               <Text key={i} style={styles.text}>
                 {line}
               </Text>
             ))
           )}
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.questionsForDoctor')}</Text>
-          {summary.questionsForDoctor.length === 0 ? (
+          {shown.questionsForDoctor.length === 0 ? (
             <Text style={styles.text}>{notMentioned}</Text>
           ) : (
-            summary.questionsForDoctor.map((line, i) => (
+            shown.questionsForDoctor.map((line, i) => (
               <Text key={i} style={styles.text}>
                 {line}
               </Text>
@@ -102,16 +139,18 @@ export default function PreVisitIntakeCard({
               m.intensity != null
                 ? t('doctorMode.preVisitIntake.bodyMap.intensitySaid', { n: m.intensity })
                 : notMentioned;
+            const names = markerLabels(m, t);
+            const note = text.markerNote(i, m.note);
             return (
               <View key={`${m.regionId}-${i}`} style={styles.marker}>
                 <Text style={styles.text}>
-                  {i + 1}. {m.layerLabel} · {m.regionLabel}
+                  {i + 1}. {names.layer} · {names.region}
                 </Text>
                 <Text style={styles.meta}>
-                  {t('doctorMode.preVisitIntake.bodyMap.layer')}: {m.layerLabel}
+                  {t('doctorMode.preVisitIntake.bodyMap.layer')}: {names.layer}
                 </Text>
                 <Text style={styles.meta}>
-                  {t('doctorMode.preVisitIntake.bodyMap.region')}: {m.regionLabel}
+                  {t('doctorMode.preVisitIntake.bodyMap.region')}: {names.region}
                 </Text>
                 <Text style={styles.meta}>
                   {t('doctorMode.preVisitIntake.bodyMap.side')}: {sideLabel}
@@ -125,9 +164,9 @@ export default function PreVisitIntakeCard({
                 <Text style={styles.meta}>
                   {t('doctorMode.preVisitIntake.bodyMap.onset')}: {onset}
                 </Text>
-                {m.note ? (
+                {note ? (
                   <Text style={styles.comment}>
-                    {t('doctorMode.preVisitIntake.bodyMap.note')}: {m.note}
+                    {t('doctorMode.preVisitIntake.bodyMap.note')}: {note}
                   </Text>
                 ) : null}
               </View>
@@ -138,7 +177,7 @@ export default function PreVisitIntakeCard({
       {session.patientComment ? (
         <>
           <Text style={styles.label}>{t('doctorMode.preVisitIntake.comment')}</Text>
-          <Text style={styles.comment}>{session.patientComment}</Text>
+          <Text style={styles.comment}>{text.patientComment ?? session.patientComment}</Text>
         </>
       ) : null}
       {chatGone ? (
@@ -159,7 +198,7 @@ export default function PreVisitIntakeCard({
           {showChat &&
             session.turns.map((turn) => (
               <Text key={turn.id} style={styles.turn}>
-                {turn.role}: {turn.text}
+                {t(speakerKey(turn.role))}: {text.turnText(turn.id, turn.text)}
               </Text>
             ))}
         </>
@@ -183,6 +222,7 @@ const styles = StyleSheet.create({
   comment: { color: colors.text, fontSize: 14, marginBottom: 4, fontStyle: 'italic' },
   meta: { color: colors.sub, fontSize: 13, marginBottom: 4 },
   sub: { color: colors.sub, fontSize: 13, marginBottom: 8, lineHeight: 18 },
+  tag: { color: colors.sub, fontSize: 12, marginBottom: 6, fontStyle: 'italic' },
   link: { color: colors.accent, fontSize: 14, marginTop: 10, textDecorationLine: 'underline' },
   turn: { color: colors.sub, fontSize: 13, marginTop: 6, lineHeight: 18 },
   marker: { marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border },

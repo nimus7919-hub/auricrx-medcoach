@@ -2,6 +2,8 @@
  * Firebase Identity Platform MFA for AuricRX Médicos.
  * Primary factor: TOTP. Optional backup: SMS (PhoneMultiFactorGenerator).
  */
+import { DoctorApiError } from '../lib/errors';
+import { getCurrentLanguage } from '../lib/currentLanguage';
 import {
   multiFactor,
   TotpMultiFactorGenerator,
@@ -68,7 +70,13 @@ export async function ensureEmailVerified(user?: User | null): Promise<{ verifie
   return { verified: false, sent: true };
 }
 
-export async function startTotpEnrollment(appName = 'AuricRX Médicos'): Promise<TotpEnrollmentSession> {
+/** Issuer shown inside the authenticator app. One English-neutral product name for every language. */
+export const TOTP_ISSUER = 'AuricRX Doctors';
+/** Factor names are stored in the Firebase account and shown by Firebase emails; keep them language-neutral. */
+export const TOTP_FACTOR_NAME = 'Authenticator';
+export const SMS_FACTOR_NAME = 'SMS';
+
+export async function startTotpEnrollment(appName = TOTP_ISSUER): Promise<TotpEnrollmentSession> {
   const user = currentUserOrThrow();
   if (!user.emailVerified) {
     throw new Error('email_not_verified');
@@ -79,7 +87,7 @@ export async function startTotpEnrollment(appName = 'AuricRX Médicos'): Promise
   return { secret, secretKey: secret.secretKey, qrCodeUrl };
 }
 
-export async function finishTotpEnrollment(secret: TotpSecret, code: string, displayName = 'Authenticator'): Promise<void> {
+export async function finishTotpEnrollment(secret: TotpSecret, code: string, displayName = TOTP_FACTOR_NAME): Promise<void> {
   const user = currentUserOrThrow();
   const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code.trim());
   await multiFactor(user).enroll(assertion, displayName);
@@ -146,7 +154,7 @@ export async function startPhoneEnrollment(
   return provider.verifyPhoneNumber({ phoneNumber, session } as any, verifier);
 }
 
-export async function finishPhoneEnrollment(verificationId: string, code: string, displayName = 'SMS backup') {
+export async function finishPhoneEnrollment(verificationId: string, code: string, displayName = SMS_FACTOR_NAME) {
   const user = currentUserOrThrow();
   const cred = PhoneAuthProvider.credential(verificationId, code.trim());
   const assertion = PhoneMultiFactorGenerator.assertion(cred);
@@ -158,12 +166,16 @@ export async function generateRecoveryCodes(): Promise<string[]> {
   const token = await user.getIdToken(true);
   const res = await fetch(`${API_BASE}/api/doctor/mfa/recovery/generate`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept-Language': getCurrentLanguage(),
+    },
     body: '{}',
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.ok === false) {
-    throw new Error(data.error || `recovery_generate_failed_${res.status}`);
+    throw new DoctorApiError(data.error || `recovery_generate_failed_${res.status}`, res.status);
   }
   return data.codes as string[];
 }
@@ -171,12 +183,12 @@ export async function generateRecoveryCodes(): Promise<string[]> {
 export async function redeemRecoveryCode(email: string, password: string, code: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/doctor/mfa/recovery/redeem`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Accept-Language': getCurrentLanguage() },
     body: JSON.stringify({ email: email.trim(), password, code }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.ok === false) {
-    throw new Error(data.error || `recovery_redeem_failed_${res.status}`);
+    throw new DoctorApiError(data.error || `recovery_redeem_failed_${res.status}`, res.status);
   }
 }
 

@@ -70,6 +70,8 @@ import {
 import { auth, db } from '../config/firebase';
 import { API_BASE } from '../config/api';
 import { isPreVisitIntakeEnabled } from '../config/preVisitIntake';
+import { DoctorApiError } from '../lib/errors';
+import { getCurrentLanguage } from '../lib/currentLanguage';
 
 function uidOrThrow(): string {
   const uid = auth.currentUser?.uid;
@@ -99,11 +101,11 @@ async function doctorApiGet<T = any>(path: string): Promise<T> {
   const token = await user.getIdToken();
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'GET',
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Accept-Language': getCurrentLanguage() },
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.ok === false) {
-    throw new Error(data.error || `request_failed_${res.status}`);
+    throw new DoctorApiError(data.error || `request_failed_${res.status}`, res.status, data.details);
   }
   return data as T;
 }
@@ -114,12 +116,16 @@ async function doctorApi<T = any>(path: string, body: Record<string, unknown> = 
   const token = await user.getIdToken();
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept-Language': getCurrentLanguage(),
+    },
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.ok === false) {
-    throw new Error(data.error || `request_failed_${res.status}`);
+    throw new DoctorApiError(data.error || `request_failed_${res.status}`, res.status, data.details);
   }
   return data as T;
 }
@@ -583,7 +589,7 @@ class DoctorAppService {
                     : entry.systolic
                   : undefined,
               limit: c.limit,
-              locale: 'es',
+              locale: getCurrentLanguage(),
             }),
           });
         }
@@ -700,6 +706,16 @@ class DoctorAppService {
     });
   }
 
+  /** Tells the server which language to use for push copy addressed to this doctor (best-effort). */
+  async syncLanguagePreference(language: 'en' | 'es'): Promise<void> {
+    if (!auth.currentUser) return;
+    try {
+      await doctorApi('/api/doctor/language', { language });
+    } catch {
+      /* best-effort: pushes fall back to Spanish until the next successful sync */
+    }
+  }
+
   async requestDescriptiveSummary(facts: Record<string, unknown>, language: string) {
     return doctorApi('/api/doctor/summary/descriptive', { facts, language });
   }
@@ -762,6 +778,7 @@ class DoctorAppService {
       await doctorApi('/api/doctor/messages/notify', {
         toUserId: updated.patientId,
         role: 'patient',
+        // Push copy is chosen by the RECIPIENT's language on the server; this is ignored there.
         language,
         messageId,
         channel: 'push',
@@ -774,7 +791,7 @@ class DoctorAppService {
 
   async exportMessageSummaryForPatient(
     patientId: string,
-    locale: 'en' | 'es' = 'es'
+    locale: 'en' | 'es' = getCurrentLanguage()
   ): Promise<MessageThreadExport> {
     const doctorId = uidOrThrow();
     const snap = await getDocs(
@@ -805,7 +822,7 @@ class DoctorAppService {
   async listConfirmedIntakes(): Promise<IntakeSession[]> {
     if (!isPreVisitIntakeEnabled()) return [];
     try {
-      const data = await doctorApiGet<{ ok: true; intakes: IntakeSession[] }>('/api/doctor/intake/list');
+      const data = await doctorApiGet<{ ok: true; intakes: IntakeSession[] }>(`/api/doctor/intake/list?lang=${getCurrentLanguage()}`);
       return data.intakes || [];
     } catch {
       return [];
@@ -814,14 +831,14 @@ class DoctorAppService {
 
   async getConfirmedIntake(id: string): Promise<IntakeSession | null> {
     if (!isPreVisitIntakeEnabled()) return null;
-    const data = await doctorApiGet<{ ok: true; intake: IntakeSession }>(`/api/doctor/intake/${encodeURIComponent(id)}`);
+    const data = await doctorApiGet<{ ok: true; intake: IntakeSession }>(`/api/doctor/intake/${encodeURIComponent(id)}?lang=${getCurrentLanguage()}`);
     return data.intake || null;
   }
 
   async viewConfirmedIntake(id: string): Promise<IntakeSession | null> {
     if (!isPreVisitIntakeEnabled()) return null;
     try {
-      const data = await doctorApi<{ ok: true; intake: IntakeSession }>(`/api/doctor/intake/${encodeURIComponent(id)}/view`, {});
+      const data = await doctorApi<{ ok: true; intake: IntakeSession }>(`/api/doctor/intake/${encodeURIComponent(id)}/view?lang=${getCurrentLanguage()}`, {});
       return data.intake || null;
     } catch {
       return this.getConfirmedIntake(id);
