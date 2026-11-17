@@ -5,6 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const { z } = require('zod');
 const { characterPrompt, appendSafety, detectUrgency, safetyText } = require('./characterPrompts');
+const { resolveAiLanguage, errorBody } = require('./ai-language');
 
 function setup(create) {
   const source = fs.readFileSync(path.join(__dirname, 'index.js'), 'utf8');
@@ -13,7 +14,7 @@ function setup(create) {
   let handler;
   vm.runInNewContext(source.slice(start, end), {
     app: { post(_path, callback) { handler = callback; } }, z,
-    characterPrompt, appendCharacterSafety: appendSafety, detectCharacterUrgency: detectUrgency,
+    characterPrompt, appendCharacterSafety: appendSafety, detectCharacterUrgency: detectUrgency, resolveAiLanguage, errorBody,
     client: { chat: { completions: { create } } }, tools: [],
     console: { log() {}, error() {} }, process: { env: {} },
   });
@@ -65,4 +66,43 @@ test('invalid character is rejected before provider access', async () => {
   const { handler, res } = setup(() => { throw new Error('must not call'); });
   await handler({ body: { message: 'Hello', character: 'doctor' } }, res);
   assert.equal(res.statusCode, 400);
+});
+
+test('language: body -> userData.language -> Accept-Language -> es (localized safety notices follow it)', async () => {
+  const cases = [
+    [{ body: { message: 'chest pain', language: 'de' }, headers: { 'accept-language': 'en' } }, 'de'],
+    [{ body: { message: 'chest pain', userData: { language: 'fr' } }, headers: { 'accept-language': 'en' } }, 'fr'],
+    [{ body: { message: 'chest pain' }, headers: { 'accept-language': 'pt-BR,pt;q=0.9,en;q=0.5' } }, 'pt'],
+    [{ body: { message: 'chest pain', language: 'ja' }, headers: { 'accept-language': 'en-US' } }, 'en'],
+    [{ body: { message: 'chest pain' }, headers: {} }, 'es'],
+    [{ body: { message: 'chest pain' } }, 'es'],
+  ];
+  for (const [req, expected] of cases) {
+    const { handler, res } = setup(() => { throw new Error('Emergency must bypass provider'); });
+    await handler(req, res);
+    assert.equal(res.statusCode, 200);
+    assert.ok(res.body.reply.includes(safetyText(expected).emergencyBanner), expected);
+  }
+});
+
+test('the provider prompt is built in the resolved language', async () => {
+  let prompt;
+  const { handler, res } = setup(async options => { prompt = options.messages[0].content; return { choices: [{ message: { role: 'assistant', content: 'Info.' } }] }; });
+  await handler({ body: { message: 'Tell me about sleep' }, headers: { 'accept-language': 'zh-CN' } }, res);
+  assert.equal(prompt, characterPrompt('alfred', 'zh'));
+});
+
+test('errors are machine codes only: no English prose, no provider details, no zod text', async () => {
+  let r = setup(() => { throw new Error('provider detail'); });
+  await r.handler({ body: { message: 'Hello' } }, r.res);
+  assert.equal(r.res.statusCode, 503);
+  assert.deepEqual(r.res.body, { ok: false, code: 'AI_UNAVAILABLE', error: 'AI_UNAVAILABLE' });
+  r = setup(() => { throw new Error('must not call'); });
+  await r.handler({ body: { message: '' } }, r.res);
+  assert.equal(r.res.statusCode, 400);
+  assert.equal(r.res.body.code, 'bad_request');
+  assert.equal(r.res.body.error, 'bad_request');
+  assert.equal(JSON.stringify(r.res.body.fields), '["message"]');
+  assert.equal(r.res.body.details, undefined);
+  assert.equal(r.res.body.message, undefined);
 });
