@@ -1,0 +1,20 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "We use your location to save places and show the approximate weather forecast.",
+    "NSLocationAlwaysAndWhenInUseUsageDescription": "Allows detecting arrivals and departures at your places so we can send you reminders even when the app is closed.",
+    "NSLocationAlwaysUsageDescription": "Allows detecting arrivals and departures at your places so we can send you reminders even when the app is closed.",
+    "NSFaceIDUsageDescription": "AuricRX MedCoach uses Face ID to unlock your Documents vault on this device.",
+    "NSCameraUsageDescription": "We use the camera to take photos of prescriptions and documents that you choose to save.",
+    "NSMicrophoneUsageDescription": "AuricRX only uses the microphone if you turn it on; it does not record audio in the background.",
+    "NSPhotoLibraryUsageDescription": "Allows choosing photos of prescriptions or documents to save in the app.",
+    "NSCalendarsUsageDescription": "Allows adding your appointments and reminders to your calendar.",
+    "NSCalendarsFullAccessUsageDescription": "Allows adding your appointments and reminders to your calendar.",
+    "NSRemindersUsageDescription": "Allows creating reminders for your medications and appointments.",
+    "NSRemindersFullAccessUsageDescription": "Allows creating reminders for your medications and appointments."
+  },
+  "android": {
+    "hc_privacy_title": "Health Connect data",
+    "hc_privacy_unavailable": "Privacy notice not available",
+    "hc_privacy_notice": "Health Connect activity and health data\n\nWith your permission, AuricRX MedCoach will read your heart rate, resting heart rate, steps, and exercise sessions from Health Connect (which may come from Samsung Health, Fitbit, Garmin, Mi Fitness, or other apps). We use them only to show you your history and charts inside the app. We do not make diagnoses. We do not sell this data, use it for advertising, or share it with third parties. It stays on your phone and is not sent to our servers. You can withdraw this permission at any time in Settings > Privacy or in Health Connect, and delete the imported data.\n\nData imported from your apps and devices for wellness purposes. It may not be accurate. It is not a diagnosis and does not replace a doctor's assessment. If you feel unwell or have symptoms, seek medical care; in an emergency call 911."
+  }
+}

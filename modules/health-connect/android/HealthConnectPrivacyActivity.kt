@@ -19,7 +19,8 @@ class HealthConnectPrivacyActivity : AppCompatActivity() {
         }
         
         val titleView = TextView(this).apply {
-            text = "Datos de Health Connect"
+            val titleId = resources.getIdentifier("hc_privacy_title", "string", packageName)
+            text = if (titleId != 0) getString(titleId) else "Health Connect"
             textSize = 24f
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 32)
@@ -27,7 +28,8 @@ class HealthConnectPrivacyActivity : AppCompatActivity() {
         
         val bodyView = TextView(this).apply {
             val resId = resources.getIdentifier("hc_privacy_notice", "string", packageName)
-            text = if (resId != 0) getString(resId) else "Privacy notice not available"
+            val missingId = resources.getIdentifier("hc_privacy_unavailable", "string", packageName)
+            text = if (resId != 0) getString(resId) else if (missingId != 0) getString(missingId) else "-"
             textSize = 16f
             setPadding(0, 0, 0, 16)
         }
