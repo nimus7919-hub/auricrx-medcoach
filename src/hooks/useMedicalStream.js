@@ -29,7 +29,7 @@ export function useMedicalStream(serverUrl = `${API_BASE}/api/ai/stream`, option
       const response = await fetch(serverUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // `language` is not read by the server yet; sent so /ask-stream can answer in the app language.
+        // The server reads `language` once server PR #49 is deployed, so /ask-stream can answer in the app language.
         body: JSON.stringify({ language: normalizeLanguage(uiI18n.language) || 'en', ...options, messages }),
         signal: controller.signal,
       });

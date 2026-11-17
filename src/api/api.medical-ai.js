@@ -1,5 +1,6 @@
 import { authenticatedFetch } from '../services/authenticatedFetch';
 import uiI18n from "../i18n";
+import { normalizeLanguage } from "../i18n/language";
 // src/api/api.medical-ai.js
 import { API_BASE } from "../config/api";
 import { createUserFacingError, ERROR_CATEGORY, logTechnicalError } from '../utils/userFacingError';
@@ -11,7 +12,7 @@ export async function askMedicalAI(message, character = 'alfred') {
   const res = await authenticatedFetch(`${API_BASE}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, character, language: uiI18n.resolvedLanguage || uiI18n.language }),
+    body: JSON.stringify({ message, character, language: normalizeLanguage(uiI18n.resolvedLanguage || uiI18n.language) || 'en' }),
   });
 
   if (!res.ok) {
