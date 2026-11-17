@@ -34,6 +34,12 @@ const {
 } = require('./previsit-intake-lib');
 const { createStore } = require('./previsit-intake-store');
 const { validateBodyPainMapPayload } = require('./previsit-intake-bodymap');
+const { createIntakeTranslator } = require('./previsit-intake-translate');
+const {
+  languageFromRequest,
+  normalizeIntakeLocale,
+  resolveRecipientLanguage,
+} = require('./language-utils');
 
 class IntakeError extends Error {
   constructor(code, status = 400) {
@@ -90,6 +96,7 @@ function createIntakeService({
   links,
   audit,
   notify,
+  translator,
   now = () => new Date(),
   retentionDays = RAW_CHAT_RETENTION_DAYS_AFTER_APPOINTMENT,
 } = {}) {
@@ -133,7 +140,7 @@ function createIntakeService({
       const link = links ? await links.getActiveLink(patientId, doctorId) : { ok: true, displayName: doctorId };
       if (!link || !link.ok) throw new IntakeError('doctor_not_linked', 403);
       if (!input?.consent || !input.consent.acceptedAt) throw new IntakeError('consent_required', 400);
-      const locale = input.locale === 'es' ? 'es' : 'en';
+      const locale = normalizeIntakeLocale(input.locale);
       if (!input.appointmentId || !input.appointmentStartIso) {
         throw new IntakeError('appointment_required', 400);
       }
@@ -286,7 +293,6 @@ function createIntakeService({
             doctorId: row.doctorId,
             patientId,
             intakeId: row.id,
-            language: row.locale,
           });
         } catch (err) {
           console.error('previsit intake notify failed:', err && err.message);
@@ -315,7 +321,12 @@ function createIntakeService({
       const row = await requireOwned(sessionId, patientId);
       if (row.status === 'confirmed') throw new IntakeError('already_shared', 400);
       if (row.status === 'discarded') throw new IntakeError('intake_discarded', 400);
-      const checked = validateBodyPainMapPayload(rawPayload);
+      // A body map without its own locale inherits the session's, so the two never disagree.
+      const payloadWithLocale =
+        rawPayload && typeof rawPayload === 'object' && !Array.isArray(rawPayload) && rawPayload.locale == null
+          ? { ...rawPayload, locale: row.locale }
+          : rawPayload;
+      const checked = validateBodyPainMapPayload(payloadWithLocale);
       if (!checked.ok) throw new IntakeError(checked.error, 400);
       const patch = { bodyPainMap: checked.payload };
       if (row.summary) {
@@ -350,7 +361,17 @@ function createIntakeService({
       return out;
     },
 
-    async doctorList(doctorId) {
+    /**
+     * Doctor-facing read model. With opts.lang ('en' | 'es') each session also carries `display`:
+     * the summary / comment / chat / body-map notes translated into the doctor's language (original
+     * fields stay untouched). Without opts.lang the payload is exactly what it was before.
+     */
+    async withDisplay(sessions, lang) {
+      if (!translator || !lang) return sessions;
+      return translator.attachDisplay(sessions, lang);
+    },
+
+    async doctorList(doctorId, opts = {}) {
       await store.purgeExpiredTurns(now());
       const rows = await store.listIntakes({ doctorId, status: 'confirmed' });
       const out = [];
@@ -360,10 +381,15 @@ function createIntakeService({
         const purged = await maybePurge(row);
         out.push(await withTurns(purged));
       }
-      return out;
+      return this.withDisplay(out, opts.lang);
     },
 
-    async doctorGet(doctorId, sessionId) {
+    async doctorGet(doctorId, sessionId, opts = {}) {
+      const session = await this.doctorGetRaw(doctorId, sessionId);
+      return this.withDisplay(session, opts.lang);
+    },
+
+    async doctorGetRaw(doctorId, sessionId) {
       const row = await store.getIntake(sessionId);
       if (!row) throw new IntakeError('intake_not_found', 404);
       if (row.doctorId !== doctorId) throw new IntakeError('forbidden', 403);
@@ -374,8 +400,8 @@ function createIntakeService({
       return withTurns(purged);
     },
 
-    async doctorView(doctorId, sessionId) {
-      const session = await this.doctorGet(doctorId, sessionId);
+    async doctorView(doctorId, sessionId, opts = {}) {
+      const session = await this.doctorGetRaw(doctorId, sessionId);
       await writeAudit({
         actorId: doctorId,
         actorRole: 'doctor',
@@ -385,7 +411,7 @@ function createIntakeService({
         detail: session.id,
         createdAt: clock(),
       });
-      return session;
+      return this.withDisplay(session, opts.lang);
     },
 
     async purgeExpired() {
@@ -440,14 +466,16 @@ async function defaultAudit(entry) {
   });
 }
 
-async function defaultNotify({ doctorId, intakeId, language }) {
+async function defaultNotify({ doctorId, intakeId }) {
   const { getDoctorFirestore } = require('./doctor-firestore');
   const db = getDoctorFirestore();
   const { sendExpoPush } = require('./doctor-messaging');
   const tokenSnap = await db.collection('doctorPushTokens').doc(doctorId).get();
   const token = tokenSnap.exists ? tokenSnap.data()?.expoPushToken : null;
   if (!token) return { skipped: true, reason: 'no_token' };
-  const copy = genericIntakePushCopy(language);
+  // Push copy follows the RECIPIENT (the doctor), not the language the patient wrote the intake in.
+  const recipientLanguage = await resolveRecipientLanguage(db, 'doctor', doctorId);
+  const copy = genericIntakePushCopy(recipientLanguage);
   return sendExpoPush(token, {
     title: copy.title,
     body: copy.body,
@@ -473,9 +501,15 @@ function mountPreVisitIntakeRoutes(app, deps = {}) {
   const now = deps.now || (() => new Date());
   const store = deps.store || createDefaultStore({ now });
   const provider = deps.provider || createProvider({ name: getPreVisitIntakeProvider(deps.env || process.env), env: deps.env || process.env, fetchImpl: deps.fetchImpl });
+  const translator = deps.translator || createIntakeTranslator({
+    store,
+    env: deps.env || process.env,
+    fetchImpl: deps.fetchImpl,
+  });
   const service = deps.service || createIntakeService({
     store,
     provider,
+    translator,
     links: deps.links || { getActiveLink: defaultGetActiveLink },
     audit: deps.audit || defaultAudit,
     notify: deps.notify || defaultNotify,
@@ -572,7 +606,7 @@ function mountPreVisitIntakeRoutes(app, deps = {}) {
 
   app.get('/api/doctor/intake/list', guard, deps.verifyDoctorAuth, async (req, res) => {
     try {
-      const intakes = await service.doctorList(req.userId);
+      const intakes = await service.doctorList(req.userId, { lang: languageFromRequest(req) });
       return res.json({ ok: true, intakes });
     } catch (err) {
       return sendErr(res, err);
@@ -581,7 +615,7 @@ function mountPreVisitIntakeRoutes(app, deps = {}) {
 
   app.get('/api/doctor/intake/:id', guard, deps.verifyDoctorAuth, async (req, res) => {
     try {
-      const intake = await service.doctorGet(req.userId, req.params.id);
+      const intake = await service.doctorGet(req.userId, req.params.id, { lang: languageFromRequest(req) });
       return res.json({ ok: true, intake });
     } catch (err) {
       return sendErr(res, err);
@@ -590,7 +624,7 @@ function mountPreVisitIntakeRoutes(app, deps = {}) {
 
   app.post('/api/doctor/intake/:id/view', guard, deps.verifyDoctorAuth, async (req, res) => {
     try {
-      const intake = await service.doctorView(req.userId, req.params.id);
+      const intake = await service.doctorView(req.userId, req.params.id, { lang: languageFromRequest(req) });
       return res.json({ ok: true, intake });
     } catch (err) {
       return sendErr(res, err);

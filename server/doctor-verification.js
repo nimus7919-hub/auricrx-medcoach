@@ -105,6 +105,38 @@ function validateSubmission(profile, body = {}) {
   return { ok: errors.length === 0, errors, payload };
 }
 
+/**
+ * Doctor-facing status text is sent as a CODE; the doctor app translates it (EN / ES).
+ * `verificationMessage` (English prose) is still written for older app builds and the admin console,
+ * but the app no longer renders it. Free-text from a reviewer goes in `verificationReviewerNote`.
+ */
+const VERIFICATION_MESSAGE_CODES = [
+  'queued_registry_unavailable',
+  'queued_manual_review',
+  'expired',
+  'approved',
+  'rejected',
+  'suspended',
+  'revoked',
+];
+
+function messageFields(code, note) {
+  const clean = typeof note === 'string' ? note.trim() : '';
+  return {
+    verificationMessageCode: code,
+    verificationReviewerNote: clean || null,
+  };
+}
+
+function submissionMessage(registry, identity) {
+  const unavailable = registry && registry.outcome === 'lookup_unavailable';
+  const code = unavailable ? 'queued_registry_unavailable' : 'queued_manual_review';
+  const text = unavailable
+    ? 'Registry lookup unavailable — queued for manual review'
+    : `Queued for manual review (registry=${registry && registry.outcome}, identity=${identity && identity.status})`;
+  return { code, text };
+}
+
 function publicProfileView(data) {
   if (!data) return null;
   // Never leak evidence blobs on doctor-facing responses
@@ -164,10 +196,7 @@ function mountDoctorVerificationRoutes(app) {
 
       const updatedAt = nowIso();
       const status = 'pending_review';
-      const message =
-        registry.outcome === 'lookup_unavailable'
-          ? 'Registry lookup unavailable — queued for manual review'
-          : `Queued for manual review (registry=${registry.outcome}, identity=${identity.status})`;
+      const { code: messageCode, text: message } = submissionMessage(registry, identity);
 
       const evidence = {
         doctorId: uid,
@@ -208,6 +237,7 @@ function mountDoctorVerificationRoutes(app) {
           verificationStatus: status,
           verificationUpdatedAt: updatedAt,
           verificationMessage: message,
+          ...messageFields(messageCode, null),
           verificationRejectionReason: null,
           identityProvider: identity.provider,
           identitySessionId: identity.sessionId || null,
@@ -253,6 +283,7 @@ function mountDoctorVerificationRoutes(app) {
             message: identity.message,
           },
           message,
+          messageCode,
         },
       });
     } catch (error) {
@@ -278,6 +309,7 @@ function mountDoctorVerificationRoutes(app) {
               verificationStatus: 'expired',
               verificationUpdatedAt: updatedAt,
               verificationMessage: 'Verification expired — re-submit for review',
+              ...messageFields('expired', null),
               updatedAt,
             },
             { merge: true }
@@ -358,7 +390,8 @@ function mountDoctorVerificationRoutes(app) {
     try {
       const db = getDoctorFirestore();
       const uid = req.params.uid;
-      const reason = String(req.body?.reason || 'Approved after manual review').trim();
+      const providedReason = String(req.body?.reason || '').trim();
+      const reason = providedReason || 'Approved after manual review';
       const ref = db.collection('doctorProfiles').doc(uid);
       const snap = await ref.get();
       if (!snap.exists) return res.status(404).json({ ok: false, error: 'not_found' });
@@ -369,6 +402,7 @@ function mountDoctorVerificationRoutes(app) {
           verificationStatus: 'verified',
           verificationUpdatedAt: verifiedAt,
           verificationMessage: reason,
+          ...messageFields('approved', providedReason),
           verificationRejectionReason: null,
           verifiedAt,
           expiresAt,
@@ -415,6 +449,7 @@ function mountDoctorVerificationRoutes(app) {
           verificationStatus: 'rejected',
           verificationUpdatedAt: updatedAt,
           verificationMessage: reason,
+          ...messageFields('rejected', reason),
           verificationRejectionReason: reason,
           verifiedAt: null,
           expiresAt: null,
@@ -456,6 +491,7 @@ function mountDoctorVerificationRoutes(app) {
           verificationStatus: 'suspended',
           verificationUpdatedAt: updatedAt,
           verificationMessage: reason,
+          ...messageFields('suspended', reason),
           verificationRejectionReason: reason,
           updatedAt,
         },
@@ -495,6 +531,7 @@ function mountDoctorVerificationRoutes(app) {
           verificationStatus: 'unverified',
           verificationUpdatedAt: updatedAt,
           verificationMessage: reason,
+          ...messageFields('revoked', reason),
           verificationRejectionReason: reason,
           verifiedAt: null,
           expiresAt: null,
@@ -582,6 +619,9 @@ module.exports = {
   notifyDoctorDecisionStub,
   isAdminToken,
   REVIEW_STATUSES,
+  VERIFICATION_MESSAGE_CODES,
+  messageFields,
+  submissionMessage,
   verifyDoctorAuth,
   sanitizeForFirestore,
 };

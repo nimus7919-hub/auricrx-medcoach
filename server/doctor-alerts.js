@@ -11,6 +11,8 @@
  * (no patient names or values on the lock screen).
  */
 
+const { resolveRecipientLanguage } = require('./language-utils');
+
 /** Pure comparator — kept in sync with src/doctor/thresholds.ts */
 function compareValue(observed, comparator, limit) {
   switch (comparator) {
@@ -74,19 +76,8 @@ function formatDescriptiveCrossingMessage(crossing, language = 'es') {
 
 /** Generic lock-screen copy — NEVER include patient names or values. */
 function genericPushCopy(language = 'es') {
+  // The doctor app supports English and Mexican Spanish only.
   const es = language === 'es' || language === 'es-MX';
-  if (language === 'zh') {
-    return { title: 'AuricRX 医生模式', body: '有一条读数超过了您设置的限值。打开应用查看详情。' };
-  }
-  if (language === 'pt') {
-    return { title: 'AuricRX Modo Médico', body: 'Uma leitura cruzou um limite que você definiu. Abra o app para ver os detalhes.' };
-  }
-  if (language === 'fr') {
-    return { title: 'AuricRX Mode médecin', body: 'Une mesure a dépassé une limite que vous avez définie. Ouvrez l’app pour les détails.' };
-  }
-  if (language === 'de') {
-    return { title: 'AuricRX Arztmodus', body: 'Ein Messwert hat ein von Ihnen gesetztes Limit überschritten. Öffnen Sie die App für Details.' };
-  }
   if (es) {
     return { title: 'AuricRX Modo médico', body: 'Una lectura cruzó un límite que usted configuró. Abra la app para ver el detalle.' };
   }
@@ -115,14 +106,22 @@ async function sendExpoPush(expoPushToken, { title, body, data }) {
 /**
  * Load bitácora entry + active doctor limits for that patient, evaluate, push.
  */
-async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, sendPush = sendExpoPush }) {
-  // Lazy-load so pure unit tests do not need firebase-admin installed locally
-  const admin = require('./firebase-admin');
-  if (!admin.apps.length) {
-    return { ok: false, error: 'firebase_admin_unavailable' };
+/**
+ * `language` (the patient's request language) is accepted for backward compatibility but ignored:
+ * push copy and in-app alert text follow the language of the doctor who receives them.
+ * `db` can be injected for tests.
+ */
+async function evaluateDoctorAlertsForEntry({ patientId, entryId, sendPush = sendExpoPush, db: injectedDb }) {
+  let db = injectedDb;
+  if (!db) {
+    // Lazy-load so pure unit tests do not need firebase-admin installed locally
+    const admin = require('./firebase-admin');
+    if (!admin.apps.length) {
+      return { ok: false, error: 'firebase_admin_unavailable' };
+    }
+    const { getDoctorFirestore } = require('./doctor-firestore');
+    db = getDoctorFirestore();
   }
-  const { getDoctorFirestore } = require('./doctor-firestore');
-  const db = getDoctorFirestore();
   const entryRef = db.collection('bitacora').doc(patientId).collection('entries').doc(entryId);
   const entrySnap = await entryRef.get();
   if (!entrySnap.exists) return { ok: false, error: 'entry_not_found' };
@@ -168,7 +167,9 @@ async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, send
 
     const tokenSnap = await db.collection('doctorPushTokens').doc(doctorId).get();
     const token = tokenSnap.exists ? tokenSnap.data()?.expoPushToken : null;
-    const copy = genericPushCopy(language);
+    // Language of the DOCTOR who receives the push / in-app alert — never the patient's request language.
+    const recipientLanguage = await resolveRecipientLanguage(db, 'doctor', doctorId);
+    const copy = genericPushCopy(recipientLanguage);
 
     if (token) {
       await sendPush(token, {
@@ -183,7 +184,7 @@ async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, send
       pushed += 1;
     }
 
-    const descriptiveDetails = crossings.map((c) => formatDescriptiveCrossingMessage(c, language));
+    const descriptiveDetails = crossings.map((c) => formatDescriptiveCrossingMessage(c, recipientLanguage));
     await db.collection('doctorAuditLogs').doc(`alert_${Date.now()}_${doctorId}`).set({
       id: `alert_${Date.now()}_${doctorId}`,
       actorId: 'system',
@@ -224,7 +225,7 @@ async function evaluateDoctorAlertsForEntry({ patientId, entryId, language, send
 function mountDoctorAlertRoutes(app, { verifyUser }) {
   app.post('/api/doctor/alerts/evaluate', verifyUser, async (req, res) => {
     try {
-      const { entryId, patientId, language } = req.body || {};
+      const { entryId, patientId } = req.body || {};
       if (!entryId || !patientId) {
         return res.status(400).json({ ok: false, error: 'entryId_and_patientId_required' });
       }
@@ -236,7 +237,6 @@ function mountDoctorAlertRoutes(app, { verifyUser }) {
       const result = await evaluateDoctorAlertsForEntry({
         patientId,
         entryId,
-        language: language || req.headers['x-auric-lang'] || 'es',
       });
       return res.json(result);
     } catch (err) {

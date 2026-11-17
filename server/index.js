@@ -3787,6 +3787,7 @@ mountDoctorMfaRoutes(app);
 // Doctor-only routes require MFA-issued tokens (sign_in_second_factor).
 require('./doctor-ai-summary').mountDoctorAiSummaryRoutes(app, { verifyDoctorAuth });
 require('./doctor-messaging').mountDoctorMessagingRoutes(app, { verifyDoctorAuth });
+require('./language-utils').mountDoctorLanguageRoutes(app, { verifyDoctorAuth });
 const {
   mountPreVisitIntakeRoutes,
   startPurgeScheduler,
@@ -3809,6 +3810,7 @@ app.listen(port, () => {
   console.log('   POST /api/doctor/plan/mock-grant');
   console.log('   POST /api/doctor/summary/descriptive');
   console.log('   POST /api/doctor/messages/notify');
+  console.log('   POST /api/doctor/language');
   console.log('   POST /api/doctor/mfa/recovery/generate');
   console.log('   POST /api/doctor/mfa/recovery/redeem');
   console.log('   POST /api/patient/intake/start|turn|summarize|comment|confirm|discard|delete-chat|body-map');

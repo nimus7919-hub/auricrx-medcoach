@@ -4,6 +4,8 @@
  * Lock-screen copy stays generic (no health content).
  */
 
+const { resolveRecipientLanguage } = require('./language-utils');
+
 function genericMessagePushCopy(language = 'es') {
   const es = language === 'es' || language === 'es-MX';
   if (es) {
@@ -48,20 +50,30 @@ function createChannelLayer({ sendPush = sendExpoPush } = {}) {
   };
 }
 
+/**
+ * Push copy is chosen by the RECIPIENT's language (doctor: doctorLanguagePrefs / token doc,
+ * patient: patientPushTokens.language; unknown -> es). The `language` argument (the sender's UI
+ * language) is accepted for backward compatibility with older apps and ignored.
+ * `db` can be injected for tests.
+ */
 async function notifyMessageRecipient({
   toUserId,
   role, // 'doctor' | 'patient'
-  language,
   messageId,
   channel = 'push',
   sendPush = sendExpoPush,
+  db: injectedDb,
 }) {
-  const admin = require('./firebase-admin');
-  if (!admin.apps.length) return { ok: false, error: 'firebase_admin_unavailable' };
-  const { getDoctorFirestore } = require('./doctor-firestore');
-  const db = getDoctorFirestore();
+  let db = injectedDb;
+  if (!db) {
+    const admin = require('./firebase-admin');
+    if (!admin.apps.length) return { ok: false, error: 'firebase_admin_unavailable' };
+    const { getDoctorFirestore } = require('./doctor-firestore');
+    db = getDoctorFirestore();
+  }
   const channels = createChannelLayer({ sendPush });
-  const copy = genericMessagePushCopy(language);
+  const recipientLanguage = await resolveRecipientLanguage(db, role === 'doctor' ? 'doctor' : 'patient', toUserId);
+  const copy = genericMessagePushCopy(recipientLanguage);
 
   if (channel !== 'push') {
     const stub = await channels[channel]?.();
@@ -88,7 +100,7 @@ function mountDoctorMessagingRoutes(app, { verifyDoctorAuth }) {
   app.post('/api/doctor/messages/notify', verifyDoctorAuth, async (req, res) => {
     try {
       const uid = req.userId || req.user?.uid;
-      const { toUserId, role, language, messageId, channel } = req.body || {};
+      const { toUserId, role, messageId, channel } = req.body || {};
       if (!toUserId || !role) {
         return res.status(400).json({ ok: false, error: 'toUserId_and_role_required' });
       }
@@ -100,7 +112,6 @@ function mountDoctorMessagingRoutes(app, { verifyDoctorAuth }) {
       const result = await notifyMessageRecipient({
         toUserId,
         role,
-        language: language || req.headers['x-auric-lang'] || 'es',
         messageId,
         channel: channel || 'push',
       });

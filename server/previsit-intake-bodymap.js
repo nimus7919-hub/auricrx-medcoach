@@ -10,6 +10,7 @@
  */
 
 const { filterModelText } = require('./previsit-intake-lib');
+const { normalizeIntakeLocale } = require('./language-utils');
 
 const BODY_LAYERS = ['skin', 'muscles', 'vessels', 'bones', 'organs'];
 const BODY_VIEWS = ['front', 'back'];
@@ -187,7 +188,7 @@ function validateBodyPainMapPayload(raw) {
     ok: true,
     payload: {
       version: 1,
-      locale: raw.locale === 'en' ? 'en' : 'es',
+      locale: normalizeIntakeLocale(raw.locale),
       reportedAt,
       markers,
     },
