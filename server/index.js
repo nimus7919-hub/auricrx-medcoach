@@ -5,7 +5,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { z } = require('zod');
 const OpenAI = require('openai');
-const { resolveAiLanguage, healthSafetyPrompt, errorBody } = require('./ai-language');
+const { explicitAiLanguage, guessMessageLanguage, normalizeAiLanguage, healthSafetyPrompt, errorBody } = require('./ai-language');
 const { resolveSuccessLanguage, successText, renderSuccessPage } = require('./success-page');
 
 const app = express();
@@ -901,7 +901,7 @@ app.post('/ask', async (req, res) => {
     const schema = z.object({ 
       message: z.string().min(1).max(10000),
       character: z.enum(['alfred', 'mimi', 'pawlmer']).optional().default('alfred'),
-      language: z.string().max(35).optional(), // normalized by resolveAiLanguage; unsupported values fall through to Accept-Language / es
+      language: z.string().max(35).optional(), // normalized by explicitAiLanguage; unsupported values are ignored
       userData: z.object({
         meds: z.array(z.any()).optional().default([]),
         supplements: z.array(z.any()).optional().default([]),
@@ -917,8 +917,8 @@ app.post('/ask', async (req, res) => {
     }
 
     const { message, userData, character } = parsed.data;
-    // body language -> userData.language -> Accept-Language -> es
-    const language = resolveAiLanguage(req, parsed.data.language, req.body?.userData?.language);
+    // body language -> userData.language -> old message-based guess (older clients send neither)
+    const language = explicitAiLanguage(parsed.data.language, req.body?.userData?.language) || guessMessageLanguage(message);
     const urgency = detectCharacterUrgency(message);
     if (urgency.emergency) {
       return res.json({ ok: true, reply: appendCharacterSafety('', message, language) });
@@ -999,7 +999,7 @@ app.post('/ask', async (req, res) => {
     
     // If we exit the loop without a response
     console.log('Tool calling loop exceeded max iterations');
-    res.status(503).json(errorBody('AI_UNAVAILABLE'));
+    res.status(503).json(errorBody('AI_UNAVAILABLE', { message: 'Alfred is unavailable right now. Please try again later.' })); // legacy `message` for old clients
     
   } catch (err) {
     // Keep provider messages, headers and credentials out of logs and responses.
@@ -1007,7 +1007,7 @@ app.post('/ask', async (req, res) => {
     const providerCode = err?.code || err?.error?.code || err?.type;
     const code = ['insufficient_quota', 'rate_limit_exceeded', 'rate_limit', 'server_error', 'invalid_api_key'].includes(providerCode) ? providerCode : 'provider_failure';
     console.error('Alfred request failed', { status, code });
-    res.status(503).json(errorBody('AI_UNAVAILABLE'));
+    res.status(503).json(errorBody('AI_UNAVAILABLE', { message: 'Alfred is unavailable right now. Please try again later.' })); // legacy `message` for old clients
   }
 });
 
@@ -1018,8 +1018,9 @@ app.post(['/ask-stream', '/api/ai/stream'], async (req, res) => {
   try {
     // Accept either a full messages array or a single message string
     let { messages, message } = req.body || {};
-    // body language -> Accept-Language -> es. The answer language is set by the server, not by the client prompt.
-    const language = resolveAiLanguage(req, req.body && req.body.language);
+    // Only an explicit body language forces the answer language. Without one (older clients) the model mirrors
+    // the user's own language. Accept-Language is intentionally ignored (see ai-language.js).
+    const language = explicitAiLanguage(req.body && req.body.language);
     if (!Array.isArray(messages)) {
       if (typeof message === 'string' && message.trim()) {
         messages = [{ role: 'user', content: message.trim() }];
@@ -2275,8 +2276,8 @@ app.post('/api/ai/drug-interactions', verifyUser, async (req, res) => {
       role: z.enum(['user', 'assistant']), content: z.string().min(1).max(10000)
     }).strict()).min(1).max(20), language: z.string().max(35).optional() }).safeParse(req.body);
     if (!parsed.success) return res.status(400).json(errorBody('INVALID_MESSAGES'));
-    // body language -> Accept-Language -> es
-    const language = resolveAiLanguage(req, parsed.data.language);
+    // Explicit body language only; otherwise the model mirrors the user's language (older clients send none).
+    const language = explicitAiLanguage(parsed.data.language);
     const messages = [{ role: 'system', content: healthSafetyPrompt(language) }, ...parsed.data.messages];
 
     console.log('🔍 Checking drug interactions...');
@@ -2853,7 +2854,8 @@ app.post('/api/stripe/create-checkout', async (req, res) => {
     }
     const currency = 'mxn';
     // Carry the app language to the bilingual /success page (only when the client states en|es).
-    const checkoutLang = ['en', 'es'].includes(req.body.language) ? `&lang=${req.body.language}` : '';
+    const checkoutLanguage = normalizeAiLanguage(req.body.language); // es-MX -> es
+    const checkoutLang = ['en', 'es'].includes(checkoutLanguage) ? `&lang=${checkoutLanguage}` : '';
     const unitAmount = billingInterval === 'year' ? 69900 : 7900;
     
     console.log(`💰 Creating checkout for ${country}: ${currency.toUpperCase()} ${unitAmount / 100}`);

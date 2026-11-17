@@ -69,7 +69,18 @@ test('/success follows ?lang= for the page and for plain-text errors; never leak
   assert.equal(r.code, 500); assert.ok(!r.body.includes('stripe internal detail')); assert.match(r.body, /Algo salió mal/);
 });
 
-test('checkout success_url carries lang only for en|es', () => {
-  assert.match(source, /const checkoutLang = \['en', 'es'\]\.includes\(req\.body\.language\)/);
-  assert.equal((source.match(/\$\{checkoutLang\}`/g) || []).length, 2);
+test('checkout success_url lang goes through normalizeAiLanguage (es-MX -> es), only en|es are carried', () => {
+  const { normalizeAiLanguage } = require('./ai-language');
+  const start = source.indexOf('const checkoutLanguage = ');
+  const end = source.indexOf('\n', source.indexOf('const checkoutLang = ', start));
+  const snippet = source.slice(start, end);
+  const langParam = body => vm.runInNewContext(`${snippet}; checkoutLang`, { normalizeAiLanguage, req: { body } });
+  assert.equal(langParam({ language: 'es-MX' }), '&lang=es');
+  assert.equal(langParam({ language: 'ES' }), '&lang=es');
+  assert.equal(langParam({ language: 'en-US' }), '&lang=en');
+  assert.equal(langParam({ language: 'es' }), '&lang=es');
+  for (const language of ['de', 'fr-CA', 'pt-BR', 'zh-Hans', 'ja', '', undefined, null, 5, '&lang=es']) assert.equal(langParam({ language }), '', String(language));
+  assert.equal(langParam({}), '');
+  assert.equal((source.match(/\$\{checkoutLang\}`/g) || []).length, 2); // both success_url sites use it
+  assert.ok(!source.includes("includes(req.body.language)"));
 });
