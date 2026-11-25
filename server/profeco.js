@@ -38,6 +38,9 @@ async function jsonFetch(url) {
   return response.json();
 }
 const attribution = 'Fuente: PROFECO, Quién es Quién en los Precios (CC-BY 4.0)';
+function isProfecoAutoMatchEnabled(value = process.env.PROFECO_AUTO_MATCH_ENABLED) {
+  return value === 'true';
+}
 function install(app, sql) {
   let trigrams = false, running = false;
   const ready = (async () => {
@@ -236,12 +239,16 @@ function install(app, sql) {
     await driving(origin,nearest);
     res.json({ok:true,med,radius_km:radiusKm,presentations:[...new Set(rows.map(r=>r.presentacion))].map(presentacion=>({presentacion,parsed:parsePresentation(presentacion)})),state:summary(local),national:summary(rows),summary:summary(fallback?rows:local),per_chain:[...chains].map(([chain,list])=>({chain,...summary(list),as_of:list[0].fecha})),nearest,source:'PROFECO QQP',attribution,as_of:rows[0]?.fecha || null,fallback,window_days:90,window_anchor:'latest_observation',currency:'MXN'});
   }));
-  const safeRun = () => run().catch(()=>console.error('Pharmacy refresh failed'));
-  const first = setTimeout(safeRun,120000); first.unref?.();
-  const weekly = setInterval(safeRun,7*86400000); weekly.unref?.();
+  const autoMatchEnabled = isProfecoAutoMatchEnabled();
+  console.log(`PROFECO auto-match: ${autoMatchEnabled ? 'on' : 'off'}`);
+  if (autoMatchEnabled) {
+    const safeRun = () => run().catch(()=>console.error('Pharmacy refresh failed'));
+    const first = setTimeout(safeRun,120000); first.unref?.();
+    const weekly = setInterval(safeRun,7*86400000); weekly.unref?.();
+  }
   // DENUE freshness is checked daily; a completed refresh is reused for 30 days.
   const monthly = setInterval(()=>ready.then(()=>ingestDENUE()).then(()=>linkStores()).catch(()=>console.error('DENUE refresh failed')),86400000); monthly.unref?.();
   if (!(process.env.INEGI_DENUE_TOKEN || process.env.INEGI_TOKEN)) console.log('DENUE skipped: INEGI_DENUE_TOKEN not set');
   return {ready,run};
 }
-module.exports = {install,normalize,signature,distance,coordinates,parsePresentation};
+module.exports = {install,isProfecoAutoMatchEnabled,normalize,signature,distance,coordinates,parsePresentation};
