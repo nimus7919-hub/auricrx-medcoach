@@ -4,11 +4,11 @@
 
 Configuration (server environment only):
 - ADMIN_TOKEN: enables POST /api/admin/ingest/profeco. Send x-admin-token or Authorization: Bearer. Unset means 404. The existing development admin endpoints keep their existing restrictions.
-- PROFECO_AUTO_MATCH_ENABLED: set to the exact string `true` to run QQP ingest and catalog matching two minutes after startup and then every 7 days. Any other value, including unset, leaves automatic matching off. Manual ingest and matching still run through POST /api/admin/ingest/profeco.
+- PROFECO_AUTO_MATCH_ENABLED: gates only catalog matching on the startup (2 min) and weekly QQP job. Only the exact string `true` turns auto-match on; any other value, including unset, leaves it off. QQP ingest, DENUE, and store linking still run on that schedule. Manual ingest and matching still run through POST /api/admin/ingest/profeco.
 - INEGI_TOKEN: required for DENUE. No token means DENUE is skipped; nearby searches use QQP monitored stores if the DENUE table is empty.
 - GOOGLE_PLACES_API_KEY: optional Distance Matrix enrichment for the first five results. No Places discovery is used by the new routes.
 
-QQP ingest and catalog matching do not run on a timer unless PROFECO_AUTO_MATCH_ENABLED=true. Resources recorded in qqp_sources are skipped; interrupted resources retry using (resource_id, _id) conflicts. CSV is attempted if the initial DataStore request fails; blocked CSV downloads fail the resource without marking it complete. Source history is retained while prices older than twelve months are purged. Unmatched products are recorded in qqp_match_review. Catalog IDs use an explicit id when available, otherwise the normalized medication name.
+QQP ingest still runs after two minutes and weekly thereafter. Catalog matching on that scheduled path runs only when PROFECO_AUTO_MATCH_ENABLED=true. Resources recorded in qqp_sources are skipped; interrupted resources retry using (resource_id, _id) conflicts. CSV is attempted if the initial DataStore request fails; blocked CSV downloads fail the resource without marking it complete. Source history is retained while prices older than twelve months are purged. Unmatched products are recorded in qqp_match_review. Catalog IDs use an explicit id when available, otherwise the normalized medication name.
 
 DENUE uses both pharmacy SCIAN classes and all 32 states, in pages of 1000. A daily freshness check refreshes completed imports every 30 days. Completion is recorded only after all states succeed. Records link to monitored QQP stores within 150 metres with a matching chain name.
 

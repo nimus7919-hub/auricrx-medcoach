@@ -120,7 +120,7 @@ imports. Build-time OAuth overrides belong in the EAS build environment.
 | Development operations | `ADMIN_CLEANUP_KEY` | Protected development-only operational endpoints |
 | Exchange-rate metadata | `FX_RATES_SOURCE` | Optional exchange-rate source label |
 | Price feature flags | `PRICE_SYSTEM_ENABLED`, `PROFECO_IMPORT_ENABLED`, `ML_PRICES_ENABLED`, `PARTNER_PRICES_ENABLED`, `PARTNER_PORTAL_ENABLED` | Optional price features, disabled by default |
-| PROFECO auto-match | `PROFECO_AUTO_MATCH_ENABLED` | Startup and weekly QQP ingest/matching; only the exact string `true` enables it, otherwise off |
+| PROFECO auto-match | `PROFECO_AUTO_MATCH_ENABLED` | Catalog matching on the startup and weekly QQP job; only the exact string `true` enables it, otherwise off. Ingest still runs |
 | PROFECO import | `PROFECO_PRODUCT_MAP_FILE`, `PROFECO_CSV_FILE`, `PROFECO_DATA_URL`, `PROFECO_IMPORT_DIR`, `PROFECO_7Z_PATH`, `PROFECO_CSV_BASENAME` | Reviewed mapping, import inputs and job storage/tools |
 | Mercado Libre | `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `ML_REFRESH_TOKEN`, `ML_TOKEN_ENCRYPTION_KEY`, `ML_AFFILIATE_TAG` | OAuth, encrypted token persistence and optional affiliate tracking |
 | Partner prices | `PRICE_PARTNER_KEYS_JSON`, `PRICE_ADMIN_TOKEN` | Partner authentication and optional price administration |

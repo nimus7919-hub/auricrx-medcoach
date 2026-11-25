@@ -95,7 +95,7 @@ function install(app, sql) {
     const after = await stat();
     console.log('PROFECO retention (90d from newest): '+JSON.stringify({before,after}));
   }
-  async function ingestQQP() {
+  async function ingestQQP({ match = true } = {}) {
     let total = 0;
     const [mx] = await sql`SELECT max(fecha) AS m FROM qqp_prices`;
     const cutoff = mx && mx.m ? new Date(new Date(mx.m).getTime()-90*86400000) : null;
@@ -144,7 +144,7 @@ function install(app, sql) {
       }
     }
     await pruneQQP();
-    await matchCatalog();
+    if (match) await matchCatalog();
     console.log(`PROFECO ingest: ${total} valid rows processed`);
     return total;
   }
@@ -178,12 +178,12 @@ function install(app, sql) {
     await sql`INSERT INTO pharmacy_jobs(name,completed_at) VALUES('denue',now()) ON CONFLICT(name) DO UPDATE SET completed_at=now()`;
     console.log(`DENUE refreshed: ${count} pharmacies`);
   }
-  async function run() {
+  async function run({ match = true } = {}) {
     if (running) return { running:true };
     running = true;
     try {
       await ready;
-      const results = await Promise.allSettled([ingestQQP(),ingestDENUE()]);
+      const results = await Promise.allSettled([ingestQQP({ match }),ingestDENUE()]);
       await linkStores();
       for (let i=0;i<results.length;i++) if(results[i].status==='rejected') console.error(`${i ? 'DENUE' : 'PROFECO'} ingest failed: ${results[i].reason.message}`);
       return { ok:results.every(r=>r.status==='fulfilled'), rows:results[0].value || 0 };
@@ -241,11 +241,9 @@ function install(app, sql) {
   }));
   const autoMatchEnabled = isProfecoAutoMatchEnabled();
   console.log(`PROFECO auto-match: ${autoMatchEnabled ? 'on' : 'off'}`);
-  if (autoMatchEnabled) {
-    const safeRun = () => run().catch(()=>console.error('Pharmacy refresh failed'));
-    const first = setTimeout(safeRun,120000); first.unref?.();
-    const weekly = setInterval(safeRun,7*86400000); weekly.unref?.();
-  }
+  const safeRun = () => run({ match: autoMatchEnabled }).catch(()=>console.error('Pharmacy refresh failed'));
+  const first = setTimeout(safeRun,120000); first.unref?.();
+  const weekly = setInterval(safeRun,7*86400000); weekly.unref?.();
   // DENUE freshness is checked daily; a completed refresh is reused for 30 days.
   const monthly = setInterval(()=>ready.then(()=>ingestDENUE()).then(()=>linkStores()).catch(()=>console.error('DENUE refresh failed')),86400000); monthly.unref?.();
   if (!(process.env.INEGI_DENUE_TOKEN || process.env.INEGI_TOKEN)) console.log('DENUE skipped: INEGI_DENUE_TOKEN not set');
